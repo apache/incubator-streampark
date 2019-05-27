@@ -3,7 +3,7 @@ package com.streamxhub.spark.core
 import com.streamxhub.spark.core.util.Utils
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{Seconds, StreamingContext}
+import org.apache.spark.streaming.{CongestionMonitorListener, Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
@@ -15,10 +15,11 @@ import scala.collection.mutable.ArrayBuffer
   */
 trait Streaming {
 
-
   protected final def args: Array[String] = _args
 
   private final var _args: Array[String] = _
+
+  private var heartbeat: Heartbeat = _
 
   private val sparkListeners = new ArrayBuffer[String]()
 
@@ -48,12 +49,21 @@ trait Streaming {
   /**
     * StreamingContext 运行之后执行
     */
-  def afterStarted(ssc: StreamingContext): Unit = {}
+  def afterStarted(ssc: StreamingContext): Unit = {
+    // 拥堵监控
+    ssc.addStreamingListener(new CongestionMonitorListener(ssc))
+    heartbeat = new Heartbeat(ssc)
+    heartbeat.start()
+  }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
-  def beforeStop(ssc: StreamingContext): Unit = {}
+  def beforeStop(ssc: StreamingContext): Unit = {
+    if (heartbeat != null) {
+      heartbeat.stop()
+    }
+  }
 
   /**
     * 处理函数
@@ -61,7 +71,6 @@ trait Streaming {
     * @param ssc
     */
   def handle(ssc: StreamingContext)
-
 
   /**
     * 创建 Context
@@ -85,7 +94,6 @@ trait Streaming {
 
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)
-
 
     sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
 
@@ -131,7 +139,6 @@ trait Streaming {
           printUsageAndExit()
       }
     }
-
 
     val context = checkpointPath match {
       case "" => creatingContext()
