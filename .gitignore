@@ -1,0 +1,7 @@
+# Created by .ignore support plugin (hsz.mobi)
+.idea/
+*.iml
+target/
+deployTo21.sh
+.DS_Store
+metastore_db
