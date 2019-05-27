@@ -247,7 +247,7 @@ object HelloApp extends Streaming {
             ----[更详细的内容可以看脚本自身,其中包含了说明]
         ----create_app.sh
             ----[创建模版项目,需要一个路径,将会在这个路径下创建模版项目]
-            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]        ----[停止soark任务脚本,如检查到多个app,会弹框提示]    
+            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]      
         bin/
             startup.sh
                 ----[提交spark任务的脚本,会做一些基础参数检查和生成]
@@ -255,6 +255,7 @@ object HelloApp extends Streaming {
                 ----[将startup.sh脚本加入到crontab中即可简单实现失败重启]
                 ----[脚本自带防重复启动的功能]
             shutdown.sh
+                ----[停止spark任务脚本,如检查到多个app,会弹框提示]    
        
      
     2) spark-core
@@ -268,20 +269,20 @@ object HelloApp extends Streaming {
                     ----[会对streaming对任务详细信息进行记录输出到对应的kafka中]
                 ----自定义及使用方法见后文的 5.2 Streaming Listener内容
         ----com.streamxhub.spark.core[StreamX-Spark的核心架构代码]
-            ----channel[通道组建]
+            ----channel[通道组件]
                 ----[目前只有接口没有具体实现]
-            ----serializable[输入输出格式化序列组建]
+            ----serializable[输入输出格式化序列组件]
             ----util[工具类]
-            ----sink[输出组建]
+            ----sink[输出组件]
                 ----[目前有influx,kafka,mysql,redis,show等]
-            ----sources[spark streaming数据源组建]
+            ----sources[spark streaming数据源组件]
                 ----[目前只有接口没有具体实现]
             ----support[支持类]
-                ----hbase[hbase连接池相关组建]
-                ----kafka[kafka生产消费相关组建]
+                ----hbase[hbase连接池相关组件]
+                ----kafka[kafka生产消费相关组件]
                     ----manager[offset管理相关]
                     ----writer[写入kafka相关]
-                ----redis[redis连接池相关组建]
+                ----redis[redis连接池相关组件]
             ----Streaming[用户需继承实现的特质]
                 ----init
                     ----[初始化SparkConf的函数,用户可做一些自定义初始化动作]
