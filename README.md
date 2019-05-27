@@ -19,7 +19,7 @@ let't bigdata easy
     </dependency>
 ```
 
-#### 2.配置说明
+#### 2.创建配置
 
 ```
 
@@ -32,7 +32,7 @@ $bash 中的create_conf.sh >my.properties
 
 ######################################################
 #                                                    #
-#               spark process run.sh                 #
+#               spark process startup.sh             #
 #                   user config                      #
 #                                                    #
 ######################################################
@@ -149,9 +149,9 @@ spark.dynamicAllocation.sustainedSchedulerBacklogTimeout=1s
 #spark.source.kafka.consume 后的配置是kafka标准配置,指定之后,将会自动传递给kafkaConsumer
 #
 #
-spark.source.kafka.consume.topics=homework_sync_canal
+spark.source.kafka.consume.topics=hello_spark
 #
-spark.source.kafka.consume.group.id=z.cloud.kafka.consumer.0018
+spark.source.kafka.consume.group.id=kafka.consumer.0018
 #
 spark.source.kafka.consume.bootstrap.servers=kafka1:9092,kafka2:9092
 spark.source.kafka.consume.auto.offset.reset=earliest
@@ -187,8 +187,11 @@ spark.sink.redis.timeout=30
 
 ```
   
-#### 3.示例代码  
   
+#### 3.创建工程骨架  
+  
+可使用spark-cli 中的create_app.sh创建默认配置文件,使用方法,运行create_app.sh即可,按提示输入
+
 ```scala    
 package com.streamxhub.spark.hello
 
@@ -210,79 +213,89 @@ object HelloApp extends Streaming {
 
 ```
 
-#### 4.运行示例代码
+#### 4.工程结构
 
 ```
-    使用bin中的create_conf.sh创建标准配置文件
-    
-    $bash create_conf.sh >my.properties
-    
-    创建配置文件之后按配置文件按提示设置必须的参数
-    
-    spark.app.main=com.streamhub.spark.hello.HelloApp
-    
-    设置完成后使用script中的run.sh来提交和停止任务
-    启动
-    $bash run.sh my.properties
-    停止(任意给第二个参数即可kill掉spark任务)
-    $bash run.sh my.properties stop
+    上一步会创建一个项目,编译完会有个tar.gz包出现,解开包工程结构如下:
+    ${artifactId}/
+        bin/ (启动停止脚本)
+            setclasspath.sh
+            shutdown.sh
+            spark.sh
+            startup.sh
+        lib/ (项目核心jar包)
+            xxx.jar
+        conf/ (项目配置文件)
+            prod/${artifactId}.properties    
+        logs/ (日志目录)
+            
+        temp/ (零时文件目录)          
     
 ```
 
-#### 5.API 说明
+#### 5.启动停止项目
+     $bash bin/startup.sh ../conf/prod/${artifactId}.properties
+     $bash bin/shutdown.sh
+
 ##### 5.1.框架说明
 ```
-    org
-    ----apache.spark
-        ----streaming[自定义的spark streaming一些Listenter]
-            ----CongestionMonitorListener 拥堵监控
-                ----[会对streaming任务是否产生拥堵进行告警和停止任务]
-            ----JobInfoReportListener 任务信息记录
-                ----[会对streaming对任务详细信息进行记录输出到对应的kafka中]
-            ----自定义及使用方法见后文的 5.2 Streaming Listener内容
-        ----RpcDemo里是spark RPC服务和client实现的演示代码
-            ----对应的启动代码在resources里
-            ----spark-rpcdemo client启动代码放到spark/bin下即可使用
-            ----start-rpcdemo-server.sh 放到spark/sbin下既可以使用
-    ----com.streamxhub.spark.core[StreamX-Spark的核心架构代码]
-        ----channel[通道组建]
-            ----[目前只有接口没有具体实现]
-        ----serializable[输入输出格式化序列组建]
-        ----kit[工具类]
-        ----support[支持类]
-            ----hbase[hbase连接池相关组建]
-            ----kafka[kafka生产消费相关组建]
-                ----manager[offset管理相关]
-                ----writer[写入kafka相关]
-            ----redis[redis连接池相关组建]
-        ----sink[输出组建]
-            ----[目前有influx,kafka,mysql,redis,show等]
-        ----sources[spark streaming数据源组建]
-            ----[目前只有接口没有具体实现]
-        ----Streaming[用户需继承实现的特质]
-            ----init
-                ----[初始化SparkConf的函数,用户可做一些自定义初始化动作]
-                ----[函数会在handle之前执行]
-                ----[参数是SparkConf]
-                ----[返回值是Unit]
-            ----handle
-                ----[用户可将计算逻辑实现在这个函数里]
-                ----[函数会在main函数的最后执行]
-                ----[参数是StreamingContext]
-                ----[返回值是Unit]
-    script[部署相关的脚本]
-        ----create_default_conf.sh
-            ----[产生FireSpark以及Spark自身需要的一些参数]
-            ----[包括run.sh需要的参数以及相关一些组建需要的参数]
+    1) spark-cli
+        -----脚手架自动创建项目骨架和配置的工程模块
+        ----create_conf.sh
+            ----[产生StreamX-Spark以及Spark自身需要的一些参数]
+            ----[包括startup.sh需要的参数以及相关一些组建需要的参数]
             ----[更详细的内容可以看脚本自身,其中包含了说明]
-        ----run.sh
-            ----[提交spark任务的脚本,会做一些基础参数检查和生成]
-            ----[需要的参数是properties类型的文件,可由上面的脚本产生]
-            ----[将run脚本加入到crontab中即可简单实现失败重启]
-            ----[脚本自带防重复启动的功能]
-        ----create_template_project.sh
+        ----create_app.sh
             ----[创建模版项目,需要一个路径,将会在这个路径下创建模版项目]
-            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]
+            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]        ----[停止soark任务脚本,如检查到多个app,会弹框提示]    
+        bin/
+            startup.sh
+                ----[提交spark任务的脚本,会做一些基础参数检查和生成]
+                ----[需要的参数是properties类型的文件,可由上面的脚本产生]
+                ----[将startup.sh脚本加入到crontab中即可简单实现失败重启]
+                ----[脚本自带防重复启动的功能]
+            shutdown.sh
+       
+     
+    2) spark-core
+        -----spark极速开发核心模块    
+        org
+        ----apache.spark
+            ----streaming[自定义的spark streaming一些Listenter]
+                ----CongestionMonitorListener 拥堵监控
+                    ----[会对streaming任务是否产生拥堵进行告警和停止任务]
+                ----JobInfoReportListener 任务信息记录
+                    ----[会对streaming对任务详细信息进行记录输出到对应的kafka中]
+                ----自定义及使用方法见后文的 5.2 Streaming Listener内容
+        ----com.streamxhub.spark.core[StreamX-Spark的核心架构代码]
+            ----channel[通道组建]
+                ----[目前只有接口没有具体实现]
+            ----serializable[输入输出格式化序列组建]
+            ----util[工具类]
+            ----sink[输出组建]
+                ----[目前有influx,kafka,mysql,redis,show等]
+            ----sources[spark streaming数据源组建]
+                ----[目前只有接口没有具体实现]
+            ----support[支持类]
+                ----hbase[hbase连接池相关组建]
+                ----kafka[kafka生产消费相关组建]
+                    ----manager[offset管理相关]
+                    ----writer[写入kafka相关]
+                ----redis[redis连接池相关组建]
+            ----Streaming[用户需继承实现的特质]
+                ----init
+                    ----[初始化SparkConf的函数,用户可做一些自定义初始化动作]
+                    ----[函数会在handle之前执行]
+                    ----[参数是SparkConf]
+                    ----[返回值是Unit]
+                ----handle
+                    ----[用户可将计算逻辑实现在这个函数里]
+                    ----[函数会在main函数的最后执行]
+                    ----[参数是StreamingContext]
+                    ----[返回值是Unit]
+          
+    3) spark-monitor
+        -----预留模块,将来做spark任务监控使用...          
 ```
 
 
