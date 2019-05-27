@@ -247,7 +247,7 @@ object HelloApp extends Streaming {
             ----[更详细的内容可以看脚本自身,其中包含了说明]
         ----create_app.sh
             ----[创建模版项目,需要一个路径,将会在这个路径下创建模版项目]
-            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]        ----[停止soark任务脚本,如检查到多个app,会弹框提示]    
+            ----[模版项目包含一个父级pom文件以及一个子模块和模块需要的pom和assembly文件及相关目录结构]      
         bin/
             startup.sh
                 ----[提交spark任务的脚本,会做一些基础参数检查和生成]
@@ -255,6 +255,7 @@ object HelloApp extends Streaming {
                 ----[将startup.sh脚本加入到crontab中即可简单实现失败重启]
                 ----[脚本自带防重复启动的功能]
             shutdown.sh
+                ----[停止spark任务脚本,如检查到多个app,会弹框提示]    
        
      
     2) spark-core
