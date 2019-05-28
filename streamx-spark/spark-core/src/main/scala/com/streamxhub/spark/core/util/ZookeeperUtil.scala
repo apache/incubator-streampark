@@ -1,8 +1,9 @@
 package com.streamxhub.spark.core.util
 
 
-import com.google.common.base.{Objects, Strings}
+import com.google.common.base.Objects
 import org.apache.commons.compress.utils.Charsets
+import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
@@ -21,10 +22,21 @@ object ZookeeperUtil {
       case Some(x) => x
       case None =>
         try {
+          // 设置重连策略ExponentialBackoffRetry, baseSleepTimeMs：初始sleep的时间,maxRetries：最大重试次数,maxSleepMs：最大重试时间
+          //val retryPolicy = new ExponentialBackoffRetry(10000, 5)
+          //（推荐）curator链接zookeeper的策略:RetryNTimes n：重试的次数 sleepMsBetweenRetries：每次重试间隔的时间
+          //val retryPolicy:RetryPolicy = new RetryNTimes(3, 5000)
+          // （不推荐） curator链接zookeeper的策略:RetryOneTime sleepMsBetweenRetry:每次重试间隔的时间,这个策略只会重试一次
+          // val retryPolicy:RetryPolicy = new RetryOneTime(3000)
+          // 永远重试，不推荐使用
+          // val retryPolicy:RetryPolicy = new RetryForever(retryIntervalMs)
+          // curator链接zookeeper的策略:RetryUntilElapsed maxElapsedTimeMs:最大重试时间 sleepMsBetweenRetries:每次重试间隔 重试时间超过maxElapsedTimeMs后，就不再重试
+          // val retryPolicy:RetryPolicy = new RetryUntilElapsed(2000, 3000)
+          val retryPolicy: RetryPolicy = new RetryNTimes(3, 2000)
           val client = CuratorFrameworkFactory
             .builder
             .connectString(url)
-            .retryPolicy(new RetryNTimes(Integer.MAX_VALUE, 1000))
+            .retryPolicy(retryPolicy)
             .connectionTimeoutMs(2000).build
           client.start()
           map += url -> client
@@ -51,7 +63,7 @@ object ZookeeperUtil {
     }
   }
 
-  def create(path: String, value: String = null, url: String = defZkURL): Boolean = {
+  def create(path: String, value: String = null,url: String = defZkURL,persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
@@ -61,7 +73,8 @@ object ZookeeperUtil {
             case null | "" => Array.empty[Byte]
             case _ => value.getBytes(Charsets.UTF_8)
           }
-          val opResult = client.create.withMode(CreateMode.EPHEMERAL).forPath(path, data)
+          val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
+          val opResult = client.create.withMode(mode).forPath(path, data)
           Objects.equal(path, opResult)
         case _ => false
       }
@@ -72,13 +85,14 @@ object ZookeeperUtil {
     }
   }
 
-  def update(path: String, value: String, url: String = defZkURL): Boolean = {
+  def update(path: String, value: String, url: String = defZkURL,persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
       stat match {
         case null =>
-          val opResult = client.create.creatingParentsIfNeeded.withMode(CreateMode.EPHEMERAL).forPath(path, value.getBytes(Charsets.UTF_8))
+          val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
+          val opResult = client.create.creatingParentsIfNeeded.withMode(mode).forPath(path, value.getBytes(Charsets.UTF_8))
           Objects.equal(path, opResult)
         case _ =>
           val opResult = client.setData().forPath(path, value.getBytes(Charsets.UTF_8))
@@ -96,7 +110,7 @@ object ZookeeperUtil {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
       if (stat != null) {
-        client.delete.deletingChildrenIfNeeded.forPath(path)
+        client.delete.deletingChildrenIfNeeded().forPath(path)
       }
     } catch {
       case e: Exception => e.printStackTrace()
@@ -119,16 +133,17 @@ object ZookeeperUtil {
   }
 
   def main(args: Array[String]): Unit = {
-    ZookeeperUtil.create("/benjobs",
+    ZookeeperUtil.create(
+      "/benjobs",
       """
         |{
         |"name":"benjobs",
         |"age":28,
         |"job":"spark"
         |}
-      """.stripMargin)
-    val data = ZookeeperUtil.get("/benjobs")
-    println(data)
+      """.stripMargin
+    )
+    println(ZookeeperUtil.get("/benjobs"))
   }
 
 }

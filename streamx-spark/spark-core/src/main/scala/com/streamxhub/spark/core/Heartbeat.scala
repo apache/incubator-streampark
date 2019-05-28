@@ -1,6 +1,6 @@
 package com.streamxhub.spark.core
 
-import com.streamxhub.spark.core.util.{Logger,ZookeeperUtil}
+import com.streamxhub.spark.core.util.{Logger, ZookeeperUtil}
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming.StreamingContext
 
@@ -35,28 +35,28 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
 
       /**
         * action:
-        *   startup:启动中,
-        *   running:运行中
-        *   killed:被杀,
-        *   error:挂了.
+        * startup:启动中,
+        * running:运行中
+        * killed:被杀,
+        * error:挂了.
         */
       val data =
         s"""
-          |{
-          |"appId":"$appId",
-          |"action":"startup",
-          |"duration":$duration,
-          |"dingURL":"$dingURL",
-          |"dingUser":"$dingUser"
-          |}
+           |{
+           |"appId":"$appId",
+           |"action":"startup",
+           |"duration":$duration,
+           |"dingURL":"$dingURL",
+           |"dingUser":"$dingUser"
+           |}
         """.stripMargin
-      ZookeeperUtil.create(path,data,zookeeperURL)
+      ZookeeperUtil.create(path, data, zookeeperURL)
     }
   }
 
   def stop(): Unit = {
     if (!isDebug()) {
-      ZookeeperUtil.delete(path,zookeeperURL)
+      ZookeeperUtil.delete(path, zookeeperURL)
       logInfo("shutdown heartbeatExecutor ...")
     }
   }
