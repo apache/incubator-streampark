@@ -63,7 +63,7 @@ object ZookeeperUtil {
     }
   }
 
-  def create(path: String, value: String = null,url: String = defZkURL,persistent: Boolean = false): Boolean = {
+  def create(path: String, value: String = null, url: String = defZkURL, persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
@@ -85,7 +85,7 @@ object ZookeeperUtil {
     }
   }
 
-  def update(path: String, value: String, url: String = defZkURL,persistent: Boolean = false): Boolean = {
+  def update(path: String, value: String, url: String = defZkURL, persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
