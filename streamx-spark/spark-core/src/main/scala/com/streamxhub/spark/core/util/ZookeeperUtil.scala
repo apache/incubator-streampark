@@ -26,8 +26,7 @@ object ZookeeperUtil {
         client.start()
         map.put(url, client)
       } catch {
-        case e: Exception =>
-          throw new IllegalStateException(e.getMessage, e)
+        case e: Exception => throw new IllegalStateException(e.getMessage, e)
       }
     }
     map.get(url)
@@ -41,53 +40,56 @@ object ZookeeperUtil {
   }
 
   def listChildren(path: String, url: String = defZkURL): Array[String] = {
-    var children = Array.empty[String]
     val client = getClient(url)
     val stat = client.checkExists.forPath(path)
-    if (stat != null) {
-      val childrenBuilder = client.getChildren
-      children = childrenBuilder.forPath(path).asScala.toArray
+    stat match {
+      case null =>
+        val childrenBuilder = client.getChildren
+        childrenBuilder.forPath(path).asScala.toArray
+      case _ =>
+        Array.empty[String]
     }
-    children
   }
 
   def create(path: String, value: String = null, url: String = defZkURL): Boolean = {
-    var result = false
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
-      if (stat == null) {
-        val data = if (Strings.isNullOrEmpty(value)) {
-          Array.empty[Byte]
-        } else {
-          value.getBytes(Charsets.UTF_8)
-        }
-        val opResult = client.create.withMode(CreateMode.EPHEMERAL).forPath(path, data)
-        result = Objects.equal(path, opResult)
+      stat match {
+        case null =>
+          val data = if (Strings.isNullOrEmpty(value)) {
+            Array.empty[Byte]
+          } else {
+            value.getBytes(Charsets.UTF_8)
+          }
+          val opResult = client.create.withMode(CreateMode.EPHEMERAL).forPath(path, data)
+          Objects.equal(path, opResult)
+        case _ => false
       }
     } catch {
-      case e: Exception => e.printStackTrace()
+      case e: Exception =>
+        e.printStackTrace()
+        false
     }
-    result
   }
 
   def update(path: String, value: String, url: String = defZkURL): Boolean = {
-    var result = false
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
-      if (stat != null) {
-        val opResult = client.setData().forPath(path, value.getBytes(Charsets.UTF_8))
-        result = opResult != null
-      }
-      else {
-        val opResult = client.create.creatingParentsIfNeeded.withMode(CreateMode.EPHEMERAL).forPath(path, value.getBytes(Charsets.UTF_8))
-        result = Objects.equal(path, opResult)
+      stat match {
+        case null =>
+          val opResult = client.create.creatingParentsIfNeeded.withMode(CreateMode.EPHEMERAL).forPath(path, value.getBytes(Charsets.UTF_8))
+          Objects.equal(path, opResult)
+        case _ =>
+          val opResult = client.setData().forPath(path, value.getBytes(Charsets.UTF_8))
+          opResult != null
       }
     } catch {
-      case e: Exception => e.printStackTrace()
+      case e: Exception =>
+        e.printStackTrace()
+        false
     }
-    result
   }
 
   def delete(path: String, url: String = defZkURL): Unit = {
@@ -103,18 +105,20 @@ object ZookeeperUtil {
   }
 
   def get(path: String, url: String = defZkURL): String = {
-    var result: String = null
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
-      if (stat != null) {
-        val data = client.getData.forPath(path)
-        result = new String(data)
+      stat match {
+        case null =>
+          val data = client.getData.forPath(path)
+          new String(data)
+        case _ => null
       }
     } catch {
-      case e: Exception => e.printStackTrace()
+      case e: Exception =>
+        e.printStackTrace()
+        null
     }
-    result
   }
 
   def main(args: Array[String]): Unit = {
