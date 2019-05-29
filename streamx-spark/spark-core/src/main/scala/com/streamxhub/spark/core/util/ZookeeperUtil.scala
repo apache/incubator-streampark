@@ -47,7 +47,7 @@ object ZookeeperUtil {
     }
   }
 
-  def destroy(url: String): Unit = {
+  def close(url: String): Unit = {
     val client = getClient(url)
     if (client != null) {
       client.close()
@@ -58,8 +58,8 @@ object ZookeeperUtil {
     val client = getClient(url)
     val stat = client.checkExists.forPath(path)
     stat match {
-      case null => client.getChildren.forPath(path).asScala.toList
-      case _ => List.empty[String]
+      case null => List.empty[String]
+      case _ => client.getChildren.forPath(path).asScala.toList
     }
   }
 
@@ -109,8 +109,9 @@ object ZookeeperUtil {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
-      if (stat != null) {
-        client.delete.deletingChildrenIfNeeded().forPath(path)
+      stat match {
+        case null =>
+        case _ => client.delete.deletingChildrenIfNeeded().forPath(path)
       }
     } catch {
       case e: Exception => e.printStackTrace()
@@ -133,16 +134,6 @@ object ZookeeperUtil {
   }
 
   def main(args: Array[String]): Unit = {
-    ZookeeperUtil.create(
-      "/benjobs",
-      """
-        |{
-        |"name":"benjobs",
-        |"age":28,
-        |"job":"spark"
-        |}
-      """.stripMargin
-    )
     println(ZookeeperUtil.get("/benjobs"))
   }
 
