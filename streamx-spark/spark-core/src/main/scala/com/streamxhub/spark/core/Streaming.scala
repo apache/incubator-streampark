@@ -50,8 +50,6 @@ trait Streaming {
     * StreamingContext 运行之后执行
     */
   def afterStarted(ssc: StreamingContext): Unit = {
-    // 拥堵监控
-    ssc.addStreamingListener(new CongestionMonitorListener(ssc))
     heartbeat = new Heartbeat(ssc)
     heartbeat.start()
   }
@@ -106,7 +104,6 @@ trait Streaming {
 
 
   private def printUsageAndExit(): Unit = {
-
     System.err.println(
       """
         |"Usage: Streaming [options]
