@@ -27,6 +27,7 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
   def start(): Unit = {
     //本地测试,不启动心跳检测
     if (!isDebug()) {
+      println(zookeeperURL)
       ZookeeperUtil.create(path, sparkConf.toDebugString, zookeeperURL)
     }
   }
