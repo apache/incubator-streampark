@@ -38,7 +38,7 @@ object SystemPropertyUtils extends Logger {
               case value => value
             }
           case Failure(e) =>
-            log.warn("Unable to retrieve a system property '{}'; default values will be used, {}.", other, e.getMessage)
+            log.warn(s"Unable to retrieve a system property '$other'; default values will be used, ${e.getMessage}.")
             default
         }
     }
@@ -52,7 +52,7 @@ object SystemPropertyUtils extends Logger {
       case "false" | "no" | "0" => false
       case other: String if other.isEmpty => false
       case _ =>
-        log.warn("Unable to parse the boolean system property '{}':{} - using the default value: {}.", key, value, default)
+        log.warn(s"Unable to parse the boolean system property '$key':$value - using the default value: $default.")
         default
     }
   }
