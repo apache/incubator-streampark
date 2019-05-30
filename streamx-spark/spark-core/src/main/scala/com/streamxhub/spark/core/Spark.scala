@@ -50,8 +50,8 @@ trait Spark {
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     // 约定传入此参数,则表示本地 Debug
-    if (sparkConf.contains("spark.conf")) {
-      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
+    if (sparkConf.contains("debug.conf")) {
+      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("debug.conf")))
       sparkConf.setAppName("LocalDebug").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }

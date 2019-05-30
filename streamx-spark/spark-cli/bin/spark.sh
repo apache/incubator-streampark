@@ -162,6 +162,7 @@ doStart(){
     local main=$(grep 'spark.app.main' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
     #spark main parameter..
     local main_params=$(grep 'spark.app.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+
     #spark application id file
     local app_pid="$APP_TEMP/${app_name}.pid"
     #spark application lock file
@@ -210,7 +211,10 @@ doStart(){
             --properties-file ${app_proper} \
             --jars ${jars} ${app_params} \
             --class ${main} \
-            ${main_jar} ${main_params} \
+            ${main_jar} \
+            ${main_params} \
+            -Dapp.home=${APP_HOME} \
+            -Dapp.config=${app_proper} \
             >> ${app_out} 2>&1
 
         exit_code=$?
