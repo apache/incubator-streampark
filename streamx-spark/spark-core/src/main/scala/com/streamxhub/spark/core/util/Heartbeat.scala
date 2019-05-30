@@ -3,8 +3,6 @@ package com.streamxhub.spark.core.util
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming.StreamingContext
 
-import scala.io.Source
-
 /**
   * 心跳上报程序
   */
