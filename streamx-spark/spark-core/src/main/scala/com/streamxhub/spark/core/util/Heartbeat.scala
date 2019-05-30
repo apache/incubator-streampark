@@ -28,16 +28,11 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
     //本地测试,不启动心跳检测
     if (!isDebug()) {
       //spark处理间隔..
-      val config = SystemPropertyUtils.get("app.config")
-      val source = Source.fromFile(config, "UTF-8")
       val map = Map(
         "appId" -> appId,
-        "config" -> source
+        "config" -> sparkConf.toDebugString
       )
       val json = Json.generate(map)
-
-      println(json)
-
       ZookeeperUtil.create(path, json, zookeeperURL)
     }
   }

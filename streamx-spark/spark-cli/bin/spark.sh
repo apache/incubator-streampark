@@ -127,7 +127,7 @@ if ${os400}; then
 fi
 
 
-chooseApp(){
+chooseApp() {
 read -p "Please select application index to shutdown:
 $1
 exit
@@ -135,8 +135,7 @@ exit
 echo "${app_target}"
 }
 
-doStart(){
-    shift
+doStart() {
     ###########################################..spark env start...#####################################################################
     local proper=""
     if [[ $# -eq 0 ]]; then
@@ -159,10 +158,9 @@ doStart(){
     # spark main jar...
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
     #spark main class
-    local main=$(grep 'spark.app.main' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
+    local main=$(grep 'spark.main.class' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
     #spark main parameter..
-    local main_params=$(grep 'spark.app.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-
+    local main_params=$(grep 'spark.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
     #spark application id file
     local app_pid="$APP_TEMP/${app_name}.pid"
     #spark application lock file
@@ -210,11 +208,7 @@ doStart(){
             --queue spark \
             --properties-file ${app_proper} \
             --jars ${jars} ${app_params} \
-            --class ${main} \
-            ${main_jar} \
-            ${main_params} \
-            -Dapp.home=${APP_HOME} \
-            -Dapp.config=${app_proper} \
+            --class ${main}  ${main_jar} ${main_params} \
             >> ${app_out} 2>&1
 
         exit_code=$?
@@ -297,7 +291,8 @@ doShutdown() {
 
 case "$1" in
     start)
-       doStart
+       shift
+       doStart "$@"
        exit $?
         ;;
     stop)
