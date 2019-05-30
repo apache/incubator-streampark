@@ -35,6 +35,9 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
         "config" -> source
       )
       val json = Json.generate(map)
+
+      println(json)
+
       ZookeeperUtil.create(path, json, zookeeperURL)
     }
   }
