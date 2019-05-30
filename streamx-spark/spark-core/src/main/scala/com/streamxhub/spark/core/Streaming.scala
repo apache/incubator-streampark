@@ -1,6 +1,6 @@
 package com.streamxhub.spark.core
 
-import com.streamxhub.spark.core.util.Utils
+import com.streamxhub.spark.core.util.{Heartbeat, Utils}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{CongestionMonitorListener, Seconds, StreamingContext}
@@ -84,8 +84,8 @@ trait Streaming {
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     // 约定传入此参数,则表示本地 Debug
-    if (sparkConf.contains("spark.conf")) {
-      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
+    if (sparkConf.contains("debug.conf")) {
+      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("debug.conf")))
       sparkConf.setAppName("LocalDebug").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
