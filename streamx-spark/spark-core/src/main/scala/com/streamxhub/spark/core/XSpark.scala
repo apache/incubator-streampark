@@ -9,7 +9,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   *
   */
-trait Spark {
+trait XSpark {
 
   protected final def args: Array[String] = _args
 
@@ -25,7 +25,7 @@ trait Spark {
     *
     * @param sparkConf
     */
-  def init(sparkConf: SparkConf): Unit = {}
+  def initialize(sparkConf: SparkConf): Unit = {}
 
   /**
     * spark 启动后 调用
@@ -50,13 +50,13 @@ trait Spark {
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     // 约定传入此参数,则表示本地 Debug
-    if (sparkConf.contains("debug.conf")) {
-      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("debug.conf")))
+    if (sparkConf.contains("spark.conf")) {
+      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
       sparkConf.setAppName("LocalDebug").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
 
-    init(sparkConf)
+    initialize(sparkConf)
 
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)

@@ -14,31 +14,26 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
 
   private val sparkConf = sc.getConf
 
-  private val appName = sparkConf.get("spark.app.name")
-
-  private val appId = sparkConf.getAppId
+  private val myid = sparkConf.get("spark.app.myid")
 
   private val zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
 
-  private val path = s"/StreamX/spark/$appName"
+  private val path = s"/StreamX/spark/$myid"
+
+  private val isDebug = sparkConf.contains("spark.conf")
 
   def start(): Unit = {
     //本地测试,不启动心跳检测
-    if (!isDebug()) {
-      println(zookeeperURL)
+    if (!isDebug) {
       ZookeeperUtil.create(path, sparkConf.toDebugString, zookeeperURL)
     }
   }
 
   def stop(): Unit = {
-    if (!isDebug()) {
+    if (!isDebug) {
       ZookeeperUtil.delete(path, zookeeperURL)
       logInfo("shutdown heartbeatExecutor ...")
     }
-  }
-
-  private def isDebug() = {
-    sparkConf.contains("debug.conf")
   }
 
 }

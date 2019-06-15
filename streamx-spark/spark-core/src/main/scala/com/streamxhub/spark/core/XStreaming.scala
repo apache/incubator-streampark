@@ -3,7 +3,7 @@ package com.streamxhub.spark.core
 import com.streamxhub.spark.core.util.{Heartbeat, Utils}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
-import org.apache.spark.streaming.{CongestionMonitorListener, Seconds, StreamingContext}
+import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
@@ -13,7 +13,7 @@ import scala.collection.mutable.ArrayBuffer
   * Spark Streaming 入口封装
   *
   */
-trait Streaming {
+trait XStreaming {
 
   protected final def args: Array[String] = _args
 
@@ -37,7 +37,7 @@ trait Streaming {
     *
     * @param sparkConf
     */
-  def init(sparkConf: SparkConf): Unit = {}
+  def initialize(sparkConf: SparkConf): Unit = {}
 
   /**
     * StreamingContext 运行之前执行
@@ -82,13 +82,14 @@ trait Streaming {
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     // 约定传入此参数,则表示本地 Debug
-    if (sparkConf.contains("debug.conf")) {
-      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("debug.conf")))
-      sparkConf.setAppName("LocalDebug").setMaster("local[*]")
+    if (sparkConf.contains("spark.conf")) {
+      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
+      val appName = sparkConf.get("spark.app.name")
+      sparkConf.setAppName(appName).setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
 
-    init(sparkConf)
+    initialize(sparkConf)
 
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)

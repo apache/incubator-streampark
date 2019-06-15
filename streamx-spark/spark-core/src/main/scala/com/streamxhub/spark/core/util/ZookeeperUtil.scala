@@ -74,7 +74,7 @@ object ZookeeperUtil {
             case _ => value.getBytes(Charsets.UTF_8)
           }
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
-          val opResult = client.create.withMode(mode).forPath(path, data)
+          val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path)
           Objects.equal(path, opResult)
         case _ => false
       }
@@ -134,7 +134,7 @@ object ZookeeperUtil {
   }
 
   def main(args: Array[String]): Unit = {
-    println(ZookeeperUtil.get("/benjobs"))
+    println(ZookeeperUtil.create("/ben3x/dx3/13333", "xxxx"))
   }
 
 }
