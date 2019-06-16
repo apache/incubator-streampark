@@ -1,4 +1,4 @@
-package com.streamxhub.spark.monitor.util
+package com.streamxhub.spark.monitor.api
 
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.StreamingContext
