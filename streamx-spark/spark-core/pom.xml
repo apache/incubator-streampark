@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>com.streamxhub.spark</groupId>
-            <artifactId>spark-monitor</artifactId>
+            <artifactId>spark-monitor-api</artifactId>
             <version>1.0.0</version>
         </dependency>
         <!--Spark 核心jar包-->
