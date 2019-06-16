@@ -1,13 +1,15 @@
 package com.streamxhub.spark.monitor.util
 
+import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
 
 /**
   * 心跳上报程序
   */
-object HeartBeatUtil {
+object HeartBeat {
 
   private val logger = LoggerFactory.getLogger(this.getClass.getName.stripSuffix("$"))
 
@@ -24,14 +26,25 @@ object HeartBeatUtil {
     val appId = sparkConf.get("spark.app.myid")
     this.zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
     this.path = s"/StreamX/spark/$appId"
-    this.isDebug =  false//sparkConf.contains("spark.conf")
+    this.isDebug = false //sparkConf.contains("spark.conf")
   }
 
-  def apply(sc: StreamingContext): HeartBeatUtil.type = {
-    HeartBeatUtil(sc.sparkContext)
+  //for java
+  def apply(javaStreamingContext: JavaStreamingContext): HeartBeat.type = {
+    HeartBeat(javaStreamingContext.sparkContext)
   }
 
-  def apply(sc: SparkContext): HeartBeatUtil.type = {
+  //for java
+  def apply(javaSparkContext: JavaSparkContext): HeartBeat.type = {
+    this.initialize(javaSparkContext)
+    this
+  }
+
+  def apply(sc: StreamingContext): HeartBeat.type = {
+    HeartBeat(sc.sparkContext)
+  }
+
+  def apply(sc: SparkContext): HeartBeat.type = {
     this.initialize(sc)
     this
   }
@@ -41,7 +54,7 @@ object HeartBeatUtil {
       //register shutdown hook
       Runtime.getRuntime().addShutdownHook(new Thread(new Runnable {
         override def run(): Unit = {
-          HeartBeatUtil.this.stop()
+          HeartBeat.this.stop()
           logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get("spark.app.name")},appId:${sparkConf.getAppId} ")
         }
       }))
