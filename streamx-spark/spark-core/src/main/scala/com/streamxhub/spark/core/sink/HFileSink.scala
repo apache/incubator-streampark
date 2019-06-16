@@ -24,7 +24,7 @@ class HFileSink[T: ClassTag](@transient override val sc: SparkContext,
                              val convert: RDD[T] => RDD[(ImmutableBytesWritable, KeyValue)],
                              val initParams: Map[String, String] = Map.empty[String, String]) extends Sink[T] {
 
-  override val paramPrefix: String = "spark.sink.hfile."
+  override val prefix: String = "spark.sink.hfile."
 
   private lazy val prop = {
     val p = new Properties()

@@ -20,7 +20,7 @@ class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
                              initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
-  override val paramPrefix: String = "spark.sink.kafka."
+  override val prefix: String = "spark.sink.kafka."
 
   private lazy val prop = {
     val p = new Properties()

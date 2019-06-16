@@ -160,7 +160,7 @@ EOF
     <dependencies>
         <dependency>
             <groupId>com.streamxhub</groupId>
-            <groupId>streamx-spark</groupId>
+            <artifactId>streamx-spark</artifactId>
         </dependency>
     </dependencies>
 

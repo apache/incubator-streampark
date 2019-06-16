@@ -21,10 +21,10 @@ import scala.util.Try
   * @param specialKafkaParams 指定 Kafka 配置,可以覆盖配置文件
   */
 class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext,
-                                                  specialKafkaParams: Map[String, String] = Map.empty[String, String])
-  extends Source {
+                                                  specialKafkaParams: Map[String, String] = Map.empty[String, String]
+                                                 ) extends Source {
 
-  override val paramPrefix: String = "spark.source.kafka.consume."
+  override val prefix: String = "spark.source.kafka.consume."
 
   // 保存 offset
   private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
@@ -41,7 +41,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
   // 组装 Kafka 参数
   private lazy val kafkaParams: Map[String, String] = {
     sparkConf.getAll.flatMap {
-      case (k, v) if k.startsWith(paramPrefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(paramPrefix.length) -> v)
+      case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
       case _ => None
     } toMap
   } ++ specialKafkaParams ++ Map("enable.auto.commit" -> "false")

@@ -22,11 +22,11 @@ trait Source extends Logger with Serializable {
   @(transient@getter)
   lazy val sparkConf: SparkConf = ssc.sparkContext.getConf
 
-  val paramPrefix: String
+  val prefix: String
 
   lazy val param: Map[String, String] = sparkConf.getAll.flatMap {
-    case (k, v) if k.startsWith(paramPrefix) && Try(v.nonEmpty).getOrElse(false) =>
-      Some(k.substring(paramPrefix.length) -> v)
+    case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) =>
+      Some(k.substring(prefix.length) -> v)
     case _ => None
   } toMap
 

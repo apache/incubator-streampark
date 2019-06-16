@@ -19,7 +19,6 @@ trait XStreaming {
 
   private final var _args: Array[String] = _
 
-  private var heartbeat: Heartbeat = _
 
   private val sparkListeners = new ArrayBuffer[String]()
 
@@ -50,17 +49,14 @@ trait XStreaming {
     * StreamingContext 运行之后执行
     */
   def afterStarted(ssc: StreamingContext): Unit = {
-    heartbeat = new Heartbeat(ssc)
-    heartbeat.start()
+    Heartbeat(ssc).start()
   }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
   def beforeStop(ssc: StreamingContext): Unit = {
-    if (heartbeat != null) {
-      heartbeat.stop()
-    }
+    Heartbeat(ssc).stop()
   }
 
   /**
@@ -85,7 +81,7 @@ trait XStreaming {
     if (sparkConf.contains("spark.conf")) {
       sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
       val appName = sparkConf.get("spark.app.name")
-      sparkConf.setAppName(appName).setMaster("local[*]")
+      sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
 
