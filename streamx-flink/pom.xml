@@ -4,14 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.streamxhub</groupId>
-    <artifactId>streamx</artifactId>
-    <version>1.0.0</version>
-    <packaging>pom</packaging>
+    <parent>
+        <groupId>com.streamxhub</groupId>
+        <artifactId>streamx</artifactId>
+        <version>1.0.0</version>
+    </parent>
 
-    <modules>
-        <module>streamx-spark</module>
-        <module>streamx-flink</module>
-    </modules>
+    <groupId>com.streamxhub.spark</groupId>
+    <artifactId>streamx-flink</artifactId>
+    <packaging>pom</packaging>
 
 </project>
