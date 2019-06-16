@@ -21,10 +21,10 @@ trait Sink[T] extends Serializable {
   @(transient@getter)
   lazy val sparkConf = sc.getConf
 
-  val paramPrefix: String
+  val prefix: String
 
   lazy val param: Map[String, String] = sparkConf.getAll.flatMap {
-    case (k, v) if k.startsWith(paramPrefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(paramPrefix.length) -> v)
+    case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
     case _ => None
   } toMap
 

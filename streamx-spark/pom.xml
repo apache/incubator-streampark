@@ -16,8 +16,9 @@
 
     <modules>
         <module>spark-core</module>
-        <module>spark-monitor</module>
-        <module>spark-cli</module>
+       <!-- <module>spark-monitor</module>
+        <module>spark-cli</module>-->
+        <module>order</module>
     </modules>
 
 </project>

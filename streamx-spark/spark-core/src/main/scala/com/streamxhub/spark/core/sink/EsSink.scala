@@ -19,7 +19,7 @@ class EsSink[T](@transient override val sc: SparkContext,
                 initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
-  override val paramPrefix: String = "spark.sink.es."
+  override val prefix: String = "spark.sink.es."
 
 
   lazy val esParam: Predef.Map[String, String] = param.map { case (k, v) => s"es.$k" -> v } ++ initParams

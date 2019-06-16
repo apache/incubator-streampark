@@ -133,9 +133,5 @@ object ZookeeperUtil {
     }
   }
 
-  def main(args: Array[String]): Unit = {
-    println(ZookeeperUtil.create("/ben3x/dx3/13333", "xxxx"))
-  }
-
 }
 

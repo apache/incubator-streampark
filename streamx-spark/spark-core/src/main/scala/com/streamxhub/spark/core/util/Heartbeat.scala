@@ -6,10 +6,18 @@ import org.apache.spark.streaming.StreamingContext
 /**
   * 心跳上报程序
   */
-class Heartbeat(private val sc: SparkContext) extends Logger {
+object Heartbeat extends Logger {
 
-  def this(ssc: StreamingContext) {
-    this(ssc.sparkContext)
+  private var sc: SparkContext = _
+
+  def apply(sc: StreamingContext): Heartbeat.type = {
+    this.sc = sc.sparkContext
+    this
+  }
+
+  def apply(sc: SparkContext): Heartbeat.type = {
+    this.sc = sc
+    this
   }
 
   private val sparkConf = sc.getConf
@@ -26,13 +34,14 @@ class Heartbeat(private val sc: SparkContext) extends Logger {
     //本地测试,不启动心跳检测
     if (!isDebug) {
       ZookeeperUtil.create(path, sparkConf.toDebugString, zookeeperURL)
+      logInfo(s"[StreamX] registry heartbeat path: $path")
     }
   }
 
   def stop(): Unit = {
     if (!isDebug) {
       ZookeeperUtil.delete(path, zookeeperURL)
-      logInfo("shutdown heartbeatExecutor ...")
+      logInfo(s"[StreamX] un registry heartbeat path: $path")
     }
   }
 

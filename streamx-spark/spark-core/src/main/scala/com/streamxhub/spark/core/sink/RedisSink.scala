@@ -22,7 +22,7 @@ class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
                                                          initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
-  override val paramPrefix: String = "spark.sink.redis."
+  override val prefix: String = "spark.sink.redis."
 
   private lazy val prop = {
     val p = new Properties()

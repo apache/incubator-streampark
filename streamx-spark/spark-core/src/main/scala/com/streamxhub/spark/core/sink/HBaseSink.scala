@@ -20,7 +20,7 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
                                           val initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
-  override val paramPrefix: String = "spark.sink.hbase."
+  override val prefix: String = "spark.sink.hbase."
 
   private lazy val prop = {
     val p = new Properties()

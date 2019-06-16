@@ -30,7 +30,7 @@ class MySQLSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
     p
   }
 
-  override val paramPrefix: String = "spark.sink.mysql."
+  override val prefix: String = "spark.sink.mysql."
 
   private lazy val url = prop.getProperty("url")
   private lazy val table = prop.getProperty("table")
