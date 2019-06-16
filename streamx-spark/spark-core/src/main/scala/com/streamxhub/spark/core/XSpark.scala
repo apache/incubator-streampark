@@ -1,7 +1,7 @@
 package com.streamxhub.spark.core
 
 import com.streamxhub.spark.core.util.Utils
-import com.streamxhub.spark.monitor.util.HeartBeatUtil
+import com.streamxhub.spark.monitor.util.HeartBeat
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 
@@ -32,14 +32,14 @@ trait XSpark {
     * StreamingContext 运行之后执行
     */
   def afterStarted(sc: SparkContext): Unit = {
-    HeartBeatUtil(sc).start()
+    HeartBeat(sc).start()
   }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
   def beforeStop(sc: SparkContext): Unit = {
-    HeartBeatUtil(sc).stop()
+    HeartBeat(sc).stop()
   }
 
   /**
