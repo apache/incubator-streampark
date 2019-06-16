@@ -12,7 +12,6 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>spark-monitor-api</artifactId>
 
-    <!--项目基本依赖-->
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
