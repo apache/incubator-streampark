@@ -12,7 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 @SpringBootApplication
 class BootStrap
 
-
 object BootStrap extends App {
 
     SpringApplication.run(classOf[BootStrap])
