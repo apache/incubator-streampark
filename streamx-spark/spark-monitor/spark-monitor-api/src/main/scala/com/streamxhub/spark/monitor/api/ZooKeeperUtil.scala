@@ -1,4 +1,4 @@
-package com.streamxhub.spark.monitor.util
+package com.streamxhub.spark.monitor.api
 
 import com.google.common.base.Objects
 import org.apache.commons.compress.utils.Charsets
