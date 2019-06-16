@@ -19,20 +19,31 @@
   * under the License.
   */
 
-package com.streamxhub.spark.monitor.support.actor
+package com.streamxhub.spark.core.util
 
-import akka.actor.{Extension, Props}
-import org.springframework.context.ApplicationContext
-import org.springframework.stereotype.Component
+import java.io.StringWriter
 
+import com.fasterxml.jackson.annotation.JsonInclude
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.module.scala.DefaultScalaModule
+import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 
-@Component class SpringExtension extends Extension {
+/**
+  *
+  */
+object JsonUtil {
+  private val mapper = new ObjectMapper() with ScalaObjectMapper
+  mapper.registerModule(DefaultScalaModule)
+  mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+  mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-  private var applicationContext: ApplicationContext = _
-
-  private[actor] def initialize(applicationContext: ApplicationContext): Unit = {
-    this.applicationContext = applicationContext
+  def parse[T](str: String)(implicit manifest: Manifest[T]) = {
+    mapper.readValue[T](str)
   }
 
-  def props(actorBeanName: String): Props = Props.create(classOf[SpringActorProducer], applicationContext, actorBeanName)
+  def generate(obj: AnyRef): String = {
+    val out = new StringWriter
+    mapper.writeValue(out, obj)
+    out.toString
+  }
 }
