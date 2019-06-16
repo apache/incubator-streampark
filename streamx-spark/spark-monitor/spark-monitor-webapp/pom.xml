@@ -5,18 +5,11 @@
 
     <parent>
         <groupId>com.streamxhub.spark</groupId>
-        <artifactId>streamx-spark</artifactId>
+        <artifactId>spark-monitor</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>spark-monitor</artifactId>
-    <packaging>pom</packaging>
-
-    <modules>
-        <module>spark-monitor-api</module>
-        <module>spark-monitor-service</module>
-        <module>spark-monitor-webapp</module>
-    </modules>
+    <artifactId>spark-monitor-webapp</artifactId>
 
 </project>

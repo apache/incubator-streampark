@@ -57,7 +57,8 @@ trait XSpark {
     // 约定传入此参数,则表示本地 Debug
     if (sparkConf.contains("spark.conf")) {
       sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
-      sparkConf.setAppName("LocalDebug").setMaster("local[*]")
+      val appName = sparkConf.get("spark.app.name")
+      sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
 
