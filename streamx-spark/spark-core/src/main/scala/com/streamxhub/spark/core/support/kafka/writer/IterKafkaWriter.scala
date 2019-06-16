@@ -19,43 +19,33 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.sink
+package com.streamxhub.spark.core.support.kafka.writer
 
 import java.util.Properties
 
-import org.apache.spark.SparkContext
-import org.apache.spark.rdd.RDD
-import org.apache.spark.streaming.Time
-import scala.collection.JavaConversions._
+import com.streamxhub.spark.core.support.kafka.ProducerCache
+import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
+
+import scala.annotation.meta.param
+import scala.reflect.ClassTag
 
 /**
   *
+  *
+  * A simple Kafka producers
   */
-class ShowSink[T](@transient override val sc: SparkContext,
-                  initParams: Map[String, String] = Map.empty[String, String]) extends Sink[T] {
-
-  override val prefix: String = "spark.sink.show."
-
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
-
-  private val num = prop.getProperty("num", "10").toInt
-
-
+class IterKafkaWriter[T: ClassTag](@(transient@param) msg: Iterator[T]) extends KafkaWriter[T] {
   /**
-    * 输出
+    *
+    * @param producerConfig The configuration that can be used to connect to Kafka
+    * @param serializerFunc The function to convert the data from the stream into Kafka
+    *                       [[ProducerRecord]]s.
+    * @tparam K The type of the key
+    * @tparam V The type of the value
     *
     */
-  override def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
-    val firstNum = rdd.take(num + 1)
-    println("-------------------------------------------")
-    println("Time: " + time)
-    println("-------------------------------------------")
-    firstNum.take(num).foreach(println)
-    if (firstNum.length > num) println("...")
-    println()
+  override def writeToKafka[K, V](producerConfig: Properties, serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
+    val producer: KafkaProducer[K, V] = ProducerCache.getProducer(producerConfig)
+    msg.map(serializerFunc).foreach(producer.send)
   }
 }
