@@ -65,8 +65,8 @@ object Utils {
             proper
         }
       }
-      val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       val map = collection.mutable.Map[String, String]()
+      val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => doEach("", x._1, x._2, map))
     } catch {
       case e: IOException => throw new SparkException(s"Failed when loading Spark properties from $filename", e)
