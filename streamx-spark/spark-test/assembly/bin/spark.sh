@@ -204,10 +204,9 @@ doStart() {
         local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
         sudo -u hdfs spark2-submit \
+            -Dspark.conf=${app_proper} \
             --name ${app_name} \
             --queue spark \
-            --properties-file ${app_proper} \
-            -Dspark.conf=${app_proper} \
             --jars ${jars} ${app_params} \
             --class ${main}  ${main_jar} ${main_params} \
             >> ${app_out} 2>&1
