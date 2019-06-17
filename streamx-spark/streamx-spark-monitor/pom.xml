@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <parent>
+        <groupId>com.streamxhub</groupId>
+        <artifactId>streamx-spark</artifactId>
+        <version>1.0.0</version>
+    </parent>
+
+    <modelVersion>4.0.0</modelVersion>
+    <artifactId>streamx-spark-monitor</artifactId>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>streamx-spark-monitor-api</module>
+        <module>streamx-spark-monitor-service</module>
+        <module>streamx-spark-monitor-webapp</module>
+    </modules>
+
+</project>

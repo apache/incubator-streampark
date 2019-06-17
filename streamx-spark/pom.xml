@@ -10,15 +10,14 @@
         <version>1.0.0</version>
     </parent>
 
-    <groupId>com.streamxhub.spark</groupId>
     <artifactId>streamx-spark</artifactId>
     <packaging>pom</packaging>
 
     <modules>
-        <module>spark-cli</module>
-        <module>spark-monitor</module>
-        <module>spark-core</module>
-        <module>spark-test</module>
+        <module>streamx-spark-cli</module>
+        <module>streamx-spark-monitor</module>
+        <module>streamx-spark-core</module>
+        <module>streamx-spark-test</module>
     </modules>
 
     <!-- 定义统一版本号-->
