@@ -21,14 +21,14 @@
 
 package com.streamxhub.spark.core.util
 
-import java.io.{File, FileInputStream, IOException, InputStreamReader}
+import java.io.{File, FileInputStream, IOException, InputStream, InputStreamReader}
 import java.util.Properties
 
 import org.apache.spark.SparkException
+import org.yaml.snakeyaml.Yaml
 
 import scala.collection.JavaConverters._
 import scala.collection.Map
-
 import scalaj.http._
 
 /**
@@ -36,6 +36,45 @@ import scalaj.http._
   */
 object Utils {
 
+  /** Load properties present in the given file. */
+  def getPropertiesFromYaml(filename: String): Map[String, String] = {
+    val file = new File(filename)
+    require(file.exists(), s"Properties file $file does not exist")
+    require(file.isFile, s"Properties file $file is not a normal file")
+    val inputStream: InputStream = new FileInputStream(file)
+
+    def doEach(prefix: String, k: String, v: Any, propMap: collection.mutable.Map[String, String]): Map[String, String] = {
+      v match {
+        case map: java.util.LinkedHashMap[String, Any] =>
+          map.asScala.flatMap(x => {
+            prefix match {
+              case "" => doEach(k, x._1, x._2, propMap)
+              case other => doEach(s"$other.$k", x._1, x._2, propMap)
+            }
+          })
+        case text =>
+          val value = text match {
+            case null => ""
+            case other => other.toString
+          }
+          prefix match {
+            case "" => propMap += k -> value.toString
+            case other => propMap += s"$other.$k" -> value.toString
+          }
+          propMap
+      }
+    }
+
+    try {
+      val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
+      val map = collection.mutable.Map[String, String]()
+      yaml.flatMap(x => doEach("", x._1, x._2, map))
+    } catch {
+      case e: IOException => throw new SparkException(s"Failed when loading Spark properties from $filename", e)
+    } finally {
+      inputStream.close()
+    }
+  }
 
   /** Load properties present in the given file. */
   def getPropertiesFromFile(filename: String): Map[String, String] = {

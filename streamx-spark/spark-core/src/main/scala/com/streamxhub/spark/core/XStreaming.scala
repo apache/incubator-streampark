@@ -21,7 +21,7 @@
 
 package com.streamxhub.spark.core
 
-import com.streamxhub.spark.core.util.Utils
+import com.streamxhub.spark.core.util.{SystemPropertyUtil, Utils}
 import com.streamxhub.spark.monitor.api.HeartBeat
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -94,17 +94,24 @@ trait XStreaming {
     * @return
     */
   def creatingContext(): StreamingContext = {
-
     val sparkConf = new SparkConf()
-
     sparkConf.set("spark.user.args", args.mkString("|"))
 
-    // 约定传入此参数,则表示本地 Debug
-    if (sparkConf.contains("spark.conf")) {
-      sparkConf.setAll(Utils.getPropertiesFromFile(sparkConf.get("spark.conf")))
-      val appName = sparkConf.get("spark.app.name")
-      sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
-      sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
+    val conf = SystemPropertyUtil.get("spark.conf", "")
+    conf.split("\\.").last match {
+      case "properties" =>
+        sparkConf.setAll(Utils.getPropertiesFromFile(conf))
+      case "yml" =>
+        sparkConf.setAll(Utils.getPropertiesFromYaml(conf))
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
+    }
+    //for debug model
+    sparkConf.get("spark.app.debug", "off") match {
+      case "true" | "on" | "yes" =>
+        val appName = sparkConf.get("spark.app.name")
+        sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
+        sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
+      case _ =>
     }
 
     initialize(sparkConf)
@@ -120,7 +127,6 @@ trait XStreaming {
     handle(ssc)
     ssc
   }
-
 
   private def printUsageAndExit(): Unit = {
     System.err.println(

@@ -15,10 +15,10 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>spark-cli</module>
         <module>spark-monitor</module>
         <module>spark-core</module>
-        <!-- <module>spark-cli</module>-->
-        <module>order</module>
+        <module>spark-test</module>
     </modules>
 
     <!-- 定义统一版本号-->
@@ -39,7 +39,6 @@
         <MaxPermGen>512m</MaxPermGen>
         <CodeCacheSize>512m</CodeCacheSize>
     </properties>
-
 
     <repositories>
         <repository>
@@ -160,12 +159,6 @@
             </dependency>
 
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
                 <version>9.3.6.v20151106</version>
@@ -193,6 +186,12 @@
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.yaml</groupId>
+                <artifactId>snakeyaml</artifactId>
+                <version>1.24</version>
             </dependency>
 
         </dependencies>
