@@ -27,6 +27,7 @@ import java.util.Properties
 import org.apache.spark.SparkException
 import org.yaml.snakeyaml.Yaml
 
+import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
 import scala.collection.Map
 import scalaj.http._
@@ -45,7 +46,7 @@ object Utils {
 
     def doEach(prefix: String, k: String, v: Any, propMap: collection.mutable.Map[String, String]): Map[String, String] = {
       v match {
-        case map: java.util.LinkedHashMap[String, Any] =>
+        case map: JavaLinkedMap[String, Any] =>
           map.asScala.flatMap(x => {
             prefix match {
               case "" => doEach(k, x._1, x._2, propMap)
