@@ -37,36 +37,34 @@ import scalaj.http._
   */
 object Utils {
 
-  /** Load properties present in the given file. */
+  /** Load Yaml present in the given file. */
   def getPropertiesFromYaml(filename: String): Map[String, String] = {
     val file = new File(filename)
-    require(file.exists(), s"Properties file $file does not exist")
-    require(file.isFile, s"Properties file $file is not a normal file")
+    require(file.exists(), s"Yaml file $file does not exist")
+    require(file.isFile, s"Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
-
-    def doEach(prefix: String, k: String, v: Any, propMap: collection.mutable.Map[String, String]): Map[String, String] = {
-      v match {
-        case map: JavaLinkedMap[String, Any] =>
-          map.asScala.flatMap(x => {
-            prefix match {
-              case "" => doEach(k, x._1, x._2, propMap)
-              case other => doEach(s"$other.$k", x._1, x._2, propMap)
-            }
-          })
-        case text =>
-          val value = text match {
-            case null => ""
-            case other => other.toString
-          }
-          prefix match {
-            case "" => propMap += k -> value.toString
-            case other => propMap += s"$other.$k" -> value.toString
-          }
-          propMap
-      }
-    }
-
     try {
+      def doEach(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
+        v match {
+          case map: JavaLinkedMap[String, Any] =>
+            map.asScala.flatMap(x => {
+              prefix match {
+                case "" => doEach(k, x._1, x._2, proper)
+                case other => doEach(s"$other.$k", x._1, x._2, proper)
+              }
+            })
+          case text =>
+            val value = text match {
+              case null => ""
+              case other => other.toString
+            }
+            prefix match {
+              case "" => proper += k -> value.toString
+              case other => proper += s"$other.$k" -> value.toString
+            }
+            proper
+        }
+      }
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       val map = collection.mutable.Map[String, String]()
       yaml.flatMap(x => doEach("", x._1, x._2, map))
