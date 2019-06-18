@@ -1,6 +1,5 @@
 spark:
   app:
-    debug: true
     main: com.streamx.spark.test.HelloStreamXApp
     myid: 123
     name: HelloStreamXApp
