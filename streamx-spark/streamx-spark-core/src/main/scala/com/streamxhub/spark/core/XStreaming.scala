@@ -98,9 +98,10 @@ trait XStreaming {
     val sparkConf = new SparkConf()
     sparkConf.set("spark.user.args", args.mkString("|"))
 
-    val conf = sparkConf.get("spark.conf") match {
-      case "" => SystemPropertyUtil.get("spark.conf", "")
-      case path => path
+    //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
+    val (isDebug, conf) = SystemPropertyUtil.get("spark.conf", "") match {
+      case "" => (false, sparkConf.get("spark.conf"))
+      case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
@@ -109,20 +110,15 @@ trait XStreaming {
         sparkConf.setAll(Utils.getPropertiesFromFile(conf))
       case "yml" =>
         sparkConf.setAll(Utils.getPropertiesFromYaml(conf))
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-    println(sparkConf.toDebugString)
-
-    //for debug model
-    sparkConf.get("spark.app.debug", "off") match {
-      case "true" | "on" | "yes" =>
-        val appName = sparkConf.get("spark.app.name")
-        sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
-        sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
-      case _ =>
+    //debug mode
+    if (isDebug) {
+      val appName = sparkConf.get("spark.app.name")
+      sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
+      sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-
 
     initialize(sparkConf)
 
