@@ -112,9 +112,4 @@ object Utils {
     (res.code, res.body)
   }
 
-
-  def main(args: Array[String]): Unit = {
-
-    println(Utils.httpGet("http://bigdata-dev:9200/app/heartbeat/application_1526125629402_7874/15000", Seq.empty[(String, String)]))
-  }
 }
