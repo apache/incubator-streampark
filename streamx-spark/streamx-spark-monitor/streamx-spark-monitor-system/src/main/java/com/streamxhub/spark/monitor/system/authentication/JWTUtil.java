@@ -12,6 +12,9 @@ import org.apache.commons.lang3.StringUtils;
 
 import java.util.Date;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 public class JWTUtil {
 

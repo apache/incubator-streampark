@@ -32,10 +32,13 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
 
         boolean match = false;
         for (String u : anonUrl) {
-            if (pathMatcher.match(u, httpServletRequest.getRequestURI()))
+            if (pathMatcher.match(u, httpServletRequest.getRequestURI())) {
                 match = true;
+            }
         }
-        if (match) return true;
+        if (match) {
+            return true;
+        }
         if (isLoginAttempt(request, response)) {
             return executeLogin(request, response);
         }
