@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.spark.monitor.system.dao.RoleMapper">
+    <resultMap id="roleMap" type="com.streamxhub.spark.monitor.system.domain.Role">
+        <!--
+          WARNING - @mbg.generated
+        -->
+        <result column="ROLE_ID" jdbcType="DECIMAL" property="roleId"/>
+        <result column="ROLE_NAME" jdbcType="VARCHAR" property="roleName"/>
+        <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <select id="findUserRole" resultMap="roleMap">
+        select r.*
+        from t_role r
+                 left join t_user_role ur on (r.role_id = ur.role_id)
+                 left join t_user u on (u.user_id = ur.user_id)
+        where u.username = #{userName}
+    </select>
+
+</mapper>
