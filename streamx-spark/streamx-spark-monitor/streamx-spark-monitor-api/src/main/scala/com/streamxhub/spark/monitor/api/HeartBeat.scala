@@ -73,7 +73,7 @@ object HeartBeat {
   def start(): Unit = {
     if (!isDebug) {
       //register shutdown hook
-      Runtime.getRuntime().addShutdownHook(new Thread(new Runnable {
+      Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
         override def run(): Unit = {
           HeartBeat.this.stop()
           logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get("spark.app.name")},appId:${sparkConf.getAppId} ")
