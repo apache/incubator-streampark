@@ -20,7 +20,7 @@
         <module>streamx-spark-monitor-common</module>
         <module>streamx-spark-monitor-system</module>
         <module>streamx-spark-monitor-core</module>
-        <module>streamx-spark-monitor-webapp</module>
+       <!-- <module>streamx-spark-monitor-webapp</module>-->
     </modules>
 
     <!-- 定义统一版本号-->

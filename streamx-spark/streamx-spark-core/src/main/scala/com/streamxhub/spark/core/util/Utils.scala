@@ -22,12 +22,11 @@
 package com.streamxhub.spark.core.util
 
 import java.io.{File, FileInputStream, IOException, InputStream, InputStreamReader}
-import java.util.Properties
+import java.util.{Properties, Scanner, LinkedHashMap => JavaLinkedMap}
 
 import org.apache.spark.SparkException
 import org.yaml.snakeyaml.Yaml
 
-import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
 import scala.collection.Map
 import scalaj.http._
@@ -37,6 +36,52 @@ import scalaj.http._
   */
 object Utils {
 
+  def getText(filename: String): String = {
+    val file = new File(filename)
+    require(file.exists(), s"Yaml file $file does not exist")
+    require(file.isFile, s"Yaml file $file is not a normal file")
+    val scanner = new Scanner(file)
+    val buffer = new StringBuilder
+    while (scanner.hasNextLine) {
+      buffer.append(scanner.nextLine()).append("\r\n")
+    }
+    scanner.close()
+    buffer.toString()
+  }
+
+  private[this] def eachAppendYamlItem(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
+    v match {
+      case map: JavaLinkedMap[String, Any] =>
+        map.asScala.flatMap(x => {
+          prefix match {
+            case "" => eachAppendYamlItem(k, x._1, x._2, proper)
+            case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
+          }
+        })
+      case text =>
+        val value = text match {
+          case null => ""
+          case other => other.toString
+        }
+        prefix match {
+          case "" => proper += k -> value.toString
+          case other => proper += s"$other.$k" -> value.toString
+        }
+        proper
+    }
+  }
+
+  def getPropertiesFromYamlText(text: String): Map[String, String] = {
+    try {
+
+      val map = collection.mutable.Map[String, String]()
+      val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+    } catch {
+      case e: IOException => throw new SparkException(s"Failed when loading conf error:", e)
+    }
+  }
+
   /** Load Yaml present in the given file. */
   def getPropertiesFromYaml(filename: String): Map[String, String] = {
     val file = new File(filename)
@@ -44,31 +89,9 @@ object Utils {
     require(file.isFile, s"Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
     try {
-      def doEach(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
-        v match {
-          case map: JavaLinkedMap[String, Any] =>
-            map.asScala.flatMap(x => {
-              prefix match {
-                case "" => doEach(k, x._1, x._2, proper)
-                case other => doEach(s"$other.$k", x._1, x._2, proper)
-              }
-            })
-          case text =>
-            val value = text match {
-              case null => ""
-              case other => other.toString
-            }
-            prefix match {
-              case "" => proper += k -> value.toString
-              case other => proper += s"$other.$k" -> value.toString
-            }
-            proper
-        }
-      }
-
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => doEach("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
     } catch {
       case e: IOException => throw new SparkException(s"Failed when loading Spark properties from $filename", e)
     } finally {

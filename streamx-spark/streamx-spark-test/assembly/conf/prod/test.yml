@@ -4,7 +4,7 @@ spark:
     myid: 123
     name: HelloStreamXApp
     conf:
-      mode: local
+      mode: cloud
   source:
     kafka:
       offset:
