@@ -26,6 +26,7 @@ import java.util.Properties
 
 import com.streamxhub.spark.core.util.{SystemPropertyUtil, Utils}
 import com.streamxhub.spark.monitor.api.{HeartBeat, ZooKeeperUtil}
+
 import scala.collection.JavaConverters._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
@@ -33,6 +34,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
+import scala.util.{Failure, Success, Try}
 
 /**
   *
@@ -100,7 +102,7 @@ trait XStreaming {
     * @return
     */
 
-  private[this] def initialize() = {
+  private[this] def initialize(args: Array[String]): Unit = {
     this.params = args
     var argv = args.toList
     while (argv.nonEmpty) {
@@ -131,7 +133,6 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
     val mode = config.getOrElse("spark.app.conf.mode", "local")
-    config ++ "spark.app.conf.mode" -> mode
     mode match {
       /**
         * 直接读取本地的配置文件...
@@ -139,17 +140,26 @@ trait XStreaming {
       case "local" => sparkConf.setAll(config)
 
       /**
-        * 从配置中心获取配置文件...
+        * 从配置中心获取配置文件,如果从配置文件中读取失败,则依旧从本地加载配置文件...
         */
-      case "cloud" =>
-        val appId = sparkConf.get("spark.app.myid")
-        val zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
-        val path = s"/StreamX/spark/conf/$appId"
-        val config = ZooKeeperUtil.get(path, zookeeperURL)
-        val properties = new Properties()
-        properties.load(new StringReader(config))
-        val map = properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
-        sparkConf.setAll(map)
+      case _ =>
+        Try {
+          val appId = config("spark.app.myid")
+          val zookeeperURL = config("spark.monitor.zookeeper")
+          val path = s"/StreamX/spark/conf/$appId"
+          val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
+          if (cloudConf.matches("(^\\s+|^)spark.app.*")) {
+            val properties = new Properties()
+            properties.load(new StringReader(cloudConf))
+            val map = properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+            map
+          } else {
+            Utils.getPropertiesFromYamlText(cloudConf)
+          }
+        } match {
+          case Success(value) => sparkConf.setAll(value)
+          case Failure(_) => sparkConf.setAll(config)
+        }
     }
     //debug mode
     if (isDebug) {
@@ -157,6 +167,9 @@ trait XStreaming {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
+    sparkConf.set("spark.app.conf", Utils.getText(conf))
+    sparkConf.set("spark.app.conf.mode", mode)
+    sparkConf.set("spark.app.debug", isDebug.toString)
   }
 
   def creatingContext(): StreamingContext = {
@@ -183,7 +196,7 @@ trait XStreaming {
   }
 
   def main(args: Array[String]): Unit = {
-    initialize()
+    initialize(args)
     configure(sparkConf)
     val context = checkpointPath match {
       case "" => creatingContext()

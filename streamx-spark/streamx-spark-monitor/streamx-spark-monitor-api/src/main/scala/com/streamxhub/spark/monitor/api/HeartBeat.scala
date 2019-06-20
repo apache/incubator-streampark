@@ -40,7 +40,7 @@ object HeartBeat {
 
   private var confPath: String = _
 
-  private var monitorPath:String = _
+  private var monitorPath: String = _
 
   private var isDebug: Boolean = _
 
@@ -50,7 +50,7 @@ object HeartBeat {
     this.zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
     this.confPath = s"/StreamX/spark/conf/$appId"
     this.monitorPath = s"/StreamX/spark/monitor/$appId"
-    this.isDebug = false //sparkConf.contains("spark.conf")
+    this.isDebug = false//sparkConf.getBoolean("spark.app.debug", false)
   }
 
   //for java
@@ -82,13 +82,8 @@ object HeartBeat {
           logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get("spark.app.name")},appId:${sparkConf.getAppId} ")
         }
       }))
-      val map = sparkConf.getAll
-      val buffer: StringBuilder = new StringBuilder
-      for ((k, v) <- map) {
-        buffer.append(k).append("=").append(v).append("\r\n")
-      }
       //register conf...
-      ZooKeeperUtil.create(confPath, buffer.toString, zookeeperURL, persistent = true)
+      ZooKeeperUtil.create(confPath, sparkConf.get("spark.app.conf"), zookeeperURL, persistent = true)
       //register monitor...
       ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
       logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
