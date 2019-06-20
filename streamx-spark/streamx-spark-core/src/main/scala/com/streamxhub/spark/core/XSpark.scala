@@ -21,8 +21,9 @@
 
 package com.streamxhub.spark.core
 
-import com.streamxhub.spark.core.util.{SystemPropertyUtil, Utils}
+import com.streamxhub.spark.core.util.SystemPropertyUtil
 import com.streamxhub.spark.monitor.api.HeartBeat
+import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
 
@@ -83,9 +84,9 @@ trait XSpark {
 
     conf.split("\\.").last match {
       case "properties" =>
-        sparkConf.setAll(Utils.getPropertiesFromFile(conf))
+        sparkConf.setAll(PropertiesUtil.getPropertiesFromFile(conf))
       case "yml" =>
-        sparkConf.setAll(Utils.getPropertiesFromYaml(conf))
+        sparkConf.setAll(PropertiesUtil.getPropertiesFromYaml(conf))
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 

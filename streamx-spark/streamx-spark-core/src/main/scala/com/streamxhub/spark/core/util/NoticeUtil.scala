@@ -66,7 +66,7 @@ package object NoticeUtil {
         """.stripMargin
 
       val headers = Map("content-type" -> "application/json")
-      val (code, res) = Utils.httpPost(ding.api, body, headers)
+      val (code, res) = HttpUtil.httpPost(ding.api, body, headers)
       println(s"result code : $code , body : $res")
     }
 

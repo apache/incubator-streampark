@@ -30,7 +30,8 @@ package com.streamxhub.spark.core.support.kafka.manager
 import java.lang.reflect.Constructor
 import java.{util => ju}
 
-import com.streamxhub.spark.core.util.{Logger, Utils}
+import com.streamxhub.spark.core.util.Logger
+import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import kafka.api._
 import kafka.common.TopicAndPartition
 import kafka.consumer.SimpleConsumer
@@ -63,7 +64,7 @@ private[kafka] class KafkaManager(val sparkConf: SparkConf) extends Logger with 
 
         logInfo(s"Custom offset management class $clazz")
         val constructors = {
-          val offsetsManagerClass = Utils.classForName(clazz)
+          val offsetsManagerClass = PropertiesUtil.classForName(clazz)
           offsetsManagerClass
             .getConstructors
             .asInstanceOf[Array[Constructor[_ <: SparkConf]]]

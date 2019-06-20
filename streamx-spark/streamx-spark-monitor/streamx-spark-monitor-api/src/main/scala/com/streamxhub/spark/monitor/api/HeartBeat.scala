@@ -21,6 +21,7 @@
 
 package com.streamxhub.spark.monitor.api
 
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil
 import org.apache.spark.api.java.JavaSparkContext
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.api.java.JavaStreamingContext
