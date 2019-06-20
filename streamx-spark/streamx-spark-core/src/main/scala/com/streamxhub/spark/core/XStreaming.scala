@@ -25,7 +25,7 @@ import java.io.StringReader
 import java.util.Properties
 
 import com.streamxhub.spark.core.util.SystemPropertyUtil
-import com.streamxhub.spark.monitor.api.HeartBeat
+import com.streamxhub.spark.monitor.api.{Const, HeartBeat}
 import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 
 import scala.collection.JavaConverters._
@@ -147,7 +147,7 @@ trait XStreaming {
         Try {
           val appId = config("spark.app.myid")
           val zookeeperURL = config("spark.monitor.zookeeper")
-          val path = s"/StreamX/spark/conf/$appId"
+          val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
           val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
           if (cloudConf.matches("(^\\s+|^)spark.app.*")) {
             val properties = new Properties()
@@ -211,4 +211,5 @@ trait XStreaming {
     context.awaitTermination()
     beforeStop(context)
   }
+
 }

@@ -79,3 +79,8 @@ lark:
     anonUrl: /login,/logout/**,/regist,/user/check/**
     # token有效期，单位秒
     jwtTimeOut: 3600
+
+spark:
+    app:
+      monitor:
+        zookeeper: localhost:2181
