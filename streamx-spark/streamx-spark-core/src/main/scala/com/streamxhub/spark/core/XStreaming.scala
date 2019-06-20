@@ -21,8 +21,12 @@
 
 package com.streamxhub.spark.core
 
+import java.io.StringReader
+import java.util.Properties
+
 import com.streamxhub.spark.core.util.{SystemPropertyUtil, Utils}
-import com.streamxhub.spark.monitor.api.HeartBeat
+import com.streamxhub.spark.monitor.api.{HeartBeat, ZooKeeperUtil}
+import scala.collection.JavaConverters._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -37,10 +41,11 @@ import scala.collection.mutable.ArrayBuffer
   */
 trait XStreaming {
 
-  protected final def args: Array[String] = _args
+  protected final def args: Array[String] = params
 
-  private final var _args: Array[String] = _
+  private final var params: Array[String] = _
 
+  private final var sparkConf: SparkConf = _
 
   private val sparkListeners = new ArrayBuffer[String]()
 
@@ -59,7 +64,7 @@ trait XStreaming {
     *
     * @param sparkConf
     */
-  def initialize(sparkConf: SparkConf): Unit = {}
+  def configure(sparkConf: SparkConf): Unit = {}
 
   /**
     * StreamingContext 运行之前执行
@@ -94,39 +99,70 @@ trait XStreaming {
     *
     * @return
     */
-  def creatingContext(): StreamingContext = {
-    val sparkConf = new SparkConf()
-    sparkConf.set("spark.user.args", args.mkString("|"))
 
+  private[this] def initialize() = {
+    this.params = args
+    var argv = args.toList
+    while (argv.nonEmpty) {
+      argv match {
+        case ("--checkpointPath") :: value :: tail =>
+          checkpointPath = value
+          argv = tail
+        case ("--createOnError") :: value :: tail =>
+          createOnError = value.toBoolean
+          argv = tail
+        case Nil =>
+        case tail =>
+          System.err.println(s"Unrecognized options: ${tail.mkString(" ")}")
+          printUsageAndExit()
+      }
+    }
+    sparkConf = new SparkConf()
+    sparkConf.set("spark.user.args", args.mkString("|"))
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
     val (isDebug, conf) = SystemPropertyUtil.get("spark.conf", "") match {
       case "" => (false, sparkConf.get("spark.conf"))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
-
-    conf.split("\\.").last match {
-      case "properties" =>
-        sparkConf.setAll(Utils.getPropertiesFromFile(conf))
-      case "yml" =>
-        sparkConf.setAll(Utils.getPropertiesFromYaml(conf))
+    val config = conf.split("\\.").last match {
+      case "properties" => Utils.getPropertiesFromFile(conf)
+      case "yml" => Utils.getPropertiesFromYaml(conf)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
+    val mode = config.getOrElse("spark.app.conf.mode", "local")
+    config ++ "spark.app.conf.mode" -> mode
+    mode match {
+      /**
+        * 直接读取本地的配置文件...
+        */
+      case "local" => sparkConf.setAll(config)
 
+      /**
+        * 从配置中心获取配置文件...
+        */
+      case "cloud" =>
+        val appId = sparkConf.get("spark.app.myid")
+        val zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
+        val path = s"/StreamX/spark/conf/$appId"
+        val config = ZooKeeperUtil.get(path, zookeeperURL)
+        val properties = new Properties()
+        properties.load(new StringReader(config))
+        val map = properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+        sparkConf.setAll(map)
+    }
     //debug mode
     if (isDebug) {
       val appName = sparkConf.get("spark.app.name")
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
+  }
 
-    initialize(sparkConf)
-
+  def creatingContext(): StreamingContext = {
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)
-
     sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
-
     // 时间间隔
     val duration = sparkConf.get("spark.batch.duration").toInt
     val ssc = new StreamingContext(sparkSession.sparkContext, Seconds(duration))
@@ -146,28 +182,9 @@ trait XStreaming {
     System.exit(1)
   }
 
-
   def main(args: Array[String]): Unit = {
-
-    this._args = args
-
-    var argv = args.toList
-    /*
-        while (argv.nonEmpty) {
-          argv match {
-            case ("--checkpointPath") :: value :: tail =>
-              checkpointPath = value
-              argv = tail
-            case ("--createOnError") :: value :: tail =>
-              createOnError = value.toBoolean
-              argv = tail
-            case Nil =>
-            case tail =>
-              System.err.println(s"Unrecognized options: ${tail.mkString(" ")}")
-              //printUsageAndExit()
-          }
-        }*/
-
+    initialize()
+    configure(sparkConf)
     val context = checkpointPath match {
       case "" => creatingContext()
       case ck =>

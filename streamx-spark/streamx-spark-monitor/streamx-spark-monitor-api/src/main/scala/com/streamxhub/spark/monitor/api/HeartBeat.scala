@@ -38,7 +38,9 @@ object HeartBeat {
 
   private var zookeeperURL: String = _
 
-  private var path: String = _
+  private var confPath: String = _
+
+  private var monitorPath:String = _
 
   private var isDebug: Boolean = _
 
@@ -46,7 +48,8 @@ object HeartBeat {
     this.sparkConf = sc.getConf
     val appId = sparkConf.get("spark.app.myid")
     this.zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
-    this.path = s"/StreamX/spark/$appId"
+    this.confPath = s"/StreamX/spark/conf/$appId"
+    this.monitorPath = s"/StreamX/spark/monitor/$appId"
     this.isDebug = false //sparkConf.contains("spark.conf")
   }
 
@@ -79,15 +82,23 @@ object HeartBeat {
           logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get("spark.app.name")},appId:${sparkConf.getAppId} ")
         }
       }))
-      ZooKeeperUtil.create(path, sparkConf.toDebugString, zookeeperURL)
-      logger.info(s"[StreamX] registry heartbeat path: $path")
+      val map = sparkConf.getAll
+      val buffer: StringBuilder = new StringBuilder
+      for ((k, v) <- map) {
+        buffer.append(k).append("=").append(v).append("\r\n")
+      }
+      //register conf...
+      ZooKeeperUtil.create(confPath, buffer.toString, zookeeperURL, persistent = true)
+      //register monitor...
+      ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
+      logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
     }
   }
 
   def stop(): Unit = {
     if (!isDebug) {
-      ZooKeeperUtil.delete(path, zookeeperURL)
-      logger.info(s"[StreamX] un registry heartbeat path: $path")
+      ZooKeeperUtil.delete(monitorPath, zookeeperURL)
+      logger.info(s"[StreamX] un registry heartbeat path: $monitorPath")
     }
   }
 

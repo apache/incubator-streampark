@@ -3,6 +3,8 @@ spark:
     main: com.streamx.spark.test.HelloStreamXApp
     myid: 123
     name: HelloStreamXApp
+    conf:
+      mode: local
   source:
     kafka:
       offset:
