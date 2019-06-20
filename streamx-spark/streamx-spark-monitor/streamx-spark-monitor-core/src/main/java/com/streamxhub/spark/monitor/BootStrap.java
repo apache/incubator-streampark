@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 public class BootStrap {
 
     public static void main(String[] args) {
-        new SpringApplicationBuilder(BootStrap.class)
-                .run(args);
+        new SpringApplicationBuilder(BootStrap.class).run(args);
     }
 }

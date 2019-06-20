@@ -24,8 +24,9 @@ package com.streamxhub.spark.core
 import java.io.StringReader
 import java.util.Properties
 
-import com.streamxhub.spark.core.util.{SystemPropertyUtil, Utils}
-import com.streamxhub.spark.monitor.api.{HeartBeat, ZooKeeperUtil}
+import com.streamxhub.spark.core.util.SystemPropertyUtil
+import com.streamxhub.spark.monitor.api.HeartBeat
+import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 
 import scala.collection.JavaConverters._
 import org.apache.spark.SparkConf
@@ -128,8 +129,8 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
     val config = conf.split("\\.").last match {
-      case "properties" => Utils.getPropertiesFromFile(conf)
-      case "yml" => Utils.getPropertiesFromYaml(conf)
+      case "properties" => PropertiesUtil.getPropertiesFromFile(conf)
+      case "yml" => PropertiesUtil.getPropertiesFromYaml(conf)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
     val mode = config.getOrElse("spark.app.conf.mode", "local")
@@ -153,7 +154,7 @@ trait XStreaming {
             properties.load(new StringReader(cloudConf))
             properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
           } else {
-            Utils.getPropertiesFromYamlText(cloudConf)
+            PropertiesUtil.getPropertiesFromYamlText(cloudConf)
           }
         } match {
           case Success(value) => sparkConf.setAll(value)
@@ -166,7 +167,7 @@ trait XStreaming {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set("spark.app.conf", Utils.getFileSource(conf))
+    sparkConf.set("spark.app.conf", PropertiesUtil.getFileSource(conf))
     sparkConf.set("spark.app.conf.mode", mode)
     sparkConf.set("spark.app.debug", isDebug.toString)
   }
