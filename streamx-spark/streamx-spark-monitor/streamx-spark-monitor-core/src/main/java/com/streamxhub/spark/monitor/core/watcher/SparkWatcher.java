@@ -9,6 +9,8 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.zookeeper.CreateMode;
+import org.apache.zookeeper.data.Stat;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -48,12 +50,14 @@ public class SparkWatcher implements ApplicationRunner {
 
     final Map<String, String> monitor = new ConcurrentHashMap<>();
 
-    final Map<String,String> sparkConf = new ConcurrentHashMap<>();
+    final Map<String, String> sparkConf = new ConcurrentHashMap<>();
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
         String sparkConfPath = Const.SPARK_CONF_PATH_PREFIX();
         String sparkMonitorPath = Const.SPARK_MONITOR_PATH_PREFIX();
+
+        initialize(sparkConfPath, sparkMonitorPath);
 
         pull(sparkConfPath, (client, event) -> {
             ChildData data = event.getData();
@@ -94,6 +98,7 @@ public class SparkWatcher implements ApplicationRunner {
         });
     }
 
+
     @PostConstruct
     public void init() {
         //获取zk连接实例
@@ -127,6 +132,17 @@ public class SparkWatcher implements ApplicationRunner {
                     e.printStackTrace();
                 }
             });
+        }
+    }
+
+    private void initialize(String sparkConfPath, String sparkMonitorPath) throws Exception {
+        Stat stat = client.checkExists().forPath(sparkConfPath);
+        if (stat == null) {
+            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT).forPath(sparkConfPath);
+        }
+        stat = client.checkExists().forPath(sparkMonitorPath);
+        if (stat == null) {
+            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT).forPath(sparkMonitorPath);
         }
     }
 
