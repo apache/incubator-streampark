@@ -36,7 +36,7 @@ import scalaj.http._
   */
 object Utils {
 
-  def getText(filename: String): String = {
+  def getFileSource(filename: String): String = {
     val file = new File(filename)
     require(file.exists(), s"Yaml file $file does not exist")
     require(file.isFile, s"Yaml file $file is not a normal file")

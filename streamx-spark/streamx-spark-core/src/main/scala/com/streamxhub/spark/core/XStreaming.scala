@@ -151,8 +151,7 @@ trait XStreaming {
           if (cloudConf.matches("(^\\s+|^)spark.app.*")) {
             val properties = new Properties()
             properties.load(new StringReader(cloudConf))
-            val map = properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
-            map
+            properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
           } else {
             Utils.getPropertiesFromYamlText(cloudConf)
           }
@@ -167,7 +166,7 @@ trait XStreaming {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set("spark.app.conf", Utils.getText(conf))
+    sparkConf.set("spark.app.conf", Utils.getFileSource(conf))
     sparkConf.set("spark.app.conf.mode", mode)
     sparkConf.set("spark.app.debug", isDebug.toString)
   }
