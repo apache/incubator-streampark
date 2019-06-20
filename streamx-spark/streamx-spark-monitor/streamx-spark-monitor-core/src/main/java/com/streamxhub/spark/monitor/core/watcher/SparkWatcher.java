@@ -2,6 +2,7 @@ package com.streamxhub.spark.monitor.core.watcher;
 
 
 import com.streamxhub.spark.monitor.api.Const;
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -135,15 +136,9 @@ public class SparkWatcher implements ApplicationRunner {
         }
     }
 
-    private void initialize(String sparkConfPath, String sparkMonitorPath) throws Exception {
-        Stat stat = client.checkExists().forPath(sparkConfPath);
-        if (stat == null) {
-            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT).forPath(sparkConfPath);
-        }
-        stat = client.checkExists().forPath(sparkMonitorPath);
-        if (stat == null) {
-            client.create().creatingParentContainersIfNeeded().withMode(CreateMode.PERSISTENT).forPath(sparkMonitorPath);
-        }
+    private void initialize(String sparkConfPath, String sparkMonitorPath) {
+        ZooKeeperUtil.create(sparkConfPath,null,zookeeperConnect,true);
+        ZooKeeperUtil.create(sparkMonitorPath,null,zookeeperConnect,true);
     }
 
 
