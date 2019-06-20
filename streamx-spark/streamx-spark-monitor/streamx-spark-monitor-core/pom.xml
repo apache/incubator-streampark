@@ -22,6 +22,11 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
+            <artifactId>streamx-spark-monitor-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub</groupId>
             <artifactId>streamx-spark-monitor-system</artifactId>
         </dependency>
 
@@ -29,6 +34,23 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-framework</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.curator</groupId>
+            <artifactId>curator-recipes</artifactId>
+        </dependency>
+
     </dependencies>
 
     <repositories>

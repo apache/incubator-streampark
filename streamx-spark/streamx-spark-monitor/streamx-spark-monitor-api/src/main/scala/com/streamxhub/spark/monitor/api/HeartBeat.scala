@@ -49,9 +49,9 @@ object HeartBeat {
     this.sparkConf = sc.getConf
     val appId = sparkConf.get("spark.app.myid")
     this.zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
-    this.confPath = s"/StreamX/spark/conf/$appId"
-    this.monitorPath = s"/StreamX/spark/monitor/$appId"
-    this.isDebug = false//sparkConf.getBoolean("spark.app.debug", false)
+    this.confPath = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
+    this.monitorPath = s"${Const.SPARK_MONITOR_PATH_PREFIX}/$appId"
+    this.isDebug = false //sparkConf.getBoolean("spark.app.debug", false)
   }
 
   //for java

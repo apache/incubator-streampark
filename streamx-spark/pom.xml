@@ -28,6 +28,7 @@
         <scala.version>2.11.8</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.8</zkclient.version>
+        <curator.version>4.0.1</curator.version>
         <redis.version>2.9.0</redis.version>
         <es.version>6.2.3</es.version>
         <protobuf.version>2.5.0</protobuf.version>
@@ -63,6 +64,16 @@
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-core_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.curator</groupId>
+                        <artifactId>curator-framework</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.curator</groupId>
+                        <artifactId>curator-recipes</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--Spark Streaming 核心jar-->
             <dependency>
@@ -75,6 +86,7 @@
                 <groupId>org.apache.spark</groupId>
                 <artifactId>spark-sql_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
+
             </dependency>
             <!--Spark kafka 核心jar-->
             <dependency>
@@ -100,6 +112,19 @@
                 <groupId>org.elasticsearch</groupId>
                 <artifactId>elasticsearch-spark-20_2.11</artifactId>
                 <version>${es.version}</version>
+            </dependency>
+
+            <!--curator-->
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-framework</artifactId>
+                <version>${curator.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.curator</groupId>
+                <artifactId>curator-recipes</artifactId>
+                <version>${curator.version}</version>
             </dependency>
 
             <!--zkClient-->
