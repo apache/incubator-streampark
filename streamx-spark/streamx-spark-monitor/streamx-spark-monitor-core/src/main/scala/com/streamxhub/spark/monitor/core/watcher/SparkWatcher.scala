@@ -81,7 +81,7 @@ import scala.util.{Failure, Success, Try}
     Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
   }
 
-  @PreDestroy def destroy(): Unit = client.close()
+  @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
 
   private def watch(parent: String, listener: TreeCacheListener): Unit = {
     Try {
