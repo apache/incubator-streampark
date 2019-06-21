@@ -6,4 +6,6 @@ object Const {
 
   val SPARK_MONITOR_PATH_PREFIX = "/StreamX/spark/monitor"
 
+  val SPARK_CONF_REGEXP = "(^\\s+|^)spark.app.*"
+
 }
