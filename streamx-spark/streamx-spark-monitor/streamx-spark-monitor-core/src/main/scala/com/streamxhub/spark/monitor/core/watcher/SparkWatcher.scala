@@ -3,7 +3,7 @@ package com.streamxhub.spark.monitor.core.watcher
 import java.io.StringReader
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import com.streamxhub.spark.monitor.api.Const
+import com.streamxhub.spark.monitor.api.Const._
 import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 import com.streamxhub.spark.monitor.core.service.WatcherService
 import lombok.extern.slf4j.Slf4j
@@ -20,9 +20,7 @@ import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
 import java.util.Properties
-
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 
 import org.apache.curator.retry.ExponentialBackoffRetry
 
@@ -54,7 +52,7 @@ import scala.util.{Failure, Success, Try}
   def run(args: ApplicationArguments): Unit = {
 
     val confThread = factory.newThread(() => {
-      watch(Const.SPARK_CONF_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
+      watch(SPARK_CONF_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
         event.getData match {
           case null =>
           case data =>
@@ -73,7 +71,7 @@ import scala.util.{Failure, Success, Try}
     confThread.start()
 
     val monitorThread = factory.newThread(() => {
-      watch(Const.SPARK_MONITOR_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
+      watch(SPARK_MONITOR_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
         event.getData match {
           case null =>
           case data =>
@@ -96,7 +94,7 @@ import scala.util.{Failure, Success, Try}
 
   @PostConstruct def initialize(): Unit = {
     //检查监控路径是否存在,不存在在创建...
-    Seq(Const.SPARK_CONF_PATH_PREFIX, Const.SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
+    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
     //获取连接实例...
     client = CuratorFrameworkFactory.newClient(zookeeperConnect, SESSION_TIMEOUT, CONNECTION_TIMEOUT, new ExponentialBackoffRetry(1000, 3))
     client.start()
@@ -121,7 +119,7 @@ import scala.util.{Failure, Success, Try}
   }
 
   private[this] def getConfigMap(conf: String): Map[String, String] = {
-    if (!conf.matches(Const.SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
+    if (!conf.matches(SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
       val properties = new Properties()
       properties.load(new StringReader(conf))
       properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
