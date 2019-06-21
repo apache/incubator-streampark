@@ -49,8 +49,8 @@ import scala.util.{Failure, Success, Try}
 
   def run(args: ApplicationArguments): Unit = {
 
-    val confThread = factory.newThread(() => watch(Const.SPARK_CONF_PATH_PREFIX, (client: CuratorFramework, event: TreeCacheEvent) => {
-      (client, event) -> (client: CuratorFramework, event: TreeCacheEvent) = {
+    val confThread = factory.newThread(() => {
+      watch(Const.SPARK_CONF_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
         event.getData match {
           case null =>
           case data =>
@@ -61,13 +61,13 @@ import scala.util.{Failure, Success, Try}
               case _ =>
             }
         }
-      }
-    }))
+      })
+    })
     confThread.setDaemon(true)
     confThread.start()
 
-    val monitorThread = factory.newThread(() => watch(Const.SPARK_MONITOR_PATH_PREFIX, (client: CuratorFramework, event: TreeCacheEvent) => {
-      (client, event) -> (client: CuratorFramework, event: TreeCacheEvent) = {
+    val monitorThread = factory.newThread(() => {
+      watch(Const.SPARK_MONITOR_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
         event.getData match {
           case null =>
           case data =>
@@ -79,8 +79,8 @@ import scala.util.{Failure, Success, Try}
               case _ =>
             }
         }
-      }
-    }))
+      })
+    })
     monitorThread.setDaemon(true)
     monitorThread.start()
 

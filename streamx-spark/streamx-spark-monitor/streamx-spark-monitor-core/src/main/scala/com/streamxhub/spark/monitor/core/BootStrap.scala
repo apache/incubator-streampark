@@ -3,7 +3,7 @@ package com.streamxhub.spark.monitor.core
 import org.springframework.context.annotation.Configuration
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration
 import org.springframework.context.annotation.ComponentScan
-import org.springframework.boot.SpringApplication
+import org.springframework.boot.builder.SpringApplicationBuilder
 import org.springframework.boot.autoconfigure.SpringBootApplication
 
 @Configuration
@@ -12,8 +12,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 @SpringBootApplication
 class BootStrap
 
-object BootStrap extends App {
+object BootStrap {
 
-  SpringApplication.run(classOf[BootStrap])
+  def main(args: Array[String]): Unit = {
+    new SpringApplicationBuilder(classOf[BootStrap]).run(args: _*)
+  }
 
 }
