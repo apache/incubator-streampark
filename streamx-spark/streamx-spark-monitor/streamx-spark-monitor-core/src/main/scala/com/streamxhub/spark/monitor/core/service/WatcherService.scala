@@ -1,15 +1,9 @@
 package com.streamxhub.spark.monitor.core.service
 
-import java.io.StringReader
-import java.util.Properties
-
-import com.streamxhub.spark.monitor.api.Const
-import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import lombok.extern.slf4j.Slf4j
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
-import scala.collection.JavaConverters._
 
 @Slf4j
 @Service("watcherService")
