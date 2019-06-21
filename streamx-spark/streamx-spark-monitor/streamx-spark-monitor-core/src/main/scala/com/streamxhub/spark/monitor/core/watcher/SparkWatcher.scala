@@ -10,7 +10,6 @@ import lombok.extern.slf4j.Slf4j
 import org.apache.curator.framework.CuratorFramework
 import org.apache.curator.framework.recipes.cache.{TreeCache, TreeCacheEvent, TreeCacheListener}
 import org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type._
-import org.apache.curator.framework.CuratorFrameworkFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationArguments
@@ -21,36 +20,22 @@ import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
 import java.util.Properties
 import scala.collection.JavaConversions._
-
-import org.apache.curator.retry.ExponentialBackoffRetry
-
 import scala.util.{Failure, Success, Try}
 
 
 @Slf4j
 @Component class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: String,
                               @Autowired watcherService: WatcherService) extends ApplicationRunner {
-
-  /**
-    * 会话超时时间
-    */
-  private val SESSION_TIMEOUT = 30000
-
-  /**
-    * 连接超时时间
-    */
-  private val CONNECTION_TIMEOUT = 5000
   /**
     * 创建连接实例
     */
-  private var client: CuratorFramework = _
+  private val client: CuratorFramework = ZooKeeperUtil.getClient(zookeeperConnect)
 
   private val factory = new ThreadFactoryBuilder().setNameFormat("pull-thread-%d").build
 
   private def getId(path: String) = path.replaceAll("^/(.*)/", "")
 
-  def run(args: ApplicationArguments): Unit = {
-
+  @Override def run(args: ApplicationArguments): Unit = {
     val confThread = factory.newThread(() => {
       watch(SPARK_CONF_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
         event.getData match {
@@ -89,15 +74,11 @@ import scala.util.{Failure, Success, Try}
     })
     monitorThread.setDaemon(true)
     monitorThread.start()
-
   }
 
   @PostConstruct def initialize(): Unit = {
     //检查监控路径是否存在,不存在在创建...
     Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
-    //获取连接实例...
-    client = CuratorFrameworkFactory.newClient(zookeeperConnect, SESSION_TIMEOUT, CONNECTION_TIMEOUT, new ExponentialBackoffRetry(1000, 3))
-    client.start()
   }
 
   @PreDestroy def destroy(): Unit = client.close()
