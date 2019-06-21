@@ -63,10 +63,9 @@ import scala.util.{Failure, Success, Try}
             val path = data.getPath
             val conf = new String(data.getData, StandardCharsets.UTF_8)
             val id = getId(path)
-            val configMap = getConfigMap(conf)
             event.getType match {
-              case NODE_ADDED | NODE_UPDATED => watcherService.publish(id, configMap)
-              case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id, configMap)
+              case NODE_ADDED | NODE_UPDATED => watcherService.publish(id)
+              case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id)
               case _ =>
             }
         }

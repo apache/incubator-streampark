@@ -10,15 +10,15 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Array(classOf[Exception]))
 class WatcherService {
 
-  def config(id: String, conf: Map[String,String]): Unit = {
+  def config(id: String, conf: Map[String, String]): Unit = {
     System.out.println(id + ":config")
   }
 
-  def publish(id: String, conf: Map[String,String]): Unit = {
+  def publish(id: String): Unit = {
     System.out.println(id + ":start")
   }
 
-  def shutdown(id: String, conf: Map[String,String]): Unit = {
+  def shutdown(id: String): Unit = {
     System.out.println(id + ":shutdown")
   }
 
