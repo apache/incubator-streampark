@@ -8,4 +8,6 @@ object Const {
 
   val SPARK_CONF_REGEXP = "(^\\s+|^)spark.app.*"
 
+  val SPARK_PARAM_APP_NAME = "spark.app.name"
+
 }

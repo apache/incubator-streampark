@@ -1,8 +1,10 @@
 package com.streamxhub.spark.monitor.core.watcher
 
+import java.io.StringReader
+
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.streamxhub.spark.monitor.api.Const
-import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil
+import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 import com.streamxhub.spark.monitor.core.service.WatcherService
 import lombok.extern.slf4j.Slf4j
 import org.apache.curator.framework.CuratorFramework
@@ -17,17 +19,19 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
+import java.util.Properties
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
 import org.apache.curator.retry.ExponentialBackoffRetry
 
 import scala.util.{Failure, Success, Try}
 
 
 @Slf4j
-@Component class SparkWatcher(@Autowired watcherService: WatcherService) extends ApplicationRunner {
-
-  @Value("${spark.app.monitor.zookeeper}") private val zookeeperConnect: String = ""
+@Component class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: String,
+                              @Autowired watcherService: WatcherService) extends ApplicationRunner {
 
   /**
     * 会话超时时间
@@ -57,7 +61,9 @@ import scala.util.{Failure, Success, Try}
             event.getType match {
               case NODE_ADDED | NODE_UPDATED =>
                 val conf = new String(data.getData, StandardCharsets.UTF_8)
-                watcherService.config(getId(data.getPath), conf)
+                val id = getId(data.getPath)
+                val configMap = getConfigMap(conf)
+                watcherService.config(id, configMap)
               case _ =>
             }
         }
@@ -73,9 +79,11 @@ import scala.util.{Failure, Success, Try}
           case data =>
             val path = data.getPath
             val conf = new String(data.getData, StandardCharsets.UTF_8)
+            val id = getId(path)
+            val configMap = getConfigMap(conf)
             event.getType match {
-              case NODE_ADDED | NODE_UPDATED => watcherService.publish(getId(path), conf)
-              case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(getId(path), conf)
+              case NODE_ADDED | NODE_UPDATED => watcherService.publish(id, configMap)
+              case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id, configMap)
               case _ =>
             }
         }
@@ -111,5 +119,14 @@ import scala.util.{Failure, Success, Try}
       case Success(_) =>
     }
   }
+
+  private[this] def getConfigMap(conf: String): Map[String, String] = {
+    if (!conf.matches(Const.SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
+      val properties = new Properties()
+      properties.load(new StringReader(conf))
+      properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
+    }
+  }
+
 
 }

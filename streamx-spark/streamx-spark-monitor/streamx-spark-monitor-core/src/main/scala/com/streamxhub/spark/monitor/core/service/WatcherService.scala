@@ -15,22 +15,18 @@ import scala.collection.JavaConverters._
 @Service("watcherService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Array(classOf[Exception]))
 class WatcherService {
-  def config(id: String, conf: String): Unit = {
-    val map = if (conf.matches(Const.SPARK_CONF_REGEXP)) {
-      val properties = new Properties()
-      properties.load(new StringReader(conf))
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
-    } else {
-      PropertiesUtil.getPropertiesFromYamlText(conf)
-    }
+
+  def config(id: String, conf: Map[String,String]): Unit = {
     System.out.println(id + ":config")
   }
 
-  def publish(id: String, conf: String): Unit = {
+  def publish(id: String, conf: Map[String,String]): Unit = {
     System.out.println(id + ":start")
   }
 
-  def shutdown(id: String, conf: String): Unit = {
+  def shutdown(id: String, conf: Map[String,String]): Unit = {
     System.out.println(id + ":shutdown")
   }
+
+
 }
