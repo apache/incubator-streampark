@@ -109,7 +109,6 @@
         </dependency>
         <!-- spring end -->
 
-
         <dependency>
             <groupId>com.streamxhub</groupId>
             <artifactId>streamx-spark-monitor-common</artifactId>
@@ -145,8 +144,6 @@
             <groupId>org.apache.zookeeper</groupId>
             <artifactId>zookeeper</artifactId>
         </dependency>
-
-
     </dependencies>
 
     <build>
