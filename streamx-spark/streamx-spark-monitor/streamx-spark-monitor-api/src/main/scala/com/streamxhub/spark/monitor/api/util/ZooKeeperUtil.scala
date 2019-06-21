@@ -16,7 +16,7 @@ object ZooKeeperUtil {
 
   private[this] val map = mutable.Map[String, CuratorFramework]()
 
-  private[this] def getClient(url: String = connect): CuratorFramework = {
+  def getClient(url: String = connect): CuratorFramework = {
     map.get(url) match {
       case Some(x) => x
       case None =>
