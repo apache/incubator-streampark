@@ -1,8 +1,10 @@
 package com.streamxhub.spark.monitor.core.watcher;
 
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.streamxhub.spark.monitor.api.Const;
 import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
+import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
@@ -10,8 +12,7 @@ import org.apache.curator.framework.recipes.cache.ChildData;
 import org.apache.curator.framework.recipes.cache.TreeCache;
 import org.apache.curator.framework.recipes.cache.TreeCacheListener;
 import org.apache.curator.retry.ExponentialBackoffRetry;
-import org.apache.zookeeper.CreateMode;
-import org.apache.zookeeper.data.Stat;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -21,8 +22,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 /**
  * @author benjobs
@@ -43,24 +43,24 @@ public class SparkWatcher implements ApplicationRunner {
      * 连接超时时间
      */
     private static final int CONNECTION_TIMEOUT = 5000;
-
     /**
      * 创建连接实例
      */
     private CuratorFramework client = null;
 
-    final Map<String, String> monitor = new ConcurrentHashMap<>();
+    private static final String sparkConfPath = Const.SPARK_CONF_PATH_PREFIX();
 
-    final Map<String, String> sparkConf = new ConcurrentHashMap<>();
+    private static final String sparkMonitorPath = Const.SPARK_MONITOR_PATH_PREFIX();
+
+    private ThreadFactory factory = new ThreadFactoryBuilder().setNameFormat("pull-thread-%d").build();
+
+    @Autowired
+    private WatcherService watcherService;
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
-        String sparkConfPath = Const.SPARK_CONF_PATH_PREFIX();
-        String sparkMonitorPath = Const.SPARK_MONITOR_PATH_PREFIX();
+    public void run(ApplicationArguments args) {
 
-        initialize(sparkConfPath, sparkMonitorPath);
-
-        pull(sparkConfPath, (client, event) -> {
+        factory.newThread(() -> pull(sparkConfPath, (client, event) -> {
             ChildData data = event.getData();
             if (data != null) {
                 String currentPath = data.getPath();
@@ -68,15 +68,15 @@ public class SparkWatcher implements ApplicationRunner {
                 switch (event.getType()) {
                     case NODE_ADDED:
                     case NODE_UPDATED:
-                        sparkConf.put(currentPath, conf);
+                        watcherService.config(currentPath, conf);
                         break;
                     default:
                         break;
                 }
             }
-        });
+        })).start();
 
-        pull(sparkMonitorPath, (client, event) -> {
+        factory.newThread(() -> pull(sparkMonitorPath, (client, event) -> {
             ChildData data = event.getData();
             if (data != null) {
                 String currentPath = data.getPath();
@@ -84,24 +84,25 @@ public class SparkWatcher implements ApplicationRunner {
                 switch (event.getType()) {
                     case NODE_ADDED:
                     case NODE_UPDATED:
-                        monitor.put(currentPath, conf);
+                        watcherService.publish(currentPath, conf);
                         break;
                     case CONNECTION_LOST:
                     case NODE_REMOVED:
                     case INITIALIZED:
                     case CONNECTION_RECONNECTED:
-                        monitor.remove(currentPath);
+                        watcherService.shutdown(currentPath, conf);
                         break;
                     default:
                         break;
                 }
             }
-        });
+        })).start();
     }
 
-
     @PostConstruct
-    public void init() {
+    public void initialize() {
+        //检查监控路径是否存在,不存在在创建...
+        checkPathIfNotExists();
         //获取zk连接实例
         client = CuratorFrameworkFactory.newClient(zookeeperConnect,
                 SESSION_TIMEOUT,
@@ -117,29 +118,32 @@ public class SparkWatcher implements ApplicationRunner {
         client.close();
     }
 
-    private void pull(String parentPath, TreeCacheListener listener) throws Exception {
-        List<String> paths = client.getChildren().forPath(parentPath);
-        if (paths != null && !paths.isEmpty()) {
-            paths.forEach(path -> {
-                try {
-                    String confPath = parentPath + "/" + path;
-                    //监听当前节点
-                    TreeCache treeCache = new TreeCache(client, confPath);
-                    //设置监听器和处理过程
-                    treeCache.getListenable().addListener(listener);
-                    //开始监听
-                    treeCache.start();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            });
+    private void pull(String parentPath, TreeCacheListener listener) {
+        try {
+            List<String> paths = client.getChildren().forPath(parentPath);
+            if (paths != null && !paths.isEmpty()) {
+                paths.forEach(path -> {
+                    try {
+                        String confPath = parentPath + "/" + path;
+                        //监听当前节点
+                        TreeCache treeCache = new TreeCache(client, confPath);
+                        //设置监听器和处理过程
+                        treeCache.getListenable().addListener(listener);
+                        //开始监听
+                        treeCache.start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                });
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private void initialize(String sparkConfPath, String sparkMonitorPath) {
-        ZooKeeperUtil.create(sparkConfPath,null,zookeeperConnect,true);
-        ZooKeeperUtil.create(sparkMonitorPath,null,zookeeperConnect,true);
+    private void checkPathIfNotExists() {
+        ZooKeeperUtil.create(sparkConfPath, null, zookeeperConnect, true);
+        ZooKeeperUtil.create(sparkMonitorPath, null, zookeeperConnect, true);
     }
-
 
 }
