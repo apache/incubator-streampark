@@ -15,7 +15,7 @@ spark:
           servers: bigdata-kafka-001-113-8:9092,bigdata-kafka-002-113-9:9092,bigdata-kafka-003-113-10:9092
         topics: flm_monitor_sqkb_basic_app_v2
         group:
-          id: kafka.consumer.002
+          id: kafka.consumer.001
         key:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value:

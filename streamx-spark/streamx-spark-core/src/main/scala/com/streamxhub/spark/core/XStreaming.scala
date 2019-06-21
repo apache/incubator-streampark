@@ -149,7 +149,7 @@ trait XStreaming {
           val zookeeperURL = config("spark.monitor.zookeeper")
           val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
           val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
-          if (cloudConf.matches("(^\\s+|^)spark.app.*")) {
+          if (cloudConf.matches(Const.SPARK_CONF_REGEXP)) {
             val properties = new Properties()
             properties.load(new StringReader(cloudConf))
             properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
