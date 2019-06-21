@@ -3,7 +3,6 @@ package com.streamxhub.spark.monitor.api.util
 import java.io._
 import java.util.{Properties, Scanner}
 
-import org.apache.spark.SparkException
 import org.yaml.snakeyaml.Yaml
 
 import java.util.{LinkedHashMap => JavaLinkedMap}
@@ -52,12 +51,11 @@ object PropertiesUtil {
 
   def getPropertiesFromYamlText(text: String): Map[String, String] = {
     try {
-
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
     } catch {
-      case e: IOException => throw new SparkException(s"Failed when loading conf error:", e)
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
     }
   }
 
@@ -72,7 +70,7 @@ object PropertiesUtil {
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
     } catch {
-      case e: IOException => throw new SparkException(s"Failed when loading Spark properties from $filename", e)
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
     } finally {
       inputStream.close()
     }
@@ -91,7 +89,7 @@ object PropertiesUtil {
       properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
       case e: IOException =>
-        throw new SparkException(s"Failed when loading Spark properties from $filename", e)
+        throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
     } finally {
       inReader.close()
     }

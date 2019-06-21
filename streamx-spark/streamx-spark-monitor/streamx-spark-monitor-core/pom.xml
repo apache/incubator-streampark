@@ -172,7 +172,7 @@
                     <launchers>
                         <launcher>
                             <id>app</id>
-                            <mainClass>com.sqkb.apollo.api.ApiBootStrap</mainClass>
+                            <mainClass>com.streamxhub.spark.monitor.core.BootStrap</mainClass>
                             <args>
                                 <arg>-deprecation</arg>
                             </args>
@@ -203,7 +203,7 @@
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
-                            <mainClass>com.sqkb.apollo.api.ApiBootStrap</mainClass>
+                            <mainClass>com.streamxhub.spark.monitor.core.BootStrap</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
@@ -256,25 +256,6 @@
             </plugin>
         </plugins>
     </reporting>
-
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-dependencies</artifactId>
-                <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.spring.platform</groupId>
-                <artifactId>platform-bom</artifactId>
-                <version>${platform-bom.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
 </project>
 
