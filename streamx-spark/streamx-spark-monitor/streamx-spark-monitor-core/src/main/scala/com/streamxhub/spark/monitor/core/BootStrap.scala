@@ -12,10 +12,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 @SpringBootApplication
 class BootStrap
 
-object BootStrap {
-
-  def main(args: Array[String]): Unit = {
-    new SpringApplicationBuilder(classOf[BootStrap]).run(args: _*)
-  }
-
+object BootStrap extends App {
+  new SpringApplicationBuilder(classOf[BootStrap]).run(args: _*)
 }
