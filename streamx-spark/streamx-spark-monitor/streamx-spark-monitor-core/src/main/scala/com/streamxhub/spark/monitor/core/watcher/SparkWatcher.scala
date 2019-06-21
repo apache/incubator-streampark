@@ -33,7 +33,12 @@ import scala.util.{Failure, Success, Try}
 
   private val factory = new ThreadFactoryBuilder().setNameFormat("pull-thread-%d").build
 
-  private def getId(path: String) = path.replaceAll("^/(.*)/", "")
+  @PostConstruct def initialize(): Unit = {
+    //检查监控路径是否存在,不存在在创建...
+    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
+  }
+
+  @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
 
   @Override def run(args: ApplicationArguments): Unit = {
     val confThread = factory.newThread(() => {
@@ -60,9 +65,7 @@ import scala.util.{Failure, Success, Try}
         event.getData match {
           case null =>
           case data =>
-            val path = data.getPath
-            val conf = new String(data.getData, StandardCharsets.UTF_8)
-            val id = getId(path)
+            val id = getId(data.getPath)
             event.getType match {
               case NODE_ADDED | NODE_UPDATED => watcherService.publish(id)
               case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id)
@@ -75,14 +78,7 @@ import scala.util.{Failure, Success, Try}
     monitorThread.start()
   }
 
-  @PostConstruct def initialize(): Unit = {
-    //检查监控路径是否存在,不存在在创建...
-    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
-  }
-
-  @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
-
-  private def watch(parent: String, listener: TreeCacheListener): Unit = {
+  private[this] def watch(parent: String, listener: TreeCacheListener): Unit = {
     Try {
       client.getChildren.forPath(parent).filter(_.nonEmpty).foreach(x => {
         //监听当前节点
@@ -98,6 +94,8 @@ import scala.util.{Failure, Success, Try}
     }
   }
 
+  private[this] def getId(path: String) = path.replaceAll("^/(.*)/", "")
+
   private[this] def getConfigMap(conf: String): Map[String, String] = {
     if (!conf.matches(SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
       val properties = new Properties()
@@ -105,6 +103,5 @@ import scala.util.{Failure, Success, Try}
       properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     }
   }
-
 
 }
