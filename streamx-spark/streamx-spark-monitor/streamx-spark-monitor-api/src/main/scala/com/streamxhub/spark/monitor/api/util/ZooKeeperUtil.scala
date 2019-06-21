@@ -50,6 +50,7 @@ object ZooKeeperUtil {
     val client = getClient(url)
     if (client != null) {
       client.close()
+      map -= url
     }
   }
 
@@ -73,7 +74,7 @@ object ZooKeeperUtil {
             case _ => value.getBytes(Charsets.UTF_8)
           }
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
-          val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path,data)
+          val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data)
           Objects.equal(path, opResult)
         case _ => false
       }
