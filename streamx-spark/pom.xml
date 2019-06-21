@@ -156,6 +156,16 @@
                 <groupId>org.apache.hadoop</groupId>
                 <artifactId>hadoop-common</artifactId>
                 <version>${hadoop.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.apache.curator</groupId>
+                        <artifactId>curator-client</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.apache.curator</groupId>
+                        <artifactId>curator-recipes</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <!--hbase-->
             <dependency>
