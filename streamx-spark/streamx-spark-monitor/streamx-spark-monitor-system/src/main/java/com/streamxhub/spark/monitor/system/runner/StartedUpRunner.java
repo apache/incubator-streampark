@@ -21,17 +21,14 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info("");
-            log.info("             ('-.     _  .-')  .-. .-')   ");
-            log.info("             ( OO ).-.( \\( -O ) \\  ( OO )  ");
-            log.info("  ,--.       / . --. / ,------. ,--. ,--.  ");
-            log.info("  |  |.-')   | \\-.  \\  |   /`. '|  .'   /  ");
-            log.info("  |  | OO ).-'-'  |  | |  /  | ||      /,  ");
-            log.info("  |  |`-' | \\| |_.'  | |  |_.' ||     ' _) ");
-            log.info(" (|  '---.'  |  .-.  | |  .  '.'|  .   \\   ");
-            log.info("  |      |   |  | |  | |  |\\  \\ |  |\\   \\  ");
-            log.info("  `------'   `--' `--' `--' '--'`--' '--'  ");
-            log.info("  STREAMX 启动完毕，时间：" + LocalDateTime.now());
+            log.info("                                                                 ");
+            log.info("     ,---.   ,--.                                  ,--.   ,--.   ");
+            log.info("    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /   ");
+            log.info("    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\    ");
+            log.info("    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\ ");
+            log.info("    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   ");
+            log.info("                                                                 ");
+            log.info("  StreamX 启动完毕，时间：" + LocalDateTime.now());
             log.info("");
         }
     }
