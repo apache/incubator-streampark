@@ -50,18 +50,14 @@ public class CacheInitRunner implements ApplicationRunner {
                 log.error("Redis连接异常，请检查Redis连接配置并确保Redis服务已启动");
             }
             log.error("缓存初始化失败，{}", e.getMessage());
-            log.error("");
-            log.error("              ('-.     _  .-')  .-. .-')   ");
-            log.error("             ( OO ).-.( \\( -O ) \\  ( OO )  ");
-            log.error("  ,--.       / . --. / ,------. ,--. ,--.  ");
-            log.error("  |  |.-')   | \\-.  \\  |   /`. '|  .'   /  ");
-            log.error("  |  | OO ).-'-'  |  | |  /  | ||      /,  ");
-            log.error("  |  |`-' | \\| |_.'  | |  |_.' ||     ' _) ");
-            log.error(" (|  '---.'  |  .-.  | |  .  '.'|  .   \\   ");
-            log.error("  |      |   |  | |  | |  |\\  \\ |  |\\   \\  ");
-            log.error("  `------'   `--' `--' `--' '--'`--' '--'  ");
-            log.error("");
-            log.error("  STREAMX 启动完毕，时间：" + LocalDateTime.now());
+            log.error("                                                                       ");
+            log.error("           ,---.   ,--.                                  ,--.   ,--.   ");
+            log.error("          '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /   ");
+            log.error("          `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\    ");
+            log.error("          .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\ ");
+            log.error("          `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   ");
+            log.error("                                                                       ");
+            log.error("  StreamX 启动完毕，时间：" + LocalDateTime.now());
             log.error("");
             context.close();
         }

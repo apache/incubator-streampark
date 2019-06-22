@@ -35,7 +35,9 @@ import scala.util.{Failure, Success, Try}
 
   @PostConstruct def initialize(): Unit = {
     //检查监控路径是否存在,不存在在创建...
-    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(ZooKeeperUtil.create(_, null, zookeeperConnect, persistent = true))
+    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(x =>
+      ZooKeeperUtil.create(x, null, zookeeperConnect, persistent = true)
+    )
   }
 
   @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
@@ -94,7 +96,7 @@ import scala.util.{Failure, Success, Try}
     }
   }
 
-  private[this] def getId(path: String) = path.replaceAll("^/(.*)/", "")
+  private[this] def getId(path: String): String = path.replaceAll("^/(.*)/", "")
 
   private[this] def getConfigMap(conf: String): Map[String, String] = {
     if (!conf.matches(SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
