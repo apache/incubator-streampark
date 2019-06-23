@@ -36,6 +36,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
+import com.streamxhub.spark.monitor.api.Const._
 
 /**
   *
@@ -121,55 +122,66 @@ trait XStreaming {
       }
     }
     sparkConf = new SparkConf()
-    sparkConf.set("spark.user.args", args.mkString("|"))
+    sparkConf.set(SPARK_PARAM_USER_ARGS, args.mkString("|"))
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, conf) = SystemPropertyUtil.get("spark.conf", "") match {
-      case "" => (false, sparkConf.get("spark.conf"))
+    val (isDebug, conf) = SystemPropertyUtil.get(SPARK_PARAM_CONF, "") match {
+      case "" => (false, sparkConf.get(SPARK_PARAM_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
-    val config = conf.split("\\.").last match {
+
+    val localConf = conf.split("\\.").last match {
       case "properties" => PropertiesUtil.getPropertiesFromFile(conf)
       case "yml" => PropertiesUtil.getPropertiesFromYaml(conf)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
-    val mode = config.getOrElse("spark.app.conf.mode", "local")
-    mode match {
-      /**
-        * 直接读取本地的配置文件...
-        */
-      case "local" => sparkConf.setAll(config)
 
+    //保存本地的配置文件版本
+    val localVersion = localConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+    sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
+
+    val cloudConf = Try {
+      val appId = localConf(SPARK_PARAM_APP_MYID)
+      val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
+      val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
+      val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
+      if (cloudConf.matches(Const.SPARK_CONF_REGEXP)) {
+        val properties = new Properties()
+        properties.load(new StringReader(cloudConf))
+        properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      } else {
+        PropertiesUtil.getPropertiesFromYamlText(cloudConf)
+      }
+    }.getOrElse(null)
+
+    /**
+      * 直接读取本地的配置文件,注意规则:
+      * 1)读取配置文件里的version,会和配置中心里的version对比,如果配置中心里的version和本地相同或比本地的version大,则会使用配置中心里的version
+      * 如果比本地小则使用本地的配置.
+      * ...
+      */
+    cloudConf match {
       /**
-        * 从配置中心获取配置文件,如果从配置文件中读取失败,则依旧从本地加载配置文件...
+        * 配置中心无配置文件,或者获取失败,则读取本地配置文件
         */
+      case null => sparkConf.setAll(localConf)
       case _ =>
-        Try {
-          val appId = config("spark.app.myid")
-          val zookeeperURL = config("spark.monitor.zookeeper")
-          val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
-          val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
-          if (cloudConf.matches(Const.SPARK_CONF_REGEXP)) {
-            val properties = new Properties()
-            properties.load(new StringReader(cloudConf))
-            properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
-          } else {
-            PropertiesUtil.getPropertiesFromYamlText(cloudConf)
-          }
-        } match {
-          case Success(value) => sparkConf.setAll(value)
-          case Failure(_) => sparkConf.setAll(config)
+        val cloudVersion = cloudConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+        cloudVersion.compare(localVersion) match {
+          case 1 | 0 => sparkConf.setAll(cloudConf)
+          case _ => sparkConf.setAll(localConf)
         }
+        //保存线上的版本...
+        sparkConf.set(SPARK_PARAM_APP_CONF_CLOUD_VERSION, cloudVersion)
     }
     //debug mode
     if (isDebug) {
-      val appName = sparkConf.get("spark.app.name")
+      val appName = sparkConf.get(SPARK_PARAM_APP_NAME)
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set("spark.app.conf", PropertiesUtil.getFileSource(conf))
-    sparkConf.set("spark.app.conf.mode", mode)
-    sparkConf.set("spark.app.debug", isDebug.toString)
+    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, PropertiesUtil.getFileSource(conf))
+    sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
   }
 
   def creatingContext(): StreamingContext = {

@@ -24,8 +24,9 @@ import scala.util.{Failure, Success, Try}
 
 
 @Slf4j
-@Component class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: String,
-                              @Autowired watcherService: WatcherService) extends ApplicationRunner {
+@Component
+class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: String,
+                   @Autowired watcherService: WatcherService) extends ApplicationRunner {
   /**
     * 创建连接实例
     */
