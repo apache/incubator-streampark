@@ -27,6 +27,7 @@ import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.api.java.JavaStreamingContext
 import org.apache.spark.{SparkConf, SparkContext}
 import org.slf4j.LoggerFactory
+import com.streamxhub.spark.monitor.api.Const._
 
 /**
   * 心跳上报程序
@@ -47,10 +48,10 @@ object HeartBeat {
 
   private[this] def initialize(sc: SparkContext): Unit = {
     this.sparkConf = sc.getConf
-    val appId = sparkConf.get("spark.app.myid")
-    this.zookeeperURL = sparkConf.get("spark.monitor.zookeeper")
-    this.confPath = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
-    this.monitorPath = s"${Const.SPARK_MONITOR_PATH_PREFIX}/$appId"
+    val appId = sparkConf.get(SPARK_PARAM_APP_MYID)
+    this.zookeeperURL = sparkConf.get(SPARK_PARAM_MONITOR_ZOOKEEPER)
+    this.confPath = s"${SPARK_CONF_PATH_PREFIX}/$appId"
+    this.monitorPath = s"${SPARK_MONITOR_PATH_PREFIX}/$appId"
     this.isDebug = false //sparkConf.getBoolean("spark.app.debug", false)
   }
 
@@ -80,11 +81,33 @@ object HeartBeat {
       Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
         override def run(): Unit = {
           HeartBeat.this.stop()
-          logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get("spark.app.name")},appId:${sparkConf.getAppId} ")
+          logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get(SPARK_PARAM_APP_NAME)},appId:${sparkConf.getAppId} ")
         }
       }))
+
       //register conf...
-      ZooKeeperUtil.create(confPath, sparkConf.get("spark.app.conf"), zookeeperURL, persistent = true)
+      val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+      val cloudVersion = sparkConf.get(SPARK_PARAM_APP_CONF_CLOUD_VERSION, null)
+      (cloudVersion, localVersion) match {
+        case (null, _) =>
+
+          /**
+            * 第一次加载,zk里还没有配置文件...
+            */
+          ZooKeeperUtil.create(confPath, sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE), zookeeperURL, persistent = true)
+        case (cloud, local) =>
+          cloud.compare(local) match {
+            /**
+              * 本地配置文件比线上大...
+              */
+            case 1 =>
+              ZooKeeperUtil.update(confPath, sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE), zookeeperURL, persistent = true)
+            case _ =>
+          }
+        case _ =>
+          new ExceptionInInitializerError("[StreamX] init config error,please check spark.app.conf.local.version.")
+          System.exit(1)
+      }
       //register monitor...
       ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
       logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
