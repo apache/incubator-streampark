@@ -35,7 +35,7 @@ object MySQLActor {
 
   case class Select(sql: String)
 
-  case class SelectOne(sql: String)
+  case class SelectOne[T: ClassTag](sql: String)
 
   case class ExecuteUpdate(sql: String)
 
