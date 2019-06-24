@@ -249,7 +249,7 @@ cat > $name/pom.xml <<EOF
         <hbase.version>1.2.0-cdh5.12.1</hbase.version>
         <hive.version>1.1.0-cdh5.12.1</hive.version>
 
-        <scala.version>2.11.12</scala.version>
+        <scala.version>2.12.8</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <redis.version>2.8.2</redis.version>
         <mysql.version>5.1.6</mysql.version>

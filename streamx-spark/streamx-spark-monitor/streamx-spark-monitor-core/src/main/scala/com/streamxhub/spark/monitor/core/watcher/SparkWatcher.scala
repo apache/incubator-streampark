@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
-import java.util.Properties
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
@@ -44,38 +43,45 @@ class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: St
   @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
 
   @Override def run(args: ApplicationArguments): Unit = {
-    val confThread = factory.newThread(() => {
-      watch(SPARK_CONF_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
-        event.getData match {
-          case null =>
-          case data =>
-            event.getType match {
-              case NODE_ADDED | NODE_UPDATED =>
-                val conf = new String(data.getData, StandardCharsets.UTF_8)
-                val id = getId(data.getPath)
-                val configMap = getConfigMap(conf)
-                watcherService.config(id, configMap)
-              case _ =>
+    val confThread = factory.newThread(new Runnable {
+      override def run(): Unit = {
+        watch(SPARK_CONF_PATH_PREFIX, new TreeCacheListener {
+          override def childEvent(curatorFramework: CuratorFramework, event: TreeCacheEvent): Unit = {
+            event.getData match {
+              case null =>
+              case data =>
+                event.getType match {
+                  case NODE_ADDED | NODE_UPDATED =>
+                    val conf = new String(data.getData, StandardCharsets.UTF_8)
+                    val id = getId(data.getPath)
+                    watcherService.config(id, conf)
+                  case _ =>
+                }
             }
-        }
-      })
+          }
+        })
+      }
     })
     confThread.setDaemon(true)
     confThread.start()
 
-    val monitorThread = factory.newThread(() => {
-      watch(SPARK_MONITOR_PATH_PREFIX, (_: CuratorFramework, event: TreeCacheEvent) => {
-        event.getData match {
-          case null =>
-          case data =>
-            val id = getId(data.getPath)
-            event.getType match {
-              case NODE_ADDED | NODE_UPDATED => watcherService.publish(id)
-              case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id)
-              case _ =>
+    val monitorThread = factory.newThread(new Runnable {
+      override def run(): Unit = {
+        watch(SPARK_MONITOR_PATH_PREFIX, new TreeCacheListener {
+          override def childEvent(curatorFramework: CuratorFramework, event: TreeCacheEvent): Unit = {
+            event.getData match {
+              case null =>
+              case data =>
+                val id = getId(data.getPath)
+                event.getType match {
+                  case NODE_ADDED | NODE_UPDATED => watcherService.publish(id)
+                  case CONNECTION_LOST | NODE_REMOVED | INITIALIZED => watcherService.shutdown(id)
+                  case _ =>
+                }
             }
-        }
-      })
+          }
+        })
+      }
     })
     monitorThread.setDaemon(true)
     monitorThread.start()
@@ -98,13 +104,5 @@ class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: St
   }
 
   private[this] def getId(path: String): String = path.replaceAll("^/(.*)/", "")
-
-  private[this] def getConfigMap(conf: String): Map[String, String] = {
-    if (!conf.matches(SPARK_CONF_REGEXP)) PropertiesUtil.getPropertiesFromYamlText(conf).toMap else {
-      val properties = new Properties()
-      properties.load(new StringReader(conf))
-      properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
-    }
-  }
 
 }
