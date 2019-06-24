@@ -13,8 +13,7 @@ import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
 
-@Repository
-class SparkConfDao @Autowired()(implicit val system: ActorSystem) {
+@Repository class SparkConfDao @Autowired()(implicit val system: ActorSystem) {
 
 
   implicit val timeout: Timeout = 10.minutes
