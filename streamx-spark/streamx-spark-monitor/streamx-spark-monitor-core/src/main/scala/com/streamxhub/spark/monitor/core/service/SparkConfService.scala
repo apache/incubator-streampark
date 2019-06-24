@@ -29,6 +29,8 @@ import scala.language.postfixOps
           case _ => Future(0)
         }
     }
+
+    Future(0)
   }
 
 }
