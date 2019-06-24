@@ -96,7 +96,7 @@ object HeartBeat {
             */
           ZooKeeperUtil.create(confPath, sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE), zookeeperURL, persistent = true)
         case (cloud, local) =>
-          cloud.compare(local) match {
+          local.compare(cloud) match {
             /**
               * 本地配置文件比线上大...
               */

@@ -1,10 +1,8 @@
 package com.streamxhub.spark.monitor.core.watcher
 
-import java.io.StringReader
-
 import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.streamxhub.spark.monitor.api.Const._
-import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil
 import com.streamxhub.spark.monitor.core.service.WatcherService
 import lombok.extern.slf4j.Slf4j
 import org.apache.curator.framework.CuratorFramework
@@ -20,7 +18,6 @@ import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
-
 
 @Slf4j
 @Component

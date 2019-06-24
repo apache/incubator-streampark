@@ -19,14 +19,13 @@
         <module>streamx-spark-monitor-common</module>
         <module>streamx-spark-monitor-system</module>
         <module>streamx-spark-monitor-core</module>
-        <module>mybatis-scala-samples</module>
        <!-- <module>streamx-spark-monitor-webapp</module>-->
     </modules>
 
     <!-- 定义统一版本号-->
     <properties>
         <spark.version>2.2.0</spark.version>
-        <scala.version>2.12.8</scala.version>
+        <scala.version>2.11.8</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.0.1</curator.version>
