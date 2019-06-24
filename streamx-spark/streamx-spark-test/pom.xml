@@ -11,7 +11,7 @@
 
     <!-- 定义统一版本号-->
     <properties>
-        <scala.version>2.11.8</scala.version>
+        <scala.version>2.12.8</scala.version>
         <streamx.spark.version>1.0.0</streamx.spark.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>

@@ -95,6 +95,18 @@
             <artifactId>json4s-jackson_${scala.supply.version}</artifactId>
             <version>3.6.5</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.mybatis.scala</groupId>
+            <artifactId>mybatis-scala-core_2.11</artifactId>
+            <version>1.0.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.4.5</version>
+        </dependency>
         <!--scala end-->
 
         <!-- spring -->
