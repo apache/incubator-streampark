@@ -9,8 +9,7 @@ import com.typesafe.config.ConfigFactory
 import akka.actor.ActorSystem
 
 
-@Configuration
-class AkkaConfig @Autowired()(val applicationContext: ApplicationContext, val springExtension: SpringExtension) {
+@Configuration class AkkaConfig @Autowired()(val applicationContext: ApplicationContext, val springExtension: SpringExtension) {
 
   @Bean def actorSystem: ActorSystem = {
     val actorSystem = ActorSystem.create("ActorSystem")

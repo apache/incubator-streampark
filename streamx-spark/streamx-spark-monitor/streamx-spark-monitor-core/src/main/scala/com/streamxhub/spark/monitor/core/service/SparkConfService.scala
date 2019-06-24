@@ -9,8 +9,7 @@ import scala.concurrent.Future
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
-@Service
-class SparkConfService @Autowired()(sparkConfDao: SparkConfDao) {
+@Service class SparkConfService @Autowired()(sparkConfDao: SparkConfDao) {
 
   def config(conf: SparkConf): Future[Int] = {
     val future = sparkConfDao.get(conf.confId)
