@@ -25,7 +25,7 @@
         <spark.version>2.2.0</spark.version>
         <hadoop.version>2.6.0</hadoop.version>
         <hbase.version>1.2.0</hbase.version>
-        <scala.version>2.12.8</scala.version>
+        <scala.version>2.11.8</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.0.1</curator.version>

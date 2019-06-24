@@ -13,11 +13,13 @@ class SparkConf(
                  @NotBlank(message = "{required}") var conf: String
                ) extends Serializable {
 
-  var confId: Long = 0L
+  var confId: Int = _
   var createTime: Date = null
   var modifyTime: Date = null
-
-  private val createTimeFrom = null
-  private val createTimeTo = null
-
 }
+
+
+
+
+
+

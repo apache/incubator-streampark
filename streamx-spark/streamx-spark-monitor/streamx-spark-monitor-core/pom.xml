@@ -49,30 +49,6 @@
         </dependency>
 
         <dependency>
-            <groupId>com.netaporter</groupId>
-            <artifactId>scala-uri_${scala.supply.version}</artifactId>
-            <version>0.4.16</version>
-        </dependency>
-
-        <dependency>
-            <groupId>net.codingwell</groupId>
-            <artifactId>scala-guice_${scala.supply.version}</artifactId>
-            <version>4.2.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.typesafe.slick</groupId>
-            <artifactId>slick_${scala.supply.version}</artifactId>
-            <version>${slick.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.typesafe.slick</groupId>
-            <artifactId>slick-hikaricp_${scala.supply.version}</artifactId>
-            <version>${slick.version}</version>
-        </dependency>
-
-        <dependency>
             <groupId>org.scalaj</groupId>
             <artifactId>scalaj-http_${scala.supply.version}</artifactId>
             <version>2.4.1</version>
@@ -95,19 +71,6 @@
             <artifactId>json4s-jackson_${scala.supply.version}</artifactId>
             <version>3.6.5</version>
         </dependency>
-
-        <dependency>
-            <groupId>org.mybatis.scala</groupId>
-            <artifactId>mybatis-scala-core_2.11</artifactId>
-            <version>1.0.3</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mybatis</groupId>
-            <artifactId>mybatis</artifactId>
-            <version>3.4.5</version>
-        </dependency>
-        <!--scala end-->
 
         <!-- spring -->
         <dependency>

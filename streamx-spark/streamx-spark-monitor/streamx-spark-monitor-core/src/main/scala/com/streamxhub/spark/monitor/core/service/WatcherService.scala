@@ -9,10 +9,12 @@ import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
 import com.streamxhub.spark.monitor.api.Const._
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
-import com.streamxhub.spark.monitor.core.dao.{Config, SparkConfDao}
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
 import com.streamxhub.spark.monitor.core.domain.{SparkConf, _}
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.util.{Base64Utils, DigestUtils}
 
 import scala.language.postfixOps
 
@@ -20,19 +22,18 @@ import scala.language.postfixOps
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Array(classOf[Exception]))
-class WatcherService() {
-
+class WatcherService(@Autowired sparkConfService: SparkConfService) {
 
   def config(id: String, conf: String): Unit = {
     val confMap = getConfigMap(conf)
     val appName = confMap(SPARK_PARAM_APP_NAME)
     val confVersion = confMap(SPARK_PARAM_APP_CONF_LOCAL_VERSION)
-    val sparkConf = new SparkConf(appName, confVersion, conf)
-
-    Config.context.transaction { implicit session =>
-      SparkConfDao insert sparkConf
+    val sparkConf = new SparkConf(appName, confVersion, Base64Utils.encodeToString(conf.getBytes))
+    sparkConf.confId = id.toInt
+    sparkConfService.config(sparkConf).map {
+      case 0 => println("插入或更新失败....")
+      case _ => println("插入或更新成功....")
     }
-
     System.out.println(id + ":config")
   }
 
