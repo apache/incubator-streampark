@@ -16,6 +16,11 @@ class SparkConf(
   var confId: Int = _
   var createTime: Date = null
   var modifyTime: Date = null
+
+  def this() {
+    this(null,null,null)
+  }
+
 }
 
 

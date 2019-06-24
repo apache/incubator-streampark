@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
 import com.streamxhub.spark.monitor.core.domain.{SparkConf, _}
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.util.{Base64Utils, DigestUtils}
+import org.springframework.util.Base64Utils
 
 import scala.language.postfixOps
 

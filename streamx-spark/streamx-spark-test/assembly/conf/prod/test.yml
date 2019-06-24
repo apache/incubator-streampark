@@ -13,10 +13,10 @@ spark:
           type: kafka
       consume:
         bootstrap:
-          servers: bigdata-kafka-001-113-8:9092,bigdata-kafka-002-113-9:9092,bigdata-kafka-003-113-10:9092
-        topics: flm_monitor_sqkb_basic_app_v2
+          servers: localhost:9092
+        topics: hello
         group:
-          id: streamx.005
+          id: streamx.001
         key:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value:

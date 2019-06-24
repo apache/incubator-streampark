@@ -8,10 +8,12 @@ import com.streamxhub.spark.monitor.core.domain.SparkConf
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
 import com.streamxhub.spark.monitor.core.actor.MySQLActor._
+import com.streamxhub.spark.monitor.core.utils.MySQLClient
 
 import scala.concurrent.Future
 import scala.concurrent.duration._
 import scala.language.postfixOps
+import scala.reflect.ClassTag
 
 @Repository class SparkConfDao @Autowired()(implicit val system: ActorSystem) {
 
@@ -39,8 +41,8 @@ import scala.language.postfixOps
     (mysqlActor ? ExecuteUpdate(sql)).mapTo[Int]
   }
 
-  def get(confId: Int): Future[Map[String, Any]] = {
-    (mysqlActor ? SelectOne(s"SELECT * FROM T_SPARK_CONF WHERE ID=$confId")).mapTo[Map[String, Any]]
+  def get(confId: Int): Future[SparkConf] = {
+    (mysqlActor ? SelectOne[SparkConf](s"SELECT * FROM T_SPARK_CONF WHERE ID=$confId"))
   }
 
   def saveRecord(x: SparkConf): Future[Int] = {

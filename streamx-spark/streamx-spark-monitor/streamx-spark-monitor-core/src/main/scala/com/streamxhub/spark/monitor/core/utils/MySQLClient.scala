@@ -9,6 +9,8 @@ import scala.util.Try
 import com.streamxhub.spark.monitor.core.utils.CommonUtils._
 import com.zaxxer.hikari.HikariDataSource
 
+import scala.reflect.{ClassTag, classTag}
+
 object MySQLClient extends Serializable {
 
   val connPool = new ThreadLocal[Connection]
@@ -32,7 +34,7 @@ object MySQLClient extends Serializable {
             ds.setConnectionTimeout(dataSourceConfig.getInt("connectionTimeout"))
             // 一个连接idle状态的最大时长（毫秒），超时则被释放（retired），缺省:10分钟 -->
             ds.setIdleTimeout(dataSourceConfig.getInt("idleTimeout"))
-           // 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒，参考MySQL wait_timeout参数（show variables like '%timeout%';） -->
+            // 一个连接的生命时长（毫秒），超时而且没被使用则被释放（retired），缺省:30分钟，建议设置比数据库超时时长少30秒，参考MySQL wait_timeout参数（show variables like '%timeout%';） -->
             ds.setMaxLifetime(dataSourceConfig.getLong("maxLifetime"))
             // 连接池中允许的最大连接数。缺省值：10；推荐的公式：((core_count * 2) + effective_spindle_count) -->
             ds.setMinimumIdle(dataSourceConfig.getInt("maximumPoolSize"))
@@ -102,7 +104,7 @@ object MySQLClient extends Serializable {
     }
   }
 
-  def select(sql: String): List[Map[String, Any]] = {
+  def select[T](sql: String): List[Map[String, Any]] = {
     if (isEmpty(sql)) List.empty else {
       val conn = getConnection
       try {
@@ -137,24 +139,30 @@ object MySQLClient extends Serializable {
     * @param sql
     * @return
     */
-  def selectOne(sql: String): Map[String, Any] = {
+  def selectOne[T: ClassTag](sql: String): T = {
     val conn = getConnection
     try {
       val stmt = conn.createStatement
       val result = stmt.executeQuery(sql)
       val count = result.getMetaData.getColumnCount
-      if (!result.next()) Map.empty else {
-        var map = Map[String, Any]()
+      if (!result.next()) null.asInstanceOf[T] else {
+        val myClassOf = implicitly[ClassTag[T]].runtimeClass
+        val obj = myClassOf.newInstance()
+        val fields = myClassOf.getDeclaredFields
+        val separator = "_|-"
         for (x <- 1 to count) {
-          val key = result.getMetaData.getColumnLabel(x)
-          val value = result.getObject(x).asInstanceOf[Any]
-          map += key -> value
+          val k = result.getMetaData.getColumnLabel(x)
+          fields.filter(f => f.getName.replaceAll(separator, "").toUpperCase() == k.replaceAll(separator, "").toUpperCase()).map(f => {
+            f.setAccessible(true)
+            val v = result.getObject(x)
+            f.set(obj, v)
+          })
         }
-        map
+        obj.asInstanceOf[T]
       }
     } catch {
       case ex: Exception => ex.printStackTrace()
-        Map.empty
+        null.asInstanceOf[T]
     } finally {
       conn.close()
       connPool.remove()
