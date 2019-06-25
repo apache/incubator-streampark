@@ -13,8 +13,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
-import static scala.collection.JavaConversions.*;
-
 import static com.streamxhub.spark.monitor.api.Const.*;
 
 import java.io.IOException;
@@ -58,7 +56,7 @@ public class WatcherServiceImpl implements WatcherService {
 
     private Map<String, String> getConfigMap(String conf) {
         if (!conf.matches(SPARK_CONF_REGEXP())) {
-            return mapAsJavaMap(PropertiesUtil.getPropertiesFromYamlText(conf));
+            return PropertiesUtil.getPropertiesFromYamlText(conf);
         } else {
             return getConfigMapFromDebugString(conf);
         }
