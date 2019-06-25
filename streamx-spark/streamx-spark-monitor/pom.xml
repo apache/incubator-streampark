@@ -65,18 +65,6 @@
 
             <dependency>
                 <groupId>com.streamxhub</groupId>
-                <artifactId>streamx-spark-monitor-system</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.streamxhub</groupId>
-                <artifactId>streamx-spark-monitor-scala</artifactId>
-                <version>${project.version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>com.streamxhub</groupId>
                 <artifactId>streamx-spark-monitor-webapp</artifactId>
                 <version>${project.version}</version>
             </dependency>
