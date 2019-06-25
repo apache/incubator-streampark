@@ -16,8 +16,6 @@
 
     <modules>
         <module>streamx-spark-monitor-api</module>
-        <module>streamx-spark-monitor-common</module>
-        <module>streamx-spark-monitor-system</module>
         <module>streamx-spark-monitor-core</module>
        <!-- <module>streamx-spark-monitor-webapp</module>-->
     </modules>
@@ -61,7 +59,7 @@
 
             <dependency>
                 <groupId>com.streamxhub</groupId>
-                <artifactId>streamx-spark-monitor-common</artifactId>
+                <artifactId>streamx-spark-monitor-core</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
@@ -73,7 +71,7 @@
 
             <dependency>
                 <groupId>com.streamxhub</groupId>
-                <artifactId>streamx-spark-monitor-core</artifactId>
+                <artifactId>streamx-spark-monitor-scala</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
