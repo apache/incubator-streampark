@@ -65,10 +65,10 @@ class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: St
     })
   }
 
-  private[this] def watch(parent: String, listener: TreeCacheListener): Unit = {
+  private[this] def watch(path: String, listener: TreeCacheListener): Unit = {
     Try {
       //监听当前节点
-      val treeCache = new TreeCache(client, parent)
+      val treeCache = new TreeCache(client, path)
       //设置监听器和处理过程
       treeCache.getListenable.addListener(listener)
       //开始监听
