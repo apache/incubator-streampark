@@ -1,6 +1,7 @@
 package com.streamxhub.spark.monitor.core.actor
 
 import MySQLActor._
+import com.streamxhub.spark.monitor.core.domain.SparkConf
 import com.streamxhub.spark.monitor.core.utils.MySQLClient
 
 
@@ -9,12 +10,12 @@ class MySQLActor extends BaseActor {
     case Select(sql) =>
       val currentSender = sender()
       logger.info(s"receive Select: $sql")
-      val result = MySQLClient.select(sql)
+      val result = MySQLClient.select[SparkConf](sql)
       currentSender ! result
     case SelectOne(sql) =>
       val currentSender = sender()
       logger.info(s"receive SelectOne:$sql")
-      val result = MySQLClient.selectOne(sql)
+      val result = MySQLClient.selectOne[SparkConf](sql)
       currentSender ! result
     case ExecuteUpdate(sql) =>
       val currentSender = sender()

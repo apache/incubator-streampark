@@ -9,7 +9,7 @@ import org.springframework.boot.SpringApplication
 
 @Configuration
 @EnableAutoConfiguration
-@ComponentScan
+@ComponentScan(value = Array("com.streamxhub.spark.monitor"))
 @SpringBootApplication
 class BootStrap
 
