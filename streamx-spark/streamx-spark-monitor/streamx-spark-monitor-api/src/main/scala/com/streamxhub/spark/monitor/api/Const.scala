@@ -16,6 +16,8 @@ object Const {
 
   val SPARK_PARAM_APP_NAME = "spark.app.name"
 
+  val SPARK_PARAM_APP_ID = "spark.app.id"
+
   val SPARK_PARAM_APP_MYID = "spark.app.myid"
 
   val SPARK_PARAM_APP_DEBUG = "spark.app.debug"

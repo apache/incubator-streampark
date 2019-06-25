@@ -187,9 +187,9 @@ object MySQLClient extends Serializable {
         val separator = "_|-"
         for (x <- 1 to count) {
           val k = result.getMetaData.getColumnLabel(x)
-          fields.filter(f => f.getName.replaceAll(separator, "").toUpperCase() == k.replaceAll(separator, "").toUpperCase()).foreach(f => {
+          val v = result.getObject(x)
+          fields.filter(f => f.getName.replaceAll(separator, "").toUpperCase() == k.replaceAll(separator, "").toUpperCase() && v != null).foreach(f => {
             f.setAccessible(true)
-            val v = result.getObject(x)
             f.set(obj, v)
           })
         }

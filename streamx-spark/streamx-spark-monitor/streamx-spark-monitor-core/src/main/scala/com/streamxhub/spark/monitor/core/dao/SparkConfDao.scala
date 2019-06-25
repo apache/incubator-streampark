@@ -37,7 +37,7 @@ import scala.language.postfixOps
     val sql =
       s"""
          |  INSERT INTO T_SPARK_CONF_HISTORY(CONF_ID,APP_NAME,CONF_VERSION,CONF,CREATE_TIME)
-         |  VALUE(${x.confId},'${x.appName}','${x.confVersion}','${x.conf}','${x.createTime}')
+         |  VALUE(${x.confId},'${x.appName}','${x.confVersion}','${x.conf}',now())
       """.stripMargin
     MySQLClient executeUpdate sql
   }
