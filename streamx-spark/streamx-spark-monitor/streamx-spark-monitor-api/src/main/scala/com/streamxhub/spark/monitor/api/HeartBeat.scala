@@ -88,20 +88,21 @@ object HeartBeat {
       //register conf...
       val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
       val cloudVersion = sparkConf.get(SPARK_PARAM_APP_CONF_CLOUD_VERSION, null)
+      val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
       (cloudVersion, localVersion) match {
         case (null, _) =>
 
           /**
             * 第一次加载,zk里还没有配置文件...
             */
-          ZooKeeperUtil.create(confPath, sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE), zookeeperURL, persistent = true)
+          ZooKeeperUtil.create(confPath, confSource, zookeeperURL, persistent = true)
         case (cloud, local) =>
           local.compare(cloud) match {
             /**
               * 本地配置文件比线上大...
               */
             case 1 =>
-              ZooKeeperUtil.update(confPath, sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE), zookeeperURL, persistent = true)
+              ZooKeeperUtil.update(confPath, confSource, zookeeperURL, persistent = true)
             case _ =>
           }
         case _ =>
@@ -109,6 +110,7 @@ object HeartBeat {
           System.exit(1)
       }
       //register monitor...
+      sparkConf.remove(SPARK_PARAM_APP_CONF_SOURCE)
       ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
       logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
     }

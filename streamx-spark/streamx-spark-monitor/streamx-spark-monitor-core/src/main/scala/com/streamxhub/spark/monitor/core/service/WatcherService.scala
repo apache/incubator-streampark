@@ -21,7 +21,7 @@ import scala.language.postfixOps
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Array(classOf[Exception]))
-class WatcherService(@Autowired sparkConfService: SparkConfService) {
+class WatcherService(@Autowired sparkConfService: SparkConfService, sparkMonitorService: SparkMonitorService) {
 
   def config(id: String, conf: String): Unit = {
     val confMap = getConfigMap(conf)
@@ -36,12 +36,14 @@ class WatcherService(@Autowired sparkConfService: SparkConfService) {
     System.out.println(id + ":config")
   }
 
-  def publish(id: String): Unit = {
-    System.out.println(id + ":start")
+  def publish(id: String, conf: String): Unit = {
+    val confMap = getConfigMapFormDebugString(conf)
+    sparkMonitorService.publish(id, confMap)
   }
 
-  def shutdown(id: String): Unit = {
-    System.out.println(id + ":shutdown")
+  def shutdown(id: String, conf: String): Unit = {
+    val confMap = getConfigMapFormDebugString(conf)
+    sparkMonitorService.shutdown(id, confMap)
   }
 
   private[this] def getConfigMap(conf: String): Map[String, String] = {
@@ -52,5 +54,9 @@ class WatcherService(@Autowired sparkConfService: SparkConfService) {
     }
   }
 
-
+  private[this] def getConfigMapFormDebugString(conf: String): Map[String, String] = {
+    val properties = new Properties()
+    properties.load(new StringReader(conf))
+    properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
+  }
 }
