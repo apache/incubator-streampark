@@ -104,7 +104,7 @@ object MySQLClient extends Serializable {
     }
   }
 
-  def select[T](sql: String): List[T] = {
+  def select[T: ClassTag](sql: String): List[T] = {
     val empty = List[T]()
     if (isEmpty(sql)) empty else {
       val conn = getConnection
@@ -113,7 +113,6 @@ object MySQLClient extends Serializable {
         val result = stmt.executeQuery(sql)
         val count = result.getMetaData.getColumnCount
         val array = ArrayBuffer[T]()
-
         val myClassOf = implicitly[ClassTag[T]].runtimeClass
         val fields = myClassOf.getDeclaredFields
         val separator = "_|-"
