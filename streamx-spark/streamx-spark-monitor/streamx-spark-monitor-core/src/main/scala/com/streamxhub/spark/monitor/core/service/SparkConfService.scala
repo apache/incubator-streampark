@@ -5,32 +5,27 @@ import org.springframework.stereotype.Service
 import com.streamxhub.spark.monitor.core.domain.SparkConf
 import org.springframework.beans.factory.annotation.Autowired
 
-import scala.concurrent.Future
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.language.postfixOps
 
 @Service class SparkConfService @Autowired()(sparkConfDao: SparkConfDao) {
 
-  def config(conf: SparkConf): Future[Int] = {
-    val future = sparkConfDao.get(conf.confId)
-    future.flatMap {
+  def config(conf: SparkConf): Int = {
+    sparkConfDao.get(conf.confId) match {
       case null =>
-        sparkConfDao.save(conf).flatMap {
-          case 0 => Future(0)
+        sparkConfDao.save(conf) match {
+          case 0 => 0
           case 1 => sparkConfDao.saveRecord(conf)
         }
-      case map =>
-        conf.confVersion.compare(map("CONF_VERSION").toString) match {
+      case old =>
+        conf.confVersion.compare(old.confVersion) match {
           case 1 =>
-            sparkConfDao.update(conf).flatMap {
-              case 0 => Future(0)
+            sparkConfDao.update(conf) match {
+              case 0 => 0
               case 1 => sparkConfDao.saveRecord(conf)
             }
-          case _ => Future(0)
+          case _ => 0
         }
     }
-
-    Future(0)
   }
 
 }

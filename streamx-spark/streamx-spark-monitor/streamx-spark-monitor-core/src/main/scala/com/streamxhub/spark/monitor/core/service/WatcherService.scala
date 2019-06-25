@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional
 import com.streamxhub.spark.monitor.api.Const._
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.collection.JavaConversions._
 import com.streamxhub.spark.monitor.core.domain.{SparkConf, _}
 import org.springframework.beans.factory.annotation.Autowired
@@ -30,7 +29,7 @@ class WatcherService(@Autowired sparkConfService: SparkConfService) {
     val confVersion = confMap(SPARK_PARAM_APP_CONF_LOCAL_VERSION)
     val sparkConf = new SparkConf(appName, confVersion, Base64Utils.encodeToString(conf.getBytes))
     sparkConf.confId = id.toInt
-    sparkConfService.config(sparkConf).map {
+    sparkConfService.config(sparkConf) match {
       case 0 => println("插入或更新失败....")
       case _ => println("插入或更新成功....")
     }
