@@ -1,57 +1,45 @@
 package com.streamxhub.spark.monitor.core.dao
 
-import akka.pattern._
-import akka.actor.{ActorSystem, Props}
-import akka.util.Timeout
-import com.streamxhub.spark.monitor.core.actor.MySQLActor
 import com.streamxhub.spark.monitor.core.domain.SparkConf
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Repository
-import com.streamxhub.spark.monitor.core.actor.MySQLActor._
 import com.streamxhub.spark.monitor.core.utils.MySQLClient
 
-import scala.concurrent.Future
-import scala.concurrent.duration._
 import scala.language.postfixOps
-import scala.reflect.ClassTag
 
-@Repository class SparkConfDao @Autowired()(implicit val system: ActorSystem) {
+@Repository class SparkConfDao {
 
 
-  implicit val timeout: Timeout = 10.minutes
-
-  private lazy val mysqlActor = system.actorOf(Props[MySQLActor], "sparkConf-mysql-actor")
-
-  def save(x: SparkConf): Future[Int] = {
+  def save(x: SparkConf): Int = {
     val sql =
       s"""
          |  INSERT INTO T_SPARK_CONF(ID,APP_NAME,CONF_VERSION,CONF,CREATE_TIME)
          |  VALUE(${x.confId},'${x.appName}','${x.confVersion}','${x.conf}',now())
       """.stripMargin
-    (mysqlActor ? ExecuteUpdate(sql)).mapTo[Int]
+    MySQLClient executeUpdate sql
   }
 
-  def update(x: SparkConf): Future[Int] = {
+  def update(x: SparkConf): Int = {
     val sql =
       s"""
          |  UPDATE T_SPARK_CONF
          |  SET APP_NAME='${x.appName}',CONF_VERSION='${x.confVersion}',CONF='${x.conf}',MODIFY_TIME=now()
          |  WHERE ID=${x.confId}
       """.stripMargin
-    (mysqlActor ? ExecuteUpdate(sql)).mapTo[Int]
+    MySQLClient executeUpdate sql
   }
 
-  def get(confId: Int): Future[SparkConf] = {
-    (mysqlActor ? SelectOne[SparkConf](s"SELECT * FROM T_SPARK_CONF WHERE ID=$confId"))
+  def get(confId: Int): SparkConf = {
+    val sql = s"SELECT * FROM T_SPARK_CONF WHERE ID=$confId"
+    MySQLClient selectOne[SparkConf] sql
   }
 
-  def saveRecord(x: SparkConf): Future[Int] = {
+  def saveRecord(x: SparkConf): Int = {
     val sql =
       s"""
          |  INSERT INTO T_SPARK_CONF_HISTORY(CONF_ID,APP_NAME,CONF_VERSION,CONF,CREATE_TIME)
          |  VALUE(${x.confId},'${x.appName}','${x.confVersion}','${x.conf}','${x.createTime}')
       """.stripMargin
-    (mysqlActor ? ExecuteUpdate(sql)).mapTo[Int]
+    MySQLClient executeUpdate sql
   }
 
 }

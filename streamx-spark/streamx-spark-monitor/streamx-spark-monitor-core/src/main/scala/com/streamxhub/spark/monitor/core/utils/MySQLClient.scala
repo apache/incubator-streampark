@@ -9,7 +9,7 @@ import scala.util.Try
 import com.streamxhub.spark.monitor.core.utils.CommonUtils._
 import com.zaxxer.hikari.HikariDataSource
 
-import scala.reflect.{ClassTag, classTag}
+import scala.reflect.ClassTag
 
 object MySQLClient extends Serializable {
 
@@ -104,7 +104,44 @@ object MySQLClient extends Serializable {
     }
   }
 
-  def select[T](sql: String): List[Map[String, Any]] = {
+  def select[T](sql: String): List[T] = {
+    val empty = List[T]()
+    if (isEmpty(sql)) empty else {
+      val conn = getConnection
+      try {
+        val stmt = conn.createStatement
+        val result = stmt.executeQuery(sql)
+        val count = result.getMetaData.getColumnCount
+        val array = ArrayBuffer[T]()
+
+        val myClassOf = implicitly[ClassTag[T]].runtimeClass
+        val fields = myClassOf.getDeclaredFields
+        val separator = "_|-"
+        while (result.next()) {
+          val obj = myClassOf.newInstance()
+          for (x <- 1 to count) {
+            val k = result.getMetaData.getColumnLabel(x)
+            fields.filter(f => f.getName.replaceAll(separator, "").toUpperCase() == k.replaceAll(separator, "").toUpperCase()).map(f => {
+              f.setAccessible(true)
+              val v = result.getObject(x)
+              f.set(obj, v)
+            })
+          }
+          array += obj.asInstanceOf[T]
+        }
+        if (array.isEmpty) empty else array.toList
+      } catch {
+        case ex: Exception => ex.printStackTrace()
+          empty
+      } finally {
+        conn.close()
+        connPool.remove()
+      }
+    }
+  }
+
+
+  def select(sql: String): List[Map[String, Any]] = {
     if (isEmpty(sql)) List.empty else {
       val conn = getConnection
       try {
@@ -131,7 +168,6 @@ object MySQLClient extends Serializable {
       }
     }
   }
-
 
   /**
     * 查询返回一行记录...
@@ -168,6 +204,37 @@ object MySQLClient extends Serializable {
       connPool.remove()
     }
   }
+
+  /**
+    * 查询返回一行记录...
+    *
+    * @param sql
+    * @return
+    */
+  def selectOne(sql: String): Map[String, Any] = {
+    val conn = getConnection
+    try {
+      val stmt = conn.createStatement
+      val result = stmt.executeQuery(sql)
+      val count = result.getMetaData.getColumnCount
+      if (!result.next()) Map.empty else {
+        var map = Map[String, Any]()
+        for (x <- 1 to count) {
+          val key = result.getMetaData.getColumnLabel(x)
+          val value = result.getObject(x).asInstanceOf[Any]
+          map += key -> value
+        }
+        map
+      }
+    } catch {
+      case ex: Exception => ex.printStackTrace()
+        Map.empty
+    } finally {
+      conn.close()
+      connPool.remove()
+    }
+  }
+
 
   /**
     *
