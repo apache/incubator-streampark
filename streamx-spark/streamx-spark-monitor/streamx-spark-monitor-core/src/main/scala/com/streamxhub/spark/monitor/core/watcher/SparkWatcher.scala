@@ -1,10 +1,8 @@
 package com.streamxhub.spark.monitor.core.watcher
 
-import java.io.StringReader
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder
 import com.streamxhub.spark.monitor.api.Const._
-import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil
 import com.streamxhub.spark.monitor.core.service.WatcherService
 import lombok.extern.slf4j.Slf4j
 import org.apache.curator.framework.CuratorFramework
@@ -18,9 +16,6 @@ import org.springframework.stereotype.Component
 import javax.annotation.PostConstruct
 import javax.annotation.PreDestroy
 import java.nio.charset.StandardCharsets
-import java.util.Properties
-
-import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 @Slf4j
@@ -33,10 +28,7 @@ class SparkWatcher(@Value("${spark.app.monitor.zookeeper}") zookeeperConnect: St
   private val client: CuratorFramework = ZooKeeperUtil.getClient(zookeeperConnect)
 
   @PostConstruct def initialize(): Unit = {
-   /* //检查监控路径是否存在,不存在在创建...
-    Seq(SPARK_CONF_PATH_PREFIX, SPARK_MONITOR_PATH_PREFIX).foreach(x =>
-      ZooKeeperUtil.create(x, null, zookeeperConnect, persistent = true)
-    )*/
+
   }
 
   @PreDestroy def destroy(): Unit = ZooKeeperUtil.close(zookeeperConnect)
