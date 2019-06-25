@@ -49,18 +49,18 @@ object PropertiesUtil {
     }
   }
 
-  def getPropertiesFromYamlText(text: String): Map[String, String] = {
+  def getPropertiesFromYamlText(text: String): java.util.Map[String, String] = {
     try {
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).asJava
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
     }
   }
 
   /** Load Yaml present in the given file. */
-  def getPropertiesFromYaml(filename: String): Map[String, String] = {
+  def getPropertiesFromYaml(filename: String): java.util.Map[String, String]  = {
     val file = new File(filename)
     require(file.exists(), s"Yaml file $file does not exist")
     require(file.isFile, s"Yaml file $file is not a normal file")
@@ -68,7 +68,7 @@ object PropertiesUtil {
     try {
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).asJava
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
     } finally {
@@ -77,7 +77,7 @@ object PropertiesUtil {
   }
 
   /** Load properties present in the given file. */
-  def getPropertiesFromFile(filename: String): Map[String, String] = {
+  def getPropertiesFromFile(filename: String): java.util.Map[String, String]  = {
     val file = new File(filename)
     require(file.exists(), s"Properties file $file does not exist")
     require(file.isFile, s"Properties file $file is not a normal file")
@@ -86,7 +86,7 @@ object PropertiesUtil {
     try {
       val properties = new Properties()
       properties.load(inReader)
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap.asJava
     } catch {
       case e: IOException =>
         throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
@@ -98,7 +98,6 @@ object PropertiesUtil {
   def classForName(className: String): Class[_] = {
     Class.forName(className, true, Thread.currentThread().getContextClassLoader)
   }
-
 
 
 }
