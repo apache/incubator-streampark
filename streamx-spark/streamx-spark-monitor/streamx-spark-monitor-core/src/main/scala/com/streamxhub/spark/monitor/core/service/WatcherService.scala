@@ -37,13 +37,15 @@ class WatcherService(@Autowired sparkConfService: SparkConfService, sparkMonitor
   }
 
   def publish(id: String, conf: String): Unit = {
-    val confMap = getConfigMapFormDebugString(conf)
+    val confMap = getConfigMapFromDebugString(conf)
     sparkMonitorService.publish(id, confMap)
+    System.out.println(id + ":publish")
   }
 
   def shutdown(id: String, conf: String): Unit = {
-    val confMap = getConfigMapFormDebugString(conf)
+    val confMap = getConfigMapFromDebugString(conf)
     sparkMonitorService.shutdown(id, confMap)
+    System.out.println(id + ":shutdown")
   }
 
   private[this] def getConfigMap(conf: String): Map[String, String] = {
@@ -54,7 +56,7 @@ class WatcherService(@Autowired sparkConfService: SparkConfService, sparkMonitor
     }
   }
 
-  private[this] def getConfigMapFormDebugString(conf: String): Map[String, String] = {
+  private[this] def getConfigMapFromDebugString(conf: String): Map[String, String] = {
     val properties = new Properties()
     properties.load(new StringReader(conf))
     properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
