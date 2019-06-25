@@ -16,8 +16,8 @@
 
     <modules>
         <module>streamx-spark-monitor-api</module>
-        <module>streamx-spark-monitor-core</module>
-       <!-- <module>streamx-spark-monitor-webapp</module>-->
+        <module>streamx-spark-monitor-service</module>
+        <module>streamx-spark-monitor-webapp</module>
     </modules>
 
     <!-- 定义统一版本号-->
@@ -59,7 +59,7 @@
 
             <dependency>
                 <groupId>com.streamxhub</groupId>
-                <artifactId>streamx-spark-monitor-core</artifactId>
+                <artifactId>streamx-spark-monitor-service</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
