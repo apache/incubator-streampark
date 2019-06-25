@@ -4,6 +4,8 @@ import MySQLActor._
 import com.streamxhub.spark.monitor.core.domain.SparkConf
 import com.streamxhub.spark.monitor.core.utils.MySQLClient
 
+import scala.reflect.ClassTag
+
 
 class MySQLActor extends BaseActor {
   override def receive: Receive = {
@@ -34,7 +36,7 @@ object MySQLActor {
 
   case class Select(sql: String)
 
-  case class SelectOne[T](sql: String)
+  case class SelectOne[T:ClassTag](sql: String)
 
   case class ExecuteUpdate(sql: String)
 
