@@ -7,5 +7,5 @@ import com.streamxhub.spark.monitor.core.domain.SparkConf;
 
 public interface SparkConfService extends IService<SparkConf> {
     boolean config(SparkConf sparkConf);
-    IPage<SparkConf> getConf(SparkConf sparkConf, QueryRequest request);
+    IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request);
 }
