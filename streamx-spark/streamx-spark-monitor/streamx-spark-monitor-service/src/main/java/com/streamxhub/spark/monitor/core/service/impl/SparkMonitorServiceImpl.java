@@ -1,9 +1,16 @@
 package com.streamxhub.spark.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.puppycrawl.tools.checkstyle.utils.CommonUtils;
+import com.streamxhub.spark.monitor.common.domain.Constant;
+import com.streamxhub.spark.monitor.common.domain.QueryRequest;
+import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
+import com.streamxhub.spark.monitor.system.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -15,8 +22,8 @@ import java.util.Date;
 import java.util.Map;
 
 @Slf4j
-@Service
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+@Service("sparkMonitorService")
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, SparkMonitor> implements SparkMonitorService {
 
     @Override
@@ -33,7 +40,11 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
         String confVersion = confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION());
         String appId = confMap.get(SPARK_PARAM_APP_ID());
+        String proxyUri = confMap.get(SPARK_PARAM_APP_PROXY_URI_BASES());
         SparkMonitor monitor = new SparkMonitor(id, appId, appName, confVersion, status);
+        if (!CommonUtils.isBlank(proxyUri)) {
+            monitor.setTrackUrl(proxyUri.split(",")[0]);
+        }
         SparkMonitor exist = baseMapper.selectById(id);
         if (exist == null) {
             monitor.setCreateTime(new Date());
@@ -41,6 +52,18 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         } else {
             monitor.setModifyTime(new Date());
             baseMapper.updateById(monitor);
+        }
+    }
+
+    @Override
+    public IPage<SparkMonitor> getMonitor(SparkMonitor sparkMonitor, QueryRequest request) {
+        try {
+            Page<User> page = new Page<>();
+            SortUtil.handlePageSort(request, page, "createTime", Constant.ORDER_ASC, false);
+            return this.baseMapper.getMonitor(page, sparkMonitor);
+        } catch (Exception e) {
+            log.error("查询Spark监控异常", e);
+            return null;
         }
     }
 

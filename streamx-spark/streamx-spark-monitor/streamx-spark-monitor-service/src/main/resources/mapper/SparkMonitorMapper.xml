@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper">
+
+    <resultMap id="sparkMonitor" type="com.streamxhub.spark.monitor.core.domain.SparkMonitor">
+        <id column="MONITOR_ID" jdbcType="BIGINT" property="monitorId"/>
+        <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
+        <result column="CONF_VERSION" jdbcType="VARCHAR" property="confVersion"/>
+        <result column="STATUS" jdbcType="INTEGER" property="status"/>
+        <result column="TRACK_URL" jdbcType="VARCHAR" property="trackUrl"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+        <result column="MODIFY_TIME" jdbcType="TIMESTAMP" property="modifyTime"/>
+    </resultMap>
+
+    <select id="getMonitor" resultType="sparkMonitor" parameterType="sparkMonitor">
+        SELECT
+        t.MONITOR_ID as monitorId,
+        t.APP_ID as appId,
+        t.APP_NAME as appName,
+        t.CONF_VERSION as confVersion,
+        t.STATUS as status,
+        t.TRACK_URL as trackUrl,
+        t.CREATE_TIME as createTime,
+        t.MODIFY_TIME modifyTime
+        FROM
+        t_spark_monitor t
+        WHERE 1 = 1
+        <if test="sparkMonitor.appName != null and sparkMonitor.appName != ''">
+            AND t.APP_NAME = #{sparkMonitor.appName}
+        </if>
+        <if test="sparkMonitor.appId != null and sparkMonitor.appId != ''">
+            AND t.APP_ID = #{sparkMonitor.appId}
+        </if>
+        <if test="sparkMonitor.status != null and sparkMonitor.status != ''">
+            AND t.STATUS = #{sparkMonitor.status}
+        </if>
+    </select>
+
+</mapper>

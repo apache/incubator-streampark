@@ -51,5 +51,6 @@ object Const {
 
   val SPARK_PARAM_APP_CONF_CLOUD_VERSION = "spark.app.conf.cloud.version"
 
+  val SPARK_PARAM_APP_PROXY_URI_BASES = "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.PROXY_URI_BASES"
 
 }

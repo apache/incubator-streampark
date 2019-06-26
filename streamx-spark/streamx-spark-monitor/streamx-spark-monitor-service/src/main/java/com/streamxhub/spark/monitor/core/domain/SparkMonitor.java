@@ -25,6 +25,8 @@ public class SparkMonitor {
     @NotBlank(message = "{required}")
     private String confVersion;
 
+    private String trackUrl;
+
     private Integer status;
 
     private Date createTime;
@@ -41,4 +43,5 @@ public class SparkMonitor {
         this.confVersion = confVersion;
         this.status = status;
     }
+
 }

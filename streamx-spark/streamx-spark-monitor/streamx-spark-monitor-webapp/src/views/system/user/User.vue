@@ -78,7 +78,6 @@
         </template>
         <template slot="operation" slot-scope="text, record">
           <a-icon v-hasPermission="'user:update'" type="setting" theme="twoTone" twoToneColor="#4a9ff5" @click="edit(record)" title="修改用户"></a-icon>
-          &nbsp;
           <a-icon v-hasPermission="'user:view'" type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
           <a-badge v-hasNoPermission="'user:update','user:view'" status="warning" text="无权限"></a-badge>
         </template>
