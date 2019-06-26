@@ -29,6 +29,7 @@ import com.streamxhub.spark.monitor.api.{Const, HeartBeat}
 import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
@@ -150,9 +151,9 @@ trait XStreaming {
         properties.load(new StringReader(cloudConf))
         properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
       } else {
-        PropertiesUtil.getPropertiesFromYamlText(cloudConf)
+        PropertiesUtil.getPropertiesFromYamlText(cloudConf).toMap
       }
-    }.getOrElse(null)
+    }.getOrElse(Map.empty)
 
     /**
       * 直接读取本地的配置文件,注意规则:
@@ -167,7 +168,7 @@ trait XStreaming {
       case null => sparkConf.setAll(localConf)
       case _ =>
         val cloudVersion = cloudConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
-        cloudVersion.compare(localVersion) match {
+        cloudVersion.toString.compare(localVersion) match {
           case 1 | 0 => sparkConf.setAll(cloudConf)
           case _ => sparkConf.setAll(localConf)
         }
