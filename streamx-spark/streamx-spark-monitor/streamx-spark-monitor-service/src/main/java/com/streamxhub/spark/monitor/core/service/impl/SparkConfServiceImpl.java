@@ -1,11 +1,17 @@
 package com.streamxhub.spark.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.spark.monitor.common.domain.Constant;
+import com.streamxhub.spark.monitor.common.domain.QueryRequest;
+import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkConfMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkConfRecord;
 import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -14,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 
+@Slf4j
 @Service("sparkConfService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf> implements SparkConfService {
@@ -23,8 +30,8 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
 
     @Override
     public boolean config(SparkConf sparkConf) {
-        SparkConf existConf = baseMapper.selectById(sparkConf.getConfId());
-        SparkConfRecord record = new SparkConfRecord(sparkConf.getConfId(), sparkConf.getAppName(), sparkConf.getConfVersion(), sparkConf.getConf());
+        SparkConf existConf = baseMapper.selectById(sparkConf.getMyId());
+        SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(), sparkConf.getAppName(), sparkConf.getConfVersion(), sparkConf.getConf());
         if (existConf == null) {
             sparkConf.setCreateTime(new Date());
             baseMapper.insert(sparkConf);
@@ -39,6 +46,18 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
             } else {
                 return false;
             }
+        }
+    }
+
+    @Override
+    public IPage<SparkConf> getConf(SparkConf sparkConf, QueryRequest request) {
+        try {
+            Page<SparkConf> page = new Page<>();
+            SortUtil.handlePageSort(request, page, "createTime", Constant.ORDER_ASC, false);
+            return this.baseMapper.getConf(page, sparkConf);
+        } catch (Exception e) {
+            log.error("查询Spark监控异常", e);
+            return null;
         }
     }
 }

@@ -2,6 +2,7 @@ package com.streamxhub.spark.monitor.core.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
+import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 
 import java.util.Map;

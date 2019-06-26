@@ -13,8 +13,8 @@ import java.util.Date;
 public class SparkMonitor {
 
     @NotBlank(message = "{required}")
-    @TableId(value = "MONITOR_ID", type = IdType.INPUT)
-    private String monitorId;
+    @TableId(value = "MY_ID", type = IdType.INPUT)
+    private String myId;
 
     @NotBlank(message = "{required}")
     private String appId;
@@ -37,7 +37,7 @@ public class SparkMonitor {
     }
 
     public SparkMonitor(String id, String appId, String appName, String confVersion, Integer status) {
-        this.monitorId = id;
+        this.myId = id;
         this.appId = appId;
         this.appName = appName;
         this.confVersion = confVersion;

@@ -58,7 +58,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     @Override
     public IPage<SparkMonitor> getMonitor(SparkMonitor sparkMonitor, QueryRequest request) {
         try {
-            Page<User> page = new Page<>();
+            Page<SparkMonitor> page = new Page<>();
             SortUtil.handlePageSort(request, page, "createTime", Constant.ORDER_ASC, false);
             return this.baseMapper.getMonitor(page, sparkMonitor);
         } catch (Exception e) {

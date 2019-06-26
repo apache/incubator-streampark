@@ -13,8 +13,8 @@ import java.util.Date;
 public class SparkConf {
 
     @NotBlank(message = "{required}")
-    @TableId(value = "CONF_ID", type = IdType.INPUT)
-    private String confId;
+    @TableId(value = "MY_ID", type = IdType.INPUT)
+    private String myId;
 
     @NotBlank(message = "{required}")
     private String appName;
@@ -29,7 +29,7 @@ public class SparkConf {
     private Date modifyTime;
 
     public SparkConf(String id, String appName, String confVersion, String conf) {
-        this.confId = id;
+        this.myId = id;
         this.appName = appName;
         this.confVersion = confVersion;
         this.conf = conf;
