@@ -1,5 +1,6 @@
 package com.streamxhub.spark.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -9,6 +10,7 @@ import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkConfMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkConfRecord;
+import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,14 +52,13 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     }
 
     @Override
-    public IPage<SparkConf> getConf(SparkConf sparkConf, QueryRequest request) {
-        try {
-            Page<SparkConf> page = new Page<>();
-            SortUtil.handlePageSort(request, page, "createTime", Constant.ORDER_ASC, false);
-            return this.baseMapper.getConf(page, sparkConf);
-        } catch (Exception e) {
-            log.error("查询Spark监控异常", e);
-            return null;
+    public IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request) {
+        Page<SparkConf> page = new Page<>();
+        SortUtil.handlePageSort(request, page, "CREATE_TIME", Constant.ORDER_ASC, false);
+        QueryWrapper wrapper = new QueryWrapper<SparkMonitor>();
+        if (sparkConf.getAppName() != null) {
+            wrapper.like("APP_NAME", sparkConf.getAppName().trim());
         }
+        return this.baseMapper.selectPage(page, wrapper);
     }
 }

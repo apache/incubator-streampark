@@ -32,13 +32,13 @@ public class SparkController extends BaseController {
     @PostMapping("monitor")
     @RequiresPermissions("spark:monitor")
     public Map<String, Object> monitor(QueryRequest request, SparkMonitor sparkMonitor) {
-        return getDataTable(this.monitorService.getMonitor(sparkMonitor,request));
+        return getDataTable(this.monitorService.getPager(sparkMonitor,request));
     }
 
     @PostMapping("conf")
     @RequiresPermissions("spark:conf")
     public Map<String, Object> conf(QueryRequest request, SparkConf sparkConf) {
-        return getDataTable(this.confService.getConf(sparkConf,request));
+        return getDataTable(this.confService.getPager(sparkConf,request));
     }
 
 

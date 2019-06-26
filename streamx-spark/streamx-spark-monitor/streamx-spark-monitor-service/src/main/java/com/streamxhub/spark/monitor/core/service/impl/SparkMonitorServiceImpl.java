@@ -1,5 +1,6 @@
 package com.streamxhub.spark.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -10,7 +11,6 @@ import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
-import com.streamxhub.spark.monitor.system.domain.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -56,11 +56,18 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     }
 
     @Override
-    public IPage<SparkMonitor> getMonitor(SparkMonitor sparkMonitor, QueryRequest request) {
+    public IPage<SparkMonitor> getPager(SparkMonitor sparkMonitor, QueryRequest request) {
         try {
             Page<SparkMonitor> page = new Page<>();
-            SortUtil.handlePageSort(request, page, "createTime", Constant.ORDER_ASC, false);
-            return this.baseMapper.getMonitor(page, sparkMonitor);
+            SortUtil.handlePageSort(request, page, "CREATE_TIME", Constant.ORDER_ASC, false);
+            QueryWrapper wrapper = new QueryWrapper<SparkMonitor>();
+            if (sparkMonitor.getAppId() != null) {
+                wrapper.eq("APP_ID", sparkMonitor.getAppId().trim());
+            }
+            if (sparkMonitor.getAppName() != null) {
+                wrapper.like("APP_NAME", sparkMonitor.getAppName().trim());
+            }
+            return this.baseMapper.selectPage(page, wrapper);
         } catch (Exception e) {
             log.error("查询Spark监控异常", e);
             return null;
