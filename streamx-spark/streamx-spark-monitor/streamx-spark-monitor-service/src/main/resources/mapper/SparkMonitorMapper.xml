@@ -3,7 +3,7 @@
 <mapper namespace="com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper">
 
     <resultMap id="sparkMonitor" type="com.streamxhub.spark.monitor.core.domain.SparkMonitor">
-        <id column="MONITOR_ID" jdbcType="BIGINT" property="monitorId"/>
+        <id column="MYID" jdbcType="VARCHAR" property="myId"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
         <result column="CONF_VERSION" jdbcType="VARCHAR" property="confVersion"/>
@@ -15,7 +15,7 @@
 
     <select id="getMonitor" resultType="sparkMonitor" parameterType="sparkMonitor">
         SELECT
-        t.MONITOR_ID as monitorId,
+        t.MY_ID as myId,
         t.APP_ID as appId,
         t.APP_NAME as appName,
         t.CONF_VERSION as confVersion,

@@ -7,10 +7,10 @@
                     <a-row >
                         <a-col :md="8" :sm="24" >
                             <a-form-item
-                                    label="appId"
+                                    label="myId"
                                     :labelCol="{span: 5}"
                                     :wrapperCol="{span: 15, offset: 1}">
-                                <a-input v-model="queryParams.appId"/>
+                                <a-input v-model="queryParams.myId"/>
                             </a-form-item>
                         </a-col>
                         <a-col :md="8" :sm="24" >
@@ -37,15 +37,7 @@
                      :loading="loading"
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
-                <template slot="status" slot-scope="text,record">
-                    <a-tag v-if="record.status === 0" color="#f50">失&nbsp;败</a-tag>
-                    <a-tag v-if="record.status === 1" color="#87d068">运&nbsp;行</a-tag>
-                    <a-tag v-if="record.status === 2" color="#108ee9">停&nbsp;止</a-tag>
-                </template>
                 <template slot="operation" slot-scope="text,record">
-                    <a-icon v-if="record.status === 0" v-hasPermission="'monitor:option'" type="play-circle-o" style="color: #f95476" @click="start(record)" title="启动"></a-icon>
-                    <a-icon v-if="record.status === 1" v-hasPermission="'monitor:option'" type="eye" theme="twoTone" :title="record.trackURL"></a-icon>
-                    <a-icon v-if="record.status === 1" v-hasPermission="'monitor:option'" type="poweroff" style="color: #f95476" @click="stop(record)" title="停止"></a-icon>
                     <a-icon v-hasPermission="'monitor:setting'" type="tool" @click="setting(record)" title="配置文件"></a-icon>
                 </template>
             </a-table>
@@ -76,28 +68,23 @@
         },
         computed: {
             columns () {
-                return [
-                {
+                return [{
                     title: 'myId',
-                    dataIndex: 'myId'
-                }
-                ,{
-                    title: 'appId',
-                    dataIndex: 'appId',
-                    scopedSlots: { customRender: 'appId' }
+                    dataIndex: 'myId',
+                    scopedSlots: { customRender: 'myId' }
                 }, {
                     title: 'appName',
                     dataIndex: 'appName'
                 }, {
                     title: '配置版本',
                     dataIndex: 'confVersion'
-                }, {
-                    title: '运行状态',
-                    dataIndex: 'status',
-                    scopedSlots: { customRender: 'status' },
                 },
                 {
-                    title: '最后时间',
+                    title: '创建时间',
+                    dataIndex: 'createTime'
+                },
+                {
+                    title: '修改时间',
                     dataIndex: 'modifyTime'
                 },
                 {
@@ -154,7 +141,7 @@
                     params.pageSize = this.pagination.defaultPageSize
                     params.pageNum = this.pagination.defaultCurrent
                 }
-                this.$post('spark/monitor', {
+                this.$post('spark/conf', {
                     ...params
                 }).then((r) => {
                     let data = r.data
