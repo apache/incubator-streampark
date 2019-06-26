@@ -5,7 +5,7 @@ spark:
     name: HelloStreamXApp
     conf:
       local:
-        version: 5
+        version: 7
   source:
     kafka:
       offset:
@@ -16,7 +16,7 @@ spark:
           servers: bigdata-kafka-001-113-8:9092,bigdata-kafka-002-113-9:9092,bigdata-kafka-003-113-10:9092
         topics: flm_monitor_sqkb_basic_app_v2
         group:
-          id: streamx.02
+          id: streamx01
         key:
           deserializer: org.apache.kafka.common.serialization.StringDeserializer
         value:
