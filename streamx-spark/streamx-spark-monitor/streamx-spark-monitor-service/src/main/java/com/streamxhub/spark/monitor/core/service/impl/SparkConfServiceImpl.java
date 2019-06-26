@@ -32,6 +32,7 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
             return true;
         } else {
             if (sparkConf.getConfVersion().compareTo(existConf.getConfVersion()) > 0) {
+                sparkConf.setModifyTime(new Date());
                 baseMapper.updateById(sparkConf);
                 confRecordService.save(record);
                 return true;
