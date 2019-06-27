@@ -3,7 +3,7 @@
         <div :class="advanced ? 'search' : null">
             <!-- 搜索区域 -->
             <a-form layout="horizontal">
-                <div :class="advanced ? null: 'fold'">
+                <div class="fold">
                     <a-row >
                         <a-col :md="8" :sm="24" >
                             <a-form-item
@@ -78,10 +78,6 @@
             columns () {
                 return [
                 {
-                    title: 'myId',
-                    dataIndex: 'myId'
-                }
-                ,{
                     title: 'appId',
                     dataIndex: 'appId',
                     scopedSlots: { customRender: 'appId' }

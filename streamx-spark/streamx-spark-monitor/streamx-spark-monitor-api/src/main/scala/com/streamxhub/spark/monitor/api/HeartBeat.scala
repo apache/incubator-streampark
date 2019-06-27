@@ -48,10 +48,10 @@ object HeartBeat {
 
   private[this] def initialize(sc: SparkContext): Unit = {
     this.sparkConf = sc.getConf
-    val appId = sparkConf.get(SPARK_PARAM_APP_MYID)
+    val myId = sparkConf.get(SPARK_PARAM_APP_MYID)
     this.zookeeperURL = sparkConf.get(SPARK_PARAM_MONITOR_ZOOKEEPER)
-    this.confPath = s"${SPARK_CONF_PATH_PREFIX}/$appId"
-    this.monitorPath = s"${SPARK_MONITOR_PATH_PREFIX}/$appId"
+    this.confPath = s"$SPARK_CONF_PATH_PREFIX/$myId"
+    this.monitorPath = s"$SPARK_MONITOR_PATH_PREFIX/$myId"
     this.isDebug = false //sparkConf.getBoolean("spark.app.debug", false)
   }
 
