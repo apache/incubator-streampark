@@ -4,22 +4,18 @@ import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
-import org.apache.curator.framework.recipes.cache.ChildData;
-import org.apache.curator.framework.recipes.cache.TreeCache;
-import org.apache.curator.framework.recipes.cache.TreeCacheListener;
+import org.apache.curator.framework.recipes.cache.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
+import javax.annotation.*;
 import java.nio.charset.StandardCharsets;
 
 import static com.streamxhub.spark.monitor.api.Const.*;
-import static org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type.NODE_ADDED;
-import static org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type.NODE_UPDATED;
+import static org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type.*;
 
 @Slf4j
 @Component

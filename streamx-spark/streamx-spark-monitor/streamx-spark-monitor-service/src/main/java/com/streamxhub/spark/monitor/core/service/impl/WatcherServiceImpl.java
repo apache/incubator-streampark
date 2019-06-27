@@ -19,9 +19,12 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service
-@Transactional(propagation = Propagation.SUPPORTS, readOnly = true)
+@Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class WatcherServiceImpl implements WatcherService {
 
     @Autowired

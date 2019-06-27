@@ -21,6 +21,9 @@ import static com.streamxhub.spark.monitor.api.Const.*;
 import java.util.Date;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("sparkMonitorService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -60,7 +63,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         try {
             Page<SparkMonitor> page = new Page<>();
             SortUtil.handlePageSort(request, page, "CREATE_TIME", Constant.ORDER_ASC, false);
-            QueryWrapper wrapper = new QueryWrapper<SparkMonitor>();
+            QueryWrapper<SparkMonitor> wrapper = new QueryWrapper<>();
             if (sparkMonitor.getAppId() != null) {
                 wrapper.eq("APP_ID", sparkMonitor.getAppId().trim());
             }
