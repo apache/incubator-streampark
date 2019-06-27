@@ -10,8 +10,12 @@ import com.streamxhub.spark.monitor.common.domain.QueryRequest;
 import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
+import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
+import com.streamxhub.spark.monitor.core.service.SparkConfService;
 import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
+import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +32,16 @@ import java.util.Map;
 @Service("sparkMonitorService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, SparkMonitor> implements SparkMonitorService {
+
+
+    @Autowired
+    private WatcherService watcherService;
+
+    @Autowired
+    private SparkConfService sparkConfService;
+
+    @Autowired
+    private SparkConfRecordService recordService;
 
     @Override
     public void publish(String id, Map<String, String> confMap) {
@@ -75,6 +89,14 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             log.error("查询Spark监控异常", e);
             return null;
         }
+    }
+
+    @Override
+    public void delete(String myId) {
+        this.baseMapper.deleteById(myId);
+        sparkConfService.delete(myId);
+        recordService.delete(myId);
+        watcherService.delete(myId);
     }
 
 }

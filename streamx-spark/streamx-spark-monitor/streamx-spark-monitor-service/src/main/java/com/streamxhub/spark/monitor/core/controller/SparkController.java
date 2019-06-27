@@ -32,14 +32,20 @@ public class SparkController extends BaseController {
     @PostMapping("monitor")
     @RequiresPermissions("spark:monitor")
     public Map<String, Object> monitor(QueryRequest request, SparkMonitor sparkMonitor) {
-        return getDataTable(this.monitorService.getPager(sparkMonitor,request));
+        return getDataTable(this.monitorService.getPager(sparkMonitor, request));
     }
 
     @PostMapping("conf")
     @RequiresPermissions("spark:conf")
     public Map<String, Object> conf(QueryRequest request, SparkConf sparkConf) {
-        return getDataTable(this.confService.getPager(sparkConf,request));
+        return getDataTable(this.confService.getPager(sparkConf, request));
     }
 
+
+    @DeleteMapping("delete/{myId}")
+    @RequiresPermissions("monitor:option")
+    public void delete(@PathVariable("myId") String myId) {
+        this.monitorService.delete(myId);
+    }
 
 }

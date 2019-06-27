@@ -2,18 +2,21 @@ package com.streamxhub.spark.monitor.core.service.impl;
 
 
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil;
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
 import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
 import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
 import static com.streamxhub.spark.monitor.api.Const.*;
+import static com.streamxhub.spark.monitor.api.Const.SPARK_CONF_PATH_PREFIX;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,6 +29,9 @@ import java.util.*;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class WatcherServiceImpl implements WatcherService {
+
+    @Value("${spark.app.monitor.zookeeper}")
+    private String zookeeperConnect;
 
     @Autowired
     private SparkConfService sparkConfService;
@@ -55,6 +61,14 @@ public class WatcherServiceImpl implements WatcherService {
         Map<String, String> confMap = getConfigMapFromDebugString(conf);
         sparkMonitorService.shutdown(id, confMap);
         System.out.println(id + ":shutdown");
+    }
+
+    @Override
+    public void delete(String myId) {
+        String confPath = SPARK_CONF_PATH_PREFIX() + "/" + myId;
+        String monitorPath = SPARK_MONITOR_PATH_PREFIX() + "/" + myId;
+        ZooKeeperUtil.delete(confPath, zookeeperConnect);
+        ZooKeeperUtil.delete(monitorPath, zookeeperConnect);
     }
 
     private Map<String, String> getConfigMap(String conf) {

@@ -10,4 +10,6 @@ public interface WatcherService {
     void publish(String id, String conf);
 
     void shutdown(String id, String conf);
+
+    void delete(String myId);
 }

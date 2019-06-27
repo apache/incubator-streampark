@@ -23,4 +23,10 @@ public interface SparkConfService extends IService<SparkConf> {
      * @return
      */
     IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request);
+
+    /**
+     *
+     * @param myId
+     */
+    Integer delete(String myId);
 }

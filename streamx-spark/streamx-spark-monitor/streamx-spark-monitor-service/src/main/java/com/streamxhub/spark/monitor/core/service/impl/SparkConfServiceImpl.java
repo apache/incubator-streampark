@@ -63,4 +63,9 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
         }
         return this.baseMapper.selectPage(page, wrapper);
     }
+
+    @Override
+    public Integer delete(String myId) {
+        return this.baseMapper.deleteById(myId);
+    }
 }
