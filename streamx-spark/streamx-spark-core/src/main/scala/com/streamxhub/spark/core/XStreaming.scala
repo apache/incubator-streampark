@@ -38,6 +38,7 @@ import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 import com.streamxhub.spark.monitor.api.Const._
+import org.apache.commons.codec.digest.DigestUtils
 
 /**
   *
@@ -137,14 +138,29 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
+    val appMain = localConf.getOrDefault(SPARK_PARAM_APP_MAIN, null)
+    if (appMain == null || appMain == "") {
+      System.err.println(s"[StreamX] $SPARK_PARAM_APP_MAIN must be not empty!")
+      System.exit(1)
+    }
+
+    /**
+      * 先获取配置文件里的spark.app.name,如果没有则以spark.app.main为appName
+      */
+    val appName = localConf.get(SPARK_PARAM_APP_NAME) match {
+      case null | "" => appMain
+      case name => name
+    }
+    val myId = DigestUtils.md5Hex(appName)
+    sparkConf.set(SPARK_PARAM_APP_MYID, myId)
+
     //保存本地的配置文件版本
     val localVersion = localConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
     sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
 
     val cloudConf = Try {
-      val appId = localConf(SPARK_PARAM_APP_MYID)
       val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
-      val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$appId"
+      val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$myId"
       val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
       if (cloudConf.matches(Const.SPARK_CONF_REGEXP)) {
         val properties = new Properties()
