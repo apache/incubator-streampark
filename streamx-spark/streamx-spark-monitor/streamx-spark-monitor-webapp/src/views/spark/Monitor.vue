@@ -38,7 +38,7 @@
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
                 <template slot="status" slot-scope="text,record">
-                    <a-tag v-if="record.status === 0" color="#f50">失&nbsp;败</a-tag>
+                    <a-tag v-if="record.status === 0" color="#f50">失&nbsp;联</a-tag>
                     <a-tag v-if="record.status === 1" color="#87d068">运&nbsp;行</a-tag>
                     <a-tag v-if="record.status === 2" color="#108ee9">停&nbsp;止</a-tag>
                 </template>
