@@ -5,7 +5,22 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 
+/**
+ * @author benjobs
+ */
 public interface SparkConfService extends IService<SparkConf> {
+    /**
+     * '
+     * @param sparkConf
+     * @return
+     */
     boolean config(SparkConf sparkConf);
+
+    /**
+     *
+     * @param sparkConf
+     * @param request
+     * @return
+     */
     IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request);
 }

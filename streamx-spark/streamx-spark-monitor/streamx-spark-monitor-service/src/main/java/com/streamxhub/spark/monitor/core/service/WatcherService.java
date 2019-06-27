@@ -1,5 +1,8 @@
 package com.streamxhub.spark.monitor.core.service;
 
+/**
+ * @author benjobs
+ */
 public interface WatcherService {
 
     void config(String id, String conf);
