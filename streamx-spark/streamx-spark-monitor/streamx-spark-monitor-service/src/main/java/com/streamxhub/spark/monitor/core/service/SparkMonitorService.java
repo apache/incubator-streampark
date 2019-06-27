@@ -7,6 +7,9 @@ import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public interface SparkMonitorService {
     void publish(String id, Map<String, String> confMap);
 
