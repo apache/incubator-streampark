@@ -58,10 +58,13 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         String confVersion = confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION());
         String appId = confMap.get(SPARK_PARAM_APP_ID());
         String proxyUri = confMap.get(SPARK_PARAM_APP_PROXY_URI_BASES());
-        SparkMonitor monitor = new SparkMonitor(id, appId, appName, confVersion, status);
+        String startUp = confMap.get(SPARK_PARAM_STARTUP());
+        SparkMonitor monitor = new SparkMonitor(id, appId, appName, confVersion, status,startUp);
+
         if (!CommonUtils.isBlank(proxyUri)) {
             monitor.setTrackUrl(proxyUri.split(",")[0]);
         }
+
         SparkMonitor exist = baseMapper.selectById(id);
         if (exist == null) {
             monitor.setCreateTime(new Date());

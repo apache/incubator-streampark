@@ -91,6 +91,7 @@ APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_LOG="$APP_BASE"/logs
 APP_LIB="$APP_BASE"/lib
+APP_BIN="$APP_BASE"/bin
 APP_TEMP="$APP_BASE"/temp
 [[ ! -d "$APP_LOG" ]] && mkdir ${APP_LOG} >/dev/null
 [[ ! -d "$APP_TEMP" ]] && mkdir ${APP_TEMP} >/dev/null
@@ -205,6 +206,7 @@ doStart() {
 
         sudo -u hdfs spark2-submit \
             --files ${app_proper} \
+            --conf "spark.startup=${APP_BIN}/$0 $@" \
             --conf "spark.conf=${app_proper}" \
             --name ${app_name} \
             --queue spark \
