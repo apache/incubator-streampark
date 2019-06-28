@@ -1,8 +1,6 @@
 package com.streamxhub.spark.monitor.core.domain;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -27,6 +25,8 @@ public class SparkMonitor {
 
     private String trackUrl;
 
+    private String startUp;
+
     private Integer status;
 
     private Date createTime;
@@ -36,12 +36,13 @@ public class SparkMonitor {
     public SparkMonitor() {
     }
 
-    public SparkMonitor(String id, String appId, String appName, String confVersion, Integer status) {
+    public SparkMonitor(String id, String appId, String appName, String confVersion, Integer status, String startUp) {
         this.myId = id;
         this.appId = appId;
         this.appName = appName;
         this.confVersion = confVersion;
         this.status = status;
+        this.startUp = startUp;
     }
 
 }

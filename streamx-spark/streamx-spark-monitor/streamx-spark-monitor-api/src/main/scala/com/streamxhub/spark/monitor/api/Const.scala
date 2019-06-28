@@ -33,13 +33,13 @@ object Const {
 
   val SPARK_PARAM_CONF = "spark.conf"
 
+  val SPARK_PARAM_STARTUP = "spark.startup"
+
   val SPARK_PARAM_USER_ARGS = "spark.user.args"
 
   val SPARK_PARAM_APP_NAME = "spark.app.name"
 
   val SPARK_PARAM_APP_MAIN = "spark.app.main"
-
-  val SPARK_PARAM_MY_ID = "spark.app.myid"
 
   val SPARK_PARAM_APP_ID = "spark.app.id"
 
