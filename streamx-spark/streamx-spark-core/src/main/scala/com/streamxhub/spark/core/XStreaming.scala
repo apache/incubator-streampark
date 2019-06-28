@@ -23,6 +23,7 @@ package com.streamxhub.spark.core
 
 import java.io.StringReader
 import java.util.Properties
+import java.util.regex.Pattern
 
 import com.streamxhub.spark.core.util.SystemPropertyUtil
 import com.streamxhub.spark.monitor.api.{Const, HeartBeat}
@@ -125,9 +126,9 @@ trait XStreaming {
     }
     sparkConf = new SparkConf()
     sparkConf.set(SPARK_PARAM_USER_ARGS, args.mkString("|"))
-    //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, conf) = SystemPropertyUtil.get(SPARK_PARAM_CONF, "") match {
-      case "" => (false, sparkConf.get(SPARK_PARAM_CONF))
+    //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
+    val (isDebug, conf) = SystemPropertyUtil.get(SPARK_PARAM_DEBUG_CONF, "") match {
+      case "" => (false, sparkConf.get(SPARK_PARAM_DEPLOY_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
@@ -162,7 +163,7 @@ trait XStreaming {
       val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
       val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$myId"
       val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
-      if (cloudConf.matches(Const.SPARK_CONF_REGEXP)) {
+      if (Pattern.compile(Const.SPARK_CONF_TYPE_REGEXP).matcher(cloudConf).find) {
         val properties = new Properties()
         properties.load(new StringReader(cloudConf))
         properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
@@ -200,6 +201,7 @@ trait XStreaming {
     sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, PropertiesUtil.getFileSource(conf))
     sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
   }
+
 
   def creatingContext(): StreamingContext = {
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")

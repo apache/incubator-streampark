@@ -15,12 +15,12 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
-import static com.streamxhub.spark.monitor.api.Const.*;
-import static com.streamxhub.spark.monitor.api.Const.SPARK_CONF_PATH_PREFIX;
-
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
+import java.util.regex.Pattern;
+
+import static com.streamxhub.spark.monitor.api.Const.*;
 
 /**
  * @author benjobs
@@ -51,14 +51,14 @@ public class WatcherServiceImpl implements WatcherService {
 
     @Override
     public void publish(String id, String conf) {
-        Map<String, String> confMap = getConfigMapFromDebugString(conf);
+        Map<String, String> confMap = getFromProperties(conf);
         sparkMonitorService.publish(id, confMap);
         System.out.println(id + ":publish");
     }
 
     @Override
     public void shutdown(String id, String conf) {
-        Map<String, String> confMap = getConfigMapFromDebugString(conf);
+        Map<String, String> confMap = getFromProperties(conf);
         sparkMonitorService.shutdown(id, confMap);
         System.out.println(id + ":shutdown");
     }
@@ -72,14 +72,14 @@ public class WatcherServiceImpl implements WatcherService {
     }
 
     private Map<String, String> getConfigMap(String conf) {
-        if (!conf.matches(SPARK_CONF_REGEXP())) {
-            return PropertiesUtil.getPropertiesFromYamlText(conf);
+        if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
+            return getFromProperties(conf);
         } else {
-            return getConfigMapFromDebugString(conf);
+            return PropertiesUtil.getPropertiesFromYamlText(conf);
         }
     }
 
-    private Map<String, String> getConfigMapFromDebugString(String conf) {
+    private Map<String, String> getFromProperties(String conf) {
         try {
             Properties properties = new Properties();
             properties.load(new StringReader(conf));

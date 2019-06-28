@@ -111,7 +111,11 @@ object HeartBeat {
       }
       //register monitor...
       sparkConf.remove(SPARK_PARAM_APP_CONF_SOURCE)
+
+      logger.info(s"[StreamX] sparkConf Debug Info:${sparkConf.toDebugString}")
+
       ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
+
       logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
     }
   }
