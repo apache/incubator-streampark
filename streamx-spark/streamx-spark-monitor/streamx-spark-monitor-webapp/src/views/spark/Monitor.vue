@@ -43,15 +43,26 @@
                     <a-tag v-if="record.status === 2" color="#108ee9">停&nbsp;止</a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,record">
-                    <a-icon v-if="record.status === 0" v-hasPermission="'monitor:option'" type="play-circle-o" theme="twoTone" @click="start(record)" title="启动"></a-icon>
-                    <a-icon v-if="record.status === 1" v-hasPermission="'monitor:option'" type="eye" theme="twoTone" :title="record.trackURL"></a-icon>
-                    <a-icon v-if="record.status === 1" v-hasPermission="'monitor:option'" type="poweroff" style="color: #f95476" @click="stop(record)" title="停止"></a-icon>
-                    <a-popconfirm title="确定要删除该Spark任务吗？" okText="删除" cancelText="取消" @confirm="remove(record)">
+                    <a-popconfirm title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
+                        <a-icon slot="icon" type="question-circle-o" style="color: green" />
                         <a v-if="record.status === 0" v-hasPermission="'monitor:option'">
-                            <a-icon type="delete" theme="twoTone" title="停止"></a-icon>
+                            <a-icon type="play-circle" theme="twoTone" twoToneColor="#52c41a" title="启动"></a-icon>
                         </a>
                     </a-popconfirm>
-                    <a-icon v-hasPermission="'monitor:setting'" type="tool" @click="setting(record)" title="配置文件"></a-icon>
+                    <a-popconfirm title="要停止该任务吗？" okText="停止" cancelText="取消" @confirm="stop(record)">
+                        <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                        <a v-if="record.status === 1" v-hasPermission="'monitor:option'">
+                            <a-icon type="pause-circle" theme="outlined" title="停止">停止</a-icon>
+                        </a>
+                    </a-popconfirm>
+                    <a-popconfirm title="确定要删除该任务吗？" okText="删除" cancelText="取消" @confirm="remove(record)">
+                        <a-icon slot="icon" type="question-circle-o" style="color: red" />
+                        <a v-if="record.status === 0" v-hasPermission="'monitor:option'">
+                            <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="停止"></a-icon>
+                        </a>
+                    </a-popconfirm>
+                    <a-icon v-if="record.status == 1" v-hasPermission="'monitor:option'" type="fire" theme="twoTone" title="record.trackURL"></a-icon>
+                    <a-icon v-hasPermission="'monitor:setting'" type="setting" @click="setting(record)" title="配置文件"></a-icon>
                 </template>
             </a-table>
         </div>
@@ -99,13 +110,13 @@
                         scopedSlots: {customRender: 'status'},
                     },
                     {
-                        title: '最后时间',
+                        title: '启动时间',
                         dataIndex: 'modifyTime'
                     },
                     {
                         title: '操作',
                         dataIndex: 'operation',
-                        width: 120,
+                        width: 180,
                         scopedSlots: {customRender: 'operation'},
                         fixed: 'right'
                     }]
@@ -174,7 +185,16 @@
                         ...this.queryParams
                     })
                 })
-            }
+            },
+            stop(params = {}) {
+
+            },
+            start(params = {}) {
+
+            },
+            setting(params = {}) {
+
+            },
         }
     }
 </script>
