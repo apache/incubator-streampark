@@ -52,7 +52,7 @@ object HeartBeat {
     this.zookeeperURL = sparkConf.get(SPARK_PARAM_MONITOR_ZOOKEEPER)
     this.confPath = s"$SPARK_CONF_PATH_PREFIX/$myId"
     this.monitorPath = s"$SPARK_MONITOR_PATH_PREFIX/$myId"
-    this.isDebug = false //sparkConf.getBoolean("spark.app.debug", false)
+    this.isDebug = sparkConf.getBoolean(SPARK_PARAM_APP_DEBUG, defaultValue = false)
   }
 
   //for java
