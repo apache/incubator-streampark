@@ -204,10 +204,10 @@ doStart() {
         local app_log_date=`date "+%Y%m%d_%H%M%S"`
         local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
-         sudo -u hdfs spark2-submit \
+        sudo -u hdfs spark2-submit \
             --files ${app_proper} \
-            --conf "spark.deploy.startup=${APP_BIN}/$0 start $app_proper" \
             --conf "spark.deploy.conf=${app_proper}" \
+	        --conf "spark.deploy.startup=$0 start ${app_proper}" \
             --name ${app_name} \
             --queue spark \
             --jars ${jars} ${app_params}  \
