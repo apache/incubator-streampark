@@ -61,7 +61,7 @@ public class SparkController extends BaseController {
     }
 
     @DeleteMapping("delete/{myId}")
-    @RequiresPermissions("monitor:option")
+    @RequiresPermissions("spark:delete")
     public void delete(@PathVariable("myId") String myId) {
         this.monitorService.delete(myId);
     }
