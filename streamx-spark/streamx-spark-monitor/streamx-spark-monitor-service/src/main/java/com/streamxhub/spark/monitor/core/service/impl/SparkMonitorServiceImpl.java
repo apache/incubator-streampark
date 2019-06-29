@@ -143,7 +143,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         int exitCode = 1;
         try {
             String home = System.getProperty("streamx.home");
-            exitCode = CommandUtils.runAsExecUser(home.concat("/bin/executor.so"),hadoopUser, cmd);
+            exitCode = CommandUtils.runAsExecUser(home.concat("/bin/executor.so"), hadoopUser, cmd);
             if (exitCode == 0) {
                 //停止中..
                 monitor.setStatusValue(SparkMonitor.Status.KILLING);
