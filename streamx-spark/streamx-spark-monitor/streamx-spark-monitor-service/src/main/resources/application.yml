@@ -84,6 +84,5 @@ spark:
     app:
       monitor:
         zookeeper: bigdata-001-112-130.sqkb-s.com:2181,bigdata-002-112-129.sqkb-s.com:2181,bigdata-003-112-128.sqkb-s.com:2181,bigdata-004-112-131.sqkb-s.com:2181,bigdata-005-112-127.sqkb-s.com:2181
-        executor: /home/workspace/StreamX/executor.so
       hadoop:
         user: hdfs

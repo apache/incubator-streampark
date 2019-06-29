@@ -36,10 +36,6 @@ import java.util.Map;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, SparkMonitor> implements SparkMonitorService {
 
-
-    @Value("${spark.app.monitor.executor}")
-    private String execLib;
-
     @Value("${spark.app.hadoop.user}")
     private String hadoopUser;
 
@@ -146,7 +142,8 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         String cmd = String.format("yarn application -kill %s", monitor.getAppId());
         int exitCode = 1;
         try {
-            exitCode = CommandUtils.runAsExecUser(execLib,hadoopUser, cmd);
+            String home = System.getProperty("streamx.home");
+            exitCode = CommandUtils.runAsExecUser(home.concat("/bin/executor.so"),hadoopUser, cmd);
             if (exitCode == 0) {
                 //停止中..
                 monitor.setStatusValue(SparkMonitor.Status.KILLING);

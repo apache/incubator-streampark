@@ -1,6 +1,8 @@
 package com.streamxhub.spark.monitor.core.runner;
 
 import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
+import com.streamxhub.spark.monitor.common.utils.CommandUtils;
+import com.streamxhub.spark.monitor.common.utils.IOUtils;
 import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.curator.framework.CuratorFramework;
@@ -30,9 +32,7 @@ public class SparkRunner implements ApplicationRunner {
     private WatcherService watcherService;
 
     @PostConstruct
-    public void initialize() {
-        client = ZooKeeperUtil.getClient(zookeeperConnect);
-    }
+    public void initialize() {client = ZooKeeperUtil.getClient(zookeeperConnect);}
 
     @PreDestroy
     public void destroy() {
