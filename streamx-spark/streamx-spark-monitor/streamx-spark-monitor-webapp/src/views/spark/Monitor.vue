@@ -38,12 +38,13 @@
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
                 <template slot="status" slot-scope="text,record">
+                    <a-tag v-if="record.status === -1" color="#F56C6C">失&nbsp;联</a-tag>
                     <a-tag v-if="record.status === 0" color="#67C23A">运行中</a-tag>
                     <a-tag v-if="record.status === 1" color="#303133">停&nbsp;止</a-tag>
                     <a-tag v-if="record.status === 2" color="#409EFF">启动中</a-tag>
-                    <a-tag v-if="record.status === 3" color="#F56C6C">启动失败</a-tag>
+                    <a-tag v-if="record.status === 3" color="#E6A23C">启动失败</a-tag>
                     <a-tag v-if="record.status === 4" color="#409EFF">停止中</a-tag>
-                    <a-tag v-if="record.status === 5" color="#F56C6C">停止失败</a-tag>
+                    <a-tag v-if="record.status === 5" color="#E6A23C">停止失败</a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,record">
 
@@ -70,7 +71,7 @@
                             <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="删除"></a-icon>
                         </a>
                     </a-popconfirm>
-                    <a v-if="record.status == 0" v-hasPermission="'spark:track'" href="http://www.qq.com" target="_blank">
+                    <a v-if="record.status == 0" v-hasPermission="'spark:track'" :href="record.trackUrl" target="_blank">
                         <a-icon type="fire" theme="twoTone"></a-icon>
                     </a>
                     <a-icon v-hasPermission="'spark:setting'" type="setting" @click="setting(record)" title="配置文件"></a-icon>
@@ -78,8 +79,6 @@
             </a-table>
         </div>
     </a-card>
-
-
 
 </template>
 

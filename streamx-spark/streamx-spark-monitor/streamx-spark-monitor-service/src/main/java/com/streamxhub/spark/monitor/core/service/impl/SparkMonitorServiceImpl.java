@@ -59,7 +59,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
 
     @Override
     public void shutdown(String id, Map<String, String> confMap) {
-        doAction(id, SparkMonitor.Status.KILLED, confMap);
+        doAction(id, SparkMonitor.Status.LOST, confMap);
     }
 
     private void doAction(String id, SparkMonitor.Status status, Map<String, String> confMap) {
