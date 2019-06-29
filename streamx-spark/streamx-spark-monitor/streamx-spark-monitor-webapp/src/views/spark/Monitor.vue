@@ -38,30 +38,36 @@
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
                 <template slot="status" slot-scope="text,record">
-                    <a-tag v-if="record.status === 0" color="#f50">失&nbsp;联</a-tag>
-                    <a-tag v-if="record.status === 1" color="#87d068">运&nbsp;行</a-tag>
-                    <a-tag v-if="record.status === 2" color="#108ee9">停&nbsp;止</a-tag>
+                    <a-tag v-if="record.status === 0" color="#67C23A">运行中</a-tag>
+                    <a-tag v-if="record.status === 1" color="#303133">停&nbsp;止</a-tag>
+                    <a-tag v-if="record.status === 2" color="#409EFF">启动中</a-tag>
+                    <a-tag v-if="record.status === 3" color="#F56C6C">启动失败</a-tag>
+                    <a-tag v-if="record.status === 4" color="#409EFF">停止中</a-tag>
+                    <a-tag v-if="record.status === 5" color="#F56C6C">停止失败</a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,record">
                     <a-popconfirm title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: green" />
-                        <a v-if="record.status === 0" v-hasPermission="'monitor:option'">
+                        <!--停止,启动失败-->
+                        <a v-if="record.status === 1||record.status === 3" v-hasPermission="'monitor:option'">
                             <a-icon type="play-circle" theme="twoTone" twoToneColor="#52c41a" title="启动"></a-icon>
                         </a>
                     </a-popconfirm>
                     <a-popconfirm title="要停止该任务吗？" okText="停止" cancelText="取消" @confirm="stop(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: red" />
-                        <a v-if="record.status === 1" v-hasPermission="'monitor:option'">
+                        <!--正常运行-->
+                        <a v-if="record.status === 0" v-hasPermission="'monitor:option'">
                             <a-icon type="pause-circle" theme="outlined" title="停止">停止</a-icon>
                         </a>
                     </a-popconfirm>
                     <a-popconfirm title="确定要删除该任务吗？" okText="删除" cancelText="取消" @confirm="remove(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: red" />
-                        <a v-if="record.status === 0" v-hasPermission="'monitor:option'">
+                        <!--停止-->
+                        <a v-if="record.status === 1" v-hasPermission="'monitor:option'">
                             <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="停止"></a-icon>
                         </a>
                     </a-popconfirm>
-                    <a-icon v-if="record.status == 1" v-hasPermission="'monitor:option'" type="fire" theme="twoTone" title="record.trackURL"></a-icon>
+                    <a-icon v-if="record.status == 0" v-hasPermission="'monitor:option'" type="fire" theme="twoTone" title="record.trackURL"></a-icon>
                     <a-icon v-hasPermission="'monitor:setting'" type="setting" @click="setting(record)" title="配置文件"></a-icon>
                 </template>
             </a-table>
@@ -187,10 +193,30 @@
                 })
             },
             stop(params = {}) {
-
+                this.$post('spark/stop/' + params.myId, {
+                }).then((r) => {
+                    if(r.data.code === 0) {
+                        this.$message.success('该任务正在停止中');
+                        this.fetch({
+                            ...this.queryParams
+                        })
+                    }else {
+                        this.$message.error('该任务停止失败');
+                    }
+                })
             },
             start(params = {}) {
-
+                this.$post('spark/start/' + params.myId, {
+                }).then((r) => {
+                    if(r.data.code === 0) {
+                        this.$message.success('该任务正在启动中');
+                        this.fetch({
+                            ...this.queryParams
+                        })
+                    }else {
+                        this.$message.error('该任务启动失败');
+                    }
+                })
             },
             setting(params = {}) {
 
