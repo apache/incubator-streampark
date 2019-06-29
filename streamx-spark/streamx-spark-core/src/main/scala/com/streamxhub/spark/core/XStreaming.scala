@@ -139,9 +139,9 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-    val appMain = localConf.getOrDefault(SPARK_PARAM_APP_MAIN, null)
+    val appMain = localConf.getOrDefault(SPARK_PARAM_MAIN_CLASS, null)
     if (appMain == null || appMain == "") {
-      System.err.println(s"[StreamX] $SPARK_PARAM_APP_MAIN must be not empty!")
+      System.err.println(s"[StreamX] $SPARK_PARAM_MAIN_CLASS must be not empty!")
       System.exit(1)
     }
 

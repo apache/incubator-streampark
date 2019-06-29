@@ -27,7 +27,7 @@ object Const {
 
   val SPARK_MONITOR_PATH_PREFIX = "/StreamX/spark/monitor"
 
-  val SPARK_CONF_TYPE_REGEXP = "\n(\\s+|)spark\\.app\\.main"
+  val SPARK_CONF_TYPE_REGEXP = "\n(\\s+|)spark\\.main\\.class"
 
   val SPARK_APP_CONF_DEFAULT_VERSION = "1"
 
@@ -41,7 +41,7 @@ object Const {
 
   val SPARK_PARAM_APP_NAME = "spark.app.name"
 
-  val SPARK_PARAM_APP_MAIN = "spark.app.main"
+  val SPARK_PARAM_MAIN_CLASS = "spark.main.class"
 
   val SPARK_PARAM_APP_ID = "spark.app.id"
 
