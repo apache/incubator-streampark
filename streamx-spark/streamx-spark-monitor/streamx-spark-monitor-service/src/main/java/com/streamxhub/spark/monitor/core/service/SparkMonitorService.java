@@ -17,4 +17,8 @@ public interface SparkMonitorService {
     IPage<SparkMonitor> getPager(SparkMonitor sparkMonitor,QueryRequest request);
 
     void delete(String myId);
+
+    int start(String myId);
+
+    int stop(String myId);
 }

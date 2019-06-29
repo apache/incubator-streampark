@@ -37,7 +37,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import scala.util.{Success, Try}
 import com.streamxhub.spark.monitor.api.Const._
 import org.apache.commons.codec.digest.DigestUtils
 

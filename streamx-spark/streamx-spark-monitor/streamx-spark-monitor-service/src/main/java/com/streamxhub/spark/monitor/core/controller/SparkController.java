@@ -2,6 +2,7 @@ package com.streamxhub.spark.monitor.core.controller;
 
 import com.streamxhub.spark.monitor.common.controller.BaseController;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
+import com.streamxhub.spark.monitor.common.domain.RestResponse;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
@@ -41,6 +42,23 @@ public class SparkController extends BaseController {
         return getDataTable(this.confService.getPager(sparkConf, request));
     }
 
+    @PostMapping("start/{myId}")
+    @RequiresPermissions("spark:start")
+    public RestResponse start(@PathVariable("myId") String myId) {
+        int code = this.monitorService.start(myId);
+        RestResponse response = new RestResponse();
+        response.put("code",code);
+        return response;
+    }
+
+    @PostMapping("stop/{myId}")
+    @RequiresPermissions("spark:stop")
+    public RestResponse stop(@PathVariable("myId") String myId) {
+        int code = this.monitorService.stop(myId);
+        RestResponse response = new RestResponse();
+        response.put("code",code);
+        return response;
+    }
 
     @DeleteMapping("delete/{myId}")
     @RequiresPermissions("monitor:option")
