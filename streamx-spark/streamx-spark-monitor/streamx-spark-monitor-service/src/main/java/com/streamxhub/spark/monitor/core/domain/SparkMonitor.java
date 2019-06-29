@@ -53,6 +53,10 @@ public class SparkMonitor {
 
     public enum Status implements Serializable {
         /**
+         * 意外终止
+         */
+        LOST(-1,"意外终止"),
+        /**
          * 正常运行
          */
         RUNNING(0, "正常运行"),
