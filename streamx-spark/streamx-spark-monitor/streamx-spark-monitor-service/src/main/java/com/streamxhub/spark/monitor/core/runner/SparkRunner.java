@@ -1,7 +1,6 @@
 package com.streamxhub.spark.monitor.core.runner;
 
 import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
-import com.streamxhub.spark.monitor.common.utils.CommandUtils;
 import com.streamxhub.spark.monitor.common.utils.IOUtils;
 import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +47,7 @@ public class SparkRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+
         watch(SPARK_CONF_PATH_PREFIX(), (client, event) -> {
             ChildData data = event.getData();
             if (data != null && !data.getPath().equals(SPARK_CONF_PATH_PREFIX())) {
@@ -80,6 +80,7 @@ public class SparkRunner implements ApplicationRunner {
 
             }
         });
+
     }
 
     private void watch(String path, TreeCacheListener listener) {
