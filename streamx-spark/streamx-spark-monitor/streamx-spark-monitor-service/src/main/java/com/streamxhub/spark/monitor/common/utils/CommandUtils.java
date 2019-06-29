@@ -172,28 +172,20 @@ public abstract class CommandUtils implements Serializable {
         return null;
     }
 
-    public static String execute(String command) {
-        Process process = null;
-        StringBuffer buffer = new StringBuffer();
-        try {
-            process = Runtime.getRuntime().exec(command);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
-            String line;
-            while ((line = reader.readLine()) != null) {
-                buffer.append(line).append("\n");
-            }
-            process.waitFor();
-        } catch (Exception e) {
-            e.printStackTrace();
+    public static String execute(String command) throws Exception {
+        StringBuilder buffer = new StringBuilder();
+        Process process = Runtime.getRuntime().exec(command);
+        BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            buffer.append(line).append("\n");
         }
-
-        if (process != null) {
-            try {
-                process.getErrorStream().close();
-                process.getInputStream().close();
-                process.getOutputStream().close();
-            } catch (Exception ee) {
-            }
+        process.waitFor();
+        try {
+            process.getErrorStream().close();
+            process.getInputStream().close();
+            process.getOutputStream().close();
+        } catch (Exception ee) {
         }
         return buffer.toString();
     }
@@ -266,7 +258,7 @@ public abstract class CommandUtils implements Serializable {
         }
     }
 
-    public static int runAsExecUser(final String execLib,final String execUser,final String command) throws IOException, InterruptedException {
+    public static int runAsExecUser(final String execLib, final String execUser, final String command) throws IOException, InterruptedException {
         String execCmd = execLib
                 .concat(IOUtils.BLANK_CHAR)
                 .concat(execUser)
