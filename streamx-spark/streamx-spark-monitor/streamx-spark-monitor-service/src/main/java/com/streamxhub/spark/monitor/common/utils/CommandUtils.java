@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 The JobX Project
+ * Copyright (c) 2015 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -44,7 +44,11 @@ public abstract class CommandUtils implements Serializable {
 
     private static String DEFAULT_USER = "root";
 
-    private static String BASH_SCHEAM = "#!/bin/bash";
+    public static String BASH_SCHEAM = "#!/bin/bash";
+
+    public static String BASH_RUN_SCHEAM = "/bin/bash +x ";
+
+    public static String SH_RUN_SCHEAM = "/bin/sh +x ";
 
     public static String executeShell(File shellFile, String... args) {
         String info = null;
@@ -93,15 +97,15 @@ public abstract class CommandUtils implements Serializable {
             process = builder.start();
             int processId = getPID(process);
             if (processId == 0) {
-                logger.debug("[JobX]Spawned thread with unknown process id");
+                logger.debug("[StreamX]Spawned thread with unknown process id");
             } else {
-                logger.debug("[JobX]Spawned thread with process id " + processId);
+                logger.debug("[StreamX]Spawned thread with process id " + processId);
             }
             startupLatch.countDown();
             try {
                 exitCode = process.waitFor();
             } catch (InterruptedException e) {
-                logger.info("[JobX]Process interrupted. Exit code is " + exitCode, e);
+                logger.info("[StreamX]Process interrupted. Exit code is " + exitCode, e);
             }
 
             completeLatch.countDown();
@@ -115,10 +119,10 @@ public abstract class CommandUtils implements Serializable {
                     .append("\n")
                     .toString();
 
-            logger.info("[JobX] executeScript,cmd:{},resulr:{}", script, output);
+            logger.info("[StreamX] executeScript,cmd:{},resulr:{}", script, output);
 
         } catch (Exception e) {
-            logger.error("[JobX] executeScript,error:{}", e.getMessage());
+            logger.error("[StreamX] executeScript,error:{}", e.getMessage());
         } finally {
             if (process != null) {
                 IOUtils.closeQuietly(process.getInputStream());
@@ -262,12 +266,12 @@ public abstract class CommandUtils implements Serializable {
         }
     }
 
-    public static int chown(boolean r, String user, String group, File file) throws IOException, InterruptedException {
-        return runAsExecUser(DEFAULT_USER, String.format("chown %s %s:%s %s", (r ? "-R" : ""), user, group, file.getAbsolutePath()));
-    }
-
-    public static int runAsExecUser(final String execUser, final String command) throws IOException, InterruptedException {
-        String execCmd = "sudo".concat(IOUtils.BLANK_CHAR).concat(execUser).concat(IOUtils.BLANK_CHAR).concat(command);
+    public static int runAsExecUser(final String execLib,final String execUser,final String command) throws IOException, InterruptedException {
+        String execCmd = execLib
+                .concat(IOUtils.BLANK_CHAR)
+                .concat(execUser)
+                .concat(IOUtils.BLANK_CHAR)
+                .concat(command);
         final Process process = Runtime.getRuntime().exec(execCmd);
         return process.waitFor();
     }

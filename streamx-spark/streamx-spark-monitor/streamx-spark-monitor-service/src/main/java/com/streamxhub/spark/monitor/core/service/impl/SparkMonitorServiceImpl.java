@@ -37,6 +37,9 @@ import java.util.Map;
 public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, SparkMonitor> implements SparkMonitorService {
 
 
+    @Value("${spark.app.monitor.executor}")
+    private String execLib;
+
     @Value("${spark.app.hadoop.user}")
     private String hadoopUser;
 
@@ -123,7 +126,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         String startUp = monitor.getStartUp();
         int exitCode = 1;
         if (StringUtils.isNotBlank(startUp)) {
-            exitCode = CommandUtils.executeScript(startUp);
+            exitCode = CommandUtils.executeScript(CommandUtils.BASH_RUN_SCHEAM.concat(startUp));
             if (exitCode == 0) {
                 //启动中..
                 monitor.setStatusValue(SparkMonitor.Status.STARTING);
@@ -143,7 +146,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         String cmd = String.format("yarn application -kill %s", monitor.getAppId());
         int exitCode = 1;
         try {
-            exitCode = CommandUtils.runAsExecUser(hadoopUser, cmd);
+            exitCode = CommandUtils.runAsExecUser(execLib,hadoopUser, cmd);
             if (exitCode == 0) {
                 //停止中..
                 monitor.setStatusValue(SparkMonitor.Status.KILLING);
