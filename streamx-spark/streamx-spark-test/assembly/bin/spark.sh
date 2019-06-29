@@ -85,6 +85,7 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+RUN_ARGS="$@"
 #global variables....
 APP_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
 APP_BASE="$APP_HOME"
@@ -207,7 +208,7 @@ doStart() {
         sudo -u hdfs spark2-submit \
             --files ${app_proper} \
             --conf "spark.deploy.conf=${app_proper}" \
-	        --conf "spark.deploy.startup=$0 start ${app_proper}" \
+	        --conf "spark.deploy.startup=$0 $RUN_ARGS" \
             --name ${app_name} \
             --queue spark \
             --jars ${jars} ${app_params}  \
