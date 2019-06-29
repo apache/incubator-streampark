@@ -112,6 +112,7 @@ PRGDIR=`dirname "$PRG"`
 [[ -z "$STREAMX_HOME" ]] && STREAMX_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
 [[ -z "$STREAMX_BASE" ]] && STREAMX_BASE="$STREAMX_HOME"
 [[ -z "$STREAMX_CONF" ]] && STREAMX_CONF="$STREAMX_BASE"/conf
+[[ -z "$STREAMX_BIN" ]] && STREAMX_CONF="$STREAMX_BASE"/bin
 [[ -z "$STREAMX_OUT" ]] && STREAMX_OUT="$STREAMX_BASE"/logs/streamx.out
 [[ -z "$STREAMX_TMPDIR" ]]  && STREAMX_TMPDIR="$STREAMX_BASE"/temp
 
@@ -191,6 +192,21 @@ if [[ "`${RUNJAVA} -version 2>&1 | head -1|grep "openjdk"|wc -l`"x == "1"x ]]; t
   exit 1;
 fi
 
+
+#gcc compile executor.c
+if [[ -z "$GCCCMD" ]] ; then
+    GCCCMD="`which gcc`"
+fi
+if [[ "$GCCCMD" ]] ; then
+    echo_g "compile executor.c starting..."
+    ${GCCCMD} ${STREAMX_BIN}/executor.c -o ${STREAMX_BIN}/executor.so
+    RET_VAL=$?
+    if [[ ${RET_VAL} -ne 0 ]] ; then
+       echo_w "WARN: compile executor.c error,please compile executor.c by yourself."
+    fi
+else
+   echo_w "ERROR:can't found gcc. please compile executor.c first,please compile executor.c by yourself."
+fi
 
 
 STREAMX_PIDDIR="/var/run";

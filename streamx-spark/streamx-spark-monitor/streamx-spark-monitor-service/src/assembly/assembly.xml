@@ -21,6 +21,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>src/assembly/native</directory>
+            <outputDirectory>native</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0755</fileMode>
