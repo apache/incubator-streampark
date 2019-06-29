@@ -70,12 +70,17 @@
                             <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="删除"></a-icon>
                         </a>
                     </a-popconfirm>
-                    <a-icon v-if="record.status == 0" v-hasPermission="'spark:track'" type="fire" theme="twoTone" title="record.trackURL"></a-icon>
+                    <a v-if="record.status == 0" v-hasPermission="'spark:track'" href="http://www.qq.com" target="_blank">
+                        <a-icon type="fire" theme="twoTone"></a-icon>
+                    </a>
                     <a-icon v-hasPermission="'spark:setting'" type="setting" @click="setting(record)" title="配置文件"></a-icon>
                 </template>
             </a-table>
         </div>
     </a-card>
+
+
+
 </template>
 
 <script>
