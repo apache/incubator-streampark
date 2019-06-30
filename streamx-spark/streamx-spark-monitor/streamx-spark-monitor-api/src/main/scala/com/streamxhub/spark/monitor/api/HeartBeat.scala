@@ -109,13 +109,8 @@ object HeartBeat {
           new ExceptionInInitializerError("[StreamX] init config error,please check spark.app.conf.local.version.")
           System.exit(1)
       }
-      //register monitor...
-      sparkConf.remove(SPARK_PARAM_APP_CONF_SOURCE)
-
       logger.info(s"[StreamX] sparkConf Debug Info:${sparkConf.toDebugString}")
-
       ZooKeeperUtil.create(monitorPath, sparkConf.toDebugString, zookeeperURL)
-
       logger.info(s"[StreamX] registry heartbeat path: $monitorPath")
     }
   }
