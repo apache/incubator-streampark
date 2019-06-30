@@ -24,10 +24,8 @@ package com.streamxhub.spark.core.support.kafka.manager
 import java.util
 
 import com.streamxhub.spark.core.support.hbase.HBaseClient
-import kafka.common.TopicAndPartition
 import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.hadoop.hbase.client.{Delete, Put, Scan, Table}
-import org.apache.hadoop.hbase.util.Bytes
 import org.apache.hadoop.hbase.filter._
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.common.TopicPartition
@@ -70,7 +68,7 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
 
   /** 存放offset的表模型如下，请自行优化和扩展，请把每个rowkey对应的record的version设置为1（默认值），因为要覆盖原来保存的offset，而不是产生多个版本
     * ----------------------------------------------------------------------------------------------------
-    * rowkey            |  column family                                                          |
+    * rowKey            |  column family                                                          |
     * --------------------------------------------------------------------------
     * |                 |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
     * ----------------------------------------------------------------------------------------------
@@ -94,22 +92,19 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
       val key = generateKey(groupId, topic)
       val filter = new PrefixFilter(key.getBytes)
       val scan = new Scan().setFilter(filter)
-      val rs = table.getScanner(scan)
-      rs.map(r => {
-        val cells = r.rawCells()
-
+      val result = table.getScanner(scan)
+      result.foreach(r => {
         var topic = ""
         var partition = 0
         var offset = 0L
-
-        cells.foreach(cell => {
+        r.rawCells().map(cell =>
           Bytes.toString(CellUtil.cloneQualifier(cell)) match {
             case "topic" => topic = Bytes.toString(CellUtil.cloneValue(cell))
             case "partition" => partition = Bytes.toInt(CellUtil.cloneValue(cell))
             case "offset" => offset = Bytes.toLong(CellUtil.cloneValue(cell))
-            case other =>
+            case _ =>
           }
-        })
+        )
 
         // 如果Offset失效了，则用 earliestOffsets 替代
         val tp = new TopicPartition(topic, partition)
@@ -121,7 +116,7 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
         }
         storedOffsetMap += tp -> finalOffset
       })
-      rs.close()
+      result.close()
     }
 
     // fix bug
