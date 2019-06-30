@@ -37,7 +37,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
-import scala.util.{Success, Try}
+import scala.util.Try
 import com.streamxhub.spark.monitor.api.Const._
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -62,6 +62,8 @@ trait XStreaming {
   // 从checkpoint 中恢复失败，则重新创建
   private var createOnError: Boolean = true
 
+  private var localSparkConf: Map[String, String] = Map[String, String]()
+
 
   @(transient@getter)
   var sparkSession: SparkSession = _
@@ -84,14 +86,13 @@ trait XStreaming {
     * StreamingContext 运行之后执行
     */
   def afterStarted(ssc: StreamingContext): Unit = {
-    HeartBeat(ssc).start()
   }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
   def beforeStop(ssc: StreamingContext): Unit = {
-    HeartBeat(ssc).stop()
+
   }
 
   /**
@@ -226,6 +227,21 @@ trait XStreaming {
     System.exit(1)
   }
 
+  def cleanSparkConf(): Unit = {
+    localSparkConf += SPARK_PARAM_DEPLOY_CONF -> sparkConf.get(SPARK_PARAM_DEPLOY_CONF)
+    localSparkConf += SPARK_PARAM_DEPLOY_STARTUP -> sparkConf.get(SPARK_PARAM_DEPLOY_STARTUP)
+    localSparkConf += SPARK_PARAM_APP_CONF_SOURCE -> sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
+    sparkConf.remove(SPARK_PARAM_DEPLOY_CONF)
+    sparkConf.remove(SPARK_PARAM_DEPLOY_STARTUP)
+    sparkConf.remove(SPARK_PARAM_APP_CONF_SOURCE)
+  }
+
+  def addSparkConf(): Unit = {
+    sparkConf.set(SPARK_PARAM_DEPLOY_CONF, localSparkConf(SPARK_PARAM_DEPLOY_CONF))
+    sparkConf.set(SPARK_PARAM_DEPLOY_STARTUP, localSparkConf(SPARK_PARAM_DEPLOY_STARTUP))
+    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localSparkConf(SPARK_PARAM_APP_CONF_SOURCE))
+  }
+
   def main(args: Array[String]): Unit = {
     initialize(args)
     configure(sparkConf)
@@ -236,10 +252,25 @@ trait XStreaming {
         ssc.checkpoint(ck)
         ssc
     }
+
     beforeStarted(context)
+
+    //将多余的参数从sparkConf中移除
+    cleanSparkConf()
+
     context.start()
+
+    //将需要的参数添加到sparkConf
+    addSparkConf()
+
+    HeartBeat(context).start()
+
     afterStarted(context)
+
     context.awaitTermination()
+
+    HeartBeat(context).stop()
+
     beforeStop(context)
   }
 
