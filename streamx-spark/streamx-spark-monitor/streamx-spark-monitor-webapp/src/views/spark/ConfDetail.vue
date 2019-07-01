@@ -3,11 +3,12 @@
               :maskClosable="false"
               width="calc(100% - 35%)"
               placement="right"
+              closable="false"
               @close="onClose"
               :visible="visiable"
               style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
         <a-textarea class="conf" ref="conf" v-model="conf" style="height: 100%"></a-textarea>
-        <div class="drawer-bootom-button">
+        <div class="drawer-bootom-button" style="z-index: 999">
             <a-button style="margin-right: .8rem" @click="onClose">关闭</a-button>
         </div>
     </a-drawer>
@@ -84,11 +85,11 @@
 <style lang="less">
     .CodeMirror {
         border: 1px solid #eee;
-        height: calc(100% - 10%);
+        height: auto;
     }
 
     .CodeMirror-scroll {
-        height: calc(100% - 10%);
+        height: auto;
         overflow-y: hidden;
         overflow-x: auto;
     }
