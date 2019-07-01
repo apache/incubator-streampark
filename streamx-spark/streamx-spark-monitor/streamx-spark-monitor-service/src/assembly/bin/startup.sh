@@ -112,8 +112,8 @@ PRGDIR=`dirname "$PRG"`
 [[ -z "$STREAMX_HOME" ]] && STREAMX_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
 [[ -z "$STREAMX_BASE" ]] && STREAMX_BASE="$STREAMX_HOME"
 [[ -z "$STREAMX_CONF" ]] && STREAMX_CONF="$STREAMX_BASE"/conf
-[[ -z "$STREAMX_BIN" ]] && STREAMX_CONF="$STREAMX_BASE"/bin
-[[ -z "$STREAMX_OUT" ]] && STREAMX_OUT="$STREAMX_BASE"/logs/streamx.out
+[[ -z "$STREAMX_BIN"  ]] && STREAMX_BIN="$STREAMX_BASE"/bin
+[[ -z "$STREAMX_OUT"  ]] && STREAMX_OUT="$STREAMX_BASE"/logs/streamx.out
 [[ -z "$STREAMX_TMPDIR" ]]  && STREAMX_TMPDIR="$STREAMX_BASE"/temp
 
 # Ensure that any user defined CLASSPATH variables are not used on startup,
