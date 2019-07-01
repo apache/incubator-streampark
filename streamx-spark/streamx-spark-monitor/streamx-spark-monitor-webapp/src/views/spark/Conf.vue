@@ -38,15 +38,15 @@
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
 
-                <a-tag color="cyan" slot="confVersion" slot-scope="text,record" >{{record.confVersion}}</a-tag>
+                <a-tag color="cyan" slot="confVersion" slot-scope="text,sparkConf" >{{sparkConf.confVersion}}</a-tag>
 
-                <template slot="history" slot-scope="text,record">
-                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
+                <template slot="history" slot-scope="text,sparkConf">
+                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" shape="circle" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
                 </template>
 
-                <template slot="operation" slot-scope="text,record">
-                    <a-icon type="eye" @click="detail(record.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
-                    <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(record)" title="配置文件"></a-icon>
+                <template slot="operation" slot-scope="text,sparkConf">
+                    <a-icon type="eye" @click="detail(sparkConf.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
+                    <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(sparkConf)" title="配置文件"></a-icon>
                 </template >
 
             </a-table>
@@ -182,7 +182,7 @@
             },
 
             detailHistory(recordId) {
-                this.$post('spark/conf/history/' + recordId, {}).then((r) => {
+                this.$post('spark/conf/record/' + recordId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
                     this.$refs.confDetail.setDetail(data.data)

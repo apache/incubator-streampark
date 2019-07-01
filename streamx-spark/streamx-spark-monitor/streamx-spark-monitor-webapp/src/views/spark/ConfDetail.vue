@@ -3,7 +3,7 @@
               :maskClosable="false"
               width="calc(100% - 35%)"
               placement="right"
-              closable="false"
+              :closable="false"
               @close="onClose"
               :visible="visiable"
               style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
