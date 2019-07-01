@@ -45,7 +45,7 @@
                 </template>
 
                 <template slot="operation" slot-scope="text,record">
-                    <a-icon type="eye" @click="detail(record.myId)" theme="twoTone" twoToneColor="#42b983" title="查询配置"></a-icon>
+                    <a-icon type="eye" @click="detail(record.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
                     <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(record)" title="配置文件"></a-icon>
                 </template >
 
@@ -178,7 +178,7 @@
                 this.$post('spark/conf/detail/' + myId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
-                    this.$refs.confDetail.setConf(data.data.conf)
+                    this.$refs.confDetail.setDetail(data.data)
                 })
             },
 

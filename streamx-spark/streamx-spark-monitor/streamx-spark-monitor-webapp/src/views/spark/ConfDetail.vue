@@ -7,7 +7,7 @@
               @close="onClose"
               :visible="visiable"
               style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
-        <a-textarea class="conf" ref="conf" v-model="conf" style="height: 100%"></a-textarea>
+        <a-textarea class="conf" ref="conf" v-model="detail.conf"></a-textarea>
         <div class="drawer-bootom-button" style="z-index: 999">
             <a-button style="margin-right: .8rem" @click="onClose">关闭</a-button>
         </div>
@@ -15,6 +15,7 @@
 </template>
 
 <script>
+
     import {mapState} from 'vuex'
     import CodeMirror from 'codemirror'
     import 'codemirror/theme/darcula.css'
@@ -31,7 +32,7 @@
         data () {
             return {
                 codeMirror:null,
-                conf:'',
+                detail:{},
                 loading:false
             }
         },
@@ -61,8 +62,8 @@
                     gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
                 })
             },
-            setConf (conf) {
-                this.conf = conf
+            setDetail (detail) {
+                this.detail = detail
                 this.$nextTick(()=>{
                     if (this.codeMirror == null) {
                         this.initCodeMirror()
@@ -71,7 +72,6 @@
             },
             onClose () {
                 this.loading = false
-                this.conf = ''
                 this.$emit('close')
             },
         },
