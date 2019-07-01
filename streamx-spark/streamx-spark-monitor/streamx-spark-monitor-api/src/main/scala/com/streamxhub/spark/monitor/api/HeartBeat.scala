@@ -66,12 +66,6 @@ object HeartBeat {
     this
   }
 
-  def apply(sc: StreamingContext,confSource:String): HeartBeat.type = {
-    val heartBeat = HeartBeat(sc.sparkContext)
-    heartBeat.sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE,confSource)
-    heartBeat
-  }
-
   def apply(sc: StreamingContext): HeartBeat.type = {
     HeartBeat(sc.sparkContext)
   }

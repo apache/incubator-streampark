@@ -17,6 +17,7 @@ import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
 import com.streamxhub.spark.monitor.core.service.WatcherService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -27,6 +28,9 @@ import static com.streamxhub.spark.monitor.api.Const.*;
 
 import java.util.Date;
 import java.util.Map;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author benjobs
@@ -57,6 +61,8 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     public void shutdown(String id, Map<String, String> confMap) {
         doAction(id, SparkMonitor.Status.LOST, confMap);
     }
+
+    private ScheduledExecutorService startExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("StreamX-start-schedule-%").daemon(true).build());
 
     private void doAction(String id, SparkMonitor.Status status, Map<String, String> confMap) {
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
@@ -127,6 +133,10 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
                 //启动中..
                 monitor.setStatusValue(SparkMonitor.Status.STARTING);
                 this.updateById(monitor);
+
+                this.checkStart(myId);
+
+
             } else {
                 //启动失败
                 monitor.setStatusValue(SparkMonitor.Status.START_FAILURE);
@@ -157,6 +167,22 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         } finally {
             return exitCode;
         }
+    }
+
+    /**
+     * 30秒之后如果状态还是一直启动中,则认为启动失败..
+     *
+     * @param myId
+     */
+    @Override
+    public void checkStart(String myId) {
+        startExecutorService.schedule(() -> {
+            SparkMonitor monitor = getById(myId);
+            if (monitor.getStatus().equals(SparkMonitor.Status.STARTING.getValue())) {
+                monitor.setStatusValue(SparkMonitor.Status.START_FAILURE);
+                this.updateById(monitor);
+            }
+        }, 30, TimeUnit.SECONDS);
     }
 
 }

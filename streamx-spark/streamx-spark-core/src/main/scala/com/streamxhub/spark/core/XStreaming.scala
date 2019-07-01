@@ -239,7 +239,7 @@ trait XStreaming {
     initialize(args)
     configure(sparkConf)
     //将多余的参数从sparkConf中移除
-    cleanSparkConf()
+    //cleanSparkConf()
     val context = checkpointPath match {
       case "" => creatingContext()
       case ck =>
@@ -249,7 +249,7 @@ trait XStreaming {
     }
     beforeStarted(context)
     context.start()
-    HeartBeat(context, localConf(SPARK_PARAM_APP_CONF_SOURCE)).start()
+    HeartBeat(context).start()
     afterStarted(context)
     context.awaitTermination()
     HeartBeat(context).stop()
