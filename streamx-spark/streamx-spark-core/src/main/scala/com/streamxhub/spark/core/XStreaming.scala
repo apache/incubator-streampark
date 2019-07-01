@@ -62,7 +62,7 @@ trait XStreaming {
   // 从checkpoint 中恢复失败，则重新创建
   private var createOnError: Boolean = true
 
-  private var localSparkConf: Map[String, String] = Map[String, String]()
+  private var localConf: Map[String, String] = Map[String, String]()
 
 
   @(transient@getter)
@@ -230,13 +230,9 @@ trait XStreaming {
   def cleanSparkConf(): Unit = {
     val cleanConf = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEPLOY_STARTUP, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE)
     cleanConf.filter(x => sparkConf.get(x, null) != null).foreach(k => {
-      localSparkConf += k -> sparkConf.get(k)
+      localConf += k -> sparkConf.get(k)
       sparkConf.remove(k)
     })
-  }
-
-  def addSparkConf(): Unit = {
-    sparkConf.setAll(localSparkConf)
   }
 
   def main(args: Array[String]): Unit = {
@@ -253,9 +249,7 @@ trait XStreaming {
     }
     beforeStarted(context)
     context.start()
-    //将需要的参数添加到sparkConf
-    addSparkConf()
-    HeartBeat(context).start()
+    HeartBeat(context, localConf(SPARK_PARAM_APP_CONF_SOURCE)).start()
     afterStarted(context)
     context.awaitTermination()
     HeartBeat(context).stop()
