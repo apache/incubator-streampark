@@ -254,23 +254,15 @@ trait XStreaming {
     }
 
     beforeStarted(context)
-
     //将多余的参数从sparkConf中移除
     cleanSparkConf()
-
     context.start()
-
     //将需要的参数添加到sparkConf
     addSparkConf()
-
     HeartBeat(context).start()
-
     afterStarted(context)
-
     context.awaitTermination()
-
     HeartBeat(context).stop()
-
     beforeStop(context)
   }
 
