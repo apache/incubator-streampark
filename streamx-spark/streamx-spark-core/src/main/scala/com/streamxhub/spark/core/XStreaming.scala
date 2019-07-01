@@ -228,23 +228,22 @@ trait XStreaming {
   }
 
   def cleanSparkConf(): Unit = {
-    localSparkConf += SPARK_PARAM_DEPLOY_CONF -> sparkConf.get(SPARK_PARAM_DEPLOY_CONF)
-    localSparkConf += SPARK_PARAM_DEPLOY_STARTUP -> sparkConf.get(SPARK_PARAM_DEPLOY_STARTUP)
-    localSparkConf += SPARK_PARAM_APP_CONF_SOURCE -> sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
-    sparkConf.remove(SPARK_PARAM_DEPLOY_CONF)
-    sparkConf.remove(SPARK_PARAM_DEPLOY_STARTUP)
-    sparkConf.remove(SPARK_PARAM_APP_CONF_SOURCE)
+    val cleanConf = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEPLOY_STARTUP, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE)
+    cleanConf.filter(x => sparkConf.get(x, null) != null).foreach(k => {
+      localSparkConf += k -> sparkConf.get(k)
+      sparkConf.remove(k)
+    })
   }
 
   def addSparkConf(): Unit = {
-    sparkConf.set(SPARK_PARAM_DEPLOY_CONF, localSparkConf(SPARK_PARAM_DEPLOY_CONF))
-    sparkConf.set(SPARK_PARAM_DEPLOY_STARTUP, localSparkConf(SPARK_PARAM_DEPLOY_STARTUP))
-    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localSparkConf(SPARK_PARAM_APP_CONF_SOURCE))
+    sparkConf.setAll(localSparkConf)
   }
 
   def main(args: Array[String]): Unit = {
     initialize(args)
     configure(sparkConf)
+    //将多余的参数从sparkConf中移除
+    cleanSparkConf()
     val context = checkpointPath match {
       case "" => creatingContext()
       case ck =>
@@ -252,10 +251,7 @@ trait XStreaming {
         ssc.checkpoint(ck)
         ssc
     }
-
     beforeStarted(context)
-    //将多余的参数从sparkConf中移除
-    cleanSparkConf()
     context.start()
     //将需要的参数添加到sparkConf
     addSparkConf()
