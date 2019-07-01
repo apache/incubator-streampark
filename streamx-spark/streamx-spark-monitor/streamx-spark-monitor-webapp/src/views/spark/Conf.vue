@@ -177,6 +177,7 @@
                 this.$post('spark/conf/detail/' + myId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
+                    this.$refs.confDetail.title="线上配置详情"
                     this.$refs.confDetail.setDetail(data.data)
                 })
             },
@@ -185,6 +186,7 @@
                 this.$post('spark/conf/record/' + recordId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
+                    this.$refs.confDetail.title="历史配置详情"
                     this.$refs.confDetail.setDetail(data.data)
                 })
             },
