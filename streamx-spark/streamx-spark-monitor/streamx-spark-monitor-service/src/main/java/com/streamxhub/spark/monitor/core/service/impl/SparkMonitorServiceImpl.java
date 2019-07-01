@@ -187,7 +187,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     }
 
     /**
-     * 5 秒之后如果状态还是一直启动中,则认为启动失败..
+     * 5 秒之后如果状态还是一直停止中,则认为停止失败..
      *
      * @param myId
      */
