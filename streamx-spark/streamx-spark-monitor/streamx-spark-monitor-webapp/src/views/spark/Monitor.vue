@@ -48,7 +48,7 @@
                 </template>
                 <template slot="operation" slot-scope="text,record">
 
-                    <a-popconfirm v-if="record.status === 1||record.status === 3" v-hasPermission="'spark:start'" title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
+                    <a-popconfirm v-if="record.status === -1||record.status === 1||record.status === 3" v-hasPermission="'spark:start'" title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: green" />
                         <!--停止,启动失败-->
                         <a>

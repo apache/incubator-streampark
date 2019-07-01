@@ -41,15 +41,12 @@ public class SparkMonitor {
         this.setStatus(status.getValue());
     }
 
-    public SparkMonitor(String id, String appId, String appName, String confVersion, SparkMonitor.Status status, String startUp) {
-        this.myId = id;
+    public SparkMonitor(String appId, String appName, String confVersion,String startUp) {
         this.appId = appId;
         this.appName = appName;
         this.confVersion = confVersion;
-        this.status = status.value;
         this.startUp = startUp;
     }
-
 
     public enum Status implements Serializable {
         /**

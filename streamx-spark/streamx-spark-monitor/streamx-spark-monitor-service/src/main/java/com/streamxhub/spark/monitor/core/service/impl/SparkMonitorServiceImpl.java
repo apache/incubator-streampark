@@ -52,31 +52,13 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     @Autowired
     private SparkConfRecordService recordService;
 
-    @Override
-    public void publish(String id, Map<String, String> confMap) {
-        doAction(id, SparkMonitor.Status.RUNNING, confMap);
-    }
-
-    @Override
-    public void shutdown(String id, Map<String, String> confMap) {
-        doAction(id, SparkMonitor.Status.LOST, confMap);
-    }
-
     private ScheduledExecutorService checkExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("StreamX-check-schedule-%").daemon(true).build());
 
-    private void doAction(String id, SparkMonitor.Status status, Map<String, String> confMap) {
-        String appName = confMap.get(SPARK_PARAM_APP_NAME());
-        String confVersion = confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION());
-        String appId = confMap.get(SPARK_PARAM_APP_ID());
-        String proxyUri = confMap.get(SPARK_PARAM_APP_PROXY_URI_BASES());
-        String startUp = confMap.get(SPARK_PARAM_DEPLOY_STARTUP());
-
-        SparkMonitor monitor = new SparkMonitor(id, appId, appName, confVersion, status, startUp);
-
-        if (!CommonUtils.isBlank(proxyUri)) {
-            monitor.setTrackUrl(proxyUri.split(",")[0]);
-        }
-
+    @Override
+    public void publish(String id, Map<String, String> confMap) {
+        SparkMonitor monitor = getSparkMonitor(confMap);
+        monitor.setMyId(id);
+        monitor.setStatusValue(SparkMonitor.Status.RUNNING);
         SparkMonitor exist = baseMapper.selectById(id);
         if (exist == null) {
             monitor.setCreateTime(new Date());
@@ -86,6 +68,49 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             baseMapper.updateById(monitor);
         }
     }
+
+    private SparkMonitor getSparkMonitor(Map<String, String> confMap) {
+        String appName = confMap.get(SPARK_PARAM_APP_NAME());
+        String confVersion = confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION());
+        String appId = confMap.get(SPARK_PARAM_APP_ID());
+        String proxyUri = confMap.get(SPARK_PARAM_APP_PROXY_URI_BASES());
+        String startUp = confMap.get(SPARK_PARAM_DEPLOY_STARTUP());
+
+        SparkMonitor monitor = new SparkMonitor(appId, appName, confVersion, startUp);
+        if (!CommonUtils.isBlank(proxyUri)) {
+            monitor.setTrackUrl(proxyUri.split(",")[0]);
+        }
+        return monitor;
+    }
+
+    /**
+     * 该监控不存在,则算"失联"
+     * 如存在:
+     *   上次的状态如果为停止中,则本次记作已停止
+     *   反之,都算意外终止,"失联"
+     * @param id
+     * @param confMap
+     */
+    @Override
+    public void shutdown(String id, Map<String, String> confMap) {
+        SparkMonitor monitor = getSparkMonitor(confMap);
+        monitor.setMyId(id);
+        SparkMonitor exist = baseMapper.selectById(id);
+        if (exist == null) {
+            monitor.setStatusValue(SparkMonitor.Status.LOST);
+            monitor.setCreateTime(new Date());
+            baseMapper.insert(monitor);
+        } else {
+            if (exist.getStatus().equals(SparkMonitor.Status.KILLING.getValue())) {
+                monitor.setStatusValue(SparkMonitor.Status.KILLED);
+            } else {
+                monitor.setStatusValue(SparkMonitor.Status.LOST);
+            }
+            monitor.setModifyTime(new Date());
+            baseMapper.updateById(monitor);
+        }
+    }
+
 
     @Override
     public IPage<SparkMonitor> getPager(SparkMonitor sparkMonitor, QueryRequest request) {
@@ -133,10 +158,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
                 //启动中..
                 monitor.setStatusValue(SparkMonitor.Status.STARTING);
                 this.updateById(monitor);
-
                 this.checkStart(myId);
-
-
             } else {
                 //启动失败
                 monitor.setStatusValue(SparkMonitor.Status.START_FAILURE);
