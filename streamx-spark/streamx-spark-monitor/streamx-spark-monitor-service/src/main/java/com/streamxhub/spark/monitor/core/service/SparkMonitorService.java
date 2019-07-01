@@ -25,4 +25,5 @@ public interface SparkMonitorService {
     void checkStart(String myId);
 
     void checkStop(String myId);
+
 }

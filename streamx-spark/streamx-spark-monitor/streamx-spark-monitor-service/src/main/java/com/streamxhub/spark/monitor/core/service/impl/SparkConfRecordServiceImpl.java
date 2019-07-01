@@ -19,7 +19,7 @@ public class SparkConfRecordServiceImpl extends ServiceImpl<SparkConfRecordMappe
 
     @Override
     public void delete(String myId) {
-        UpdateWrapper wrapper = new UpdateWrapper<SparkConfRecord>();
+        UpdateWrapper<SparkConfRecord> wrapper = new UpdateWrapper<>();
         wrapper.eq("MY_ID", myId);
         baseMapper.delete(wrapper);
     }

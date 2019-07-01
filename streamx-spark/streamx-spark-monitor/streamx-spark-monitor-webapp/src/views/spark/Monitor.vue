@@ -71,10 +71,10 @@
                             <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="删除"></a-icon>
                         </a>
                     </a-popconfirm>
-                    <a v-if="record.status == 0" v-hasPermission="'spark:track'" :href="record.trackUrl" target="_blank">
+                    <a v-if="record.status == 0" v-hasPermission="'spark:track'" :href="record.trackUrl" theme="twoTone" twoToneColor="#42b983"  target="_blank">
                         <a-icon type="fire" theme="twoTone"></a-icon>
                     </a>
-                    <a-icon v-hasPermission="'spark:setting'" type="setting" @click="setting(record)" title="配置文件"></a-icon>
+                    <a-icon v-hasPermission="'spark:setting'" type="setting" @click="setting(record)" theme="twoTone" twoToneColor="#4a9ff5" title="配置文件"></a-icon>
                 </template>
             </a-table>
         </div>
@@ -180,7 +180,7 @@
                     params.pageSize = this.pagination.defaultPageSize
                     params.pageNum = this.pagination.defaultCurrent
                 }
-                this.$post('spark/monitor', {
+                this.$post('spark/monitor/view', {
                     ...params
                 }).then((r) => {
                     let data = r.data
@@ -192,7 +192,7 @@
                 })
             },
             remove(params = {}) {
-                this.$delete('spark/delete/' + params.myId, {
+                this.$delete('spark/monitor/delete/' + params.myId, {
                 }).then((r) => {
                     this.fetch({
                         ...this.queryParams
@@ -200,7 +200,7 @@
                 })
             },
             stop(params = {}) {
-                this.$post('spark/stop/' + params.myId, {
+                this.$post('spark/monitor/stop/' + params.myId, {
                 }).then((r) => {
                     if(r.data.code === 0) {
                         this.$message.success('该任务正在停止中');
@@ -213,7 +213,7 @@
                 })
             },
             start(params = {}) {
-                this.$post('spark/start/' + params.myId, {
+                this.$post('spark/monitor/start/' + params.myId, {
                 }).then((r) => {
                     if(r.data.code === 0) {
                         this.$message.success('该任务正在启动中');
