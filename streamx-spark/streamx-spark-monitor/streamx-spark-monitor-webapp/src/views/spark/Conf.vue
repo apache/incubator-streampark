@@ -41,11 +41,11 @@
                 <a-tag color="cyan" slot="confVersion" slot-scope="text,record" >{{record.confVersion}}</a-tag>
 
                 <template slot="history" slot-scope="text,record">
-                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" >{{item}}</a-tag>
+                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" @click="detail(item.myId)">{{item}}</a-tag>
                 </template>
 
                 <template slot="operation" slot-scope="text,record">
-                    <a-icon type="eye" @click="detail(record)" theme="twoTone" twoToneColor="#42b983" title="查询配置"></a-icon>
+                    <a-icon type="eye" @click="detail(record.myId)" theme="twoTone" twoToneColor="#42b983" title="查询配置"></a-icon>
                     <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(record)" title="配置文件"></a-icon>
                 </template >
 
@@ -173,8 +173,9 @@
                     this.pagination = pagination
                 })
             },
-            detail(record) {
-                this.$post('spark/conf/detail/' + record.myId, {}).then((r) => {
+
+            detail(myId) {
+                this.$post('spark/conf/detail/' + myId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
                     this.$refs.confDetail.setConf(data.data.conf)
