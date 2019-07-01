@@ -1,5 +1,5 @@
 <template>
-    <a-drawer title="配置详细"
+    <a-drawer :title="title"
               :maskClosable="false"
               width="calc(100% - 35%)"
               placement="right"
@@ -31,6 +31,7 @@
         },
         data () {
             return {
+                title:'配置详情',
                 codeMirror:null,
                 detail:{},
                 loading:false
