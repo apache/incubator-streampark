@@ -1,6 +1,8 @@
 spark:
+  main:
+    class: com.streamx.spark.test.HelloStreamXApp
+    params:
   app:
-    main: com.streamx.spark.test.HelloStreamXApp
     name: HelloStreamXApp
     conf:
       local:
