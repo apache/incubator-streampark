@@ -260,7 +260,7 @@ fi
 
 PROPER=${STREAMX_CONF}/application.yml
 [[ ! -f "${PROPER}" ]] && { echo "Usage: base application.yml not found ";exit; }
-MAIN=$(grep 'app.main' ${PROPER} | grep -v '^#' | awk -F':' '{print $2}')
+MAIN=com.streamxhub.spark.monitor.BootStrap #$(grep 'app.main' ${PROPER} | grep -v '^#' | awk -F':' '{print $2}')
 
 JARS=`ls -1 "$STREAMX_BASE"/lib`
 for JAR in ${JARS}; do
