@@ -10,6 +10,7 @@ import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.Base64Utils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,19 +31,30 @@ public class SparkController extends BaseController {
     @Autowired
     private SparkConfService confService;
 
-    @PostMapping("monitor")
+    @PostMapping("monitor/view")
     @RequiresPermissions("spark:monitor")
     public Map<String, Object> monitor(QueryRequest request, SparkMonitor sparkMonitor) {
         return getDataTable(this.monitorService.getPager(sparkMonitor, request));
     }
 
-    @PostMapping("conf")
+    @PostMapping("conf/view")
     @RequiresPermissions("spark:conf")
     public Map<String, Object> conf(QueryRequest request, SparkConf sparkConf) {
         return getDataTable(this.confService.getPager(sparkConf, request));
     }
 
-    @PostMapping("start/{myId}")
+    @PostMapping("conf/detail/{myId}")
+    @RequiresPermissions("spark:conf")
+    public RestResponse detail(@PathVariable("myId") String myId) {
+        SparkConf sparkConf = this.confService.getById(myId);
+        String conf = new String(Base64Utils.decodeFromString(sparkConf.getConf()));
+        sparkConf.setConf(conf);
+        RestResponse response = new RestResponse();
+        response.put("data",sparkConf);
+        return response;
+    }
+
+    @PostMapping("monitor/start/{myId}")
     @RequiresPermissions("spark:start")
     public RestResponse start(@PathVariable("myId") String myId) {
         int code = this.monitorService.start(myId);
@@ -51,7 +63,7 @@ public class SparkController extends BaseController {
         return response;
     }
 
-    @PostMapping("stop/{myId}")
+    @PostMapping("monitor/stop/{myId}")
     @RequiresPermissions("spark:stop")
     public RestResponse stop(@PathVariable("myId") String myId) {
         int code = this.monitorService.stop(myId);
@@ -60,7 +72,7 @@ public class SparkController extends BaseController {
         return response;
     }
 
-    @DeleteMapping("delete/{myId}")
+    @DeleteMapping("monitor/delete/{myId}")
     @RequiresPermissions("spark:delete")
     public void delete(@PathVariable("myId") String myId) {
         this.monitorService.delete(myId);

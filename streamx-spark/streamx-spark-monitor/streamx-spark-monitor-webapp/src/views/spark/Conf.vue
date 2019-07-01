@@ -37,18 +37,37 @@
                      :loading="loading"
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
-                <template slot="operation" slot-scope="text,record">
-                    <a-icon v-hasPermission="'monitor:setting'" type="tool" @click="setting(record)" title="配置文件"></a-icon>
+
+                <a-tag color="cyan" slot="confVersion" slot-scope="text,record" >{{record.confVersion}}</a-tag>
+
+                <template slot="history" slot-scope="text,record">
+                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" >{{item}}</a-tag>
                 </template>
+
+                <template slot="operation" slot-scope="text,record">
+                    <a-icon type="eye" @click="detail(record)" theme="twoTone" twoToneColor="#42b983" title="查询配置"></a-icon>
+                    <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(record)" title="配置文件"></a-icon>
+                </template >
+
             </a-table>
         </div>
+
+        <!-- detail -->
+        <conf-detail
+                ref="confDetail"
+                @close="handleConfDetailClose"
+                :visiable="confDetail.visiable">
+        </conf-detail>
+
     </a-card>
 </template>
 
 <script>
     import {mapState} from 'vuex'
+    import ConfDetail from './ConfDetail'
     export default {
-        name: 'Online',
+        name: 'Conf',
+        components: { ConfDetail },
         data () {
             return {
                 advanced: false,
@@ -63,7 +82,10 @@
                     showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
                 },
                 queryParams: {},
-                loading: false
+                loading: false,
+                confDetail: {
+                    visiable: false
+                },
             }
         },
         computed: {
@@ -73,15 +95,17 @@
                     dataIndex: 'appName'
                 }, {
                     title: '配置版本',
-                    dataIndex: 'confVersion'
+                    dataIndex: 'confVersion',
+                    scopedSlots: {customRender: 'confVersion'},
                 },
                 {
                     title: '创建时间',
                     dataIndex: 'createTime'
                 },
                 {
-                    title: '修改时间',
-                    dataIndex: 'modifyTime'
+                    title: '历史版本',
+                    dataIndex: 'history',
+                    scopedSlots: {customRender: 'history'},
                 },
                 {
                     title: '操作',
@@ -137,17 +161,30 @@
                     params.pageSize = this.pagination.defaultPageSize
                     params.pageNum = this.pagination.defaultCurrent
                 }
-                this.$post('spark/conf', {
+                this.$post('spark/conf/view', {
                     ...params
                 }).then((r) => {
                     let data = r.data
+                    data.rows[0].history = [1,2,3,4]
                     const pagination = { ...this.pagination }
                     pagination.total = data.total
                     this.loading = false
                     this.dataSource = data.rows
                     this.pagination = pagination
                 })
-            }
+            },
+            detail(record) {
+                this.$post('spark/conf/detail/' + record.myId, {}).then((r) => {
+                    let data = r.data
+                    this.confDetail.visiable = true
+                    this.$refs.confDetail.setConf(data.data.conf)
+                })
+            },
+
+            handleConfDetailClose() {
+                this.confDetail.visiable = false
+            },
+
         }
     }
 </script>
