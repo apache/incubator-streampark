@@ -62,7 +62,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
         doAction(id, SparkMonitor.Status.LOST, confMap);
     }
 
-    private ScheduledExecutorService startExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("StreamX-start-schedule-%").daemon(true).build());
+    private ScheduledExecutorService checkExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("StreamX-check-schedule-%").daemon(true).build());
 
     private void doAction(String id, SparkMonitor.Status status, Map<String, String> confMap) {
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
@@ -157,6 +157,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             if (exitCode == 0) {
                 //停止中..
                 monitor.setStatusValue(SparkMonitor.Status.KILLING);
+                this.checkStop(myId);
             } else {
                 //停止失败..
                 monitor.setStatusValue(SparkMonitor.Status.KILL_FAILURE);
@@ -176,13 +177,29 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
      */
     @Override
     public void checkStart(String myId) {
-        startExecutorService.schedule(() -> {
+        checkExecutorService.schedule(() -> {
             SparkMonitor monitor = getById(myId);
             if (monitor.getStatus().equals(SparkMonitor.Status.STARTING.getValue())) {
                 monitor.setStatusValue(SparkMonitor.Status.START_FAILURE);
                 this.updateById(monitor);
             }
         }, 30, TimeUnit.SECONDS);
+    }
+
+    /**
+     * 5 秒之后如果状态还是一直启动中,则认为启动失败..
+     *
+     * @param myId
+     */
+    @Override
+    public void checkStop(String myId) {
+        checkExecutorService.schedule(() -> {
+            SparkMonitor monitor = getById(myId);
+            if (monitor.getStatus().equals(SparkMonitor.Status.KILLING.getValue())) {
+                monitor.setStatusValue(SparkMonitor.Status.KILL_FAILURE);
+                this.updateById(monitor);
+            }
+        }, 5, TimeUnit.SECONDS);
     }
 
 }
