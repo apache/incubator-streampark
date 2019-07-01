@@ -39,8 +39,8 @@ spring:
     time-zone: GMT+8
 
   redis:
-    host: 127.0.0.1
-    port: 6379
+    host: 172.17.113.187
+    port: 30000
     password:
     jedis:
       pool:
