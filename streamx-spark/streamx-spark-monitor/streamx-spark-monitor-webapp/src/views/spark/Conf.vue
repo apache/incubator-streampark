@@ -41,7 +41,7 @@
                 <a-tag color="cyan" slot="confVersion" slot-scope="text,record" >{{record.confVersion}}</a-tag>
 
                 <template slot="history" slot-scope="text,record">
-                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" @click="detail(item.myId)">{{item}}</a-tag>
+                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in record.history" :key="index" type="primary" size="small" shape="circle" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
                 </template>
 
                 <template slot="operation" slot-scope="text,record">
@@ -165,7 +165,6 @@
                     ...params
                 }).then((r) => {
                     let data = r.data
-                    data.rows[0].history = [1,2,3,4]
                     const pagination = { ...this.pagination }
                     pagination.total = data.total
                     this.loading = false
@@ -176,6 +175,14 @@
 
             detail(myId) {
                 this.$post('spark/conf/detail/' + myId, {}).then((r) => {
+                    let data = r.data
+                    this.confDetail.visiable = true
+                    this.$refs.confDetail.setDetail(data.data)
+                })
+            },
+
+            detailHistory(recordId) {
+                this.$post('spark/conf/history/' + recordId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
                     this.$refs.confDetail.setDetail(data.data)

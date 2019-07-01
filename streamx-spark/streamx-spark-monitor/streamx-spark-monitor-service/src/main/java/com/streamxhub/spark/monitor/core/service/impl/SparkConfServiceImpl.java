@@ -19,6 +19,8 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -56,12 +58,19 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     @Override
     public IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request) {
         Page<SparkConf> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "CREATE_TIME", Constant.ORDER_ASC, false);
         QueryWrapper<SparkConf> wrapper = new QueryWrapper<>();
         if (sparkConf.getAppName() != null) {
             wrapper.like("APP_NAME", sparkConf.getAppName().trim());
         }
-        return this.baseMapper.selectPage(page, wrapper);
+        wrapper.groupBy("MY_ID").orderByDesc("CONF_VERSION").orderByAsc("CREATE_TIME");
+        IPage<SparkConf> pager = this.baseMapper.selectPage(page, wrapper);
+        List<SparkConf> sparkConfList = pager.getRecords();
+
+        for (SparkConf conf : sparkConfList) {
+            List<SparkConfRecord> records = this.confRecordService.getRecords(conf.getMyId());
+            conf.setHistory(records);
+        }
+        return pager;
     }
 
     @Override

@@ -4,7 +4,9 @@ import com.streamxhub.spark.monitor.common.controller.BaseController;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
 import com.streamxhub.spark.monitor.common.domain.RestResponse;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
+import com.streamxhub.spark.monitor.core.domain.SparkConfRecord;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
+import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
 import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +33,9 @@ public class SparkController extends BaseController {
     @Autowired
     private SparkConfService confService;
 
+    @Autowired
+    private SparkConfRecordService recordService;
+
     @PostMapping("monitor/view")
     @RequiresPermissions("spark:monitor")
     public Map<String, Object> monitor(QueryRequest request, SparkMonitor sparkMonitor) {
@@ -51,6 +56,17 @@ public class SparkController extends BaseController {
         sparkConf.setConf(conf);
         RestResponse response = new RestResponse();
         response.put("data",sparkConf);
+        return response;
+    }
+
+    @PostMapping("conf/record/{recordId}")
+    @RequiresPermissions("spark:conf")
+    public RestResponse record(@PathVariable("recordId") String recordId) {
+        SparkConfRecord record = this.recordService.getById(recordId);
+        String conf = new String(Base64Utils.decodeFromString(record.getConf()));
+        record.setConf(conf);
+        RestResponse response = new RestResponse();
+        response.put("data",record);
         return response;
     }
 

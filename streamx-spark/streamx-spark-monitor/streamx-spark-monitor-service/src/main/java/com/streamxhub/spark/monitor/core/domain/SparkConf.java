@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @TableName("t_spark_conf")
@@ -24,6 +25,8 @@ public class SparkConf {
 
     @NotBlank(message = "{required}")
     private String conf;
+
+    private transient List<SparkConfRecord> history;
 
     private Date createTime;
     private Date modifyTime;
