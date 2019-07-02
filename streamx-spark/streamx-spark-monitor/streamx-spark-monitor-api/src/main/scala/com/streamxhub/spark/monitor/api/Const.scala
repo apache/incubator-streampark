@@ -61,10 +61,4 @@ object Const {
 
   val SPARK_PARAM_APP_PROXY_URI_BASES = "spark.org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter.param.PROXY_URI_BASES"
 
-  val ISO_8859_1: Charset = Charset.forName("ISO-8859-1")
-  val US_ASCII: Charset = Charset.forName("US-ASCII")
-  val UTF_16: Charset = Charset.forName("UTF-16")
-  val UTF_16BE: Charset = Charset.forName("UTF-16BE")
-  val UTF_16LE: Charset = Charset.forName("UTF-16LE")
-  val UTF_8: Charset = Charset.forName("UTF-8")
 }
