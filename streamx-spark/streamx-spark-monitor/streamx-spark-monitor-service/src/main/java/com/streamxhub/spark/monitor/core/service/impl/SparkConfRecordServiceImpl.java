@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -33,5 +34,27 @@ public class SparkConfRecordServiceImpl extends ServiceImpl<SparkConfRecordMappe
         QueryWrapper<SparkConfRecord> historyWrapper = new QueryWrapper<>();
         historyWrapper.eq("MY_ID",myId).orderByDesc("CONF_VERSION");
        return this.baseMapper.selectList(historyWrapper);
+    }
+
+    @Override
+    public void addRecord(SparkConf sparkConf) {
+        SparkConfRecord record = new SparkConfRecord();
+        record.setMyId(sparkConf.getMyId());
+        record.setConf(sparkConf.getConf());
+        record.setAppName(sparkConf.getAppName());
+        record.setConfVersion(sparkConf.getConfVersion());
+        record.setCreateTime(new Date());
+        save(record);
+
+        QueryWrapper<SparkConfRecord> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("MY_ID",sparkConf.getMyId());
+        queryWrapper.ne("RECORD_ID",record.getRecordId());
+        queryWrapper.eq("PARENT_ID",0);
+
+        SparkConfRecord existRecord =  baseMapper.selectOne(queryWrapper);
+        if (existRecord!=null) {
+            existRecord.setParentId(record.getRecordId());
+            baseMapper.updateById(existRecord);
+        }
     }
 }
