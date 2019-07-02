@@ -18,10 +18,12 @@
     "enquire.js": "^2.1.6",
     "vue": "^2.6.10",
     "vue-apexcharts": "^1.3.5",
+    "vue-code-diff": "0.0.4",
     "vue-loader": "^13.3.0",
     "vue-router": "^3.0.1",
     "vuedraggable": "^2.16.0",
-    "vuex": "^3.0.1"
+    "vuex": "^3.0.1",
+    "yarn": "^1.16.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

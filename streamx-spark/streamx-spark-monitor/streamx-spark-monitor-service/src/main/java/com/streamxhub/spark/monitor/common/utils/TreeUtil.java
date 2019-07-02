@@ -119,6 +119,14 @@ public class TreeUtil {
         root.setChildren(topRoutes);
         list.add(root);
 
+        router = new VueRouter<>();
+        router.setPath("/spark/confEdit");
+        router.setName("修改配置");
+        router.setComponent("spark/ConfEdit");
+        router.setIcon("none");
+        router.setMeta(new RouterMeta(true, false));
+        topRoutes.add(router);
+
         root = new VueRouter<>();
         root.setName("404");
         root.setComponent("error/404");

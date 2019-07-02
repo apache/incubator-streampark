@@ -4,9 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.spark.monitor.common.domain.Constant;
+import static com.streamxhub.spark.monitor.api.Const.*;
+import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
-import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkConfMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkConfRecord;
@@ -14,13 +14,14 @@ import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Base64Utils;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 
 /**
@@ -30,6 +31,9 @@ import java.util.Map;
 @Service("sparkConfService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf> implements SparkConfService {
+
+    @Value("${spark.app.monitor.zookeeper}")
+    private String zookeeperConnect;
 
     @Autowired
     private SparkConfRecordService confRecordService;
@@ -76,5 +80,29 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     @Override
     public Integer delete(String myId) {
         return this.baseMapper.deleteById(myId);
+    }
+
+    @Override
+    public void update(String myId,String conf) {
+        SparkConf existConf = getById(myId);
+        //保存修改之前的记录
+        SparkConfRecord record = new SparkConfRecord();
+        record.setConf(existConf.getConf());
+        record.setAppName(existConf.getAppName());
+        record.setConfVersion(existConf.getConfVersion());
+        record.setCreateTime(new Date());
+        record.setMyId(myId);
+        confRecordService.save(record);
+        //保存配置
+        existConf.setModifyTime(new Date());
+        //版本号加1
+        existConf.setConfVersion(existConf.getConfVersion() + 1);
+        existConf.setConf(Base64Utils.encodeToString(conf.getBytes()));
+        updateById(existConf);
+
+        String path = SPARK_CONF_PATH_PREFIX().concat("/").concat(myId);
+        //持久保存...
+        ZooKeeperUtil.update(path,conf,zookeeperConnect,true);
+
     }
 }

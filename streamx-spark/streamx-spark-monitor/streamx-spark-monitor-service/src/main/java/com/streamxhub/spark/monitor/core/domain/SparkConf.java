@@ -21,7 +21,7 @@ public class SparkConf {
     private String appName;
 
     @NotBlank(message = "{required}")
-    private String confVersion;
+    private Integer confVersion;
 
     @NotBlank(message = "{required}")
     private String conf;
@@ -31,7 +31,7 @@ public class SparkConf {
     private Date createTime;
     private Date modifyTime;
 
-    public SparkConf(String id, String appName, String confVersion, String conf) {
+    public SparkConf(String id, String appName, Integer confVersion, String conf) {
         this.myId = id;
         this.appName = appName;
         this.confVersion = confVersion;

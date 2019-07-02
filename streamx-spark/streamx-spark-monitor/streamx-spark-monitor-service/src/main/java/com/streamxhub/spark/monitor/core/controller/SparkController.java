@@ -70,6 +70,12 @@ public class SparkController extends BaseController {
         return response;
     }
 
+    @PostMapping("conf/update")
+    @RequiresPermissions("spark:update")
+    public void update(String myId,String conf) {
+        this.confService.update(myId,conf);
+    }
+
     @PostMapping("monitor/start/{myId}")
     @RequiresPermissions("spark:start")
     public RestResponse start(@PathVariable("myId") String myId) {

@@ -12,7 +12,7 @@ export default {
     isMobile: false,
     theme: db.get('THEME', 'light'),
     layout: db.get('LAYOUT', 'side'),
-    systemName: 'StreamX Spark监控',
+    systemName: 'Apollo',
     copyright: `${new Date().getFullYear()} <a href="https://github.com/streamxhub/streamx" target="_blank">StreamX</a>`,
     multipage: getBooleanValue(db.get('MULTIPAGE'), true),
     fixSiderbar: getBooleanValue(db.get('FIX_SIDERBAR'), true),
