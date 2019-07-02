@@ -14,7 +14,7 @@
                 <a-button style="margin-right: .8rem" @click="onSubmit">提交</a-button>
             </div>
         </div>
-        <a-spin tip="生成配置对比中..." :spinning="true" style="width: 100%;height: 400px;z-index:1000;position: absolute"></a-spin>
+        <a-spin v-if="false" tip="生成配置对比中..." :spinning="true" style="width: 100%;height: 400px;z-index:1000;position: absolute"></a-spin>
     </div>
 </template>
 
