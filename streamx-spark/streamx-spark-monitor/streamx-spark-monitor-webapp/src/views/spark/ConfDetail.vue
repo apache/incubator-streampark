@@ -1,13 +1,46 @@
 <template>
-    <a-drawer :title="title"
+    <a-drawer title="配置详细"
               :maskClosable="false"
-              width="calc(100% - 35%)"
+              width="calc(100% - 20%)"
               placement="right"
               :closable="false"
               @close="onClose"
               :visible="visiable"
               style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+
+        <a-col style="font-size: 1rem">
+            <p>
+                <a-tag color="blue">
+                    <a-icon type="fire"></a-icon> appName
+                </a-tag>
+                &nbsp;&nbsp;{{detail.appName}}
+            </p>
+            <p>
+                <a-tag color="blue">
+                    <a-icon type="setting"></a-icon> 配置版本
+                </a-tag>
+                &nbsp;&nbsp;{{detail.confVersion}}
+            </p>
+            <p>
+                <a-tag color="blue">
+                    <a-icon type="schedule"></a-icon> 记录时间
+                </a-tag>
+                &nbsp;&nbsp;{{detail.createTime}}
+            </p>
+            <p>
+                <a-tag color="blue">
+                    <a-icon type="question-circle"></a-icon> 版本状态
+                </a-tag>
+                &nbsp;&nbsp;
+                <a-tag v-if="detail.status === 1" color="#87d068">线上版本</a-tag>
+                <a-tag v-else color="#666">历史版本</a-tag>
+                <a-button type="primary" shape="circle" icon="edit" size="small" @click="edit()"></a-button>
+                <a-button type="primary" shape="circle" icon="download" size="small"  @click="download()"></a-button>
+            </p>
+        </a-col>
+
         <a-textarea class="conf" ref="conf" v-model="detail.conf"></a-textarea>
+
         <div class="drawer-bootom-button" style="z-index: 999">
             <a-button style="margin-right: .8rem" @click="onClose">关闭</a-button>
         </div>
@@ -15,8 +48,7 @@
 </template>
 
 <script>
-
-    import {mapState} from 'vuex'
+    import {mapState,mapMutations} from 'vuex'
     import CodeMirror from 'codemirror'
     import 'codemirror/theme/darcula.css'
     import 'codemirror/lib/codemirror.css'
@@ -31,7 +63,6 @@
         },
         data () {
             return {
-                title:'配置详情',
                 codeMirror:null,
                 detail:{},
                 loading:false
@@ -44,9 +75,12 @@
         },
 
         methods: {
+            ...mapMutations({setConfType: 'spark/setConfType'}),
+            ...mapMutations({setRecordId: 'spark/setRecordId'}),
+            ...mapMutations({setMyId: 'spark/setMyId'}),
             initCodeMirror () {
                 this.codeMirror = CodeMirror.fromTextArea(document.querySelector(".conf"), {
-                    tabSize: 4,
+                    tabSize: 2,
                     styleActiveLine: true,
                     lineNumbers: true,
                     line: true,
@@ -58,7 +92,8 @@
                     lint: true,
                     autoMatchParens: true,
                     mode: 'shell',
-                    theme: 'darcula',	// 设置主题
+                    readOnly:true,
+                    theme: 'default',	// 设置主题
                     lineWrapping: true, // 代码折叠
                     gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
                 })
@@ -75,6 +110,15 @@
                 this.loading = false
                 this.$emit('close')
             },
+            edit() {
+                this.setConfType(this.detail.status)
+                this.setMyId(this.detail.myId)
+                this.setRecordId(null)
+                if(this.detail.status === 0) {
+                    this.setRecordId(this.detail.recordId)
+                }
+                this.$router.push({path: '/spark/confEdit'})
+            }
         },
     }
 </script>

@@ -15,6 +15,8 @@ public class SparkConfRecord {
     @TableId(value = "RECORD_ID", type = IdType.AUTO)
     private Integer recordId;
 
+    private Integer parentId;
+
     @NotBlank(message = "{required}")
     private String myId;
 
@@ -22,7 +24,7 @@ public class SparkConfRecord {
     private String appName;
 
     @NotBlank(message = "{required}")
-    private String confVersion;
+    private Integer confVersion;
 
     @NotBlank(message = "{required}")
     private String conf;
@@ -32,7 +34,7 @@ public class SparkConfRecord {
     public SparkConfRecord() {
     }
 
-    public SparkConfRecord(String confId, String appName, String confVersion, String conf) {
+    public SparkConfRecord(String confId, String appName, Integer confVersion, String conf) {
         this.myId = confId;
         this.appName = appName;
         this.confVersion = confVersion;

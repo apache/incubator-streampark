@@ -53,11 +53,7 @@
         </div>
 
         <!-- detail -->
-        <conf-detail
-                ref="confDetail"
-                @close="handleConfDetailClose"
-                :visiable="confDetail.visiable">
-        </conf-detail>
+        <conf-detail ref="confDetail" @close="handleConfDetailClose" :visiable="confDetail.visiable"></conf-detail>
 
     </a-card>
 </template>
@@ -177,7 +173,7 @@
                 this.$post('spark/conf/detail/' + myId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
-                    this.$refs.confDetail.title="线上配置详情"
+                    data.data.status = 1
                     this.$refs.confDetail.setDetail(data.data)
                 })
             },
@@ -186,7 +182,7 @@
                 this.$post('spark/conf/record/' + recordId, {}).then((r) => {
                     let data = r.data
                     this.confDetail.visiable = true
-                    this.$refs.confDetail.title="历史配置详情"
+                    data.data.status = 0
                     this.$refs.confDetail.setDetail(data.data)
                 })
             },

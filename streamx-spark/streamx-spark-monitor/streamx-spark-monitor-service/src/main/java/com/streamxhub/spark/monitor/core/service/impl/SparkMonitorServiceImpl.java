@@ -10,6 +10,7 @@ import com.streamxhub.spark.monitor.common.domain.QueryRequest;
 import com.streamxhub.spark.monitor.common.utils.CommandUtils;
 import com.streamxhub.spark.monitor.common.utils.SortUtil;
 import com.streamxhub.spark.monitor.core.dao.SparkMonitorMapper;
+import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkMonitor;
 import com.streamxhub.spark.monitor.core.service.SparkConfRecordService;
 import com.streamxhub.spark.monitor.core.service.SparkConfService;
@@ -223,5 +224,6 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             }
         }, 5, TimeUnit.SECONDS);
     }
+
 
 }
