@@ -36,7 +36,7 @@ public class InitializeRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) {
         String home = System.getProperty("streamx.home", null);
         if (home != null) {
-            String executor = home.concat("/executor.so");
+            String executor = home.concat("/bin/executor.so");
             if (!IOUtils.fileExists(executor)) {
                 log.error("[StreamX] can't found gcc. please compile executor.c first,please compile executor.c by yourself.");
                 log.error(getLogo(false));
@@ -70,11 +70,11 @@ public class InitializeRunner implements ApplicationRunner {
     private String getLogo(boolean success) {
         StringBuilder builder = new StringBuilder();
         builder.append("\n");
-        builder.append("     ,---.   ,--.                                  ,--.   ,--.   ");
-        builder.append("    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /   ");
-        builder.append("    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\    ");
-        builder.append("    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\ ");
-        builder.append("    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   \n");
+        builder.append("     ,---.   ,--.                                  ,--.   ,--.  \n ");
+        builder.append("    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /  \n");
+        builder.append("    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\   \n");
+        builder.append("    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\\n");
+        builder.append("    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   \n\n");
         builder.append(String.format("    StreamX 启动%s，时间：" + LocalDateTime.now(), success ? "成功" : "失败"));
         return builder.toString();
     }

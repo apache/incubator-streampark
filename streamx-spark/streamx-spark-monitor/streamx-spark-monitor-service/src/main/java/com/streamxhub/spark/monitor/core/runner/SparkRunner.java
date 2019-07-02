@@ -35,13 +35,6 @@ public class SparkRunner implements ApplicationRunner {
 
     @PreDestroy
     public void destroy() {
-        String home = System.getProperty("streamx.home",null);
-        if (home!=null) {
-            String executor = home.concat("/executor.so");
-            if (!IOUtils.fileExists(executor)) {
-                throw new ExceptionInInitializerError("[StreamX] can't found gcc. please compile executor.c first,please compile executor.c by yourself.");
-            }
-        }
         ZooKeeperUtil.close(zookeeperConnect);
     }
 
