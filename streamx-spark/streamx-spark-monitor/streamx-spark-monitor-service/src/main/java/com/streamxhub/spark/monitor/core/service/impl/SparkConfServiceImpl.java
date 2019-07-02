@@ -41,11 +41,9 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     @Override
     public boolean config(SparkConf sparkConf) {
         SparkConf existConf = baseMapper.selectById(sparkConf.getMyId());
-        SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(), sparkConf.getAppName(), sparkConf.getConfVersion(), sparkConf.getConf());
         if (existConf == null) {
             sparkConf.setCreateTime(new Date());
             baseMapper.insert(sparkConf);
-            confRecordService.save(record);
             return true;
         } else {
             if (sparkConf.getConfVersion().compareTo(existConf.getConfVersion()) > 0) {
