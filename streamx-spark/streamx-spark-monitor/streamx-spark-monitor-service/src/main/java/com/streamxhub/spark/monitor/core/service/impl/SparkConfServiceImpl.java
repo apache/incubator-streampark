@@ -49,9 +49,9 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
             return true;
         } else {
             if (sparkConf.getConfVersion().compareTo(existConf.getConfVersion()) > 0) {
+                confRecordService.addRecord(sparkConf);
                 sparkConf.setModifyTime(new Date());
                 baseMapper.updateById(sparkConf);
-                confRecordService.save(record);
                 return true;
             } else {
                 return false;
@@ -86,13 +86,8 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     public void update(String myId,String conf) {
         SparkConf existConf = getById(myId);
         //保存修改之前的记录
-        SparkConfRecord record = new SparkConfRecord();
-        record.setConf(existConf.getConf());
-        record.setAppName(existConf.getAppName());
-        record.setConfVersion(existConf.getConfVersion());
-        record.setCreateTime(new Date());
-        record.setMyId(myId);
-        confRecordService.save(record);
+        confRecordService.addRecord(existConf);
+
         //保存配置
         existConf.setModifyTime(new Date());
         //版本号加1
