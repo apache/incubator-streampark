@@ -1,6 +1,7 @@
-package com.streamxhub.spark.monitor.system.runner;
+package com.streamxhub.spark.monitor.core.runner;
 
 import com.streamxhub.spark.monitor.common.exception.RedisConnectException;
+import com.streamxhub.spark.monitor.common.utils.IOUtils;
 import com.streamxhub.spark.monitor.system.domain.User;
 import com.streamxhub.spark.monitor.system.manager.UserManager;
 import com.streamxhub.spark.monitor.system.service.CacheService;
@@ -15,12 +16,10 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.List;
 
-/**
- * 缓存初始化
- */
+
 @Slf4j
 @Component
-public class CacheInitRunner implements ApplicationRunner {
+public class InitializeRunner implements ApplicationRunner {
 
     @Autowired
     private UserService userService;
@@ -35,10 +34,19 @@ public class CacheInitRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
+        String home = System.getProperty("streamx.home", null);
+        if (home != null) {
+            String executor = home.concat("/executor.so");
+            if (!IOUtils.fileExists(executor)) {
+                log.error("[StreamX] can't found gcc. please compile executor.c first,please compile executor.c by yourself.");
+                log.error(getLogo(false));
+                context.close();
+            }
+        }
+
         try {
             log.info("Redis连接中 ······");
             cacheService.testConnect();
-
             log.info("缓存初始化 ······");
             log.info("缓存用户数据 ······");
             List<User> list = this.userService.list();
@@ -50,16 +58,24 @@ public class CacheInitRunner implements ApplicationRunner {
                 log.error("Redis连接异常，请检查Redis连接配置并确保Redis服务已启动");
             }
             log.error("缓存初始化失败，{}", e.getMessage());
-            log.error("                                                                       ");
-            log.error("           ,---.   ,--.                                  ,--.   ,--.   ");
-            log.error("          '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /   ");
-            log.error("          `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\    ");
-            log.error("          .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\ ");
-            log.error("          `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   ");
-            log.error("                                                                       ");
-            log.error("  StreamX 启动完毕，时间：" + LocalDateTime.now());
-            log.error("");
+            log.error(getLogo(false));
             context.close();
         }
+
+        if (context.isActive()) {
+            log.info(getLogo(true));
+        }
+    }
+
+    private String getLogo(boolean success) {
+        StringBuilder builder = new StringBuilder();
+        builder.append("\n");
+        builder.append("     ,---.   ,--.                                  ,--.   ,--.   ");
+        builder.append("    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /   ");
+        builder.append("    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\    ");
+        builder.append("    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\ ");
+        builder.append("    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   \n");
+        builder.append(String.format("    StreamX 启动%s，时间：" + LocalDateTime.now(), success ? "成功" : "失败"));
+        return builder.toString();
     }
 }
