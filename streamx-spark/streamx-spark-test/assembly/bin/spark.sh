@@ -128,7 +128,6 @@ if ${os400}; then
   export QIBM_MULTI_THREADED=Y
 fi
 
-
 chooseApp() {
 read -p "Please select application index to shutdown:
 $1
@@ -155,14 +154,30 @@ doStart() {
        echo_r "Usage: properties file:$proper not exists!!! ";
        exit 1;
     fi
-    #spark app name
-    local app_name=$(grep 'spark.app.name' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
-    # spark main jar...
+
+    local isYml=$(echo "$app_proper"|grep "\.yml$"|wc -l)
+
+    if [[ isYml == 1 ]]; then
+        #source yaml.sh
+        source ${APP_BIN}/yaml.sh
+        #
+        yaml_get ${app_proper}
+         #spark app name
+        local app_name=$(echo ${spark_app_name})
+        #spark main class
+        local main=$(echo ${spark_main_class})
+        #spark main parameter..
+        local main_params=$(echo ${spark_main_params})
+    else
+        #spark app name
+        local app_name=$(grep 'spark.app.name' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
+        #spark main class
+        local main=$(grep 'spark.main.class' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
+        #spark main parameter..
+        local main_params=$(grep 'spark.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+    fi
+     # spark main jar...
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
-    #spark main class
-    local main=$(grep 'spark.main.class' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
-    #spark main parameter..
-    local main_params=$(grep 'spark.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
     #spark application id file
     local app_pid="$APP_TEMP/${app_name}.pid"
     #spark application lock file
