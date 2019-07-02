@@ -26,6 +26,7 @@ public class InitializeRunner implements ApplicationRunner {
 
     @Autowired
     private CacheService cacheService;
+
     @Autowired
     private UserManager userManager;
 
