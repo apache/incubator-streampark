@@ -53,7 +53,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     @Autowired
     private SparkConfRecordService recordService;
 
-    private ScheduledExecutorService checkExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().namingPattern("StreamX-check-schedule-%").daemon(true).build());
+    private ScheduledExecutorService checkExecutorService = new ScheduledThreadPoolExecutor(1, new BasicThreadFactory.Builder().daemon(true).build());
 
     @Override
     public void publish(String id, Map<String, String> confMap) {
