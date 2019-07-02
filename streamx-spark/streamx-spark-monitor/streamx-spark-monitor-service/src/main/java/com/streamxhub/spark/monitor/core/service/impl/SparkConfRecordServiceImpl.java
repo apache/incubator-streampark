@@ -38,11 +38,7 @@ public class SparkConfRecordServiceImpl extends ServiceImpl<SparkConfRecordMappe
 
     @Override
     public void addRecord(SparkConf sparkConf) {
-        SparkConfRecord record = new SparkConfRecord();
-        record.setMyId(sparkConf.getMyId());
-        record.setConf(sparkConf.getConf());
-        record.setAppName(sparkConf.getAppName());
-        record.setConfVersion(sparkConf.getConfVersion());
+        SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(),sparkConf.getAppName(),sparkConf.getConfVersion(),sparkConf.getConf());
         record.setCreateTime(new Date());
         save(record);
 
