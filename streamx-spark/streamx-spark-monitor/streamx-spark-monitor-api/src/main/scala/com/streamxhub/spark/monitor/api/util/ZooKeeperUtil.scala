@@ -22,13 +22,13 @@
 package com.streamxhub.spark.monitor.api.util
 
 import com.google.common.base.Objects
-import org.apache.commons.compress.utils.Charsets
+import com.streamxhub.spark.monitor.api.Const._
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 object ZooKeeperUtil {
@@ -92,7 +92,7 @@ object ZooKeeperUtil {
         case null =>
           val data = value match {
             case null | "" => Array.empty[Byte]
-            case _ => value.getBytes(Charsets.UTF_8)
+            case _ => value.getBytes(UTF_8)
           }
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
           val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data)
@@ -113,10 +113,10 @@ object ZooKeeperUtil {
       stat match {
         case null =>
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
-          val opResult = client.create.creatingParentsIfNeeded.withMode(mode).forPath(path, value.getBytes(Charsets.UTF_8))
+          val opResult = client.create.creatingParentsIfNeeded.withMode(mode).forPath(path, value.getBytes(UTF_8))
           Objects.equal(path, opResult)
         case _ =>
-          val opResult = client.setData().forPath(path, value.getBytes(Charsets.UTF_8))
+          val opResult = client.setData().forPath(path, value.getBytes(UTF_8))
           opResult != null
       }
     } catch {

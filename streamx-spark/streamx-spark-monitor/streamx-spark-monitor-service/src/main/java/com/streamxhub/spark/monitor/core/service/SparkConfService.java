@@ -30,5 +30,10 @@ public interface SparkConfService extends IService<SparkConf> {
      */
     Integer delete(String myId);
 
+    /**
+     *
+     * @param myId
+     * @param conf
+     */
     void update(String myId,String conf);
 }
