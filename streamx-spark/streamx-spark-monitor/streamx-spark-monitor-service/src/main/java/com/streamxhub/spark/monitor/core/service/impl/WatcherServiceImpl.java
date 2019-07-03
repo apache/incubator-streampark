@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.streamxhub.spark.monitor.api.Const.*;
@@ -39,7 +40,12 @@ public class WatcherServiceImpl implements WatcherService {
 
     @Override
     public void config(String id, String conf) {
-        Map<String, String> confMap = getConfigMap(conf);
+        Map<String, String> confMap;
+        if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
+            confMap = PropertiesUtil.getPropertiesFromText(conf);
+        } else {
+            confMap = PropertiesUtil.getPropertiesFromYamlText(conf);
+        }
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
         Integer confVersion = Integer.parseInt(confMap.get(SPARK_PARAM_APP_CONF_VERSION()));
         SparkConf sparkConf = new SparkConf(id, appName, confVersion, Base64.getEncoder().encodeToString(conf.getBytes(StandardCharsets.UTF_8)));
@@ -67,14 +73,6 @@ public class WatcherServiceImpl implements WatcherService {
         String monitorPath = SPARK_MONITOR_PATH_PREFIX() + "/" + myId;
         ZooKeeperUtil.delete(confPath, zookeeperConnect);
         ZooKeeperUtil.delete(monitorPath, zookeeperConnect);
-    }
-
-    private Map<String, String> getConfigMap(String conf) {
-        if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
-            return PropertiesUtil.getPropertiesFromText(conf);
-        } else {
-            return PropertiesUtil.getPropertiesFromYamlText(conf);
-        }
     }
 
 }

@@ -30,6 +30,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 
 /**
@@ -93,13 +94,19 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     public void update(String myId, String conf, Long userId) {
         SparkConf existConf = getById(myId);
         existConf.setConfOwner(userId);
+
         //保存修改之前的记录
         confRecordService.addRecord(existConf);
         //保存配置
         existConf.setModifyTime(new Date());
 
-        Map<String, String> map = PropertiesUtil.getPropertiesFromText(conf);
-        Integer version = Integer.parseInt(map.get(SPARK_PARAM_APP_CONF_VERSION()));
+        Map<String, String> confMap;
+        if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
+            confMap = PropertiesUtil.getPropertiesFromText(conf);
+        } else {
+            confMap = PropertiesUtil.getPropertiesFromYamlText(conf);
+        }
+        Integer version = Integer.parseInt(confMap.get(SPARK_PARAM_APP_CONF_VERSION()));
         existConf.setConfVersion(version);
 
         String confText = Base64.getEncoder().encodeToString(conf.getBytes(StandardCharsets.UTF_8));

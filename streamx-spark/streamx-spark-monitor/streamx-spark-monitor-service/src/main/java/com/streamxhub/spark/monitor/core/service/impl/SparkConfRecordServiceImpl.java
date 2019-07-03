@@ -32,24 +32,24 @@ public class SparkConfRecordServiceImpl extends ServiceImpl<SparkConfRecordMappe
     @Override
     public List<SparkConfRecord> getRecords(String myId) {
         QueryWrapper<SparkConfRecord> historyWrapper = new QueryWrapper<>();
-        historyWrapper.eq("MY_ID",myId).orderByDesc("CONF_VERSION");
-       return this.baseMapper.selectList(historyWrapper);
+        historyWrapper.eq("MY_ID", myId).orderByDesc("CONF_VERSION");
+        return this.baseMapper.selectList(historyWrapper);
     }
 
     @Override
     public void addRecord(SparkConf sparkConf) {
-        SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(),sparkConf.getAppName(),sparkConf.getConfVersion(),sparkConf.getConf());
+        SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(), sparkConf.getAppName(), sparkConf.getConfVersion(), sparkConf.getConf());
         record.setCreateTime(new Date());
         record.setConfOwner(sparkConf.getConfOwner());
         save(record);
 
         QueryWrapper<SparkConfRecord> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("MY_ID",sparkConf.getMyId());
-        queryWrapper.ne("RECORD_ID",record.getRecordId());
-        queryWrapper.eq("PARENT_ID",0);
+        queryWrapper.eq("MY_ID", sparkConf.getMyId());
+        queryWrapper.ne("RECORD_ID", record.getRecordId());
+        queryWrapper.eq("PARENT_ID", 0);
 
-        SparkConfRecord existRecord =  baseMapper.selectOne(queryWrapper);
-        if (existRecord!=null) {
+        SparkConfRecord existRecord = baseMapper.selectOne(queryWrapper);
+        if (existRecord != null) {
             existRecord.setParentId(record.getRecordId());
             baseMapper.updateById(existRecord);
         }
