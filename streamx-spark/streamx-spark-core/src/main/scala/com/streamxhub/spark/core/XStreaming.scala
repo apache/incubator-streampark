@@ -174,15 +174,18 @@ trait XStreaming {
       val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
       val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$myId"
       val bytes = Base64.getDecoder.decode(ZooKeeperUtil.get(path, zookeeperURL).getBytes(StandardCharsets.UTF_8))
-      val cloudConf = new String(bytes, StandardCharsets.UTF_8)
-      if (Pattern.compile(Const.SPARK_CONF_TYPE_REGEXP).matcher(cloudConf).find) {
+      val confText = new String(bytes, StandardCharsets.UTF_8)
+      if (Pattern.compile(Const.SPARK_CONF_TYPE_REGEXP).matcher(confText).find) {
         val properties = new Properties()
-        properties.load(new StringReader(cloudConf))
+        properties.load(new StringReader(confText))
         properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
       } else {
-        PropertiesUtil.getPropertiesFromYamlText(cloudConf).toMap
+        PropertiesUtil.getPropertiesFromYamlText(confText).toMap
       }
     }.getOrElse(null)
+
+
+    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(conf).getBytes(StandardCharsets.UTF_8))
 
     /**
       * 直接读取本地的配置文件,注意规则:
@@ -194,13 +197,18 @@ trait XStreaming {
       /**
         * 配置中心无配置文件,或者获取失败,则读取本地配置文件
         */
-      case null => sparkConf.setAll(localConf)
+      case null =>
+        sparkConf.setAll(localConf)
+        sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localConfSource)
       case _ =>
         //获取线上版本的app.version,key为[spark.app.conf.version]
         val cloudVersion = cloudConf(SPARK_PARAM_APP_CONF_VERSION)
         cloudVersion.toString.compare(localVersion) match {
-          case 1 | 0 => sparkConf.setAll(cloudConf)
-          case _ => sparkConf.setAll(localConf)
+          case 1 | 0 =>
+            sparkConf.setAll(cloudConf)
+          case _ =>
+            sparkConf.setAll(localConf)
+            sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localConfSource)
         }
         //保存线上的版本,保存key为[spark.app.conf.cloud.version]
         sparkConf.set(SPARK_PARAM_APP_CONF_CLOUD_VERSION, cloudVersion)
@@ -211,7 +219,6 @@ trait XStreaming {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(conf).getBytes(StandardCharsets.UTF_8)))
     sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
   }
 
