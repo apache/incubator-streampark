@@ -37,6 +37,7 @@ public class UserController extends BaseController {
 
     @Autowired
     private UserService userService;
+
     @Autowired
     private UserConfigService userConfigService;
 
@@ -137,10 +138,10 @@ public class UserController extends BaseController {
             @NotBlank(message = "{required}") String password) {
         String encryptPassword = MD5Util.encrypt(username, password);
         User user = userService.findByName(username);
-        if (user != null)
+        if (user != null) {
             return StringUtils.equals(user.getPassword(), encryptPassword);
-        else
-            return false;
+        }
+        return false;
     }
 
     @PutMapping("password")

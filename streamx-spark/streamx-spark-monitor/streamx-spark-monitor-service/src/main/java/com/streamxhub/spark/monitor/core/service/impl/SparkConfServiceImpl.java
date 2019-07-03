@@ -4,7 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+
 import static com.streamxhub.spark.monitor.api.Const.*;
+
 import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
 import com.streamxhub.spark.monitor.core.dao.SparkConfMapper;
@@ -47,8 +49,9 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
             return true;
         } else {
             if (sparkConf.getConfVersion().compareTo(existConf.getConfVersion()) > 0) {
-                confRecordService.addRecord(sparkConf);
+                sparkConf.setConfOwner(0L);
                 sparkConf.setModifyTime(new Date());
+                confRecordService.addRecord(sparkConf);
                 baseMapper.updateById(sparkConf);
                 return true;
             } else {
@@ -81,8 +84,9 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     }
 
     @Override
-    public void update(String myId,String conf) {
+    public void update(String myId, String conf,Long userId) {
         SparkConf existConf = getById(myId);
+        existConf.setConfOwner(userId);
         //保存修改之前的记录
         confRecordService.addRecord(existConf);
 
@@ -95,7 +99,7 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
 
         String path = SPARK_CONF_PATH_PREFIX().concat("/").concat(myId);
         //持久保存...
-        ZooKeeperUtil.update(path,conf,zookeeperConnect,true);
+        ZooKeeperUtil.update(path, conf, zookeeperConnect, true);
 
     }
 }

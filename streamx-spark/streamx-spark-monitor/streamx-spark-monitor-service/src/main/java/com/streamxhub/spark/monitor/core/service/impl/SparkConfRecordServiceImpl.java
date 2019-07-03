@@ -40,6 +40,7 @@ public class SparkConfRecordServiceImpl extends ServiceImpl<SparkConfRecordMappe
     public void addRecord(SparkConf sparkConf) {
         SparkConfRecord record = new SparkConfRecord(sparkConf.getMyId(),sparkConf.getAppName(),sparkConf.getConfVersion(),sparkConf.getConf());
         record.setCreateTime(new Date());
+        record.setConfOwner(sparkConf.getConfOwner());
         save(record);
 
         QueryWrapper<SparkConfRecord> queryWrapper = new QueryWrapper<>();

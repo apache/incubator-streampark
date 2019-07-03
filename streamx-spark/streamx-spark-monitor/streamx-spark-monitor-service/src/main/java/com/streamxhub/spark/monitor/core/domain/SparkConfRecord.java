@@ -29,6 +29,8 @@ public class SparkConfRecord {
     @NotBlank(message = "{required}")
     private String conf;
 
+    private Long confOwner;
+
     private Date createTime;
 
     public SparkConfRecord() {
@@ -40,5 +42,6 @@ public class SparkConfRecord {
         this.confVersion = confVersion;
         this.conf = conf;
         this.createTime = new Date();
+        this.confOwner = 0L;
     }
 }
