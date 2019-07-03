@@ -16,6 +16,7 @@ import org.springframework.util.Base64Utils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.Serializable;
 import java.util.Map;
 
 /**
@@ -74,6 +75,15 @@ public class SparkController extends BaseController {
     @RequiresPermissions("spark:update")
     public void update(String myId, String conf, Long userId) {
         this.confService.update(myId, conf, userId);
+    }
+
+    @PostMapping("conf/verify")
+    @RequiresPermissions("spark:verify")
+    public RestResponse verify(String myId, String conf) {
+        Map<String, Serializable> map = this.confService.verify(myId, conf);
+        RestResponse response = new RestResponse();
+        response.put("data", map);
+        return response;
     }
 
     @PostMapping("monitor/start/{myId}")

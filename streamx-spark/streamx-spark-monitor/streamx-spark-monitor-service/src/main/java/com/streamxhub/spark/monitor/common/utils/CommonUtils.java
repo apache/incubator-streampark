@@ -517,6 +517,14 @@ public abstract class CommonUtils implements Serializable {
     }
 
 
+    public static boolean isNumber(String text) {
+        try {
+            Long.parseLong(text);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
 }
 
 

@@ -116,6 +116,16 @@ object PropertiesUtil {
     }
   }
 
+  def getPropertiesFromText(conf: String): java.util.Map[String, String] = {
+    try {
+      val properties = new Properties()
+      properties.load(new StringReader(conf))
+      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap.asJava
+    } catch {
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties ", e)
+    }
+  }
+
   def classForName(className: String): Class[_] = {
     Class.forName(className, true, Thread.currentThread().getContextClassLoader)
   }
