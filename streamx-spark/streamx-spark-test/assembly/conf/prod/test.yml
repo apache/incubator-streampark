@@ -71,10 +71,10 @@ spark:
     userClassPathFirst: true
   #执行集群设置,不用设置,一般使用YARN
   master: yarn
-  submit:
-    deployMode: cluster
   yarn:
     queue: default
+  submit:
+    deployMode: cluster
   serializer: org.apache.spark.serializer.KryoSerializer
   shuffle:
     service:
