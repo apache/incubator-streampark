@@ -41,7 +41,7 @@ public class WatcherServiceImpl implements WatcherService {
     public void config(String id, String conf) {
         Map<String, String> confMap = getConfigMap(conf);
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
-        Integer confVersion = Integer.parseInt(confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION()));
+        Integer confVersion = Integer.parseInt(confMap.get(SPARK_PARAM_APP_CONF_VERSION()));
         SparkConf sparkConf = new SparkConf(id, appName, confVersion, Base64Utils.encodeToString(conf.getBytes()));
         boolean configFlag = sparkConfService.config(sparkConf);
         System.out.println(id + ":config");
