@@ -38,7 +38,9 @@
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
                 <a-tag color="cyan" slot="confVersion" slot-scope="text,sparkConf" >{{sparkConf.confVersion}}</a-tag>
-                <a-tag slot="history" slot-scope="text,sparkConf" color="#606266" style=";margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
+                <template slot="history" slot-scope="text,sparkConf">
+                    <a-tag color="#606266" style=";margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
+                </template>
                 <template slot="operation" slot-scope="text,sparkConf">
                     <a-icon type="eye" @click="detail(sparkConf.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
                     <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(sparkConf)" title="配置文件"></a-icon>

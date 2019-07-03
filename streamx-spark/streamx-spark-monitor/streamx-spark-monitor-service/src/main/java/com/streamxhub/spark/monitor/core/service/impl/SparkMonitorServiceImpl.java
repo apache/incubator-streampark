@@ -200,7 +200,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     }
 
     /**
-     * 30秒之后如果状态还是一直启动中,则认为启动超时,如启动1分钟还未检测到则认为启动失败..
+     * 1分钟之后如果状态还是一直启动中,则认为启动超时,如启动2分钟还未检测到则认为启动失败..
      *
      * @param myId
      */
@@ -213,7 +213,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
                 monitor.setStatusValue(SparkMonitor.Status.START_TIMEOUT);
                 this.updateById(monitor);
             }
-        }, 30, TimeUnit.SECONDS);
+        }, 60, TimeUnit.SECONDS);
         //启动失败...
         checkExecutorService.schedule(() -> {
             SparkMonitor monitor = getById(myId);
@@ -221,7 +221,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
                 monitor.setStatusValue(SparkMonitor.Status.START_FAILURE);
                 this.updateById(monitor);
             }
-        }, 60, TimeUnit.SECONDS);
+        }, 120, TimeUnit.SECONDS);
     }
 
     /**
