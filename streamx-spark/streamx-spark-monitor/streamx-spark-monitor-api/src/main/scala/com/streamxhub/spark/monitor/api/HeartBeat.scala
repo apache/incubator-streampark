@@ -94,7 +94,7 @@ object HeartBeat {
             /**
               * 本地配置文件比线上大...
               */
-            case 1 =>
+            case compare if compare > 0 =>
               sparkConf.set(SPARK_PARAM_APP_CONF_VERSION, local)
               ZooKeeperUtil.update(confPath, confSource, zookeeperURL, persistent = true)
             case _ =>
