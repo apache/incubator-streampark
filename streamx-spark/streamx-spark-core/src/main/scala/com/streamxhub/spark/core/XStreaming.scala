@@ -141,29 +141,28 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-    val appMain = localConf.getOrDefault(SPARK_PARAM_MAIN_CLASS, null)
-    if (appMain == null || appMain == "") {
+
+    if (Try(localConf(SPARK_PARAM_APP_CONF_VERSION).toInt).isFailure) {
+      System.err.println(s"[StreamX] $SPARK_PARAM_APP_CONF_VERSION must be not empty!must be number")
+      System.exit(1)
+    }
+
+    val (appMain: String, appName: String) = localConf.getOrElse(SPARK_PARAM_MAIN_CLASS, null) match {
+      case null | "" => (null, null)
+      case other => localConf.getOrElse(SPARK_PARAM_APP_NAME, null) match {
+        case null | "" => (other, other)
+        case name => (other, name)
+      }
+    }
+
+    if (appMain == null) {
       System.err.println(s"[StreamX] $SPARK_PARAM_MAIN_CLASS must be not empty!")
       System.exit(1)
     }
-    /**
-      * 先获取配置文件里的spark.app.name,如果没有则以spark.app.main为appName
-      */
-    val appName = localConf.get(SPARK_PARAM_APP_NAME) match {
-      case null | "" => appMain
-      case name => name
-    }
+
     val myId = DigestUtils.md5Hex(appName)
     sparkConf.set(SPARK_PARAM_APP_MYID, myId)
 
-    Try {
-      localConf(SPARK_PARAM_APP_CONF_VERSION).toInt
-    } match {
-      case Success(_) =>
-      case Failure(_) =>
-        System.err.println(s"[StreamX] $SPARK_PARAM_APP_CONF_VERSION must be not empty!must be number")
-        System.exit(1)
-    }
 
     //获取本地conf.version版本,key为[spark.app.conf.version]
     val localVersion = localConf(SPARK_PARAM_APP_CONF_VERSION)
