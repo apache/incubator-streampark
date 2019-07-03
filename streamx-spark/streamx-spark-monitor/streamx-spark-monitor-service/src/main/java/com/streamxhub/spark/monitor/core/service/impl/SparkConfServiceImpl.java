@@ -7,8 +7,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import static com.streamxhub.spark.monitor.api.Const.*;
 
+import com.streamxhub.spark.monitor.api.util.PropertiesUtil;
 import com.streamxhub.spark.monitor.api.util.ZooKeeperUtil;
 import com.streamxhub.spark.monitor.common.domain.QueryRequest;
+import com.streamxhub.spark.monitor.common.utils.CommonUtils;
 import com.streamxhub.spark.monitor.core.dao.SparkConfMapper;
 import com.streamxhub.spark.monitor.core.domain.SparkConf;
 import com.streamxhub.spark.monitor.core.domain.SparkConfRecord;
@@ -21,9 +23,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
+import org.springframework.util.NumberUtils;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
@@ -84,7 +90,7 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
     }
 
     @Override
-    public void update(String myId, String conf,Long userId) {
+    public void update(String myId, String conf, Long userId) {
         SparkConf existConf = getById(myId);
         existConf.setConfOwner(userId);
         //保存修改之前的记录
@@ -101,5 +107,27 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
         //持久保存...
         ZooKeeperUtil.update(path, conf, zookeeperConnect, true);
 
+    }
+
+    @Override
+    public Map<String, Serializable> verify(String myId, String conf) {
+        Map<String, String> config = PropertiesUtil.getPropertiesFromText(conf);
+        String version = config.get(SPARK_PARAM_APP_CONF_VERSION());
+        boolean isnumber = CommonUtils.isNumber(version);
+        Map<String, Serializable> map = new ConcurrentHashMap<>();
+        if (!isnumber) {
+            map.put("code", 500);
+            map.put("message", "spark.app.conf.version 必须是一个数字");
+            return map;
+        }
+        Integer ver = Integer.parseInt(version);
+        SparkConf existConf = getById(myId);
+        if (existConf.getConfVersion() >= ver) {
+            map.put("code", 500);
+            map.put("message", "spark.app.conf.version 必须比上次的版本号大.");
+            return map;
+        }
+        map.put("code", 200);
+        return map;
     }
 }

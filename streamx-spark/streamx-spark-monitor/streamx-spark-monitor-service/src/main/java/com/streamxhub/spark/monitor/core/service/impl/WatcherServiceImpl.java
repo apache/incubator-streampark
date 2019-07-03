@@ -15,8 +15,6 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Base64Utils;
 
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -51,14 +49,14 @@ public class WatcherServiceImpl implements WatcherService {
 
     @Override
     public void publish(String id, String conf) {
-        Map<String, String> confMap = getFromProperties(conf);
+        Map<String, String> confMap = PropertiesUtil.getPropertiesFromText(conf);
         sparkMonitorService.publish(id, confMap);
         System.out.println(id + ":publish");
     }
 
     @Override
     public void shutdown(String id, String conf) {
-        Map<String, String> confMap = getFromProperties(conf);
+        Map<String, String> confMap = PropertiesUtil.getPropertiesFromText(conf);
         sparkMonitorService.shutdown(id, confMap);
         System.out.println(id + ":shutdown");
     }
@@ -73,26 +71,10 @@ public class WatcherServiceImpl implements WatcherService {
 
     private Map<String, String> getConfigMap(String conf) {
         if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
-            return getFromProperties(conf);
+            return PropertiesUtil.getPropertiesFromText(conf);
         } else {
             return PropertiesUtil.getPropertiesFromYamlText(conf);
         }
-    }
-
-    private Map<String, String> getFromProperties(String conf) {
-        try {
-            Properties properties = new Properties();
-            properties.load(new StringReader(conf));
-            Set<String> set = properties.stringPropertyNames();
-            Map<String, String> map = new HashMap<>(0);
-            for (String k : set) {
-                map.put(k, properties.getProperty(k));
-            }
-            return map;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return Collections.emptyMap();
     }
 
 }
