@@ -12,11 +12,12 @@ import com.streamxhub.spark.monitor.core.service.SparkMonitorService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.Base64Utils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Map;
 
 /**
@@ -53,7 +54,7 @@ public class SparkController extends BaseController {
     @RequiresPermissions("spark:conf")
     public RestResponse detail(@PathVariable("myId") String myId) {
         SparkConf sparkConf = this.confService.getById(myId);
-        String conf = new String(Base64Utils.decodeFromString(sparkConf.getConf()));
+        String conf = new String(Base64.getDecoder().decode(sparkConf.getConf()), StandardCharsets.UTF_8);
         sparkConf.setConf(conf);
         RestResponse response = new RestResponse();
         response.put("data", sparkConf);
@@ -64,7 +65,7 @@ public class SparkController extends BaseController {
     @RequiresPermissions("spark:conf")
     public RestResponse record(@PathVariable("recordId") String recordId) {
         SparkConfRecord record = this.recordService.getById(recordId);
-        String conf = new String(Base64Utils.decodeFromString(record.getConf()));
+        String conf = new String(Base64.getDecoder().decode(record.getConf()), StandardCharsets.UTF_8);
         record.setConf(conf);
         RestResponse response = new RestResponse();
         response.put("data", record);

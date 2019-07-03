@@ -22,10 +22,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
-import org.springframework.util.NumberUtils;
 
 import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -95,17 +95,20 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
         existConf.setConfOwner(userId);
         //保存修改之前的记录
         confRecordService.addRecord(existConf);
-
         //保存配置
         existConf.setModifyTime(new Date());
-        //版本号加1
-        existConf.setConfVersion(existConf.getConfVersion() + 1);
-        existConf.setConf(Base64Utils.encodeToString(conf.getBytes()));
+
+        Map<String, String> map = PropertiesUtil.getPropertiesFromText(conf);
+        Integer version = Integer.parseInt(map.get(SPARK_PARAM_APP_CONF_VERSION()));
+        existConf.setConfVersion(version);
+
+        String confText = Base64.getEncoder().encodeToString(conf.getBytes(StandardCharsets.UTF_8));
+        existConf.setConf(confText);
         updateById(existConf);
 
         String path = SPARK_CONF_PATH_PREFIX().concat("/").concat(myId);
         //持久保存...
-        ZooKeeperUtil.update(path, conf, zookeeperConnect, true);
+        ZooKeeperUtil.update(path, confText, zookeeperConnect, true);
 
     }
 

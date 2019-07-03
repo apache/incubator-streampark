@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 
 import static com.streamxhub.spark.monitor.api.Const.*;
 import static org.apache.curator.framework.recipes.cache.TreeCacheEvent.Type.*;
@@ -51,7 +52,7 @@ public class SparkRunner implements ApplicationRunner {
             ChildData data = event.getData();
             if (data != null && !data.getPath().equals(zkConfPath)) {
                 if (event.getType().equals(NODE_ADDED) || event.getType().equals(NODE_UPDATED)) {
-                    String conf = new String(data.getData(), StandardCharsets.UTF_8);
+                    String conf = new String(Base64.getDecoder().decode(data.getData()), StandardCharsets.UTF_8);
                     String id = getId(data.getPath());
                     watcherService.config(id, conf);
                 }

@@ -13,8 +13,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Base64Utils;
 
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -42,7 +42,7 @@ public class WatcherServiceImpl implements WatcherService {
         Map<String, String> confMap = getConfigMap(conf);
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
         Integer confVersion = Integer.parseInt(confMap.get(SPARK_PARAM_APP_CONF_VERSION()));
-        SparkConf sparkConf = new SparkConf(id, appName, confVersion, Base64Utils.encodeToString(conf.getBytes()));
+        SparkConf sparkConf = new SparkConf(id, appName, confVersion, Base64.getEncoder().encodeToString(conf.getBytes(StandardCharsets.UTF_8)));
         boolean configFlag = sparkConfService.config(sparkConf);
         System.out.println(id + ":config");
     }
