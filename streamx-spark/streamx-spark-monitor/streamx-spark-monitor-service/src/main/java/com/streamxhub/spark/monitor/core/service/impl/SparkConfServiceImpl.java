@@ -121,7 +121,12 @@ public class SparkConfServiceImpl extends ServiceImpl<SparkConfMapper, SparkConf
 
     @Override
     public Map<String, Serializable> verify(String myId, String conf) {
-        Map<String, String> config = PropertiesUtil.getPropertiesFromText(conf);
+        Map<String, String> config;
+        if (Pattern.compile(SPARK_CONF_TYPE_REGEXP()).matcher(conf).find()) {
+            config = PropertiesUtil.getPropertiesFromText(conf);
+        } else {
+            config = PropertiesUtil.getPropertiesFromYamlText(conf);
+        }
         String version = config.get(SPARK_PARAM_APP_CONF_VERSION());
         boolean isnumber = CommonUtils.isNumber(version);
         Map<String, Serializable> map = new ConcurrentHashMap<>();
