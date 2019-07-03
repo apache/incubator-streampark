@@ -3,7 +3,7 @@
               :maskClosable="false"
               width="calc(100% - 20%)"
               placement="right"
-              :closable="false"
+              :closable="true"
               @close="onClose"
               :visible="visiable"
               style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
@@ -38,16 +38,11 @@
                 &nbsp;&nbsp;
                 <a-tag v-if="detail.status === 1" color="#87d068">线上版本</a-tag>
                 <a-tag v-else color="#666">历史版本</a-tag>
-                <a-button type="primary" shape="circle" icon="edit" size="small" @click="edit()"></a-button>
-                <a-button type="primary" shape="circle" icon="download" size="small" @click="download()"></a-button>
+                <a-button type="primary" shape="circle" icon="edit" size="small" @click="edit()" style="border-radius: 50%!important;" ghost></a-button>
+                <a-button type="primary" shape="circle" icon="download" size="small" @click="download()" style="border-radius: 50%!important;" ghost></a-button>
             </p>
         </a-col>
-
         <a-textarea class="conf" ref="conf" v-model="detail.conf"></a-textarea>
-
-        <div class="drawer-bootom-button" style="z-index: 999">
-            <a-button style="margin-right: .8rem" @click="onClose">关闭</a-button>
-        </div>
     </a-drawer>
 </template>
 

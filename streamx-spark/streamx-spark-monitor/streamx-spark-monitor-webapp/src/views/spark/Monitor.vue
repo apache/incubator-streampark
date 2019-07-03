@@ -41,10 +41,14 @@
                     <a-tag v-if="record.status === -1" color="#F56C6C">失&nbsp;联</a-tag>
                     <a-tag v-if="record.status === 0" color="#67C23A">运行中</a-tag>
                     <a-tag v-if="record.status === 1" color="#303133">停&nbsp;止</a-tag>
-                    <a-tag v-if="record.status === 2" color="#409EFF">启动中</a-tag>
+                    <a-button  v-if="record.status === 2" size="small" type="primary" loading>
+                        启动中
+                    </a-button>
                     <a-tag v-if="record.status === 3" color="#E6A23C">启动超时</a-tag>
                     <a-tag v-if="record.status === 4" color="#F56C6C">启动失败</a-tag>
-                    <a-tag v-if="record.status === 5" color="#409EFF">停止中</a-tag>
+                    <a-button  v-if="record.status === 5" size="small" type="danger" loading>
+                        停止中
+                    </a-button>
                     <a-tag v-if="record.status === 6" color="#F56C6C">停止失败</a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,record">
@@ -228,4 +232,8 @@
 
 <style lang="less" scoped>
     @import "../../../static/less/Common";
+
+    .ant-btn-sm.ant-btn-loading:not(.ant-btn-circle):not(.ant-btn-circle-outline):not(.ant-btn-icon-only) {
+        padding-left: 18px !important;
+    }
 </style>

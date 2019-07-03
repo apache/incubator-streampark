@@ -1,21 +1,23 @@
 <template>
     <div :class="[multiPage === true ? 'multi-page':'single-page', 'not-menu-page']">
-        <div v-show="!diffVisible">
-            <a-textarea class="conf" ref="conf" v-model="sparkConf.conf"></a-textarea>
-            <div class="drawer-bootom-button" style="z-index: 999">
-                <a-button style="margin-right: .8rem" @click="codeDiff(true)">提交</a-button>
+        <a-card :title="title" :bordered="false">
+            <div v-show="!diffVisible">
+                <a-textarea class="conf" ref="conf" v-model="sparkConf.conf"></a-textarea>
+                <div class="drawer-bootom-button" style="z-index: 999">
+                    <a-button style="margin-right: .8rem" @click="goBack">取消</a-button>
+                    <a-button style="margin-right: .8rem" @click="codeDiff(true)" :disabled=" conf ==='' || conf === oldConf">下一步</a-button>
+                </div>
             </div>
-        </div>
-        <div v-if="diffVisible">
-            <vue-code-diff :old-string="oldConf" :new-string="conf" :context="20" outputFormat="side-by-side"/>
-            <div class="drawer-bootom-button" style="z-index: 999">
-                <a-button style="margin-right: .8rem" @click="codeDiff(false)">上一部</a-button>
-                <a-button style="margin-right: .8rem" @click="goBack">取消</a-button>
-                <a-button style="margin-right: .8rem" @click="onSubmit">提交</a-button>
+            <div v-if="diffVisible">
+                <vue-code-diff :old-string="oldConf" :new-string="conf" :context="20" outputFormat="side-by-side"/>
+                <div class="drawer-bootom-button" style="z-index: 999;position: static">
+                    <a-button style="margin-right: .8rem" @click="codeDiff(false)">上一部</a-button>
+                    <a-button style="margin-right: .8rem" @click="onSubmit">
+                        提交
+                    </a-button>
+                </div>
             </div>
-        </div>
-        <a-spin v-if="false" tip="生成配置对比中..." :spinning="true"
-                style="width: 100%;height: 400px;z-index:1000;position: absolute"></a-spin>
+        </a-card>
     </div>
 </template>
 
@@ -32,12 +34,12 @@
         components: {vueCodeDiff},
         data() {
             return {
+                title: '修改配置',
                 codeMirror: null,
                 sparkConf: {},
                 conf: '',
                 oldConf: '',
-                diffVisible: false,
-                spinVisible: false,
+                diffVisible: false
             }
         },
         computed: {
@@ -94,13 +96,12 @@
             },
 
             codeDiff(flag) {
-                this.diffVisible = flag;
+                this.diffVisible = flag
                 if (flag) {
-                    this.spinVisible = true
+                    this.title = "对比配置文件"
+                } else {
+                    this.title = "修改配置文件"
                 }
-                this.$nextTick(() => {
-                    this.spinVisible = false
-                })
             },
             goBack() {
                 this.$router.push("/spark/conf")
