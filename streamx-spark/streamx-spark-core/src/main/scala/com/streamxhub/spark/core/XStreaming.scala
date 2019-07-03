@@ -204,7 +204,7 @@ trait XStreaming {
         //获取线上版本的app.version,key为[spark.app.conf.version]
         val cloudVersion = cloudConf(SPARK_PARAM_APP_CONF_VERSION)
         cloudVersion.toString.compare(localVersion) match {
-          case 1 | 0 =>
+          case compare if compare > 0 =>
             sparkConf.setAll(cloudConf)
           case _ =>
             sparkConf.setAll(localConf)
