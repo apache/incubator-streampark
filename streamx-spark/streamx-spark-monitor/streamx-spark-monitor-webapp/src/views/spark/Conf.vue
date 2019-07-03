@@ -166,18 +166,18 @@
             detail(myId) {
                 this.$post('spark/conf/detail/' + myId, {}).then((r) => {
                     let data = r.data
-                    this.confDetail.visiable = true
                     data.data.status = 1
                     this.$refs.confDetail.setDetail(data.data)
+                    this.confDetail.visiable = true
                 })
             },
 
             detailHistory(recordId) {
                 this.$post('spark/conf/record/' + recordId, {}).then((r) => {
                     let data = r.data
-                    this.confDetail.visiable = true
                     data.data.status = 0
                     this.$refs.confDetail.setDetail(data.data)
+                    this.confDetail.visiable = true
                 })
             },
 
