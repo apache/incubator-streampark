@@ -80,13 +80,13 @@ object HeartBeat {
       //register conf...
       val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION)
       val cloudVersion = sparkConf.get(SPARK_PARAM_APP_CONF_CLOUD_VERSION, null)
-      val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
       (cloudVersion, localVersion) match {
         case (null, _) =>
 
           /**
             * 第一次加载,zk里还没有配置文件...
             */
+          val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
           sparkConf.set(SPARK_PARAM_APP_CONF_VERSION, localVersion)
           ZooKeeperUtil.create(confPath, confSource, zookeeperURL, persistent = true)
         case (cloud, local) =>
@@ -95,6 +95,7 @@ object HeartBeat {
               * 本地配置文件比线上大...
               */
             case compare if compare > 0 =>
+              val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
               sparkConf.set(SPARK_PARAM_APP_CONF_VERSION, local)
               ZooKeeperUtil.update(confPath, confSource, zookeeperURL, persistent = true)
             case _ =>
