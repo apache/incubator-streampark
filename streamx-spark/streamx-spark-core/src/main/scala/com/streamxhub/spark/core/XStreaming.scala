@@ -129,15 +129,15 @@ trait XStreaming {
     sparkConf = new SparkConf()
     sparkConf.set(SPARK_PARAM_USER_ARGS, args.mkString("|"))
     //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, conf) = SystemPropertyUtil.get(SPARK_PARAM_DEBUG_CONF, "") match {
+    val (isDebug, confPath) = SystemPropertyUtil.get(SPARK_PARAM_DEBUG_CONF, "") match {
       case "" => (false, sparkConf.get(SPARK_PARAM_DEPLOY_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
-    val localConf = conf.split("\\.").last match {
-      case "properties" => PropertiesUtil.getPropertiesFromFile(conf)
-      case "yml" => PropertiesUtil.getPropertiesFromYaml(conf)
+    val localConf = confPath.split("\\.").last match {
+      case "properties" => PropertiesUtil.getPropertiesFromFile(confPath)
+      case "yml" => PropertiesUtil.getPropertiesFromYaml(confPath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
@@ -185,7 +185,7 @@ trait XStreaming {
     }.getOrElse(null)
 
 
-    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(conf).getBytes(StandardCharsets.UTF_8))
+    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(confPath).getBytes(StandardCharsets.UTF_8))
 
     /**
       * 直接读取本地的配置文件,注意规则:
