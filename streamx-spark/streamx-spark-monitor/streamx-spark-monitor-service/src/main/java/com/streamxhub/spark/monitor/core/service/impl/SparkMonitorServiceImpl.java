@@ -86,8 +86,9 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     /**
      * 该监控不存在,则算"失联"
      * 如存在:
-     *   上次的状态如果为停止中,则本次记作已停止
-     *   反之,都算意外终止,"失联"
+     * 上次的状态如果为停止中,则本次记作已停止
+     * 反之,都算意外终止,"失联"
+     *
      * @param id
      * @param confMap
      */
@@ -101,10 +102,17 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             monitor.setCreateTime(new Date());
             baseMapper.insert(monitor);
         } else {
-            if (exist.getStatus().equals(SparkMonitor.Status.KILLING.getValue())) {
-                monitor.setStatusValue(SparkMonitor.Status.KILLED);
-            } else {
-                monitor.setStatusValue(SparkMonitor.Status.LOST);
+            SparkMonitor.Status status = SparkMonitor.Status.getByStatus(exist.getStatus());
+            assert status != null;
+            switch (status) {
+                case KILLING:
+                case KILL_FAILURE:
+                case KILLED:
+                    monitor.setStatusValue(SparkMonitor.Status.KILLED);
+                    break;
+                default:
+                    monitor.setStatusValue(SparkMonitor.Status.LOST);
+                    break;
             }
             monitor.setModifyTime(new Date());
             baseMapper.updateById(monitor);
@@ -187,9 +195,8 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
             this.updateById(monitor);
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            return exitCode;
         }
+        return exitCode;
     }
 
     /**
