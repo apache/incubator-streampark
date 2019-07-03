@@ -180,7 +180,7 @@ trait XStreaming {
       } else {
         PropertiesUtil.getPropertiesFromYamlText(cloudConf).toMap
       }
-    }.getOrElse(Map.empty)
+    }.getOrElse(null)
 
     /**
       * 直接读取本地的配置文件,注意规则:
