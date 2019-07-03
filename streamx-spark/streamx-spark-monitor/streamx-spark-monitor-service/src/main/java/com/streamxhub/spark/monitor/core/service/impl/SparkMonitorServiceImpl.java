@@ -71,7 +71,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
 
     private SparkMonitor getSparkMonitor(Map<String, String> confMap) {
         String appName = confMap.get(SPARK_PARAM_APP_NAME());
-        String confVersion = confMap.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION());
+        String confVersion = confMap.get(SPARK_PARAM_APP_CONF_VERSION());
         String appId = confMap.get(SPARK_PARAM_APP_ID());
         String proxyUri = confMap.get(SPARK_PARAM_APP_PROXY_URI_BASES());
         String startUp = confMap.get(SPARK_PARAM_DEPLOY_STARTUP());
