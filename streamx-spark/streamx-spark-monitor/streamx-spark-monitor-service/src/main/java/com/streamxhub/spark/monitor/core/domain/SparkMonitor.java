@@ -41,7 +41,7 @@ public class SparkMonitor {
         this.setStatus(status.getValue());
     }
 
-    public SparkMonitor(String appId, String appName, String confVersion,String startUp) {
+    public SparkMonitor(String appId, String appName, String confVersion, String startUp) {
         this.appId = appId;
         this.appName = appName;
         this.confVersion = confVersion;
@@ -52,7 +52,7 @@ public class SparkMonitor {
         /**
          * 意外终止
          */
-        LOST(-1,"意外终止"),
+        LOST(-1, "意外终止"),
         /**
          * 正常运行
          */
@@ -66,17 +66,21 @@ public class SparkMonitor {
          */
         STARTING(2, "启动中"),
         /**
+         * 启动超时
+         */
+        START_TIMEOUT(3, "启动超时"),
+        /**
          * 启动失败
          */
-        START_FAILURE(3, "启动失败"),
+        START_FAILURE(4, "启动失败"),
         /**
          * 停止中
          */
-        KILLING(4, "停止中"),
+        KILLING(5, "停止中"),
         /**
          * 停止失败
          */
-        KILL_FAILURE(5, "停止失败");
+        KILL_FAILURE(6, "停止失败");
 
         private Integer value;
         private String description;

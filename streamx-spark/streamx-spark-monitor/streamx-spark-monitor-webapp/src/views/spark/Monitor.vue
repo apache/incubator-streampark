@@ -42,12 +42,12 @@
                     <a-tag v-if="record.status === 0" color="#67C23A">运行中</a-tag>
                     <a-tag v-if="record.status === 1" color="#303133">停&nbsp;止</a-tag>
                     <a-tag v-if="record.status === 2" color="#409EFF">启动中</a-tag>
-                    <a-tag v-if="record.status === 3" color="#E6A23C">启动失败</a-tag>
-                    <a-tag v-if="record.status === 4" color="#409EFF">停止中</a-tag>
-                    <a-tag v-if="record.status === 5" color="#E6A23C">停止失败</a-tag>
+                    <a-tag v-if="record.status === 3" color="#E6A23C">启动超时</a-tag>
+                    <a-tag v-if="record.status === 4" color="#F56C6C">启动失败</a-tag>
+                    <a-tag v-if="record.status === 5" color="#409EFF">停止中</a-tag>
+                    <a-tag v-if="record.status === 6" color="#F56C6C">停止失败</a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,record">
-
                     <a-popconfirm v-if="record.status === -1||record.status === 1||record.status === 3" v-hasPermission="'spark:start'" title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: green" />
                         <!--停止,启动失败-->
