@@ -86,8 +86,7 @@ public class SparkRunner implements ApplicationRunner {
             TreeCache treeCache = new TreeCache(client, path);
             treeCache.getListenable().addListener(listener);
             treeCache.start();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
     }
 
