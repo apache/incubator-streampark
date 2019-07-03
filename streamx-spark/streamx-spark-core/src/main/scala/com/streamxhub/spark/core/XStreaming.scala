@@ -22,7 +22,8 @@
 package com.streamxhub.spark.core
 
 import java.io.StringReader
-import java.util.Properties
+import java.nio.charset.StandardCharsets
+import java.util.{Base64, Properties}
 import java.util.regex.Pattern
 
 import com.streamxhub.spark.core.util.SystemPropertyUtil
@@ -209,7 +210,7 @@ trait XStreaming {
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, PropertiesUtil.getFileSource(conf))
+    sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(conf).getBytes(StandardCharsets.UTF_8)))
     sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
   }
 
