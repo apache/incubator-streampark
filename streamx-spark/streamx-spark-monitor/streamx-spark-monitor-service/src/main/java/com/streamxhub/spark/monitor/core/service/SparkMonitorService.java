@@ -10,6 +10,7 @@ import java.util.Map;
  * @author benjobs
  */
 public interface SparkMonitorService {
+
     void publish(String id, Map<String, String> confMap);
 
     void shutdown(String id, Map<String, String> confMap);

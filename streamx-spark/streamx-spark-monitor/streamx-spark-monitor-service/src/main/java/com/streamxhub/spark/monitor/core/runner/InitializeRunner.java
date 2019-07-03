@@ -69,14 +69,12 @@ public class InitializeRunner implements ApplicationRunner {
     }
 
     private String getLogo(boolean success) {
-        StringBuilder builder = new StringBuilder();
-        builder.append("\n");
-        builder.append("     ,---.   ,--.                                  ,--.   ,--.  \n ");
-        builder.append("    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /  \n");
-        builder.append("    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\   \n");
-        builder.append("    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\\n");
-        builder.append("    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   \n\n");
-        builder.append(String.format("    StreamX 启动%s，时间：" + LocalDateTime.now(), success ? "成功" : "失败"));
-        return builder.toString();
+        return "\n" +
+                "     ,---.   ,--.                                  ,--.   ,--.  \n " +
+                "    '   .-',-'  '-.,--.--. ,---.  ,--,--.,--,--,--. \\  `.'  /  \n" +
+                "    `.  `-.'-.  .-'|  .--'| .-. :' ,-.  ||        |  .'    \\   \n" +
+                "    .-'    | |  |  |  |   \\   --.\\ '-'  ||  |  |  | /  .'.  \\\n" +
+                "    `-----'  `--'  `--'    `----' `--`--'`--`--`--''--'   '--'   \n\n" +
+                String.format("    StreamX 启动%s，时间：" + LocalDateTime.now(), success ? "成功" : "失败");
     }
 }
