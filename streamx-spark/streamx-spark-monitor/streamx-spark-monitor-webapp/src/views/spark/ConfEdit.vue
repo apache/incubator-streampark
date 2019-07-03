@@ -41,6 +41,7 @@
         },
         computed: {
             ...mapState({
+                user: state => state.account.user,
                 multiPage: state => state.setting.multipage,
                 confType: state => state.spark.confType,
                 myId: state => state.spark.myId,
@@ -106,7 +107,8 @@
             onSubmit() {
                 this.$post("/spark/conf/update", {
                     myId:this.myId,
-                    conf:this.conf
+                    conf:this.conf,
+                    userId:this.user.userId
                 }).then((r) => {
                     this.$message.success('修改成功')
                     this.goBack()
