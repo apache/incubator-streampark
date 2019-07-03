@@ -24,9 +24,9 @@
                     </a-row>
                 </div>
                 <span style="float: right; margin-top: 3px;">
-          <a-button type="primary" @click="search">查询</a-button>
-          <a-button style="margin-left: 8px" @click="reset">重置</a-button>
-        </span>
+                  <a-button type="primary" @click="search">查询</a-button>
+                  <a-button style="margin-left: 8px" @click="reset">重置</a-button>
+                </span>
             </a-form>
         </div>
         <div>
@@ -37,18 +37,12 @@
                      :loading="loading"
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
-
                 <a-tag color="cyan" slot="confVersion" slot-scope="text,sparkConf" >{{sparkConf.confVersion}}</a-tag>
-
-                <template slot="history" slot-scope="text,sparkConf">
-                    <a-tag color="#87d068" style="border-radius:50%!important;margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" shape="circle" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
-                </template>
-
+                <a-tag slot="history" slot-scope="text,sparkConf" color="#606266" style=";margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
                 <template slot="operation" slot-scope="text,sparkConf">
                     <a-icon type="eye" @click="detail(sparkConf.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
                     <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(sparkConf)" title="配置文件"></a-icon>
                 </template >
-
             </a-table>
         </div>
 

@@ -51,25 +51,19 @@
                     <a-popconfirm v-if="record.status === -1||record.status === 1||record.status === 3" v-hasPermission="'spark:start'" title="要启动该任务吗？" okText="启动" cancelText="取消" @confirm="start(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: green" />
                         <!--停止,启动失败-->
-                        <a>
-                            <a-icon type="play-circle" theme="twoTone" twoToneColor="#52c41a" title="启动"></a-icon>
-                        </a>
+                        <a><a-icon type="play-circle" theme="twoTone" twoToneColor="#52c41a" title="启动"></a-icon></a>
                     </a-popconfirm>
 
                     <a-popconfirm v-if="record.status === 0||record.status === 5" v-hasPermission="'spark:stop'" title="要停止该任务吗？" okText="停止" cancelText="取消" @confirm="stop(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: red" />
                         <!--正常运行-->
-                        <a>
-                            <a-icon type="pause-circle" theme="outlined" title="停止"></a-icon>
-                        </a>
+                        <a><a-icon type="pause-circle" theme="outlined" title="停止"></a-icon></a>
                     </a-popconfirm>
 
                     <a-popconfirm v-if="record.status === 1" v-hasPermission="'spark:delete'" title="确定要删除该任务吗？" okText="删除" cancelText="取消" @confirm="remove(record)">
                         <a-icon slot="icon" type="question-circle-o" style="color: red" />
                         <!--停止-->
-                        <a>
-                            <a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="删除"></a-icon>
-                        </a>
+                        <a><a-icon type="delete" theme="twoTone" twoToneColor="#eb2f96" title="删除"></a-icon></a>
                     </a-popconfirm>
                     <a v-if="record.status == 0" v-hasPermission="'spark:track'" :href="record.trackUrl" theme="twoTone" twoToneColor="#42b983"  target="_blank">
                         <a-icon type="fire" theme="twoTone"></a-icon>
