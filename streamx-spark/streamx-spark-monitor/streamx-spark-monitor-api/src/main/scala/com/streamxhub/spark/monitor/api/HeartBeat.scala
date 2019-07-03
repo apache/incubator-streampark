@@ -78,7 +78,7 @@ object HeartBeat {
   def start(): Unit = {
     if (!isDebug) {
       //register conf...
-      val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+      val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION)
       val cloudVersion = sparkConf.get(SPARK_PARAM_APP_CONF_CLOUD_VERSION, null)
       val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
       (cloudVersion, localVersion) match {

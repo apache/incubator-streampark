@@ -37,7 +37,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 import com.streamxhub.spark.monitor.api.Const._
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -145,7 +145,6 @@ trait XStreaming {
       System.err.println(s"[StreamX] $SPARK_PARAM_MAIN_CLASS must be not empty!")
       System.exit(1)
     }
-
     /**
       * 先获取配置文件里的spark.app.name,如果没有则以spark.app.main为appName
       */
@@ -156,8 +155,17 @@ trait XStreaming {
     val myId = DigestUtils.md5Hex(appName)
     sparkConf.set(SPARK_PARAM_APP_MYID, myId)
 
+    Try {
+      localConf(SPARK_PARAM_APP_CONF_VERSION).toInt
+    } match {
+      case Success(_) =>
+      case Failure(_) =>
+        System.err.println(s"[StreamX] $SPARK_PARAM_APP_CONF_VERSION must be not empty!must be number")
+        System.exit(1)
+    }
+
     //获取本地conf.version版本,key为[spark.app.conf.version]
-    val localVersion = localConf.getOrElse(SPARK_PARAM_APP_CONF_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+    val localVersion = localConf(SPARK_PARAM_APP_CONF_VERSION)
     //保存本地的配置文件版本,保存key为spark.app.conf.local.version
     sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
 
@@ -187,7 +195,7 @@ trait XStreaming {
       case null => sparkConf.setAll(localConf)
       case _ =>
         //获取线上版本的app.version,key为[spark.app.conf.version]
-        val cloudVersion = cloudConf.getOrElse(SPARK_PARAM_APP_CONF_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+        val cloudVersion = cloudConf(SPARK_PARAM_APP_CONF_VERSION)
         cloudVersion.toString.compare(localVersion) match {
           case 1 | 0 => sparkConf.setAll(cloudConf)
           case _ => sparkConf.setAll(localConf)
