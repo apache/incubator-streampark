@@ -29,8 +29,6 @@ object Const {
 
   val SPARK_CONF_TYPE_REGEXP = "\n(\\s+|)spark\\.main\\.class"
 
-  val SPARK_APP_CONF_DEFAULT_VERSION = "1"
-
   val SPARK_PARAM_DEBUG_CONF = "spark.debug.conf"
 
   val SPARK_PARAM_DEPLOY_CONF = "spark.deploy.conf"
