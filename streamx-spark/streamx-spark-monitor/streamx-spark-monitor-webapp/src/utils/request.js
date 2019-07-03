@@ -7,7 +7,7 @@ moment.locale('zh-cn')
 
 // 统一配置
 let STREAMX_REQUEST = axios.create({
-  baseURL: 'http://localhost:9527/',
+  baseURL: 'http://172.17.114.111:9527/',
   responseType: 'json',
   validateStatus (status) {
     // 200 外的状态码都认定为失败
