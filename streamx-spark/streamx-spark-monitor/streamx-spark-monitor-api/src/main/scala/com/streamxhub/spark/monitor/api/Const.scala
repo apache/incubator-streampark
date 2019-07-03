@@ -21,8 +21,6 @@
 
 package com.streamxhub.spark.monitor.api
 
-import java.nio.charset.Charset
-
 object Const {
 
   val SPARK_CONF_PATH_PREFIX = "/StreamX/spark/conf"
