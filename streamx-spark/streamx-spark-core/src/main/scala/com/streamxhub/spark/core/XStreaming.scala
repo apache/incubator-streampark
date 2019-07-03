@@ -173,7 +173,8 @@ trait XStreaming {
     val cloudConf = Try {
       val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
       val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$myId"
-      val cloudConf = ZooKeeperUtil.get(path, zookeeperURL)
+      val bytes = Base64.getDecoder.decode(ZooKeeperUtil.get(path, zookeeperURL).getBytes(StandardCharsets.UTF_8))
+      val cloudConf = new String(bytes, StandardCharsets.UTF_8)
       if (Pattern.compile(Const.SPARK_CONF_TYPE_REGEXP).matcher(cloudConf).find) {
         val properties = new Properties()
         properties.load(new StringReader(cloudConf))
