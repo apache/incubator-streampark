@@ -77,24 +77,16 @@ object HeartBeat {
 
   def start(): Unit = {
     if (!isDebug) {
-      //register shutdown hook
-      Runtime.getRuntime.addShutdownHook(new Thread(new Runnable {
-        override def run(): Unit = {
-          HeartBeat.this.stop()
-          logger.info(s"[StreamX] run shutdown hook,appName:${sparkConf.get(SPARK_PARAM_APP_NAME)},appId:${sparkConf.getAppId} ")
-        }
-      }))
-
       //register conf...
       val localVersion = sparkConf.get(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
       val cloudVersion = sparkConf.get(SPARK_PARAM_APP_CONF_CLOUD_VERSION, null)
       val confSource = sparkConf.get(SPARK_PARAM_APP_CONF_SOURCE)
       (cloudVersion, localVersion) match {
         case (null, _) =>
-
           /**
             * 第一次加载,zk里还没有配置文件...
             */
+          sparkConf.set(SPARK_PARAM_APP_CONF_VERSION,localVersion)
           ZooKeeperUtil.create(confPath, confSource, zookeeperURL, persistent = true)
         case (cloud, local) =>
           local.compare(cloud) match {
@@ -102,14 +94,16 @@ object HeartBeat {
               * 本地配置文件比线上大...
               */
             case 1 =>
+              sparkConf.set(SPARK_PARAM_APP_CONF_VERSION,local)
               ZooKeeperUtil.update(confPath, confSource, zookeeperURL, persistent = true)
             case _ =>
+              sparkConf.set(SPARK_PARAM_APP_CONF_VERSION,cloudVersion)
           }
         case _ =>
-          new ExceptionInInitializerError("[StreamX] init config error,please check spark.app.conf.local.version.")
+          new ExceptionInInitializerError("[StreamX] init config error,please check spark.app.conf.version.")
           System.exit(1)
       }
-      val ignoredParam = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE)
+      val ignoredParam = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE,SPARK_PARAM_APP_CONF_LOCAL_VERSION,SPARK_PARAM_APP_CONF_CLOUD_VERSION)
       val debugInfo = sparkConf.getAll.filter(x => !ignoredParam.contains(x._1)).sorted.map { case (k, v) => k + "=" + v }.mkString("\n")
       logger.info(s"[StreamX] sparkConf Debug Info:$debugInfo")
       ZooKeeperUtil.create(monitorPath, debugInfo, zookeeperURL)

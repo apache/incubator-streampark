@@ -5,8 +5,7 @@ spark:
   app:
     name: HelloStreamXApp
     conf:
-      local:
-        version: 10
+      version: 10
   source:
     kafka:
       offset:
