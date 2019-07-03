@@ -157,7 +157,7 @@ doStart() {
 
     local isYml=$(echo "$app_proper"|grep "\.yml$"|wc -l)
 
-    if [[ isYml == 1 ]]; then
+    if [[ isYml -eq 1 ]]; then
         #source yaml.sh
         source ${APP_BIN}/yaml.sh
         #

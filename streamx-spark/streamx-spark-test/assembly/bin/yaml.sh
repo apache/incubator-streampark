@@ -70,5 +70,5 @@ yaml_parse() {
 yaml_get () {
     local yaml_file="$1"
     local prefix="$2"
-    eval "$(parse "$yaml_file" "$prefix")"
+    eval "$(yaml_parse "$yaml_file" "$prefix")"
 }
