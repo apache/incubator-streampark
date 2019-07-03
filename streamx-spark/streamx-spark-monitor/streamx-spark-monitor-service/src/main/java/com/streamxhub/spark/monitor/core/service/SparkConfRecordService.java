@@ -11,6 +11,7 @@ import java.util.List;
  * @author benjobs
  */
 public interface SparkConfRecordService extends IService<SparkConfRecord> {
+
     void delete(String myId);
 
     List<SparkConfRecord> getRecords(String myId);
