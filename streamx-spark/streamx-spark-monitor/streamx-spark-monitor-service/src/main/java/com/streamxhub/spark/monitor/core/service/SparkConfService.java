@@ -35,5 +35,5 @@ public interface SparkConfService extends IService<SparkConf> {
      * @param myId
      * @param conf
      */
-    void update(String myId,String conf);
+    void update(String myId,String conf,Long userId);
 }

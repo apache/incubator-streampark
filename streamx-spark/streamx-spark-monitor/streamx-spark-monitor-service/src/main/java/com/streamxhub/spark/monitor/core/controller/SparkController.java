@@ -55,7 +55,7 @@ public class SparkController extends BaseController {
         String conf = new String(Base64Utils.decodeFromString(sparkConf.getConf()));
         sparkConf.setConf(conf);
         RestResponse response = new RestResponse();
-        response.put("data",sparkConf);
+        response.put("data", sparkConf);
         return response;
     }
 
@@ -66,14 +66,14 @@ public class SparkController extends BaseController {
         String conf = new String(Base64Utils.decodeFromString(record.getConf()));
         record.setConf(conf);
         RestResponse response = new RestResponse();
-        response.put("data",record);
+        response.put("data", record);
         return response;
     }
 
     @PostMapping("conf/update")
     @RequiresPermissions("spark:update")
-    public void update(String myId,String conf) {
-        this.confService.update(myId,conf);
+    public void update(String myId, String conf, Long userId) {
+        this.confService.update(myId, conf, userId);
     }
 
     @PostMapping("monitor/start/{myId}")
@@ -81,7 +81,7 @@ public class SparkController extends BaseController {
     public RestResponse start(@PathVariable("myId") String myId) {
         int code = this.monitorService.start(myId);
         RestResponse response = new RestResponse();
-        response.put("code",code);
+        response.put("code", code);
         return response;
     }
 
@@ -90,7 +90,7 @@ public class SparkController extends BaseController {
     public RestResponse stop(@PathVariable("myId") String myId) {
         int code = this.monitorService.stop(myId);
         RestResponse response = new RestResponse();
-        response.put("code",code);
+        response.put("code", code);
         return response;
     }
 

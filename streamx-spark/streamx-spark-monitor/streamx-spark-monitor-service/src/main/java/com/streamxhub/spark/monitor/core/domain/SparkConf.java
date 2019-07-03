@@ -26,6 +26,8 @@ public class SparkConf {
     @NotBlank(message = "{required}")
     private String conf;
 
+    private Long confOwner;
+
     private transient List<SparkConfRecord> history;
 
     private Date createTime;
@@ -36,6 +38,7 @@ public class SparkConf {
         this.appName = appName;
         this.confVersion = confVersion;
         this.conf = conf;
+        this.confOwner = 0L;
     }
 
     public SparkConf(){}
