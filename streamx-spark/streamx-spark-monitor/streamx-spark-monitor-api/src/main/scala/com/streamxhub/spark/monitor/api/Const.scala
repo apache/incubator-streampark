@@ -53,6 +53,8 @@ object Const {
 
   val SPARK_PARAM_APP_CONF_SOURCE = "spark.app.conf.source"
 
+  val SPARK_PARAM_APP_CONF_VERSION = "spark.app.conf.version"
+
   val SPARK_PARAM_APP_CONF_LOCAL_VERSION = "spark.app.conf.local.version"
 
   val SPARK_PARAM_APP_CONF_CLOUD_VERSION = "spark.app.conf.cloud.version"

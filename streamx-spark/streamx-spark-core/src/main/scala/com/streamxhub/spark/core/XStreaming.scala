@@ -156,8 +156,9 @@ trait XStreaming {
     val myId = DigestUtils.md5Hex(appName)
     sparkConf.set(SPARK_PARAM_APP_MYID, myId)
 
-    //保存本地的配置文件版本
-    val localVersion = localConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+    //获取本地conf.version版本,key为[spark.app.conf.version]
+    val localVersion = localConf.getOrElse(SPARK_PARAM_APP_CONF_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+    //保存本地的配置文件版本,保存key为spark.app.conf.local.version
     sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
 
     val cloudConf = Try {
@@ -185,12 +186,13 @@ trait XStreaming {
         */
       case null => sparkConf.setAll(localConf)
       case _ =>
-        val cloudVersion = cloudConf.getOrElse(SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
+        //获取线上版本的app.version,key为[spark.app.conf.version]
+        val cloudVersion = cloudConf.getOrElse(SPARK_PARAM_APP_CONF_VERSION, SPARK_APP_CONF_DEFAULT_VERSION)
         cloudVersion.toString.compare(localVersion) match {
           case 1 | 0 => sparkConf.setAll(cloudConf)
           case _ => sparkConf.setAll(localConf)
         }
-        //保存线上的版本...
+        //保存线上的版本,保存key为[spark.app.conf.cloud.version]
         sparkConf.set(SPARK_PARAM_APP_CONF_CLOUD_VERSION, cloudVersion)
     }
     //debug mode
