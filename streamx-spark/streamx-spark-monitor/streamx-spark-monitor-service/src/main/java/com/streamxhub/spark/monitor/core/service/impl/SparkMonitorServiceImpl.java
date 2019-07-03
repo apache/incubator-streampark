@@ -225,7 +225,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
     }
 
     /**
-     * 10 秒之后如果状态还是一直停止中,则认为停止失败..
+     * 30 秒之后如果状态还是一直停止中,则认为停止失败..
      *
      * @param myId
      */
@@ -237,7 +237,7 @@ public class SparkMonitorServiceImpl extends ServiceImpl<SparkMonitorMapper, Spa
                 monitor.setStatusValue(SparkMonitor.Status.KILL_FAILURE);
                 this.updateById(monitor);
             }
-        }, 10, TimeUnit.SECONDS);
+        }, 30, TimeUnit.SECONDS);
     }
 
 
