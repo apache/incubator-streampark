@@ -141,7 +141,6 @@ trait XStreaming {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-
     if (Try(localConf(SPARK_PARAM_APP_CONF_VERSION).toInt).isFailure) {
       System.err.println(s"[StreamX] $SPARK_PARAM_APP_CONF_VERSION must be not empty!must be number")
       System.exit(1)
@@ -163,11 +162,13 @@ trait XStreaming {
     val myId = DigestUtils.md5Hex(appName)
     sparkConf.set(SPARK_PARAM_APP_MYID, myId)
 
-
     //获取本地conf.version版本,key为[spark.app.conf.version]
     val localVersion = localConf(SPARK_PARAM_APP_CONF_VERSION)
     //保存本地的配置文件版本,保存key为spark.app.conf.local.version
     sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
+
+    //本地配置源文件...
+    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(confPath).getBytes(StandardCharsets.UTF_8))
 
     val cloudConf = Try {
       val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
@@ -182,9 +183,6 @@ trait XStreaming {
         PropertiesUtil.getPropertiesFromYamlText(confText).toMap
       }
     }.getOrElse(null)
-
-
-    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(confPath).getBytes(StandardCharsets.UTF_8))
 
     /**
       * 直接读取本地的配置文件,注意规则:
@@ -212,6 +210,7 @@ trait XStreaming {
         //保存线上的版本,保存key为[spark.app.conf.cloud.version]
         sparkConf.set(SPARK_PARAM_APP_CONF_CLOUD_VERSION, cloudVersion)
     }
+
     //debug mode
     if (isDebug) {
       val appName = sparkConf.get(SPARK_PARAM_APP_NAME)
@@ -220,7 +219,6 @@ trait XStreaming {
     }
     sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
   }
-
 
   def creatingContext(): StreamingContext = {
     val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
@@ -257,7 +255,7 @@ trait XStreaming {
     initialize(args)
     configure(sparkConf)
     //将多余的参数从sparkConf中移除
-    //cleanSparkConf()
+    cleanSparkConf()
     val context = checkpointPath match {
       case "" => creatingContext()
       case ck =>
@@ -267,6 +265,7 @@ trait XStreaming {
     }
     beforeStarted(context)
     context.start()
+    sparkConf.setAll(this.localConf)
     HeartBeat(context).start()
     afterStarted(context)
     context.awaitTermination()
