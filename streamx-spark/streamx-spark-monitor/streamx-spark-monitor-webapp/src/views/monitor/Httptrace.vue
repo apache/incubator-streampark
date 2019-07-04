@@ -56,34 +56,22 @@
                     customRender: (text, row, index) => {
                         switch (text) {
                             case 'GET':
-                                return
-                            <
-                                a - tag
-                                color = "#87d068" > {text} < /a-tag>
+                                return <a-tag color="#87d068">{text}</a-tag>
                             case 'POST':
-                                return
-                            <
-                                a - tag
-                                color = "#2db7f5" > {text} < /a-tag>
+                                return <a-tag color="#2db7f5">{text}</a-tag>
                             case 'PUT':
-                                return
-                            <
-                                a - tag
-                                color = "#ffba5a" > {text} < /a-tag>
+                                return <a-tag color="#ffba5a">{text}</a-tag>
                             case 'DELETE':
-                                return
-                            <
-                                a - tag
-                                color = "#f50" > {text} < /a-tag>
+                                return <a-tag color="#f50">{text}</a-tag>
                             default:
                                 return text
                         }
                     },
                     filters: [
-                        {text: 'GET', value: 'GET'},
-                        {text: 'POST', value: 'POST'},
-                        {text: 'PUT', value: 'PUT'},
-                        {text: 'DELETE', value: 'DELETE'}
+                        { text: 'GET', value: 'GET' },
+                        { text: 'POST', value: 'POST' },
+                        { text: 'PUT', value: 'PUT' },
+                        { text: 'DELETE', value: 'DELETE' }
                     ],
                     filterMultiple: true,
                     onFilter: (value, record) => record.request.method.includes(value)
@@ -98,30 +86,15 @@
                     dataIndex: 'response.status',
                     customRender: (text, row, index) => {
                         if (text < 200) {
-                            return
-                        <
-                            a - tag
-                            color = "pink" > {text} < /a-tag>
+                            return <a-tag color="pink">{text}</a-tag>
                         } else if (text < 201) {
-                            return
-                        <
-                            a - tag
-                            color = "green" > {text} < /a-tag>
+                            return <a-tag color="green">{text}</a-tag>
                         } else if (text < 399) {
-                            return
-                        <
-                            a - tag
-                            color = "cyan" > {text} < /a-tag>
+                            return <a-tag color="cyan">{text}</a-tag>
                         } else if (text < 403) {
-                            return
-                        <
-                            a - tag
-                            color = "orange" > {text} < /a-tag>
+                            return <a-tag color="orange">{text}</a-tag>
                         } else if (text < 501) {
-                            return
-                        <
-                            a - tag
-                            color = "red" > {text} < /a-tag>
+                            return <a-tag color="red">{text}</a-tag>
                         } else {
                             return text
                         }
@@ -131,29 +104,13 @@
                     dataIndex: 'timeTaken',
                     customRender: (text, row, index) => {
                         if (text < 500) {
-                            return
-                        <
-                            a - tag
-                            color = "green" > {text}
-                            ms < /a-tag>
+                            return <a-tag color="green">{text} ms</a-tag>
                         } else if (text < 1000) {
-                            return
-                        <
-                            a - tag
-                            color = "cyan" > {text}
-                            ms < /a-tag>
+                            return <a-tag color="cyan">{text} ms</a-tag>
                         } else if (text < 1500) {
-                            return
-                        <
-                            a - tag
-                            color = "orange" > {text}
-                            ms < /a-tag>
+                            return <a-tag color="orange">{text} ms</a-tag>
                         } else {
-                            return
-                        <
-                            a - tag
-                            color = "red" > {text}
-                            ms < /a-tag>
+                            return <a-tag color="red">{text} ms</a-tag>
                         }
                     }
                 }]
