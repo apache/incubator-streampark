@@ -391,7 +391,7 @@ public abstract class IOUtils implements Serializable {
     }
 
     public static boolean fileExists(Object file) {
-        assert file!=null;
+        assert file != null;
         if (file instanceof String) {
             file = new File((String) file);
         }
@@ -399,7 +399,7 @@ public abstract class IOUtils implements Serializable {
     }
 
     public static String getCurrentPath(Class type) {
-        assert type!=null;
+        assert type != null;
         return type.getProtectionDomain().getCodeSource().getLocation().getFile();
     }
 

@@ -15,7 +15,7 @@ public interface SparkMonitorService {
 
     void shutdown(String id, Map<String, String> confMap);
 
-    IPage<SparkMonitor> getPager(SparkMonitor sparkMonitor,QueryRequest request);
+    IPage<SparkMonitor> getPager(SparkMonitor sparkMonitor, QueryRequest request);
 
     void delete(String myId);
 
