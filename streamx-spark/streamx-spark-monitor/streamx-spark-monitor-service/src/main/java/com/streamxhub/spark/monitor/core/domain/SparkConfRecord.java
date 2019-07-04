@@ -36,7 +36,7 @@ public class SparkConfRecord {
     public SparkConfRecord() {
     }
 
-    public SparkConfRecord(String confId, String appName,Integer confVersion, String conf) {
+    public SparkConfRecord(String confId, String appName, Integer confVersion, String conf) {
         this.myId = confId;
         this.appName = appName;
         this.confVersion = confVersion;

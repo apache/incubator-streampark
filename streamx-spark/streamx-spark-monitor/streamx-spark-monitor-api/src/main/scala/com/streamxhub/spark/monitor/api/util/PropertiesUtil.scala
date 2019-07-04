@@ -81,7 +81,7 @@ object PropertiesUtil {
   }
 
   /** Load Yaml present in the given file. */
-  def getPropertiesFromYaml(filename: String): java.util.Map[String, String]  = {
+  def getPropertiesFromYaml(filename: String): java.util.Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"Yaml file $file does not exist")
     require(file.isFile, s"Yaml file $file is not a normal file")
@@ -98,7 +98,7 @@ object PropertiesUtil {
   }
 
   /** Load properties present in the given file. */
-  def getPropertiesFromFile(filename: String): java.util.Map[String, String]  = {
+  def getPropertiesFromFile(filename: String): java.util.Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"Properties file $file does not exist")
     require(file.isFile, s"Properties file $file is not a normal file")

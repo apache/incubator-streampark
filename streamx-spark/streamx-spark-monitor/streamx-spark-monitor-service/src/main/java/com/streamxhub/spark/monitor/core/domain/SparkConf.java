@@ -33,7 +33,7 @@ public class SparkConf {
     private Date createTime;
     private Date modifyTime;
 
-    public SparkConf(String id, String appName,Integer confVersion, String conf) {
+    public SparkConf(String id, String appName, Integer confVersion, String conf) {
         this.myId = id;
         this.appName = appName;
         this.confVersion = confVersion;
@@ -41,5 +41,6 @@ public class SparkConf {
         this.confOwner = 0L;
     }
 
-    public SparkConf(){}
+    public SparkConf() {
+    }
 }

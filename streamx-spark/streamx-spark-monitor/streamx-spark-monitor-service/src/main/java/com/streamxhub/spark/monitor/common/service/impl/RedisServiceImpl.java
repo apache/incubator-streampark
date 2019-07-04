@@ -15,8 +15,6 @@ import java.util.*;
 /**
  * Redis 工具类，只封装了几个常用的 redis 命令，
  * 可根据实际需要按类似的方式扩展即可。
- *
- *
  */
 @Service("redisService")
 public class RedisServiceImpl implements RedisService {

@@ -7,9 +7,9 @@ import spark from './modules/spark'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  modules: {
-    account,
-    setting,
-    spark
-  }
+    modules: {
+        account,
+        setting,
+        spark
+    }
 })

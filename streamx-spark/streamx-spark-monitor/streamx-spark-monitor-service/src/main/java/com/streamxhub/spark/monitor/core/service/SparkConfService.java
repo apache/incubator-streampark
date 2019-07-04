@@ -14,13 +14,13 @@ import java.util.Map;
 public interface SparkConfService extends IService<SparkConf> {
     /**
      * '
+     *
      * @param sparkConf
      * @return
      */
     boolean config(SparkConf sparkConf);
 
     /**
-     *
      * @param sparkConf
      * @param request
      * @return
@@ -28,21 +28,18 @@ public interface SparkConfService extends IService<SparkConf> {
     IPage<SparkConf> getPager(SparkConf sparkConf, QueryRequest request);
 
     /**
-     *
      * @param myId
      */
     Integer delete(String myId);
 
     /**
-     *
      * @param myId
      * @param conf
      */
-    void update(String myId,String conf,Long userId);
+    void update(String myId, String conf, Long userId);
 
 
     /**
-     *
      * @param myId
      * @param conf
      * @return

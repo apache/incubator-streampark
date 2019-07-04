@@ -6,7 +6,7 @@ server.use(bodyParser.json({limit: '50mb'}))
 server.use(bodyParser.urlencoded({limit: '50mb', extended: false}))
 
 //the cores config
-server.all('*', function(req, res, next) {
+server.all('*', function (req, res, next) {
     res.header('Access-Control-Allow-Origin', '*')
     res.header('Access-Control-Allow-Headers', 'Content-Type, Content-Length, Authorization, Accept, X-Requested-With')
     res.header('Access-Control-Allow-Methods', 'PUT, POST, GET, DELETE, OPTIONS')

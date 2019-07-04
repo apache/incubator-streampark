@@ -19,9 +19,9 @@ Vue.use(VueApexCharts)
 Vue.component('apexchart', VueApexCharts)
 
 Vue.use({
-  install (Vue) {
-    Vue.prototype.$db = db
-  }
+    install(Vue) {
+        Vue.prototype.$db = db
+    }
 })
 
 Vue.prototype.$post = request.post
@@ -34,7 +34,7 @@ Vue.prototype.$upload = request.upload
 
 /* eslint-disable no-new */
 new Vue({
-  router,
-  store,
-  render: h => h(StreamX)
+    router,
+    store,
+    render: h => h(StreamX)
 }).$mount('#streamx')
