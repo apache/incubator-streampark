@@ -37,7 +37,7 @@ import scala.collection.mutable
   *
   */
 class StreamXHBSink(@transient override val sc: SparkContext,
-                 val initParams: Map[String, String] = Map.empty[String, String]) extends Sink[StreamXMutation] {
+                    val initParams: Map[String, String] = Map.empty[String, String]) extends Sink[StreamXMutation] {
 
 
   override val prefix: String = "spark.sink.hbase."
