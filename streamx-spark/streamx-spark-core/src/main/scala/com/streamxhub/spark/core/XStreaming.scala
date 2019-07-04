@@ -38,7 +38,7 @@ import org.apache.spark.streaming.{Seconds, StreamingContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
-import scala.util.{Failure, Success, Try}
+import scala.util.Try
 import com.streamxhub.spark.monitor.api.Const._
 import org.apache.commons.codec.digest.DigestUtils
 
@@ -62,9 +62,6 @@ trait XStreaming {
 
   // 从checkpoint 中恢复失败，则重新创建
   private var createOnError: Boolean = true
-
-  private var localConf: Map[String, String] = Map[String, String]()
-
 
   @(transient@getter)
   var sparkSession: SparkSession = _
@@ -243,19 +240,9 @@ trait XStreaming {
     System.exit(1)
   }
 
-  def cleanSparkConf(): Unit = {
-    val cleanConf = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEPLOY_STARTUP, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE)
-    cleanConf.filter(x => sparkConf.get(x, null) != null).foreach(k => {
-      localConf += k -> sparkConf.get(k)
-      sparkConf.remove(k)
-    })
-  }
-
   def main(args: Array[String]): Unit = {
     initialize(args)
     configure(sparkConf)
-    //将多余的参数从sparkConf中移除
-    cleanSparkConf()
     val context = checkpointPath match {
       case "" => creatingContext()
       case ck =>
@@ -265,7 +252,6 @@ trait XStreaming {
     }
     beforeStarted(context)
     context.start()
-    sparkConf.setAll(this.localConf)
     HeartBeat(context).start()
     afterStarted(context)
     context.awaitTermination()
