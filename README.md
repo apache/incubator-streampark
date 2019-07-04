@@ -13,8 +13,8 @@ let't bigdata easy
     构建完成之后会将jar安装到m2的对应路径下，使用时在自己的项目的pom.xml文件里添加
     
     <dependency>
-        <groupId>com.streamxhub.spark</groupId>
-    	<artifactId>spark-core</artifactId>
+        <groupId>com.streamxhub</groupId>
+        <artifactId>streamx-spark-core</artifactId>
     	<version>1.0.0</version>
     </dependency>
 ```
