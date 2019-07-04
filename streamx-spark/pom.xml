@@ -127,7 +127,7 @@
             <!-- elasticsearch-spark_2.11 -->
             <dependency>
                 <groupId>org.elasticsearch</groupId>
-                <artifactId>elasticsearch-spark-20_2.11</artifactId>
+                <artifactId>elasticsearch-spark-20_${scala.binary.version}</artifactId>
                 <version>${es.version}</version>
             </dependency>
 
