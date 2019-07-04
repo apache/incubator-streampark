@@ -4,8 +4,8 @@
             <!-- 搜索区域 -->
             <a-form layout="horizontal">
                 <div class="fold">
-                    <a-row >
-                        <a-col :md="8" :sm="24" >
+                    <a-row>
+                        <a-col :md="8" :sm="24">
                             <a-form-item
                                     label="myId"
                                     :labelCol="{span: 5}"
@@ -13,7 +13,7 @@
                                 <a-input v-model="queryParams.myId"/>
                             </a-form-item>
                         </a-col>
-                        <a-col :md="8" :sm="24" >
+                        <a-col :md="8" :sm="24">
                             <a-form-item
                                     label="appName"
                                     :labelCol="{span: 5}"
@@ -37,14 +37,18 @@
                      :loading="loading"
                      :scroll="{ x: 900 }"
                      @change="handleTableChange">
-                <a-tag color="cyan" slot="confVersion" slot-scope="text,sparkConf" >{{sparkConf.confVersion}}</a-tag>
+                <a-tag color="cyan" slot="confVersion" slot-scope="text,sparkConf">{{sparkConf.confVersion}}</a-tag>
                 <template slot="history" slot-scope="text,sparkConf">
-                    <a-tag color="#606266" style=";margin:2px;"  v-for="(item,index) in sparkConf.history" :key="index" type="primary" size="small" @click="detailHistory(item.recordId)">{{item.confVersion}}</a-tag>
+                    <a-tag color="#606266" style=";margin:2px;" v-for="(item,index) in sparkConf.history" :key="index"
+                           type="primary" size="small" @click="detailHistory(item.recordId)">{{item.confVersion}}
+                    </a-tag>
                 </template>
                 <template slot="operation" slot-scope="text,sparkConf">
-                    <a-icon type="eye" @click="detail(sparkConf.myId)" theme="twoTone" twoToneColor="#42b983" title="配置详情"></a-icon>
-                    <a-icon  v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting" @click="setting(sparkConf)" title="配置文件"></a-icon>
-                </template >
+                    <a-icon type="eye" @click="detail(sparkConf.myId)" theme="twoTone" twoToneColor="#42b983"
+                            title="配置详情"></a-icon>
+                    <a-icon v-hasPermission="'spark:setting'" theme="twoTone" twoToneColor="#4a9ff5" type="setting"
+                            @click="setting(sparkConf)" title="配置文件"></a-icon>
+                </template>
             </a-table>
         </div>
 
@@ -57,10 +61,11 @@
 <script>
     import {mapState} from 'vuex'
     import ConfDetail from './ConfDetail'
+
     export default {
         name: 'Conf',
-        components: { ConfDetail },
-        data () {
+        components: {ConfDetail},
+        data() {
             return {
                 advanced: false,
                 dataSource: [],
@@ -81,7 +86,7 @@
             }
         },
         computed: {
-            columns () {
+            columns() {
                 return [{
                     title: 'appName',
                     dataIndex: 'appName'
@@ -90,37 +95,37 @@
                     dataIndex: 'confVersion',
                     scopedSlots: {customRender: 'confVersion'},
                 },
-                {
-                    title: '创建时间',
-                    dataIndex: 'createTime'
-                },
-                {
-                    title: '历史版本',
-                    dataIndex: 'history',
-                    scopedSlots: {customRender: 'history'},
-                },
-                {
-                    title: '操作',
-                    dataIndex: 'operation',
-                    width: 120,
-                    scopedSlots: {customRender: 'operation'},
-                    fixed: 'right'
-                }]
+                    {
+                        title: '创建时间',
+                        dataIndex: 'createTime'
+                    },
+                    {
+                        title: '历史版本',
+                        dataIndex: 'history',
+                        scopedSlots: {customRender: 'history'},
+                    },
+                    {
+                        title: '操作',
+                        dataIndex: 'operation',
+                        width: 120,
+                        scopedSlots: {customRender: 'operation'},
+                        fixed: 'right'
+                    }]
             },
             ...mapState({
                 user: state => state.account.user
             })
         },
-        mounted () {
+        mounted() {
             this.fetch()
         },
         methods: {
-            search () {
+            search() {
                 this.fetch({
                     ...this.queryParams
                 })
             },
-            reset () {
+            reset() {
                 this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
                 if (this.paginationInfo) {
                     this.paginationInfo.current = this.pagination.defaultCurrent
@@ -131,13 +136,13 @@
                 this.queryParams = {}
                 this.fetch()
             },
-            handleTableChange (pagination, filters, sorter) {
+            handleTableChange(pagination, filters, sorter) {
                 this.paginationInfo = pagination
                 this.fetch({
                     ...this.queryParams
                 })
             },
-            fetch (params = {}) {
+            fetch(params = {}) {
                 this.loading = true
                 if (this.paginationInfo) {
                     // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
@@ -154,7 +159,7 @@
                     ...params
                 }).then((r) => {
                     let data = r.data
-                    const pagination = { ...this.pagination }
+                    const pagination = {...this.pagination}
                     pagination.total = data.total
                     this.loading = false
                     this.dataSource = data.rows

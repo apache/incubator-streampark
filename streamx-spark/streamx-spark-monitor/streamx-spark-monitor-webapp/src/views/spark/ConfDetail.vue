@@ -37,8 +37,10 @@
                 </a-tag>
                 <a-tag v-if="detail.status === 1" color="#87d068">线上版本</a-tag>
                 <a-tag v-else color="#666">历史版本</a-tag>
-                <a-button type="primary" shape="circle" icon="edit" size="small" @click="edit()" style="border-radius: 50%!important;"></a-button>
-                <a-button type="primary" shape="circle" icon="download" size="small" @click="download()" style="border-radius: 50%!important;"></a-button>
+                <a-button type="primary" shape="circle" icon="edit" size="small" @click="edit()"
+                          style="border-radius: 50%!important;"></a-button>
+                <a-button type="primary" shape="circle" icon="download" size="small" @click="download()"
+                          style="border-radius: 50%!important;"></a-button>
             </p>
         </a-col>
         <a-textarea class="conf" ref="conf" v-model="detail.conf"></a-textarea>
