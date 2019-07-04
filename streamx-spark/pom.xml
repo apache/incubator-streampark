@@ -235,7 +235,7 @@
 
             <dependency>
                 <groupId>com.solarmosaic.client</groupId>
-                <artifactId>mail-client_2.11</artifactId>
+                <artifactId>mail-client_${scala.binary.version}</artifactId>
                 <exclusions>
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
