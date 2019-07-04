@@ -277,8 +277,8 @@ cat > $name/pom.xml <<EOF
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.streamxhub.spark</groupId>
-                <groupId>spark-core</groupId>
+                <groupId>com.streamxhub</groupId>
+                <artifactId>streamx-spark-core</artifactId>
                 <version>\${streamx.spark.version}</version>
             </dependency>
         </dependencies>
