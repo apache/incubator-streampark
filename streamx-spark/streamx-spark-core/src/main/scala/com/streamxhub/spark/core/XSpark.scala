@@ -30,6 +30,7 @@ import org.apache.spark.sql.SparkSession
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.JavaConversions._
+
 /**
   *
   */
