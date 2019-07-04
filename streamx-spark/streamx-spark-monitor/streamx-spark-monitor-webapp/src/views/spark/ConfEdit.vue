@@ -5,7 +5,9 @@
                 <a-textarea class="conf" ref="conf" v-model="sparkConf.conf"></a-textarea>
                 <div class="drawer-bootom-button" style="z-index: 999">
                     <a-button style="margin-right: .8rem" @click="goBack">取消</a-button>
-                    <a-button style="margin-right: .8rem" @click="codeDiff(true)" :disabled=" conf ==='' || conf === oldConf">下一步</a-button>
+                    <a-button style="margin-right: .8rem" @click="codeDiff(true)"
+                              :disabled=" conf ==='' || conf === oldConf">下一步
+                    </a-button>
                 </div>
             </div>
             <div v-if="diffVisible">
