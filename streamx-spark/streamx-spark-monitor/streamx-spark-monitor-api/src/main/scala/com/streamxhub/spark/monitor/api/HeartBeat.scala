@@ -103,7 +103,7 @@ object HeartBeat {
           new ExceptionInInitializerError("[StreamX] init config error,please check spark.app.conf.version.")
           System.exit(1)
       }
-      val ignoredParam = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_APP_CONF_SOURCE, SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_PARAM_APP_CONF_CLOUD_VERSION)
+      val ignoredParam = List(SPARK_PARAM_DEPLOY_CONF, SPARK_PARAM_DEBUG_CONF, SPARK_PARAM_DEPLOY_STARTUP, SPARK_PARAM_APP_CONF_SOURCE, SPARK_PARAM_APP_CONF_LOCAL_VERSION, SPARK_PARAM_APP_CONF_CLOUD_VERSION)
       val debugInfo = sparkConf.getAll.filter(x => !ignoredParam.contains(x._1)).sorted.map { case (k, v) => k + "=" + v }.mkString("\n")
       logger.info(s"[StreamX] sparkConf Debug Info:$debugInfo")
       ZooKeeperUtil.create(monitorPath, debugInfo, zookeeperURL)
