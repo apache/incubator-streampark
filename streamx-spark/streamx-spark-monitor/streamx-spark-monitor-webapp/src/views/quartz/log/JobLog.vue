@@ -152,13 +152,13 @@
                     dataIndex: 'times',
                     customRender: (text, row, index) => {
                         if (text < 500) {
-                            return <a-tag color = "green" > {text}  ms < /a-tag>
+                            return <a-tag color = "green" > {text}  ms </a-tag>
                         } else if (text < 1000) {
-                            return <a- tag color = "cyan" > {text} ms < /a-tag>
+                            return <a-tag color = "cyan" > {text} ms </a-tag>
                         } else if (text < 1500) {
-                            return <a-tag color = "orange" > {text} ms < /a-tag>
+                            return <a-tag color = "orange" > {text} ms </a-tag>
                         } else {
-                            return <a-tag color = "red" > {text} ms < /a-tag>
+                            return <a-tag color = "red" > {text} ms </a-tag>
                         }
                     },
                     sorter: true,
@@ -174,9 +174,9 @@
                     customRender: (text, row, index) => {
                         switch (text) {
                             case '0':
-                                return <a-tag color = "green" > 成功 < /a-tag>
+                                return <a-tag color = "green" > 成功 </a-tag>
                             case '1':
-                                return <a-tag color = "orange" > 失败 < /a-tag>
+                                return <a-tag color = "orange" > 失败 </a-tag>
                             default:
                                 return text
                         }

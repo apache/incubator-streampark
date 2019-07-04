@@ -187,9 +187,9 @@
                     customRender: (text, row, index) => {
                         switch (text) {
                             case '0':
-                                return <a-tag color = "green" > 正常 < /a-tag>
+                                return <a-tag color = "green" > 正常 </a-tag>
                             case '1':
-                                return <a-tag color = "orange" > 暂停 < /a-tag>
+                                return <a-tag color = "orange" > 暂停 </a-tag>
                             default:
                                 return text
                         }
