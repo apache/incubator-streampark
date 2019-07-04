@@ -200,9 +200,9 @@
                     customRender: (text, row, index) => {
                         switch (text) {
                             case '0':
-                                return <a-tag color = "red" > 锁定 < /a-tag>
+                                return <a-tag color = "red" > 锁定 </a-tag>
                             case '1':
-                                return <a-tag color = "cyan" > 有效 < /a-tag>
+                                return <a-tag color = "cyan" > 有效 </a-tag>
                             default:
                                 return text
                         }

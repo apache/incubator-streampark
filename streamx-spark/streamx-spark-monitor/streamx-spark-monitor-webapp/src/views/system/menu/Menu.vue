@@ -147,9 +147,9 @@
                     customRender: (text, row, index) => {
                         switch (text) {
                             case '0':
-                                return <a-tag color = "cyan" > 菜单 < /a-tag>
+                                return <a-tag color = "cyan" > 菜单 </a-tag>
                             case '1':
-                                return <a-tag color = "pink" > 按钮 < /a-tag>
+                                return <a-tag color = "pink" > 按钮 </a-tag>
                             default:
                                 return text
                         }
