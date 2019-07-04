@@ -53,7 +53,7 @@ object ZooKeeperUtil {
           // val retryPolicy:RetryPolicy = new RetryForever(retryIntervalMs)
           // curator链接zookeeper的策略:RetryUntilElapsed maxElapsedTimeMs:最大重试时间 sleepMsBetweenRetries:每次重试间隔 重试时间超过maxElapsedTimeMs后，就不再重试
           // val retryPolicy:RetryPolicy = new RetryUntilElapsed(2000, 3000)
-          val retryPolicy: RetryPolicy = new RetryNTimes(3, 5000)
+          val retryPolicy: RetryPolicy = new RetryNTimes(5, 2000)
           val client = CuratorFrameworkFactory
             .builder
             .connectString(url)
