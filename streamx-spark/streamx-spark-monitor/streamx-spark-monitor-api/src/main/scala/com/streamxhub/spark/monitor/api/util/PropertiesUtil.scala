@@ -91,7 +91,7 @@ object PropertiesUtil {
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).asJava
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
       inputStream.close()
     }
@@ -110,7 +110,7 @@ object PropertiesUtil {
       properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap.asJava
     } catch {
       case e: IOException =>
-        throw new IllegalArgumentException(s"Failed when loading Spark properties from $filename", e)
+        throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
       inReader.close()
     }
