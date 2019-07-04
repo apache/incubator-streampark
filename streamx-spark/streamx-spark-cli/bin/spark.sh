@@ -85,12 +85,14 @@ done
 # Get standard environment variables
 PRGDIR=`dirname "$PRG"`
 
+RUN_ARGS="$@"
 #global variables....
 APP_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
 APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_LOG="$APP_BASE"/logs
 APP_LIB="$APP_BASE"/lib
+APP_BIN="$APP_BASE"/bin
 APP_TEMP="$APP_BASE"/temp
 [[ ! -d "$APP_LOG" ]] && mkdir ${APP_LOG} >/dev/null
 [[ ! -d "$APP_TEMP" ]] && mkdir ${APP_TEMP} >/dev/null
@@ -126,7 +128,6 @@ if ${os400}; then
   export QIBM_MULTI_THREADED=Y
 fi
 
-
 chooseApp() {
 read -p "Please select application index to shutdown:
 $1
@@ -153,14 +154,30 @@ doStart() {
        echo_r "Usage: properties file:$proper not exists!!! ";
        exit 1;
     fi
-    #spark app name
-    local app_name=$(grep 'spark.app.name' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
-    # spark main jar...
+
+    local isYml=$(echo "$app_proper"|grep "\.yml$"|wc -l)
+
+    if [[ isYml -eq 1 ]]; then
+        #source yaml.sh
+        source ${APP_BIN}/yaml.sh
+        #
+        yaml_get ${app_proper}
+         #spark app name
+        local app_name=$(echo ${spark_app_name})
+        #spark main class
+        local main=$(echo ${spark_main_class})
+        #spark main parameter..
+        local main_params=$(echo ${spark_main_params})
+    else
+        #spark app name
+        local app_name=$(grep 'spark.app.name' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
+        #spark main class
+        local main=$(grep 'spark.main.class' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
+        #spark main parameter..
+        local main_params=$(grep 'spark.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+    fi
+     # spark main jar...
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
-    #spark main class
-    local main=$(grep 'spark.main.class' ${app_proper} | grep -v '^#' | awk -F'=' '{print $2}')
-    #spark main parameter..
-    local main_params=$(grep 'spark.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
     #spark application id file
     local app_pid="$APP_TEMP/${app_name}.pid"
     #spark application lock file
@@ -204,12 +221,14 @@ doStart() {
         local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
         sudo -u hdfs spark2-submit \
-            -Dspark.conf=${app_proper} \
+            --files ${app_proper} \
+            --conf "spark.deploy.conf=${app_proper}" \
+	        --conf "spark.deploy.startup=$0 $RUN_ARGS" \
             --name ${app_name} \
             --queue spark \
-            --jars ${jars} ${app_params} \
+            --jars ${jars} ${app_params}  \
             --class ${main}  ${main_jar} ${main_params} \
-            >> ${app_out} 2>&1
+            >> ${app_out} 2>&1 &
 
         exit_code=$?
 
