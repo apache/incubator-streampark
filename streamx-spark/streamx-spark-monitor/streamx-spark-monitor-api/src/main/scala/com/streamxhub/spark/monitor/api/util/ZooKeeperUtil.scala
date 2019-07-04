@@ -23,7 +23,6 @@ package com.streamxhub.spark.monitor.api.util
 
 import java.nio.charset.StandardCharsets
 
-import com.google.common.base.Objects
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
@@ -97,7 +96,7 @@ object ZooKeeperUtil {
           }
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
           val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data)
-          Objects.equal(path, opResult)
+          path == opResult
         case _ => false
       }
     } catch {
@@ -115,7 +114,7 @@ object ZooKeeperUtil {
         case null =>
           val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
           val opResult = client.create.creatingParentsIfNeeded.withMode(mode).forPath(path, value.getBytes(StandardCharsets.UTF_8))
-          Objects.equal(path, opResult)
+          path == opResult
         case _ =>
           val opResult = client.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8))
           opResult != null
