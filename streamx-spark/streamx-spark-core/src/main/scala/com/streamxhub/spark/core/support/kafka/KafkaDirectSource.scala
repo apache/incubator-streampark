@@ -24,7 +24,7 @@ package com.streamxhub.spark.core.support.kafka
 import java.util.concurrent.ConcurrentHashMap
 
 import com.streamxhub.spark.core.source.Source
-import com.streamxhub.spark.core.support.kafka.manager.KafkaManager
+import com.streamxhub.spark.core.support.kafka.offset.KafkaClient
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
@@ -69,10 +69,10 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
 
   lazy val groupId = kafkaParams.get("group.id")
 
-  val km = new KafkaManager(ssc.sparkContext.getConf)
-
 
   override type SourceType = ConsumerRecord[K, V]
+
+  val kafkaClient = new KafkaClient(ssc.sparkContext.getConf)
 
   /**
     * 获取DStream 流
@@ -80,7 +80,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     * @return
     */
   override def getDStream[R: ClassTag](messageHandler: ConsumerRecord[K, V] => R): DStream[R] = {
-    val stream = km.createDirectStream[K, V](ssc, kafkaParams, topicSet)
+    val stream = kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
     canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
     stream.transform((rdd, time) => {
       offsetRanges.put(time.milliseconds, rdd.asInstanceOf[HasOffsetRanges].offsetRanges)
@@ -92,14 +92,14 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     * 更新Offset 操作 一定要放在所有逻辑代码的最后
     * 这样才能保证,只有action执行成功后才更新offset
     */
-  def updateOffsets(time: Long): Unit = {
+  def updateOffset(time: Long): Unit = {
     // 更新 offset
     if (groupId.isDefined) {
-      logInfo(s"updateOffsets with ${km.offsetManagerType} for time $time offsetRanges: $offsetRanges")
+      logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
       val offset = offsetRanges.get(time)
-      km.offsetManagerType match {
+      kafkaClient.offsetStoreType match {
         case "kafka" => canCommitOffsets.commitAsync(offset)
-        case _ => km.updateOffsets(groupId.get, offset)
+        case _ => kafkaClient.updateOffsets(groupId.get, offset)
       }
     }
     offsetRanges.remove(time)

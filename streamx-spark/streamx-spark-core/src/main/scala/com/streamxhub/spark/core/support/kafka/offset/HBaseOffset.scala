@@ -19,7 +19,7 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.support.kafka.manager
+package com.streamxhub.spark.core.support.kafka.offset
 
 import java.util
 
@@ -39,8 +39,7 @@ import scala.collection.mutable
   *
   * Hbase 存储Offset
   */
-class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
-
+class HBaseOffset(val sparkConf: SparkConf) extends Offsets {
 
   private lazy val tableName = storeParams("hbase.table")
   private lazy val familyName = storeParams.getOrElse("hbase.table.family", "tpo")
@@ -51,18 +50,13 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
 
   @transient
   private lazy val table: Table = {
-
     val conn = HBaseClient.connect(storeParams)
-
     if (!conn.getAdmin.tableExists(TableName.valueOf(tableName))) {
       val tableDesc: HTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName))
-
       tableDesc.addFamily(new HColumnDescriptor(familyName))
-
       conn.getAdmin.createTable(tableDesc)
     }
     conn.getTable(TableName.valueOf(tableName))
-
   }
 
 
@@ -83,41 +77,40 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
     * @param topics
     * @return
     */
-  override def getOffsets(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
+  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val storedOffsetMap = new mutable.HashMap[TopicPartition, Long]()
-
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
 
-    for (topic <- topics) {
-      val key = generateKey(groupId, topic)
-      val filter = new PrefixFilter(key.getBytes)
+    topics.foreach(topic => {
+      val filter = new PrefixFilter(key(groupId, topic).getBytes)
       val scan = new Scan().setFilter(filter)
       val result = table.getScanner(scan)
+
       result.foreach(r => {
         var topic = ""
         var partition = 0
         var offset = 0L
-        r.rawCells().map(cell =>
+        while (r.advance()) {
+          val cell = r.current()
           Bytes.toString(CellUtil.cloneQualifier(cell)) match {
             case "topic" => topic = Bytes.toString(CellUtil.cloneValue(cell))
             case "partition" => partition = Bytes.toInt(CellUtil.cloneValue(cell))
             case "offset" => offset = Bytes.toLong(CellUtil.cloneValue(cell))
             case _ =>
           }
-        )
-
+        }
         // 如果Offset失效了，则用 earliestOffsets 替代
-        val tp = new TopicPartition(topic, partition)
-        val finalOffset = earliestOffsets.get(tp) match {
+        val topicPartition = new TopicPartition(topic, partition)
+        val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
-            logWarning(s"consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets已经过时，更新为: $left")
+            logWarning(s"consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets已经过时，更新为: $left")
             left
           case _ => offset
         }
-        storedOffsetMap += tp -> finalOffset
+        storedOffsetMap += topicPartition -> finalOffset
       })
       result.close()
-    }
+    })
 
     // fix bug
     // 如果GroupId 已经在Hbase存在了，这个时候新加一个topic ，则新加的Topic 不会被消费
@@ -137,10 +130,10 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
     * @param groupId
     * @param offsetInfos
     */
-  override def updateOffsets(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
+  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
     val puts = offsetInfos.map {
       case (tp, offset) =>
-        val put: Put = new Put(Bytes.toBytes(s"${generateKey(groupId, tp.topic)}#${tp.partition}"))
+        val put: Put = new Put(Bytes.toBytes(s"${key(groupId, tp.topic)}#${tp.partition}"))
         put.addColumn(familyNameBytes, topicBytes, Bytes.toBytes(tp.topic))
         put.addColumn(familyNameBytes, partitionBytes, Bytes.toBytes(tp.partition))
         put.addColumn(familyNameBytes, offsetBytes, Bytes.toBytes(offset))
@@ -157,14 +150,14 @@ class HBaseOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
     * @param groupId
     * @param topics
     */
-  override def delOffsets(groupId: String, topics: Set[String]): Unit = {
+  override def delete(groupId: String, topics: Set[String]): Unit = {
 
     val filterList = new FilterList(FilterList.Operator.MUST_PASS_ONE)
 
-    for (topic <- topics) {
-      val filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new BinaryPrefixComparator(Bytes.toBytes(s"${generateKey(groupId, topic)}#")))
+    topics.foreach(topic => {
+      val filter = new RowFilter(CompareFilter.CompareOp.EQUAL, new BinaryPrefixComparator(Bytes.toBytes(s"${key(groupId, topic)}#")))
       filterList.addFilter(filter)
-    }
+    })
 
     val scan = new Scan()
     scan.setFilter(filterList)

@@ -19,7 +19,7 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.support.kafka.manager
+package com.streamxhub.spark.core.support.kafka.offset
 
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
@@ -29,7 +29,7 @@ import org.apache.spark.SparkConf
   *
   * 默认Offset管理，不做任何操作
   */
-class DefaultOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
+class DefaultOffset(val sparkConf: SparkConf) extends Offsets {
 
   /**
     * 获取存储的Offset
@@ -38,7 +38,7 @@ class DefaultOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
     * @param topics
     * @return
     */
-  override def getOffsets(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
+  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     Map.empty[TopicPartition, Long]
   }
 
@@ -48,7 +48,8 @@ class DefaultOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
     * @param groupId
     * @param offsetInfos
     */
-  override def updateOffsets(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
+  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
 
   }
+
 }

@@ -19,7 +19,7 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.support.kafka.manager
+package com.streamxhub.spark.core.support.kafka.offset
 
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
@@ -32,16 +32,13 @@ import scala.collection.JavaConversions._
   *
   * Offset 存储到Redis
   */
-private[kafka] class RedisOffsetsManager(val sparkConf: SparkConf) extends OffsetsManager {
+private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offsets {
 
-  override def getOffsets(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
-
+  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
-
-
-    val offsetMap = close { jedis =>
+    val offsetMap =  close { redis =>
       topics.flatMap(topic => {
-        jedis.hgetAll(generateKey(groupId, topic)).map {
+        redis.hgetAll(key(groupId, topic)).map {
           case (partition, offset) =>
             // 如果Offset失效了，则用 earliestOffsets 替代
             val tp = new TopicPartition(topic, partition.toInt)
@@ -68,19 +65,19 @@ private[kafka] class RedisOffsetsManager(val sparkConf: SparkConf) extends Offse
   }
 
 
-  override def updateOffsets(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
-    close { jedis =>
+  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
+    close { redis =>
       for ((tp, offset) <- offsetInfos) {
-        jedis.hset(generateKey(groupId, tp.topic), tp.partition().toString, offset.toString)
+        redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString)
       }
     }(connect(storeParams))
     logInfo(s"updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
   }
 
-  override def delOffsets(groupId: String, topics: Set[String]): Unit = {
-    close { jedis =>
+  override def delete(groupId: String, topics: Set[String]): Unit = {
+    close { redis =>
       for (topic <- topics) {
-        jedis.del(generateKey(groupId, topic))
+        redis.del(key(groupId, topic))
       }
     }(connect(storeParams))
     logInfo(s"delOffsets [ $groupId,${topics.mkString(",")} ]")

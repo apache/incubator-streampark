@@ -57,15 +57,12 @@ object RedisClient {
     * @return
     */
   def connect(params: Map[String, String]): Jedis = {
-
     val hosts = params.getOrElse("redis.hosts", "localhost").split(",").map(_.trim)
     val port = params.getOrElse("redis.port", "6379").toInt
     val auth = Try(params("redis.auth")) getOrElse null
     val dbNum = params.getOrElse("redis.dbnum", "0").toInt
     val timeout = params.getOrElse("redis.timeout", "2000").toInt
-
     val endpoints = hosts.map(RedisEndpoint(_, port, auth, dbNum, timeout))
-
     connect(endpoints)
   }
 
@@ -160,10 +157,10 @@ object RedisClient {
   }
 
 
-  def close[R](f: Jedis => R)(implicit jedis: Jedis): R = {
-    val result = f(jedis)
+  def close[R](f: Jedis => R)(implicit redis: Jedis): R = {
+    val result = f(redis)
     Try {
-      jedis.close()
+      redis.close()
     } match {
       case Success(_) => logger.debug("jedis.close successful.")
       case Failure(e) => logger.error(s"jedis.close failed.error:${e.getLocalizedMessage}")
