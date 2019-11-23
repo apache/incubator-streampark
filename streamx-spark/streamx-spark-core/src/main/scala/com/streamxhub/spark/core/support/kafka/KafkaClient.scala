@@ -44,7 +44,7 @@ import org.apache.spark.{SparkConf, SparkContext}
 import scala.reflect.ClassTag
 
 
-private[kafka] class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
+class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   // 自定义
   private lazy val offsets = {

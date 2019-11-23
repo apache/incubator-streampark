@@ -19,11 +19,11 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.support.kafka
+package com.streamxhub.spark.core.source
 
 import java.util.concurrent.ConcurrentHashMap
 
-import com.streamxhub.spark.core.source.Source
+import com.streamxhub.spark.core.support.kafka.KafkaClient
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
