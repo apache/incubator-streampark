@@ -24,11 +24,10 @@ package com.streamxhub.spark.core.support.kafka
 import java.util.concurrent.ConcurrentHashMap
 
 import com.streamxhub.spark.core.source.Source
-import com.streamxhub.spark.core.support.kafka.offset.KafkaClient
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream
-import org.apache.spark.streaming.kafka010.{CanCommitOffsets, HasOffsetRanges, OffsetRange}
+import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
 
 import scala.language.postfixOps
 import scala.reflect.ClassTag
@@ -50,7 +49,6 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
   // 保存 offset
   private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
 
-  private var canCommitOffsets: CanCommitOffsets = _
 
   // 分区数
   lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
@@ -67,8 +65,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     } toMap
   } ++ specialKafkaParams ++ Map("enable.auto.commit" -> "false")
 
-  lazy val groupId = kafkaParams.get("group.id")
-
+  lazy val groupId: Option[String] = kafkaParams.get("group.id")
 
   override type SourceType = ConsumerRecord[K, V]
 
@@ -79,13 +76,12 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     *
     * @return
     */
-  override def getDStream[R: ClassTag](messageHandler: ConsumerRecord[K, V] => R): DStream[R] = {
+  override def getDStream[R: ClassTag](recordHandler: ConsumerRecord[K, V] => R): DStream[R] = {
     val stream = kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
-    canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
     stream.transform((rdd, time) => {
       offsetRanges.put(time.milliseconds, rdd.asInstanceOf[HasOffsetRanges].offsetRanges)
       rdd
-    }).map(messageHandler)
+    }).map(recordHandler)
   }
 
   /**
@@ -97,10 +93,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     if (groupId.isDefined) {
       logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
       val offset = offsetRanges.get(time)
-      kafkaClient.offsetStoreType match {
-        case "kafka" => canCommitOffsets.commitAsync(offset)
-        case _ => kafkaClient.updateOffsets(groupId.get, offset)
-      }
+      kafkaClient.updateOffset(groupId.get, offset)
     }
     offsetRanges.remove(time)
   }

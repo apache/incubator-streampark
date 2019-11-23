@@ -19,7 +19,7 @@
   * under the License.
   */
 
-package com.streamxhub.spark.core.support.kafka.offset
+package com.streamxhub.spark.core.support.kafka
 
 /**
   *
@@ -30,17 +30,19 @@ package com.streamxhub.spark.core.support.kafka.offset
 import java.lang.reflect.Constructor
 import java.{util => ju}
 
+import com.streamxhub.spark.core.support.kafka.offset.{DefaultOffset, HBaseOffset, Offset, RedisOffset}
 import com.streamxhub.spark.core.util.Logger
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.rdd.RDD
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010._
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.reflect.ClassTag
+
 
 private[kafka] class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
@@ -65,11 +67,13 @@ private[kafka] class KafkaClient(val sparkConf: SparkConf) extends Logger with S
         val constructorTakingSparkConf = constructors.find { c =>
           c.getParameterTypes.sameElements(Array(classOf[SparkConf]))
         }
-        constructorTakingSparkConf.get.newInstance(sparkConf).asInstanceOf[Offsets]
+        constructorTakingSparkConf.get.newInstance(sparkConf).asInstanceOf[Offset]
     }
   }
 
   def offsetStoreType: String = offsets.storeType
+
+  private var canCommitOffsets: CanCommitOffsets = _
 
   /**
     *
@@ -85,27 +89,32 @@ private[kafka] class KafkaClient(val sparkConf: SparkConf) extends Logger with S
                                                    topics: Set[String]
                                                   ): InputDStream[ConsumerRecord[K, V]] = {
 
+
     var consumerOffsets = Map.empty[TopicPartition, Long]
 
     kafkaParams.get("group.id") match {
       case Some(groupId) =>
-        logInfo(s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
         consumerOffsets = offsets.get(groupId.toString, topics)
+        logInfo(s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
       case _ =>
         logInfo(s"createDirectStream witchOut group.id topics ${topics.mkString(",")}")
     }
 
     if (consumerOffsets.nonEmpty) {
       logInfo(s"read topics ==[$topics]== from offsets ==[$consumerOffsets]==")
-      KafkaUtils.createDirectStream[K, V](ssc,
+      val stream = KafkaUtils.createDirectStream[K, V](ssc,
         LocationStrategies.PreferConsistent,
         ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets)
       )
+      canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
+      stream
     } else {
-      KafkaUtils.createDirectStream[K, V](ssc,
+      val stream = KafkaUtils.createDirectStream[K, V](ssc,
         LocationStrategies.PreferConsistent,
         ConsumerStrategies.Subscribe[K, V](topics, kafkaParams)
       )
+      canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
+      stream
     }
 
   }
@@ -132,11 +141,15 @@ private[kafka] class KafkaClient(val sparkConf: SparkConf) extends Logger with S
     * 更新 Offsets
     *
     * @param groupId
-    * @param offsetRange
+    * @param offset
     */
-  def updateOffsets(groupId: String, offsetRange: Array[OffsetRange]): Unit = {
-    val offsetInfos = offsetRange.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
-    offsets.update(groupId, offsetInfos)
+  def updateOffset(groupId: String, offset: Array[OffsetRange]): Unit = {
+    offsetStoreType match {
+      case "kafka" => canCommitOffsets.commitAsync(offset)
+      case _ =>
+        val tps = offset.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
+        offsets.update(groupId, tps)
+    }
   }
 
 }

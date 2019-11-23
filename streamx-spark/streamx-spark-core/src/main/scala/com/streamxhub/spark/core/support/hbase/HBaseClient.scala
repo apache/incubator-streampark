@@ -55,13 +55,8 @@ object HBaseClient {
   * spark.hbase.hbase.master=ip:port
   * */
   def connect(sparkConf: SparkConf): Connection = {
-
     val conf = HBaseConfiguration.create
-
-    for ((key, value) <- sparkConf.getAllWithPrefix("spark.hbase.")) {
-      conf.set(key, value)
-    }
-
+    sparkConf.getAllWithPrefix("spark.hbase.").foreach { case (k, v) => conf.set(k, v) }
     connect(conf)
   }
 

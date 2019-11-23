@@ -32,17 +32,16 @@ import scala.collection.JavaConversions._
   *
   * Offset 存储到Redis
   */
-private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offsets {
+private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
-    val offsetMap =  close { redis =>
+    val offsetMap = close { redis =>
       topics.flatMap(topic => {
         redis.hgetAll(key(groupId, topic)).map {
           case (partition, offset) =>
             // 如果Offset失效了，则用 earliestOffsets 替代
             val tp = new TopicPartition(topic, partition.toInt)
-
             val finalOffset = earliestOffsets.get(tp) match {
               case Some(left) if left > offset.toLong =>
                 logWarning(s"consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets已经过时，更新为: $left")
@@ -65,20 +64,16 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offsets {
   }
 
 
-  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
+  override def update(groupId: String, offsets: Map[TopicPartition, Long]): Unit = {
     close { redis =>
-      for ((tp, offset) <- offsetInfos) {
-        redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString)
-      }
+      offsets.foreach { case (tp, offset) => redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString) }
     }(connect(storeParams))
-    logInfo(s"updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
+    logInfo(s"updateOffsets [ $groupId,${offsets.mkString(",")} ]")
   }
 
   override def delete(groupId: String, topics: Set[String]): Unit = {
     close { redis =>
-      for (topic <- topics) {
-        redis.del(key(groupId, topic))
-      }
+      topics.foreach(x => redis.del(key(groupId, x)))
     }(connect(storeParams))
     logInfo(s"delOffsets [ $groupId,${topics.mkString(",")} ]")
   }
