@@ -29,7 +29,7 @@ import org.apache.spark.SparkConf
   *
   * 默认Offset管理，不做任何操作
   */
-class DefaultOffset(val sparkConf: SparkConf) extends Offsets {
+private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
 
   /**
     * 获取存储的Offset

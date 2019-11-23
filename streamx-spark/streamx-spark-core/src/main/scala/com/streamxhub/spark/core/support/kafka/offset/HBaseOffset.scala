@@ -39,7 +39,7 @@ import scala.collection.mutable
   *
   * Hbase 存储Offset
   */
-class HBaseOffset(val sparkConf: SparkConf) extends Offsets {
+private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
   private lazy val tableName = storeParams("hbase.table")
   private lazy val familyName = storeParams.getOrElse("hbase.table.family", "tpo")

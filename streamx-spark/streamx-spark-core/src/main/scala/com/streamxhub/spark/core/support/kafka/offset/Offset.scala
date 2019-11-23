@@ -14,22 +14,20 @@ import scala.util.Try
 /**
   * Offset 管理
   */
-trait Offsets extends Logger with Serializable {
+trait Offset extends Logger with Serializable {
 
   val sparkConf: SparkConf
 
-  lazy val storeParams: Map[String, String] = sparkConf
-    .getAllWithPrefix(s"spark.source.kafka.offset.store.")
-    .toMap
-
   lazy val storeType: String = storeParams.getOrElse("type", "none")
+
+  lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+
+  lazy val reset: String = sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
 
   lazy val (host, port) = sparkConf.get("spark.source.kafka.consume.bootstrap.servers")
     .split(",").head.split(":") match {
     case Array(h, p) => (h, p.toInt)
   }
-
-  lazy val reset = sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
 
   /**
     * 获取存储的Offset
