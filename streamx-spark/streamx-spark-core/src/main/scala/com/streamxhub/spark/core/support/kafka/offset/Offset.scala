@@ -52,7 +52,7 @@ trait Offset extends Logger with Serializable {
     * @param groupId
     * @param topics
     */
-  def delete(groupId: String, topics: Set[String]): Unit = {}
+  def delete(groupId: String, topics: Set[String]): Unit
 
   /**
     * 生成Key

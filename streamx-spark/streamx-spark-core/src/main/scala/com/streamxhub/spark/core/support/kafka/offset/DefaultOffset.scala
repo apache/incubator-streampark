@@ -52,4 +52,13 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
 
   }
 
+  /**
+    * 删除 Offsets
+    *
+    * @param groupId
+    * @param topics
+    */
+  override def delete(groupId: String, topics: Set[String]): Unit = {
+
+  }
 }

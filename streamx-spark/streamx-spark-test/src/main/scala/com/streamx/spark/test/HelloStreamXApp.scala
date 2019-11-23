@@ -2,7 +2,7 @@ package com.streamx.spark.test
 
 import org.apache.spark.streaming.StreamingContext
 import com.streamxhub.spark.core.XStreaming
-import com.streamxhub.spark.core.support.kafka.KafkaDirectSource
+import com.streamxhub.spark.core.source.KafkaDirectSource
 
 object HelloStreamXApp extends XStreaming {
 
