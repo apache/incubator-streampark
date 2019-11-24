@@ -129,7 +129,7 @@ trait Offset extends Logger with Serializable {
         val offsetResponse = consumer.getOffsetsBefore(offsetRequest)
 
         if (offsetResponse.hasError) {
-          logError(s"get topic offset failed offsetResponse $offsetResponse")
+          logError(s"[StreamX] get topic offset failed offsetResponse $offsetResponse")
           throw new SparkException(s"get topic offset failed $leaderHost $taps")
         }
         offsetResponse.offsetsGroupedByTopic.values.foreach(partitionToResponse => {

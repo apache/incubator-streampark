@@ -44,7 +44,7 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
             val tp = new TopicPartition(topic, partition.toInt)
             val finalOffset = earliestOffsets.get(tp) match {
               case Some(left) if left > offset.toLong =>
-                logWarning(s"consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets已经过时，更新为: $left")
+                logWarning(s"[StreamX] storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
                 left
               case _ => offset.toLong
             }
@@ -59,7 +59,7 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
       case "largest" => getLatestOffsets(topics.toSeq) ++ offsetMap
       case _ => getEarliestOffsets(topics.toSeq) ++ offsetMap
     }
-    logInfo(s"getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
+    logInfo(s"[StreamX] getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
     offsetMaps
   }
 
@@ -68,13 +68,13 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
     close { redis =>
       offsets.foreach { case (tp, offset) => redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString) }
     }(connect(storeParams))
-    logInfo(s"updateOffsets [ $groupId,${offsets.mkString(",")} ]")
+    logInfo(s"[StreamX] storeType:Redis,updateOffsets [ $groupId,${offsets.mkString(",")} ]")
   }
 
   override def delete(groupId: String, topics: Set[String]): Unit = {
     close { redis =>
       topics.foreach(x => redis.del(key(groupId, x)))
     }(connect(storeParams))
-    logInfo(s"delOffsets [ $groupId,${topics.mkString(",")} ]")
+    logInfo(s"[StreamX] storeType:Redis,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
 }
