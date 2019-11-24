@@ -109,8 +109,7 @@ object PropertiesUtil {
       properties.load(inReader)
       properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap.asJava
     } catch {
-      case e: IOException =>
-        throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
+      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
       inReader.close()
     }
