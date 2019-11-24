@@ -27,7 +27,7 @@ object HelloStreamXApp extends XStreaming {
       rdd.map(_._2).foreach(println)
 
       //提交offset
-      source.updateOffset(time.milliseconds)
+      source.updateOffset(time)
     })
   }
 
