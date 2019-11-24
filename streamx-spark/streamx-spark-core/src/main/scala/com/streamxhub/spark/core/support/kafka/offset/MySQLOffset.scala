@@ -17,8 +17,18 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   private lazy val user = storeParams("mysql.user")
   private lazy val password = storeParams("mysql.password")
 
+
   /**
-    * 获取存储的Offset
+    *
+    *  存放offset的表模型如下,(topic+groupId+partition 为联合唯一主键)
+    *  |----------------------------------------------------------------------------------|
+    *  | topic         |     groupId        |     partition      |         offset         |
+    *  |--------------------------------------------------------------------------———————-|
+    *  | topic_001    |     groupId_001     |     0             | 197                     |
+    *  |----------------------------------------------------------------------------------|
+    *  | topic_001    |     groupId_001     |     1             | 200                     |
+    *  |----------------------------------------------------------------------------------|
+    *  ......
     *
     * @param groupId
     * @param topics
