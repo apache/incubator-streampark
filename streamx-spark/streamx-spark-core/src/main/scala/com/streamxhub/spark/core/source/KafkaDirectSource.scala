@@ -25,7 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 
 import com.streamxhub.spark.core.support.kafka.KafkaClient
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.spark.streaming.StreamingContext
+import org.apache.spark.streaming.{StreamingContext, Time}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
 
@@ -87,13 +87,14 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     * 更新Offset 操作 一定要放在所有逻辑代码的最后
     * 这样才能保证,只有action执行成功后才更新offset
     */
-  def updateOffset(time: Long): Unit = {
+  def updateOffset(time: Time): Unit = {
     // 更新 offset
+    val milliseconds = time.milliseconds
     if (groupId.isDefined) {
       logInfo(s"[StreamX] updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
-      val offsetRange = offsetRanges.get(time)
+      val offsetRange = offsetRanges.get(milliseconds)
       kafkaClient.updateOffset(groupId.get, offsetRange)
     }
-    offsetRanges.remove(time)
+    offsetRanges.remove(milliseconds)
   }
 }
