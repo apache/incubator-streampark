@@ -43,6 +43,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
           """.stripMargin
           SQL(sql).execute.apply()
         }
+        logWarning(s"[StreamX] storeType:MySQL,table: $table is not exist,auto created...")
         Map.empty[TopicPartition, Long]
       case Some(_) =>
         DB.readOnly { implicit session =>
@@ -69,9 +70,10 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
       offsetInfos.foreach { case (tp, offset) =>
         val sql = s"replace into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?)"
         val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update().apply()
-        if (updated != 1) {
+        if (updated == 0) {
           throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
         }
+        logInfo(s"[StreamX] storeType:MySQL,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
       }
     }
   }
@@ -89,5 +91,6 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
         SQL(sql).bind(topic, groupId).update().apply()
       })
     }
+    logInfo(s"[StreamX] storeType:MySQL,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
 }

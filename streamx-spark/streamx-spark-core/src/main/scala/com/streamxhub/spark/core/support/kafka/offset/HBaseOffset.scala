@@ -61,13 +61,13 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
 
   /** 存放offset的表模型如下，请自行优化和扩展，请把每个rowkey对应的record的version设置为1（默认值），因为要覆盖原来保存的offset，而不是产生多个版本
-    * ----------------------------------------------------------------------------------------------------
-    * rowKey            |  column family                                                          |
-    * --------------------------------------------------------------------------
-    * |                 |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
-    * ----------------------------------------------------------------------------------------------
-    * topic#partition   |   topic                |   partition             |    offset            |
-    * ---------------------------------------------------------------------------------------------------
+    * |---------------------------------------------------------------------------------------------------|
+    * |rowKey                   |  column family                                                          |
+    * |--------------------------------------------------------------------------—————————————————————————|
+    * |                         |  column:topic(string)  |  column:partition(int)  | column:offset(long)  |
+    * |----------------------------------------------------------------------------------------------—————|
+    * |topic#groupId#partition  |   topic                |   partition             |    offset            |
+    * |---------------------------------------------------------------------------------------------------|
     */
 
   /**
@@ -85,7 +85,6 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
       val filter = new PrefixFilter(key(groupId, topic).getBytes)
       val scan = new Scan().setFilter(filter)
       val result = table.getScanner(scan)
-
       result.foreach(r => {
         var topic = ""
         var partition = 0
@@ -103,7 +102,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         val topicPartition = new TopicPartition(topic, partition)
         val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
-            logWarning(s"consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets已经过时，更新为: $left")
+            logWarning(s"[StreamX] storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
             left
           case _ => offset
         }
@@ -119,7 +118,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
       case _ => getEarliestOffsets(topics.toSeq) ++ storedOffsetMap
     }
 
-    logInfo(s"getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
+    logInfo(s"[StreamX] storeType:HBase,getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
 
     offsetMaps
   }
@@ -140,7 +139,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         put
     }.toList
     table.put(puts)
-    logInfo(s"updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
+    logInfo(s"[StreamX] storeType:HBase,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
   }
 
   /**
@@ -171,6 +170,6 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
     }
     rs.close()
     table.delete(deletes)
-    logInfo(s"deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
+    logInfo(s"[StreamX] storeType:HBase,deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
   }
 }

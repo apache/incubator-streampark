@@ -90,7 +90,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
   def updateOffset(time: Long): Unit = {
     // 更新 offset
     if (groupId.isDefined) {
-      logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
+      logInfo(s"[StreamX] updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
       val offsetRange = offsetRanges.get(time)
       kafkaClient.updateOffset(groupId.get, offsetRange)
     }
