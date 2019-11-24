@@ -20,15 +20,15 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
 
   /**
     *
-    *  存放offset的表模型如下,(topic+groupId+partition 为联合唯一主键)
-    *  |----------------------------------------------------------------------------------|
-    *  | topic         |     groupId        |     partition      |         offset         |
-    *  |--------------------------------------------------------------------------———————-|
-    *  | topic_001    |     groupId_001     |     0             | 197                     |
-    *  |----------------------------------------------------------------------------------|
-    *  | topic_001    |     groupId_001     |     1             | 200                     |
-    *  |----------------------------------------------------------------------------------|
-    *  ......
+    * 存放offset的表模型如下,(topic+groupId+partition 为联合唯一主键)
+    * |----------------------------------------------------------------------------------|
+    * | topic         |     groupId        |     partition      |         offset         |
+    * |--------------------------------------------------------------------------———————-|
+    * | topic_001    |     groupId_001     |     0             | 197                     |
+    * |----------------------------------------------------------------------------------|
+    * | topic_001    |     groupId_001     |     1             | 200                     |
+    * |----------------------------------------------------------------------------------|
+    * ......
     *
     * @param groupId
     * @param topics
@@ -78,7 +78,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
     DB.localTx { implicit session =>
       offsetInfos.foreach { case (tp, offset) =>
-        val sql = s"replace into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?)"
+        val sql = s"insert into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?) on duplicate key update `offset`= values(`offset`) "
         val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update().apply()
         if (updated == 0) {
           throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
