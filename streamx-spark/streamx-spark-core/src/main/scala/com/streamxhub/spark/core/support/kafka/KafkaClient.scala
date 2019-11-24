@@ -30,7 +30,7 @@ package com.streamxhub.spark.core.support.kafka
 import java.lang.reflect.Constructor
 import java.{util => ju}
 
-import com.streamxhub.spark.core.support.kafka.offset.{DefaultOffset, HBaseOffset, Offset, RedisOffset}
+import com.streamxhub.spark.core.support.kafka.offset.{DefaultOffset, HBaseOffset, MySQLOffset, Offset, RedisOffset}
 import com.streamxhub.spark.core.util.Logger
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -47,13 +47,14 @@ import scala.reflect.ClassTag
 class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   // 自定义
-  private lazy val offsets = {
+  private lazy val offsetManager = {
     sparkConf.get("spark.source.kafka.offset.store.class", "none").trim match {
       case "none" =>
         sparkConf.get("spark.source.kafka.offset.store.type", "none").trim.toLowerCase match {
           case "redis" => new RedisOffset(sparkConf)
           case "hbase" => new HBaseOffset(sparkConf)
           case "kafka" => new DefaultOffset(sparkConf)
+          case "mysql" => new MySQLOffset(sparkConf)
           case "none" => new DefaultOffset(sparkConf)
         }
       case clazz =>
@@ -71,7 +72,7 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     }
   }
 
-  def offsetStoreType: String = offsets.storeType
+  def offsetStoreType: String = offsetManager.storeType
 
   private var canCommitOffsets: CanCommitOffsets = _
 
@@ -94,7 +95,7 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
     kafkaParams.get("group.id") match {
       case Some(groupId) =>
-        consumerOffsets = offsets.get(groupId.toString, topics)
+        consumerOffsets = offsetManager.get(groupId.toString, topics)
         logInfo(s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
       case _ =>
         logInfo(s"createDirectStream witchOut group.id topics ${topics.mkString(",")}")
@@ -141,14 +142,14 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     * 更新 Offsets
     *
     * @param groupId
-    * @param offset
+    * @param offsetRanges
     */
-  def updateOffset(groupId: String, offset: Array[OffsetRange]): Unit = {
+  def updateOffset(groupId: String, offsetRanges: Array[OffsetRange]): Unit = {
     offsetStoreType match {
-      case "kafka" => canCommitOffsets.commitAsync(offset)
+      case "kafka" => canCommitOffsets.commitAsync(offsetRanges)
       case _ =>
-        val tps = offset.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
-        offsets.update(groupId, tps)
+        val tps = offsetRanges.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
+        offsetManager.update(groupId, tps)
     }
   }
 

@@ -93,7 +93,7 @@ trait Offset extends Logger with Serializable {
       metadata.partitionsMetadata.foreach((partition: PartitionMetadata) => {
         partition.leader match {
           case Some(endPoint) =>
-            val hp = Tuple2(endPoint.host, endPoint.port)
+            val hp = endPoint.host -> endPoint.port
             leaderAndTopicPartition.get(hp) match {
               case Some(taps) => leaderAndTopicPartition.put(hp, taps :+ new TopicPartition(topic, partition.partitionId))
               case None => leaderAndTopicPartition.put(hp, Seq(new TopicPartition(topic, partition.partitionId)))

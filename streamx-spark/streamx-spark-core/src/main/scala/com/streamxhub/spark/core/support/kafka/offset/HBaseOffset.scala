@@ -138,8 +138,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         put.addColumn(familyNameBytes, partitionBytes, Bytes.toBytes(tp.partition))
         put.addColumn(familyNameBytes, offsetBytes, Bytes.toBytes(offset))
         put
-    } toList
-
+    }.toList
     table.put(puts)
     logInfo(s"updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
   }

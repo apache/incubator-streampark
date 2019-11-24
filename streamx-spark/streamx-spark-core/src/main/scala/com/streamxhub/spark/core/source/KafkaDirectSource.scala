@@ -46,10 +46,6 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
 
   override val prefix: String = "spark.source.kafka.consume."
 
-  // 保存 offset
-  private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
-
-
   // 分区数
   lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
@@ -70,6 +66,9 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
   override type SourceType = ConsumerRecord[K, V]
 
   val kafkaClient = new KafkaClient(ssc.sparkContext.getConf)
+
+  // 保存 offset
+  private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
 
   /**
     * 获取DStream 流
@@ -92,8 +91,8 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
     // 更新 offset
     if (groupId.isDefined) {
       logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $time offsetRanges: $offsetRanges")
-      val offset = offsetRanges.get(time)
-      kafkaClient.updateOffset(groupId.get, offset)
+      val offsetRange = offsetRanges.get(time)
+      kafkaClient.updateOffset(groupId.get, offsetRange)
     }
     offsetRanges.remove(time)
   }
