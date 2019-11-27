@@ -19,9 +19,9 @@ object ESSink {
 }
 
 class ESSink(@transient context: StreamingContext,
-                        overwriteParams: Map[String, String] = Map.empty[String, String],
-                        parallelism: Int = 0,
-                        uidHash: String = null) {
+             overwriteParams: Map[String, String] = Map.empty[String, String],
+             parallelism: Int = 0,
+             uidHash: String = null) {
 
   /**
    * for ElasticSearch5....
