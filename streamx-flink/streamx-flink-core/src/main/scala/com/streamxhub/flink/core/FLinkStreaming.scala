@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import scala.annotation.meta.getter
 import scala.util.Try
 
-trait FlinkStreaming extends Logger {
+trait FLinkStreaming extends Logger {
 
   @(transient@getter)
   private var env: StreamExecutionEnvironment = _
@@ -22,7 +22,7 @@ trait FlinkStreaming extends Logger {
   def handler(context: StreamingContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
-    SystemPropertyUtil.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
+    SystemPropertyUtil.setAppHome(KEY_APP_HOME, classOf[FLinkStreaming])
     //parameter from args...
     val argsMap = ParameterTool.fromArgs(args).toMap
     val file = argsMap.get(FLINK_CONF)
