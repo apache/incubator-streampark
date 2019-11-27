@@ -8,7 +8,7 @@ import org.apache.flink.api.scala._
 import scala.annotation.meta.getter
 import scala.util.Try
 
-trait FlinkDataSet extends Logger {
+trait FLinkDataSet extends Logger {
 
   @(transient@getter)
   private var env: ExecutionEnvironment = _
