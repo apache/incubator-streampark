@@ -37,9 +37,9 @@ object ES6Sink {
 
 
 class ES6Sink(@transient ctx: StreamingContext,
-                                   overwriteParams: Map[String, String] = Map.empty[String, String],
-                                   parallelism: Int = 0,
-                                   uidHash: String = null) extends Sink with Logger {
+              overwriteParams: Map[String, String] = Map.empty[String, String],
+              parallelism: Int = 0,
+              uidHash: String = null) extends Sink with Logger {
 
   def sink[T](stream: DataStream[T], suffix: String = "",
               restClientFactory: Any = null,
