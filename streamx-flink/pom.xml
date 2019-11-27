@@ -14,7 +14,7 @@
     </modules>
 
     <properties>
-        <flink.version>1.7.2</flink.version>
+        <flink.version>1.9.0</flink.version>
         <scala.version>2.11.8</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
     </properties>
@@ -23,7 +23,7 @@
         <dependency>
             <groupId>org.scala-lang</groupId>
             <artifactId>scala-library</artifactId>
-            <version>2.11.8</version>
+            <version>${scala.version}</version>
         </dependency>
 
         <dependency>
