@@ -33,6 +33,7 @@
         <redis.version>2.9.0</redis.version>
         <es.version>6.2.3</es.version>
         <protobuf.version>2.5.0</protobuf.version>
+        <slf4j.version>1.7.25</slf4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.build.jdk>1.8</project.build.jdk>
@@ -90,6 +91,14 @@
                         <groupId>org.scala-lang</groupId>
                         <artifactId>scala-library</artifactId>
                     </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
+                    </exclusion>
                 </exclusions>
             </dependency>
 
@@ -102,6 +111,14 @@
                     <exclusion>
                         <groupId>org.scala-lang</groupId>
                         <artifactId>scala-library</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>log4j</groupId>
+                        <artifactId>log4j</artifactId>
+                    </exclusion>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
@@ -200,6 +217,7 @@
                 <artifactId>hbase-client</artifactId>
                 <version>${hbase.version}</version>
             </dependency>
+
             <dependency>
                 <groupId>org.apache.hbase</groupId>
                 <artifactId>hbase-hadoop2-compat</artifactId>
@@ -261,6 +279,45 @@
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
                 <version>1.24</version>
+            </dependency>
+
+            <!--logback -->
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-core</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-access</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>ch.qos.logback</groupId>
+                <artifactId>logback-classic</artifactId>
+                <version>1.2.3</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>log4j-over-slf4j</artifactId>
+                <version>1.7.15</version>
+            </dependency>
+
+            <!--jul桥接 用来输出 Java Logging Framework (JUL) -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jul-to-slf4j</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <!-- jcl桥接，用来输出 第三方Jakarta Commons Logging (JCL) -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>jcl-over-slf4j</artifactId>
+                <version>${slf4j.version}</version>
             </dependency>
 
         </dependencies>

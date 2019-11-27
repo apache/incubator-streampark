@@ -1,0 +1,34 @@
+<assembly>
+    <id>${project.version}</id>
+    <formats>
+        <format>tar.gz</format>
+    </formats>
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>true</useProjectArtifact>
+            <outputDirectory>lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+    <fileSets>
+        <fileSet>
+            <directory>assembly/bin</directory>
+            <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>assembly/conf</directory>
+            <outputDirectory>conf</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>assembly/logs</directory>
+            <outputDirectory>logs</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>assembly/temp</directory>
+            <outputDirectory>temp</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+    </fileSets>
+</assembly>
