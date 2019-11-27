@@ -26,17 +26,17 @@ import scala.collection.Map
 import scala.util.{Success, Try}
 
 
-object ElasticSearch6Sink {
+object ES6Sink {
 
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
-            uidHash: String = null): ElasticSearch6Sink = new ElasticSearch6Sink(ctx, overwriteParams, parallelism, uidHash)
+            uidHash: String = null): ES6Sink = new ES6Sink(ctx, overwriteParams, parallelism, uidHash)
 
 }
 
 
-class ElasticSearch6Sink(@transient ctx: StreamingContext,
+class ES6Sink(@transient ctx: StreamingContext,
                                    overwriteParams: Map[String, String] = Map.empty[String, String],
                                    parallelism: Int = 0,
                                    uidHash: String = null) extends Sink with Logger {

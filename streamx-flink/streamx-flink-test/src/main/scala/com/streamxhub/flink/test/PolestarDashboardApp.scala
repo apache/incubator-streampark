@@ -3,8 +3,8 @@ package com.streamxhub.flink.test
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.streamxhub.flink.core.{FLinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.ElasticSearch6Sink
+import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.sink.ESSink
 import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.util.{EsIndexUtils, WatermarkUtils}
 import org.apache.flink.api.scala._
@@ -17,33 +17,36 @@ import org.json4s.jackson.Serialization
 
 import scala.util.Try
 
-object PolestarDashboardApp extends FLinkStreaming {
+object PolestarDashboardApp extends XStreaming {
 
   /**
-   * @param context
-   */
+    * @param context
+    */
   override def handler(context: StreamingContext): Unit = {
     val data = new KafkaSource(context)
 
-    val ds = data.getDataStream().map(x => OrderEntity.build(x))
+    val ds = data
+      .getDataStream()
+      .map(x => OrderEntity.build(x))
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)
-      .assignTimestampsAndWatermarks(WatermarkUtils.boundedOutOfOrdernessWatermark[OrderEntity](1000 * 30)(_.timestamp))
+      .assignTimestampsAndWatermarks(WatermarkUtils
+        .boundedOutOfOrdernessWatermark[OrderEntity](1000 * 30)(_.timestamp))
       .keyBy(_.client_id)
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
 
-    implicit def indexReq(x: OrderEntity): IndexRequest = EsIndexUtils.indexRequest(
-      s"polestar_dash_${x.ymd}",
-      "_doc",
-      s"${x.timestamp}",
-      x.toJson
-    )
+    implicit def indexReq(x: OrderEntity): IndexRequest =
+      EsIndexUtils.indexRequest(
+        s"polestar_dash_${x.ymd}",
+        "_doc",
+        s"${x.timestamp}",
+        x.toJson
+      )
 
     //数据下沉到es
-    ElasticSearch6Sink(context).sink[OrderEntity](ds)
-
+    ESSink(context).sink6[OrderEntity](ds)
   }
 
   def now(fmt: String = "yyyyMMdd"): String = {
@@ -53,8 +56,12 @@ object PolestarDashboardApp extends FLinkStreaming {
 
 }
 
-
-case class OrderEntity(ymd: String, timestamp: Long, gmv: Double, profit: Double, client_id: String, num: Int = 1) {
+case class OrderEntity(ymd: String,
+                       timestamp: Long,
+                       gmv: Double,
+                       profit: Double,
+                       client_id: String,
+                       num: Int = 1) {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -98,20 +105,25 @@ object OrderEntity {
 
     @transient
     lazy val json: json4s.JValue = parse(log)
-    val create_time: String = (json \ "create_time").extractOrElse("1970-01-01 00:00:00")
+    val create_time: String =
+      (json \ "create_time").extractOrElse("1970-01-01 00:00:00")
     val timestamp = fullDateFormat.parse(create_time).getTime
     val ymd = ymdFormat.format(fullDateFormat.parse(create_time))
 
     val site_id: String = (json \ "site_id").extractOrElse("")
-    val gmv: Double = (json \ "alipay_total_price").extractOpt[String].filter(_.nonEmpty).getOrElse("0").toDouble
-    val profit: Double = (json \ "pub_share_pre_fee").extractOpt[String].filter(_.nonEmpty).getOrElse("0").toDouble
+    val gmv: Double = (json \ "alipay_total_price")
+      .extractOpt[String]
+      .filter(_.nonEmpty)
+      .getOrElse("0")
+      .toDouble
+    val profit: Double = (json \ "pub_share_pre_fee")
+      .extractOpt[String]
+      .filter(_.nonEmpty)
+      .getOrElse("0")
+      .toDouble
     val client_id: String = Try(client_Map(site_id)).getOrElse("")
 
     OrderEntity(ymd, timestamp, gmv, profit, client_id)
   }
 
-
 }
-
-
-

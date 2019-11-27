@@ -2,15 +2,15 @@ package com.streamxhub.flink.test
 
 import java.util.Date
 
-import com.streamxhub.flink.core.sink.ElasticSearch6Sink
-import com.streamxhub.flink.core.{FLinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.sink.ESSink
+import com.streamxhub.flink.core.{StreamingContext, XStreaming}
 import com.streamxhub.flink.core.util.{EsIndexUtils, Logger}
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import org.apache.flink.streaming.api.scala._
 
-object ConnectorApp extends FLinkStreaming with Logger {
+object ConnectorApp extends XStreaming with Logger {
 
 
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -36,8 +36,7 @@ object ConnectorApp extends FLinkStreaming with Logger {
       Serialization.write(x)
     )
     //3)定义esSink并下沉=数据. done
-    ElasticSearch6Sink(context).sink[OrderEntity](ds)
-
+    ESSink(context).sink6[OrderEntity](ds)
   }
 
 
