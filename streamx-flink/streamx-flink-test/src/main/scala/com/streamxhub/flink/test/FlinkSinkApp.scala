@@ -1,14 +1,14 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{FLinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.{StreamingContext, XStreaming}
 import com.streamxhub.flink.core.sink.{KafkaSink, Mapper, RedisSink}
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 
-object FlinkSinkApp extends FLinkStreaming {
+object FlinkSinkApp extends XStreaming {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -29,7 +29,7 @@ object FlinkSinkApp extends FLinkStreaming {
 
     //Kafka sink..................
     //1)定义 KafkaSink
-    val kfkSink =  new KafkaSink(context)
+    val kfkSink = new KafkaSink(context)
     //2)下沉到目标
     kfkSink.sink(ds1)
 

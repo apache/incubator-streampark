@@ -9,16 +9,16 @@ import org.elasticsearch.action.index.IndexRequest
 
 import scala.collection.Map
 
-object ElasticSearch5Sink {
+object ESSink {
 
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
-            uidHash: String = null): ElasticSearchSink = new ElasticSearchSink(ctx, overwriteParams, parallelism, uidHash)
+            uidHash: String = null): ESSink = new ESSink(ctx, overwriteParams, parallelism, uidHash)
 
 }
 
-class ElasticSearchSink(@transient context: StreamingContext,
+class ESSink(@transient context: StreamingContext,
                         overwriteParams: Map[String, String] = Map.empty[String, String],
                         parallelism: Int = 0,
                         uidHash: String = null) {
@@ -38,8 +38,9 @@ class ElasticSearchSink(@transient context: StreamingContext,
                failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
               (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ElasticSearch6Sink(context, overwriteParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
-
+    //TODO....
+    null
+    //new sink5(context, overwriteParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
   }
 
   /**
@@ -59,7 +60,7 @@ class ElasticSearchSink(@transient context: StreamingContext,
                failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
               (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ElasticSearch6Sink(context, overwriteParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
+    new ES6Sink(context, overwriteParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
   }
 
 }
