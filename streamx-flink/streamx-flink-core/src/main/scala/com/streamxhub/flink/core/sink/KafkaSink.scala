@@ -1,0 +1,34 @@
+package com.streamxhub.flink.core.sink
+
+import org.apache.flink.api.common.serialization.SimpleStringSchema
+import org.apache.flink.streaming.api.datastream.DataStreamSink
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
+import com.streamxhub.flink.core.conf.{Const, KafkaPropertiesUtils}
+import com.streamxhub.flink.core.StreamingContext
+
+import scala.collection.JavaConversions._
+import scala.collection.Map
+
+object KafkaSink {
+  def apply(@transient ctx: StreamingContext,
+            overwriteParams: Map[String, String] = Map.empty[String, String],
+            parallelism: Int = 0,
+            uidHash: String = null): KafkaSink = new KafkaSink(ctx, overwriteParams, parallelism, uidHash)
+}
+
+class KafkaSink(@transient val ctx: StreamingContext,
+                overwriteParams: Map[String, String] = Map.empty[String, String],
+                parallelism: Int = 0,
+                uidHash: String = null) extends Sink {
+
+  def sink[T](stream: DataStream[String], topic: String = ""): DataStreamSink[String] = {
+    val prop = KafkaPropertiesUtils.getSink(ctx.parameter, topic)
+    prop.putAll(overwriteParams)
+    val _topic = prop.getProperty(Const.TOPIC)
+    val producer = new FlinkKafkaProducer011[String](_topic, new SimpleStringSchema, prop)
+    val sink = stream.addSink(producer)
+    afterSink(sink, parallelism, uidHash)
+  }
+
+}
