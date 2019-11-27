@@ -20,10 +20,10 @@ object RedisSink {
 }
 
 class RedisSink(@transient ctx: StreamingContext,
-                     overwriteParams: Map[String, String] = Map.empty[String, String],
-                     parallelism: Int = 0,
-                     uidHash: String = null
-                    ) extends Sink {
+                overwriteParams: Map[String, String] = Map.empty[String, String],
+                parallelism: Int = 0,
+                uidHash: String = null
+               ) extends Sink {
 
   @Override
   def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
