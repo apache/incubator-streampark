@@ -4,6 +4,7 @@ import org.apache.spark.streaming.StreamingContext
 import com.streamxhub.spark.core.XStreaming
 import com.streamxhub.spark.core.source.KafkaDirectSource
 import org.apache.spark.SparkConf
+import scalikejdbc.{ConnectionPool, DB, SQL}
 
 object HelloStreamXApp extends XStreaming {
 
@@ -20,15 +21,34 @@ object HelloStreamXApp extends XStreaming {
 
   override def handle(ssc: StreamingContext): Unit = {
 
+    val sparkConf = ssc.sparkContext.getConf
+    val jdbcURL = sparkConf.get("spark.sink.mysql.jdbc.url")
+    val user = sparkConf.get("spark.sink.mysql.user")
+    val password = sparkConf.get("spark.sink.mysql.password")
+
     val source = new KafkaDirectSource[String, String](ssc)
+
     source.getDStream[(String, String)](x => (x.topic, x.value)).foreachRDD((rdd, time) => {
 
-      //处理逻辑
-      rdd.map(_._2).foreach(println)
+      //transform 业务处理
+      rdd.foreachPartition(iter => {
+
+        //sink 数据落盘到MySQL
+        ConnectionPool.singleton(jdbcURL, user, password)
+        DB.localTx(implicit session => {
+          iter.map(_._2.toInt).foreach(x => {
+            val sql = s"insert into t_test(`key`) values($x)"
+            SQL(sql).update().apply()
+          })
+        })
+
+      })
 
       //提交offset
       source.updateOffset(time)
+
     })
+
   }
 
 }
