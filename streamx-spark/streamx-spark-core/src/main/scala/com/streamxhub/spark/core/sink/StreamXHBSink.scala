@@ -75,8 +75,7 @@ class StreamXHBSink(@transient override val sc: SparkContext,
     * @param rdd  spark.RDD
     * @param time spark.streaming.Time
     */
-  override def output(rdd: RDD[StreamXMutation], time: Time): Unit = {
-
+  override def sink(rdd: RDD[StreamXMutation], time: Time): Unit = {
 
     rdd.foreachPartition { iter =>
       val mutator = getMutator
@@ -105,9 +104,7 @@ class StreamXHBSink(@transient override val sc: SparkContext,
           val start = System.currentTimeMillis()
           val (head, tail) = actions.splitAt(commitBatch)
           table.batch(head, new Array[AnyRef](head.length))
-
           println(s"batch ${head.size} use ${System.currentTimeMillis() - start} MS")
-
           batch(tail.toList: _*)
         }
       }

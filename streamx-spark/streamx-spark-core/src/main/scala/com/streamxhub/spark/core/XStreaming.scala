@@ -58,7 +58,7 @@ trait XStreaming {
   private val sparkListeners = new ArrayBuffer[String]()
 
   // checkpoint目录
-  private var checkpointPath: String = ""
+  private var checkpoint: String = ""
 
   // 从checkpoint 中恢复失败，则重新创建
   private var createOnError: Boolean = true
@@ -114,8 +114,8 @@ trait XStreaming {
     var argv = args.toList
     while (argv.nonEmpty) {
       argv match {
-        case ("--checkpointPath") :: value :: tail =>
-          checkpointPath = value
+        case ("--checkpoint") :: value :: tail =>
+          checkpoint = value
           argv = tail
         case ("--createOnError") :: value :: tail =>
           createOnError = value.toBoolean
@@ -239,7 +239,7 @@ trait XStreaming {
         |"Usage: Streaming [options]
         |
         | Options are:
-        |   --checkpointPath <checkpoint 目录设置>
+        |   --checkpoint <checkpoint 目录设置>
         |   --createOnError <从 checkpoint 恢复失败,是否重新创建 true|false>
         |""".stripMargin)
     System.exit(1)
@@ -248,7 +248,7 @@ trait XStreaming {
   def main(args: Array[String]): Unit = {
     initialize(args)
     configure(sparkConf)
-    val context = checkpointPath match {
+    val context = checkpoint match {
       case "" => creatingContext()
       case ck =>
         val ssc = StreamingContext.getOrCreate(ck, creatingContext, createOnError = createOnError)

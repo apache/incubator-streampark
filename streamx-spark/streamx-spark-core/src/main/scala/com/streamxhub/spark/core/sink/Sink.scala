@@ -53,8 +53,8 @@ trait Sink[T] extends Serializable {
     * 输出
     *
     */
-  def output(dStream: DStream[T]): Unit = {
-    dStream.foreachRDD((rdd, time) => output(rdd, time))
+  def sink(dStream: DStream[T]): Unit = {
+    dStream.foreachRDD((rdd, time) => sink(rdd, time))
   }
 
   /**
@@ -63,5 +63,5 @@ trait Sink[T] extends Serializable {
     * @param rdd  spark.RDD
     * @param time spark.streaming.Time
     */
-  def output(rdd: RDD[T], time: Time)
+  def sink(rdd: RDD[T], time: Time)
 }

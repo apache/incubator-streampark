@@ -49,7 +49,7 @@ class EsSink[T](@transient override val sc: SparkContext,
     * 输出
     *
     */
-  def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd match {
       case rdd: RDD[String] => EsSpark.saveJsonToEs(rdd, esParam)
       case _ => EsSpark.saveToEs(rdd, esParam)

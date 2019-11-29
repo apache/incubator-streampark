@@ -61,7 +61,7 @@ class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
 
   private val redisEndpoint = RedisEndpoint(host, port, auth, db, timeout)
 
-  def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd.foreachPartition(r => {
       closePipe { pipe =>
         r.foreach(d => {
