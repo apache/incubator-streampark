@@ -53,7 +53,7 @@ class InfluxDBSink[T: ClassTag](@transient override val sc: SparkContext,
   private val port = prop.getProperty("port", "8086")
   private val db = prop.getProperty("db", "influx")
 
-  def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+  def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd.foreach(d => {
       val (postData, ip, pt, dbName) = d match {
         case t: String => (t, host, port, db)

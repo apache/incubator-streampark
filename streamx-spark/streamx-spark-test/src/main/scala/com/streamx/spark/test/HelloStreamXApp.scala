@@ -41,7 +41,6 @@ object HelloStreamXApp extends XStreaming {
             SQL(sql).update().apply()
           })
         })
-
       })
 
       //提交offset
