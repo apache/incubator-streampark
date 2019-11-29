@@ -55,8 +55,7 @@ class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
     * 以字符串的形式输出到kafka
     *
     */
-  override def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
-
+  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd.writeToKafka(prop, x => new ProducerRecord[String, String](outputTopic, UUID.randomUUID().toString, x.toString))
   }
 }

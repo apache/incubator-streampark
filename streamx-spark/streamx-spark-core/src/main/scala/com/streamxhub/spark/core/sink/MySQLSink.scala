@@ -71,7 +71,7 @@ class MySQLSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
     * @param rdd
     * @param time
     */
-  override def output(rdd: RDD[T], time: Time): Unit = {
+  override def sink(rdd: RDD[T], time: Time): Unit = {
     val sqlContext = SQLContextUtil.getSqlContext(rdd.sparkContext)
     import sqlContext.implicits._
     //

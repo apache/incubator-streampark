@@ -74,7 +74,7 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
     * @param rdd  RDD[Put]或者RDD[Delete]
     * @param time spark.streaming.Time
     */
-  override def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd match {
       case r: RDD[Put] => r.foreachPartition { putRDD =>
         val mutator = getMutator

@@ -49,7 +49,7 @@ class ShowSink[T](@transient override val sc: SparkContext,
     * 输出
     *
     */
-  override def output(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     val firstNum = rdd.take(num + 1)
     println("-------------------------------------------")
     println("Time: " + time)
