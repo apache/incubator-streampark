@@ -259,7 +259,6 @@ object MySQLUtils {
           val initStatus = connectionInit(prefix)
           //该实例的连接池已经初始化过,10个连接已经全部放出去了,则等待收回....
           if (initStatus.get()) {
-            println("getConnection waiting....... ")
             Thread.sleep(waitingTime)
             return getConnection(config)
           }
