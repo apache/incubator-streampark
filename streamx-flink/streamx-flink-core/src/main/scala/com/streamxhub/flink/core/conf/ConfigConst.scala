@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.conf
 
-object Const {
+object ConfigConst {
 
   /**
    *
@@ -37,28 +37,48 @@ object Const {
 
   val KEY_FLINK_CHECKPOINT_INTERVAL = "flink.checkpoint.interval"
 
+  val KEY_FLINK_PARALLELISM = "flink.parallelism"
+
+  val KEY_FLINK_RESTART_ATTEMPTS = "flink.restart.attempts"
+
+  val KEY_FLINK_DELAY_ATTEMPTS = "flink.delay.attempts"
+
   val KEY_FLINK_CHECKPOINT_MODE = "flink.checkpoint.mode"
 
   val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
 
+  val KEY_APP_NAME = "app.name"
+
+  val KEY_APP_DEFAULT_CONF = "/application.yml"
+
   /**
    * about config prefix
    */
-  val FLINK_CONF = "flink.conf"
+  val APP_CONF = "app.conf"
 
   val TOPIC = "topic"
 
-  val APP_NAME = "app.name"
+  val SOURCE_KAFKA_PREFIX = "source.kafka."
 
-  val SOURCE_KAFKA_PREFIX = "source.kafka.consume."
-
-  val SINK_KAFKA_PREFIX = "sink.kafka.producer."
+  val SINK_KAFKA_PREFIX = "sink.kafka."
 
   val SINK_REDIS_PREFIX = "sink.redis."
 
   val SINK_ES_PREFIX = "sink.es."
 
   val SINK_ES_CONF_BULK_PREFIX = "bulk.flush."
+
+  val SOURCE_MYSQL_PREFIX = "source.mysql"
+
+  val SINK_MYSQL_PREFIX = "sink.mysql"
+
+  /**
+   * about config MySQL
+    */
+  val KEY_MYSQL_DRIVER = "driver"
+  val KEY_MYSQL_URL = "url"
+  val KEY_MYSQL_USER = "user"
+  val KEY_MYSQL_PASSWORD = "password"
 
   /**
    * sign....
