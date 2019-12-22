@@ -1,12 +1,14 @@
 package com.streamxhub.flink.core
 
-import com.streamxhub.flink.core.conf.Const._
-import com.streamxhub.flink.core.util.{Logger, SystemPropertyUtil}
+import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtil}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.api.common.restartstrategy.RestartStrategies
 
+import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
 import scala.util.Try
 
@@ -22,27 +24,40 @@ trait XStreaming extends Logger {
   def handler(context: StreamingContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
+    //read config and merge config......
     SystemPropertyUtil.setAppHome(KEY_APP_HOME, classOf[XStreaming])
-    //parameter from args...
-    val argsMap = ParameterTool.fromArgs(args).toMap
-    val file = argsMap.get(FLINK_CONF)
-    require(file != null, s"Properties file $file is not found!!!")
-    //parameter from properties
-    val propMap = ParameterTool.fromPropertiesFile(file).toMap
-    //union args and properties...
-    val map = new java.util.HashMap[String, String]()
-    map.putAll(propMap)
-    map.putAll(argsMap)
-    parameter = ParameterTool.fromMap(map)
+    val argsMap = ParameterTool.fromArgs(args)
+    val config = argsMap.toMap.get(APP_CONF) match {
+      case null | "" => KEY_APP_DEFAULT_CONF
+      case file => if (file.startsWith("/")) file else s"/${file}"
+    }
+    val configFile = classOf[XStreaming].getResourceAsStream(config)
+    require(configFile != null, s"appConfig file $configFile is not found!!!")
 
+    val configArgs = config.split("\\.").last match {
+      case "properties" => PropertiesUtils.fromPropertiesFile(configFile)
+      case "yml" => PropertiesUtils.fromYamlFile(configFile)
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
+    }
+    parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties)
+
+    //init env....
     env = StreamExecutionEnvironment.getExecutionEnvironment
-    val checkpointInterval = Try(map.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
-    val checkpointMode = Try(CheckpointingMode.valueOf(map.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
-    val timeCharacteristic = Try(TimeCharacteristic.valueOf(map.get(KEY_FLINK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
+    val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(5)
+    val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
+    val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
+
+    val checkpointInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
+    val checkpointMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
+    val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
+
+    env.setParallelism(parallelism)
     env.setStreamTimeCharacteristic(timeCharacteristic)
     env.enableCheckpointing(checkpointInterval)
+    env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
     env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
-
+    env.getConfig.disableSysoutLogging
+    env.getConfig.setGlobalJobParameters(parameter)
   }
 
   /**
@@ -65,17 +80,17 @@ trait XStreaming extends Logger {
   }
 
   def doStart(): JobExecutionResult = {
-    val appName = parameter.get(APP_NAME, "")
+    val appName = parameter.get(KEY_APP_NAME, "")
     logger.info(
       s"""
-        |   ____   __   _          __          ____  __                            _
-        |  / __/  / /  (_)  ___   / /__       / __/ / /_  ____ ___  ___ _  __ _   (_)  ___   ___ _
-        | / _/   / /  / /  / _ \\ /  '_/      _\\ \\  / __/ / __// -_)/ _ `/ /  ' \\ / /  / _ \\ / _ `/
-        |/_/    /_/  /_/  /_//_//_/\\_\\      /___/  \\__/ /_/   \\__/ \\_,_/ /_/_/_//_/  /_//_/ \\_, /
-        |
-        |$appName Starting...
-        |
-        |""".stripMargin)
+         |   ____   __   _          __          ____  __                            _
+         |  / __/  / /  (_)  ___   / /__       / __/ / /_  ____ ___  ___ _  __ _   (_)  ___   ___ _
+         | / _/   / /  / /  / _ \\ /  '_/      _\\ \\  / __/ / __// -_)/ _ `/ /  ' \\ / /  / _ \\ / _ `/
+         |/_/    /_/  /_/  /_//_//_/\\_\\      /___/  \\__/ /_/   \\__/ \\_,_/ /_/_/_//_/  /_//_/ \\_, /
+         |
+         |$appName Starting...
+         |
+         |""".stripMargin)
     env.execute(appName)
   }
 
