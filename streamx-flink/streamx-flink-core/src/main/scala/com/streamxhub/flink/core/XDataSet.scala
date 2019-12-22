@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core
 
-import com.streamxhub.flink.core.conf.Const._
+import com.streamxhub.flink.core.conf.ConfigConst._
 import com.streamxhub.flink.core.util.Logger
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
@@ -22,7 +22,7 @@ trait XDataSet extends Logger {
   private def initialize(args: Array[String]): Unit = {
     //parameter from args...
     val argsMap = ParameterTool.fromArgs(args).toMap
-    val file = Try(argsMap.get(FLINK_CONF)).getOrElse(null)
+    val file = Try(argsMap.get(APP_CONF)).getOrElse(null)
     require(file != null, s"[StreamX-Flink] Properties file $file is not found!!!")
     //parameter from properties
     val propMap = ParameterTool.fromPropertiesFile(file).toMap
@@ -55,7 +55,7 @@ trait XDataSet extends Logger {
   }
 
   def doStart(): Unit = {
-    val appName = parameter.get(APP_NAME, "")
+    val appName = parameter.get(KEY_APP_NAME, "")
     logger.info(
       s"""
          |

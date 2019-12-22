@@ -55,6 +55,7 @@
             <groupId>org.apache.bahir</groupId>
             <artifactId>flink-connector-redis_2.11</artifactId>
         </dependency>
+
     </dependencies>
 
     <build>
