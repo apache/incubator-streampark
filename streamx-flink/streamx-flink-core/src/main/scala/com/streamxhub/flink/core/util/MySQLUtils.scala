@@ -4,30 +4,19 @@ import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import java.util
 
 import scala.collection.mutable
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
-import java.sql.Connection
-import java.sql.DriverManager
+import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.locks.{Condition, ReentrantLock}
 
+import com.streamxhub.flink.core.conf.ConfigConst._
 import org.json4s.DefaultFormats
 
 import scala.collection.JavaConversions._
 
-/**
- *
- * @param instance : 当前连接的实例名称,用户自定义,字符串类型,就是一个连接的名字,用于区分多个连接
- * @param driver   : MySQL driver class (必填)
- * @param url      : MySQL url (必填)
- * @param user     : MySQL user (选填,如不填需要用户在url中设置)
- * @param password : MySQL password(选填,如不填需要用户在url中设置)
- */
-case class MySQLConfig(instance: String, driver: String, url: String, user: String, password: String)
-
 object MySQLUtils {
-
 
   @transient
   implicit private lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
@@ -58,12 +47,12 @@ object MySQLUtils {
    * @param config
    * @return
    */
-  def select(sql: String)(implicit config: MySQLConfig): List[Map[String, _]] = {
+  def select(sql: String)(implicit config: Properties): List[Map[String, _]] = {
     val conn = getConnection(config)
     select(conn, sql)
   }
 
-  def select(conn: Connection, sql: String)(implicit config: MySQLConfig): List[Map[String, _]] = {
+  def select(conn: Connection, sql: String)(implicit config: Properties): List[Map[String, _]] = {
     if (sql == null || sql.isEmpty) List.empty else {
       var stmt: Statement = null
       var result: ResultSet = null
@@ -97,7 +86,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def fetch(sql: String)(implicit config: MySQLConfig): Option[Map[String, _]] = select(sql).headOption
+  def fetch(sql: String)(implicit config: Properties): Option[Map[String, _]] = select(sql).headOption
 
   /**
    * 直接查询一个对象
@@ -108,17 +97,17 @@ object MySQLUtils {
    * @tparam T
    * @return
    */
-  def query[T](sql: String)(implicit config: MySQLConfig, manifest: Manifest[T]): List[T] = {
+  def query[T](sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = {
     toObject[T](select(sql))
   }
 
-  def query[T](connection: Connection, sql: String)(implicit config: MySQLConfig, manifest: Manifest[T]): List[T] = {
+  def query[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = {
     toObject[T](select(connection, sql))
   }
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(x => JsonUtils.read[T](JsonUtils.write(x)))
 
-  def executeBatch(sql: Iterable[String])(implicit config: MySQLConfig): Int = {
+  def executeBatch(sql: Iterable[String])(implicit config: Properties): Int = {
     var conn: Connection = null
     Try(sql.size).getOrElse(0) match {
       case 0 => 0
@@ -162,7 +151,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def update(sql: String)(implicit config: MySQLConfig): Int = {
+  def update(sql: String)(implicit config: Properties): Int = {
     val conn = getConnection(config)
     var statement: Statement = null
     try {
@@ -182,7 +171,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def selectOne(sql: String)(implicit config: MySQLConfig): Map[String, _] = {
+  def selectOne(sql: String)(implicit config: Properties): Map[String, _] = {
     val conn = getConnection(config)
     var stmt: Statement = null
     var result: ResultSet = null
@@ -218,7 +207,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def execute(sql: String)(implicit config: MySQLConfig): Boolean = {
+  def execute(sql: String)(implicit config: Properties): Boolean = {
     val conn = getConnection(config)
     var stmt: Statement = null
     try {
@@ -232,31 +221,30 @@ object MySQLUtils {
     }
   }
 
-  def getConnection(config: MySQLConfig): Connection = {
-    lock.lock()
-    val prefix = s"${config.instance}"
-    val condition = connectionCondition.getOrElseUpdate(prefix, lock.newCondition())
-
-    def needWait() = lockMonitor.getOrElse(prefix, null) == prefix
-
+  def getConnection(config: Properties): Connection = {
     try {
+      lock.lock()
+      val instance = config(KEY_MYSQL_INSTANCE)
+      val condition = connectionCondition.getOrElseUpdate(instance, lock.newCondition())
+
+      def needWait() = lockMonitor.getOrElse(instance, null) == instance
 
       while (needWait()) {
         condition.await()
       }
       //加入当前实例为监控对象
-      lockMonitor += prefix -> prefix
+      lockMonitor += instance -> instance
 
-      connectionInit.getOrElseUpdate(prefix, new AtomicBoolean(false))
-      val conn = Try(collectionHolder.get()(prefix)).getOrElse(null)
+      connectionInit.getOrElseUpdate(instance, new AtomicBoolean(false))
+      val conn = Try(collectionHolder.get()(instance)).getOrElse(null)
       if (conn != null) conn else {
-        val size = Try(collectionPool(prefix).size).getOrElse(0)
+        val size = Try(collectionPool(instance).size).getOrElse(0)
 
         /**
          * 如果10个连接全部被占用,而且长时间不释放,则等待,等待释放在返回连接
          */
         if (size == 0) {
-          val initStatus = connectionInit(prefix)
+          val initStatus = connectionInit(instance)
           //该实例的连接池已经初始化过,10个连接已经全部放出去了,则等待收回....
           if (initStatus.get()) {
             Thread.sleep(waitingTime)
@@ -264,25 +252,25 @@ object MySQLUtils {
           }
 
           for (_ <- 0 to initConnSize) {
-            val conn = config.user match {
-              case null => DriverManager.getConnection(config.url)
-              case _ => DriverManager.getConnection(config.url, config.user, config.password)
+            val conn = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
+              case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
+              case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
             }
             //往连接池里放连接....
-            collectionPool.getOrElseUpdate(prefix, new util.LinkedList[Connection]).add(conn)
+            collectionPool.getOrElseUpdate(instance, new util.LinkedList[Connection]).add(conn)
           }
           initStatus.set(true)
         }
 
         val map = new ConcurrentHashMap[String, Connection]
-        val conn = collectionPool(prefix).poll()
-        map += prefix -> conn
+        val conn = collectionPool(instance).poll()
+        map += instance -> conn
         collectionHolder.set(map)
         //移除当前的监控对象...
         if (needWait()) {
           condition.signalAll()
         }
-        lockMonitor -= prefix
+        lockMonitor -= instance
         conn
       }
     } finally {
@@ -290,7 +278,7 @@ object MySQLUtils {
     }
   }
 
-  def close(config: MySQLConfig, connection: Connection, statement: Statement, resultSet: ResultSet) = {
+  def close(config: Properties, connection: Connection, statement: Statement, resultSet: ResultSet) = {
     if (resultSet != null) {
       resultSet.close()
     }
@@ -299,8 +287,9 @@ object MySQLUtils {
     }
     if (connection != null) {
       //此连接关闭会将资源回收到连接池里....
-      Try(collectionHolder.get().remove(config.instance))
-      collectionPool.getOrElseUpdate(config.instance, new util.LinkedList[Connection]).add(connection)
+      val instance = config(KEY_MYSQL_INSTANCE)
+      Try(collectionHolder.get().remove(instance))
+      collectionPool.getOrElseUpdate(instance, new util.LinkedList[Connection]).add(connection)
     }
   }
 

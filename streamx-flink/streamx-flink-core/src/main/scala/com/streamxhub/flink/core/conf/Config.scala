@@ -8,7 +8,6 @@ import scala.collection.Map
 import scala.util.Try
 import scala.collection.JavaConversions._
 import ConfigConst._
-import com.streamxhub.flink.core.util.MySQLConfig
 
 object Config {
 
@@ -46,11 +45,11 @@ object Config {
     }
   }
 
-  def getMySQLSink(parameter: ParameterTool)(implicit prefix: String = ""): MySQLConfig = mysqlGet(parameter, SINK_MYSQL_PREFIX, prefix)
+  def getMySQLSink(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, SINK_MYSQL_PREFIX, prefix)
 
-  def getMySQLSource(parameter: ParameterTool)(implicit prefix: String = ""): MySQLConfig = mysqlGet(parameter, SOURCE_MYSQL_PREFIX, prefix)
+  def getMySQLSource(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, SOURCE_MYSQL_PREFIX, prefix)
 
-  private[this] def mysqlGet(parameter: ParameterTool, prefix: String, instance: String): MySQLConfig = {
+  private[this] def mysqlGet(parameter: ParameterTool, prefix: String, instance: String): Properties = {
     val fix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
     val driver = parameter.toMap.getOrDefault(s"${prefix}.${KEY_MYSQL_DRIVER}", null)
     val url = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_URL}", null)
@@ -60,10 +59,13 @@ object Config {
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL Source prefix:${prefix} error,[driver|url] must be not null")
       case (_, _, x, y) if (x != null && y == null) || (x != null && y != null) => throw new IllegalArgumentException(s"MySQL Source prefix:${prefix} error, [user|password] must be all null,or all not null ")
-      case (x, y, u, _) if u == null => MySQLConfig(fix, x, y, null, null)
-      case _ => MySQLConfig(fix, driver, url, user, password)
+      case _ =>
     }
 
+    val list = List(KEY_MYSQL_INSTANCE -> fix, KEY_MYSQL_DRIVER -> driver, KEY_MYSQL_URL -> url, KEY_MYSQL_USER -> user, KEY_MYSQL_PASSWORD -> password)
+    val prop = new Properties()
+    prop.putAll(list.filter(_._2 != null).toMap[String,String])
+    prop
   }
 
 }
