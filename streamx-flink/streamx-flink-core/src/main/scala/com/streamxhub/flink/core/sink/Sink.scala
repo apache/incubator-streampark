@@ -1,21 +1,24 @@
 package com.streamxhub.flink.core.sink
 
+import org.apache.commons.lang3.StringUtils
 import org.apache.flink.streaming.api.datastream.{DataStream, DataStreamSink}
 
 
 trait Sink extends Serializable {
 
-  //def sink[T: ClassTag](stream: DataStream[T]): DataStreamSink[T]
+  //def sink[T](stream: DataStream[T]): DataStreamSink[T]
 
-  def afterSink[T](sink: DataStreamSink[T], parallelism: Int, uidHash: String): DataStreamSink[T] = {
-    val _uidHash = uidHash != null && uidHash.nonEmpty
-    val _parallelism = parallelism > 0
-    (_parallelism, _uidHash) match {
-      case (true, true) => sink.setParallelism(parallelism).setUidHash(uidHash)
-      case (true, _) => sink.setParallelism(parallelism)
-      case (_, true) => sink.setUidHash(uidHash)
-      case _ => sink
+  def afterSink[T](sink: DataStreamSink[T], name: String, parallelism: Int, uidHash: String): DataStreamSink[T] = {
+    if (name != null && name.nonEmpty) {
+      sink.name(name)
     }
+    if (parallelism > 0) {
+      sink.setParallelism(parallelism)
+    }
+    if (uidHash != null && uidHash.nonEmpty) {
+      sink.setUidHash(uidHash)
+    }
+    sink
   }
 
 }

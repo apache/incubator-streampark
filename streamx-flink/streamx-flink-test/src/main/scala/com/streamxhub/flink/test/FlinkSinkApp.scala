@@ -29,7 +29,7 @@ object FlinkSinkApp extends XStreaming {
 
     //Kafka sink..................
     //1)定义 KafkaSink
-    val kfkSink = new KafkaSink(context)
+    val kfkSink = KafkaSink(context)
     //2)下沉到目标
     kfkSink.sink(ds1)
 

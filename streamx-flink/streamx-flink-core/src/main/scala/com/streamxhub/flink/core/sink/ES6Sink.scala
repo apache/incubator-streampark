@@ -30,14 +30,16 @@ object ES6Sink {
 
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
+            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null): ES6Sink = new ES6Sink(ctx, overwriteParams, parallelism, uidHash)
+            uidHash: String = null): ES6Sink = new ES6Sink(ctx, overwriteParams, name, parallelism, uidHash)
 
 }
 
 
 class ES6Sink(@transient ctx: StreamingContext,
               overwriteParams: Map[String, String] = Map.empty[String, String],
+              name: String = null,
               parallelism: Int = 0,
               uidHash: String = null) extends Sink with Logger {
 
@@ -113,7 +115,7 @@ class ES6Sink(@transient ctx: StreamingContext,
 
     val sink = stream.addSink(esSink)
 
-    afterSink(sink, parallelism, uidHash)
+    afterSink(sink, name, parallelism, uidHash)
   }
 }
 
