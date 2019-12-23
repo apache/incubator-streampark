@@ -24,7 +24,7 @@ class KafkaSink(@transient val ctx: StreamingContext,
                 parallelism: Int = 0,
                 uidHash: String = null) extends Sink {
 
-  def sink[T](stream: DataStream[String], topic: String = ""): DataStreamSink[String] = {
+  def sink[T](stream: DataStream[String])(implicit topic:String = ""): DataStreamSink[String] = {
     val prop = Config.getKafkaSink(ctx.parameter, topic)
     prop.putAll(overwriteParams)
     val topicName = prop.getProperty(ConfigConst.TOPIC)

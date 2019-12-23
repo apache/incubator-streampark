@@ -43,7 +43,8 @@ class ES6Sink(@transient ctx: StreamingContext,
               parallelism: Int = 0,
               uidHash: String = null) extends Sink with Logger {
 
-  def sink[T](stream: DataStream[T], suffix: String = "",
+  def sink[T](stream: DataStream[T],
+              suffix: String = "",
               restClientFactory: Any = null,
               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
              (implicit f: T => IndexRequest): DataStreamSink[T] = {
