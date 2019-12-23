@@ -24,43 +24,43 @@ trait Logger {
     _logger
   }
 
-  protected def logInfo(msg: => String) {
+  def logInfo(msg: => String) {
     if (logger.isInfoEnabled) logger.info(msg)
   }
 
-  protected def logDebug(msg: => String) {
+  def logDebug(msg: => String) {
     if (logger.isDebugEnabled) logger.debug(msg)
   }
 
-  protected def logTrace(msg: => String) {
+  def logTrace(msg: => String) {
     if (logger.isTraceEnabled) logger.trace(msg)
   }
 
-  protected def logWarning(msg: => String) {
+  def logWarning(msg: => String) {
     if (logger.isWarnEnabled) logger.warn(msg)
   }
 
-  protected def logError(msg: => String) {
+  def logError(msg: => String) {
     if (logger.isErrorEnabled) logger.error(msg)
   }
 
-  protected def logInfo(msg: => String, throwable: Throwable) {
+  def logInfo(msg: => String, throwable: Throwable) {
     if (logger.isInfoEnabled) logger.info(msg, throwable)
   }
 
-  protected def logDebug(msg: => String, throwable: Throwable) {
+  def logDebug(msg: => String, throwable: Throwable) {
     if (logger.isDebugEnabled) logger.debug(msg, throwable)
   }
 
-  protected def logTrace(msg: => String, throwable: Throwable) {
+  def logTrace(msg: => String, throwable: Throwable) {
     if (logger.isTraceEnabled) logger.trace(msg, throwable)
   }
 
-  protected def logWarning(msg: => String, throwable: Throwable) {
+  def logWarning(msg: => String, throwable: Throwable) {
     if (logger.isWarnEnabled) logger.warn(msg, throwable)
   }
 
-  protected def logError(msg: => String, throwable: Throwable) {
+  def logError(msg: => String, throwable: Throwable) {
     if (logger.isErrorEnabled) logger.error(msg, throwable)
   }
 

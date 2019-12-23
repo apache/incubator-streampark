@@ -13,12 +13,14 @@ import scala.collection.Map
 object KafkaSink {
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
+            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null): KafkaSink = new KafkaSink(ctx, overwriteParams, parallelism, uidHash)
+            uidHash: String = null): KafkaSink = new KafkaSink(ctx, overwriteParams, name, parallelism, uidHash)
 }
 
 class KafkaSink(@transient val ctx: StreamingContext,
                 overwriteParams: Map[String, String] = Map.empty[String, String],
+                name: String = null,
                 parallelism: Int = 0,
                 uidHash: String = null) extends Sink {
 
@@ -28,7 +30,7 @@ class KafkaSink(@transient val ctx: StreamingContext,
     val topicName = prop.getProperty(ConfigConst.TOPIC)
     val producer = new FlinkKafkaProducer011[String](topicName, new SimpleStringSchema, prop)
     val sink = stream.addSink(producer)
-    afterSink(sink, parallelism, uidHash)
+    afterSink(sink, name, parallelism, uidHash)
   }
 
 }

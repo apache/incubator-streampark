@@ -7,6 +7,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
+import org.apache.flink.streaming.api.environment.CheckpointConfig
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
@@ -20,6 +21,8 @@ trait XStreaming extends Logger {
   private var parameter: ParameterTool = _
 
   private var context: StreamingContext = _
+
+  def config(env: StreamExecutionEnvironment): Unit = {}
 
   def handler(context: StreamingContext): Unit
 
@@ -43,19 +46,22 @@ trait XStreaming extends Logger {
 
     //init env....
     env = StreamExecutionEnvironment.getExecutionEnvironment
+
     val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(5)
     val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
     val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
-
-    val checkpointInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
-    val checkpointMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
-
     env.setParallelism(parallelism)
     env.setStreamTimeCharacteristic(timeCharacteristic)
-    env.enableCheckpointing(checkpointInterval)
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
+
+    //checkPoint
+    val checkpointInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
+    val checkpointMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
+    env.enableCheckpointing(checkpointInterval)
     env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
+    //set config by yourself...
+    this.config(env)
     env.getConfig.disableSysoutLogging
     env.getConfig.setGlobalJobParameters(parameter)
   }

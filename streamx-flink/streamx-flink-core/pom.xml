@@ -53,7 +53,7 @@
 
         <dependency>
             <groupId>org.apache.bahir</groupId>
-            <artifactId>flink-connector-redis_2.11</artifactId>
+            <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
         </dependency>
 
     </dependencies>
@@ -89,12 +89,13 @@
                 </configuration>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <version>3.6.0</version>
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <encoding>UTF-8</encoding>
                 </configuration>
             </plugin>
 

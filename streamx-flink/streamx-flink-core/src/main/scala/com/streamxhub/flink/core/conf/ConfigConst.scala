@@ -74,7 +74,8 @@ object ConfigConst {
 
   /**
    * about config MySQL
-    */
+   */
+  val KEY_MYSQL_INSTANCE = "instance"
   val KEY_MYSQL_DRIVER = "driver"
   val KEY_MYSQL_URL = "url"
   val KEY_MYSQL_USER = "user"
