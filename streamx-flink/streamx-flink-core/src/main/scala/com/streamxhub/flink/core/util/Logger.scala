@@ -12,11 +12,12 @@ import org.slf4j.{LoggerFactory, Logger => SlfLogger}
 trait Logger {
 
   @transient private var _logger: SlfLogger = _
+
   protected def logName = {
     this.getClass.getName.stripSuffix("$")
   }
 
-  protected def  logger: SlfLogger = {
+  protected def logger: SlfLogger = {
     if (_logger == null) {
       initializeLogIfNecessary(false)
       _logger = LoggerFactory.getLogger(logName)

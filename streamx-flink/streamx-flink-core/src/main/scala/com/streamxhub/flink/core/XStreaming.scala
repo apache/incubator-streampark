@@ -1,7 +1,7 @@
 package com.streamxhub.flink.core
 
 import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtil}
+import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
@@ -27,7 +27,7 @@ trait XStreaming extends Logger {
 
   private def initialize(args: Array[String]): Unit = {
     //read config and merge config......
-    SystemPropertyUtil.setAppHome(KEY_APP_HOME, classOf[XStreaming])
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[XStreaming])
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.toMap.get(APP_CONF) match {
       case null | "" => KEY_APP_DEFAULT_CONF
@@ -112,7 +112,7 @@ trait XStreaming extends Logger {
  * @param parameter
  * @param env
  */
-class StreamingContext(val parameter: ParameterTool,val streamExecutionEnvironment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(streamExecutionEnvironment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, val streamExecutionEnvironment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(streamExecutionEnvironment.getJavaEnv) {
 }
 
 

@@ -26,17 +26,17 @@ object MySQLSink {
    */
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
-            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null)(implicit instance: String = ""): MySQLSink = new MySQLSink(ctx, overwriteParams, name, parallelism, uidHash)
+            name: String = null,
+            uid: String = null)(implicit instance: String = ""): MySQLSink = new MySQLSink(ctx, overwriteParams, parallelism, name, uid)
 
 }
 
 class MySQLSink(@transient ctx: StreamingContext,
                 overwriteParams: Map[String, String] = Map.empty[String, String],
-                name: String = null,
                 parallelism: Int = 0,
-                uidHash: String = null)(implicit instance: String = "") extends Sink with Logger {
+                name: String = null,
+                uid: String = null)(implicit instance: String = "") extends Sink with Logger {
 
   /**
    *
@@ -50,7 +50,7 @@ class MySQLSink(@transient ctx: StreamingContext,
     prop.putAll(overwriteParams)
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
-    afterSink(sink, name, parallelism, uidHash)
+    afterSink(sink, parallelism, name, uid)
   }
 
 }

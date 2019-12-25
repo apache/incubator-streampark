@@ -7,7 +7,7 @@ import org.apache.commons.lang3.StringUtils
 
 import scala.util.{Failure, Success, Try}
 
-object SystemPropertyUtil extends Logger {
+object SystemPropertyUtils extends Logger {
 
   /**
    * Returns {@code true} if and only if the system property with the specified {@code key}
@@ -102,7 +102,7 @@ object SystemPropertyUtil extends Logger {
       } else { //开发阶段,将app.home定位到target下.
         file.getPath.replaceAll("classes/$", "")
       }
-      SystemPropertyUtil.set(key, appHome)
+      SystemPropertyUtils.set(key, appHome)
     }
   }
 }
