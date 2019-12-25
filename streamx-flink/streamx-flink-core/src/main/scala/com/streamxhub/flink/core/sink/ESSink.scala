@@ -13,17 +13,17 @@ object ESSink {
 
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
-            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null): ESSink = new ESSink(ctx, overwriteParams, name,parallelism, uidHash)
+            name: String = null,
+            uid: String = null): ESSink = new ESSink(ctx, overwriteParams, parallelism, name, uid)
 
 }
 
 class ESSink(@transient context: StreamingContext,
              overwriteParams: Map[String, String] = Map.empty[String, String],
-             name: String = null,
              parallelism: Int = 0,
-             uidHash: String = null) {
+             name: String = null,
+             uid: String = null) {
 
   /**
    * for ElasticSearch5....
@@ -62,7 +62,7 @@ class ESSink(@transient context: StreamingContext,
                failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
               (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ES6Sink(context, overwriteParams, name, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
+    new ES6Sink(context, overwriteParams, parallelism, name, uid).sink[T](stream, suffix, failureHandler)(f)
   }
 
 }

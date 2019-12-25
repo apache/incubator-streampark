@@ -20,7 +20,7 @@ object JsonUtils {
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-  def read[T](str: String)(implicit manifest: Manifest[T]) = {
+  def read[T](str: String)(implicit manifest: Manifest[T]): T = {
     mapper.readValue[T](str)
   }
 

@@ -64,7 +64,7 @@ object Config {
 
     val list = List(KEY_MYSQL_INSTANCE -> fix, KEY_MYSQL_DRIVER -> driver, KEY_MYSQL_URL -> url, KEY_MYSQL_USER -> user, KEY_MYSQL_PASSWORD -> password)
     val prop = new Properties()
-    prop.putAll(list.filter(_._2 != null).toMap[String,String])
+    prop.putAll(list.filter(_._2 != null).toMap[String, String])
     prop
   }
 

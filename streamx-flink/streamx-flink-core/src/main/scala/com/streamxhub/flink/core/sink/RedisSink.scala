@@ -15,16 +15,16 @@ import com.streamxhub.flink.core.conf.ConfigConst._
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
-            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null): RedisSink = new RedisSink(ctx, overwriteParams, name, parallelism, uidHash)
+            name: String = null,
+            uid: String = null): RedisSink = new RedisSink(ctx, overwriteParams, parallelism, name, uid)
 }
 
 class RedisSink(@transient ctx: StreamingContext,
                 overwriteParams: Map[String, String] = Map.empty[String, String],
-                name: String = null,
                 parallelism: Int = 0,
-                uidHash: String = null
+                name: String = null,
+                uid: String = null
                ) extends Sink {
 
   @Override
@@ -39,7 +39,7 @@ class RedisSink(@transient ctx: StreamingContext,
       case _ =>
     }
     val sink = stream.addSink(new RSink[T](builder.build(), mapper))
-    afterSink(sink, name, parallelism, uidHash)
+    afterSink(sink, parallelism, name, uid)
   }
 
 }
