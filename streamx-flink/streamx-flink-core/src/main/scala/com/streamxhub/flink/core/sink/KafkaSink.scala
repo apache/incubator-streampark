@@ -13,24 +13,24 @@ import scala.collection.Map
 object KafkaSink {
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
-            name: String = null,
             parallelism: Int = 0,
-            uidHash: String = null): KafkaSink = new KafkaSink(ctx, overwriteParams, name, parallelism, uidHash)
+            name: String = null,
+            uid: String = null): KafkaSink = new KafkaSink(ctx, overwriteParams, parallelism, name, uid)
 }
 
 class KafkaSink(@transient val ctx: StreamingContext,
                 overwriteParams: Map[String, String] = Map.empty[String, String],
-                name: String = null,
                 parallelism: Int = 0,
-                uidHash: String = null) extends Sink {
+                name: String = null,
+                uid: String = null) extends Sink {
 
-  def sink[T](stream: DataStream[String])(implicit topic:String = ""): DataStreamSink[String] = {
+  def sink[T](stream: DataStream[String])(implicit topic: String = ""): DataStreamSink[String] = {
     val prop = Config.getKafkaSink(ctx.parameter, topic)
     prop.putAll(overwriteParams)
     val topicName = prop.getProperty(ConfigConst.TOPIC)
     val producer = new FlinkKafkaProducer011[String](topicName, new SimpleStringSchema, prop)
     val sink = stream.addSink(producer)
-    afterSink(sink, name, parallelism, uidHash)
+    afterSink(sink, parallelism, name, uid)
   }
 
 }
