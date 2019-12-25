@@ -16,7 +16,7 @@ object FlinkSinkApp extends XStreaming {
   override def handler(context: StreamingContext): Unit = {
 
     //1)读取数据源
-    val source = context.env.readTextFile("data/in/person.txt")
+    val source = context.readTextFile("data/in/person.txt")
 
     val ds = source.flatMap(x => {
       x.split(",") match {
