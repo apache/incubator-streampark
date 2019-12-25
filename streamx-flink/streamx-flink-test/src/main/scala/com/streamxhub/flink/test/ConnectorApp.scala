@@ -16,7 +16,7 @@ object ConnectorApp extends XStreaming with Logger {
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
   override def handler(context: StreamingContext): Unit = {
-    val ds = context.env.fromCollection(List(
+    val ds = context.fromCollection(List(
       OrderEntity(1, 1, 11.3d, 3.1d, new Date()),
       OrderEntity(2, 1, 12.3d, 3.2d, new Date()),
       OrderEntity(3, 1, 13.3d, 3.3d, new Date()),

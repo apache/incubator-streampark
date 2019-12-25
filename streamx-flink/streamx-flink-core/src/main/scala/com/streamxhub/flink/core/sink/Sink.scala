@@ -1,7 +1,6 @@
 package com.streamxhub.flink.core.sink
 
-import org.apache.commons.lang3.StringUtils
-import org.apache.flink.streaming.api.datastream.{DataStream, DataStreamSink}
+import org.apache.flink.streaming.api.datastream.DataStreamSink
 
 
 trait Sink extends Serializable {
