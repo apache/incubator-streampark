@@ -7,7 +7,6 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
-import org.apache.flink.streaming.api.environment.CheckpointConfig
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
@@ -87,21 +86,33 @@ trait XStreaming extends Logger {
 
   def doStart(): JobExecutionResult = {
     val appName = parameter.get(KEY_APP_NAME, "")
-    logger.info(
+    val logo =
       s"""
-         |   ____   __   _          __          ____  __                            _
-         |  / __/  / /  (_)  ___   / /__       / __/ / /_  ____ ___  ___ _  __ _   (_)  ___   ___ _
-         | / _/   / /  / /  / _ \\ /  '_/      _\\ \\  / __/ / __// -_)/ _ `/ /  ' \\ / /  / _ \\ / _ `/
-         |/_/    /_/  /_/  /_//_//_/\\_\\      /___/  \\__/ /_/   \\__/ \\_,_/ /_/_/_//_/  /_//_/ \\_, /
+         |███████╗██╗     ██╗███╗   ██╗██╗  ██╗    ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗██╗███╗   ██╗ ██████╗
+         |██╔════╝██║     ██║████╗  ██║██║ ██╔╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔════╝
+         |█████╗  ██║     ██║██╔██╗ ██║█████╔╝     ███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║██║██╔██╗ ██║██║  ███╗
+         |██╔══╝  ██║     ██║██║╚██╗██║██╔═██╗     ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║██║██║╚██╗██║██║   ██║
+         |██║     ███████╗██║██║ ╚████║██║  ██╗    ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║╚██████╔╝
+         |╚═╝     ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝    ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
          |
          |$appName Starting...
          |
-         |""".stripMargin)
+         |""".stripMargin
+
+    println(s"\033[33;4m${logo}\033[0m")
+
     env.execute(appName)
   }
 
 }
 
-class StreamingContext(val parameter: ParameterTool, val env: StreamExecutionEnvironment)
+/**
+ * 不要觉得神奇,这个类就是这么神奇....
+ *
+ * @param parameter
+ * @param env
+ */
+class StreamingContext(val parameter: ParameterTool,val streamExecutionEnvironment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(streamExecutionEnvironment.getJavaEnv) {
+}
 
 

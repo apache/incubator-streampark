@@ -22,6 +22,6 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
     prop.putAll(specialKafkaParams)
     val _topic = prop.getProperty(ConfigConst.TOPIC)
     val consumer = new FlinkKafkaConsumer011[String](_topic, new SimpleStringSchema(), prop)
-    ctx.env.addSource(consumer)
+    ctx.addSource(consumer)
   }
 }

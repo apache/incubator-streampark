@@ -15,7 +15,7 @@ import com.streamxhub.flink.core.conf.ConfigConst._
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
-            name: String,
+            name: String = null,
             parallelism: Int = 0,
             uidHash: String = null): RedisSink = new RedisSink(ctx, overwriteParams, name, parallelism, uidHash)
 }
