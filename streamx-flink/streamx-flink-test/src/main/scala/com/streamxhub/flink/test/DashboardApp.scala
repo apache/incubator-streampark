@@ -3,6 +3,9 @@ package com.streamxhub.flink.test
 import com.streamxhub.flink.core.{StreamingContext, XStreaming}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
+import org.apache.flink.api.scala._
+import org.apache.flink.shaded.guava18.com.google.common.collect.ImmutableMap
+import scala.collection.JavaConverters._
 
 import scala.util.Random
 
@@ -11,10 +14,15 @@ import scala.util.Random
  */
 object DashboardApp extends XStreaming {
 
+  def doAction(x: OrderEntry): java.util.List[String] = {
+    List(x.userId.toString,x.siteId.toString).asJava
+  }
+
   override def handler(context: StreamingContext): Unit = {
     implicit val orderType = TypeInformation.of[OrderEntry](classOf[OrderEntry])
     val source = context.addSource(new OrderSource())
-    source.print()
+    val ds = source.map(x=>doAction(x)).flatMap(_.asScala)
+    ds.print()
   }
 
 }
