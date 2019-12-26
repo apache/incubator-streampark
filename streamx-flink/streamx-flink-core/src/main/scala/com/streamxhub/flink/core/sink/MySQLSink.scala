@@ -17,6 +17,11 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.collection.Map
 import scala.collection.JavaConversions._
 
+/**
+ *
+ * 注意： 该MySQLSink实现可能针对不用的MySQL版本会出现问题,导致获取类型失败(	at com.esotericsoftware.kryo.Generics.getConcreteClass(Generics.java:44)... )
+ *
+ */
 object MySQLSink {
 
   /**
@@ -74,6 +79,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
   override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
     logInfo("[StreamX] MySQLSink invoke ....")
     val sql = toSQLFn(value)
+    println(sql)
     transaction.prepareStatement(sql).executeUpdate()
   }
 
@@ -110,3 +116,4 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
   private def close(conn: Connection): Unit = MySQLUtils.close(this.config, conn, null, null)
 
 }
+
