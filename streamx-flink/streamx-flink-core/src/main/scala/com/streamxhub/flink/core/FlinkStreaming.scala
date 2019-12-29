@@ -12,7 +12,7 @@ import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
 import scala.util.Try
 
-trait XStreaming extends Logger {
+trait FlinkStreaming extends Logger {
 
   @(transient@getter)
   private var env: StreamExecutionEnvironment = _
