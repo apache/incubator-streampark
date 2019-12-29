@@ -1,14 +1,14 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import com.streamxhub.flink.core.sink.{KafkaSink, Mapper, RedisSink}
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 
-object FlinkSinkApp extends XStreaming {
+object FlinkSinkApp extends FlinkStreaming {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats

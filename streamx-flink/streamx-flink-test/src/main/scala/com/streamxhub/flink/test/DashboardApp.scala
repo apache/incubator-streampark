@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.api.scala._
@@ -12,7 +12,7 @@ import scala.util.Random
 /**
  * 电商实时大屏Dashboard...
  */
-object DashboardApp extends XStreaming {
+object DashboardApp extends FlinkStreaming {
 
   def doAction(x: OrderEntry): java.util.List[String] = {
     List(x.userId.toString,x.siteId.toString).asJava

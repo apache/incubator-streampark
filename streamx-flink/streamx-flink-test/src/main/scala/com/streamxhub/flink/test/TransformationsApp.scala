@@ -1,7 +1,7 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{DataSetContext,XDataSet}
+import com.streamxhub.flink.core.{DataSetContext,FlinkDataSet}
 import org.apache.flink.api.common.accumulators.LongCounter
 import org.apache.flink.api.common.functions.{GroupCombineFunction, GroupReduceFunction, RichMapFunction}
 import org.apache.flink.api.common.operators.Order
@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
 /**
   * 学习flink的各类算子的流转操作......
   */
-object TransformationsApp extends XDataSet {
+object TransformationsApp extends FlinkDataSet {
 
   override def handler(context: DataSetContext): Unit = {
 
