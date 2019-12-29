@@ -47,7 +47,7 @@ import org.apache.commons.codec.digest.DigestUtils
   * Spark Streaming 入口封装
   *
   */
-trait XStreaming {
+trait SparkStreaming {
 
   protected final def args: Array[String] = params
 
