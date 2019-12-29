@@ -220,7 +220,7 @@ object MySQLUtils {
                   val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
                   Try(Option(config.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
                     case Some(x) => x
-                    case None => throw new IllegalArgumentException(s"config error,field:${x._1} invalid,please see more HikariCP Properties config https://github.com/brettwooldridge/HikariCP")
+                    case None => throw new IllegalArgumentException(s"config error,property:${x._1} invalid,please see more properties config https://github.com/brettwooldridge/HikariCP")
                   }
                 case Some(x) => x
               }
