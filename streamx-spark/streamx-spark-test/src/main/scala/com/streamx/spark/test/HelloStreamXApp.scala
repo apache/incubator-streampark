@@ -1,12 +1,12 @@
 package com.streamx.spark.test
 
 import org.apache.spark.streaming.StreamingContext
-import com.streamxhub.spark.core.XStreaming
+import com.streamxhub.spark.core.SparkStreaming
 import com.streamxhub.spark.core.source.KafkaDirectSource
 import org.apache.spark.SparkConf
 import scalikejdbc.{ConnectionPool, DB, SQL}
 
-object HelloStreamXApp extends XStreaming {
+object HelloStreamXApp extends SparkStreaming {
 
   /**
     * 用户设置sparkConf参数,如,spark序列化:

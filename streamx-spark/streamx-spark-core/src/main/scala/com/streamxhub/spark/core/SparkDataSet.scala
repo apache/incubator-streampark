@@ -34,7 +34,7 @@ import scala.collection.JavaConversions._
 /**
   *
   */
-trait XSpark {
+trait SparkDataSet {
 
   protected final def args: Array[String] = _args
 
@@ -75,6 +75,7 @@ trait XSpark {
 
   def creatingContext(): SparkContext = {
     val sparkConf = new SparkConf()
+
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
