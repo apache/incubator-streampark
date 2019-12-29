@@ -3,14 +3,14 @@ package com.streamxhub.flink.test
 import java.util.Date
 
 import com.streamxhub.flink.core.sink.ESSink
-import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import com.streamxhub.flink.core.util.{EsIndexUtils, Logger}
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import org.apache.flink.streaming.api.scala._
 
-object ConnectorApp extends XStreaming with Logger {
+object ConnectorApp extends FlinkStreaming with Logger {
 
 
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats

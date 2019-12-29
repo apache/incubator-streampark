@@ -3,7 +3,7 @@ package com.streamxhub.flink.test
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import com.streamxhub.flink.core.sink.ESSink
 import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.util.{EsIndexUtils, WatermarkUtils}
@@ -17,7 +17,7 @@ import org.json4s.jackson.Serialization
 
 import scala.util.Try
 
-object PolestarDashboardApp extends XStreaming {
+object PolestarDashboardApp extends FlinkStreaming {
 
   /**
     * @param context

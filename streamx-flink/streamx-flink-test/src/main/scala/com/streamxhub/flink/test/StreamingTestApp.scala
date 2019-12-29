@@ -1,11 +1,11 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.{StreamingContext, XStreaming}
+import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import org.apache.flink.api.scala._
 
 import scala.util.Try
 
-object StreamingTestApp extends XStreaming {
+object StreamingTestApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
     val host = context.parameter.get("host")
