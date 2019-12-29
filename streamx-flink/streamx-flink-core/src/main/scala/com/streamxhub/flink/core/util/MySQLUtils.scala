@@ -4,7 +4,7 @@ import java.sql.{Connection, ResultSet, Statement}
 import java.util
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.{Condition, ReentrantLock}
+import java.util.concurrent.locks.ReentrantLock
 
 import com.streamxhub.flink.core.conf.ConfigConst._
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
@@ -76,7 +76,7 @@ object MySQLUtils {
    * @tparam T
    * @return
    */
-  def select2[T](sql: String)(implicit config: Properties): List[T] = toObject(select(sql))
+  def select2[T](sql: String)(implicit config: Properties,manifest: Manifest[T]): List[T] = toObject[T](select(sql))
 
   def select2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
@@ -171,7 +171,7 @@ object MySQLUtils {
     }
   }
 
-  def unique2[T](sql: String)(implicit config: Properties): T = toObject(List(unique(sql))).head
+  def unique2[T](sql: String)(implicit config: Properties,manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
 
   def unique2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
 
@@ -210,21 +210,33 @@ object MySQLUtils {
       val conn = Try(connectionPool.get()(instance).poll()).getOrElse(null)
       if (conn != null) conn else {
         //尝试获取该实力的数据源对象
-        var ds = Try(dataSourceHolder(instance)).getOrElse(null)
-        //没有数据源
-        if (ds == null) {
-          //创建一个数据源对象
-          val config = new HikariConfig()
-          config.setDriverClassName(prop(KEY_MYSQL_DRIVER))
-          config.setJdbcUrl(prop(KEY_MYSQL_URL))
-          config.setUsername(prop(KEY_MYSQL_USER))
-          config.setPassword(prop(KEY_MYSQL_PASSWORD))
-          config.setAutoCommit(false)
-          config.addDataSourceProperty("cachePrepStmts", "true")
-          config.addDataSourceProperty("prepStmtCacheSize", "250")
-          config.addDataSourceProperty("prepStmtCacheSqlLimit", "2048")
-          ds = new HikariDataSource(config)
-          dataSourceHolder += instance -> ds
+        val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+          case None =>
+            //创建一个数据源对象
+            val config = new HikariConfig()
+            prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
+              val field = Try(Option(config.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+                case None =>
+                  val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+                  Try(Option(config.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
+                    case Some(x) => x
+                    case None => throw new IllegalArgumentException(s"config error,field:${x._1} invalid,please see more HikariCP Properties config https://github.com/brettwooldridge/HikariCP")
+                  }
+                case Some(x) => x
+              }
+              field.setAccessible(true)
+              field.getType.getSimpleName match {
+                case "String" => field.set(config, x._2)
+                case "int" => field.set(config, x._2.toInt)
+                case "long" => field.set(config, x._2.toLong)
+                case "boolean" => field.set(config, x._2.toBoolean)
+                case _ =>
+              }
+            })
+            val ds = new HikariDataSource(config)
+            dataSourceHolder += instance -> ds
+            ds
+          case Some(x) => x
         }
         //返回连接...
         val conn = ds.getConnection
@@ -252,6 +264,7 @@ object MySQLUtils {
             }
           }
         }).asInstanceOf[Connection]
+
       }
     } finally {
       lock.unlock()

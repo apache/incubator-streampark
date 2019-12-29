@@ -16,12 +16,8 @@ object Config {
   def getKafkaSource(parameter: ParameterTool, topic: String): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX, topic)
 
   private[this] def kafkaGet(parameter: ParameterTool, prefix: String, _topic: String): Properties = {
-    val param: Map[String, String] = parameter.toMap.filter(x => {
-      x._1.startsWith(prefix) && Try(x._2.nonEmpty).getOrElse(false)
-    }).flatMap(x => Some(x._1.substring(prefix.length) -> x._2)).toMap
-    if (param.isEmpty) {
-      throw new IllegalArgumentException(s"${_topic} init error...")
-    } else {
+    val param: Map[String, String] = filterParam(parameter, prefix)
+    if (param.isEmpty) throw new IllegalArgumentException(s"${_topic} init error...") else {
       val kafkaProperty = new Properties()
       kafkaProperty.putAll(param)
       val topic = _topic match {
@@ -57,15 +53,19 @@ object Config {
     val password = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_PASSWORD}", null)
 
     (driver, url, user, password) match {
-      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL Source prefix:${prefix} error,[driver|url] must be not null")
-      case (_, _, x, y) if (x != null && y == null) || (x != null && y != null) => throw new IllegalArgumentException(s"MySQL Source prefix:${prefix} error, [user|password] must be all null,or all not null ")
+      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error,[driver|url] must be not null")
+      case (_, _, x, y) if (x != null && y == null) || (x != null && y != null) => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error, [user|password] must be all null,or all not null ")
       case _ =>
     }
+    val param: Map[String, String] = filterParam(parameter, fix)
+    val properties = new Properties()
+    properties.put(KEY_MYSQL_DRIVER, driver)
+    properties.putAll(param)
+    properties
+  }
 
-    val list = List(KEY_MYSQL_INSTANCE -> fix, KEY_MYSQL_DRIVER -> driver, KEY_MYSQL_URL -> url, KEY_MYSQL_USER -> user, KEY_MYSQL_PASSWORD -> password)
-    val prop = new Properties()
-    prop.putAll(list.filter(_._2 != null).toMap[String, String])
-    prop
+  private[this] def filterParam(parameter: ParameterTool, fix: String): Map[String, String] = {
+    parameter.toMap.filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false)).flatMap(x => Some(x._1.substring(fix.length) -> x._2)).toMap
   }
 
 }
