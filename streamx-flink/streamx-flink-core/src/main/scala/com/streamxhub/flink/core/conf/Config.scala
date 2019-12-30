@@ -65,7 +65,12 @@ object Config {
   }
 
   private[this] def filterParam(parameter: ParameterTool, fix: String): Map[String, String] = {
-    parameter.toMap.filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false)).flatMap(x => Some(x._1.substring(fix.length) -> x._2)).toMap
+    parameter
+      .toMap
+      .filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false))
+      .flatMap(x =>
+        Some(x._1.substring(fix.length).replaceFirst("^\\.","") -> x._2)
+      ).toMap
   }
 
 }
