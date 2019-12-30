@@ -27,13 +27,13 @@ trait FlinkStreaming extends Logger {
 
   private def initialize(args: Array[String]): Unit = {
     //read config and merge config......
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[XStreaming])
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.toMap.get(APP_CONF) match {
       case null | "" => KEY_APP_DEFAULT_CONF
       case file => if (file.startsWith("/")) file else s"/${file}"
     }
-    val configFile = classOf[XStreaming].getResourceAsStream(config)
+    val configFile = classOf[FlinkStreaming].getResourceAsStream(config)
     require(configFile != null, s"appConfig file $configFile is not found!!!")
 
     val configArgs = config.split("\\.").last match {
