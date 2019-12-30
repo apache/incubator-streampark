@@ -59,6 +59,7 @@ object Config {
     }
     val param: Map[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
+    properties.put(KEY_MYSQL_INSTANCE,instance)
     properties.put(KEY_MYSQL_DRIVER, driver)
     properties.putAll(param)
     properties
