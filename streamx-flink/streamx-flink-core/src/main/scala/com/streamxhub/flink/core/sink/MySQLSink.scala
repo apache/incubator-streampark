@@ -1,12 +1,13 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, SQLException}
+import java.sql.{Connection, DriverManager, SQLException}
 import java.util.Properties
 
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
-import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
+import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.flink.core.util.Logger
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -16,6 +17,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.collection.Map
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 /**
  *
@@ -71,7 +73,11 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
-    val connection = MySQLUtils.getConnection(this.config)
+    Class.forName(config(KEY_MYSQL_DRIVER))
+    val connection = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
+      case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
+      case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
+    }
     connection.setAutoCommit(false)
     connection
   }
@@ -79,7 +85,6 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
   override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
     logInfo("[StreamX] MySQLSink invoke ....")
     val sql = toSQLFn(value)
-    println(sql)
     transaction.prepareStatement(sql).executeUpdate()
   }
 
@@ -113,7 +118,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
     }
   }
 
-  private def close(conn: Connection): Unit = MySQLUtils.close(this.config, conn, null, null)
+  private def close(conn: Connection): Unit = Try(conn.close())
 
 }
 
