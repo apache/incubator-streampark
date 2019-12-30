@@ -80,7 +80,7 @@ public class JavaMySQLSink extends TwoPhaseCommitSinkFunction<String, Connection
 
     public void close(Connection conn) {
         if (conn != null) {
-            MySQLUtils.close(jdbcProp, conn, null, null);
+            MySQLUtils.close(conn, null, null);
         }
     }
 }

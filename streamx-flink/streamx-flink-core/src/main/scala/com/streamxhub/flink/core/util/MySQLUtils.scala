@@ -63,7 +63,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close(config, conn, stmt, result)
+        close( conn, stmt, result)
       }
     }
   }
@@ -110,7 +110,7 @@ object MySQLUtils {
           case ex: Exception => ex.printStackTrace()
             0
         } finally {
-          close(config, conn, null, null)
+          close( conn, null, null)
         }
     }
   }
@@ -135,7 +135,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close(config, conn, statement, null)
+      close( conn, statement, null)
     }
   }
 
@@ -167,7 +167,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close(config, conn, stmt, result)
+      close( conn, stmt, result)
     }
   }
 
@@ -196,7 +196,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close(config, conn, null, null)
+      close( conn, null, null)
     }
   }
 
@@ -271,7 +271,7 @@ object MySQLUtils {
     }
   }
 
-  def close(config: Properties, connection: Connection, statement: Statement, resultSet: ResultSet) = {
+  def close(connection: Connection, statement: Statement, resultSet: ResultSet) = {
     if (resultSet != null) {
       resultSet.close()
     }
