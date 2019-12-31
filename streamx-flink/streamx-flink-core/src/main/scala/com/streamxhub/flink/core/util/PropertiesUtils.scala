@@ -98,7 +98,7 @@ object PropertiesUtils {
     try {
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
@@ -130,7 +130,7 @@ object PropertiesUtils {
     try {
       val map = collection.mutable.Map[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)
     } finally {
