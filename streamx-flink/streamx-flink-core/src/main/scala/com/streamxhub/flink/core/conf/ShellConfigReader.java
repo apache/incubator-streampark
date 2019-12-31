@@ -29,7 +29,7 @@ public class ShellConfigReader implements Serializable {
                     //配置文件必须以application为前缀。。。。
                     if (name.startsWith("application-")) {
                         if (type.equals("properties") || type.equals("yml")) {
-                            configBuffer.append("\"").append(jarEntry.getName()).append("\"").append(" ");
+                            configBuffer.append(jarEntry.getName()).append(" ");
                         }
                     }
                 }
@@ -38,7 +38,7 @@ public class ShellConfigReader implements Serializable {
         } else if (action.equals("--read")) {
             JarFile jarFile = new JarFile(jarPath);
             String conf = args[2];
-            JarEntry jarEntry = jarFile.getJarEntry(conf.replace("\"", ""));
+            JarEntry jarEntry = jarFile.getJarEntry(conf);
             scala.collection.immutable.Map<String, String> configArgs;
             if (conf.endsWith(".properties")) {
                 configArgs = PropertiesUtils.fromPropertiesFile(jarFile.getInputStream(jarEntry));
