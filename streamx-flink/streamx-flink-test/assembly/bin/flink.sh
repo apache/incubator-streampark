@@ -128,8 +128,8 @@ if ${os400}; then
   export QIBM_MULTI_THREADED=Y
 fi
 
-chooseApp() {
-read -p "Please select application index to shutdown:
+chooseConf() {
+read -p "Please select configFile to startup:
 $1
 exit
 " app_target
@@ -137,94 +137,26 @@ echo "${app_target}"
 }
 
 doStart() {
-    ###########################################..flink env start...#####################################################################
-    local proper=""
-    if [[ $# -eq 0 ]]; then
-      proper="application.properties"
-      echo_w "not input properties-file,use default application.properties"
-    else
-      #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
-      proper=$(echo "$1"|awk -F 'conf/' '{print $2}')
-    fi
-    # flink properties file
-    local app_proper=""
-    if [[ -f "$APP_CONF/$proper" ]] ; then
-       app_proper="$APP_CONF/$proper"
-    else
-       echo_r "Usage: properties file:$proper not exists!!! ";
-       exit 1;
-    fi
-
-    # shellcheck disable=SC2126
-    # shellcheck disable=SC2155
-    local isYml=$(echo "$app_proper"|grep "\.yml$"|wc -l)
-
-    if [[ isYml -eq 1 ]]; then
-        #source yaml.sh
-        # shellcheck disable=SC1090
-        source "${APP_BIN}"/yaml.sh
-        #
-        yaml_get "${app_proper}"
-        local yarnname=$(echo "${flink_deploy_yarnname}")
-        local main=$(echo "${flink_deploy_main}")
-        local mainParams=$(echo "${flink_deploy_mainParams}")
-        local detached=$(echo "${flink_deploy_detached}")
-        local jobmanager=$(echo "${flink_deploy_jobmanager}")
-        local yarnapplicationType=$(echo "${flink_deploy_yarnapplicationType}")
-        local shutdownOnAttachedExit=$(echo "${flink_deploy_shutdownOnAttachedExit}")
-        local yarndetached=$(echo "${flink_deploy_yarndetached}")
-        local yarnapplicationId=$(echo "${flink_deploy_yarnapplicationId}")
-        local yarnjobManagerMemory=$(echo "${flink_deploy_yarnjobManagerMemory}")
-        local yarncontainer=$(echo "${flink_deploy_yarncontainer}")
-        local yarnnodeLabel=$(echo "${flink_deploy_yarnnodeLabel}")
-        local yarnqueue=$(echo "${flink_deploy_yarnqueue}")
-        local yarnslots=$(echo "${flink_deploy_yarnslots}")
-        local yarntaskManagerMemory=$(echo "${flink_deploy_yarntaskManagerMemory}")
-    else
-        local yarnname=$(grep 'flink.deploy.yarnname' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
-        local main=$(grep 'flink.deploy.main' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
-        local mainParams=$(grep 'flink.deploy.mainParams' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local detached=$(grep 'flink.deploy.detached' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local jobmanager=$(grep 'flink.deploy.jobmanager' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnapplicationType=$(grep 'flink.deploy.yarnapplicationType' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local shutdownOnAttachedExit=$(grep 'flink.deploy.shutdownOnAttachedExit' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarndetached=$(grep 'flink.deploy.yarndetached' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnapplicationId=$(grep 'flink.deploy.yarnapplicationId' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnjobManagerMemory=$(grep 'flink.deploy.yarnjobManagerMemory' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarncontainer=$(grep 'flink.deploy.yarncontainer' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnnodeLabel=$(grep 'flink.deploy.yarnnodeLabel' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnqueue=$(grep 'flink.deploy.yarnqueue' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarnslots=$(grep 'flink.deploy.yarnslots' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-        local yarntaskManagerMemory=$(grep 'flink.deploy.yarntaskManagerMemory' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
-
-    fi
-     # flink main jar...
+    # flink main jar...
+    local shellReader="com.streamxhub.flink.core.conf"
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
+    local javaProps=$(java -cp ${main_jar} $shellReader  --which )
+    local sureProp=$(chooseConf "${javaProps}")
 
-    shift
-    local app_params=""
-    if [[ "x$*" != "x" ]]; then
-        app_params=$*
-    fi
-
-    local run_params=""
-    [ x"$main" != x"" ] && run_params=" --class $main $run_params"
-    [ x"$yarnname" != x"" ] && run_params=" --yarnname $yarnname $run_params"
-    [ x"$jobmanager" != x"" ] && run_params=" --jobmanager $jobmanager $run_params"
-    [ x"$detached" != x"" ] && run_params=" --jobmanager $detached $run_params"
-    [ x"$yarnapplicationType" != x"" ] && run_params=" --yarnapplicationType $yarnapplicationType $run_params"
-    [ x"$shutdownOnAttachedExit" != x"" ] && run_params=" --shutdownOnAttachedExit $shutdownOnAttachedExit $run_params"
-    [ x"$yarndetached" != x"" ] && run_params=" --yarndetached $yarndetached $run_params"
-    [ x"$yarnapplicationId" != x"" ] && run_params=" --yarnapplicationId $yarnapplicationId $run_params"
-    [ x"$yarncontainer" != x"" ] && run_params=" --yarncontainer $yarncontainer $run_params"
-    [ x"$yarnjobManagerMemory" != x"" ] && run_params=" --yarnjobManagerMemory $yarnjobManagerMemory $run_params"
-    [ x"$yarnnodeLabel" != x"" ] && run_params=" --yarnnodeLabel $yarnnodeLabel $run_params"
-    [ x"$yarnqueue" != x"" ] && run_params=" --yarnqueue $yarnqueue $run_params"
-    [ x"$yarnslots" != x"" ] && run_params=" --yarnslots $yarnslots $run_params"
-    [ x"$yarntaskManagerMemory" != x"" ] && run_params=" --yarntaskManagerMemory $yarntaskManagerMemory $run_params"
-
-    echo "flink run -m yarn-cluster $run_params $main_jar ${mainParams}"
-
+     if [[ x"${sureProp}" == x"" ]] ; then
+         echo_w "Usage error."
+         exit 1
+     elif [[ x"${sureProp}" == x"exit" ]] ; then
+         echo_w "exit startup."
+         exit 0
+     elif [[ -n "`echo "${sureProp}" | sed 's/[0-9]//g'`" ]] ; then
+        echo_r "Usage error."
+        exit 1;
+     else
+         conf=${javaProps[${sureProp}]}
+         local run_params=$(java -cp ${main_jar} $shellReader --conf ${conf} )
+         echo "flink run -m yarn-cluster $run_params $main_jar"
+     fi
 }
 
 
