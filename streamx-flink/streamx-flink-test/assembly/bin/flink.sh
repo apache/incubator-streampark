@@ -140,7 +140,7 @@ doStart() {
     # flink main jar...
     local shellReader="com.streamxhub.flink.core.conf"
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
-    local javaProps=$(java -cp ${main_jar} $shellReader  --which )
+    local javaProps=$(java -cp ${main_jar} $shellReader --conf ${main_jar} )
     local sureProp=$(chooseConf "${javaProps}")
 
      if [[ x"${sureProp}" == x"" ]] ; then
@@ -154,7 +154,7 @@ doStart() {
         exit 1;
      else
          conf=${javaProps[${sureProp}]}
-         local run_params=$(java -cp ${main_jar} $shellReader --conf ${conf} )
+         local run_params=$(java -cp ${main_jar} $shellReader --read ${main_jar} ${conf} )
          echo "flink run -m yarn-cluster $run_params $main_jar"
      fi
 }
