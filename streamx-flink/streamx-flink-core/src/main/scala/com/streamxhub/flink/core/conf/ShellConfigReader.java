@@ -1,6 +1,7 @@
 package com.streamxhub.flink.core.conf;
 
 import com.streamxhub.flink.core.util.PropertiesUtils;
+import org.apache.commons.lang3.StringUtils;
 import scala.collection.JavaConversions;
 
 import java.io.*;
@@ -14,6 +15,7 @@ public class ShellConfigReader implements Serializable {
     public static void main(String[] args) throws IOException {
         String action = args[0];
         String jarPath = args[1];
+
         if (action.equals("--conf")) {
             JarFile jarFile = new JarFile(jarPath);
             Enumeration<JarEntry> entries = jarFile.entries();
@@ -43,15 +45,17 @@ public class ShellConfigReader implements Serializable {
                 configArgs = PropertiesUtils.fromYamlFile(jarFile.getInputStream(jarEntry));
             }
             Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
+
             StringBuffer buffer = new StringBuffer();
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (entry.getKey().startsWith("flink.deploy")) {
-                    buffer.append(" --".contains(entry.getKey()))
+                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith("flink.deploy")) {
+                    buffer.append(" --")
+                            .append(entry.getKey().replace("flink.deploy.",""))
                             .append(" ")
                             .append(entry.getValue());
                 }
             }
-            System.out.println(buffer.toString());
+            System.out.println(buffer.toString().trim());
         }
     }
 
