@@ -165,37 +165,41 @@ doStart() {
         source "${APP_BIN}"/yaml.sh
         #
         yaml_get "${app_proper}"
-         #flink app name
-        # shellcheck disable=SC2155
-        # shellcheck disable=SC2116
-        # shellcheck disable=SC2154
-        local app_name=$(echo "${flink_app_name}")
-        #flink main class
-        # shellcheck disable=SC2155
-        # shellcheck disable=SC2116
-        # shellcheck disable=SC2154
-        local main=$(echo "${flink_main_class}")
-        #flink main parameter..
-        # shellcheck disable=SC2155
-        # shellcheck disable=SC2116
-        # shellcheck disable=SC2154
-        local main_params=$(echo "${flink_main_params}")
+        local yarnname=$(echo "${flink_deploy_yarnname}")
+        local main=$(echo "${flink_deploy_main}")
+        local mainParams=$(echo "${flink_deploy_mainParams}")
+        local detached=$(echo "${flink_deploy_detached}")
+        local jobmanager=$(echo "${flink_deploy_jobmanager}")
+        local yarnapplicationType=$(echo "${flink_deploy_yarnapplicationType}")
+        local shutdownOnAttachedExit=$(echo "${flink_deploy_shutdownOnAttachedExit}")
+        local yarndetached=$(echo "${flink_deploy_yarndetached}")
+        local yarnapplicationId=$(echo "${flink_deploy_yarnapplicationId}")
+        local yarnjobManagerMemory=$(echo "${flink_deploy_yarnjobManagerMemory}")
+        local yarncontainer=$(echo "${flink_deploy_yarncontainer}")
+        local yarnnodeLabel=$(echo "${flink_deploy_yarnnodeLabel}")
+        local yarnqueue=$(echo "${flink_deploy_yarnqueue}")
+        local yarnslots=$(echo "${flink_deploy_yarnslots}")
+        local yarntaskManagerMemory=$(echo "${flink_deploy_yarntaskManagerMemory}")
     else
-        #flink app name
-        # shellcheck disable=SC2155
-        local app_name=$(grep 'flink.app.name' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
-        #flink main class
-        # shellcheck disable=SC2155
-        local main=$(grep 'flink.main.class' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
-        #flink main parameter..
-        local main_params=$(grep 'flink.main.params' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnname=$(grep 'flink.deploy.yarnname' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
+        local main=$(grep 'flink.deploy.main' "${app_proper}" | grep -v '^#' | awk -F'=' '{print $2}')
+        local mainParams=$(grep 'flink.deploy.mainParams' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local detached=$(grep 'flink.deploy.detached' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local jobmanager=$(grep 'flink.deploy.jobmanager' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnapplicationType=$(grep 'flink.deploy.yarnapplicationType' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local shutdownOnAttachedExit=$(grep 'flink.deploy.shutdownOnAttachedExit' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarndetached=$(grep 'flink.deploy.yarndetached' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnapplicationId=$(grep 'flink.deploy.yarnapplicationId' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnjobManagerMemory=$(grep 'flink.deploy.yarnjobManagerMemory' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarncontainer=$(grep 'flink.deploy.yarncontainer' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnnodeLabel=$(grep 'flink.deploy.yarnnodeLabel' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnqueue=$(grep 'flink.deploy.yarnqueue' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarnslots=$(grep 'flink.deploy.yarnslots' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+        local yarntaskManagerMemory=$(grep 'flink.deploy.yarntaskManagerMemory' ${app_proper} | grep -v '^#' | awk -F'params=' '{print $2}')
+
     fi
      # flink main jar...
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
-    #flink application id file
-    local app_pid="$APP_TEMP/${app_name}.pid"
-    #flink application lock file
-    local app_lock="$APP_TEMP/${app_name}.lock"
 
     shift
     local app_params=""
@@ -203,124 +207,26 @@ doStart() {
         app_params=$*
     fi
 
-    ### assembly all jars.......
-    for jar in $(ls -1 "${APP_LIB}"); do
-        if [[ "x$jar" != "x$(basename ${main_jar})" ]]; then
-            jars=${APP_LIB}/${jar},${jars}
-        fi
-    done
+    local run_params=""
+    [ x"$main" != x"" ] && run_params=" --class $main $run_params"
+    [ x"$yarnname" != x"" ] && run_params=" --yarnname $yarnname $run_params"
+    [ x"$jobmanager" != x"" ] && run_params=" --jobmanager $jobmanager $run_params"
+    [ x"$detached" != x"" ] && run_params=" --jobmanager $detached $run_params"
+    [ x"$yarnapplicationType" != x"" ] && run_params=" --yarnapplicationType $yarnapplicationType $run_params"
+    [ x"$shutdownOnAttachedExit" != x"" ] && run_params=" --shutdownOnAttachedExit $shutdownOnAttachedExit $run_params"
+    [ x"$yarndetached" != x"" ] && run_params=" --yarndetached $yarndetached $run_params"
+    [ x"$yarnapplicationId" != x"" ] && run_params=" --yarnapplicationId $yarnapplicationId $run_params"
+    [ x"$yarncontainer" != x"" ] && run_params=" --yarncontainer $yarncontainer $run_params"
+    [ x"$yarnjobManagerMemory" != x"" ] && run_params=" --yarnjobManagerMemory $yarnjobManagerMemory $run_params"
+    [ x"$yarnnodeLabel" != x"" ] && run_params=" --yarnnodeLabel $yarnnodeLabel $run_params"
+    [ x"$yarnqueue" != x"" ] && run_params=" --yarnqueue $yarnqueue $run_params"
+    [ x"$yarnslots" != x"" ] && run_params=" --yarnslots $yarnslots $run_params"
+    [ x"$yarntaskManagerMemory" != x"" ] && run_params=" --yarntaskManagerMemory $yarntaskManagerMemory $run_params"
 
-    [[ "x$jars" == "x" ]] && { echo_r "Usage: ${APP_LIB} assembly jar error!!! "; exit 1; }
+    echo "flink run -m yarn-cluster $run_params $main_jar ${mainParams}"
 
-    ##check lock.....
-    if [[ -f "${app_lock}" ]] ; then
-        echo_r "this app already running.please check it,you cat delete $app_lock by yourself...";
-        exit 1
-    else
-        #create lock file
-        touch ${app_lock}
-    fi
-    ###########################################..flink env end...#####################################################################
-
-    local exit_code=0
-
-    sudo -u hdfs yarn application --list | grep -i "flink" | grep "${app_name}" >/dev/null
-
-    if [[ $? -eq 0 ]]; then
-        echo_r "${app_name} already exists!!!"
-        exit_code=1
-    else
-        echo_g "${app_name} Starting..."
-        local app_log_date=`date "+%Y%m%d_%H%M%S"`
-        local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
-
-        sudo -u hdfs flink2-submit \
-            --files ${app_proper} \
-            --conf "flink.deploy.conf=${app_proper}" \
-	          --conf "flink.deploy.startup=$0 $RUN_ARGS" \
-            --name ${app_name} \
-            --queue flink \
-            --jars ${jars} ${app_params}  \
-            --class ${main}  ${main_jar} ${main_params} \
-            >> ${app_out} 2>&1 &
-
-        exit_code=$?
-
-        if [[ ${exit_code} -eq 0 ]] ; then
-             #get application_id
-             local pid="application_`grep "tracking URL:" ${app_out}|awk -F'/application_' '{print $2}'|awk -F'/' '{print $1}'`"
-             #write application_id to ${app_pid}
-             echo ${pid} > ${app_pid}
-             echo_g "${app_name} start successful,application_id:${pid}"
-        else
-            echo_r "${app_name} start error,please log:${app_out}"
-        fi
-    fi
-     #start done,and delete lock file.....
-    [[ -f "${app_lock}" ]] && rm -rf ${app_lock}
-    exit ${exit_code}
 }
 
-doShutdown() {
-
-    local exit_code=0
-
-    local pid_len="`ls ${APP_TEMP}/ | grep ".pid"|wc -l`"
-
-    if [[ x"${pid_len}" == x"0" ]] ; then
-        echo_r "cat not found application_id!!!"
-        exit_code=1
-    else
-        #only one pid...
-        if [[ x"${pid_len}" == x"1" ]] ; then
-           pid_file="`ls ${APP_TEMP}/ | grep ".pid"`"
-           pid="`cat ${APP_TEMP}/${pid_file}`"
-        else
-           ###more pid file.....
-           index=0
-           for pid_file in `ls ${APP_TEMP}/ | grep ".pid"`; do
-               pid_files[index]=${pid_file}
-               index=`expr ${index} + 1`
-           done
-           index=0
-           apps=$(for pid_file in `ls ${APP_TEMP}/ | grep ".pid"`; do
-               pid_APP=$(echo "$pid_file"|awk -F'.pid' '{print $1}')
-               echo "$index) ${pid_APP}"
-               index=`expr ${index} + 1`
-           done)
-
-           local app_target=$(chooseApp "${apps}")
-
-           if [[ x"${app_target}" == x"" ]] ; then
-               echo_w "Usage error."
-               exit 1
-           elif [[ x"${app_target}" == x"exit" ]] ; then
-               echo_w "exit shutdown."
-               exit 0
-           elif [[ -n "`echo ${app_target} | sed 's/[0-9]//g'`" ]] ; then
-              echo_r "Usage error."
-              exit 1;
-           else
-               pid_file=${pid_files[${app_target}]}
-               pid=`cat ${APP_TEMP}/${pid_file}`
-           fi
-        fi
-
-        sudo -u hdfs yarn application -kill ${pid}  >/dev/null
-
-        if [[ $? -eq 0 ]] ; then
-           echo_g "stop successful,application_id:${pid}"
-           [[ -f "${APP_TEMP}/${pid_file}" ]] && rm -rf ${APP_TEMP}/${pid_file}
-        else
-           echo_r "stop error,application_id:${pid}"
-        fi
-
-        exit_code=$?
-
-    fi
-
-    exit ${exit_code}
-}
 
 case "$1" in
     start)
@@ -329,7 +235,6 @@ case "$1" in
        exit $?
         ;;
     stop)
-      doShutdown
       exit $?
       ;;
     *)

@@ -37,7 +37,7 @@ object ConfigConst {
 
   val KEY_FLINK_CHECKPOINT_INTERVAL = "flink.checkpoint.interval"
 
-  val KEY_FLINK_PARALLELISM = "flink.parallelism"
+  val KEY_FLINK_PARALLELISM = "flink.deploy.parallelism"
 
   val KEY_FLINK_RESTART_ATTEMPTS = "flink.restart.attempts"
 
@@ -47,7 +47,7 @@ object ConfigConst {
 
   val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
 
-  val KEY_APP_NAME = "app.name"
+  val KEY_APP_NAME = "flink.deploy.yarnname"
 
   val KEY_APP_DEFAULT_CONF = "/application.yml"
 

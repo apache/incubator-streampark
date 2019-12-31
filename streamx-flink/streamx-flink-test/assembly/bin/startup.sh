@@ -43,7 +43,7 @@ while [[ -h "$PRG" ]] ; do
 done
 
 PRGDIR=`dirname "$PRG"`
-EXECUTABLE=spark.sh
+EXECUTABLE=flink.sh
 
 # Check that target executable exists
 if ${os400}; then
