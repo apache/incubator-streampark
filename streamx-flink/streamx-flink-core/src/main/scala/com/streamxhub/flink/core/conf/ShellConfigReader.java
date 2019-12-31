@@ -3,36 +3,35 @@ package com.streamxhub.flink.core.conf;
 import com.streamxhub.flink.core.util.PropertiesUtils;
 import scala.collection.JavaConversions;
 
-import java.io.File;
-import java.io.Serializable;
-import java.net.URL;
-import java.util.Arrays;
+import java.io.*;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class ShellConfigReader implements Serializable {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         String action = args[0];
-        if(action.equals("--which")) {
-            URL url = Thread.currentThread().getContextClassLoader().getResource("./");
-            File[] files = new File(url.getFile()).listFiles((dir, name) -> name.matches(".*\\.properties$|.*\\.yml$"));
-            String prop = Arrays.stream(files).map(x-> x.getName()+" ").collect(Collectors.joining());
-            System.out.println(prop);
-        }else if(action.equals("--conf")) {
-            String conf = args[1];
-            URL url= Thread.currentThread().getContextClassLoader().getResource(".".concat(conf));
-            scala.collection.immutable.Map<String,String> configArgs = null;
-            if(url.getPath().endsWith(".properties")) {
-                configArgs = PropertiesUtils.fromPropertiesFile(url.getPath());
-            }else if(url.getPath().endsWith(".yml")) {
-                configArgs = PropertiesUtils.fromYamlFile(url.getPath());
-            }else {
-                throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml");
-            }
-            Map<String,String> map = JavaConversions.mapAsJavaMap(configArgs);
+        ClassLoader loader = Thread.currentThread().getContextClassLoader();
+        if (action.equals("--which")) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(loader.getResourceAsStream("./")));
             StringBuffer buffer = new StringBuffer();
-            for (Map.Entry<String,String> entry:map.entrySet()) {
+            String line;
+            while ((line = in.readLine()) != null) {
+                if (line.startsWith("application-") && (line.endsWith(".properties") || line.endsWith(".yml"))) {
+                    buffer.append(line).append(" ");
+                }
+            }
+            System.out.println(buffer.toString().trim());
+        } else if (action.equals("--conf")) {
+            String conf = args[1];
+            scala.collection.immutable.Map<String, String> configArgs;
+            if (conf.endsWith(".properties")) {
+                configArgs = PropertiesUtils.fromPropertiesFile(loader.getResourceAsStream(".".concat(conf)));
+            } else {
+                configArgs = PropertiesUtils.fromYamlFile(loader.getResourceAsStream(".".concat(conf)));
+            }
+            Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
+            StringBuffer buffer = new StringBuffer();
+            for (Map.Entry<String, String> entry : map.entrySet()) {
                 if (entry.getKey().startsWith("flink.deploy")) {
                     buffer.append(" --".contains(entry.getKey()))
                             .append(" ")
