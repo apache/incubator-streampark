@@ -4,30 +4,43 @@ import com.streamxhub.flink.core.util.PropertiesUtils;
 import scala.collection.JavaConversions;
 
 import java.io.*;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 public class ShellConfigReader implements Serializable {
 
     public static void main(String[] args) throws IOException {
         String action = args[0];
-        ClassLoader loader = Thread.currentThread().getContextClassLoader();
-        if (action.equals("--which")) {
-            BufferedReader in = new BufferedReader(new InputStreamReader(loader.getResourceAsStream("./")));
-            StringBuffer buffer = new StringBuffer();
-            String line;
-            while ((line = in.readLine()) != null) {
-                if (line.startsWith("application-") && (line.endsWith(".properties") || line.endsWith(".yml"))) {
-                    buffer.append(line).append(" ");
+        String jarPath = args[1];
+        if (action.equals("--conf")) {
+            JarFile jarFile = new JarFile(jarPath);
+            Enumeration<JarEntry> entries = jarFile.entries();
+            StringBuffer stringBuffer = new StringBuffer();
+            while (entries.hasMoreElements()) {
+                JarEntry jarEntry = entries.nextElement();
+                String[] entryInfo = jarEntry.getName().split("\\.");
+                if (entryInfo.length == 2) {
+                    String name = entryInfo[0];
+                    String type = entryInfo[1];
+                    if(name.startsWith("application-")) {
+                        if(type.equals("properties") || type.equals("yml")) {
+                            stringBuffer.append(jarEntry.getName()).append(" ");
+                        }
+                    }
                 }
             }
-            System.out.println(buffer.toString().trim());
-        } else if (action.equals("--conf")) {
-            String conf = args[1];
+            System.out.println(stringBuffer.toString().trim());
+        } else if (action.equals("--read")) {
+            JarFile jarFile = new JarFile(jarPath);
+            String conf = args[2];
+            JarEntry jarEntry = jarFile.getJarEntry(conf);
             scala.collection.immutable.Map<String, String> configArgs;
             if (conf.endsWith(".properties")) {
-                configArgs = PropertiesUtils.fromPropertiesFile(loader.getResourceAsStream(".".concat(conf)));
+                configArgs = PropertiesUtils.fromPropertiesFile(jarFile.getInputStream(jarEntry));
             } else {
-                configArgs = PropertiesUtils.fromYamlFile(loader.getResourceAsStream(".".concat(conf)));
+                configArgs = PropertiesUtils.fromYamlFile(jarFile.getInputStream(jarEntry));
             }
             Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
             StringBuffer buffer = new StringBuffer();
