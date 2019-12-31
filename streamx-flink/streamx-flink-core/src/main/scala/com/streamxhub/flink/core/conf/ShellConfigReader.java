@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class ShellConfigReader implements Serializable {
 
@@ -16,7 +17,7 @@ public class ShellConfigReader implements Serializable {
         if(action.equals("--which")) {
             URL url = Thread.currentThread().getContextClassLoader().getResource("./");
             File[] files = new File(url.getFile()).listFiles((dir, name) -> name.matches(".*\\.properties$|.*\\.yml$"));
-            String prop = Arrays.stream(files).map(x-> x.getName()+" ").toString();
+            String prop = Arrays.stream(files).map(x-> x.getName()+" ").collect(Collectors.joining());
             System.out.println(prop);
         }else if(action.equals("--conf")) {
             String conf = args[1];
