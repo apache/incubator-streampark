@@ -29,18 +29,27 @@ trait FlinkStreaming extends Logger {
     //read config and merge config......
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.toMap.get(APP_CONF) match {
-      case null | "" => KEY_APP_DEFAULT_CONF
-      case file => if (file.startsWith("/")) file else s"/${file}"
+    /**
+     * 线上环境会自动加上启动参数app.debug=false,会走线上一套外部参数的方式....
+     * debug本地调试需要设置-Dapp.conf=$configPath... 指定配置文件地址
+     */
+    val configArgs = SystemPropertyUtils.getBoolean(APP_DEBUG,false) match {
+      case true =>
+        //debug...
+        val config = SystemPropertyUtils.get(APP_CONF,null) match {
+          case null | "" => throw new ExceptionInInitializerError("can't fond config,please set \"-Dapp.conf=$path \" in VM Option")
+          case file => file
+        }
+        val configFile = new java.io.File(config)
+        require(configFile.exists(), s"appConfig file $configFile is not found!!!")
+        config.split("\\.").last match {
+          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+          case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
+        }
+      case _ => Map.empty[String,String]
     }
-    val configFile = classOf[FlinkStreaming].getResourceAsStream(config)
-    require(configFile != null, s"appConfig file $configFile is not found!!!")
 
-    val configArgs = config.split("\\.").last match {
-      case "properties" => PropertiesUtils.fromPropertiesFile(configFile)
-      case "yml" => PropertiesUtils.fromYamlFile(configFile)
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
-    }
     parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties)
 
     //init env....
@@ -88,18 +97,45 @@ trait FlinkStreaming extends Logger {
     val appName = parameter.get(KEY_APP_NAME, "")
     val logo =
       s"""
-         |███████╗██╗     ██╗███╗   ██╗██╗  ██╗    ███████╗████████╗██████╗ ███████╗ █████╗ ███╗   ███╗██╗███╗   ██╗ ██████╗
-         |██╔════╝██║     ██║████╗  ██║██║ ██╔╝    ██╔════╝╚══██╔══╝██╔══██╗██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔════╝
-         |█████╗  ██║     ██║██╔██╗ ██║█████╔╝     ███████╗   ██║   ██████╔╝█████╗  ███████║██╔████╔██║██║██╔██╗ ██║██║  ███╗
-         |██╔══╝  ██║     ██║██║╚██╗██║██╔═██╗     ╚════██║   ██║   ██╔══██╗██╔══╝  ██╔══██║██║╚██╔╝██║██║██║╚██╗██║██║   ██║
-         |██║     ███████╗██║██║ ╚████║██║  ██╗    ███████║   ██║   ██║  ██║███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║╚██████╔╝
-         |╚═╝     ╚══════╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝    ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝ ╚═════╝
+         |
+         |                         ▒▓██▓██▒
+         |                     ▓████▒▒█▓▒▓███▓▒
+         |                  ▓███▓░░        ▒▒▒▓██▒  ▒
+         |                ░██▒   ▒▒▓▓█▓▓▒░      ▒████
+         |                ██▒         ░▒▓███▒    ▒█▒█▒
+         |                  ░▓█            ███   ▓░▒██
+         |                    ▓█       ▒▒▒▒▒▓██▓░▒░▓▓█
+         |                  █░ █   ▒▒░       ███▓▓█ ▒█▒▒▒
+         |                  ████░   ▒▓█▓      ██▒▒▒ ▓███▒
+         |               ░▒█▓▓██       ▓█▒    ▓█▒▓██▓ ░█░
+         |         ▓░▒▓████▒ ██         ▒█    █▓░▒█▒░▒█▒
+         |        ███▓░██▓  ▓█           █   █▓ ▒▓█▓▓█▒
+         |      ░██▓  ░█░            █  █▒ ▒█████▓▒ ██▓░▒
+         |     ███░ ░ █░          ▓ ░█ █████▒░░    ░█░▓  ▓░
+         |    ██▓█ ▒▒▓▒          ▓███████▓░       ▒█▒ ▒▓ ▓██▓
+         | ▒██▓ ▓█ █▓█       ░▒█████▓▓▒░         ██▒▒  █ ▒  ▓█▒
+         | ▓█▓  ▓█ ██▓ ░▓▓▓▓▓▓▓▒              ▒██▓           ░█▒
+         | ▓█    █ ▓███▓▒░              ░▓▓▓███▓          ░▒░ ▓█
+         | ██▓    ██▒    ░▒▓▓███▓▓▓▓▓██████▓▒            ▓███  █
+         |▓███▒ ███   ░▓▓▒░░   ░▓████▓░                  ░▒▓▒  █▓
+         |█▓▒▒▓▓██  ░▒▒░░░▒▒▒▒▓██▓░                            █▓
+         |██ ▓░▒█   ▓▓▓▓▒░░  ▒█▓       ▒▓▓██▓    ▓▒          ▒▒▓
+         |▓█▓ ▓▒█  █▓░  ░▒▓▓██▒            ░▓█▒   ▒▒▒░▒▒▓█████▒
+         | ██░ ▓█▒█▒  ▒▓▓▒  ▓█                █░      ░░░░   ░█▒
+         | ▓█   ▒█▓   ░     █░                ▒█              █▓
+         |  █▓   ██         █░                 ▓▓        ▒█▓▓▓▒█░
+         |   █▓ ░▓██░       ▓▒                  ▓█▓▒░░░▒▓█░    ▒█
+         |    ██   ▓█▓░      ▒                    ░▒█▒██▒      ▓▓
+         |     ▓█▒   ▒█▓▒░                         ▒▒ █▒█▓▒▒░░▒██
+         |      ░██▒    ▒▓▓▒                     ▓██▓▒█▒ ░▓▓▓▓▒█▓
+         |        ░▓██▒                          ▓░  ▒█▓█  ░░▒▒▒
+         |            ▒▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▓▓  ▓░▒█░
          |
          |$appName Starting...
          |
          |""".stripMargin
 
-    println(s"\033[33;4m${logo}\033[0m")
+    println(s"${logo}")
 
     env.execute(appName)
   }

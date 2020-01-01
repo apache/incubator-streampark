@@ -49,11 +49,11 @@ object ConfigConst {
 
   val KEY_APP_NAME = "flink.deploy.yarnname"
 
-  val KEY_APP_DEFAULT_CONF = "/application.yml"
-
   /**
    * about config prefix
    */
+  val APP_DEBUG = "app.debug" // debug ...or no debug...
+
   val APP_CONF = "app.conf"
 
   val TOPIC = "topic"
