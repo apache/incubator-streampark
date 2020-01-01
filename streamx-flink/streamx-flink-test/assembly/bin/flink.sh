@@ -129,13 +129,31 @@ if ${os400}; then
 fi
 
 doStart() {
+
+    local proper=""
+    if [[ $# -eq 0 ]]; then
+      proper="application.yml"
+      echo_w "not input properties-file,use default application.yml"
+    else
+      #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
+      proper=$(echo "$1"|awk -F 'conf/' '{print $2}')
+    fi
+    # flink properties file
+    local app_proper=""
+    if [[ -f "$APP_CONF/$proper" ]] ; then
+       app_proper="$APP_CONF/$proper"
+    else
+       echo_r "Usage: properties file:$proper not exists!!! ";
+       exit 1;
+    fi
+
     # flink main jar...
     local shellReader="com.streamxhub.flink.core.conf.ShellConfigReader"
     local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
     # shellcheck disable=SC2006
-    local deploy_params="`java -cp "${main_jar}" $shellReader --deploy "${main_jar}"`"
+    local deploy_params="`java -cp "${main_jar}" $shellReader --deploy "${proper}"`"
     # shellcheck disable=SC2006
-    local run_params="`java -cp "${main_jar}" $shellReader --conf "${main_jar}"`"
+    local run_params="`java -cp "${main_jar}" $shellReader --conf "${proper}"`"
     echo "flink run -m yarn-cluster $run_params $deploy_params $main_jar"
 }
 
