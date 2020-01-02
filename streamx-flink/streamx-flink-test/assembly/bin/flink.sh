@@ -160,7 +160,7 @@ doStart() {
           $deploy_params \
           $run_params \
           -yD deploy.mode=YARN \
-          -jarfile $main_jars
+          -jarfile $flink_jar
 
 }
 
