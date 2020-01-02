@@ -80,7 +80,7 @@ trait FlinkStreaming extends Logger {
     //set config by yourself...
     this.config(env)
     env.getConfig.disableSysoutLogging
-    env.getConfig.setGlobalJobParameters(parameter)
+    //env.getConfig.setGlobalJobParameters(parameter)
   }
 
   /**
