@@ -19,8 +19,8 @@ public class ShellConfigReader implements Serializable {
             configArgs = PropertiesUtils.fromYamlFile(conf);
         }
         Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
-        if(conf.equals("--deploy")) {
-            StringBuffer buffer = new StringBuffer();
+        StringBuffer buffer = new StringBuffer();
+        if(action.equals("--deploy")) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith("flink.deploy")) {
                     buffer.append(" --")
@@ -31,10 +31,9 @@ public class ShellConfigReader implements Serializable {
             }
             System.out.println(buffer.toString().trim());
         } else if (action.equals("--conf")) {
-            StringBuffer buffer = new StringBuffer();
             for (Map.Entry<String, String> entry : map.entrySet()) {
                 if (StringUtils.isNoneBlank(entry.getValue()) && !entry.getKey().startsWith("flink.deploy")) {
-                    buffer.append(" -D").append(entry.getKey()).append("=").append(entry.getValue());
+                    buffer.append(" -yD ").append(entry.getKey()).append("=").append(entry.getValue());
                 }
             }
             System.out.println(buffer.toString().trim());
