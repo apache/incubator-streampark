@@ -52,9 +52,9 @@ object ConfigConst {
   /**
    * about config prefix
    */
-  val APP_DEBUG = "app.debug" // debug ...or no debug...
+  val DEPLOY_MODE = "deploy.mode" // debug ...or no debug...
 
-  val APP_CONF = "app.conf"
+  val APP_CONF = "flink.conf"
 
   val TOPIC = "topic"
 
