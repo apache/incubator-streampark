@@ -148,17 +148,19 @@ doStart() {
     fi
 
     # flink main jar...
+    local flink_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
+
     local shellReader="com.streamxhub.flink.core.conf.ShellConfigReader"
-    local main_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
     # shellcheck disable=SC2006
-    local deploy_params="`java -cp "${main_jar}" $shellReader --deploy "${app_proper}"`"
+    local deploy_params="`java -cp "${flink_jar}" $shellReader --deploy "${app_proper}"`"
     # shellcheck disable=SC2006
-    local run_params="`java -cp "${main_jar}" $shellReader --conf "${app_proper}"`"
+    local run_params="`java -cp "${flink_jar}" $shellReader --conf "${app_proper}"`"
 
     flink run \
-          $run_params \
           $deploy_params \
-          $main_jar
+          $run_params \
+          -yD deploy.mode=YARN \
+          -jarfile $main_jars
 
 }
 
