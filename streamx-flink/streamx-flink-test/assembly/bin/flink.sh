@@ -157,9 +157,10 @@ doStart() {
     local run_params="`java -cp "${flink_jar}" $shellReader --conf "${app_proper}"`"
 
     flink run \
+          -m yarn-cluster \
+          -yD deploy.mode=YARN \
           $deploy_params \
           $run_params \
-          -yD deploy.mode=YARN \
           -jarfile $flink_jar
 
 }
