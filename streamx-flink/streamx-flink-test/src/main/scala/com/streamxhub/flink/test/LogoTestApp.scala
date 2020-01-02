@@ -44,7 +44,7 @@ object LogoTestApp {
          |
          |""".stripMargin.replaceAll("_","")
 
-    System.out.println(s"\033[31;2m${logo}\033[2m")
+    println(s"\033[91;2m${logo}\033[0m")
 
 
   }
