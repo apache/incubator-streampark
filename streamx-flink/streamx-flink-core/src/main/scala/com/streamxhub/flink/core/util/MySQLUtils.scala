@@ -240,16 +240,12 @@ object MySQLUtils {
         }
         //返回连接...
         val conn = ds.getConnection
+
         Proxy.newProxyInstance(conn.getClass.getClassLoader, conn.getClass.getInterfaces, new InvocationHandler {
           override def invoke(proxy: Any, method: Method, args: Array[AnyRef]): AnyRef = {
             method.getName match {
               case "close" =>
                 val proxyConn = proxy.asInstanceOf[Connection]
-                //确保上一次的事物已经提交...
-                Try(proxyConn.commit())
-                //重新设置不自动提交事物,确保下次获取到一个正常的连接。。。
-                proxyConn.setAutoCommit(false)
-                //重新将连接返回连接池...
                 Option(connectionPool.get()) match {
                   case Some(x) =>
                     x.getOrElseUpdate(instance,new util.LinkedList[Connection]())
