@@ -7,7 +7,7 @@ object LogoTestApp {
     val logo =
       s"""
          |
-         |                         ▒▓██▓██▒
+         |                          ▒▓██▓██▒
          |                     ▓████▒▒█▓▒▓███▓▒
          |                  ▓███▓░░        ▒▒▒▓██▒  ▒
          |                ░██▒   ▒▒▓▓█▓▓▒░      ▒████
@@ -42,9 +42,10 @@ object LogoTestApp {
          |
          |$appName Starting...
          |
-         |""".stripMargin
+         |""".stripMargin.replaceAll("_","")
 
-    println(s"\033[31;4m${logo}\033[0m")
+    System.out.println(s"\033[31;2m${logo}\033[1m")
+
 
   }
 
