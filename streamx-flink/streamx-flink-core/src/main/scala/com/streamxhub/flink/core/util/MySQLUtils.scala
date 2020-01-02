@@ -1,7 +1,6 @@
 package com.streamxhub.flink.core.util
 
 import java.sql.{Connection, ResultSet, Statement}
-import java.util
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
@@ -15,19 +14,12 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
-import java.lang.reflect.InvocationHandler
-import java.lang.reflect.Method
-import java.lang.reflect.Proxy
-
-
 object MySQLUtils {
 
   @transient
   implicit private lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
   private val lockMap: mutable.Map[String, ReentrantLock] = new ConcurrentHashMap[String, ReentrantLock]
-
-  private[this] val connectionPool = new ThreadLocal[ConcurrentHashMap[String, util.Queue[Connection]]]()
 
   private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
 
@@ -63,7 +55,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close( conn, stmt, result)
+        close(conn, stmt, result)
       }
     }
   }
@@ -76,7 +68,7 @@ object MySQLUtils {
    * @tparam T
    * @return
    */
-  def select2[T](sql: String)(implicit config: Properties,manifest: Manifest[T]): List[T] = toObject[T](select(sql))
+  def select2[T](sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
 
   def select2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
@@ -110,7 +102,7 @@ object MySQLUtils {
           case ex: Exception => ex.printStackTrace()
             0
         } finally {
-          close( conn, null, null)
+          close(conn, null, null)
         }
     }
   }
@@ -135,7 +127,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close( conn, statement, null)
+      close(conn, statement, null)
     }
   }
 
@@ -167,11 +159,11 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close( conn, stmt, result)
+      close(conn, stmt, result)
     }
   }
 
-  def unique2[T](sql: String)(implicit config: Properties,manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
+  def unique2[T](sql: String)(implicit config: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
 
   def unique2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
 
@@ -196,7 +188,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close( conn, null, null)
+      close(conn, null, null)
     }
   }
 
@@ -205,65 +197,38 @@ object MySQLUtils {
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
-      //连接实例名称
-      //尝试从连接池里获取一个连接...
-      val conn = Try(connectionPool.get()(instance).poll()).getOrElse(null)
-      if (conn != null) conn else {
-        //尝试获取该实力的数据源对象
-        val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
-          case None =>
-            //创建一个数据源对象
-            val config = new HikariConfig()
-            prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
-              val field = Try(Option(config.getClass.getDeclaredField(x._1))).getOrElse(None) match {
-                case None =>
-                  val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                  Try(Option(config.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
-                    case Some(x) => x
-                    case None => throw new IllegalArgumentException(s"config error,property:${x._1} invalid,please see more properties config https://github.com/brettwooldridge/HikariCP")
-                  }
-                case Some(x) => x
-              }
-              field.setAccessible(true)
-              field.getType.getSimpleName match {
-                case "String" => field.set(config, x._2)
-                case "int" => field.set(config, x._2.toInt)
-                case "long" => field.set(config, x._2.toLong)
-                case "boolean" => field.set(config, x._2.toBoolean)
-                case _ =>
-              }
-            })
-            val ds = new HikariDataSource(config)
-            dataSourceHolder += instance -> ds
-            ds
-          case Some(x) => x
-        }
-        //返回连接...
-        val conn = ds.getConnection
-
-        Proxy.newProxyInstance(conn.getClass.getClassLoader, conn.getClass.getInterfaces, new InvocationHandler {
-          override def invoke(proxy: Any, method: Method, args: Array[AnyRef]): AnyRef = {
-            method.getName match {
-              case "close" =>
-                val proxyConn = proxy.asInstanceOf[Connection]
-                Option(connectionPool.get()) match {
-                  case Some(x) =>
-                    x.getOrElseUpdate(instance,new util.LinkedList[Connection]())
-                    x(instance).add(proxyConn)
-                  case _ =>
-                    val list = new util.LinkedList[Connection]()
-                    list.add(proxyConn)
-                    val map = new ConcurrentHashMap[String, util.Queue[Connection]]()
-                    map += instance -> list
-                    connectionPool.set(map)
+      val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+        case None =>
+          //创建一个数据源对象
+          val config = new HikariConfig()
+          prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
+            val field = Try(Option(config.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+              case None =>
+                val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+                Try(Option(config.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
+                  case Some(x) => x
+                  case None => throw new IllegalArgumentException(s"config error,property:${x._1} invalid,please see more properties config https://github.com/brettwooldridge/HikariCP")
                 }
-                null
-              case _ => method.invoke(conn, args: _*)
+              case Some(x) => x
             }
-          }
-        }).asInstanceOf[Connection]
-
+            field.setAccessible(true)
+            field.getType.getSimpleName match {
+              case "String" => field.set(config, x._2)
+              case "int" => field.set(config, x._2.toInt)
+              case "long" => field.set(config, x._2.toLong)
+              case "boolean" => field.set(config, x._2.toBoolean)
+              case _ =>
+            }
+          })
+          //关闭自动提交...
+          config.setAutoCommit(false)
+          val ds = new HikariDataSource(config)
+          dataSourceHolder += instance -> ds
+          ds
+        case Some(x) => x
       }
+      //返回连接...
+      ds.getConnection()
     } finally {
       lock.unlock()
     }
