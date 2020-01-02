@@ -144,7 +144,7 @@ trait FlinkStreaming extends Logger {
          |
          |""".stripMargin
 
-    println(s"\033[31;2m${logo}\033[0m")
+    println(s"\033[31;2m${logo}\033[2m")
     env.execute(appName)
   }
 
