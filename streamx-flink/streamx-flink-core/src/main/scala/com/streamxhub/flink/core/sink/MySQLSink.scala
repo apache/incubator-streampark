@@ -7,7 +7,7 @@ import java.util.Properties
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
 import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -73,11 +73,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
-    Class.forName(config(KEY_MYSQL_DRIVER))
-    val connection = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
-      case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
-      case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
-    }
+    val connection = MySQLUtils.getConnection(config)
     connection.setAutoCommit(false)
     connection
   }
@@ -118,7 +114,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
     }
   }
 
-  private def close(conn: Connection): Unit = Try(conn.close())
+  private def close(conn: Connection): Unit = MySQLUtils.close(conn,null,null)
 
 }
 
