@@ -32,7 +32,7 @@ public class ShellConfigReader implements Serializable {
             System.out.println(buffer.toString().trim());
         } else if (action.equals("--conf")) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (StringUtils.isNoneBlank(entry.getValue()) && !entry.getKey().startsWith("flink.deploy")) {
+                if (StringUtils.isNoneBlank(entry.getValue())) {
                     buffer.append(" -yD ").append(entry.getKey()).append("=").append(entry.getValue());
                 }
             }
