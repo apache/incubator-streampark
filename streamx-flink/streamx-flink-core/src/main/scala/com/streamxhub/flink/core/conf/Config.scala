@@ -8,6 +8,7 @@ import scala.collection.Map
 import scala.util.Try
 import scala.collection.JavaConversions._
 import ConfigConst._
+import org.apache.commons.lang3.StringUtils
 
 object Config {
 
@@ -59,7 +60,8 @@ object Config {
     }
     val param: Map[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    properties.put(KEY_MYSQL_INSTANCE,instance)
+    val instanceName = if(StringUtils.isBlank(instance)) "default" else instance
+    properties.put(KEY_MYSQL_INSTANCE,instanceName)
     properties.put(KEY_MYSQL_DRIVER, driver)
     properties.putAll(param)
     properties

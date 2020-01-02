@@ -251,7 +251,9 @@ object MySQLUtils {
                 proxyConn.setAutoCommit(false)
                 //重新将连接返回连接池...
                 Option(connectionPool.get()) match {
-                  case Some(x) => x(instance).add(proxyConn)
+                  case Some(x) =>
+                    x.getOrElseUpdate(instance,new util.LinkedList[Connection]())
+                    x(instance).add(proxyConn)
                   case _ =>
                     val list = new util.LinkedList[Connection]()
                     list.add(proxyConn)
