@@ -9,6 +9,9 @@ import java.util.Map;
 
 public class ShellConfigReader implements Serializable {
 
+    static String resourcePrefix = "flink.deployment.resource.";
+    static String dynamicPrefix = "flink.deployment.dynamic.";
+
     public static void main(String[] args) {
         String action = args[0];
         String conf = args[1];
@@ -20,24 +23,36 @@ public class ShellConfigReader implements Serializable {
         }
         Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
         StringBuffer buffer = new StringBuffer();
-        if(action.equals("--deploy")) {
+        if (action.equals("--resource")) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith("flink.deploy")) {
+                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(resourcePrefix)) {
                     buffer.append(" --")
-                            .append(entry.getKey().replace("flink.deploy.", ""))
+                            .append(entry.getKey().replace(resourcePrefix, ""))
                             .append(" ")
                             .append(entry.getValue());
                 }
             }
             System.out.println(buffer.toString().trim());
-        } else if (action.equals("--conf")) {
+        } else if (action.equals("--dynamic")) {
             for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (StringUtils.isNoneBlank(entry.getValue())) {
-                    buffer.append(" -yD ").append(entry.getKey()).append("=").append(entry.getValue());
+                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(dynamicPrefix)) {
+                    buffer.append(" -yD ")
+                            .append(entry.getKey().replace(dynamicPrefix, ""))
+                            .append("=")
+                            .append(entry.getValue());
                 }
             }
             System.out.println(buffer.toString().trim());
+        } else if (action.equals("--name")) {
+            String yarnName = map.getOrDefault("flink.deployment.resource.yarnname", null);
+            if (StringUtils.isEmpty(yarnName)) {
+                System.out.println("");
+            } else {
+                System.out.println(" --yarnname " + yarnName);
+            }
         }
+
     }
+
 
 }

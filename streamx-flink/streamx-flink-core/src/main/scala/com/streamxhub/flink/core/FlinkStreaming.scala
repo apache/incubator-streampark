@@ -10,7 +10,6 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
-import scala.collection.mutable
 import scala.util.Try
 
 trait FlinkStreaming extends Logger {
@@ -30,40 +29,21 @@ trait FlinkStreaming extends Logger {
     //read config and merge config......
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     val argsMap = ParameterTool.fromArgs(args)
-    /**
-     * 线上环境会自动加上启动参数deploy.mode=YARN,会走线上一套外部参数的方式....
-     * debug本地调试需要设置-Dflink.conf=$configPath... 指定配置文件地址
-     */
-    val command = ParameterTool.fromSystemProperties.toMap.get("sun.java.command").split("\\s+")
-    val map: mutable.Map[String, String] = new mutable.HashMap[String, String]()
-    for (i <- 0 until command.length) {
-      val cmd = command(i)
-      if (cmd == "-yD") {
-        val prop = command(i + 1)
-        val array = prop.split("=")
-        map += array.head -> array.last
-      }
+    val config = argsMap.get(APP_CONF, null) match {
+      case null | "" => throw new ExceptionInInitializerError("can't fond config,please set \"--flink.conf $path \" in main arguments")
+      case file => file
     }
-
-    val configArgs = if (Try(map(DEPLOY_MODE)).getOrElse("local") == "YARN") map else {
-      //local...
-      val config = SystemPropertyUtils.get(APP_CONF, null) match {
-        case null | "" => throw new ExceptionInInitializerError("can't fond config,please set \"-Dflink.conf=$path \" in VM Option")
-        case file => file
-      }
-      val configFile = new java.io.File(config)
-      require(configFile.exists(), s"appConfig file $configFile is not found!!!")
-      config.split("\\.").last match {
-        case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-        case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-        case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
-      }
+    val configFile = new java.io.File(config)
+    require(configFile.exists(), s"appConfig file $configFile is not found!!!")
+    val configArgs = config.split("\\.").last match {
+      case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+      case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
-
     parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties)
-    //init env....
-    env = StreamExecutionEnvironment.getExecutionEnvironment
 
+    env = StreamExecutionEnvironment.getExecutionEnvironment
+    //init env...
     val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(5)
     val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
     val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
@@ -79,7 +59,6 @@ trait FlinkStreaming extends Logger {
     env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
     //set config by yourself...
     this.config(env)
-    env.getConfig.disableSysoutLogging
     env.getConfig.setGlobalJobParameters(parameter)
   }
 
