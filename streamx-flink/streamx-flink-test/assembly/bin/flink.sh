@@ -157,10 +157,19 @@ doStart() {
        echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
        exit 1
     fi
+    local name_array=($name_params)
+    local app_name=${name_array[1]}
+
     # shellcheck disable=SC2006
     local resource_params="`java -cp "${flink_jar}" $shellReader --resource "${app_proper}"`"
     # shellcheck disable=SC2006
     local dynamic_params="`java -cp "${flink_jar}" $shellReader --dynamic "${app_proper}"`"
+
+    # shellcheck disable=SC2006
+    local app_log_date=`date "+%Y%m%d_%H%M%S"`
+    local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
+
+    echo_g "${app_name} Starting..."
 
     flink run \
           -m yarn-cluster \
@@ -168,7 +177,10 @@ doStart() {
           $dynamic_params \
           $name_params \
           --jarfile $flink_jar \
-          --flink.comf $app_proper
+          --flink.conf $app_proper \
+          >> $app_out 2>&1 &
+
+    echo_r "${app_name} starting,more detail please log:${app_out}"
 
 }
 
