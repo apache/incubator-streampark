@@ -119,11 +119,11 @@ trait FlinkStreaming extends Logger {
          |        ░▓██▒                          ▓░  ▒█▓█  ░░▒▒▒
          |            ▒▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▓▓  ▓░▒█░
          |
-         |  ______ StreamX let's flink|spark easy...
+         |         //======= StreamX let's flink|spark easy...
          |
          |""".stripMargin
 
-    println(s"\033[91;2m${logo}\033[0m\n")
+    println(s"\033[35;2m${logo}\033[0m\n")
     println(s"$appName Starting...")
     env.execute(appName)
   }
