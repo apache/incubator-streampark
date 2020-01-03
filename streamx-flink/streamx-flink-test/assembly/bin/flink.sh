@@ -36,24 +36,28 @@ RES="\E[0m";
 echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
