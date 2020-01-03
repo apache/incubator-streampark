@@ -30,7 +30,7 @@ trait FlinkStreaming extends Logger {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(APP_CONF, null) match {
-      case null | "" => throw new ExceptionInInitializerError("can't fond config,please set \"--flink.conf $path \" in main arguments")
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }
     val configFile = new java.io.File(config)
