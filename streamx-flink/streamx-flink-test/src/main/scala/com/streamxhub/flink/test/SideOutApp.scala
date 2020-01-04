@@ -22,12 +22,13 @@ object SideOutApp extends FlinkStreaming {
      * 侧输出流。。。
      * 官方写法:设置侧输出流
      */
-    val side1 = source.process(new ProcessFunction[SideEntry,SideEntry] {
+    val side1 = source.process(new ProcessFunction[SideEntry, SideEntry] {
       val tag = new OutputTag[SideEntry]("flink")
+
       override def processElement(value: SideEntry, ctx: ProcessFunction[SideEntry, SideEntry]#Context, out: Collector[SideEntry]): Unit = {
-        if(value.userId<100) {
-          ctx.output(tag,value)
-        }else {
+        if (value.userId < 100) {
+          ctx.output(tag, value)
+        } else {
           out.collect(value)
         }
       }
@@ -40,7 +41,7 @@ object SideOutApp extends FlinkStreaming {
      * Streamx 封装之后的写法....
      */
     //侧输出写出....
-    val side2 = source.sideOut[SideEntry]("streamx",x=>  if(x.userId<100) x else null)
+    val side2 = source.sideOut[SideEntry]("streamx", x => if (x.userId < 100) x else null)
 
     //侧输出获取....
     side2.sideGet[SideEntry]("streamx").print("streamx:========>")
@@ -62,16 +63,16 @@ object SideOutApp extends FlinkStreaming {
  * @param timestamp   : 下单时间
  */
 case class SideEntry(userId: Long,
-                 orderId: Long,
-                 siteId: Long,
-                 cityId: Long,
-                 orderStatus: Int,
-                 isNewOrder: Int,
-                 price: Double,
-                 quantity: Int,
-                 timestamp: Long)
+                     orderId: Long,
+                     siteId: Long,
+                     cityId: Long,
+                     orderStatus: Int,
+                     isNewOrder: Int,
+                     price: Double,
+                     quantity: Int,
+                     timestamp: Long)
 
-class SideSource extends SourceFunction[SideEntry]{
+class SideSource extends SourceFunction[SideEntry] {
 
   private[this] var isRunning = true
 
@@ -87,7 +88,7 @@ class SideSource extends SourceFunction[SideEntry]{
       val isNew = random.nextInt(1)
       val price = random.nextDouble()
       val quantity = new Random(10).nextInt()
-      val order = SideEntry(userId,orderId,siteId = 1,cityId = 1,status,isNew,price,quantity,System.currentTimeMillis)
+      val order = SideEntry(userId, orderId, siteId = 1, cityId = 1, status, isNew, price, quantity, System.currentTimeMillis)
       ctx.collect(order)
     }
   }
