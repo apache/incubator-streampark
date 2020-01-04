@@ -150,9 +150,9 @@ trait FlinkStreaming extends Logger {
         val outData = fun(value)
         if (outData != null) {
           ctx.output(tag, outData)
-        } else {
-          out.collect(value)
         }
+        //侧输出流不能影响主输出流...
+        out.collect(value)
       }
     })
 
