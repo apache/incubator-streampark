@@ -73,7 +73,7 @@ trait FlinkStreaming extends Logger {
     context = new StreamingContext(parameter, env)
   }
 
-  def doStart(): JobExecutionResult = {
+  private[this] def doStart(): JobExecutionResult = {
     val logo =
       s"""
          |
