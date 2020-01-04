@@ -7,6 +7,9 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.functions.ProcessFunction
+import org.apache.flink.util.Collector
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
@@ -127,6 +130,35 @@ trait FlinkStreaming extends Logger {
     doStart()
   }
 
+  /**
+   *
+   * 增强方法.........
+   *
+   * @param dataStream
+   * @tparam T
+   * @return
+   */
+
+  implicit def sideOut[T:TypeInformation](dataStream: DataStream[T]) = new SiteOutSupport(dataStream)
+
+  class SiteOutSupport[T:TypeInformation](val dataStream: DataStream[T]) {
+
+    def sideOut[R:TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T,T] {
+      val tag = new OutputTag[R](sideTag)
+      override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
+        val outData = fun(value)
+        if (outData != null) {
+          ctx.output(tag, outData)
+        } else {
+          out.collect(value)
+        }
+      }
+    })
+
+    def sideGet[R:TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+
+  }
+
 }
 
 /**
@@ -137,5 +169,7 @@ trait FlinkStreaming extends Logger {
  */
 class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 }
+
+
 
 
