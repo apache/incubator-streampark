@@ -2,7 +2,7 @@ package com.streamxhub.flink.core
 
 import com.streamxhub.flink.core.conf.ConfigConst._
 import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtils}
-import org.apache.flink.api.common.JobExecutionResult
+import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
@@ -44,7 +44,7 @@ trait FlinkStreaming extends Logger {
 
     env = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
-    val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(5)
+    val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT)
     val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
     val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
