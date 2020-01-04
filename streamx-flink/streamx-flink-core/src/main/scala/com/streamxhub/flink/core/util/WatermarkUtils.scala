@@ -1,26 +1,20 @@
 package com.streamxhub.flink.core.util
 
+import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks}
 import org.apache.flink.streaming.api.watermark.Watermark
+import org.apache.flink.streaming.api.windowing.time.Time
 
 
 object WatermarkUtils {
 
-  def boundedOutOfOrdernessWatermark[T](maxOutOfOrderness: Long)(implicit f: T => Long): AssignerWithPeriodicWatermarks[T] = {
-    new AssignerWithPeriodicWatermarks[T] {
-      var currentMaxTimestamp: Long = _
-
-      override def getCurrentWatermark: Watermark = new Watermark(currentMaxTimestamp - maxOutOfOrderness)
-
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = {
-        val timestamp = f(element)
-        currentMaxTimestamp = Math.max(timestamp, currentMaxTimestamp)
-        timestamp
-      }
+  def boundedOutOfOrdernessWatermark[T](f: T => Long)(implicit maxOutOfOrderness: Time): AssignerWithPeriodicWatermarks[T] = {
+    new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
+      override def extractTimestamp(element: T): Long =  f(element)
     }
   }
 
-  def timeLagWatermark[T](maxTimeLag: Long)(implicit f: T => Long): AssignerWithPeriodicWatermarks[T] = {
+  def timeLagWatermark[T](f: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
     new AssignerWithPeriodicWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = f(element)
 
