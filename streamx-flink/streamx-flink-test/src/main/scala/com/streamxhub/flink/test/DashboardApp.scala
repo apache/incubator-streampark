@@ -4,7 +4,6 @@ import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.api.scala._
-import org.apache.flink.shaded.guava18.com.google.common.collect.ImmutableMap
 import scala.collection.JavaConverters._
 
 import scala.util.Random
