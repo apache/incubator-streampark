@@ -69,7 +69,7 @@ trait FlinkStreaming extends Logger {
    */
   def beforeStart(env: StreamExecutionEnvironment): Unit = {}
 
-  private def createContext(): Unit = {
+  private[this] def createContext(): Unit = {
     context = new StreamingContext(parameter, env)
   }
 
@@ -118,7 +118,6 @@ trait FlinkStreaming extends Logger {
     println(s"$appName Starting...")
     env.execute(appName)
   }
-
 
   def main(args: Array[String]): Unit = {
     initialize(args)
