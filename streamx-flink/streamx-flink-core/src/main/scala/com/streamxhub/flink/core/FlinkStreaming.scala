@@ -17,6 +17,8 @@ import scala.util.Try
 
 trait FlinkStreaming extends Logger {
 
+  implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+
   @(transient@getter)
   private var env: StreamExecutionEnvironment = _
 
@@ -129,37 +131,6 @@ trait FlinkStreaming extends Logger {
     handler(context)
     doStart()
   }
-
-  /**
-   *
-   * 增强方法.........
-   *
-   * @param dataStream
-   * @tparam T
-   * @return
-   */
-
-  implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
-
-  class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
-
-    def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
-      val tag = new OutputTag[R](sideTag)
-
-      override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-        val outData = fun(value)
-        if (outData != null) {
-          ctx.output(tag, outData)
-        }
-        //侧输出流不能影响主输出流...
-        out.collect(value)
-      }
-    })
-
-    def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
-
-  }
-
 }
 
 /**
@@ -168,7 +139,25 @@ trait FlinkStreaming extends Logger {
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
+
+class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
+
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+    val tag = new OutputTag[R](sideTag)
+
+    override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
+      val outData = fun(value)
+      if (outData != null) {
+        ctx.output(tag, outData)
+      }
+      //侧输出流不能影响主输出流...
+      out.collect(value)
+    }
+  })
+
+  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+
 }
 
 
