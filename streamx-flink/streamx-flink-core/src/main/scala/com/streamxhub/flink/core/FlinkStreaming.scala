@@ -139,12 +139,13 @@ trait FlinkStreaming extends Logger {
    * @return
    */
 
-  implicit def sideOut[T:TypeInformation](dataStream: DataStream[T]) = new SiteOutSupport(dataStream)
+  implicit def sideOut[T: TypeInformation](dataStream: DataStream[T]) = new SiteOutSupport(dataStream)
 
-  class SiteOutSupport[T:TypeInformation](val dataStream: DataStream[T]) {
+  class SiteOutSupport[T: TypeInformation](val dataStream: DataStream[T]) {
 
-    def sideOut[R:TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T,T] {
+    def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
       val tag = new OutputTag[R](sideTag)
+
       override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
         val outData = fun(value)
         if (outData != null) {
@@ -155,7 +156,7 @@ trait FlinkStreaming extends Logger {
       }
     })
 
-    def sideGet[R:TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+    def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
   }
 
