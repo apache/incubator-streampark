@@ -15,6 +15,14 @@ import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
 import scala.util.Try
 
+/**
+ * 不要觉得神奇,这个类就是这么神奇....
+ *
+ * @param parameter
+ * @param environment
+ */
+class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
+
 trait FlinkStreaming extends Logger {
 
   implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
@@ -132,14 +140,6 @@ trait FlinkStreaming extends Logger {
     doStart()
   }
 }
-
-/**
- * 不要觉得神奇,这个类就是这么神奇....
- *
- * @param parameter
- * @param environment
- */
-class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
