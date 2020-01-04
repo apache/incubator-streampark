@@ -3,7 +3,7 @@ package com.streamxhub.flink.test
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
+import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.sink.ESSink
 import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.util.{EsIndexUtils, WatermarkUtils}
@@ -25,14 +25,15 @@ object PolestarDashboardApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
     val data = new KafkaSource(context)
 
+    implicit val outTime = Time.milliseconds(30 * 1000)
+
     val ds = data
       .getDataStream()
       .map(x => OrderEntity.build(x))
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)
-      .assignTimestampsAndWatermarks(WatermarkUtils
-        .boundedOutOfOrdernessWatermark[OrderEntity](1000 * 30)(_.timestamp))
+      .assignTimestampsAndWatermarks(WatermarkUtils.boundedOutOfOrdernessWatermark[OrderEntity](_.timestamp))
       .keyBy(_.client_id)
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
