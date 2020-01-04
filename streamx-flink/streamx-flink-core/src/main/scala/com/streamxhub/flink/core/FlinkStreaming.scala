@@ -139,9 +139,9 @@ trait FlinkStreaming extends Logger {
    * @return
    */
 
-  implicit def sideOut[T: TypeInformation](dataStream: DataStream[T]) = new SiteOutSupport(dataStream)
+  implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
-  class SiteOutSupport[T: TypeInformation](val dataStream: DataStream[T]) {
+  class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
     def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
       val tag = new OutputTag[R](sideTag)
