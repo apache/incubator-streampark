@@ -28,19 +28,26 @@
 
 # Make sure prerequisite environment variables are set
 if [[ -z "$JAVA_HOME" && -z "$JRE_HOME" ]]; then
+  # shellcheck disable=SC2154
   if ${darwin}; then
     # Bugzilla 54390
     if [[ -x '/usr/libexec/java_home' ]] ; then
+      # shellcheck disable=SC2006
+      # shellcheck disable=SC2155
       export JAVA_HOME=`/usr/libexec/java_home`
     # Bugzilla 37284 (reviewed).
     elif [[ -d "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home" ]]; then
       export JAVA_HOME="/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home"
     fi
   else
+    # shellcheck disable=SC2006
+    # shellcheck disable=SC2230
     JAVA_PATH=`which java 2>/dev/null`
     if [[ "x$JAVA_PATH" != "x" ]]; then
-      JAVA_PATH=`dirname ${JAVA_PATH} 2>/dev/null`
-      JRE_HOME=`dirname ${JAVA_PATH} 2>/dev/null`
+      # shellcheck disable=SC2006
+      JAVA_PATH=`dirname "${JAVA_PATH}" 2>/dev/null`
+      # shellcheck disable=SC2006
+      JRE_HOME=`dirname "${JAVA_PATH}" 2>/dev/null`
     fi
     if [[ "x$JRE_HOME" = "x" ]]; then
       # XXX: Should we try other locations?
@@ -65,6 +72,7 @@ fi
 
 # If we're running under jdb, we need a full jdk.
 if [[ "$1" = "debug" ]] ; then
+  # shellcheck disable=SC2154
   if [[ "$os400" = "true" ]]; then
     if [[ ! -x "$JAVA_HOME"/bin/java || ! -x "$JAVA_HOME"/bin/javac ]]; then
       echo "The JAVA_HOME environment variable is not defined correctly"
@@ -83,7 +91,9 @@ if [[ "$1" = "debug" ]] ; then
 fi
 
 # Set standard commands for invoking Java, if not already set.
+# shellcheck disable=SC2153
 if [[ -z "$_RUNJAVA" ]]; then
+  # shellcheck disable=SC2034
   RUNJAVA="$JRE_HOME"/bin/java
 fi
 if [[ "$os400" != "true" ]]; then

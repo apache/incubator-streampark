@@ -36,24 +36,28 @@ RES="\E[0m";
 echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
+    # shellcheck disable=SC2059
     printf "[${BLUE_COLOR}Flink${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
@@ -62,6 +66,7 @@ cygwin=false
 darwin=false
 os400=false
 hpux=false
+# shellcheck disable=SC2006
 case "`uname`" in
 CYGWIN*) cygwin=true;;
 Darwin*) darwin=true;;
@@ -73,33 +78,44 @@ esac
 PRG="$0"
 
 while [[ -h "$PRG" ]]; do
+  # shellcheck disable=SC2006
   ls=`ls -ld "$PRG"`
+  # shellcheck disable=SC2006
   link=`expr "$ls" : '.*-> \(.*\)$'`
   if expr "$link" : '/.*' > /dev/null; then
     PRG="$link"
   else
+    # shellcheck disable=SC2006
     PRG=`dirname "$PRG"`/"$link"
   fi
 done
 
 # Get standard environment variables
+# shellcheck disable=SC2006
 PRGDIR=`dirname "$PRG"`
 
+# shellcheck disable=SC2124
+# shellcheck disable=SC2034
 RUN_ARGS="$@"
 #global variables....
+# shellcheck disable=SC2006
+# shellcheck disable=SC2164
 APP_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
 APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_LOG="$APP_BASE"/logs
 APP_LIB="$APP_BASE"/lib
+# shellcheck disable=SC2034
 APP_BIN="$APP_BASE"/bin
 APP_TEMP="$APP_BASE"/temp
-[[ ! -d "$APP_LOG" ]] && mkdir ${APP_LOG} >/dev/null
-[[ ! -d "$APP_TEMP" ]] && mkdir ${APP_TEMP} >/dev/null
+[[ ! -d "$APP_LOG" ]] && mkdir "${APP_LOG}" >/dev/null
+[[ ! -d "$APP_TEMP" ]] && mkdir "${APP_TEMP}" >/dev/null
 
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if ${cygwin}; then
+  # shellcheck disable=SC2006
   [[ -n "$APP_HOME" ]] && APP_HOME=`cygpath --unix "$APP_HOME"`
+  # shellcheck disable=SC2006
   [[ -n "$APP_BASE" ]] && APP_BASE=`cygpath --unix "$APP_BASE"`
 fi
 
@@ -123,7 +139,7 @@ if ${os400}; then
   # the interactive priority - 6, the helper threads that respond to requests
   # will be running at the same priority as interactive jobs.
   COMMAND='chgjob job('${JOBNAME}') runpty(6)'
-  system ${COMMAND}
+  system "${COMMAND}"
   # Enable multi threading
   export QIBM_MULTI_THREADED=Y
 fi
@@ -148,24 +164,30 @@ doStart() {
     fi
 
     # flink main jar...
-    local flink_jar="${APP_LIB}/$(basename ${APP_BASE}).jar"
+    # shellcheck disable=SC2155
+    local flink_jar="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
     local shellReader="com.streamxhub.flink.core.conf.ShellConfigReader"
     # shellcheck disable=SC2006
+    # shellcheck disable=SC2155
     local name_params="`java -cp "${flink_jar}" $shellReader --name "${app_proper}"`"
     if [ x"${name_params}" == x"" ] ; then
        echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
        exit 1
     fi
+    # shellcheck disable=SC2206
     local name_array=($name_params)
     local app_name=${name_array[1]}
 
     # shellcheck disable=SC2006
+    # shellcheck disable=SC2155
     local resource_params="`java -cp "${flink_jar}" $shellReader --resource "${app_proper}"`"
     # shellcheck disable=SC2006
+    # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $shellReader --dynamic "${app_proper}"`"
 
     # shellcheck disable=SC2006
+    # shellcheck disable=SC2155
     local app_log_date=`date "+%Y%m%d_%H%M%S"`
     local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
@@ -173,12 +195,12 @@ doStart() {
 
     flink run \
           -m yarn-cluster \
-          $resource_params \
-          $dynamic_params \
-          $name_params \
-          --jarfile $flink_jar \
-          --flink.conf $app_proper \
-          >> $app_out 2>&1 &
+          "$resource_params" \
+          "$dynamic_params" \
+          "$name_params" \
+          --jarfile "$flink_jar" \
+          --flink.conf "$app_proper" \
+          >> "$app_out" 2>&1 &
 
     echo_r "${app_name} starting,more detail please log:${app_out}"
 
