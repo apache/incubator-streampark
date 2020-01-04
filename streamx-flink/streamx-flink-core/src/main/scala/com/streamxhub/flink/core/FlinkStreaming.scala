@@ -34,11 +34,11 @@ trait FlinkStreaming extends Logger {
       case file => file
     }
     val configFile = new java.io.File(config)
-    require(configFile.exists(), s"appConfig file $configFile is not found!!!")
+    require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
     val configArgs = config.split("\\.").last match {
       case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
       case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
     parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties)
 
@@ -73,16 +73,7 @@ trait FlinkStreaming extends Logger {
     context = new StreamingContext(parameter, env)
   }
 
-  def main(args: Array[String]): Unit = {
-    initialize(args)
-    beforeStart(env)
-    createContext()
-    handler(context)
-    doStart()
-  }
-
   def doStart(): JobExecutionResult = {
-    val appName = parameter.get(KEY_APP_NAME, "")
     val logo =
       s"""
          |
@@ -122,10 +113,19 @@ trait FlinkStreaming extends Logger {
          |         //======= StreamX let's flink|spark easy...
          |
          |""".stripMargin
-
     println(s"\033[95;1m${logo}\033[1m\n")
+    val appName = parameter.get(KEY_APP_NAME, "")
     println(s"$appName Starting...")
     env.execute(appName)
+  }
+
+
+  def main(args: Array[String]): Unit = {
+    initialize(args)
+    beforeStart(env)
+    createContext()
+    handler(context)
+    doStart()
   }
 
 }
@@ -134,9 +134,9 @@ trait FlinkStreaming extends Logger {
  * 不要觉得神奇,这个类就是这么神奇....
  *
  * @param parameter
- * @param env
+ * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, val streamExecutionEnvironment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(streamExecutionEnvironment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 }
 
 
