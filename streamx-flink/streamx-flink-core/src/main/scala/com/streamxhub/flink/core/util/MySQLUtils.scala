@@ -241,20 +241,11 @@ object MySQLUtils {
     }
   }
 
-  def close(statement: Statement, resultSet: ResultSet) = {
-    if (resultSet != null) {
-      resultSet.close()
-    }
-    if (statement != null) {
-      statement.close()
-    }
-  }
+  def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
 
   /**
    * 程序销毁时关闭所有资源连接。。。
    */
-  def destroy() = {
-    dataSourceHolder.foreach(_._2.close())
-  }
+  def destroy():Unit =  Try(dataSourceHolder.foreach(_._2.close()))
 
 }
