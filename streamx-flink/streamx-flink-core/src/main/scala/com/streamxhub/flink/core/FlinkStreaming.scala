@@ -1,6 +1,7 @@
 package com.streamxhub.flink.core
 
 import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.flink.core.conf.Parameter
 import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
 import org.apache.flink.api.java.utils.ParameterTool
@@ -20,7 +21,7 @@ import scala.util.Try
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
+class StreamingContext(val parameter: Parameter, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
 
 trait FlinkStreaming extends Logger {
 
@@ -29,7 +30,7 @@ trait FlinkStreaming extends Logger {
   @transient
   private var env: StreamExecutionEnvironment = _
 
-  private var parameter: ParameterTool = _
+  private var parameter: Parameter = _
 
   private var context: StreamingContext = _
 
@@ -52,7 +53,9 @@ trait FlinkStreaming extends Logger {
       case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
-    parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties)
+
+    val parameterTool = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
+    parameter = new Parameter(parameterTool)
 
     env = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
@@ -71,6 +74,7 @@ trait FlinkStreaming extends Logger {
     env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
     //set config by yourself...
     this.config(env)
+
     env.getConfig.setGlobalJobParameters(parameter)
   }
 
