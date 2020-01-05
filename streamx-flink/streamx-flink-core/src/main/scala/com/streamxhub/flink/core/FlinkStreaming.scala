@@ -25,7 +25,7 @@ class StreamingContext(val parameter: ParameterTool, val environment: StreamExec
 
 trait FlinkStreaming extends Logger {
 
-  implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+  implicit def ext[T:TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
   @(transient@getter)
   private var env: StreamExecutionEnvironment = _
@@ -141,11 +141,10 @@ trait FlinkStreaming extends Logger {
   }
 }
 
-class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
+class DataStreamExt[T:TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut[R:TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
-
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       val outData = fun(value)
       if (outData != null) {
@@ -156,7 +155,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     }
   })
 
-  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+  def sideGet[R:TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
 }
 
