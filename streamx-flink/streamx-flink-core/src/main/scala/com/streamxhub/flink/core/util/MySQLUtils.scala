@@ -193,7 +193,8 @@ object MySQLUtils {
   }
 
   /**
-   * 注意：使用该方式获取连接,不要关闭,不要关闭,不要关闭!!!有连接池自己维护连接.....
+   * 注意：使用该方式获取连接,不要关闭,不要关闭,不要关闭!!!由连接池自己维护连接.....
+   *
    * @param prop
    * @return
    */
@@ -249,5 +250,11 @@ object MySQLUtils {
     }
   }
 
+  /**
+   * 程序销毁时关闭所有资源连接。。。
+   */
+  def destroy() = {
+    dataSourceHolder.foreach(_._2.close())
+  }
 
 }
