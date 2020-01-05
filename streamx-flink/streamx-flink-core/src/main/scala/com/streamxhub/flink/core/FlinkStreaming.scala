@@ -12,7 +12,6 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
 
 import scala.collection.JavaConversions._
-import scala.annotation.meta.getter
 import scala.util.Try
 
 /**
@@ -27,7 +26,7 @@ trait FlinkStreaming extends Logger {
 
   implicit def ext[T:TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
-  @(transient@getter)
+  @transient
   private var env: StreamExecutionEnvironment = _
 
   private var parameter: ParameterTool = _
