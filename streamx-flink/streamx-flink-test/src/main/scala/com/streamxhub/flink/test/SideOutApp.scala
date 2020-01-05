@@ -41,10 +41,11 @@ object SideOutApp extends FlinkStreaming {
      * Streamx 封装之后的写法....
      */
     //侧输出写出....
-    val side2 = source.sideOut[SideEntry]("streamx", x => if (x.userId < 100) x else null)
 
+    implicit val sideTypeInfo = TypeInformation.of[String](classOf[String])
+    val side2 = source.sideOut[String]("streamx", x => if (x.userId < 100) x.orderId.toString else null)
     //侧输出获取....
-    side2.sideGet[SideEntry]("streamx").print("streamx:========>")
+    side2.sideGet[String]("streamx").print("streamx:========>")
 
   }
 
