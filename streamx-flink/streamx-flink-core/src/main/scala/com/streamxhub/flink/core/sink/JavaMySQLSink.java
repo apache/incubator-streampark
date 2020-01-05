@@ -37,9 +37,7 @@ public class JavaMySQLSink extends TwoPhaseCommitSinkFunction<String, Connection
     @Override
     protected Connection beginTransaction() throws Exception {
         log.info("start beginTransaction.......");
-        Connection connection = MySQLUtils.getConnection(jdbcProp);
-        connection.setAutoCommit(false);
-        return connection;
+        return MySQLUtils.getConnection(jdbcProp);
     }
 
     @Override
@@ -57,8 +55,6 @@ public class JavaMySQLSink extends TwoPhaseCommitSinkFunction<String, Connection
             } catch (SQLException e) {
                 log.error("提交事物失败,Connection:" + connection);
                 e.printStackTrace();
-            } finally {
-                close(connection);
             }
         }
     }
@@ -72,16 +68,9 @@ public class JavaMySQLSink extends TwoPhaseCommitSinkFunction<String, Connection
             } catch (SQLException e) {
                 log.error("事物回滚失败,Connection:" + connection);
                 e.printStackTrace();
-            } finally {
-                close(connection);
             }
         }
     }
 
-    public void close(Connection conn) {
-        if (conn != null) {
-            MySQLUtils.close(conn, null, null);
-        }
-    }
 }
 
