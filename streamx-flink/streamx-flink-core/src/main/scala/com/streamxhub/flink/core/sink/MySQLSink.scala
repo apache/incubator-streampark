@@ -1,13 +1,12 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, DriverManager, SQLException}
+import java.sql.{Connection,SQLException}
 import java.util.Properties
 
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
-import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -17,7 +16,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.collection.Map
 import scala.collection.JavaConversions._
-import scala.util.Try
 
 /**
  *
@@ -73,13 +71,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
-    Class.forName(config(KEY_MYSQL_DRIVER))
-    val connection = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
-      case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
-      case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
-    }
-    connection.setAutoCommit(false)
-    connection
+    MySQLUtils.getConnection(config)
   }
 
   override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
@@ -99,8 +91,6 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
         transaction.commit()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
-      } finally {
-        close(transaction)
       }
     }
   }
@@ -112,13 +102,10 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
         transaction.rollback()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
-      } finally {
-        close(transaction)
       }
     }
   }
 
-  private def close(conn: Connection): Unit = Try(conn.close())
 
 }
 

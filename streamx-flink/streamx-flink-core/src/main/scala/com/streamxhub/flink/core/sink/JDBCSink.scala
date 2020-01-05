@@ -8,14 +8,12 @@ import java.util.Properties
 
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
-import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.collection.Map
 import scala.collection.JavaConversions._
-import scala.util.Try
 
 object JDBCSink {
 
@@ -62,26 +60,28 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
-    logInfo("[StreamX] MySQLSink Open....")
-    Class.forName(config(KEY_MYSQL_DRIVER))
-    connection = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
-      case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
-      case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
-    }
-    connection.setAutoCommit(false)
+    logInfo("[StreamX] JDBCSink Open....")
+    connection = MySQLUtils.getConnection(config)
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
+    logInfo("[StreamX] JDBCSink invoke....")
     require(connection != null)
-    preparedStatement = connection.prepareStatement(toSQLFn(value))
+    val sql = toSQLFn(value)
+    preparedStatement = connection.prepareStatement(sql)
     preparedStatement.executeUpdate
+    connection.commit()
   }
 
-
+  /**
+   *
+   * @throws
+   */
   @throws[Exception]
   override def close(): Unit = {
     if (preparedStatement != null) preparedStatement.close()
-    if (connection != null) connection.close()
+    //注意这里使用连接池,connection不需要关闭,(千万不能关闭连接)
+    //if (connection != null) connection.close()
   }
 
 }
