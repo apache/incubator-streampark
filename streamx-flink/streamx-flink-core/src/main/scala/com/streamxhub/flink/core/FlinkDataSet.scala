@@ -1,12 +1,15 @@
 package com.streamxhub.flink.core
 
 import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
 
+import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
-import scala.util.Try
+
+
+class DataSetContext(val parameter: ParameterTool, val env: ExecutionEnvironment) extends ExecutionEnvironment(env.getJavaEnv)
 
 trait FlinkDataSet extends Logger {
 
@@ -20,19 +23,25 @@ trait FlinkDataSet extends Logger {
   def handler(context: DataSetContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
-    //parameter from args...
-    val argsMap = ParameterTool.fromArgs(args).toMap
-    val file = Try(argsMap.get(APP_CONF)).getOrElse(null)
-    require(file != null, s"[StreamX-Flink] Properties file $file is not found!!!")
-    //parameter from properties
-    val propMap = ParameterTool.fromPropertiesFile(file).toMap
-    //union args and properties...
-    val map = new java.util.HashMap[String, String]()
-    map.putAll(propMap)
-    map.putAll(argsMap)
-    parameter = ParameterTool.fromMap(map)
+    //read config and merge config......
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
+    val argsMap = ParameterTool.fromArgs(args)
+    val config = argsMap.get(APP_CONF, null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+      case file => file
+    }
+    val configFile = new java.io.File(config)
+    require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
+    val configArgs = config.split("\\.").last match {
+      case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+      case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+    }
+
+    this.parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
 
     env = ExecutionEnvironment.getExecutionEnvironment
+    env.getConfig.setGlobalJobParameters(parameter)
   }
 
   /**
@@ -72,6 +81,5 @@ trait FlinkDataSet extends Logger {
 
 }
 
-class DataSetContext(val parameter: ParameterTool, val env: ExecutionEnvironment)
 
 
