@@ -55,7 +55,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close(conn, stmt, result)
+        close(stmt, result)
       }
     }
   }
@@ -102,7 +102,7 @@ object MySQLUtils {
           case ex: Exception => ex.printStackTrace()
             0
         } finally {
-          close(conn, null, null)
+          close(null, null)
         }
     }
   }
@@ -127,7 +127,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close(conn, statement, null)
+      close(statement, null)
     }
   }
 
@@ -159,7 +159,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close(conn, stmt, result)
+      close(stmt, result)
     }
   }
 
@@ -188,10 +188,15 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close(conn, null, null)
+      close(stmt, null)
     }
   }
 
+  /**
+   * 注意：使用该方式获取连接,不要关闭,不要关闭,不要关闭!!!有连接池自己维护连接.....
+   * @param prop
+   * @return
+   */
   def getConnection(prop: Properties): Connection = {
     val instance = prop(KEY_MYSQL_INSTANCE)
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
@@ -229,20 +234,18 @@ object MySQLUtils {
       }
       //返回连接...
       ds.getConnection()
+
     } finally {
       lock.unlock()
     }
   }
 
-  def close(connection: Connection, statement: Statement, resultSet: ResultSet) = {
+  def close(statement: Statement, resultSet: ResultSet) = {
     if (resultSet != null) {
       resultSet.close()
     }
     if (statement != null) {
       statement.close()
-    }
-    if (connection != null) {
-      connection.close()
     }
   }
 
