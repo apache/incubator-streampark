@@ -15,8 +15,13 @@ object JsonUtils {
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
-  def read[T](str: String)(implicit manifest: Manifest[T]): T = {
-    mapper.readValue[T](str)
+  def read[T](obj: AnyRef)(implicit manifest: Manifest[T]): T = {
+    if (obj.isInstanceOf[String]) {
+      mapper.readValue[T](obj.asInstanceOf[String])
+    } else {
+      val json = write(obj)
+      mapper.readValue[T](json)
+    }
   }
 
   def write(obj: AnyRef): String = {
