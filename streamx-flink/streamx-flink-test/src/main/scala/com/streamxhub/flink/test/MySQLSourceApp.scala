@@ -2,7 +2,6 @@ package com.streamxhub.flink.test
 
 import java.util.Properties
 
-import com.streamxhub.flink.core.conf.Config
 import com.streamxhub.flink.core.conf.ConfigConst.{KEY_MYSQL_DRIVER, KEY_MYSQL_INSTANCE, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.util.JsonUtils
@@ -22,8 +21,8 @@ object MySQLSourceApp extends FlinkStreaming {
     prop.put("idleTimeout","20000")
 
     implicit val typeInfo = TypeInformation.of[MyPerson](classOf[MyPerson])
-    val mysqlSource = new MySQLSource[MyPerson](context)
-    val ds = mysqlSource.getDataStream("select * from person")(prop)
+    val mysqlSource = new MySQLSource(context)
+    val ds = mysqlSource.getDataStream[MyPerson]("select * from person",x=>  JsonUtils.read[MyPerson](x))
     ds.print()
   }
 

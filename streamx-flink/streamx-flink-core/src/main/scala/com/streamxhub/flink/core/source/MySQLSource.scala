@@ -11,16 +11,16 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.collection.Map
 
 
-class MySQLSource[R:TypeInformation](@transient val ctx: StreamingContext, specialKafkaParams: Map[String, String] = Map.empty[String, String])(implicit manifest: Manifest[R]) {
+class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[String, String] = Map.empty[String, String]) {
 
-  def getDataStream(querySQL: String)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](querySQL)
+  def getDataStream[R:TypeInformation](querySQL: String,fun:Map[String,_] => R )(implicit config: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](querySQL,fun)
     ctx.addSource(mysqlFun)
   }
 
 }
 
-private[this] class MySQLSourceFunction[R:TypeInformation](querySQL: String)(implicit config: Properties,manifest: Manifest[R]) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R:TypeInformation](querySQL: String,fun:Map[String,_] => R)(implicit config: Properties,manifest: Manifest[R]) extends SourceFunction[R] with Logger {
   private[this] var isRunning = true
   override def cancel(): Unit = this.isRunning = false
   @throws[Exception]
@@ -28,8 +28,7 @@ private[this] class MySQLSourceFunction[R:TypeInformation](querySQL: String)(imp
     while (isRunning) {
       val list = MySQLUtils.select(querySQL)
       list.foreach(x=>{
-        val json = JsonUtils.write(x)
-        val r = JsonUtils.read[R](json)
+        val r = fun(x)
         ctx.collect(r)
       })
     }
