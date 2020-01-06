@@ -20,7 +20,7 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
 
 }
 
-private[this] class MySQLSourceFunction[R:TypeInformation](querySQL: String,fun:Map[String,_] => R)(implicit config: Properties,manifest: Manifest[R]) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R:TypeInformation](querySQL: String,fun:Map[String,_] => R)(implicit config: Properties) extends SourceFunction[R] with Logger {
   private[this] var isRunning = true
   override def cancel(): Unit = this.isRunning = false
   @throws[Exception]

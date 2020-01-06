@@ -22,10 +22,10 @@ object MySQLSourceApp extends FlinkStreaming {
 
     implicit val typeInfo = TypeInformation.of[MyPerson](classOf[MyPerson])
     val mysqlSource = new MySQLSource(context)
-    val ds = mysqlSource.getDataStream[MyPerson]("select * from person",x=>  JsonUtils.read[MyPerson](x))
+    val ds = mysqlSource.getDataStream[MyPerson]("select * from student",x=>  JsonUtils.read[MyPerson](x))
     ds.print()
   }
 
 }
 
-case class MyPerson(name:String,age:Int,address:String)
+case class MyPerson(name:String,age:Int,password:String)

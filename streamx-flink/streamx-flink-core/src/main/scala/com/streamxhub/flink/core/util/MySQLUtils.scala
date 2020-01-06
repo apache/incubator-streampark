@@ -55,7 +55,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close(stmt, result)
+        close(conn,stmt, result)
       }
     }
   }
@@ -102,7 +102,7 @@ object MySQLUtils {
           case ex: Exception => ex.printStackTrace()
             0
         } finally {
-          close(null, null)
+          close(conn)
         }
     }
   }
@@ -127,7 +127,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close(statement, null)
+      close(conn,statement)
     }
   }
 
@@ -159,7 +159,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close(stmt, result)
+      close(conn,stmt, result)
     }
   }
 
@@ -188,12 +188,11 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close(stmt, null)
+      close(conn,stmt)
     }
   }
 
   /**
-   * 注意：使用该方式获取连接,不要关闭,不要关闭,不要关闭!!!由连接池自己维护连接.....
    *
    * @param prop
    * @return
@@ -226,8 +225,6 @@ object MySQLUtils {
               case _ =>
             }
           })
-          //关闭自动提交...
-          config.setAutoCommit(false)
           val ds = new HikariDataSource(config)
           dataSourceHolder += instance -> ds
           ds
