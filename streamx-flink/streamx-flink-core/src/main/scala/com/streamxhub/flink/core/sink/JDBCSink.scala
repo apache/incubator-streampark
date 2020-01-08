@@ -69,8 +69,13 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
     require(connection != null)
     val sql = toSQLFn(value)
     preparedStatement = connection.prepareStatement(sql)
-    preparedStatement.executeUpdate
-    connection.commit()
+    try{
+      preparedStatement.executeUpdate
+      connection.commit()
+    }catch {
+      case e:Exception =>
+        System.err.println(s"[StreamX] JDBCSink invoke error:${sql}")
+    }
   }
 
   /**
@@ -80,8 +85,7 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   @throws[Exception]
   override def close(): Unit = {
     if (preparedStatement != null) preparedStatement.close()
-    //注意这里使用连接池,connection不需要关闭,(千万不能关闭连接)
-    //if (connection != null) connection.close()
+    if (connection != null) connection.close()
   }
 
 }

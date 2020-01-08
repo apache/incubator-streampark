@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.util
 
-import java.sql.{Connection, ResultSet, Statement}
+import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
@@ -122,7 +122,9 @@ object MySQLUtils {
     var statement: Statement = null
     try {
       statement = conn.createStatement
-      statement.executeUpdate(sql)
+      val res = statement.executeUpdate(sql)
+      conn.commit()
+      res
     } catch {
       case ex: Exception => ex.printStackTrace()
         -1
@@ -183,10 +185,12 @@ object MySQLUtils {
     var stmt: Statement = null
     try {
       stmt = conn.createStatement
-      stmt.execute(sql)
+      val res = stmt.execute(sql)
+      conn.commit()
+      res
     } catch {
-      case ex: Exception => ex.printStackTrace()
-        false
+      case e: Exception =>  e.printStackTrace()
+      false
     } finally {
       close(conn,stmt)
     }
@@ -202,9 +206,18 @@ object MySQLUtils {
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
-      val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+
+      Class.forName(prop(KEY_MYSQL_DRIVER))
+      val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
+        case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
+        case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
+      }
+      connection.setAutoCommit(false)
+      connection
+     /* val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
         case None =>
           //创建一个数据源对象
+
           val config = new HikariConfig()
           prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
             val field = Try(Option(config.getClass.getDeclaredField(x._1))).getOrElse(None) match {
@@ -231,7 +244,7 @@ object MySQLUtils {
         case Some(x) => x
       }
       //返回连接...
-      ds.getConnection()
+      ds.getConnection()*/
 
     } finally {
       lock.unlock()
