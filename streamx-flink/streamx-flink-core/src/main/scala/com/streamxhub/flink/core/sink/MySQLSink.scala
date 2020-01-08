@@ -71,7 +71,9 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
-    MySQLUtils.getConnection(config)
+    val connection = MySQLUtils.getConnection(this.config)
+    connection.setAutoCommit(false)
+    connection
   }
 
   override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
@@ -91,6 +93,8 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
         transaction.commit()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
+      } finally {
+        close(transaction)
       }
     }
   }
@@ -102,9 +106,13 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends Two
         transaction.rollback()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
+      } finally {
+        close(transaction)
       }
     }
   }
+
+  private def close(conn: Connection): Unit = MySQLUtils.close(conn)
 
 
 }
