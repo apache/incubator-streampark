@@ -241,9 +241,4 @@ object MySQLUtils {
 
   def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
 
-  /**
-   * 程序销毁时关闭所有资源连接。。。
-   */
-  def destroy():Unit =  Try(dataSourceHolder.foreach(_._2.close()))
-
 }
