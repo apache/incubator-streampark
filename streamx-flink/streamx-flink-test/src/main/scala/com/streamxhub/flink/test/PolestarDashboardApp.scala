@@ -29,6 +29,8 @@ object PolestarDashboardApp extends FlinkStreaming {
 
     val ds = data
       .getDataStream()
+      .uid("Kafka_Source")
+      .name("Kafka_Source")
       .map(x => OrderEntity.build(x))
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
