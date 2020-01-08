@@ -17,11 +17,11 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    *
    * @return
    */
-  def getDataStream(implicit topic: String = ""): DataStream[String] = {
-    val prop = Config.getKafkaSource(ctx.parameter, topic)
+  def getDataStream(implicit inTopic: String = ""): DataStream[String] = {
+    val prop = Config.getKafkaSource(ctx.parameter, inTopic)
     prop.putAll(specialKafkaParams)
-    val _topic = prop.getProperty(ConfigConst.TOPIC)
-    val consumer = new FlinkKafkaConsumer011[String](_topic, new SimpleStringSchema(), prop)
+    val topic = prop.remove(ConfigConst.TOPIC)
+    val consumer = new FlinkKafkaConsumer011[String](topic.toString, new SimpleStringSchema(), prop)
     ctx.addSource(consumer)
   }
 }
