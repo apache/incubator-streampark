@@ -85,7 +85,8 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   @throws[Exception]
   override def close(): Unit = {
     if (preparedStatement != null) preparedStatement.close()
-    if (connection != null) connection.close()
+    //注意这里使用连接池,connection不需要关闭,(千万不能关闭连接)
+    //if (connection != null) connection.close()
   }
 
 }
