@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.util
 
-import java.sql.{Connection, ResultSet, Statement}
+import java.sql.{Connection, DriverManager, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
@@ -202,6 +202,7 @@ object MySQLUtils {
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
+      /*
       val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
         case None =>
           //创建一个数据源对象
@@ -232,6 +233,14 @@ object MySQLUtils {
       }
       //返回连接...
       ds.getConnection()
+      */
+      Class.forName(prop(KEY_MYSQL_DRIVER))
+      val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
+        case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
+        case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
+      }
+      connection.setAutoCommit(false)
+      connection
     } finally {
       lock.unlock()
     }

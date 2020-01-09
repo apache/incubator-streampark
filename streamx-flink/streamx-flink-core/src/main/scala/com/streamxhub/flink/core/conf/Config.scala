@@ -12,9 +12,9 @@ import org.apache.commons.lang3.StringUtils
 
 object Config {
 
-  def getKafkaSink(parameter: ParameterTool, topic: String): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX, topic)
+  def getKafkaSink(parameter: ParameterTool, topic: String,prefix:String = ""): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX + prefix, topic)
 
-  def getKafkaSource(parameter: ParameterTool, topic: String): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX, topic)
+  def getKafkaSource(parameter: ParameterTool, topic: String,prefix:String = ""): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX + prefix, topic)
 
   private[this] def kafkaGet(parameter: ParameterTool, prefix: String, _topic: String): Properties = {
     val param: Map[String, String] = filterParam(parameter, prefix)
@@ -68,11 +68,12 @@ object Config {
   }
 
   private[this] def filterParam(parameter: ParameterTool, fix: String): Map[String, String] = {
+    val prefix = if (fix.endsWith(".")) fix else s"${fix}."
     parameter
       .toMap
-      .filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false))
+      .filter(x => x._1.startsWith(prefix) && Try(x._2.nonEmpty).getOrElse(false))
       .flatMap(x =>
-        Some(x._1.substring(fix.length).replaceFirst("^\\.","") -> x._2)
+        Some(x._1.substring(prefix.length) -> x._2)
       ).toMap
   }
 
