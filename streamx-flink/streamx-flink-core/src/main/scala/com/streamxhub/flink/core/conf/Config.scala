@@ -12,32 +12,29 @@ import org.apache.commons.lang3.StringUtils
 
 object Config {
 
-  def getKafkaSink(parameter: ParameterTool, topic: String,prefix:String = ""): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX + prefix, topic)
+  def getKafkaSink(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX + instance, topic)
 
-  def getKafkaSource(parameter: ParameterTool, topic: String,prefix:String = ""): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX + prefix, topic)
+  def getKafkaSource(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX + instance, topic)
 
-  private[this] def kafkaGet(parameter: ParameterTool, prefix: String, _topic: String): Properties = {
-    val param: Map[String, String] = filterParam(parameter, prefix)
-    if (param.isEmpty) throw new IllegalArgumentException(s"${_topic} init error...") else {
+  private[this] def kafkaGet(parameter: ParameterTool, prefix: String, inTopic: String): Properties = {
+    val param: Map[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
+    if (param.isEmpty) throw new IllegalArgumentException(s"${inTopic} init error...") else {
       val kafkaProperty = new Properties()
       kafkaProperty.putAll(param)
-      val topic = _topic match {
+      val topic = inTopic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getProperty(TOPIC, null)
           if (top == null || top.split(SIGN_COMMA).length > 1) {
-            throw new IllegalArgumentException("topic error...")
+            throw new IllegalArgumentException(s"Can't find a unique topic!!!")
           } else top
         case t => t
       }
-
-      val prefix = kafkaProperty.toMap.filter(_._1.startsWith(TOPIC)).filter(_._2.split(SIGN_COMMA).toSet.contains(topic)).keys.map(_.drop(5))
-      if (prefix.size > 1) {
-        throw new IllegalArgumentException(s"Can't find a unique topic of:${topic}!!!")
+      val hasTopic = kafkaProperty.toMap.filter(x => x._1 == TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic)).isEmpty
+      if (hasTopic) {
+        throw new IllegalArgumentException(s"Can't find a topic of:${topic}!!!")
       } else {
-        val fix = prefix.head
-        val prop = new Properties()
-        kafkaProperty.filter(x => x._1.endsWith(fix)).map(x => prop.put(x._1.dropRight(fix.length), x._2))
-        prop
+        kafkaProperty.put(TOPIC, topic)
+        kafkaProperty
       }
     }
   }
@@ -60,20 +57,19 @@ object Config {
     }
     val param: Map[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    val instanceName = if(StringUtils.isBlank(instance)) "default" else instance
-    properties.put(KEY_MYSQL_INSTANCE,instanceName)
+    val instanceName = if (StringUtils.isBlank(instance)) "default" else instance
+    properties.put(KEY_MYSQL_INSTANCE, instanceName)
     properties.put(KEY_MYSQL_DRIVER, driver)
     properties.putAll(param)
     properties
   }
 
   private[this] def filterParam(parameter: ParameterTool, fix: String): Map[String, String] = {
-    val prefix = if (fix.endsWith(".")) fix else s"${fix}."
     parameter
       .toMap
-      .filter(x => x._1.startsWith(prefix) && Try(x._2.nonEmpty).getOrElse(false))
+      .filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false))
       .flatMap(x =>
-        Some(x._1.substring(prefix.length) -> x._2)
+        Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2)
       ).toMap
   }
 
