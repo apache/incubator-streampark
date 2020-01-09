@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.util
 
-import java.sql.{Connection, DriverManager, ResultSet, Statement}
+import java.sql.{Connection, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
@@ -27,17 +27,17 @@ object MySQLUtils {
    * 将查询的一行数据的所有字段封装到Map里,返回List。。。
    *
    * @param sql
-   * @param config
+   * @param jdbcConfig
    * @return
    */
-  def select(sql: String)(implicit config: Properties): List[Map[String, _]] = select(getConnection(config), sql)
+  def select(sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = select(getConnection(jdbcConfig), sql)
 
-  def select(conn: Connection, sql: String)(implicit config: Properties): List[Map[String, _]] = {
+  def select(conn: Connection, sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
       var stmt: Statement = null
       var result: ResultSet = null
       try {
-        stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+        stmt = createStatement(conn)
         result = stmt.executeQuery(sql)
         val count = result.getMetaData.getColumnCount
         val array = ArrayBuffer[Map[String, Any]]()
@@ -64,23 +64,23 @@ object MySQLUtils {
    * 直接查询一个对象
    *
    * @param sql
-   * @param config
+   * @param jdbcConfig
    * @tparam T
    * @return
    */
-  def select2[T](sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
+  def select2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
 
-  def select2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
+  def select2[T](connection: Connection, sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(x => JsonUtils.read[T](JsonUtils.write(x)))
 
-  def executeBatch(sql: Iterable[String])(implicit config: Properties): Int = {
+  def executeBatch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
     Try(sql.size).getOrElse(0) match {
       case 0 => 0
       case 1 => update(sql.head)
       case _ =>
-        conn = getConnection(config)
+        conn = getConnection(jdbcConfig)
         conn.setAutoCommit(false)
         val ps = conn.prepareStatement("select 1")
         var index: Int = 0
@@ -117,14 +117,12 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def update(sql: String)(implicit config: Properties): Int = {
-    val conn = getConnection(config)
+  def update(sql: String)(implicit jdbcConfig: Properties): Int = {
+    val conn = getConnection(jdbcConfig)
     var statement: Statement = null
     try {
       statement = conn.createStatement
-      val res = statement.executeUpdate(sql)
-      conn.commit()
-      res
+      statement.executeUpdate(sql)
     } catch {
       case ex: Exception => ex.printStackTrace()
         -1
@@ -133,7 +131,7 @@ object MySQLUtils {
     }
   }
 
-  def unique(sql: String)(implicit config: Properties): Map[String, _] = unique(getConnection(config), sql)
+  def unique(sql: String)(implicit jdbcConfig: Properties): Map[String, _] = unique(getConnection(jdbcConfig), sql)
 
   /**
    * 查询返回一行记录...
@@ -141,11 +139,11 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def unique(conn: Connection, sql: String)(implicit config: Properties): Map[String, _] = {
+  def unique(conn: Connection, sql: String)(implicit jdbcConfig: Properties): Map[String, _] = {
     var stmt: Statement = null
     var result: ResultSet = null
     try {
-      stmt = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+      stmt = createStatement(conn)
       result = stmt.executeQuery(sql)
       val count = result.getMetaData.getColumnCount
       if (!result.next()) Map.empty else {
@@ -165,9 +163,9 @@ object MySQLUtils {
     }
   }
 
-  def unique2[T](sql: String)(implicit config: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
+  def unique2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
 
-  def unique2[T](connection: Connection, sql: String)(implicit config: Properties, manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
+  def unique2[T](connection: Connection, sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
 
   /**
    *
@@ -180,17 +178,15 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def execute(sql: String)(implicit config: Properties): Boolean = {
-    val conn = getConnection(config)
+  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean = {
+    val conn = getConnection(jdbcConfig)
     var stmt: Statement = null
     try {
       stmt = conn.createStatement
-      val res = stmt.execute(sql)
-      conn.commit()
-      res
+      stmt.execute(sql)
     } catch {
-      case e: Exception =>  e.printStackTrace()
-      false
+      case ex: Exception => ex.printStackTrace()
+        false
     } finally {
       close(conn,stmt)
     }
@@ -206,56 +202,43 @@ object MySQLUtils {
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
-
-      Class.forName(prop(KEY_MYSQL_DRIVER))
-      val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
-        case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
-        case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
-      }
-      connection.setAutoCommit(false)
-      connection
-     /* val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+      val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
         case None =>
           //创建一个数据源对象
-
-          val config = new HikariConfig()
+          val jdbcConfig = new HikariConfig()
           prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
-            val field = Try(Option(config.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+            val field = Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
               case None =>
                 val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                Try(Option(config.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
+                Try(Option(jdbcConfig.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
                   case Some(x) => x
-                  case None => throw new IllegalArgumentException(s"config error,property:${x._1} invalid,please see more properties config https://github.com/brettwooldridge/HikariCP")
+                  case None => throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
               case Some(x) => x
             }
             field.setAccessible(true)
             field.getType.getSimpleName match {
-              case "String" => field.set(config, x._2)
-              case "int" => field.set(config, x._2.toInt)
-              case "long" => field.set(config, x._2.toLong)
-              case "boolean" => field.set(config, x._2.toBoolean)
+              case "String" => field.set(jdbcConfig, x._2)
+              case "int" => field.set(jdbcConfig, x._2.toInt)
+              case "long" => field.set(jdbcConfig, x._2.toLong)
+              case "boolean" => field.set(jdbcConfig, x._2.toBoolean)
               case _ =>
             }
           })
-          val ds = new HikariDataSource(config)
+          val ds = new HikariDataSource(jdbcConfig)
           dataSourceHolder += instance -> ds
           ds
         case Some(x) => x
       }
       //返回连接...
-      ds.getConnection()*/
-
+      ds.getConnection()
     } finally {
       lock.unlock()
     }
   }
 
-  def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
+  private[this] def createStatement(conn:Connection):Statement =  conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
-  /**
-   * 程序销毁时关闭所有资源连接。。。
-   */
-  def destroy():Unit =  Try(dataSourceHolder.foreach(_._2.close()))
+  def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
 
 }

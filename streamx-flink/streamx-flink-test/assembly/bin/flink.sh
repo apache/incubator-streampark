@@ -202,8 +202,19 @@ doStart() {
           --flink.conf "$app_proper" \
           >> "$app_out" 2>&1 &
 
-    echo_r "${app_name} starting,more detail please log:${app_out}"
+    echo "${app_name}" > "${APP_TEMP}/.running"
 
+    echo_r "${app_name} starting,more detail please log:${app_out}"
+}
+
+doStop() {
+  # shellcheck disable=SC2155
+  # shellcheck disable=SC2034
+  local running_app=$(cat "${APP_TEMP/.running}")
+  if [ x"${running_app}" != x"" ]; then
+    echo_w "can not found flink job!"
+  fi
+  flink list -r|grep "${running_app}"|awk '{print $4}'|xargs flink cancel
 }
 
 case "$1" in
@@ -213,6 +224,7 @@ case "$1" in
        exit $?
         ;;
     stop)
+      doStop
       exit $?
       ;;
     *)
