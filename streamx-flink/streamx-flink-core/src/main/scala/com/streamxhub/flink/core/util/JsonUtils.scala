@@ -16,11 +16,9 @@ object JsonUtils {
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
 
   def read[T](obj: AnyRef)(implicit manifest: Manifest[T]): T = {
-    if (obj.isInstanceOf[String]) {
-      mapper.readValue[T](obj.asInstanceOf[String])
-    } else {
-      val json = write(obj)
-      mapper.readValue[T](json)
+    obj match {
+      case str: String => mapper.readValue[T](str)
+      case _ => mapper.readValue[T](write(obj))
     }
   }
 
