@@ -67,12 +67,13 @@ class MySQLSink(@transient ctx: StreamingContext,
  * @param toSQLFn
  * @tparam T
  */
-class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String) extends TwoPhaseCommitSinkFunction[T, Connection, Void](new KryoSerializer[Connection](classOf[Connection], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
+class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
+  extends TwoPhaseCommitSinkFunction[T, Connection, Void](new KryoSerializer[Connection](classOf[Connection], new ExecutionConfig), VoidSerializer.INSTANCE)
+    with Logger {
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
     val connection = MySQLUtils.getConnection(this.config)
-    connection.setAutoCommit(false)
     connection
   }
 

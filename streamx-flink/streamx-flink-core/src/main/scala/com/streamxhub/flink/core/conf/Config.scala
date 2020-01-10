@@ -52,7 +52,7 @@ object Config {
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error,[driver|url] must be not null")
-      case (_, _, x, y) if (x != null && y == null) || (x != null && y != null) => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error, [user|password] must be all null,or all not null ")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: Map[String, String] = filterParam(parameter, fix)
