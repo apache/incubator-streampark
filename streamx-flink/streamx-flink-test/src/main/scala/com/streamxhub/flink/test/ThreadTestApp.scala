@@ -1,6 +1,5 @@
 package com.streamxhub.flink.test
 
-import java.sql.Connection
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.{Condition, ReentrantLock}
