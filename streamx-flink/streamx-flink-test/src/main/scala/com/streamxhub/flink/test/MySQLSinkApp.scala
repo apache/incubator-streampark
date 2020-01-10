@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.MySQLSink
+import com.streamxhub.flink.core.sink.{JDBCSink, MySQLSink}
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
@@ -12,7 +12,7 @@ object MySQLSinkApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
     implicit val orderType = TypeInformation.of[OrderBean](classOf[OrderBean])
     val source = context.addSource(new OrderBeanSource())
-    MySQLSink(context).sink[OrderBean](source)(x => {
+    JDBCSink(context).sink[OrderBean](source)(x=>{
       s"insert into orders(userId,orderId,siteId,cityId,orderStatus,price,quantity,timestamp) values(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
     })
   }
@@ -31,30 +31,33 @@ object MySQLSinkApp extends FlinkStreaming {
  * @param timestamp   : 下单时间
  */
 case class OrderBean(userId: Long,
-                     orderId: Long,
-                     siteId: Long,
-                     cityId: Long,
-                     orderStatus: Int,
-                     price: Double,
-                     quantity: Int,
-                     timestamp: Long)
+                      orderId: Long,
+                      siteId: Long,
+                      cityId: Long,
+                      orderStatus: Int,
+                      price: Double,
+                      quantity: Int,
+                      timestamp: Long)
 
-class OrderBeanSource extends SourceFunction[OrderBean] {
+class OrderBeanSource extends SourceFunction[OrderBean]{
 
   private[this] var isRunning = true
 
   override def cancel(): Unit = this.isRunning = false
 
+  var count = 0
   val random = new Random()
 
   override def run(ctx: SourceFunction.SourceContext[OrderBean]): Unit = {
     while (isRunning) {
+      if(count>=1000) isRunning = false
+      count=count+1
       val userId = random.nextInt(1000)
       val orderId = random.nextInt(100)
       val status = random.nextInt(1)
       val price = random.nextDouble()
       val quantity = new Random(10).nextInt()
-      val order = OrderBean(userId, orderId, siteId = 1, cityId = 1, status, price, quantity, System.currentTimeMillis)
+      val order = OrderBean(userId,orderId,siteId = 1,cityId = 1,status,price,quantity,System.currentTimeMillis)
       ctx.collect(order)
     }
   }
