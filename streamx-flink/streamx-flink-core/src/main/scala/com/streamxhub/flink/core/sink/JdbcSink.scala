@@ -15,7 +15,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.collection.Map
 import scala.collection.JavaConversions._
 
-object JDBCSink {
+object JdbcSink {
 
   /**
    * @param ctx      : StreamingContext
@@ -26,11 +26,11 @@ object JDBCSink {
             overwriteParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): JDBCSink = new JDBCSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit instance: String = ""): JdbcSink = new JdbcSink(ctx, overwriteParams, parallelism, name, uid)
 
 }
 
-class JDBCSink(@transient ctx: StreamingContext,
+class JdbcSink(@transient ctx: StreamingContext,
                overwriteParams: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
@@ -46,26 +46,26 @@ class JDBCSink(@transient ctx: StreamingContext,
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = Config.getMySQLSink(ctx.parameter)(instance)
     prop.putAll(overwriteParams)
-    val sinkFun = new JDBCSinkFunction[T](prop, toSQLFn)
+    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
 }
 
-class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
+class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = null
   private var preparedStatement: PreparedStatement = null
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
-    logInfo("[StreamX] JDBCSink Open....")
+    logInfo("[StreamX] JdbcSink Open....")
     connection = MySQLUtils.getConnection(config)
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
-    logInfo("[StreamX] JDBCSink invoke....")
+    logInfo("[StreamX] JdbcSink invoke....")
     require(connection != null)
     val sql = toSQLFn(value)
     preparedStatement = connection.prepareStatement(sql)
@@ -74,7 +74,7 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
       connection.commit()
     }catch {
       case e:Exception =>
-        System.err.println(s"[StreamX] JDBCSink invoke error:${sql}")
+        System.err.println(s"[StreamX] JdbcSink invoke error:${sql}")
     }
   }
 
