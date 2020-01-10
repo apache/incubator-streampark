@@ -83,11 +83,7 @@ class JDBCSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
    * @throws
    */
   @throws[Exception]
-  override def close(): Unit = {
-    if (preparedStatement != null) preparedStatement.close()
-    //注意这里使用连接池,connection不需要关闭,(千万不能关闭连接)
-    //if (connection != null) connection.close()
-  }
+  override def close(): Unit =  MySQLUtils.close(preparedStatement,connection)
 
 }
 
