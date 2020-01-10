@@ -46,7 +46,7 @@ object MySQLUtils {
           for (x <- 1 to count) {
             val key = result.getMetaData.getColumnLabel(x)
             val value = result.getObject(x)
-            map += key -> value
+            map += key -> value.toString
           }
           array += map
         }
@@ -202,7 +202,6 @@ object MySQLUtils {
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
-      /*
       val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
         case None =>
           //创建一个数据源对象
@@ -226,14 +225,17 @@ object MySQLUtils {
               case _ =>
             }
           })
+          jdbcConfig.setAutoCommit(false)
           val ds = new HikariDataSource(jdbcConfig)
           dataSourceHolder += instance -> ds
           ds
         case Some(x) => x
       }
       //返回连接...
-      ds.getConnection()
-      */
+      val conn = ds.getConnection()
+      conn.setAutoCommit(false)
+      conn
+      /**
       Class.forName(prop(KEY_MYSQL_DRIVER))
       val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
         case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
@@ -241,6 +243,7 @@ object MySQLUtils {
       }
       connection.setAutoCommit(false)
       connection
+       **/
     } finally {
       lock.unlock()
     }
