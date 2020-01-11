@@ -200,7 +200,7 @@ object MySQLUtils {
   }
 
   /**
-   *
+   *以及Hikari连接池
    * @param prop
    * @return
    */
