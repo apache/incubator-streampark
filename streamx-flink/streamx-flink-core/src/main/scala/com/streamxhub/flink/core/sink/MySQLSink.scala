@@ -99,7 +99,6 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
   }
 
   override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
-    logInfo("[StreamX] MySQLSink invoke ....")
     val sql = toSQLFn(value)
     transaction.prepareStatement(sql).executeUpdate()
   }
