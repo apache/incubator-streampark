@@ -120,9 +120,7 @@ object MySQLUtils {
     var statement: Statement = null
     try {
       statement = conn.createStatement
-      val index = statement.executeUpdate(sql)
-      conn.commit()
-      index
+      statement.executeUpdate(sql)
     } catch {
       case ex: Exception => ex.printStackTrace()
         -1
@@ -183,9 +181,7 @@ object MySQLUtils {
     var stmt: Statement = null
     try {
       stmt = conn.createStatement
-      val res = stmt.execute(sql)
-      conn.commit()
-      res
+      stmt.execute(sql)
     } catch {
       case ex: Exception => ex.printStackTrace()
         false
@@ -227,16 +223,13 @@ object MySQLUtils {
               case _ =>
             }
           })
-          jdbcConfig.setAutoCommit(false)
           val ds = new HikariDataSource(jdbcConfig)
           dataSourceHolder += instance -> ds
           ds
         case Some(x) => x
       }
       //返回连接...
-      val conn = ds.getConnection()
-      conn.setAutoCommit(false)
-      conn
+      ds.getConnection()
     } finally {
       lock.unlock()
     }
