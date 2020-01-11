@@ -45,13 +45,10 @@ class MySQLSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
                                                          initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
-  private lazy val prop: Properties = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
 
   override val prefix: String = "spark.sink.mysql."
+
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private lazy val url = prop.getProperty("url")
   private lazy val table = prop.getProperty("table")

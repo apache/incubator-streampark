@@ -36,11 +36,7 @@ class ShowSink[T](@transient override val sc: SparkContext,
 
   override val prefix: String = "spark.sink.show."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private val num = prop.getProperty("num", "10").toInt
 

@@ -1,14 +1,14 @@
-package com.streamxhub.flink.core.util
-
-
-import org.slf4j.impl.StaticLoggerBinder
-import org.slf4j.{LoggerFactory, Logger => SlfLogger}
+package com.streamxhub.common.util
 
 /**
  * 这是个特质是hbase-spark中实现用来替代spark-2.0中的内部Logging的
  * 这里直接引用代码,使之成为一个通用的类spark.Logging 的特质
  * 使用方式如同spark.Logging
  */
+
+import org.slf4j.impl.StaticLoggerBinder
+import org.slf4j.{LoggerFactory, Logger => SlfLogger}
+
 trait Logger {
 
   @transient private var _logger: SlfLogger = _

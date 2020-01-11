@@ -1,10 +1,11 @@
-package com.streamxhub.flink.core.util
+package com.streamxhub.common.util
 
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
+
 
 object DateUtils {
 

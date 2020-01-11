@@ -1,4 +1,4 @@
-package com.streamx.spark.test
+package com.streamxhub.common
 
 import org.apache.spark.streaming.StreamingContext
 import com.streamxhub.spark.core.SparkStreaming

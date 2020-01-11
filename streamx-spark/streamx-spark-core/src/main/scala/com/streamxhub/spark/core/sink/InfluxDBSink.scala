@@ -23,7 +23,7 @@ package com.streamxhub.spark.core.sink
 
 import java.util.Properties
 
-import com.streamxhub.spark.core.util.HttpUtil
+import com.streamxhub.common.util.HttpUtils
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
@@ -43,11 +43,7 @@ class InfluxDBSink[T: ClassTag](@transient override val sc: SparkContext,
 
   override val prefix: String = "spark.sink.influxDB."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private val host = prop.getProperty("host")
   private val port = prop.getProperty("port", "8086")
@@ -68,7 +64,7 @@ class InfluxDBSink[T: ClassTag](@transient override val sc: SparkContext,
         case (h: String, p: String, d: String, v: String) => (v, h, p, d)
         case _ => (d.toString, host, port, db)
       }
-      val (code, res) = HttpUtil.httpPost(s"http://$ip:$pt/write?db=$dbName", postData)
+      val (code, res) = HttpUtils.httpPost(s"http://$ip:$pt/write?db=$dbName", postData)
       code match {
         case d if d >= 200 && d < 300 =>
           logger.info(s"Write influxDB successful. $code")

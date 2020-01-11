@@ -26,7 +26,7 @@ import java.nio.charset.StandardCharsets
 import java.util.{Base64, Properties}
 import java.util.regex.Pattern
 
-import com.streamxhub.spark.core.util.SystemPropertyUtil
+import com.streamxhub.common.util.SystemPropertyUtils
 import com.streamxhub.spark.monitor.api.{Const, HeartBeat}
 import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
 
@@ -129,7 +129,7 @@ trait SparkStreaming {
     sparkConf = new SparkConf()
     sparkConf.set(SPARK_PARAM_USER_ARGS, args.mkString("|"))
     //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, confPath) = SystemPropertyUtil.get(SPARK_PARAM_DEBUG_CONF, "") match {
+    val (isDebug, confPath) = SystemPropertyUtils.get(SPARK_PARAM_DEBUG_CONF, "") match {
       case "" => (false, sparkConf.get(SPARK_PARAM_DEPLOY_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")

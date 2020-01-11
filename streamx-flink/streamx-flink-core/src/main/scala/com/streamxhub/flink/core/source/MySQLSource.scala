@@ -2,8 +2,8 @@ package com.streamxhub.flink.core.source
 
 import java.util.Properties
 
+import com.streamxhub.common.util.{Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.DataStream

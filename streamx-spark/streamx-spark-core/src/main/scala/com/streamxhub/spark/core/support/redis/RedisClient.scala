@@ -23,7 +23,7 @@ package com.streamxhub.spark.core.support.redis
 
 import java.util.concurrent.ConcurrentHashMap
 
-import org.slf4j.LoggerFactory
+import com.streamxhub.common.util.Logger
 import redis.clients.jedis.exceptions.JedisConnectionException
 import redis.clients.jedis._
 
@@ -31,9 +31,7 @@ import scala.annotation.meta.getter
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
-object RedisClient {
-
-  lazy val logger = LoggerFactory.getLogger(getClass)
+object RedisClient extends Logger {
 
   @transient
   @getter
