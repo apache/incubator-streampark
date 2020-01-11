@@ -1,19 +1,21 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, DriverManager, SQLException}
+import java.sql.{Connection, DriverManager, SQLException, Statement}
 import java.util.Properties
 
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
 import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.api.CheckpointingMode
+import org.apache.flink.streaming.api.environment.CheckpointConfig
 
 import scala.collection.Map
 import scala.collection.JavaConversions._
@@ -21,7 +23,11 @@ import scala.util.Try
 
 /**
  *
- * 注意： 该MySQLSink实现可能针对不用的MySQL版本会出现问题,导致获取类型失败(	at com.esotericsoftware.kryo.Generics.getConcreteClass(Generics.java:44)... )
+ * TODO  注意：
+ * TODO  注意：
+ * TODO  注意：
+ * TODO 1) 该MySQLSink实现可能针对不用的MySQL版本会出现问题,导致获取类型失败(	at com.esotericsoftware.kryo.Generics.getConcreteClass(Generics.java:44)... )
+ * TODO 2) 该MySQLSink对MySQL的连接时长有要求,要连接等待时长(wait_timeout)设置的长一些,不然一个连接打开一直在invoke插入数据阶段由于还未提交,还一直在长时间插入可能会超时(Communications link failure during rollback(). Transaction resolution unknown.)
  *
  */
 object MySQLSink {
@@ -44,6 +50,14 @@ class MySQLSink(@transient ctx: StreamingContext,
                 parallelism: Int = 0,
                 name: String = null,
                 uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+
+
+  ctx.enableCheckpointing(5000)
+  ctx.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
+  ctx.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
+  ctx.getCheckpointConfig.setCheckpointTimeout(5000)
+  ctx.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
+  ctx.getCheckpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
 
   /**
    *
@@ -99,6 +113,8 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
       try {
         logInfo("[StreamX] MySQLSink commit ....")
         transaction.commit()
+        //前一个连接提交事务,则重新获取一个新连接
+        this.beginTransaction()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
       } finally {
