@@ -30,8 +30,8 @@ package com.streamxhub.spark.core.support.kafka
 import java.lang.reflect.Constructor
 import java.{util => ju}
 
+import com.streamxhub.common.util.Logger
 import com.streamxhub.spark.core.support.kafka.offset.{DefaultOffset, HBaseOffset, MySQLOffset, Offset, RedisOffset}
-import com.streamxhub.spark.core.util.Logger
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition

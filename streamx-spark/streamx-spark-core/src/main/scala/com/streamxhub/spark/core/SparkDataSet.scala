@@ -21,7 +21,7 @@
 
 package com.streamxhub.spark.core
 
-import com.streamxhub.spark.core.util.SystemPropertyUtil
+import com.streamxhub.common.util.SystemPropertyUtils
 import com.streamxhub.spark.monitor.api.HeartBeat
 import com.streamxhub.spark.monitor.api.util.PropertiesUtil
 import org.apache.spark.{SparkConf, SparkContext}
@@ -79,7 +79,7 @@ trait SparkDataSet {
     sparkConf.set("spark.user.args", args.mkString("|"))
 
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, conf) = SystemPropertyUtil.get("spark.conf", "") match {
+    val (isDebug, conf) = SystemPropertyUtils.get("spark.conf", "") match {
       case "" => (false, sparkConf.get("spark.conf"))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")

@@ -14,6 +14,13 @@
 
     <!--项目基本依赖-->
     <dependencies>
+
+        <dependency>
+            <groupId>com.streamxhub</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.streamxhub</groupId>
             <artifactId>streamx-spark-monitor-api</artifactId>
@@ -95,13 +102,6 @@
             <artifactId>jedis</artifactId>
         </dependency>
 
-        <!--MySQL依赖-->
-        <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>8.0.16</version>
-        </dependency>
-
         <dependency>
             <groupId>org.scalikejdbc</groupId>
             <artifactId>scalikejdbc_${scala.binary.version}</artifactId>
@@ -112,28 +112,10 @@
             <groupId>com.google.protobuf</groupId>
             <artifactId>protobuf-java</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-email</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.sun.mail</groupId>
-            <artifactId>javax.mail</artifactId>
-        </dependency>
 
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
             <artifactId>jetty-servlet</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>com.solarmosaic.client</groupId>
-            <artifactId>mail-client_2.11</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.scalaj</groupId>
-            <artifactId>scalaj-http_${scala.binary.version}</artifactId>
         </dependency>
 
         <dependency>
@@ -161,7 +143,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>4.2.4</version>
                 <executions>
                     <execution>
                         <id>compile-scala</id>

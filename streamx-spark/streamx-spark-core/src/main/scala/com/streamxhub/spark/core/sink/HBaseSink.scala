@@ -43,11 +43,7 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
 
   override val prefix: String = "spark.sink.hbase."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param.map { case (k, v) => s"hbase.$k" -> v } ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix,"hbase.")
 
   private val tableName = prop.getProperty("hbase.table")
   private val commitBatch = prop.getProperty("hbase.commit.batch", "1000").toInt

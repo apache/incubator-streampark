@@ -1,32 +1,14 @@
-/**
-  * Copyright (c) 2019 The StreamX Project
-  * <p>
-  * Licensed to the Apache Software Foundation (ASF) under one
-  * or more contributor license agreements. See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership. The ASF licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License. You may obtain a copy of the License at
-  * <p>
-  * http://www.apache.org/licenses/LICENSE-2.0
-  * <p>
-  * Unless required by applicable law or agreed to in writing,
-  * software distributed under the License is distributed on an
-  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  * KIND, either express or implied. See the License for the
-  * specific language governing permissions and limitations
-  * under the License.
-  */
+package com.streamxhub.common
 
-package com.streamxhub.spark.core.util
-
-import com.solarmosaic.client.mail.EnvelopeWrappers
+import com.solarmosaic.client.mail.{Envelope, EnvelopeWrappers, Mailer}
+import com.solarmosaic.client.mail.configuration.SmtpConfiguration
 import com.solarmosaic.client.mail.content.ContentType.MultipartTypes
+import com.solarmosaic.client.mail.content.{Html, Multipart, Text}
+import com.streamxhub.common.util.HttpUtils
 import javax.mail.internet.InternetAddress
 import javax.mail.{Authenticator, PasswordAuthentication}
 
-package object NoticeUtil {
+package object NoticeUtils {
 
   case class Ding(api: String, to: String, message: String)
 
@@ -40,7 +22,7 @@ package object NoticeUtil {
                    tls: Boolean = false,
                    subtype: String = "text"
                   ) extends Authenticator {
-    override def getPasswordAuthentication(): PasswordAuthentication = {
+    override def getPasswordAuthentication: PasswordAuthentication = {
       new PasswordAuthentication(user, password)
     }
   }
@@ -66,16 +48,12 @@ package object NoticeUtil {
         """.stripMargin
 
       val headers = Map("content-type" -> "application/json")
-      val (code, res) = HttpUtil.httpPost(ding.api, body, headers)
+      val (code, res) = HttpUtils.httpPost(ding.api, body, headers)
       println(s"result code : $code , body : $res")
     }
 
 
     def a(email: EMail): Unit = {
-
-      import com.solarmosaic.client.mail._
-      import com.solarmosaic.client.mail.configuration._
-      import com.solarmosaic.client.mail.content._
 
       val config = SmtpConfiguration(host = email.addr,
         port = email.port,

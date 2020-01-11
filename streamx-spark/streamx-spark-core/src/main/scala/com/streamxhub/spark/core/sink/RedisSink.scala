@@ -45,11 +45,7 @@ class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
 
   override val prefix: String = "spark.sink.redis."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix)
 
 
   private lazy val host = prop.getProperty("host", Protocol.DEFAULT_HOST)

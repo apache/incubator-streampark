@@ -47,11 +47,7 @@ class HFileSink[T: ClassTag](@transient override val sc: SparkContext,
 
   override val prefix: String = "spark.sink.hfile."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private val tableName = prop.getProperty("hbase.table")
 

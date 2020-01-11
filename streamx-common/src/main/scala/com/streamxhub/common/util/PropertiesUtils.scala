@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.util
+package com.streamxhub.common.util
 
 import java.io._
 import java.util.{Properties, Scanner}
@@ -29,9 +29,6 @@ import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
 import scala.collection.Map
 
-/**
- *
- */
 object PropertiesUtils {
 
   def getFileSource(filename: String): String = {

@@ -308,7 +308,7 @@ cat > $name/pom.xml <<EOF
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.2</version>
+                 <version>4.2.4</version>
                 <executions>
                     <execution>
                         <id>compile-scala</id>

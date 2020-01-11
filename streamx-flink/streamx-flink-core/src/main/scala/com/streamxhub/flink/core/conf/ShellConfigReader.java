@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.conf;
 
-import com.streamxhub.flink.core.util.PropertiesUtils;
+import com.streamxhub.common.util.PropertiesUtils;
 import org.apache.commons.lang3.StringUtils;
 import scala.collection.JavaConversions;
 

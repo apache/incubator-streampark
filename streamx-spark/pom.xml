@@ -14,33 +14,11 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>streamx-spark-cli</module>
-        <module>streamx-spark-monitor</module>
         <module>streamx-spark-core</module>
         <module>streamx-spark-test</module>
+        <module>streamx-spark-cli</module>
+      <module>streamx-spark-monitor</module>
     </modules>
-
-    <!-- 定义统一版本号-->
-    <properties>
-        <java.version>1.8</java.version>
-        <spark.version>2.2.0</spark.version>
-        <hadoop.version>2.6.0</hadoop.version>
-        <hbase.version>1.2.0</hbase.version>
-        <scala.version>2.11.8</scala.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <zkclient.version>0.11</zkclient.version>
-        <curator.version>4.0.1</curator.version>
-        <redis.version>2.9.0</redis.version>
-        <es.version>6.2.3</es.version>
-        <protobuf.version>2.5.0</protobuf.version>
-        <slf4j.version>1.7.25</slf4j.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.build.jdk>1.8</project.build.jdk>
-        <PermGen>64m</PermGen>
-        <MaxPermGen>512m</MaxPermGen>
-        <CodeCacheSize>512m</CodeCacheSize>
-    </properties>
 
     <repositories>
         <repository>
@@ -235,89 +213,14 @@
                 <version>${protobuf.version}</version>
             </dependency>
             <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-email</artifactId>
-                <version>1.4</version>
-            </dependency>
-            <dependency>
-                <groupId>com.sun.mail</groupId>
-                <artifactId>javax.mail</artifactId>
-                <version>1.5.5</version>
-            </dependency>
-
-            <dependency>
                 <groupId>org.eclipse.jetty</groupId>
                 <artifactId>jetty-servlet</artifactId>
                 <version>9.3.6.v20151106</version>
             </dependency>
-
-            <dependency>
-                <groupId>com.solarmosaic.client</groupId>
-                <artifactId>mail-client_${scala.binary.version}</artifactId>
-                <exclusions>
-                    <exclusion>
-                        <groupId>org.scala-lang</groupId>
-                        <artifactId>scala-library</artifactId>
-                    </exclusion>
-                </exclusions>
-                <version>0.1.0</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.scalaj</groupId>
-                <artifactId>scalaj-http_${scala.binary.version}</artifactId>
-                <version>2.3.0</version>
-            </dependency>
-
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>4.5</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.yaml</groupId>
-                <artifactId>snakeyaml</artifactId>
-                <version>1.24</version>
-            </dependency>
-
-            <!--logback -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>1.2.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-access</artifactId>
-                <version>1.2.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>1.2.3</version>
-            </dependency>
-
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>log4j-over-slf4j</artifactId>
-                <version>1.7.15</version>
-            </dependency>
-
-            <!--jul桥接 用来输出 Java Logging Framework (JUL) -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jul-to-slf4j</artifactId>
-                <version>${slf4j.version}</version>
-            </dependency>
-
-            <!-- jcl桥接，用来输出 第三方Jakarta Commons Logging (JCL) -->
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>jcl-over-slf4j</artifactId>
-                <version>${slf4j.version}</version>
             </dependency>
 
         </dependencies>

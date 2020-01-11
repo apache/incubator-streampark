@@ -3,6 +3,7 @@ package com.streamxhub.flink.core.conf
 import java.util.Properties
 
 import org.apache.flink.api.java.utils.ParameterTool
+import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_INSTANCE,KEY_MYSQL_DRIVER,KEY_MYSQL_PASSWORD,KEY_MYSQL_URL,KEY_MYSQL_USER}
 
 import scala.collection.Map
 import scala.util.Try
@@ -20,7 +21,7 @@ object Config {
     val param: Map[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${inTopic} init error...") else {
       val kafkaProperty = new Properties()
-      kafkaProperty.putAll(param)
+      param.foreach(x=>kafkaProperty.put(x._1,x._2))
       val topic = inTopic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getProperty(TOPIC, null)
@@ -29,7 +30,7 @@ object Config {
           } else top
         case t => t
       }
-      val hasTopic = kafkaProperty.toMap.filter(x => x._1 == TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic)).isEmpty
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${topic}!!!")
       } else {
@@ -60,7 +61,7 @@ object Config {
     val instanceName = if (StringUtils.isBlank(instance)) "default" else instance
     properties.put(KEY_MYSQL_INSTANCE, instanceName)
     properties.put(KEY_MYSQL_DRIVER, driver)
-    properties.putAll(param)
+    param.foreach(x=>properties.put(x._1,x._2))
     properties
   }
 
