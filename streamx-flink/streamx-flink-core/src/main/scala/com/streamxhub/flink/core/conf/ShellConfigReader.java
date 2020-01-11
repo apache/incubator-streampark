@@ -7,6 +7,9 @@ import scala.collection.JavaConversions;
 import java.io.*;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class ShellConfigReader implements Serializable {
 
     static String resourcePrefix = "flink.deployment.resource.";
@@ -22,34 +25,40 @@ public class ShellConfigReader implements Serializable {
             configArgs = PropertiesUtils.fromYamlFile(conf);
         }
         Map<String, String> map = JavaConversions.mapAsJavaMap(configArgs);
-        StringBuffer buffer = new StringBuffer();
-        if (action.equals("--resource")) {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(resourcePrefix)) {
-                    buffer.append(" --")
-                            .append(entry.getKey().replace(resourcePrefix, ""))
-                            .append(" ")
-                            .append(entry.getValue());
+        StringBuilder buffer = new StringBuilder();
+        switch (action) {
+            case "--resource":
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(resourcePrefix)) {
+                        buffer.append(" --")
+                                .append(entry.getKey().replace(resourcePrefix, ""))
+                                .append(" ")
+                                .append(entry.getValue());
+                    }
                 }
-            }
-            System.out.println(buffer.toString().trim());
-        } else if (action.equals("--dynamic")) {
-            for (Map.Entry<String, String> entry : map.entrySet()) {
-                if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(dynamicPrefix)) {
-                    buffer.append(" -yD ")
-                            .append(entry.getKey().replace(dynamicPrefix, ""))
-                            .append("=")
-                            .append(entry.getValue());
+                System.out.println(buffer.toString().trim());
+                break;
+            case "--dynamic":
+                for (Map.Entry<String, String> entry : map.entrySet()) {
+                    if (StringUtils.isNoneBlank(entry.getValue()) && entry.getKey().startsWith(dynamicPrefix)) {
+                        buffer.append(" -yD ")
+                                .append(entry.getKey().replace(dynamicPrefix, ""))
+                                .append("=")
+                                .append(entry.getValue());
+                    }
                 }
-            }
-            System.out.println(buffer.toString().trim());
-        } else if (action.equals("--name")) {
-            String yarnName = map.getOrDefault("flink.deployment.resource.yarnname", null);
-            if (StringUtils.isEmpty(yarnName)) {
-                System.out.println("");
-            } else {
-                System.out.println(" --yarnname " + yarnName);
-            }
+                System.out.println(buffer.toString().trim());
+                break;
+            case "--name":
+                String yarnName = map.getOrDefault("flink.deployment.resource.yarnname", null);
+                if (StringUtils.isEmpty(yarnName)) {
+                    System.out.println("");
+                } else {
+                    System.out.println(" --yarnname " + yarnName);
+                }
+                break;
+            default:
+                break;
         }
 
     }
