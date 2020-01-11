@@ -55,7 +55,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close(conn,stmt, result)
+        close(conn, stmt, result)
       }
     }
   }
@@ -74,34 +74,32 @@ object MySQLUtils {
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(x => JsonUtils.read[T](JsonUtils.write(x)))
 
-  def executeBatch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
+  def batch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
     Try(sql.size).getOrElse(0) match {
       case 0 => 0
       case 1 => update(sql.head)
       case _ =>
         conn = getConnection(jdbcConfig)
-        conn.setAutoCommit(false)
-        val ps = conn.prepareStatement("select 1")
-        var index: Int = 0
-        var count = 0
+        val prepStat = conn.createStatement()
         try {
-          sql.foreach(x => {
-            ps.addBatch(x)
+          var index: Int = 0
+          val batchSize = 1000
+          sql.map(x => {
+            prepStat.addBatch(x)
             index += 1
-            if (index > 0 && index % 1000 == 0) {
-              count += ps.executeBatch().sum
+            if (index > 0 && index % batchSize == 0) {
+              val count = prepStat.executeBatch().sum
               conn.commit()
-              ps.clearBatch()
-            }
-          })
-          count += ps.executeBatch().sum
-          conn.commit()
-          count
+              prepStat.clearBatch()
+              count
+            } else 0
+          }).sum + prepStat.executeBatch().sum
         } catch {
           case ex: Exception => ex.printStackTrace()
             0
         } finally {
+          conn.commit()
           close(conn)
         }
     }
@@ -127,7 +125,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close(conn,statement)
+      close(conn, statement)
     }
   }
 
@@ -159,7 +157,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close(conn,stmt, result)
+      close(conn, stmt, result)
     }
   }
 
@@ -188,7 +186,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close(conn,stmt)
+      close(conn, stmt)
     }
   }
 
@@ -235,21 +233,22 @@ object MySQLUtils {
       val conn = ds.getConnection()
       conn.setAutoCommit(false)
       conn
+
       /**
-      Class.forName(prop(KEY_MYSQL_DRIVER))
-      val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
-        case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
-        case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
-      }
-      connection.setAutoCommit(false)
-      connection
+       *Class.forName(prop(KEY_MYSQL_DRIVER))
+       * val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
+       * case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
+       * case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
+       * }
+       *connection.setAutoCommit(false)
+       * connection
        **/
     } finally {
       lock.unlock()
     }
   }
 
-  private[this] def createStatement(conn:Connection):Statement =  conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
+  private[this] def createStatement(conn: Connection): Statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
   def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
 
