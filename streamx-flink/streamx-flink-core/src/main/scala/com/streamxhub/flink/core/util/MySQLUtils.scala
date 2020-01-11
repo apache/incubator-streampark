@@ -120,7 +120,9 @@ object MySQLUtils {
     var statement: Statement = null
     try {
       statement = conn.createStatement
-      statement.executeUpdate(sql)
+      val index = statement.executeUpdate(sql)
+      conn.commit()
+      index
     } catch {
       case ex: Exception => ex.printStackTrace()
         -1
@@ -181,7 +183,9 @@ object MySQLUtils {
     var stmt: Statement = null
     try {
       stmt = conn.createStatement
-      stmt.execute(sql)
+      val res = stmt.execute(sql)
+      conn.commit()
+      res
     } catch {
       case ex: Exception => ex.printStackTrace()
         false
