@@ -237,16 +237,6 @@ object MySQLUtils {
       val conn = ds.getConnection()
       conn.setAutoCommit(false)
       conn
-
-      /**
-       *Class.forName(prop(KEY_MYSQL_DRIVER))
-       * val connection = Try(prop(KEY_MYSQL_USER)).getOrElse(null) match {
-       * case null => DriverManager.getConnection(prop(KEY_MYSQL_URL))
-       * case _ => DriverManager.getConnection(prop(KEY_MYSQL_URL), prop(KEY_MYSQL_USER), prop(KEY_MYSQL_PASSWORD))
-       * }
-       *connection.setAutoCommit(false)
-       * connection
-       **/
     } finally {
       lock.unlock()
     }
