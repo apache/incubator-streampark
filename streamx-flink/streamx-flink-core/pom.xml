@@ -14,6 +14,12 @@
 
     <dependencies>
 
+        <dependency>
+            <groupId>com.streamxhub</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!--flink-->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -54,7 +60,7 @@
             <plugin>
                 <groupId>net.alchim31.maven</groupId>
                 <artifactId>scala-maven-plugin</artifactId>
-                <version>3.2.2</version>
+                <version>4.2.4</version>
                 <executions>
                     <execution>
                         <id>compile-scala</id>

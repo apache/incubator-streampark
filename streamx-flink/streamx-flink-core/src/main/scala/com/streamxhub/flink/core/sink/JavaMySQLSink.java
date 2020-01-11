@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.sink;
 
-import com.streamxhub.flink.core.util.MySQLUtils;
+import com.streamxhub.common.util.MySQLUtils;
 import org.apache.flink.api.common.ExecutionConfig;
 import org.apache.flink.api.common.typeutils.base.VoidSerializer;
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer;

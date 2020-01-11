@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core.sink
 
-import com.streamxhub.flink.core.util.Logger
+import com.streamxhub.common.util.Logger
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.api.common.functions.RuntimeContext
@@ -19,7 +19,6 @@ import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RestClientBuilder
-
 
 import scala.collection.JavaConversions._
 import scala.collection.Map

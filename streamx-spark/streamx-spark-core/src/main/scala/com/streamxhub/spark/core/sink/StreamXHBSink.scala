@@ -31,6 +31,7 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**
@@ -42,11 +43,7 @@ class StreamXHBSink(@transient override val sc: SparkContext,
 
   override val prefix: String = "spark.sink.hbase."
 
-  private lazy val prop = {
-    val p = new Properties()
-    p.putAll(param.map { case (k, v) => s"hbase.$k" -> v } ++ initParams)
-    p
-  }
+  private lazy val prop = filterProp(param,initParams,prefix,"hbase.")
 
   private val tableName = prop.getProperty("hbase.table")
   private val commitBatch = prop.getProperty("hbase.commit.batch", "1000").toInt

@@ -1,7 +1,7 @@
 package com.streamxhub.flink.core
 
 import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.{Logger, PropertiesUtils, SystemPropertyUtils}
+import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._

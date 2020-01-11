@@ -21,7 +21,7 @@
 
 package com.streamxhub.spark.core.source
 
-import com.streamxhub.spark.core.util.Logger
+import com.streamxhub.common.util.Logger
 import org.apache.spark.SparkConf
 import org.apache.spark.streaming.StreamingContext
 import org.apache.spark.streaming.dstream.DStream

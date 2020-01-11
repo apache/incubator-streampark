@@ -4,10 +4,10 @@ package com.streamxhub.flink.core.sink
 import java.sql.{Connection, DriverManager, SQLException, Statement}
 import java.util.Properties
 
+import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.conf.Config
-import com.streamxhub.flink.core.conf.ConfigConst._
-import com.streamxhub.flink.core.util.{Logger, MySQLUtils}
+import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_DRIVER,KEY_MYSQL_PASSWORD,KEY_MYSQL_URL,KEY_MYSQL_USER}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
@@ -68,7 +68,7 @@ class MySQLSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = Config.getMySQLSink(ctx.parameter)(instance)
-    prop.putAll(overwriteParams)
+    overwriteParams.foreach(x=>prop.put(x._1,x._2))
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)

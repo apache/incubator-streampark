@@ -43,7 +43,7 @@ class EsSink[T](@transient override val sc: SparkContext,
   override val prefix: String = "spark.sink.es."
 
 
-  lazy val esParam: Predef.Map[String, String] = param.map { case (k, v) => s"es.$k" -> v } ++ initParams
+  lazy val esParam: Map[String, String] = (param++initParams).filter(_._1.startsWith(prefix))
 
   /**
     * 输出

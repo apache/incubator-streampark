@@ -1,4 +1,4 @@
-package com.streamxhub.flink.core.util
+package com.streamxhub.common.util
 
 import java.io.File
 import java.net.URL

@@ -8,10 +8,8 @@ import java.sql.Connection
 import java.util.Properties
 
 import com.esotericsoftware.kryo.io.{Input, Output}
-import com.mysql.jdbc.JDBC4Connection
-import com.streamxhub.flink.core.conf.ConfigConst.{KEY_MYSQL_DRIVER, KEY_MYSQL_INSTANCE, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
-import com.streamxhub.flink.core.util.MySQLUtils
-import com.zaxxer.hikari.pool.HikariProxyConnection
+import com.streamxhub.common.util.MySQLUtils
+import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_DRIVER, KEY_MYSQL_INSTANCE, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
 
 object KryoApp {
 
