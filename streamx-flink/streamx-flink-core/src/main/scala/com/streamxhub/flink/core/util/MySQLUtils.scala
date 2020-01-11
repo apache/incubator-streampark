@@ -46,7 +46,7 @@ object MySQLUtils {
           for (x <- 1 to count) {
             val key = result.getMetaData.getColumnLabel(x)
             val value = result.getObject(x)
-            map += key -> value.toString
+            map += key -> value
           }
           array += map
         }
