@@ -167,7 +167,7 @@ doStart() {
     # shellcheck disable=SC2155
     local flink_jar="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
-    local shellReader="com.streamxhub.flink.core.conf.ShellConfigReader"
+    local shellReader="com.streamxhub.flink.common.conf.ParameterCli"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local name_params="`java -cp "${flink_jar}" $shellReader --name "${app_proper}"`"

@@ -112,7 +112,9 @@
                 <version>1.7.15</version>
                 <scope>provided</scope>
             </dependency>
+            <!--logbak end-->
 
+            <!--mail-->
             <dependency>
                 <groupId>com.solarmosaic.client</groupId>
                 <artifactId>mail-client_${scala.binary.version}</artifactId>
@@ -143,6 +145,13 @@
                 <version>1.5.5</version>
             </dependency>
 
+            <!--apache.commons -->
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>3.8.1</version>
+            </dependency>
+
             <!--flink-->
             <dependency>
                 <groupId>org.apache.flink</groupId>
@@ -162,7 +171,6 @@
                 <version>${flink.version}</version>
             </dependency>
 
-            <!--Es5和Es6的connector目前不能工共存...-->
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-elasticsearch5_${scala.binary.version}</artifactId>

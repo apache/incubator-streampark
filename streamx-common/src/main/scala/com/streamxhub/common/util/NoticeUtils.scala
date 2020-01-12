@@ -1,4 +1,4 @@
-package com.streamxhub.common
+package com.streamxhub.common.util
 
 import com.solarmosaic.client.mail.{Envelope, EnvelopeWrappers, Mailer}
 import com.solarmosaic.client.mail.configuration.SmtpConfiguration
