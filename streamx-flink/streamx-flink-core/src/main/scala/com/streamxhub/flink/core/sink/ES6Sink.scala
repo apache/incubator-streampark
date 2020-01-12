@@ -4,7 +4,7 @@ import com.streamxhub.common.util.Logger
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.api.common.functions.RuntimeContext
-import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkBase._
 import org.apache.flink.streaming.connectors.elasticsearch.{ActionRequestFailureHandler, ElasticsearchSinkFunction, RequestIndexer}

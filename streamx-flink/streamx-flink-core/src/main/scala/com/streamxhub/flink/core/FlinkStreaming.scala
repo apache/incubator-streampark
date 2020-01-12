@@ -1,6 +1,6 @@
 package com.streamxhub.flink.core
 
-import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
 import org.apache.flink.api.java.utils.ParameterTool
@@ -41,7 +41,7 @@ trait FlinkStreaming extends Logger {
     //read config and merge config......
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(APP_CONF, null) match {
+    val config = argsMap.get(KEY_FLINK_APP_CONF, null) match {
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }
@@ -128,7 +128,7 @@ trait FlinkStreaming extends Logger {
          |
          |""".stripMargin
     println(s"\033[95;1m${logo}\033[1m\n")
-    val appName = parameter.get(KEY_APP_NAME, "")
+    val appName = parameter.get(KEY_FLINK_APP_NAME, "")
     println(s"$appName Starting...")
     env.execute(appName)
   }
