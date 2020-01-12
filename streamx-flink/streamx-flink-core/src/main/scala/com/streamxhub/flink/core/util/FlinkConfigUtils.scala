@@ -1,17 +1,19 @@
-package com.streamxhub.flink.core.conf
+package com.streamxhub.flink.core.util
 
 import java.util.Properties
+
 
 import org.apache.flink.api.java.utils.ParameterTool
 import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_INSTANCE,KEY_MYSQL_DRIVER,KEY_MYSQL_PASSWORD,KEY_MYSQL_URL,KEY_MYSQL_USER}
 
-import scala.collection.Map
-import scala.util.Try
 import scala.collection.JavaConversions._
-import ConfigConst._
+import com.streamxhub.common.conf.ConfigConst._
 import org.apache.commons.lang3.StringUtils
 
-object Config {
+import scala.collection.Map
+import scala.util.Try
+
+object FlinkConfigUtils {
 
   def getKafkaSink(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX + instance, topic)
 

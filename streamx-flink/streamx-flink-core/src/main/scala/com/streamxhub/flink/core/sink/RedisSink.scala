@@ -5,12 +5,12 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper}
-import com.streamxhub.flink.core.conf.ConfigConst.SINK_REDIS_PREFIX
+import com.streamxhub.common.conf.ConfigConst.SINK_REDIS_PREFIX
 import com.streamxhub.flink.core.StreamingContext
 
 import scala.collection.JavaConversions._
 import scala.collection.Map
-import com.streamxhub.flink.core.conf.ConfigConst._
+import com.streamxhub.common.conf.ConfigConst._
 
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
