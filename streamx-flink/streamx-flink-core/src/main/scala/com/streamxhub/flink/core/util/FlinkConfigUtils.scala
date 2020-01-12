@@ -2,10 +2,7 @@ package com.streamxhub.flink.core.util
 
 import java.util.Properties
 
-
 import org.apache.flink.api.java.utils.ParameterTool
-import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_INSTANCE,KEY_MYSQL_DRIVER,KEY_MYSQL_PASSWORD,KEY_MYSQL_URL,KEY_MYSQL_USER}
-
 import scala.collection.JavaConversions._
 import com.streamxhub.common.conf.ConfigConst._
 import org.apache.commons.lang3.StringUtils

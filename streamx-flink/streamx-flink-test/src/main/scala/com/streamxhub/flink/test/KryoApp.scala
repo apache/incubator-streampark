@@ -9,8 +9,7 @@ import java.util.Properties
 
 import com.esotericsoftware.kryo.io.{Input, Output}
 import com.streamxhub.common.util.MySQLUtils
-import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_DRIVER, KEY_MYSQL_INSTANCE, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
-
+import com.streamxhub.common.conf.ConfigConst._
 object KryoApp {
 
   def main(args: Array[String]): Unit = {

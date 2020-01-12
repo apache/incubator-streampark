@@ -1,9 +1,10 @@
 package com.streamxhub.common.util
 
-import java.sql.{Connection, DriverManager, ResultSet, Statement}
+import java.sql.{Connection, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
+import com.streamxhub.common.conf.ConfigConst._
 
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.json4s.DefaultFormats
@@ -14,16 +15,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 object MySQLUtils {
-
-
-  /**
-   * about config MySQL
-   */
-  val KEY_MYSQL_INSTANCE = "instance"
-  val KEY_MYSQL_DRIVER = "driverClassName"
-  val KEY_MYSQL_URL = "jdbcUrl"
-  val KEY_MYSQL_USER = "username"
-  val KEY_MYSQL_PASSWORD = "password"
 
   @transient
   implicit private lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
