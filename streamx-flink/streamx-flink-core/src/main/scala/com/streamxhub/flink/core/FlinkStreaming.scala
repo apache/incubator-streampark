@@ -24,7 +24,7 @@ class StreamingContext(val parameter: ParameterTool, val environment: StreamExec
 
 trait FlinkStreaming extends Logger {
 
-  implicit def ext[T:TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+  implicit def ext[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
   @transient
   private var env: StreamExecutionEnvironment = _
@@ -53,7 +53,7 @@ trait FlinkStreaming extends Logger {
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
 
-     this.parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
+    this.parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
 
     env = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
@@ -142,21 +142,24 @@ trait FlinkStreaming extends Logger {
   }
 }
 
-class DataStreamExt[T:TypeInformation](val dataStream: DataStream[T]) {
+class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R:TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
+
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       val outData = fun(value)
       if (outData != null) {
         ctx.output(tag, outData)
       }
-      //侧输出流不能影响主输出流...
-      out.collect(value)
+      //根据条件判断是否跳过主输出...
+      if (!skip) {
+        out.collect(value)
+      }
     }
   })
 
-  def sideGet[R:TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
 }
 
