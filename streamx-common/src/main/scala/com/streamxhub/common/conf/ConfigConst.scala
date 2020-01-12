@@ -61,6 +61,15 @@ object ConfigConst {
 
   val SINK_MYSQL_PREFIX = "sink.mysql"
 
+  /**
+   * about config MySQL
+   */
+  val KEY_MYSQL_INSTANCE = "instance"
+  val KEY_MYSQL_DRIVER = "driverClassName"
+  val KEY_MYSQL_URL = "jdbcUrl"
+  val KEY_MYSQL_USER = "username"
+  val KEY_MYSQL_PASSWORD = "password"
+
 
   val SINK_ES_PREFIX = "sink.es."
 

@@ -1,12 +1,12 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, DriverManager, SQLException, Statement}
+import java.sql.{Connection, DriverManager, SQLException}
 import java.util.Properties
 
 import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_DRIVER, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.util.FlinkConfigUtils
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
