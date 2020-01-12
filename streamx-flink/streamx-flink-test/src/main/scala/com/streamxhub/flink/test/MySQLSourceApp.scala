@@ -3,7 +3,7 @@ package com.streamxhub.flink.test
 import java.util.Properties
 
 import com.streamxhub.common.util.JsonUtils
-import com.streamxhub.common.util.MySQLUtils.{KEY_MYSQL_DRIVER, KEY_MYSQL_INSTANCE, KEY_MYSQL_PASSWORD, KEY_MYSQL_URL, KEY_MYSQL_USER}
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.common.typeinfo.TypeInformation
