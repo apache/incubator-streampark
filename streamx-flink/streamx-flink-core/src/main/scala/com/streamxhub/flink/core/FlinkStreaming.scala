@@ -149,9 +149,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       val outData = fun(value)
-      if (outData != null) {
-        ctx.output(tag, outData)
-      }
+      ctx.output(tag, outData)
       //根据条件判断是否跳过主输出...
       if (!skip) {
         out.collect(value)

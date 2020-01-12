@@ -15,7 +15,6 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.collection.Map
-import scala.collection.JavaConversions._
 
 object JdbcSink {
 
