@@ -12,39 +12,44 @@ import scala.util.Try
 
 object FlinkConfigUtils {
 
-  def getKafkaSink(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, SINK_KAFKA_PREFIX + instance, topic)
+  def get(parameter: ParameterTool, prefix: String = "")(instance: String = ""): Properties = {
+    val map = filterParam(parameter, prefix + instance)
+    val prop = new Properties()
+    map.foreach { case (k, v) => prop.put(k, v) }
+    prop
+  }
 
-  def getKafkaSource(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, SOURCE_KAFKA_PREFIX + instance, topic)
+  def getKafkaSink(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, KAFKA_SINK_PREFIX + instance, topic)
+
+  def getKafkaSource(parameter: ParameterTool, topic: String, instance: String = ""): Properties = kafkaGet(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
 
   private[this] def kafkaGet(parameter: ParameterTool, prefix: String, inTopic: String): Properties = {
     val param: Map[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${inTopic} init error...") else {
       val kafkaProperty = new Properties()
-      param.foreach(x=>kafkaProperty.put(x._1,x._2))
+      param.foreach(x => kafkaProperty.put(x._1, x._2))
       val topic = inTopic match {
         case SIGN_EMPTY =>
-          val top = kafkaProperty.getProperty(TOPIC, null)
+          val top = kafkaProperty.getProperty(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(SIGN_COMMA).length > 1) {
             throw new IllegalArgumentException(s"Can't find a unique topic!!!")
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic))
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${topic}!!!")
       } else {
-        kafkaProperty.put(TOPIC, topic)
+        kafkaProperty.put(KEY_KAFKA_TOPIC, topic)
         kafkaProperty
       }
     }
   }
 
-  def getMySQLSink(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, SINK_MYSQL_PREFIX, prefix)
-
-  def getMySQLSource(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, SOURCE_MYSQL_PREFIX, prefix)
+  def getMySQL(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, MYSQL_PREFIX, prefix)
 
   private[this] def mysqlGet(parameter: ParameterTool, prefix: String, instance: String): Properties = {
-    val fix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
+    val fix = if (instance == null || instance.isEmpty) prefix else s"${prefix}${instance}"
     val driver = parameter.toMap.getOrDefault(s"${prefix}.${KEY_MYSQL_DRIVER}", null)
     val url = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_URL}", null)
     val user = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_USER}", null)
@@ -60,7 +65,7 @@ object FlinkConfigUtils {
     val instanceName = if (StringUtils.isBlank(instance)) "default" else instance
     properties.put(KEY_MYSQL_INSTANCE, instanceName)
     properties.put(KEY_MYSQL_DRIVER, driver)
-    param.foreach(x=>properties.put(x._1,x._2))
+    param.foreach(x => properties.put(x._1, x._2))
     properties
   }
 
