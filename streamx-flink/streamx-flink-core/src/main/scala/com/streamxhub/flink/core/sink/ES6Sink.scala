@@ -54,13 +54,13 @@ class ES6Sink(@transient ctx: StreamingContext,
 
     //所有es的配置文件...
     val fullConfig = ctx.parameter.toMap
-      .filter(_._1.startsWith(SINK_ES_PREFIX))
+      .filter(_._1.startsWith(ES_PREFIX))
       .filter(_._2.nonEmpty)
 
     //当前实例(默认,或者指定后缀实例)的配置文件...
     val shortConfig = fullConfig
       .filter(_._1.endsWith(suffix))
-      .map(x => x._1.drop(SINK_ES_PREFIX.length + suffix.length) -> x._2.trim)
+      .map(x => x._1.drop(ES_PREFIX.length + suffix.length) -> x._2.trim)
 
     // parameter of sink.es.host
     val httpHosts = shortConfig.getOrElse(KEY_HOST, SIGN_EMPTY).split(SIGN_COMMA).map(x => {
@@ -107,7 +107,7 @@ class ES6Sink(@transient ctx: StreamingContext,
       case _ =>
     }
     //set value from properties
-    shortConfig.filter(_._1.startsWith(SINK_ES_CONF_BULK_PREFIX)).foreach(doConfig)
+    shortConfig.filter(_._1.startsWith(KEY_ES_BULK_PREFIX)).foreach(doConfig)
     //set value from method parameter...
     overwriteParams.foreach(doConfig)
 
