@@ -7,7 +7,6 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.util.FlinkConfigUtils
 
-import scala.collection.JavaConversions._
 import scala.collection.Map
 import scala.language.postfixOps
 
@@ -18,9 +17,9 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    *
    * @return
    */
-  def getDataStream(topic:String = "",instance: String = ""): DataStream[String] = {
-    val prop = FlinkConfigUtils.getKafkaSource(ctx.parameter, topic,instance)
-    specialKafkaParams.foreach(x=>prop.put(x._1,x._2))
+  def getDataStream(topic: String = "", instance: String = ""): DataStream[String] = {
+    val prop = FlinkConfigUtils.getKafkaSource(ctx.parameter, topic, instance)
+    specialKafkaParams.foreach(x => prop.put(x._1, x._2))
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
     ctx.addSource(consumer)
   }

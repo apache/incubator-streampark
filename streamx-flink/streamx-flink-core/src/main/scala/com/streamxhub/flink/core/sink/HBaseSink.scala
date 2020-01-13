@@ -41,7 +41,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Put): DataStreamSink[T] = {
     val prop = FlinkConfigUtils.get(ctx.parameter, HBASE_PREFIX)(instance)
-    overwriteParams.foreach(x => prop.put(x._1, x._2))
+    overwriteParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](prop, tableName, fun)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
