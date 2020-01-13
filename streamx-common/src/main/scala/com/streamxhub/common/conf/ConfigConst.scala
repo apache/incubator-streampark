@@ -97,6 +97,8 @@ object ConfigConst {
   val HBASE_PREFIX = "hbase."
 
   val KEY_HBASE_COMMIT_BATCH ="hbase.commit.batch"
+
+  val KEY_HBASE_AUTH_USER = "hbase.auth.user"
   /**
    * about config es
    */
