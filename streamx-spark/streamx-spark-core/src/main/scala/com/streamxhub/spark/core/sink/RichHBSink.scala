@@ -21,31 +21,31 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.{ArrayList => JAList}
-
+import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.spark.core.support.hbase.HBaseClient
+import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
 import org.apache.spark.SparkContext
-import org.apache.spark.streaming.Time
-import org.apache.hadoop.hbase.client._
 import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.Time
 
-import scala.reflect.ClassTag
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 
 /**
  *
  */
-class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkContext,
-                                          val initParams: Map[String, String] = Map.empty[String, String])
-  extends Sink[T] {
+class RichHBSink(@transient override val sc: SparkContext,
+                 val initParams: Map[String, String] = Map.empty[String, String]) extends Sink[Mutation] {
+
 
   override val prefix: String = "spark.sink.hbase."
 
   private lazy val prop = filterProp(param, initParams, prefix, "hbase.")
 
   private val tableName = prop.getProperty("hbase.table")
-  private val commitBatch = prop.getProperty("hbase.commit.batch", "1000").toInt
+
+  private val commitBatch = prop.getOrElse(ConfigConst.KEY_HBASE_COMMIT_BATCH, "1000").toInt
 
   private def getConnect: Connection = {
     val conf = HBaseConfiguration.create
@@ -59,49 +59,42 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
     connection.getBufferedMutator(bufferedMutatorParams)
   }
 
-  private def getTable: Table = {
-    val connection = getConnect
-    connection.getTable(TableName.valueOf(tableName))
-  }
+  private def getTable: Table = getConnect.getTable(TableName.valueOf(tableName))
 
-  /** 输出
+  /**
+   * 输出
    *
-   * @param rdd  RDD[Put]或者RDD[Delete]
+   * @param rdd  spark.RDD
    * @param time spark.streaming.Time
    */
-  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
-    rdd match {
-      case r: RDD[Put] => r.foreachPartition { put =>
-        val mutator = getMutator
-        put.foreach { p => mutator.mutate(p.asInstanceOf[Put]) }
-        mutator.flush()
-        mutator.close()
+  override def sink(rdd: RDD[Mutation], time: Time): Unit = {
+    rdd.foreachPartition { iter =>
+      val mutator = getMutator
+      val table = getTable
+      val list = new mutable.ArrayBuffer[Mutation]()
+      iter.foreach {
+        case put: Put => mutator.mutate(put)
+        case other => list += other
       }
-
-      case r: RDD[Delete] => r.foreachPartition { del =>
-        val table = getTable
-        val delList = new JAList[Delete]()
-        del.foreach { d =>
-          delList += d.asInstanceOf[Delete]
-          if (delList.size() >= commitBatch) {
-            table.batch(delList, null)
-            delList.clear()
-          }
-        }
-        if (delList.size() > 0) {
-          table.batch(delList, null)
-          delList.clear()
-        }
-        table.close()
-      }
+      batch(table, list: _*)
+      mutator.flush()
+      mutator.close()
+      table.close()
     }
   }
 
-  def close(): Unit = HBaseClient.close()
-}
-
-object HBaseSink {
-  def apply(sc: SparkContext) = new HBaseSink[Put](sc)
-
-  def apply[T <: Mutation : ClassTag](rdd: RDD[T]) = new HBaseSink[T](rdd.sparkContext)
+  /**
+   * 批量插入
+   *
+   * @param actions
+   */
+  def batch(table: Table, actions: Mutation*): Unit = {
+    if (actions.nonEmpty) {
+      val start = System.currentTimeMillis()
+      val (head, tail) = actions.splitAt(commitBatch)
+      table.batch(head, new Array[AnyRef](head.length))
+      println(s"batch ${head.size} use ${System.currentTimeMillis() - start} MS")
+      batch(table, tail.toList: _*)
+    }
+  }
 }
