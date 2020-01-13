@@ -10,7 +10,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Connection, ConnectionFactory, Put, Table}
+import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Connection, ConnectionFactory, Put}
 import com.streamxhub.common.conf.ConfigConst._
 
 import scala.collection.JavaConversions._
@@ -50,25 +50,24 @@ class HBaseSink(@transient ctx: StreamingContext,
 
 class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Put) extends RichSinkFunction[T] with Logger {
 
-  var conn: Connection = _
+  var connection: Connection = _
   var mutator: BufferedMutator = _
   var count = 0
 
   override def open(parameters: Configuration): Unit = {
     val conf = HBaseConfiguration.create
     prop.foreach(x => conf.set(x._1, x._2))
-    conn = ConnectionFactory.createConnection(conf)
+    connection = ConnectionFactory.createConnection(conf)
     val tableName = TableName.valueOf(tabName)
-    mutator = conn.getBufferedMutator(new BufferedMutatorParams(tableName))
+    mutator = connection.getBufferedMutator(new BufferedMutatorParams(tableName))
     count = 0
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
     val put = fun(value)
     mutator.mutate(put)
-    if (count >= 2000) {
+    if (count % 500 == 0) {
       mutator.flush()
-      count = 0
     }
     count += 1
   }
@@ -78,8 +77,8 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Put) ext
       mutator.flush()
       mutator.close()
     }
-    if (conn != null) {
-      conn.close()
+    if (connection != null) {
+      connection.close()
     }
   }
 }
