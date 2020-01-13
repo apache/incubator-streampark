@@ -50,22 +50,17 @@ object ClassLoaderUtils {
   private def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
       addURL(file)
-      val tmps = file.listFiles
-      for (tmp <- tmps) {
-        loopDirs(tmp)
-      }
+      file.listFiles.foreach(x=>loopDirs(x))
     }
   }
 
 
   private def loopFiles(file: File): Unit = {
     if (file.isDirectory) {
-      val tmps = file.listFiles
-      for (tmp <- tmps) {
-        loopFiles(tmp)
-      }
+      file.listFiles.foreach(x=>loopFiles(x))
+    } else if (file.getAbsolutePath.endsWith(".jar") || file.getAbsolutePath.endsWith(".zip")) {
+      addURL(file)
     }
-    else if (file.getAbsolutePath.endsWith(".jar") || file.getAbsolutePath.endsWith(".zip")) addURL(file)
   }
 
   private def addURL(file: File): Unit = {
