@@ -50,7 +50,7 @@ object FlinkConfigUtils {
 
   private[this] def mysqlGet(parameter: ParameterTool, prefix: String, instance: String): Properties = {
     val fix = if (instance == null || instance.isEmpty) prefix else s"${prefix}${instance}"
-    val driver = parameter.toMap.getOrDefault(s"${prefix}.${KEY_MYSQL_DRIVER}", null)
+    val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_MYSQL_DRIVER}", null)
     val url = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_URL}", null)
     val user = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_USER}", null)
     val password = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_PASSWORD}", null)
