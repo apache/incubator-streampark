@@ -21,8 +21,6 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.Properties
-
 import com.streamxhub.spark.core.support.hbase.HBaseClient
 import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
@@ -31,7 +29,6 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable
 
 /**

@@ -10,11 +10,11 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Connection, ConnectionFactory, Put}
+import org.apache.hadoop.hbase.client._
 import com.streamxhub.common.conf.ConfigConst._
 
 import scala.collection.JavaConversions._
-import scala.collection.Map
+import scala.collection.{Map, mutable}
 
 object HBaseSink {
 
@@ -39,7 +39,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Put): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
     val prop = FlinkConfigUtils.get(ctx.parameter, HBASE_PREFIX)(instance)
     overwriteParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](prop, tableName, fun)
@@ -48,11 +48,15 @@ class HBaseSink(@transient ctx: StreamingContext,
   }
 }
 
-class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Put) extends RichSinkFunction[T] with Logger {
+class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation) extends RichSinkFunction[T] with Logger {
 
-  var connection: Connection = _
-  var mutator: BufferedMutator = _
-  var count = 0
+  private var connection: Connection = _
+  private var table: Table = _
+  private var mutator: BufferedMutator = _
+  private var count: Int = 0
+
+  private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, "1000").toInt
+  private val mutations = new mutable.ArrayBuffer[Mutation]()
 
   override def open(parameters: Configuration): Unit = {
     val conf = HBaseConfiguration.create
@@ -60,14 +64,23 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Put) ext
     connection = ConnectionFactory.createConnection(conf)
     val tableName = TableName.valueOf(tabName)
     mutator = connection.getBufferedMutator(new BufferedMutatorParams(tableName))
+    table = connection.getTable(tableName)
     count = 0
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
-    val put = fun(value)
-    mutator.mutate(put)
-    if (count % 500 == 0) {
+    fun(value) match {
+      case put: Put => mutator.mutate(put)
+      case other => mutations += other
+    }
+    if (count % commitBatch == 0) {
+      val start = System.currentTimeMillis()
       mutator.flush()
+      if (mutations.nonEmpty) {
+        table.batch(mutations, new Array[AnyRef](mutations.length))
+        mutations.clear()
+        logInfo(s"[StreamX] HBaseSink batch ${mutations.size} use ${System.currentTimeMillis() - start} MS")
+      }
     }
     count += 1
   }
@@ -77,8 +90,12 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Put) ext
       mutator.flush()
       mutator.close()
     }
+    if (table != null) {
+      table.close()
+    }
     if (connection != null) {
       connection.close()
     }
   }
+
 }
