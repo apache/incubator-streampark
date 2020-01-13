@@ -76,6 +76,7 @@ object ConfigConst {
    */
   val HBASE_PREFIX = "hbase."
 
+  val KEY_HBASE_COMMIT_BATCH ="hbase.commit.batch"
   /**
    * about config es
    */
