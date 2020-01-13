@@ -29,7 +29,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
 import com.streamxhub.common.conf.ConfigConst._
 import org.apache.flink.api.common.io.RichOutputFormat
