@@ -8,7 +8,6 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.util.FlinkConfigUtils
 
-import scala.collection.JavaConversions._
 import scala.collection.Map
 
 object KafkaSink {
