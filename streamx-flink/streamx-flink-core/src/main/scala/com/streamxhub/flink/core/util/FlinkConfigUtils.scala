@@ -49,15 +49,16 @@ object FlinkConfigUtils {
   def getMySQL(parameter: ParameterTool)(implicit prefix: String = ""): Properties = mysqlGet(parameter, MYSQL_PREFIX, prefix)
 
   private[this] def mysqlGet(parameter: ParameterTool, prefix: String, instance: String): Properties = {
-    val fix = if (instance == null || instance.isEmpty) prefix else s"${prefix}${instance}"
+    val tmpFix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
+    val fix = s"${tmpFix.replaceAll("\\.+$","")}."
     val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_MYSQL_DRIVER}", null)
-    val url = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_URL}", null)
-    val user = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_USER}", null)
-    val password = parameter.toMap.getOrDefault(s"${fix}.${KEY_MYSQL_PASSWORD}", null)
+    val url = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_URL}", null)
+    val user = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_USER}", null)
+    val password = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_PASSWORD}", null)
 
     (driver, url, user, password) match {
-      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error,[driver|url] must be not null")
-      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"MySQL Source instance:${prefix} error, [user|password] must be all null,or all not null ")
+      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL instance:${prefix} error,[driver|url] must be not null")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"MySQL instance:${prefix} error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: Map[String, String] = filterParam(parameter, fix)
