@@ -50,52 +50,53 @@ object ConfigConst {
   val KEY_FLINK_APP_NAME = "flink.deployment.resource.yarnname"
 
   /**
-   * about sink prefix
+   * about config Kafka
    */
 
-  val TOPIC = "topic"
+  val KAFKA_SINK_PREFIX = "kafka.sink."
 
-  val SINK_KAFKA_PREFIX = "sink.kafka."
+  val KAFKA_SOURCE_PREFIX = "kafka.source."
 
-  val SINK_REDIS_PREFIX = "sink.redis."
+  val KEY_KAFKA_TOPIC = "topic"
 
-  val SINK_MYSQL_PREFIX = "sink.mysql"
+  val REDIS_PREFIX = "redis."
 
   /**
    * about config MySQL
    */
+  val MYSQL_PREFIX = "mysql."
   val KEY_MYSQL_INSTANCE = "instance"
   val KEY_MYSQL_DRIVER = "driverClassName"
   val KEY_MYSQL_URL = "jdbcUrl"
   val KEY_MYSQL_USER = "username"
   val KEY_MYSQL_PASSWORD = "password"
 
-
-  val SINK_ES_PREFIX = "sink.es."
-
-  val KEY_ES_AUTH_USER = "sink.es.auth.user"
-
-  val KEY_ES_AUTH_PASSWORD = "sink.es.auth.password"
-
-  val KEY_ES_REST_MAX_RETRY = "sink.es.rest.max.retry.timeout"
-
-  val KEY_ES_REST_CONTENT_TYPE = "sink.es.rest.content.type"
-
-  val KEY_ES_CONN_REQ_TIME_OUT = "sink.es.connect.request.timeout"
-
-  val KEY_ES_CONN_TIME_OUT = "sink.es.connect.timeout"
-
-  val KEY_ES_CLUSTER_NAME = "sink.es.cluster.name"
-
-  val SINK_ES_CONF_BULK_PREFIX = "bulk.flush."
-
-  val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
+  /**
+   * about config HBase
+   */
+  val HBASE_PREFIX = "hbase."
 
   /**
-   * about source prefix
+   * about config es
    */
-  val SOURCE_KAFKA_PREFIX = "source.kafka."
+  val ES_PREFIX = "es.sink."
 
-  val SOURCE_MYSQL_PREFIX = "source.mysql"
+  val KEY_ES_AUTH_USER = "es.auth.user"
+
+  val KEY_ES_AUTH_PASSWORD = "es.auth.password"
+
+  val KEY_ES_REST_MAX_RETRY = "es.rest.max.retry.timeout"
+
+  val KEY_ES_REST_CONTENT_TYPE = "es.rest.content.type"
+
+  val KEY_ES_CONN_REQ_TIME_OUT = "es.connect.request.timeout"
+
+  val KEY_ES_CONN_TIME_OUT = "es.connect.timeout"
+
+  val KEY_ES_CLUSTER_NAME = "es.cluster.name"
+
+  val KEY_ES_BULK_PREFIX = "bulk.flush."
+
+  val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
 }

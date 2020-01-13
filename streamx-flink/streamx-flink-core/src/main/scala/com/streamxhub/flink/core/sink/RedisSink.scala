@@ -5,7 +5,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
 import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper}
-import com.streamxhub.common.conf.ConfigConst.SINK_REDIS_PREFIX
 import com.streamxhub.flink.core.StreamingContext
 
 import scala.collection.JavaConversions._
@@ -31,7 +30,7 @@ class RedisSink(@transient ctx: StreamingContext,
   def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
     val config = ctx.parameter.toMap ++ overwriteParams
-    config.filter(_._1.startsWith(SINK_REDIS_PREFIX)).filter(_._2.nonEmpty).map(x => x._1.drop(SINK_REDIS_PREFIX.length) -> x._2).map {
+    config.filter(_._1.startsWith(REDIS_PREFIX)).filter(_._2.nonEmpty).map(x => x._1.drop(REDIS_PREFIX.length) -> x._2).map {
       case (KEY_HOST, host) => builder.setHost(host)
       case (KEY_PORT, port) => builder.setPort(port.toInt)
       case (KEY_DB, db) => builder.setDatabase(db.toInt)
