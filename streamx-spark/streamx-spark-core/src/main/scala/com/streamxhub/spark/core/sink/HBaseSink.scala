@@ -23,8 +23,8 @@ package com.streamxhub.spark.core.sink
 
 import java.util.{ArrayList => JAList}
 
-import com.streamxhub.spark.core.support.hbase.HBaseClient
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import com.streamxhub.common.util.HBaseClient
+import org.apache.hadoop.hbase.TableName
 import org.apache.spark.SparkContext
 import org.apache.spark.streaming.Time
 import org.apache.hadoop.hbase.client._
@@ -47,11 +47,7 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
   private val tableName = prop.getProperty("hbase.table")
   private val commitBatch = prop.getProperty("hbase.commit.batch", "1000").toInt
 
-  private def getConnect: Connection = {
-    val conf = HBaseConfiguration.create
-    prop.foreach { case (k, v) => conf.set(k, v) }
-    HBaseClient.connect(conf)
-  }
+  private def getConnect: Connection = HBaseClient(prop).connection
 
   private def getMutator: BufferedMutator = {
     val connection = getConnect
@@ -96,8 +92,6 @@ class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkConte
       }
     }
   }
-
-  def close(): Unit = HBaseClient.close()
 }
 
 object HBaseSink {

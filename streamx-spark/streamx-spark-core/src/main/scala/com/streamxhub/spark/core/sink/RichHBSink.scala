@@ -22,9 +22,9 @@
 package com.streamxhub.spark.core.sink
 
 import com.streamxhub.common.conf.ConfigConst
-import com.streamxhub.spark.core.support.hbase.HBaseClient
+import com.streamxhub.common.util.HBaseClient
 import org.apache.hadoop.hbase.client._
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.TableName
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
@@ -47,11 +47,7 @@ class RichHBSink(@transient override val sc: SparkContext,
 
   private val commitBatch = prop.getOrElse(ConfigConst.KEY_HBASE_COMMIT_BATCH, "1000").toInt
 
-  private def getConnect: Connection = {
-    val conf = HBaseConfiguration.create
-    prop.foreach { case (k, v) => conf.set(k, v) }
-    HBaseClient.connect(conf)
-  }
+  private def getConnect: Connection = HBaseClient(prop).connection
 
   private def getMutator: BufferedMutator = {
     val connection = getConnect
