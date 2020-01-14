@@ -92,14 +92,8 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation
       .writeBufferSize(writeBufferSize)
       .listener(new BufferedMutator.ExceptionListener {
         override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
-          for (i <- 0.to(exception.getNumExceptions)) {
-            Try {
-              val row = exception.getRow(i)
-              mutator.mutate(row.asInstanceOf[Put])
-            } match {
-              case Failure(e) => logger.error(s"[StreamX] HBaseSink Failed to sent put,error: ${e.getMessage}")
-              case Success(_) =>
-            }
+          for (i <- 0.until(exception.getNumExceptions)) {
+            logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
           }
         }
       })
@@ -118,6 +112,7 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation
       val start = System.currentTimeMillis()
       //put ...
       mutator.mutate(putArray)
+      mutator.flush()
       putArray.clear()
       //mutation...
       if (mutations.nonEmpty) {
