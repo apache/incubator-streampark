@@ -37,8 +37,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.{Map, mutable}
-import scala.util.{Failure, Success, Try}
+import scala.collection.Map
 
 object HBaseSink {
 
@@ -139,11 +138,13 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String)(implicit fun: T =>
 
 class HBaseOutputFormat[T: TypeInformation](prop: Properties, tabName: String)(implicit fun: T => Mutation) extends RichOutputFormat[T] with Logger {
 
-  private val sinkFunction = new HBaseSinkFunction[T](prop, tabName)
+  val sinkFunction = new HBaseSinkFunction[T](prop, tabName)
 
-  override def configure(configuration: Configuration): Unit = {}
+  var configuration: Configuration = _
 
-  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(null)
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
+
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
 
   override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
 
