@@ -98,6 +98,8 @@ object ConfigConst {
 
   val KEY_HBASE_COMMIT_BATCH ="hbase.commit.batch"
 
+  val KEY_HBASE_WRITE_SIZE = "hbase.client.write.size"
+
   val KEY_HBASE_AUTH_USER = "hbase.auth.user"
   /**
    * about config es

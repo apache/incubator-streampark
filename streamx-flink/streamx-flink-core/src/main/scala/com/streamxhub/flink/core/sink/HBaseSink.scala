@@ -36,7 +36,9 @@ import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ArrayBuffer
 import scala.collection.{Map, mutable}
+import scala.util.{Failure, Success, Try}
 
 object HBaseSink {
 
@@ -78,25 +80,46 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation
   private var count: Int = 0
 
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, "1000").toInt
+  private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"${1024 * 1024 * 10}").toLong
+
   private val mutations = new mutable.ArrayBuffer[Mutation]()
+  private val putArray = new ArrayBuffer[Put]()
 
   override def open(parameters: Configuration): Unit = {
     connection = HBaseClient(prop).connection
     val tableName = TableName.valueOf(tabName)
-    val buffer = new BufferedMutatorParams(tableName)
-    mutator = connection.getBufferedMutator(buffer)
+    val mutatorParam = new BufferedMutatorParams(tableName)
+      .writeBufferSize(writeBufferSize)
+      .listener(new BufferedMutator.ExceptionListener {
+        override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
+          for (i <- 0.to(exception.getNumExceptions)) {
+            Try {
+              val row = exception.getRow(i)
+              mutator.mutate(row.asInstanceOf[Put])
+            } match {
+              case Failure(e) => logger.error(s"[StreamX] HBaseSink Failed to sent put,error: ${e.getMessage}")
+              case Success(_) =>
+            }
+          }
+        }
+      })
+    mutator = connection.getBufferedMutator(mutatorParam)
     table = connection.getTable(tableName)
     count = 0
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
     fun(value) match {
-      case put: Put => mutator.mutate(put)
+      case put: Put => putArray += put
       case other => mutations += other
     }
+
     if (count > 0 && count % commitBatch == 0) {
       val start = System.currentTimeMillis()
-      mutator.flush()
+      //put ...
+      mutator.mutate(putArray)
+      putArray.clear()
+      //mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
         mutations.clear()
