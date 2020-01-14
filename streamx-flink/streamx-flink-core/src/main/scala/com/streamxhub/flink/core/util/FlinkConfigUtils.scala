@@ -32,7 +32,7 @@ import scala.util.Try
 
 object FlinkConfigUtils {
 
-  def get(parameter: ParameterTool, prefix: String = "",headfix:String = "")(instance: String = ""): Properties = {
+  def get(parameter: ParameterTool, prefix: String = "",headfix:String = "")(implicit instance: String = ""): Properties = {
     val map = filterParam(parameter, prefix + instance)
     val prop = new Properties()
     map.foreach { case (k, v) => prop.put(headfix+k, v) }
