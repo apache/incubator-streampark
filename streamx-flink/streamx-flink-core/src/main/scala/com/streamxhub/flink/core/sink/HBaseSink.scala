@@ -82,7 +82,7 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String)(implicit fun: T =>
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, "1000").toInt
   private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"${1024 * 1024 * 10}").toLong
 
-  private val mutations = new mutable.ArrayBuffer[Mutation]()
+  private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
 
   override def open(parameters: Configuration): Unit = {
