@@ -100,7 +100,11 @@ object ConfigConst {
 
   val KEY_HBASE_WRITE_SIZE = "hbase.client.write.size"
 
+  val DEFAULT_HBASE_COMMIT_BATCH = 1000
+
   val KEY_HBASE_AUTH_USER = "hbase.auth.user"
+
+  val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
   /**
    * about config es
    */
