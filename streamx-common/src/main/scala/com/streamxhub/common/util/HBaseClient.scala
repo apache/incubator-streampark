@@ -4,7 +4,7 @@ import java.util.Properties
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, HConnectionManager}
 import org.apache.hadoop.security.UserGroupInformation
 import com.streamxhub.common.conf.ConfigConst._
 

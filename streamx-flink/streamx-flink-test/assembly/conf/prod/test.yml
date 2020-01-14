@@ -3,7 +3,7 @@ mysql:
   jdbcUrl: jdbc:mysql://localhost:3306/test
   username: root
   password: 123322242
+
 hbase:
-  zookeeper.quorum: bigdata-001-112-130.sqkb-s.com,bigdata-002-112-129.sqkb-s.com,bigdata-003-112-128.sqkb-s.com,bigdata-004-112-131.sqkb-s.com,bigdata-005-112-127.sqkb-s.com
+  zookeeper.quorum: localhost
   zookeeper.property.clientPort: 2181
-  table: user_location_v1
