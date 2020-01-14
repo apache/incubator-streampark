@@ -29,7 +29,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.{HConstants, TableName}
 import org.apache.hadoop.hbase.client._
 import com.streamxhub.common.conf.ConfigConst._
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -62,7 +62,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
-    val prop = FlinkConfigUtils.get(ctx.parameter, HBASE_PREFIX)(instance)
+    val prop = FlinkConfigUtils.get(ctx.parameter, HBASE_PREFIX, HBASE_PREFIX)(instance)
     overwriteParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](prop, tableName, fun)
     val sink = stream.addSink(sinkFun)
@@ -83,7 +83,8 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation
   override def open(parameters: Configuration): Unit = {
     connection = HBaseClient(prop).connection
     val tableName = TableName.valueOf(tabName)
-    mutator = connection.getBufferedMutator(new BufferedMutatorParams(tableName))
+    val buffer = new BufferedMutatorParams(tableName)
+    mutator = connection.getBufferedMutator(buffer)
     table = connection.getTable(tableName)
     count = 0
   }
@@ -93,14 +94,15 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String, fun: T => Mutation
       case put: Put => mutator.mutate(put)
       case other => mutations += other
     }
-    if (count % commitBatch == 0) {
+    if (count > 0 && count % commitBatch == 0) {
       val start = System.currentTimeMillis()
       mutator.flush()
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
         mutations.clear()
-        logInfo(s"[StreamX] HBaseSink batch ${mutations.size} use ${System.currentTimeMillis() - start} MS")
       }
+      count = 0
+      logInfo(s"[StreamX] HBaseSink batchSize:${commitBatch} use ${System.currentTimeMillis() - start} MS")
     }
     count += 1
   }
