@@ -26,9 +26,8 @@ import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunc
 import java.sql._
 import java.util.Properties
 
-import com.streamxhub.common.util.{Logger, MySQLUtils}
+import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.flink.core.util.FlinkConfigUtils
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.environment.CheckpointConfig
@@ -78,7 +77,7 @@ class JdbcSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = FlinkConfigUtils.getMySQL(ctx.parameter)(instance)
+    val prop = ConfigUtils.getMySQLConf(ctx.parameter.toMap)(instance)
     overwriteParams.foreach(x=>prop.put(x._1,x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
