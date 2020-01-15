@@ -43,7 +43,7 @@ import scala.util.Try
  * @param environment
  */
 class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
-  val paramMap: util.Map[String, String] = parameter.toMap
+  val paramMap: java.util.Map[String, String] = parameter.toMap
 }
 
 trait FlinkStreaming extends Logger {
