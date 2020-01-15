@@ -8,7 +8,7 @@ import org.apache.hadoop.hbase.util.Bytes
 import java.util.Random
 
 import com.streamxhub.common.conf.ConfigConst.HBASE_PREFIX
-import com.streamxhub.flink.core.util.FlinkConfigUtils
+import com.streamxhub.common.util.ConfigUtils
 
 object HBaseSinkApp extends FlinkStreaming {
 
@@ -33,7 +33,7 @@ object HBaseSinkApp extends FlinkStreaming {
 
     //2) 插入方式2
     //1.指定HBase 配置文件
-    val prop = FlinkConfigUtils.get(context.parameter, HBASE_PREFIX, HBASE_PREFIX)
+    val prop = ConfigUtils.getConf(context.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)
     //2.插入...
     source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]( prop,"order"))
 
