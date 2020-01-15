@@ -22,9 +22,8 @@ package com.streamxhub.flink.core.sink
 
 import java.util.Properties
 
-import com.streamxhub.common.util.{HBaseClient, Logger}
+import com.streamxhub.common.util.{ConfigUtils, HBaseClient, Logger}
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.flink.core.util.FlinkConfigUtils
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
@@ -63,7 +62,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
-    val prop = FlinkConfigUtils.get(ctx.parameter, HBASE_PREFIX, HBASE_PREFIX)(instance)
+    val prop = ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
     overwriteParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](prop, tableName)
     val sink = stream.addSink(sinkFun)
