@@ -38,25 +38,25 @@ object FlinkOption {
 
   private[this] val CLASSPATH_OPTION = new Option("C", "classpath", true, "Adds a URL to each user code " + "classloader  on all nodes in the cluster. The paths must specify a protocol (e.g. file://) and be " + "accessible on all nodes (e.g. by means of a NFS share). You can use this option multiple " + "times for specifying more than one URL. The protocol must be supported by the " + "{@link java.net.URLClassLoader}.")
 
-  private[this]  val PARALLELISM_OPTION = new Option("p", "parallelism", true, "The parallelism with which to run the program. Optional flag to override the default value " + "specified in the configuration.")
+  private[this] val PARALLELISM_OPTION = new Option("p", "parallelism", true, "The parallelism with which to run the program. Optional flag to override the default value " + "specified in the configuration.")
 
   private[this] val LOGGING_OPTION = new Option("q", "sysoutLogging", false, "If present, " + "suppress logging output to standard out.")
 
-  private[this]  val DETACHED_OPTION = new Option("d", "detached", false, "If present, runs " + "the job in detached mode")
+  private[this] val DETACHED_OPTION = new Option("d", "detached", false, "If present, runs " + "the job in detached mode")
 
-  private[this]  val SHUTDOWN_IF_ATTACHED_OPTION = new Option("sae", "shutdownOnAttachedExit", false, "If the job is submitted in attached mode, perform a best-effort cluster shutdown " + "when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.")
+  private[this] val SHUTDOWN_IF_ATTACHED_OPTION = new Option("sae", "shutdownOnAttachedExit", false, "If the job is submitted in attached mode, perform a best-effort cluster shutdown " + "when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.")
 
   /**
    * @deprecated use non-prefixed variant { @link #DETACHED_OPTION} for both YARN and non-YARN deployments
    */
   @deprecated
-  private[this]  val YARN_DETACHED_OPTION = new Option("yd", "yarndetached", false, "If present, runs " + "the job in detached mode (deprecated; use non-YARN specific option instead)")
+  private[this] val YARN_DETACHED_OPTION = new Option("yd", "yarndetached", false, "If present, runs " + "the job in detached mode (deprecated; use non-YARN specific option instead)")
 
   private[this] val ARGS_OPTION = new Option("a", "arguments", true, "Program arguments. Arguments can also be added without -a, simply as trailing parameters.")
 
-  private[this]  val SAVEPOINT_PATH_OPTION = new Option("s", "fromSavepoint", true, "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537).")
+  private[this] val SAVEPOINT_PATH_OPTION = new Option("s", "fromSavepoint", true, "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537).")
 
-  private[this]  val SAVEPOINT_ALLOW_NON_RESTORED_OPTION = new Option("n", "allowNonRestoredState", false, "Allow to skip savepoint state that cannot be restored. " + "You need to allow this if you removed an operator from your " + "program that was part of the program when the savepoint was triggered.")
+  private[this] val SAVEPOINT_ALLOW_NON_RESTORED_OPTION = new Option("n", "allowNonRestoredState", false, "Allow to skip savepoint state that cannot be restored. " + "You need to allow this if you removed an operator from your " + "program that was part of the program when the savepoint was triggered.")
 
   private[this] val PY_OPTION = new Option("py", "python", true, "Python script with the program entry point. " + "The dependent resources can be configured with the `--pyFiles` option.")
 
@@ -64,16 +64,16 @@ object FlinkOption {
 
   private[this] val PYMODULE_OPTION = new Option("pym", "pyModule", true, "Python module with the program entry point. " + "This option must be used in conjunction with `--pyFiles`.")
 
-  def getOptions():Options = {
+  def getOptions(): Options = {
     val commOptions = getRunCommandOptions
     val yarnOptions = getYARNOptions
     val resultOptions = new Options
-    commOptions.getOptions.foreach(x=>resultOptions.addOption(x))
-    yarnOptions.getOptions.foreach(x=>resultOptions.addOption(x))
+    commOptions.getOptions.foreach(x => resultOptions.addOption(x))
+    yarnOptions.getOptions.foreach(x => resultOptions.addOption(x))
     resultOptions
   }
 
-  private[this] def getRunCommandOptions:Options = {
+  private[this] def getRunCommandOptions: Options = {
     var options = buildGeneralOptions(new Options)
     options = getProgramSpecificOptions(options)
     options.addOption(SAVEPOINT_PATH_OPTION)
@@ -81,7 +81,7 @@ object FlinkOption {
   }
 
 
-  private[this]  def getYARNOptions:Options = {
+  private[this] def getYARNOptions: Options = {
     val shortPrefix = "y"
     val longPrefix = "yarn"
     //yarn
