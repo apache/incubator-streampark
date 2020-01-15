@@ -45,7 +45,7 @@ class KafkaSink(@transient val ctx: StreamingContext,
                 uid: String = null) extends Sink {
 
   def sink[T](stream: DataStream[String])(implicit topic: String = ""): DataStreamSink[String] = {
-    val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
+    val prop = ConfigUtils.getKafkaSinkConf(ctx.paramMap, topic)
     overwriteParams.foreach(x=>prop.put(x._1,x._2))
     val topicName = prop.getProperty(ConfigConst.KEY_KAFKA_TOPIC)
     val producer = new FlinkKafkaProducer011[String](topicName, new SimpleStringSchema, prop)
