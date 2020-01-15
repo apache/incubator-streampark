@@ -13,6 +13,12 @@
     <artifactId>streamx-flink-core</artifactId>
 
     <dependencies>
+        <!--clickhouse-->
+        <dependency>
+            <groupId>ru.yandex.clickhouse</groupId>
+            <artifactId>clickhouse-jdbc</artifactId>
+            <version>${clickhouse.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.streamxhub</groupId>
