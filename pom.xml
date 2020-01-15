@@ -35,6 +35,7 @@
         <project.build.jdk>1.8</project.build.jdk>
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
+        <clickhouse.version>0.1.53</clickhouse.version>
         <CodeCacheSize>512m</CodeCacheSize>
     </properties>
 
