@@ -62,7 +62,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
-    val prop = ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
+    val prop = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
     overwriteParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](prop, tableName)
     val sink = stream.addSink(sinkFun)
