@@ -21,7 +21,6 @@
 package com.streamxhub.common.conf
 
 
-
 import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.DefaultParser
 
@@ -40,11 +39,11 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
-    val optionMap = new mutable.HashMap[String,String]()
+    val optionMap = new mutable.HashMap[String, String]()
     val buffer = new StringBuffer()
     action match {
       case "--resource" =>
-        map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x =>  optionMap += s" --${x._1.drop(resourcePrefix.length)}" -> x._2)
+        map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => optionMap += s" --${x._1.drop(resourcePrefix.length)}" -> x._2)
         args.drop(2) match {
           case Array.empty =>
           case array =>
@@ -52,9 +51,9 @@ object ParameterCli {
             val parser = new DefaultParser
             val allOptions = FlinkOption.getOptions()
             val line = parser.parse(allOptions, array, false)
-            line.getOptions.foreach(x=> optionMap += x.getLongOpt -> x.getValue)
+            line.getOptions.foreach(x => optionMap += x.getLongOpt -> x.getValue)
         }
-        optionMap.foreach(x=> buffer.append(x._1).append(" ").append(x._2).append(" ") )
+        optionMap.foreach(x => buffer.append(x._1).append(" ").append(x._2).append(" "))
         println(buffer.toString.trim)
       case "--dynamic" =>
         map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
