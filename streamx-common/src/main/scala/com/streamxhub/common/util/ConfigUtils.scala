@@ -19,9 +19,13 @@ object ConfigUtils {
     prop
   }
 
+  def getHBaseConfig(parameter: JMap[String, String])(implicit instance: String = ""):Properties =  getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
+
   def getKafkaSinkConf(parameter: JMap[String, String], topic: String, instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + instance, topic)
 
   def getKafkaSourceConf(parameter: JMap[String, String], topic: String, instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
+
+  def getMySQLConf(parameter: JMap[String, String])(implicit prefix: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, prefix)
 
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
@@ -45,8 +49,6 @@ object ConfigUtils {
       }
     }
   }
-
-  def getMySQLConf(parameter: JMap[String, String])(implicit prefix: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, prefix)
 
   private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, instance: String): Properties = {
     val tmpFix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"

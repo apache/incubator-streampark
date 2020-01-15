@@ -20,6 +20,8 @@
  */
 package com.streamxhub.flink.core
 
+import java.util
+
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
@@ -40,7 +42,9 @@ import scala.util.Try
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv)
+class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+  val paramMap: util.Map[String, String] = parameter.toMap
+}
 
 trait FlinkStreaming extends Logger {
 
