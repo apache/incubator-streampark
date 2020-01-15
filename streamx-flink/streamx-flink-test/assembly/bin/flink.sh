@@ -145,7 +145,6 @@ if ${os400}; then
 fi
 
 doStart() {
-
     local proper=""
     if [[ $# -eq 0 ]]; then
       proper="application.yml"
@@ -153,6 +152,7 @@ doStart() {
     else
       #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
       proper=$(echo "$1"|awk -F 'conf/' '{print $2}')
+      shift;
     fi
     # flink properties file
     local app_proper=""
@@ -181,7 +181,7 @@ doStart() {
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local resource_params="`java -cp "${flink_jar}" $shellReader --resource "${app_proper}"`"
+    local resource_params="`java -cp "${flink_jar}" $shellReader --resource "${app_proper}"` $*"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $shellReader --dynamic "${app_proper}"`"
