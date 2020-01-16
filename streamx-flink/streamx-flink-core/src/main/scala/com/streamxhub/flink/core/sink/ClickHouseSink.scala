@@ -37,6 +37,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 
 import scala.collection.JavaConversions._
 import scala.collection.Map
+import scala.util.Try
 
 object ClickHouseSink {
 
@@ -78,21 +79,37 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
   var index = 0
 
   override def open(parameters: Configuration): Unit = {
-    val database: String = config(KEY_JDBC_DATABASE)
-    val user: String = config.getOrElse(KEY_JDBC_USER, null)
-    val password: String = config.getOrElse(KEY_JDBC_PASSWORD, null)
-    val url: String = config(KEY_JDBC_URL)
-    val properties = new ClickHouseProperties()
-    (Option(user), Option(password)) match {
-      case (None, None) =>
-      case  _ =>
-        properties.setUser(user)
-        properties.setPassword(password)
-    }
-    properties.setDatabase(database)
-    properties.setSocketTimeout(50000)
-    val dataSource = new ClickHouseDataSource(url, properties)
+    val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
+    val user: String = Try(config.remove(KEY_JDBC_USER).toString).getOrElse(null)
+    val driver: String = Try(config.remove(KEY_JDBC_DRIVER).toString).getOrElse(null)
 
+    //reflect set all properties...
+    val properties = new ClickHouseProperties()
+    properties.setUser(user)
+    config.foreach(x => {
+      val field = Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+        case None =>
+          val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+          Try(Option(properties.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
+            case Some(x) => x
+            case None => throw new IllegalArgumentException(s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
+          }
+        case Some(x) => x
+      }
+      field.setAccessible(true)
+      field.getType.getSimpleName match {
+        case "String" => field.set(properties, x._2)
+        case "int" | "Integer" => field.set(properties, x._2.toInt)
+        case "long" | "Long" => field.set(properties, x._2.toLong)
+        case "boolean" | "Boolean" => field.set(properties, x._2.toBoolean)
+        case _ =>
+      }
+    })
+
+    if (driver != null) {
+      Class.forName(driver)
+    }
+    val dataSource = new ClickHouseDataSource(url, properties)
     connection = dataSource.getConnection
   }
 
@@ -134,9 +151,9 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
 }
 
 
-class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties,toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new ClickHouseSinkFunction[T](prop,toSQlFun)
+  val sinkFunction = new ClickHouseSinkFunction[T](prop, toSQlFun)
 
   var configuration: Configuration = _
 
