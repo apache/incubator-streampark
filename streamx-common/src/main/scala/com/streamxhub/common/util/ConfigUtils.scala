@@ -73,10 +73,10 @@ object ConfigUtils {
   private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, instance: String): Properties = {
     val tmpFix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
     val fix = tmpFix.replaceAll("\\.+",".").replaceAll("\\.+$","").concat(".")
-    val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_MYSQL_DRIVER}", null)
-    val url = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_URL}", null)
-    val user = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_USER}", null)
-    val password = parameter.toMap.getOrDefault(s"${fix}${KEY_MYSQL_PASSWORD}", null)
+    val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_JDBC_DRIVER}", null)
+    val url = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_URL}", null)
+    val user = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_USER}", null)
+    val password = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_PASSWORD}", null)
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL instance:${prefix} error,[driver|url] must be not null")
@@ -86,8 +86,8 @@ object ConfigUtils {
     val param: SMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
     val instanceName = if (StringUtils.isBlank(instance)) "default" else instance
-    properties.put(KEY_MYSQL_INSTANCE, instanceName)
-    properties.put(KEY_MYSQL_DRIVER, driver)
+    properties.put(KEY_INSTANCE, instanceName)
+    properties.put(KEY_JDBC_DRIVER, driver)
     param.foreach(x => properties.put(x._1, x._2))
     properties
   }
