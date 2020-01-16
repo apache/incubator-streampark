@@ -15,7 +15,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
  * var password: String = ""
  * var url: String = "jdbc:clickhouse://xxx:8123"
  */
-object ClickhouseSinkApp extends FlinkStreaming {
+object ClickHouseSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
     implicit val entryType = TypeInformation.of[TestEntity](classOf[TestEntity])
