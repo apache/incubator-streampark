@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.ClickHouseJDBCSink
+import com.streamxhub.flink.core.sink.ClickHouseSink
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.functions.source.RichParallelSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
@@ -28,7 +28,7 @@ object ClickhouseSinkApp  {
     val source =env.addSource(new SensorSource)
       .map( r =>Map(s"name"->r.name,s"age"->r.age,s"cnt"->r.cnt).asJava)
 
-    source.addSink(new ClickHouseJDBCSink())
+    source.addSink(new ClickHouseSink())
 
     env.execute("clickhouse sink test1")
   }
