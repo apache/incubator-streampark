@@ -32,14 +32,14 @@ import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  def getConf(parameter: JMap[String, String], prefix: String = "",headfix:String = "")(implicit instance: String = ""): Properties = {
+  def getConf(parameter: JMap[String, String], prefix: String = "", headfix: String = "")(implicit instance: String = ""): Properties = {
     val map = filterParam(parameter, prefix + instance)
     val prop = new Properties()
-    map.foreach { case (k, v) => prop.put(headfix+k, v) }
+    map.foreach { case (k, v) => prop.put(headfix + k, v) }
     prop
   }
 
-  def getHBaseConfig(parameter: JMap[String, String])(implicit instance: String = ""):Properties =  getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
+  def getHBaseConfig(parameter: JMap[String, String])(implicit instance: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
   def getKafkaSinkConf(parameter: JMap[String, String], topic: String, instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + instance, topic)
 
@@ -72,7 +72,7 @@ object ConfigUtils {
 
   private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, instance: String): Properties = {
     val tmpFix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
-    val fix = tmpFix.replaceAll("\\.+",".").replaceAll("\\.+$","").concat(".")
+    val fix = tmpFix.replaceAll("\\.+", ".").replaceAll("\\.+$", "").concat(".")
     val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_JDBC_DRIVER}", null)
     val url = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_URL}", null)
     val user = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_USER}", null)
@@ -95,7 +95,7 @@ object ConfigUtils {
   private[this] def filterParam(parameter: JMap[String, String], fix: String): SMap[String, String] = {
     parameter
       .toMap
-      .filter(x => x._1.startsWith(fix) && Try(x._2.nonEmpty).getOrElse(false))
+      .filter(x => x._1.startsWith(fix) && Try(x._2 != null).getOrElse(false))
       .flatMap(x =>
         Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2)
       )
