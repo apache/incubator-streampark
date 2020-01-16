@@ -8,3 +8,8 @@ mysql:
 hbase:
   zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
   zookeeper.property.clientPort: 2181
+clickhouse:
+  driverClassName:
+  jdbcUrl: jdbc:clickhouse://localhost:8123
+  username: default
+  password:

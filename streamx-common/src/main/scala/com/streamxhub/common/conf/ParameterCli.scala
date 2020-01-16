@@ -45,7 +45,7 @@ object ParameterCli {
       case "--resource" =>
         map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => optionMap += s" --${x._1.drop(resourcePrefix.length)}" -> x._2)
         args.drop(2) match {
-          case Array.empty =>
+          case Array() =>
           case array =>
             //覆盖的参数追加.....
             val parser = new DefaultParser
