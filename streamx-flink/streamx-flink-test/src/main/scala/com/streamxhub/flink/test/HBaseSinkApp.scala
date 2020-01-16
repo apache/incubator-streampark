@@ -32,9 +32,9 @@ object HBaseSinkApp extends FlinkStreaming {
 
     //2) 插入方式2
     //1.指定HBase 配置文件
-    val prop = ConfigUtils.getHBaseConfig(context.paramMap)
+    implicit val prop = ConfigUtils.getHBaseConfig(context.paramMap)
     //2.插入...
-    source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]( prop,"order"))
+    source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]( "order"))
 
 
   }
