@@ -62,15 +62,15 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
-    val prop = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
+    implicit val prop = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
     overwriteParams.foreach { case (k, v) => prop.put(k, v) }
-    val sinkFun = new HBaseSinkFunction[T](prop, tableName)
+    val sinkFun = new HBaseSinkFunction[T](tableName, fun)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 }
 
-class HBaseSinkFunction[T](prop: Properties, tabName: String)(implicit fun: T => Mutation) extends RichSinkFunction[T] with Logger {
+class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = _
   private var table: Table = _
@@ -135,9 +135,9 @@ class HBaseSinkFunction[T](prop: Properties, tabName: String)(implicit fun: T =>
 
 }
 
-class HBaseOutputFormat[T: TypeInformation](prop: Properties, tabName: String)(implicit fun: T => Mutation) extends RichOutputFormat[T] with Logger {
+class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => Mutation)(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new HBaseSinkFunction[T](prop, tabName)
+  val sinkFunction = new HBaseSinkFunction[T](tabName, fun)
 
   var configuration: Configuration = _
 

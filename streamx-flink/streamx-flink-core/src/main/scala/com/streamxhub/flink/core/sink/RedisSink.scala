@@ -20,6 +20,8 @@
  */
 package com.streamxhub.flink.core.sink
 
+import java.util.Properties
+
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
@@ -30,6 +32,10 @@ import com.streamxhub.flink.core.StreamingContext
 import scala.collection.JavaConversions._
 import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.util.Logger
+import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.configuration.Configuration
 
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
@@ -70,3 +76,4 @@ case class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => Str
 
   override def getValueFromData(r: T): String = v(r)
 }
+
