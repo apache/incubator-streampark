@@ -28,8 +28,11 @@ import com.streamxhub.common.util.{ConfigUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.common.conf.ConfigConst._
 import org.apache.flink.api.common.ExecutionConfig
+import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
@@ -158,5 +161,22 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
 
 
 }
+
+
+class MySQLOutputFormat[T: TypeInformation](implicit prop: Properties,toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+
+  val sinkFunction = new MySQLSinkFunction[T](prop,toSQlFun)
+
+  var configuration: Configuration = _
+
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
+
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
+
+  override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
+
+  override def close(): Unit = sinkFunction.close()
+}
+
 
 

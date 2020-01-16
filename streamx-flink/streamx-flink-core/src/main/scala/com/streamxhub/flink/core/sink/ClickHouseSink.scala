@@ -32,6 +32,8 @@ import org.apache.flink.streaming.api.scala.DataStream
 import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 import com.streamxhub.common.conf.ConfigConst._
+import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.typeinfo.TypeInformation
 
 import scala.collection.JavaConversions._
 import scala.collection.Map
@@ -130,4 +132,20 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
 
   override def close(): Unit = MySQLUtils.close(preparedStatement, connection)
 
+}
+
+
+class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties,toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+
+  val sinkFunction = new ClickHouseSinkFunction[T](prop,toSQlFun)
+
+  var configuration: Configuration = _
+
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
+
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
+
+  override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
+
+  override def close(): Unit = sinkFunction.close()
 }
