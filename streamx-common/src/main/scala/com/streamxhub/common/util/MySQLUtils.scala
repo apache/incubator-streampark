@@ -219,7 +219,7 @@ object MySQLUtils {
    * @return
    */
   def getConnection(prop: Properties): Connection = {
-    val instance = prop(KEY_MYSQL_INSTANCE)
+    val instance = prop(KEY_INSTANCE)
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
@@ -227,7 +227,7 @@ object MySQLUtils {
         case None =>
           //创建一个数据源对象
           val jdbcConfig = new HikariConfig()
-          prop.filter(_._1 != KEY_MYSQL_INSTANCE).foreach(x => {
+          prop.filter(_._1 != KEY_INSTANCE).foreach(x => {
             val field = Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
               case None =>
                 val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"

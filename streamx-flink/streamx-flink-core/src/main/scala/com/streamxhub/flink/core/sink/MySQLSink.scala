@@ -108,10 +108,10 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
-    Class.forName(config(KEY_MYSQL_DRIVER))
-    val connection = Try(config(KEY_MYSQL_USER)).getOrElse(null) match {
-      case null => DriverManager.getConnection(config(KEY_MYSQL_URL))
-      case _ => DriverManager.getConnection(config(KEY_MYSQL_URL), config(KEY_MYSQL_USER), config(KEY_MYSQL_PASSWORD))
+    Class.forName(config(KEY_JDBC_DRIVER))
+    val connection = Try(config(KEY_JDBC_USER)).getOrElse(null) match {
+      case null => DriverManager.getConnection(config(KEY_JDBC_URL))
+      case _ => DriverManager.getConnection(config(KEY_JDBC_URL), config(KEY_JDBC_USER), config(KEY_JDBC_PASSWORD))
     }
     connection.setAutoCommit(false)
     connection

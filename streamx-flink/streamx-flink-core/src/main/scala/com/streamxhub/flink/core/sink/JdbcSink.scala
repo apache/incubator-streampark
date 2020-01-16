@@ -26,12 +26,14 @@ import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunc
 import java.sql._
 import java.util.Properties
 
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.scala.DataStream
+import scala.collection.JavaConversions._
 
 import scala.collection.Map
 
@@ -90,6 +92,8 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
 
   private var connection: Connection = _
   private var preparedStatement: PreparedStatement = _
+  private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH,s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
