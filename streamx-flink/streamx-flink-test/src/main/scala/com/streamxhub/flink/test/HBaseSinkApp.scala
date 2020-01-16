@@ -17,7 +17,7 @@ object HBaseSinkApp extends FlinkStreaming {
     val random = new Random()
 
     //定义转换规则...
-    implicit def entry2Put(entity:TestEntity):Put = {
+     implicit def entry2Put(entity:TestEntity):Put = {
       val put = new Put(Bytes.toBytes(System.nanoTime()+random.nextInt(1000000)),entity.timestamp)
       put.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("cid"),Bytes.toBytes(entity.cityId))
       put.addColumn(Bytes.toBytes("cf"),Bytes.toBytes("oid"),Bytes.toBytes(entity.orderId))
@@ -34,7 +34,7 @@ object HBaseSinkApp extends FlinkStreaming {
     //1.指定HBase 配置文件
     implicit val prop = ConfigUtils.getHBaseConfig(context.paramMap)
     //2.插入...
-    source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]( "order"))
+    source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]( "order",entry2Put))
 
 
   }
