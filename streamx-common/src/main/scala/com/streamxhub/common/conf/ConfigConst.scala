@@ -81,16 +81,21 @@ object ConfigConst {
 
   val REDIS_PREFIX = "redis."
 
+  val KEY_INSTANCE = "instance"
+
   /**
-   * about config MySQL
+   * about config jdbc...
    */
   val MYSQL_PREFIX = "mysql."
-  val KEY_MYSQL_INSTANCE = "instance"
-  val KEY_MYSQL_DRIVER = "driverClassName"
-  val KEY_MYSQL_URL = "jdbcUrl"
-  val KEY_MYSQL_USER = "username"
-  val KEY_MYSQL_PASSWORD = "password"
+  val CLICKHOUSE_PREFIX = "clickhouse."
+  val KEY_JDBC_DRIVER = "driverClassName"
+  val KEY_JDBC_DATABASE = "database"
 
+  val KEY_JDBC_URL = "jdbcUrl"
+  val KEY_JDBC_USER = "username"
+  val KEY_JDBC_PASSWORD = "password"
+  val KEY_JDBC_INSERT_BATCH = "batch.size"
+  val DEFAULT_JDBC_INSERT_BATCH = 1
   /**
    * about config HBase
    */
