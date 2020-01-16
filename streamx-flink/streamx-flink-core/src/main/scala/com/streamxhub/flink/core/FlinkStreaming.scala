@@ -20,8 +20,6 @@
  */
 package com.streamxhub.flink.core
 
-import java.util
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
