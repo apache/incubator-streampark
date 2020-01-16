@@ -74,7 +74,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
 
   var connection: Connection = _
   var preparedStatement: Statement = _
-  val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
   var index = 0
 
   override def open(parameters: Configuration): Unit = {
@@ -84,11 +84,10 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     val url: String = config(KEY_JDBC_URL)
     val properties = new ClickHouseProperties()
     (Option(user), Option(password)) match {
-      case (Some(u), Some(p)) =>
-        properties.setUser(u)
-        properties.setPassword(p)
       case (None, None) =>
-      case _ => throw new IllegalArgumentException("[StreamX] ClickHouse user|password muse be all not null or all null")
+      case  _ =>
+        properties.setUser(user)
+        properties.setPassword(password)
     }
     properties.setDatabase(database)
     properties.setSocketTimeout(50000)

@@ -128,6 +128,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
             val count = statement.executeBatch().sum
             statement.clearBatch()
             connection.commit()
+            index = 0
             logInfo(s"[StreamX] JdbcSink batch $count successful..")
           }
         } catch {
@@ -149,9 +150,9 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
 }
 
 
-class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties,toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new JdbcSinkFunction[T](prop,toSQlFun)
+  val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun)
 
   var configuration: Configuration = _
 
