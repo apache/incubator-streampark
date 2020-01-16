@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.sink
 
 import java.sql._
 import java.util.Properties
-import java.util.concurrent.ConcurrentHashMap
 
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
@@ -72,43 +71,60 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
 
   var connection: Connection = _
-  var preparedStatement: PreparedStatement = _
-  val dataSourcePool = new ConcurrentHashMap[String, ClickHouseDataSource]()
+  var preparedStatement: Statement = _
+  val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  var index = 0
 
-  // 继承open方法
   override def open(parameters: Configuration): Unit = {
-    val instance = config(KEY_INSTANCE)
-    val dataSource = dataSourcePool.getOrElseUpdate(instance, {
-      val database: String = config(KEY_JDBC_DATABASE)
-      val user: String = config.getOrElse(KEY_JDBC_USER, null)
-      val password: String = config.getOrElse(KEY_JDBC_PASSWORD, null)
-      val url: String = config(KEY_JDBC_URL)
-      val properties = new ClickHouseProperties()
-      (Option(user), Option(password)) match {
-        case (Some(u), Some(p)) =>
-          properties.setUser(u)
-          properties.setPassword(p)
-        case (None, None) =>
-        case _ => throw new IllegalArgumentException("[StreamX] ClickHouse user|password muse be all not null or all null")
-      }
-      properties.setDatabase(database)
-      properties.setSocketTimeout(50000)
-      new ClickHouseDataSource(url, properties)
-    })
+    val database: String = config(KEY_JDBC_DATABASE)
+    val user: String = config.getOrElse(KEY_JDBC_USER, null)
+    val password: String = config.getOrElse(KEY_JDBC_PASSWORD, null)
+    val url: String = config(KEY_JDBC_URL)
+    val properties = new ClickHouseProperties()
+    (Option(user), Option(password)) match {
+      case (Some(u), Some(p)) =>
+        properties.setUser(u)
+        properties.setPassword(p)
+      case (None, None) =>
+      case _ => throw new IllegalArgumentException("[StreamX] ClickHouse user|password muse be all not null or all null")
+    }
+    properties.setDatabase(database)
+    properties.setSocketTimeout(50000)
+    val dataSource = new ClickHouseDataSource(url, properties)
+
     connection = dataSource.getConnection
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
     require(connection != null)
     val sql = toSQLFn(value)
-    preparedStatement = connection.prepareStatement(sql)
-    try {
-      preparedStatement.executeUpdate
-      connection.commit()
-    } catch {
-      case e: Exception =>
-        logError(s"[StreamX] JdbcSink invoke error:${sql}")
-        throw e
+    batchSize match {
+      case 1 =>
+        try {
+          preparedStatement = connection.prepareStatement(sql)
+          preparedStatement.asInstanceOf[PreparedStatement].executeUpdate
+        } catch {
+          case e: Exception =>
+            logError(s"[StreamX] ClickHouseSink invoke error:${sql}")
+            throw e
+          case _ =>
+        }
+      case batch =>
+        try {
+          preparedStatement = connection.createStatement()
+          preparedStatement.addBatch(sql)
+          if (index > 0 && index % batch == 0) {
+            preparedStatement.executeBatch().sum
+            preparedStatement.clearBatch()
+            index = 0
+          }
+        } catch {
+          case e: Exception =>
+            logError(s"[StreamX] ClickHouseSink batch invoke error:${sql}")
+            throw e
+          case _ =>
+        }
+
     }
   }
 

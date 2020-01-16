@@ -80,7 +80,7 @@ class JdbcSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(instance)
-    overwriteParams.foreach(x=>prop.put(x._1,x._2))
+    overwriteParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
@@ -91,9 +91,9 @@ class JdbcSink(@transient ctx: StreamingContext,
 class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = _
-  private var preparedStatement: PreparedStatement = _
-  private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH,s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
-
+  private var statement: Statement = _
+  private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  var index: Int = 0
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
@@ -105,14 +105,35 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
     require(connection != null)
     val sql = toSQLFn(value)
-    preparedStatement = connection.prepareStatement(sql)
-    try{
-      preparedStatement.executeUpdate
-      connection.commit()
-    }catch {
-      case e:Exception =>
-        logError(s"[StreamX] JdbcSink invoke error:${sql}")
-        throw e
+    batchSize match {
+      case 1 =>
+        try {
+          statement = connection.prepareStatement(sql)
+          statement.asInstanceOf[PreparedStatement].executeUpdate
+          connection.commit()
+        } catch {
+          case e: Exception =>
+            logError(s"[StreamX] JdbcSink invoke error:${sql}")
+            throw e
+          case _ =>
+        }
+      case batch =>
+        try {
+          statement = connection.createStatement()
+          statement.addBatch(sql)
+          index += 1
+          if (index > 0 && index % batch == 0) {
+            val count = statement.executeBatch().sum
+            statement.clearBatch()
+            connection.commit()
+            logInfo(s"[StreamX] JdbcSink batch $count successful..")
+          }
+        } catch {
+          case e: Exception =>
+            logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
+            throw e
+          case _ =>
+        }
     }
   }
 
@@ -121,7 +142,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
    * @throws
    */
   @throws[Exception]
-  override def close(): Unit =  MySQLUtils.close(preparedStatement,connection)
+  override def close(): Unit = MySQLUtils.close(statement, connection)
 
 }
 
