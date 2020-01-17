@@ -129,9 +129,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
             case _ =>
           }
           timer.schedule(new TimerTask() {
-            override def run(): Unit = {
-              if (offset.get() > 0) execBatch()
-            }
+            override def run(): Unit = execBatch()
           }, 1000)
         } catch {
           case e: Exception =>
@@ -146,11 +144,13 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   override def close(): Unit = MySQLUtils.close(statement, connection)
 
   private[this] def execBatch(): Unit = {
-    val count = statement.executeBatch().sum
-    statement.clearBatch()
-    connection.commit()
-    offset.set(0L)
-    logInfo(s"[StreamX] JdbcSink batch $count successful..")
+    if (offset.get() > 0) {
+      val count = statement.executeBatch().sum
+      statement.clearBatch()
+      connection.commit()
+      offset.set(0L)
+      logInfo(s"[StreamX] JdbcSink batch $count successful..")
+    }
   }
 
 
