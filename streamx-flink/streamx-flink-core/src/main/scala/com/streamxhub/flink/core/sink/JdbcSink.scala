@@ -96,6 +96,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   private var statement: Statement = _
   private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
   val offset: AtomicLong = new AtomicLong(0L)
+  val timer:Timer = new Timer()
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
@@ -123,18 +124,15 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
         try {
           statement = connection.createStatement()
           statement.addBatch(sql)
-
           offset.incrementAndGet() % batch match {
             case 0 => execBatch()
             case _ =>
           }
-          // don't ask me way....
-          new Timer().schedule(new TimerTask {
+          timer.schedule( new TimerTask() {
             override def run(): Unit = {
               if (offset.get() > 0) execBatch()
             }
           }, 1000)
-
         } catch {
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
@@ -143,16 +141,18 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
         }
     }
 
-    def execBatch(): Unit = {
-      val count = statement.executeBatch().sum
-      statement.clearBatch()
-      connection.commit()
-      offset.set(0L)
-      logInfo(s"[StreamX] JdbcSink batch $count successful..")
-    }
   }
 
   override def close(): Unit = MySQLUtils.close(statement, connection)
+
+  private[this] def execBatch(): Unit = {
+    val count = statement.executeBatch().sum
+    statement.clearBatch()
+    connection.commit()
+    offset.set(0L)
+    logInfo(s"[StreamX] JdbcSink batch $count successful..")
+  }
+
 
 }
 
