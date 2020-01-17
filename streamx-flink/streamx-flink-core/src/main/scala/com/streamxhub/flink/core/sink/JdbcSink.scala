@@ -123,15 +123,18 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
         try {
           statement = connection.createStatement()
           statement.addBatch(sql)
-          val index = offset.incrementAndGet()
-          //如果距离上次插入的时间超过1秒钟则直接执行插入操作
-          if (index > 0 && index % batch == 0) {
-            execBatch()
+
+          offset.incrementAndGet() % batch match {
+            case 0 => execBatch()
+            case _ =>
           }
           // don't ask me way....
           new Timer().schedule(new TimerTask {
-            override def run(): Unit = if (offset.get() > 0) execBatch()
+            override def run(): Unit = {
+              if (offset.get() > 0) execBatch()
+            }
           }, 1000)
+
         } catch {
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
