@@ -1,11 +1,11 @@
 package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.scala.OutputTag
 import org.apache.flink.util.Collector
+import org.apache.flink.streaming.api.scala._
 
 import scala.util.Random
 
@@ -16,7 +16,6 @@ object SideOutApp extends FlinkStreaming {
 
 
   override def handler(context: StreamingContext): Unit = {
-    implicit val sideType = TypeInformation.of[SideEntry](classOf[SideEntry])
     val source = context.addSource(new SideSource())
     /**
      * 侧输出流。。。
@@ -24,7 +23,6 @@ object SideOutApp extends FlinkStreaming {
      */
     val side1 = source.process(new ProcessFunction[SideEntry, SideEntry] {
       val tag = new OutputTag[SideEntry]("flink")
-
       override def processElement(value: SideEntry, ctx: ProcessFunction[SideEntry, SideEntry]#Context, out: Collector[SideEntry]): Unit = {
         if (value.userId < 100) {
           ctx.output(tag, value)
@@ -41,8 +39,6 @@ object SideOutApp extends FlinkStreaming {
      * Streamx 封装之后的写法....
      */
     //侧输出写出....
-
-    implicit val sideTypeInfo = TypeInformation.of[String](classOf[String])
     val side2 = source.sideOut[String]("streamx", x => if (x.userId < 100) x.orderId.toString else null)
     //侧输出获取....
     side2.sideGet[String]("streamx").print("streamx:========>")

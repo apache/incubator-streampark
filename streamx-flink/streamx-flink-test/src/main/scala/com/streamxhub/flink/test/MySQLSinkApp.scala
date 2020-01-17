@@ -1,16 +1,15 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.{JdbcSink, MySQLSink}
+import com.streamxhub.flink.core.sink.JdbcSink
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
+import org.apache.flink.streaming.api.scala._
 
 import scala.util.Random
 
 object MySQLSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
-    implicit val orderType = TypeInformation.of[OrderBean](classOf[OrderBean])
     val source = context.addSource(new OrderBeanSource())
     JdbcSink(context).sink[OrderBean](source)(x=>{
       s"insert into orders(userId,orderId,siteId,cityId,orderStatus,price,quantity,timestamp) values(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
