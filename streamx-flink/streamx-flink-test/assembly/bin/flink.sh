@@ -167,10 +167,10 @@ doStart() {
     # shellcheck disable=SC2155
     local flink_jar="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
-    local shellReader="com.streamxhub.flink.common.conf.ParameterCli"
+    local param_cli="com.streamxhub.flink.common.conf.ParameterCli"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local name_params="`java -cp "${flink_jar}" $shellReader --name "${app_proper}"`"
+    local name_params="`java -cp "${flink_jar}" $param_cli --name "${app_proper}"`"
     if [ x"${name_params}" == x"" ] ; then
        echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
        exit 1
@@ -181,10 +181,10 @@ doStart() {
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local resource_params="`java -cp "${flink_jar}" $shellReader --resource "${app_proper}"` $*"
+    local resource_params="`java -cp "${flink_jar}" $param_cli --resource "${app_proper}"` $*"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local dynamic_params="`java -cp "${flink_jar}" $shellReader --dynamic "${app_proper}"`"
+    local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
