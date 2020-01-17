@@ -77,7 +77,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
   var statement: Statement = _
   val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
   val offset: AtomicLong = new AtomicLong(0L)
-  val timer:Timer = new Timer()
+  val timer: Timer = new Timer()
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
