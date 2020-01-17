@@ -107,7 +107,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
     }
 
     offset.incrementAndGet() % commitBatch match {
-      case 0 =>  execBatch()
+      case 0 => execBatch()
       case _ =>
     }
 
