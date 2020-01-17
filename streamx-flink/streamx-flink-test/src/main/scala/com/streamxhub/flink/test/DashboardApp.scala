@@ -1,7 +1,6 @@
 package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.api.scala._
 import scala.collection.JavaConverters._
@@ -18,7 +17,6 @@ object DashboardApp extends FlinkStreaming {
   }
 
   override def handler(context: StreamingContext): Unit = {
-    implicit val orderType = TypeInformation.of[OrderEntry](classOf[OrderEntry])
     val source = context.addSource(new OrderSource())
     val ds = source.map(x=>doAction(x)).flatMap(_.asScala)
     ds.print()
