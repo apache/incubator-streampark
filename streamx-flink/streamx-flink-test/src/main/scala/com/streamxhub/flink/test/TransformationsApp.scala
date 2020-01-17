@@ -1,7 +1,7 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{DataSetContext,FlinkDataSet}
+import com.streamxhub.flink.core.{DataSetContext, FlinkDataSet}
 import org.apache.flink.api.common.accumulators.LongCounter
 import org.apache.flink.api.common.functions.{GroupCombineFunction, GroupReduceFunction, RichMapFunction}
 import org.apache.flink.api.common.operators.Order
@@ -13,8 +13,8 @@ import scala.collection.JavaConversions._
 
 
 /**
-  * 学习flink的各类算子的流转操作......
-  */
+ * 学习flink的各类算子的流转操作......
+ */
 object TransformationsApp extends FlinkDataSet {
 
   override def handler(context: DataSetContext): Unit = {
@@ -258,7 +258,7 @@ object TransformationsApp extends FlinkDataSet {
       .groupBy(0)
       .combineGroup {
         (x, out: Collector[(String, Int)]) =>
-          var key:String = null
+          var key: String = null
           var count = 0
           for (word <- x) {
             key = word._1
