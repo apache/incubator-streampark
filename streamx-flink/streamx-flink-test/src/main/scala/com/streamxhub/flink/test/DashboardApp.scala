@@ -13,12 +13,12 @@ import scala.util.Random
 object DashboardApp extends FlinkStreaming {
 
   def doAction(x: OrderEntry): java.util.List[String] = {
-    List(x.userId.toString,x.siteId.toString).asJava
+    List(x.userId.toString, x.siteId.toString).asJava
   }
 
   override def handler(context: StreamingContext): Unit = {
     val source = context.addSource(new OrderSource())
-    val ds = source.map(x=>doAction(x)).flatMap(_.asScala)
+    val ds = source.map(x => doAction(x)).flatMap(_.asScala)
     ds.print()
   }
 
@@ -39,18 +39,18 @@ object DashboardApp extends FlinkStreaming {
  * @param timestamp   : 下单时间
  */
 case class OrderEntry(userId: Long,
-                 orderId: Long,
-                 siteId: Long,
-                 siteName: String,
-                 cityId: Long,
-                 cityName: String,
-                 orderStatus: Int,
-                 isNewOrder: Int,
-                 price: Double,
-                 quantity: Int,
-                 timestamp: Long)
+                      orderId: Long,
+                      siteId: Long,
+                      siteName: String,
+                      cityId: Long,
+                      cityName: String,
+                      orderStatus: Int,
+                      isNewOrder: Int,
+                      price: Double,
+                      quantity: Int,
+                      timestamp: Long)
 
-class OrderSource extends SourceFunction[OrderEntry]{
+class OrderSource extends SourceFunction[OrderEntry] {
 
   private[this] var isRunning = true
 
@@ -66,7 +66,7 @@ class OrderSource extends SourceFunction[OrderEntry]{
       val isNew = random.nextInt(1)
       val price = random.nextDouble()
       val quantity = new Random(10).nextInt()
-      val order = OrderEntry(userId,orderId,siteId = 1,siteName = "",cityId = 1,cityName = "",status,isNew,price,quantity,System.currentTimeMillis)
+      val order = OrderEntry(userId, orderId, siteId = 1, siteName = "", cityId = 1, cityName = "", status, isNew, price, quantity, System.currentTimeMillis)
       ctx.collect(order)
     }
   }

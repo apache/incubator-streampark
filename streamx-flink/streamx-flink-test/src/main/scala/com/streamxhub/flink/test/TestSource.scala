@@ -27,7 +27,7 @@ case class TestEntity(userId: Long,
                       quantity: Int,
                       timestamp: Long)
 
-class TestSource extends SourceFunction[TestEntity]{
+class TestSource extends SourceFunction[TestEntity] {
 
   private[this] var isRunning = true
 
@@ -43,7 +43,7 @@ class TestSource extends SourceFunction[TestEntity]{
       val isNew = random.nextInt(1)
       val price = random.nextDouble()
       val quantity = new Random().nextInt(10)
-      val order = TestEntity(userId,orderId,siteId = 1,cityId = 1,status,isNew,price,quantity,System.currentTimeMillis)
+      val order = TestEntity(userId, orderId, siteId = 1, cityId = 1, status, isNew, price, quantity, System.currentTimeMillis)
       ctx.collect(order)
     }
   }
