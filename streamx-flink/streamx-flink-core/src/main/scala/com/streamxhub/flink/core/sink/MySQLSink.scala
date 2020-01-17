@@ -91,7 +91,7 @@ class MySQLSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = getMySQLConf(ctx.paramMap)(instance)
-    overwriteParams.foreach(x=>prop.put(x._1,x._2))
+    overwriteParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
@@ -164,9 +164,9 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
 }
 
 
-class MySQLOutputFormat[T: TypeInformation](implicit prop: Properties,toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+class MySQLOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new MySQLSinkFunction[T](prop,toSQlFun)
+  val sinkFunction = new MySQLSinkFunction[T](prop, toSQlFun)
 
   var configuration: Configuration = _
 
