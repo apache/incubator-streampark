@@ -166,9 +166,9 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
 
 class MySQLOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new MySQLSinkFunction[T](prop, toSQlFun)
+  private val sinkFunction = new MySQLSinkFunction[T](prop, toSQlFun)
 
-  var configuration: Configuration = _
+  private var configuration: Configuration = _
 
   override def configure(configuration: Configuration): Unit = this.configuration = configuration
 
