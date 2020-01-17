@@ -131,17 +131,22 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
           case _ =>
         }
       case batch =>
+
         try {
           statement = connection.createStatement()
           statement.addBatch(sql)
-          val index = offset.incrementAndGet()
-          if (index > 0 && index % batch == 0) {
-            execBatch()
+
+          offset.incrementAndGet() % batch match {
+            case 0 => execBatch()
+            case _ =>
           }
-          // don't ask me way....
+
           new Timer().schedule(new TimerTask {
-            override def run(): Unit = if (offset.get() > 0) execBatch()
+            override def run(): Unit = {
+              if (offset.get() > 0) execBatch()
+            }
           }, 1000)
+
         } catch {
           case e: Exception =>
             logError(s"[StreamX] ClickHouseSink batch invoke error:${sql}")

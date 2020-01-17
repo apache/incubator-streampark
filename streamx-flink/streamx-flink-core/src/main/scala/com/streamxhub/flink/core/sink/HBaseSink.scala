@@ -20,7 +20,8 @@
  */
 package com.streamxhub.flink.core.sink
 
-import java.util.Properties
+import java.util.{Properties, Timer, TimerTask}
+import java.util.concurrent.atomic.AtomicLong
 
 import com.streamxhub.common.util.{ConfigUtils, HBaseClient, Logger}
 import com.streamxhub.flink.core.StreamingContext
@@ -75,7 +76,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
   private var connection: Connection = _
   private var table: Table = _
   private var mutator: BufferedMutator = _
-  private var count: Int = 0
+  val offset: AtomicLong = new AtomicLong(0L)
 
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
   private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
@@ -97,7 +98,6 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
       })
     mutator = connection.getBufferedMutator(mutatorParam)
     table = connection.getTable(tableName)
-    count = 0
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
@@ -106,7 +106,18 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
       case other => mutations += other
     }
 
-    if (count > 0 && count % commitBatch == 0) {
+    offset.incrementAndGet() % commitBatch match {
+      case 0 =>  execBatch()
+      case _ =>
+    }
+
+    new Timer().schedule(new TimerTask {
+      override def run(): Unit = {
+        if (offset.get() > 0) execBatch()
+      }
+    }, 1000)
+
+    def execBatch() = {
       val start = System.currentTimeMillis()
       //put ...
       mutator.mutate(putArray)
@@ -117,10 +128,10 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
         table.batch(mutations, new Array[AnyRef](mutations.length))
         mutations.clear()
       }
-      count = 0
       logInfo(s"[StreamX] HBaseSink batchSize:${commitBatch} use ${System.currentTimeMillis() - start} MS")
+      offset.set(0L)
     }
-    count += 1
+
   }
 
   override def close(): Unit = {
