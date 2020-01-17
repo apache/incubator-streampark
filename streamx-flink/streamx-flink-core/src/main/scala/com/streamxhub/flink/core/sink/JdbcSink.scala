@@ -140,11 +140,6 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
     }
   }
 
-  /**
-   *
-   * @throws
-   */
-  @throws[Exception]
   override def close(): Unit = MySQLUtils.close(statement, connection)
 
 }
