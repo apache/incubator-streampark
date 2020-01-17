@@ -21,7 +21,8 @@
 package com.streamxhub.flink.core.sink
 
 import java.sql._
-import java.util.Properties
+import java.util.concurrent.atomic.AtomicLong
+import java.util.{Properties, Timer, TimerTask}
 
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
@@ -72,11 +73,10 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 }
 
 class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
-
   var connection: Connection = _
-  var preparedStatement: Statement = _
+  var statement: Statement = _
   val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
-  var index = 0
+  val offset: AtomicLong = new AtomicLong(0L)
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
@@ -85,10 +85,10 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
 
     val properties = new ClickHouseProperties()
     (user, driver) match {
-      case (u,d) if(u!=null && d !=null) =>
+      case (u, d) if (u != null && d != null) =>
         Class.forName(d)
         properties.setUser(u)
-      case (null,null) =>
+      case (null, null) =>
       case (_, d) if d != null => Class.forName(d)
       case _ => properties.setUser(user)
     }
@@ -122,8 +122,8 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     batchSize match {
       case 1 =>
         try {
-          preparedStatement = connection.prepareStatement(sql)
-          preparedStatement.asInstanceOf[PreparedStatement].executeUpdate
+          statement = connection.prepareStatement(sql)
+          statement.asInstanceOf[PreparedStatement].executeUpdate
         } catch {
           case e: Exception =>
             logError(s"[StreamX] ClickHouseSink invoke error:${sql}")
@@ -132,24 +132,38 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
         }
       case batch =>
         try {
-          preparedStatement = connection.createStatement()
-          preparedStatement.addBatch(sql)
+          statement = connection.createStatement()
+          statement.addBatch(sql)
+          val index = offset.incrementAndGet()
           if (index > 0 && index % batch == 0) {
-            preparedStatement.executeBatch().sum
-            preparedStatement.clearBatch()
-            index = 0
+            execBatch()
           }
+          // don't ask me way....
+          new Timer().schedule(new TimerTask {
+            override def run(): Unit = {
+              val index = offset.get()
+              if (index > 0) {
+                execBatch()
+              }
+            }
+          }, 1000)
         } catch {
           case e: Exception =>
             logError(s"[StreamX] ClickHouseSink batch invoke error:${sql}")
             throw e
           case _ =>
         }
+    }
 
+    def execBatch(): Unit = {
+      val count = statement.executeBatch().sum
+      statement.clearBatch()
+      offset.set(0)
+      logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
     }
   }
 
-  override def close(): Unit = MySQLUtils.close(preparedStatement, connection)
+  override def close(): Unit = MySQLUtils.close(Statement, connection)
 
 }
 

@@ -24,7 +24,8 @@ package com.streamxhub.flink.core.sink
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import java.sql._
-import java.util.Properties
+import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
+import java.util.{Properties, Timer, TimerTask}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
@@ -91,11 +92,10 @@ class JdbcSink(@transient ctx: StreamingContext,
 }
 
 class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
-
   private var connection: Connection = _
   private var statement: Statement = _
   private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
-  var index: Int = 0
+  val offset: AtomicLong = new AtomicLong(0L)
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
@@ -123,20 +123,35 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
         try {
           statement = connection.createStatement()
           statement.addBatch(sql)
-          index += 1
+          val index = offset.incrementAndGet()
+          //如果距离上次插入的时间超过1秒钟则直接执行插入操作
           if (index > 0 && index % batch == 0) {
-            val count = statement.executeBatch().sum
-            statement.clearBatch()
-            connection.commit()
-            index = 0
-            logInfo(s"[StreamX] JdbcSink batch $count successful..")
+            execBatch()
           }
+          // don't ask me way....
+          new Timer().schedule(new TimerTask {
+            override def run(): Unit = {
+              val index = offset.get()
+              if (index > 0) {
+                execBatch()
+              }
+            }
+          }, 1000)
+
         } catch {
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
             throw e
           case _ =>
         }
+    }
+
+    def execBatch(): Unit = {
+      val count = statement.executeBatch().sum
+      statement.clearBatch()
+      connection.commit()
+      offset.set(0L)
+      logInfo(s"[StreamX] JdbcSink batch $count successful..")
     }
   }
 
