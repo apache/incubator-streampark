@@ -163,7 +163,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     }
   }
 
-  override def close(): Unit = MySQLUtils.close(Statement, connection)
+  override def close(): Unit = MySQLUtils.close(statement, connection)
 
 }
 
