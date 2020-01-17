@@ -77,6 +77,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
   var statement: Statement = _
   val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
   val offset: AtomicLong = new AtomicLong(0L)
+  val timer:Timer = new Timer()
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
@@ -131,22 +132,18 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
           case _ =>
         }
       case batch =>
-
         try {
           statement = connection.createStatement()
           statement.addBatch(sql)
-
           offset.incrementAndGet() % batch match {
             case 0 => execBatch()
             case _ =>
           }
-
-          new Timer().schedule(new TimerTask {
+          timer.schedule(new TimerTask {
             override def run(): Unit = {
               if (offset.get() > 0) execBatch()
             }
           }, 1000)
-
         } catch {
           case e: Exception =>
             logError(s"[StreamX] ClickHouseSink batch invoke error:${sql}")
