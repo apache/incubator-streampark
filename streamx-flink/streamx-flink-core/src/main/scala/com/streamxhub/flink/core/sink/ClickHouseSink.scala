@@ -140,12 +140,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
           }
           // don't ask me way....
           new Timer().schedule(new TimerTask {
-            override def run(): Unit = {
-              val index = offset.get()
-              if (index > 0) {
-                execBatch()
-              }
-            }
+            override def run(): Unit = if (offset.get() > 0) execBatch()
           }, 1000)
         } catch {
           case e: Exception =>

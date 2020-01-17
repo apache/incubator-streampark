@@ -24,7 +24,7 @@ package com.streamxhub.flink.core.sink
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import java.sql._
-import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
+import java.util.concurrent.atomic.AtomicLong
 import java.util.{Properties, Timer, TimerTask}
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -130,14 +130,8 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
           }
           // don't ask me way....
           new Timer().schedule(new TimerTask {
-            override def run(): Unit = {
-              val index = offset.get()
-              if (index > 0) {
-                execBatch()
-              }
-            }
+            override def run(): Unit = if (offset.get() > 0) execBatch()
           }, 1000)
-
         } catch {
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
