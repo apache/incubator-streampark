@@ -23,6 +23,7 @@ object SideOutApp extends FlinkStreaming {
      */
     val side1 = source.process(new ProcessFunction[SideEntry, SideEntry] {
       val tag = new OutputTag[SideEntry]("flink")
+
       override def processElement(value: SideEntry, ctx: ProcessFunction[SideEntry, SideEntry]#Context, out: Collector[SideEntry]): Unit = {
         if (value.userId < 100) {
           ctx.output(tag, value)

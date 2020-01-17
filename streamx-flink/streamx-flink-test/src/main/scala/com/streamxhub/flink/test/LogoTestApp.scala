@@ -42,7 +42,7 @@ object LogoTestApp {
          |
          |$appName Starting...
          |
-         |""".stripMargin.replaceAll("_","")
+         |""".stripMargin.replaceAll("_", "")
 
     println(s"\033[95;1m${logo}\033[1m\n")
 

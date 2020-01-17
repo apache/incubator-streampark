@@ -17,12 +17,12 @@ public class TestCondition {
     private int count = 0;
     private int takeptr = 0;
     private int putptr = 0;
-    Object [] blockArray = new Object[100];
+    Object[] blockArray = new Object[100];
 
     public static void main(String[] args) {
         final TestCondition condition = new TestCondition();
         for (int i = 0; i < 100; i++) {
-            new Thread(()->{
+            new Thread(() -> {
                 try {
                     condition.put(new Object());
                 } catch (InterruptedException e) {
@@ -30,7 +30,7 @@ public class TestCondition {
                 }
             }).start();
 
-            new Thread(()->{
+            new Thread(() -> {
                 try {
                     condition.take();
                 } catch (InterruptedException e) {
@@ -41,7 +41,7 @@ public class TestCondition {
         }
     }
 
-    public void put (Object element) throws InterruptedException {
+    public void put(Object element) throws InterruptedException {
         try {
             lock.lock();
             while (count == blockArray.length) {

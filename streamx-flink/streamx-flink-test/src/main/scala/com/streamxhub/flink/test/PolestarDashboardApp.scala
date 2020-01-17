@@ -20,8 +20,8 @@ import scala.util.Try
 object PolestarDashboardApp extends FlinkStreaming {
 
   /**
-    * @param context
-    */
+   * @param context
+   */
   override def handler(context: StreamingContext): Unit = {
     val data = new KafkaSource(context)
 
