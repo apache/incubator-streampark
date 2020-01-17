@@ -6,7 +6,7 @@ import com.streamxhub.common.util.JsonUtils
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala._
 
 object MySQLSourceApp extends FlinkStreaming {
 
@@ -20,7 +20,6 @@ object MySQLSourceApp extends FlinkStreaming {
     prop.put("readOnly","false")
     prop.put("idleTimeout","20000")
 
-    implicit val typeInfo = TypeInformation.of[MyPerson](classOf[MyPerson])
     val mysqlSource = new MySQLSource(context)
     val ds = mysqlSource.getDataStream[MyPerson]("select * from student",x=>  JsonUtils.read[MyPerson](x))
     ds.print()

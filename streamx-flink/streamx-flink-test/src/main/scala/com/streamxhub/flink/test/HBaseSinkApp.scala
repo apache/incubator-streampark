@@ -2,17 +2,16 @@ package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.sink.{HBaseOutputFormat, HBaseSink}
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.hadoop.hbase.client.Put
 import org.apache.hadoop.hbase.util.Bytes
 import java.util.Random
+import org.apache.flink.streaming.api.scala._
 
 import com.streamxhub.common.util.ConfigUtils
 
 object HBaseSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
-    implicit val orderType = TypeInformation.of[TestEntity](classOf[TestEntity])
     val source = context.addSource(new TestSource)
     val random = new Random()
 
