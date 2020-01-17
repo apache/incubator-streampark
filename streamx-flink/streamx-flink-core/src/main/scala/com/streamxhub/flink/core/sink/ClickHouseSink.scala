@@ -141,7 +141,7 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
           }
           timer.schedule(new TimerTask {
             override def run(): Unit = {
-              if (offset.get() > 0) execBatch()
+              execBatch()
             }
           }, 1000)
         } catch {
@@ -153,10 +153,12 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     }
 
     def execBatch(): Unit = {
-      val count = statement.executeBatch().sum
-      statement.clearBatch()
-      offset.set(0)
-      logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
+      if (offset.get() > 0) {
+        val count = statement.executeBatch().sum
+        statement.clearBatch()
+        offset.set(0)
+        logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
+      }
     }
   }
 
