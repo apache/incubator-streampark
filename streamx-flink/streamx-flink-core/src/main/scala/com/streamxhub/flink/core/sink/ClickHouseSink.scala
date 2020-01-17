@@ -85,8 +85,12 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
 
     val properties = new ClickHouseProperties()
     (user, driver) match {
+      case (u,d) if(u!=null && d !=null) =>
+        Class.forName(d)
+        properties.setUser(u)
+      case (null,null) =>
       case (_, d) if d != null => Class.forName(d)
-      case (u, _) if u != null => properties.setUser(u)
+      case _ => properties.setUser(user)
     }
     //reflect set all properties...
     config.foreach(x => {
