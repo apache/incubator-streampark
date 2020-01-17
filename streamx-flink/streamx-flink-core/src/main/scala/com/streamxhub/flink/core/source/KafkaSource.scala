@@ -41,7 +41,7 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
   def getDataStream(topic: String = "", instance: String = ""): DataStream[String] = {
     val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
     specialKafkaParams.foreach(x => prop.put(x._1, x._2))
-    prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,true)
+    prop.remove(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG)
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
     ctx.addSource(consumer)
   }
