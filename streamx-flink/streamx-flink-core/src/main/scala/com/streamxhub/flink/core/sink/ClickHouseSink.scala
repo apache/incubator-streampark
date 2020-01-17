@@ -96,8 +96,8 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     config.foreach(x => {
       val field = Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
         case None =>
-          val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-          Try(Option(properties.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
+          val boolField = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+          Try(Option(properties.getClass.getDeclaredField(boolField))).getOrElse(None) match {
             case Some(x) => x
             case None => throw new IllegalArgumentException(s"ClickHouseProperties config error,property:${x._1} invalid,please see ru.yandex.clickhouse.settings.ClickHouseProperties")
           }
