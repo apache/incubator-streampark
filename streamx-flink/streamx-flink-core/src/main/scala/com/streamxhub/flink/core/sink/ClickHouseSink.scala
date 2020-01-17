@@ -73,11 +73,11 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 }
 
 class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
-  var connection: Connection = _
-  var statement: Statement = _
-  val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
-  val offset: AtomicLong = new AtomicLong(0L)
-  val timer: Timer = new Timer()
+  private var connection: Connection = _
+  private var statement: Statement = _
+  private val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  private val offset: AtomicLong = new AtomicLong(0L)
+  private val timer: Timer = new Timer()
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)

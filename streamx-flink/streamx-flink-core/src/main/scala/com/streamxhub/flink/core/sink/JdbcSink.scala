@@ -95,8 +95,8 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
   private var connection: Connection = _
   private var statement: Statement = _
   private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
-  val offset: AtomicLong = new AtomicLong(0L)
-  val timer: Timer = new Timer()
+  private val offset: AtomicLong = new AtomicLong(0L)
+  private val timer: Timer = new Timer()
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {

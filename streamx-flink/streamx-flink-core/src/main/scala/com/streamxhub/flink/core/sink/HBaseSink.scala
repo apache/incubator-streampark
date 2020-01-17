@@ -76,8 +76,8 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
   private var connection: Connection = _
   private var table: Table = _
   private var mutator: BufferedMutator = _
-  val offset: AtomicLong = new AtomicLong(0L)
-  val timer: Timer = new Timer()
+  private val offset: AtomicLong = new AtomicLong(0L)
+  private val timer: Timer = new Timer()
 
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
   private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
