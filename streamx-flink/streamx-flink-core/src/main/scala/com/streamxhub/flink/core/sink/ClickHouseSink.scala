@@ -83,9 +83,12 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     val user: String = Try(config.remove(KEY_JDBC_USER).toString).getOrElse(null)
     val driver: String = Try(config.remove(KEY_JDBC_DRIVER).toString).getOrElse(null)
 
-    //reflect set all properties...
     val properties = new ClickHouseProperties()
-    properties.setUser(user)
+    (user, driver) match {
+      case (_, d) if d != null => Class.forName(d)
+      case (u, _) if u != null => properties.setUser(u)
+    }
+    //reflect set all properties...
     config.foreach(x => {
       val field = Try(Option(properties.getClass.getDeclaredField(x._1))).getOrElse(None) match {
         case None =>
@@ -105,10 +108,6 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
         case _ =>
       }
     })
-
-    if (driver != null) {
-      Class.forName(driver)
-    }
     val dataSource = new ClickHouseDataSource(url, properties)
     connection = dataSource.getConnection
   }
