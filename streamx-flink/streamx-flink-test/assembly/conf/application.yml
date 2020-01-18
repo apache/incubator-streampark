@@ -3,6 +3,7 @@ mysql:
   jdbcUrl: jdbc:mysql://localhost:3306/test
   username: root
   password: 123322242
+  batch.size: 100
 
 # hbase
 hbase:
