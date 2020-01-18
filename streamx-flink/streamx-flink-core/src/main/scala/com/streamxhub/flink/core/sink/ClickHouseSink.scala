@@ -75,9 +75,12 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
-  private val batchSize: Int = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  private val batchSize = config.remove(KEY_JDBC_INSERT_BATCH) match {
+    case null => DEFAULT_JDBC_INSERT_BATCH
+    case batch => batch.toString.toInt
+  }
   private val offset: AtomicLong = new AtomicLong(0L)
-  private val timer: Timer = new Timer()
+  private var timestamp = 0L
 
   override def open(parameters: Configuration): Unit = {
     val url: String = Try(config.remove(KEY_JDBC_URL).toString).getOrElse(null)
@@ -115,6 +118,9 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
     })
     val dataSource = new ClickHouseDataSource(url, properties)
     connection = dataSource.getConnection
+    if (batchSize > 1) {
+      statement = connection.createStatement()
+    }
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
@@ -133,17 +139,12 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
         }
       case batch =>
         try {
-          statement = connection.createStatement()
           statement.addBatch(sql)
-          offset.incrementAndGet() % batch match {
-            case 0 => execBatch()
+          (offset.incrementAndGet() % batch, timestamp) match {
+            case (0, _) => execBatch()
+            case (_, time) if System.currentTimeMillis() - time > 1000 => execBatch()
             case _ =>
           }
-          timer.schedule(new TimerTask {
-            override def run(): Unit = {
-              execBatch()
-            }
-          }, 1000)
         } catch {
           case e: Exception =>
             logError(s"[StreamX] ClickHouseSink batch invoke error:${sql}")
@@ -151,18 +152,22 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
           case _ =>
         }
     }
-
-    def execBatch(): Unit = {
-      if (offset.get() > 0) {
-        val count = statement.executeBatch().sum
-        statement.clearBatch()
-        offset.set(0)
-        logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
-      }
-    }
   }
 
-  override def close(): Unit = MySQLUtils.close(statement, connection)
+  override def close(): Unit = {
+    execBatch()
+    MySQLUtils.close(statement, connection)
+  }
+
+  private[this] def execBatch(): Unit = {
+    if (offset.get() > 0) {
+      offset.set(0)
+      val count = statement.executeBatch().sum
+      statement.clearBatch()
+      logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
+      timestamp = System.currentTimeMillis()
+    }
+  }
 
 }
 

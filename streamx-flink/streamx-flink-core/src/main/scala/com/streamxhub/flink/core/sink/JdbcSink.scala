@@ -25,7 +25,7 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import java.sql._
 import java.util.concurrent.atomic.AtomicLong
-import java.util.{Properties, Timer, TimerTask}
+import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
@@ -37,7 +37,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.scala.DataStream
 
-import scala.collection.JavaConversions._
 import scala.collection.Map
 
 object JdbcSink {
@@ -94,15 +93,22 @@ class JdbcSink(@transient ctx: StreamingContext,
 class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
-  private val batchSize = config.getOrElse(KEY_JDBC_INSERT_BATCH, s"${DEFAULT_JDBC_INSERT_BATCH}").toInt
+  private val batchSize = config.remove(KEY_JDBC_INSERT_BATCH) match {
+    case null => DEFAULT_JDBC_INSERT_BATCH
+    case batch => batch.toString.toInt
+  }
+
   private val offset: AtomicLong = new AtomicLong(0L)
-  private val timer: Timer = new Timer()
+  private var timestamp: Long = 0L
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
     logInfo("[StreamX] JdbcSink Open....")
     connection = MySQLUtils.getConnection(config)
     connection.setAutoCommit(false)
+    if (batchSize > 1) {
+      statement = connection.createStatement()
+    }
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
@@ -122,15 +128,12 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
         }
       case batch =>
         try {
-          statement = connection.createStatement()
           statement.addBatch(sql)
-          offset.incrementAndGet() % batch match {
-            case 0 => execBatch()
+          (offset.incrementAndGet() % batch, timestamp) match {
+            case (0, _) => execBatch()
+            case (_, time) if System.currentTimeMillis() - time > 1000 => execBatch()
             case _ =>
           }
-          timer.schedule(new TimerTask() {
-            override def run(): Unit = execBatch()
-          }, 1000)
         } catch {
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
@@ -138,21 +141,24 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
           case _ =>
         }
     }
-
   }
 
-  override def close(): Unit = MySQLUtils.close(statement, connection)
+  override def close(): Unit = {
+    execBatch()
+    MySQLUtils.close(statement, connection)
+  }
 
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
+      offset.set(0L)
+      val start = System.currentTimeMillis()
       val count = statement.executeBatch().sum
       statement.clearBatch()
       connection.commit()
-      offset.set(0L)
-      logInfo(s"[StreamX] JdbcSink batch $count successful..")
+      logInfo(s"[StreamX] JdbcSink batch $count use ${System.currentTimeMillis() - start} MS")
+      timestamp = System.currentTimeMillis()
     }
   }
-
 
 }
 
