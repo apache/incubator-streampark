@@ -1,11 +1,12 @@
 package com.streamxhub.flink.test
 
+import java.util.Random
+
 import com.streamxhub.flink.core.sink.JdbcSink
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 
-import scala.util.Random
 
 object MySQLSinkApp extends FlinkStreaming {
 
@@ -13,7 +14,7 @@ object MySQLSinkApp extends FlinkStreaming {
     val source = context.addSource(new OrderBeanSource())
     JdbcSink(context).sink[OrderBean](source)(x => {
       s"insert into orders(userId,orderId,siteId,cityId,orderStatus,price,quantity,timestamp) values(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
-    })
+    }).name("jdbcSink")
   }
 
 }
@@ -36,7 +37,7 @@ case class OrderBean(userId: Long,
                      orderStatus: Int,
                      price: Double,
                      quantity: Int,
-                     timestamp: Long)
+                     timestamp: Long) extends Serializable
 
 class OrderBeanSource extends SourceFunction[OrderBean] {
 
@@ -48,9 +49,7 @@ class OrderBeanSource extends SourceFunction[OrderBean] {
   val random = new Random()
 
   override def run(ctx: SourceFunction.SourceContext[OrderBean]): Unit = {
-    while (isRunning) {
-      if (count >= 1000) isRunning = false
-      count = count + 1
+    while (count<555) {
       val userId = random.nextInt(1000)
       val orderId = random.nextInt(100)
       val status = random.nextInt(1)
@@ -58,6 +57,7 @@ class OrderBeanSource extends SourceFunction[OrderBean] {
       val quantity = new Random(10).nextInt()
       val order = OrderBean(userId, orderId, siteId = 1, cityId = 1, status, price, quantity, System.currentTimeMillis)
       ctx.collect(order)
+      count+=1
     }
   }
 

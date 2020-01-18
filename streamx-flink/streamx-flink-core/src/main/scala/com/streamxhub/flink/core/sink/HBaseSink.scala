@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.core.sink
 
-import java.util.{Properties, Timer, TimerTask}
+import java.util.Properties
 import java.util.concurrent.atomic.AtomicLong
 
 import com.streamxhub.common.util.{ConfigUtils, HBaseClient, Logger}
@@ -77,7 +77,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
   private var table: Table = _
   private var mutator: BufferedMutator = _
   private val offset: AtomicLong = new AtomicLong(0L)
-  private val timer: Timer = new Timer()
+  private var timestamp = 0L
 
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
   private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
@@ -107,43 +107,39 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
       case other => mutations += other
     }
 
-    offset.incrementAndGet() % commitBatch match {
-      case 0 => execBatch()
+    (offset.incrementAndGet() % commitBatch, timestamp) match {
+      case (0, _) => execBatch()
+      case (_, time) if System.currentTimeMillis() - time > 1000 => execBatch()
       case _ =>
     }
-
-    timer.schedule(new TimerTask {
-      override def run(): Unit = {
-        execBatch()
-      }
-    }, 1000)
-
-    def execBatch() = {
-      if (offset.get() > 0) {
-        val start = System.currentTimeMillis()
-        //put ...
-        mutator.mutate(putArray)
-        mutator.flush()
-        putArray.clear()
-        //mutation...
-        if (mutations.nonEmpty) {
-          table.batch(mutations, new Array[AnyRef](mutations.length))
-          mutations.clear()
-        }
-        logInfo(s"[StreamX] HBaseSink batchSize:${commitBatch} use ${System.currentTimeMillis() - start} MS")
-        offset.set(0L)
-      }
-    }
-
   }
 
   override def close(): Unit = {
+    execBatch()
     if (mutator != null) {
       mutator.flush()
       mutator.close()
     }
     if (table != null) {
       table.close()
+    }
+  }
+
+  private[this] def execBatch() = {
+    if (offset.get() > 0) {
+      offset.set(0L)
+      val start = System.currentTimeMillis()
+      //put ...
+      mutator.mutate(putArray)
+      mutator.flush()
+      putArray.clear()
+      //mutation...
+      if (mutations.nonEmpty) {
+        table.batch(mutations, new Array[AnyRef](mutations.length))
+        mutations.clear()
+      }
+      logInfo(s"[StreamX] HBaseSink batchSize:${commitBatch} use ${System.currentTimeMillis() - start} MS")
+      timestamp = System.currentTimeMillis()
     }
   }
 
