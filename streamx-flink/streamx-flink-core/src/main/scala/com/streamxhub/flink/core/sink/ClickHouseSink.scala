@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.sink
 
 import java.sql._
 import java.util.concurrent.atomic.AtomicLong
-import java.util.{Properties, Timer, TimerTask}
+import java.util.Properties
 
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
 import com.streamxhub.flink.core.StreamingContext
@@ -140,9 +140,9 @@ class ClickHouseSinkFunction[T](config: Properties, toSQLFn: T => String) extend
       case batch =>
         try {
           statement.addBatch(sql)
-          (offset.incrementAndGet() % batch, timestamp) match {
+          (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
             case (0, _) => execBatch()
-            case (_, time) if System.currentTimeMillis() - time > 1000 => execBatch()
+            case (_, current) if current - timestamp > 1000 => execBatch()
             case _ =>
           }
         } catch {
