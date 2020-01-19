@@ -107,9 +107,9 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
       case other => mutations += other
     }
 
-    (offset.incrementAndGet() % commitBatch, timestamp) match {
+    (offset.incrementAndGet() % commitBatch, System.currentTimeMillis()) match {
       case (0, _) => execBatch()
-      case (_, time) if System.currentTimeMillis() - time > 1000 => execBatch()
+      case (_, current) if current - timestamp > 1000 => execBatch()
       case _ =>
     }
   }
