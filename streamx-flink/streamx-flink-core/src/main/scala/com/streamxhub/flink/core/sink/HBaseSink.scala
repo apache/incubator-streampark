@@ -125,7 +125,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
     }
   }
 
-  private[this] def execBatch() = {
+  private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
       offset.set(0L)
       val start = System.currentTimeMillis()
