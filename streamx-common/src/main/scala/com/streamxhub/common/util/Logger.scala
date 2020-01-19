@@ -27,9 +27,7 @@ trait Logger {
 
   @transient private var _logger: SlfLogger = _
 
-  protected def logName = {
-    this.getClass.getName.stripSuffix("$")
-  }
+  protected def logName = this.getClass.getName.stripSuffix("$")
 
   protected def logger: SlfLogger = {
     if (_logger == null) {
