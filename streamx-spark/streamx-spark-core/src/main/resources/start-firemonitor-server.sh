@@ -25,10 +25,13 @@
 #
 
 if [ -z "${SPARK_HOME}" ]; then
+  # shellcheck disable=SC2155
   export SPARK_HOME="$(cd "`dirname "$0"`"/..; pwd)"
 fi
 
+# shellcheck disable=SC1090
 . "${SPARK_HOME}/sbin/spark-config.sh"
+# shellcheck disable=SC1090
 . "${SPARK_HOME}/bin/load-spark-env.sh"
 
 exec "${SPARK_HOME}/sbin"/spark-daemon.sh start org.apache.spark.YarnAppMonitorSer 1 "$@"
