@@ -87,7 +87,6 @@ object ConfigConst {
    * about config jdbc...
    */
   val MYSQL_PREFIX = "mysql."
-  val CLICKHOUSE_PREFIX = "clickhouse."
   val KEY_JDBC_DRIVER = "driverClassName"
   val KEY_JDBC_DATABASE = "database"
 
@@ -110,6 +109,21 @@ object ConfigConst {
   val KEY_HBASE_AUTH_USER = "hbase.auth.user"
 
   val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
+
+  /**
+   * about clickhouse
+   */
+  val CLICKHOUSE_PREFIX = "clickhouse.sink"
+  val KEY_CK_SINK_TABLE: String = "table"
+  val KEY_CK_SINK_MAX_BUFFER_SIZE: String = "max-buffer-size"
+  val KEY_CK_SINK_NUM_WRITERS: String = "num-writers"
+  val KEY_CK_SINK_QUEUE_MAX_CAPACITY: String = "queue-max-capacity"
+  val KEY_CK_SINK_TIMEOUT_SEC: String = "timeout"
+  val KEY_CK_SINK_NUM_RETRIES: String = "retries"
+  val KEY_CK_SINK_FAILED_RECORDS_PATH: String = "failed-records-path"
+  val KEY_CK_SINK_HOSTS = "hosts"
+  val KEY_CK_SINK_USER = "user"
+  val KEY_CK_SINK_PASSWORD = "password"
   /**
    * about config es
    */

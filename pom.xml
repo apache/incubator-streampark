@@ -22,6 +22,7 @@
         <java.version>1.8</java.version>
         <spark.version>2.2.0</spark.version>
         <flink.version>1.9.1</flink.version>
+        <async.client.version>2.0.39</async.client.version>
         <hadoop.version>2.6.0</hadoop.version>
         <hbase.version>1.2.0</hbase.version>
         <scala.version>2.11.12</scala.version>
@@ -188,6 +189,12 @@
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
                 <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.asynchttpclient</groupId>
+                <artifactId>async-http-client</artifactId>
+                <version>${async.client.version}</version>
             </dependency>
 
             <!--es sink need httpcomponents -->
