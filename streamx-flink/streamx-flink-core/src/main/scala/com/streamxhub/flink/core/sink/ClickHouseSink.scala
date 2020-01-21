@@ -120,7 +120,6 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
       case _ => toCSVFun(value)
     }
     try {
-      println(csv)
       sinkBuffer.put(csv)
     } catch {
       case e: Exception =>
