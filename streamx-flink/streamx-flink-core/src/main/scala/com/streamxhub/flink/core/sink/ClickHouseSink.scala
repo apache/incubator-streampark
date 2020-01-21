@@ -265,10 +265,7 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 
 
 //----------------------------...async...-----------------------------------------------------------
-
 class ClickHouseConfig(parameters: Properties) {
-  require(parameters != null)
-
   var currentHostId: Int = 0
   var authorizationRequired: Boolean = false
   val credentials: String = (parameters.getProperty(KEY_CK_SINK_USER), parameters.getProperty(KEY_CK_SINK_PASSWORD)) match {
@@ -277,6 +274,18 @@ class ClickHouseConfig(parameters: Properties) {
       val credentials = String.join(":", u, p)
       new String(Base64.getEncoder.encode(credentials.getBytes))
   }
+
+  val failedRecordsPath: String = parameters(KEY_CK_SINK_FAILED_RECORDS_PATH)
+  val numWriters: Int = parameters.getProperty(KEY_CK_SINK_NUM_WRITERS).toInt
+  val queueMaxCapacity: Int = parameters.getProperty(KEY_CK_SINK_QUEUE_MAX_CAPACITY).toInt
+  val timeout: Int = parameters.getProperty(KEY_CK_SINK_TIMEOUT_SEC).toInt
+  val maxRetries: Int = parameters.getProperty(KEY_CK_SINK_NUM_RETRIES).toInt
+
+  require(failedRecordsPath != null)
+  require(queueMaxCapacity > 0)
+  require(numWriters > 0)
+  require(timeout > 0)
+  require(maxRetries > 0)
 
   private[this] val hostsString: String = parameters.getProperty(KEY_CK_SINK_HOSTS)
   require(hostsString != null)
@@ -295,7 +304,6 @@ class ClickHouseConfig(parameters: Properties) {
     }
   }
 
-
   def getRandomHostUrl: String = {
     currentHostId = ThreadLocalRandom.current.nextInt(hostsWithPorts.size)
     hostsWithPorts.get(currentHostId)
@@ -311,28 +319,6 @@ class ClickHouseConfig(parameters: Properties) {
   }
 }
 
-class SinkCommonParams(params: Properties) {
-
-  var clickHouseConfig: ClickHouseConfig = _
-  var failedRecordsPath: String = _
-  var numWriters = 0
-  var queueMaxCapacity = 0
-  var timeout = 0
-  var maxRetries = 0
-
-  this.clickHouseConfig = new ClickHouseConfig(params)
-  this.numWriters = params.getProperty(KEY_CK_SINK_NUM_WRITERS).toInt
-  this.queueMaxCapacity = params.getProperty(KEY_CK_SINK_QUEUE_MAX_CAPACITY).toInt
-  this.maxRetries = params.getProperty(KEY_CK_SINK_NUM_RETRIES).toInt
-  this.timeout = params.getProperty(KEY_CK_SINK_TIMEOUT_SEC).toInt
-  this.failedRecordsPath = params(KEY_CK_SINK_FAILED_RECORDS_PATH)
-  Preconditions.checkNotNull(failedRecordsPath)
-  Preconditions.checkArgument(queueMaxCapacity > 0)
-  Preconditions.checkArgument(numWriters > 0)
-  Preconditions.checkArgument(timeout > 0)
-  Preconditions.checkArgument(maxRetries > 0)
-}
-
 class ClickHouseRequest(val values: util.List[String], val table: String) {
   var attemptCounter = 0
 
@@ -340,14 +326,15 @@ class ClickHouseRequest(val values: util.List[String], val table: String) {
 }
 
 class SinkWriter() extends AutoCloseable with Logger {
-  var sinkParams: SinkCommonParams = _
+
+  var sinkParams: ClickHouseConfig = _
   var service: ExecutorService = _
   var callbackService: ExecutorService = _
   var tasks = new ArrayBuffer[WriterTask]
   var commonQueue: BlockingQueue[ClickHouseRequest] = _
   var asyncHttpClient: AsyncHttpClient = _
 
-  def this(sinkParams: SinkCommonParams) = {
+  def this(sinkParams: ClickHouseConfig) = {
     this()
     this.sinkParams = sinkParams
     asyncHttpClient = Dsl.asyncHttpClient
@@ -404,7 +391,7 @@ class SinkWriter() extends AutoCloseable with Logger {
 class WriterTask(val id: Int,
                  val asyncHttpClient: AsyncHttpClient,
                  val queue: BlockingQueue[ClickHouseRequest],
-                 val sinkSettings: SinkCommonParams,
+                 val sinkSettings: ClickHouseConfig,
                  val callbackService: ExecutorService) extends Runnable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
@@ -437,10 +424,10 @@ class WriterTask(val id: Int,
   def buildRequest(chRequest: ClickHouseRequest): Request = {
     val resultCSV = String.join(" , ", chRequest.values)
     val query = String.format("INSERT INTO %s VALUES %s", chRequest.table, resultCSV)
-    val host = sinkSettings.clickHouseConfig.getRandomHostUrl
+    val host = sinkSettings.getRandomHostUrl
     val builder = asyncHttpClient.preparePost(host).setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8").setBody(query)
-    if (sinkSettings.clickHouseConfig.authorizationRequired) {
-      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkSettings.clickHouseConfig.credentials)
+    if (sinkSettings.authorizationRequired) {
+      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkSettings.credentials)
     }
     builder.build
   }
@@ -494,24 +481,14 @@ class WriterTask(val id: Int,
 }
 
 
-class SinkBuffer() extends AutoCloseable with Logger {
-  var writer: SinkWriter = _
-  var table: String = _
-  var bufferSize: Int = 0
-  var timeoutMillis: Long = 0L
-  var localValues: ArrayBuffer[String] = _
+class SinkBuffer(val writer: SinkWriter,
+                 val timeoutMillis: Long,
+                 val bufferSize: Int,
+                 val table: String) extends AutoCloseable with Logger {
 
   private var lastAddTimeMillis = 0L
 
-  def this(chWriter: SinkWriter, timeout: Long, maxBuffer: Int, table: String) {
-    this()
-    this.writer = chWriter
-    this.localValues = new ArrayBuffer[String]
-    this.timeoutMillis = timeout
-    this.bufferSize = maxBuffer
-    this.table = table
-    logger.info("[StreamX] Instance ClickHouse Sink, target table = {}, buffer size = {}", this.table, this.bufferSize)
-  }
+  var localValues: ArrayBuffer[String] = new ArrayBuffer[String]
 
   def put(recordAsCSV: String): Unit = {
     tryAddToQueue()
@@ -547,7 +524,7 @@ class SinkBuffer() extends AutoCloseable with Logger {
 
 }
 
-class SinkScheduledChecker(params: SinkCommonParams) extends AutoCloseable with Logger {
+class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with Logger {
   val sinkBuffers: ArrayBuffer[SinkBuffer] = new ArrayBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
@@ -573,7 +550,7 @@ class SinkScheduledChecker(params: SinkCommonParams) extends AutoCloseable with 
 }
 
 class SinkManager(properties: Properties) extends AutoCloseable with Logger {
-  val sinkParams: SinkCommonParams = new SinkCommonParams(properties)
+  val sinkParams: ClickHouseConfig = new ClickHouseConfig(properties)
   val writer = new SinkWriter(sinkParams)
   val checker = new SinkScheduledChecker(sinkParams)
   @volatile var isClosed: Boolean = false
