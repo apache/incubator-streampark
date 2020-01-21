@@ -88,17 +88,16 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 }
 
 class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: T => String = null) extends RichSinkFunction[T] with Logger {
-  @transient val LOCK = new Object()
-
   @volatile
   @transient var sinkManager: SinkManager = _
   @transient var sinkBuffer: SinkBuffer = _
 
   override def open(config: Configuration): Unit = {
-    if (sinkManager == null) {
-      LOCK.synchronized {
-        if (sinkManager == null) {
+    if (!Lock.initialized) {
+      Lock.lock.synchronized {
+        if (!Lock.initialized) {
           sinkManager = new SinkManager(properties)
+          Lock.initialized = true
         }
       }
     }
@@ -134,11 +133,16 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
   override def close(): Unit = {
     if (sinkBuffer != null) sinkBuffer.close()
     if (sinkManager != null && !sinkManager.isClosed) {
-      LOCK.synchronized {
+      Lock.lock.synchronized {
         if (!sinkManager.isClosed) sinkManager.close()
       }
     }
     super.close()
+  }
+
+  private[this] object Lock {
+    @volatile var initialized = false
+    val lock = new Object()
   }
 
 }
@@ -311,7 +315,7 @@ class ClickHouseConfig(parameters: Properties) {
   val jdbcUrl: String = parameters.getProperty(KEY_JDBC_URL)
   require(jdbcUrl != null)
   val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
-  require(hostsWithPorts.isEmpty)
+  require(hostsWithPorts.nonEmpty)
 
   def buildHosts(hostsString: String): util.List[String] = hostsString.split(SIGN_COMMA).map(checkUrl).toList
 
@@ -433,7 +437,7 @@ class WriterTask(val id: Int,
     logInfo(s"[StreamX] Task id = $id is finished")
   }
 
-  private def send(chRequest: ClickHouseRequest): Unit = {
+  def send(chRequest: ClickHouseRequest): Unit = {
     val request = buildRequest(chRequest)
     logger.debug(s"[StreamX] Ready to load data to ${chRequest.table}, size = ${chRequest.values.size}")
     val whenResponse = asyncHttpClient.executeRequest(request)
@@ -556,14 +560,14 @@ class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with 
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
   scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MICROSECONDS)
-  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (sec) = ${params.timeout}")
+  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = ${params.timeout}")
 
   def addSinkBuffer(sinkBuffer: SinkBuffer): Unit = {
     this.synchronized(sinkBuffers.add(sinkBuffer))
     logger.debug(s"[StreamX] Add sinkBuffer, target table = ${sinkBuffer.table}")
   }
 
-  private def getTask: Runnable = new Runnable {
+  def getTask: Runnable = new Runnable {
     override def run(): Unit = {
       this synchronized {
         logger.debug(s"[StreamX] Start checking buffers. Current count of buffers = ${sinkBuffers.size}")
