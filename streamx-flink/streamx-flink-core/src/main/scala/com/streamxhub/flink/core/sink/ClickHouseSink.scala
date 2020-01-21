@@ -275,7 +275,7 @@ class ClickHouseConfig(parameters: Properties) {
   val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
   val numWriters: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
-  val timeout: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_TIMEOUT).toInt
+  val timeout: Long = parameters.getProperty(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
   val maxRetries: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_RETRIES).toInt
 
   require(failedRecordsPath != null)
@@ -531,7 +531,7 @@ class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with 
   val sinkBuffers: ArrayBuffer[SinkBuffer] = new ArrayBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.SECONDS)
+  scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MICROSECONDS)
   logger.info("[StreamX] Build Sink scheduled checker, timeout (sec) = {}", params.timeout)
 
   def addSinkBuffer(sinkBuffer: SinkBuffer): Unit = {
