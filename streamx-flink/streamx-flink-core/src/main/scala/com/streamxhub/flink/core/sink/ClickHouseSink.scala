@@ -35,7 +35,6 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
-import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -47,7 +46,6 @@ import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
@@ -69,13 +67,13 @@ object ClickHouseSink {
 }
 
 class ClickHouseSink(@transient ctx: StreamingContext,
-                          overwriteParams: Map[String, String] = Map.empty[String, String],
-                          parallelism: Int = 0,
-                          name: String = null,
-                          uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+                     overwriteParams: Map[String, String] = Map.empty[String, String],
+                     parallelism: Int = 0,
+                     name: String = null,
+                     uid: String = null)(implicit instance: String = "") extends Sink with Logger {
 
   val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_PREFIX)(instance)
-  overwriteParams.foreach(x => prop.put(x._1, x._2))
+  overwriteParams.foreach { case (k, v) => prop.put(k, v) }
 
   def sink[T](stream: DataStream[T])(implicit toCSVFun: T => String): DataStreamSink[T] = {
     val sinkFun = new AsyncClickHouseSinkFunction[T](prop, toCSVFun)
@@ -93,6 +91,7 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 
 class AsyncClickHouseSinkFunction[T](properties: Properties, toCSVFun: T => String) extends RichSinkFunction[T] with Logger {
   val LOCK = new Object()
+
   @volatile
   @transient var sinkManager: SinkManager = _
   @transient var sinkBuffer: SinkBuffer = _
@@ -101,7 +100,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties, toCSVFun: T => Stri
     if (sinkManager == null) {
       LOCK.synchronized {
         if (sinkManager == null) {
-          sinkManager = new SinkManager(properties.toMap.asJava)
+          sinkManager = new SinkManager(properties)
         }
       }
     }
@@ -114,7 +113,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties, toCSVFun: T => Stri
       sinkBuffer.put(csv)
     } catch {
       case e: Exception =>
-        logger.error("[StreamX] Error while sending data to Clickhouse, record = {},error:{}", csv)
+        logger.error(s"""[StreamX] Error while sending data to Clickhouse, record = $csv,error:$e""")
         throw new RuntimeException(e)
     }
   }
@@ -267,38 +266,27 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 
 //----------------------------...async...-----------------------------------------------------------
 
-class ClickHouseConfig(parameters: util.Map[String, String]) {
+class ClickHouseConfig(parameters: Properties) {
+  require(parameters != null)
 
-  var hostsWithPorts: util.List[String] = _
-  var user: String = _
-  var password: String = _
-  var credentials: String = _
-  var authorizationRequired: Boolean = false
   var currentHostId: Int = 0
-
-  Preconditions.checkNotNull(parameters)
-  val hostsString: String = parameters.get(KEY_CK_SINK_HOSTS)
-  Preconditions.checkNotNull(hostsString)
-  hostsWithPorts = buildHostsAndPort(hostsString)
-  Preconditions.checkArgument(hostsWithPorts.nonEmpty)
-  val usr: String = parameters.get(KEY_CK_SINK_USER)
-  val pass: String = parameters.get(KEY_CK_SINK_PASSWORD)
-
-  if (StringUtils.isNotEmpty(usr) && StringUtils.isNotEmpty(pass)) {
-    user = parameters.get(KEY_CK_SINK_USER)
-    password = parameters.get(KEY_CK_SINK_PASSWORD)
-    credentials = buildCredentials(user, password)
-    authorizationRequired = true
-  } else { // avoid NPE
-    credentials = ""
-    password = ""
-    user = ""
-    authorizationRequired = false
+  var authorizationRequired: Boolean = false
+  val credentials: String = (parameters.getProperty(KEY_CK_SINK_USER), parameters.getProperty(KEY_CK_SINK_PASSWORD)) match {
+    case (null, null) => ""
+    case (u, p) =>
+      val credentials = String.join(":", u, p)
+      new String(Base64.getEncoder.encode(credentials.getBytes))
   }
 
-  private def buildHostsAndPort(hostsString: String): util.List[String] = hostsString.split(ConfigConst.SIGN_COMMA).map(checkHttpAndAdd).toList
+  private[this] val hostsString: String = parameters.getProperty(KEY_CK_SINK_HOSTS)
+  require(hostsString != null)
 
-  private def checkHttpAndAdd(host: String): String = {
+  val hostsWithPorts: util.List[String] = buildHosts(hostsString)
+  require(hostsWithPorts.isEmpty)
+
+  def buildHosts(hostsString: String): util.List[String] = hostsString.split(ConfigConst.SIGN_COMMA).map(checkHttpAndAdd).toList
+
+  def checkHttpAndAdd(host: String): String = {
     val newHost = host.replace(" ", "")
     if (!newHost.contains("http")) {
       "http://" + newHost
@@ -307,11 +295,6 @@ class ClickHouseConfig(parameters: util.Map[String, String]) {
     }
   }
 
-  private def buildCredentials(user: String, password: String) = {
-    val x = Base64.getEncoder
-    val credentials = String.join(":", user, password)
-    new String(x.encode(credentials.getBytes))
-  }
 
   def getRandomHostUrl: String = {
     currentHostId = ThreadLocalRandom.current.nextInt(hostsWithPorts.size)
@@ -328,7 +311,7 @@ class ClickHouseConfig(parameters: util.Map[String, String]) {
   }
 }
 
-class SinkCommonParams(params: util.Map[String, String]) {
+class SinkCommonParams(params: Properties) {
 
   var clickHouseConfig: ClickHouseConfig = _
   var failedRecordsPath: String = _
@@ -338,10 +321,10 @@ class SinkCommonParams(params: util.Map[String, String]) {
   var maxRetries = 0
 
   this.clickHouseConfig = new ClickHouseConfig(params)
-  this.numWriters = Integer.valueOf(params.get(KEY_CK_SINK_NUM_WRITERS))
-  this.queueMaxCapacity = Integer.valueOf(params.get(KEY_CK_SINK_QUEUE_MAX_CAPACITY))
-  this.maxRetries = Integer.valueOf(params.get(KEY_CK_SINK_NUM_RETRIES))
-  this.timeout = Integer.valueOf(params.get(KEY_CK_SINK_TIMEOUT_SEC))
+  this.numWriters = params.getProperty(KEY_CK_SINK_NUM_WRITERS).toInt
+  this.queueMaxCapacity = params.getProperty(KEY_CK_SINK_QUEUE_MAX_CAPACITY).toInt
+  this.maxRetries = params.getProperty(KEY_CK_SINK_NUM_RETRIES).toInt
+  this.timeout = params.getProperty(KEY_CK_SINK_TIMEOUT_SEC).toInt
   this.failedRecordsPath = params(KEY_CK_SINK_FAILED_RECORDS_PATH)
   Preconditions.checkNotNull(failedRecordsPath)
   Preconditions.checkArgument(queueMaxCapacity > 0)
@@ -350,7 +333,7 @@ class SinkCommonParams(params: util.Map[String, String]) {
   Preconditions.checkArgument(maxRetries > 0)
 }
 
-class ClickHouseRequest(val values: util.List[String], val targetTable: String) {
+class ClickHouseRequest(val values: util.List[String], val table: String) {
   var attemptCounter = 0
 
   def incrementCounter(): Unit = this.attemptCounter += 1
@@ -443,17 +426,17 @@ class WriterTask(val id: Int,
     logger.info("[StreamX] Task id = {} is finished", id)
   }
 
-  private def send(clickhouseRequest: ClickHouseRequest): Unit = {
-    val request = buildRequest(clickhouseRequest)
-    logger.debug("[StreamX] Ready to load data to {}, size = {}", clickhouseRequest.targetTable, clickhouseRequest.values.size)
+  private def send(chRequest: ClickHouseRequest): Unit = {
+    val request = buildRequest(chRequest)
+    logger.debug("[StreamX] Ready to load data to {}, size = {}", chRequest.table, chRequest.values.size)
     val whenResponse = asyncHttpClient.executeRequest(request)
-    val callback = respCallback(whenResponse, clickhouseRequest)
+    val callback = respCallback(whenResponse, chRequest)
     whenResponse.addListener(callback, callbackService)
   }
 
-  def buildRequest(clickhouseRequest: ClickHouseRequest): Request = {
-    val resultCSV = String.join(" , ", clickhouseRequest.values)
-    val query = String.format("INSERT INTO %s VALUES %s", clickhouseRequest.targetTable, resultCSV)
+  def buildRequest(chRequest: ClickHouseRequest): Request = {
+    val resultCSV = String.join(" , ", chRequest.values)
+    val query = String.format("INSERT INTO %s VALUES %s", chRequest.table, resultCSV)
     val host = sinkSettings.clickHouseConfig.getRandomHostUrl
     val builder = asyncHttpClient.preparePost(host).setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8").setBody(query)
     if (sinkSettings.clickHouseConfig.authorizationRequired) {
@@ -462,19 +445,19 @@ class WriterTask(val id: Int,
     builder.build
   }
 
-  def respCallback(whenResponse: ListenableFuture[Response], clickhouseRequest: ClickHouseRequest): Runnable = new Runnable {
+  def respCallback(whenResponse: ListenableFuture[Response], chRequest: ClickHouseRequest): Runnable = new Runnable {
     override def run(): Unit = {
       val response = whenResponse.get();
       try {
         if (response.getStatusCode != HTTP_OK) {
-          handleUnsuccessfulResponse(response, clickhouseRequest);
+          handleUnsuccessfulResponse(response, chRequest);
         } else {
-          logger.info(s"[StreamX] Successful send data to ClickHouse, batch size = ${clickhouseRequest.values.size()}, target table = ${clickhouseRequest.targetTable}, current attempt = ${clickhouseRequest.attemptCounter}")
+          logger.info(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.values.size()}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
       } catch {
         case e: Exception => logger.error(s"""[StreamX] Error while executing callback, params = $sinkSettings,error = $e""")
           try {
-            handleUnsuccessfulResponse(response, clickhouseRequest);
+            handleUnsuccessfulResponse(response, chRequest);
           } catch {
             case e: Exception => logger.error("[StreamX] Error while handle unsuccessful response", e);
           }
@@ -483,28 +466,28 @@ class WriterTask(val id: Int,
   }
 
   @throws[Exception]
-  def handleUnsuccessfulResponse(response: Response, clickhouseRequest: ClickHouseRequest): Unit = {
-    if (clickhouseRequest.attemptCounter > sinkSettings.maxRetries) {
+  def handleUnsuccessfulResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
+    if (chRequest.attemptCounter > sinkSettings.maxRetries) {
       logger.warn(s"[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = ${response}. Ready to flush data on disk")
-      logFailedRecords(clickhouseRequest)
+      logFailedRecords(chRequest)
     } else {
-      clickhouseRequest.incrementCounter()
-      logger.warn(s"[StreamX] Next attempt to send data to ClickHouse, table = ${clickhouseRequest.targetTable}, buffer size = ${clickhouseRequest.values.size}, current attempt num = ${clickhouseRequest.attemptCounter}, max attempt num = ${sinkSettings.maxRetries}, response = ${response}")
-      queue.put(clickhouseRequest)
+      chRequest.incrementCounter()
+      logger.warn(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.values.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkSettings.maxRetries}, response = ${response}")
+      queue.put(chRequest)
     }
   }
 
   @throws[Exception]
-  def logFailedRecords(clickhouseRequest: ClickHouseRequest): Unit = {
-    val filePath = s"${sinkSettings.failedRecordsPath}/${clickhouseRequest}_${System.currentTimeMillis}"
+  def logFailedRecords(chRequest: ClickHouseRequest): Unit = {
+    val filePath = s"${sinkSettings.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
     try {
-      clickhouseRequest.values.foreach(writer.println)
+      chRequest.values.foreach(writer.println)
       writer.flush()
     } finally {
       if (writer != null) writer.close()
     }
-    logger.info("[StreamX] Successful send data on disk, path = {}, size = {} ", filePath, clickhouseRequest.values.size)
+    logger.info("[StreamX] Successful send data on disk, path = {}, size = {} ", filePath, chRequest.values.size)
   }
 
   def setStopWorking(): Unit = isWorking = false
@@ -513,8 +496,8 @@ class WriterTask(val id: Int,
 
 class SinkBuffer() extends AutoCloseable with Logger {
   var writer: SinkWriter = _
-  var targetTable: String = _
-  var maxFlushBufferSize: Int = 0
+  var table: String = _
+  var bufferSize: Int = 0
   var timeoutMillis: Long = 0L
   var localValues: ArrayBuffer[String] = _
 
@@ -522,12 +505,12 @@ class SinkBuffer() extends AutoCloseable with Logger {
 
   def this(chWriter: SinkWriter, timeout: Long, maxBuffer: Int, table: String) {
     this()
-    writer = chWriter
-    localValues = new ArrayBuffer[String]
-    timeoutMillis = timeout
-    maxFlushBufferSize = maxBuffer
-    targetTable = table
-    logger.info("[StreamX] Instance ClickHouse Sink, target table = {}, buffer size = {}", this.targetTable, this.maxFlushBufferSize)
+    this.writer = chWriter
+    this.localValues = new ArrayBuffer[String]
+    this.timeoutMillis = timeout
+    this.bufferSize = maxBuffer
+    this.table = table
+    logger.info("[StreamX] Instance ClickHouse Sink, target table = {}, buffer size = {}", this.table, this.bufferSize)
   }
 
   def put(recordAsCSV: String): Unit = {
@@ -542,15 +525,15 @@ class SinkBuffer() extends AutoCloseable with Logger {
 
   private[this] def addToQueue(): Unit = {
     val deepCopy = buildDeepCopy(localValues.toList)
-    val params = new ClickHouseRequest(deepCopy, targetTable)
-    logger.debug("[StreamX] Build blank with params: buffer size = {}, target table  = {}", params.values.size, params.targetTable)
+    val params = new ClickHouseRequest(deepCopy, table)
+    logger.debug("[StreamX] Build blank with params: buffer size = {}, target table  = {}", params.values.size, params.table)
     writer.put(params)
     localValues.clear()
   }
 
   private[this] def flushCondition: Boolean = localValues.nonEmpty && (checkSize || checkTime)
 
-  private[this] def checkSize: Boolean = localValues.size >= maxFlushBufferSize
+  private[this] def checkSize: Boolean = localValues.size >= bufferSize
 
   private[this] def checkTime: Boolean = {
     if (lastAddTimeMillis == 0) return false
@@ -573,7 +556,7 @@ class SinkScheduledChecker(params: SinkCommonParams) extends AutoCloseable with 
 
   def addSinkBuffer(sinkBuffer: SinkBuffer): Unit = {
     this.synchronized(sinkBuffers.add(sinkBuffer))
-    logger.debug("[StreamX] Add sinkBuffer, target table = {}", sinkBuffer.targetTable)
+    logger.debug("[StreamX] Add sinkBuffer, target table = {}", sinkBuffer.table)
   }
 
   private def getTask: Runnable = new Runnable {
@@ -589,8 +572,8 @@ class SinkScheduledChecker(params: SinkCommonParams) extends AutoCloseable with 
   override def close(): Unit = ThreadUtils.shutdownExecutorService(scheduledExecutorService)
 }
 
-class SinkManager(globalParams: util.Map[String, String]) extends AutoCloseable with Logger {
-  val sinkParams: SinkCommonParams = new SinkCommonParams(globalParams)
+class SinkManager(properties: Properties) extends AutoCloseable with Logger {
+  val sinkParams: SinkCommonParams = new SinkCommonParams(properties)
   val writer = new SinkWriter(sinkParams)
   val checker = new SinkScheduledChecker(sinkParams)
   @volatile var isClosed: Boolean = false
@@ -598,9 +581,9 @@ class SinkManager(globalParams: util.Map[String, String]) extends AutoCloseable 
   def buildBuffer(properties: Properties): SinkBuffer = {
     Preconditions.checkNotNull(checker)
     Preconditions.checkNotNull(writer)
-    val targetTable = properties.getProperty(KEY_CK_SINK_TABLE)
-    val maxFlushBufferSize = Integer.valueOf(properties.getProperty(KEY_CK_SINK_MAX_BUFFER_SIZE))
-    val sinkBuffer = new SinkBuffer(writer, sinkParams.timeout, maxFlushBufferSize, targetTable)
+    val table = properties.getProperty(KEY_CK_SINK_TABLE)
+    val bufferSize = Integer.valueOf(properties.getProperty(KEY_CK_SINK_MAX_BUFFER_SIZE))
+    val sinkBuffer = new SinkBuffer(writer, sinkParams.timeout, bufferSize, table)
     checker.addSinkBuffer(sinkBuffer)
     sinkBuffer
   }
