@@ -29,7 +29,6 @@ import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Collections, Properties}
 
-import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
@@ -266,18 +265,18 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 class ClickHouseConfig(parameters: Properties) {
   var currentHostId: Int = 0
   var authorizationRequired: Boolean = false
-  val credentials: String = (parameters.getProperty(KEY_CK_SINK_USER), parameters.getProperty(KEY_CK_SINK_PASSWORD)) match {
+  val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
     case (null, null) => ""
     case (u, p) =>
       val credentials = String.join(":", u, p)
       new String(Base64.getEncoder.encode(credentials.getBytes))
   }
 
-  val failedRecordsPath: String = parameters(KEY_CK_SINK_FAILED_RECORDS_PATH)
-  val numWriters: Int = parameters.getProperty(KEY_CK_SINK_NUM_WRITERS).toInt
-  val queueMaxCapacity: Int = parameters.getProperty(KEY_CK_SINK_QUEUE_MAX_CAPACITY).toInt
-  val timeout: Int = parameters.getProperty(KEY_CK_SINK_TIMEOUT_SEC).toInt
-  val maxRetries: Int = parameters.getProperty(KEY_CK_SINK_NUM_RETRIES).toInt
+  val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
+  val numWriters: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
+  val queueMaxCapacity: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
+  val timeout: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_TIMEOUT).toInt
+  val maxRetries: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_RETRIES).toInt
 
   require(failedRecordsPath != null)
   require(queueMaxCapacity > 0)
@@ -285,13 +284,13 @@ class ClickHouseConfig(parameters: Properties) {
   require(timeout > 0)
   require(maxRetries > 0)
 
-  private[this] val hostsString: String = parameters.getProperty(KEY_CK_SINK_HOSTS)
+  private[this] val hostsString: String = parameters.getProperty(KEY_HOST)
   require(hostsString != null)
 
   val hostsWithPorts: util.List[String] = buildHosts(hostsString)
   require(hostsWithPorts.isEmpty)
 
-  def buildHosts(hostsString: String): util.List[String] = hostsString.split(ConfigConst.SIGN_COMMA).map(checkHttpAndAdd).toList
+  def buildHosts(hostsString: String): util.List[String] = hostsString.split(SIGN_COMMA).map(checkHttpAndAdd).toList
 
   def checkHttpAndAdd(host: String): String = {
     val newHost = host.replace(" ", "")
@@ -561,8 +560,8 @@ class SinkManager(properties: Properties) extends AutoCloseable with Logger {
   @volatile var isClosed: Boolean = false
 
   def getBuffer(properties: Properties): SinkBuffer = {
-    val table = properties.getProperty(KEY_CK_SINK_TABLE)
-    val bufferSize = properties.getProperty(KEY_CK_SINK_MAX_BUFFER_SIZE).toInt
+    val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
+    val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
     val sinkBuffer = new SinkBuffer(writer, sinkParams.timeout, bufferSize, table)
     checker.addSinkBuffer(sinkBuffer)
     sinkBuffer

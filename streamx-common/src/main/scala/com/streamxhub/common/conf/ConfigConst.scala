@@ -114,16 +114,13 @@ object ConfigConst {
    * about clickhouse
    */
   val CLICKHOUSE_PREFIX = "clickhouse.sink"
-  val KEY_CK_SINK_TABLE: String = "table"
-  val KEY_CK_SINK_MAX_BUFFER_SIZE: String = "max-buffer-size"
-  val KEY_CK_SINK_NUM_WRITERS: String = "num-writers"
-  val KEY_CK_SINK_QUEUE_MAX_CAPACITY: String = "queue-max-capacity"
-  val KEY_CK_SINK_TIMEOUT_SEC: String = "timeout"
-  val KEY_CK_SINK_NUM_RETRIES: String = "retries"
-  val KEY_CK_SINK_FAILED_RECORDS_PATH: String = "failed-records-path"
-  val KEY_CK_SINK_HOSTS = "hosts"
-  val KEY_CK_SINK_USER = "user"
-  val KEY_CK_SINK_PASSWORD = "password"
+  val KEY_CLICKHOUSE_SINK_TABLE: String = "table"
+  val KEY_CLICKHOUSE_SINK_BUFFER_SIZE: String = "async.buffer-size"
+  val KEY_CLICKHOUSE_SINK_NUM_WRITERS: String = "async.num-writers"
+  val KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY: String = "async.queue-capacity"
+  val KEY_CLICKHOUSE_SINK_TIMEOUT: String = "async.timeout"
+  val KEY_CLICKHOUSE_SINK_RETRIES: String = "async.retries"
+  val KEY_CLICKHOUSE_SINK_FAILED_PATH: String = "async.failed-path"
   /**
    * about config es
    */
