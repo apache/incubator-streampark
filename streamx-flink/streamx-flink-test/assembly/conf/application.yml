@@ -10,8 +10,16 @@ hbase:
   zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
   zookeeper.property.clientPort: 2181
 
-clickhouse:
+clickhouse.sink:
   driverClassName:
-  jdbcUrl: jdbc:clickhouse://localhost:8123
+  host: 192.168.0.100
   username: default
-  password:
+  password: 123322242
+  table: default
+  async:
+    buffer-size: 10240
+    num-writers: 3
+    queue-capacity: 1000
+    timeout: 1000
+    retries: 10
+    failed-path: /tmp/failed_records
