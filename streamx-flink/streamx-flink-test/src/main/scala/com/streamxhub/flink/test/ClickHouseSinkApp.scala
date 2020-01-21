@@ -4,23 +4,28 @@ import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.sink.ClickHouseSink
 import org.apache.flink.streaming.api.scala._
 
-/** *
- * 建表语句
- * CREATE TABLE test.test (`name` String, `age` UInt16, `cnt` UInt16) ENGINE = TinyLog
- *
- * // clickhouse参数值
- * var schemaName: String = "test"
- * var tableName: String = "test"
- * var user: String = "default"
- * var password: String = ""
- * var url: String = "jdbc:clickhouse://xxx:8123"
- */
 object ClickHouseSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
+    val createTable =
+      """
+        |create TABLE test.orders(
+        |userId UInt16,
+        |orderId UInt16,
+        |siteId UInt8,
+        |cityId UInt8,
+        |orderStatus UInt8,
+        |price Float64,
+        |quantity UInt8,
+        |timestamp UInt16
+        |)ENGINE = TinyLog;
+        |""".stripMargin.toString
+
+    println(createTable)
+
     val source = context.addSource(new TestSource)
-    ClickHouseSink(context).sink[TestEntity](source)(x => {
-      s"insert into orders(userId,orderId,siteId,cityId,orderStatus,price,quantity,timestamp) values(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
+    ClickHouseSink(context).sink[TestEntity](source,"default")(x => {
+      s"(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
     })
   }
 
