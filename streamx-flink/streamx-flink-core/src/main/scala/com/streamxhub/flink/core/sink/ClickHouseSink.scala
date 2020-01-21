@@ -88,6 +88,12 @@ class ClickHouseSink(@transient ctx: StreamingContext,
 }
 
 class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: T => String = null) extends RichSinkFunction[T] with Logger {
+
+  private[this] object Lock {
+    @volatile var initialized = false
+    val lock = new Object()
+  }
+
   @volatile
   @transient var sinkManager: SinkManager = _
   @transient var sinkBuffer: SinkBuffer = _
@@ -139,10 +145,6 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     super.close()
   }
 
-  private[this] object Lock {
-    @volatile var initialized = false
-    val lock = new Object()
-  }
 
 }
 
@@ -368,6 +370,7 @@ class SinkWriter() extends AutoCloseable with Logger {
     val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
     val cores = Runtime.getRuntime.availableProcessors
     val coreThreadsNum = Math.max(cores / 4, 2)
+
     callbackService = new ThreadPoolExecutor(coreThreadsNum, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable], callbackServiceFactory)
 
     for (i <- 0 until numWriters) {
@@ -515,22 +518,24 @@ class SinkBuffer(val writer: SinkWriter,
 
   private var lastAddTimeMillis = 0L
 
-  var localValues: ArrayBuffer[String] = new ArrayBuffer[String]
+  var localValues: CopyOnWriteArrayList[String] = new CopyOnWriteArrayList[String]()
 
-  def put(recordAsCSV: String): Unit = {
+  def put(csv: String): Unit = {
     tryAddToQueue()
-    localValues.add(recordAsCSV)
+    localValues.add(csv)
     lastAddTimeMillis = System.currentTimeMillis
   }
 
   def tryAddToQueue(): Unit = {
-    if (flushCondition) {
-      addToQueue()
+    this.synchronized{
+      if (flushCondition) {
+        addToQueue()
+      }
     }
   }
 
   private[this] def addToQueue(): Unit = {
-    val deepCopy = buildDeepCopy(localValues.toList)
+    val deepCopy = buildDeepCopy(localValues)
     val params = new ClickHouseRequest(deepCopy, table)
     logger.debug(s"[StreamX] Build blank with params: buffer size = ${params.values.size}, target table  = ${params.table}")
     writer.put(params)
@@ -558,7 +563,7 @@ class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with 
   val sinkBuffers: ArrayBuffer[SinkBuffer] = new ArrayBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MICROSECONDS)
+  scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MILLISECONDS)
   logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = ${params.timeout}")
 
   def addSinkBuffer(sinkBuffer: SinkBuffer): Unit = {

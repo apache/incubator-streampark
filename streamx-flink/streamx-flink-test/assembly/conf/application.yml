@@ -17,9 +17,9 @@ clickhouse.sink:
   username: default
   password: 123322242
   async:
-    buffer-size: 10
+    buffer-size: 1000
     num-writers: 3
-    queue-capacity: 100
+    queue-capacity: 1000
     timeout: 1000
     retries: 10
     failed-path: /tmp/failed_records
