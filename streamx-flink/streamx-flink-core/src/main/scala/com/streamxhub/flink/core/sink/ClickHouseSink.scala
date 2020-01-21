@@ -436,10 +436,10 @@ class WriterTask(val id: Int,
 
   def respCallback(whenResponse: ListenableFuture[Response], chRequest: ClickHouseRequest): Runnable = new Runnable {
     override def run(): Unit = {
-      val response = whenResponse.get();
+      val response = whenResponse.get()
       try {
         if (response.getStatusCode != HTTP_OK) {
-          handleUnsuccessfulResponse(response, chRequest);
+          handleUnsuccessfulResponse(response, chRequest)
         } else {
           logger.info(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.values.size()}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
@@ -529,6 +529,7 @@ class SinkBuffer(val writer: SinkWriter,
 }
 
 class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with Logger {
+
   val sinkBuffers: ArrayBuffer[SinkBuffer] = new ArrayBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
