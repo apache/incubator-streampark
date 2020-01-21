@@ -29,7 +29,6 @@ import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Collections, Properties}
 
-import com.google.common.base.Preconditions
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils, ThreadUtils}
@@ -49,7 +48,6 @@ import scala.collection.JavaConversions._
 import scala.collection.Map
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
-
 
 object ClickHouseSink {
 
@@ -104,7 +102,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties, toCSVFun: T => Stri
         }
       }
     }
-    sinkBuffer = sinkManager.buildBuffer(properties)
+    sinkBuffer = sinkManager.getBuffer(properties)
   }
 
   override def invoke(value: T): Unit = {
@@ -423,9 +421,13 @@ class WriterTask(val id: Int,
 
   def buildRequest(chRequest: ClickHouseRequest): Request = {
     val resultCSV = String.join(" , ", chRequest.values)
-    val query = String.format("INSERT INTO %s VALUES %s", chRequest.table, resultCSV)
+    val query = s"INSERT INTO ${chRequest.table} VALUES ${resultCSV}"
     val host = sinkSettings.getRandomHostUrl
-    val builder = asyncHttpClient.preparePost(host).setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8").setBody(query)
+    val builder = asyncHttpClient
+      .preparePost(host)
+      .setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8")
+      .setBody(query)
+
     if (sinkSettings.authorizationRequired) {
       builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkSettings.credentials)
     }
@@ -497,7 +499,9 @@ class SinkBuffer(val writer: SinkWriter,
   }
 
   def tryAddToQueue(): Unit = {
-    if (flushCondition) addToQueue()
+    if (flushCondition) {
+      addToQueue()
+    }
   }
 
   private[this] def addToQueue(): Unit = {
@@ -555,11 +559,9 @@ class SinkManager(properties: Properties) extends AutoCloseable with Logger {
   val checker = new SinkScheduledChecker(sinkParams)
   @volatile var isClosed: Boolean = false
 
-  def buildBuffer(properties: Properties): SinkBuffer = {
-    Preconditions.checkNotNull(checker)
-    Preconditions.checkNotNull(writer)
+  def getBuffer(properties: Properties): SinkBuffer = {
     val table = properties.getProperty(KEY_CK_SINK_TABLE)
-    val bufferSize = Integer.valueOf(properties.getProperty(KEY_CK_SINK_MAX_BUFFER_SIZE))
+    val bufferSize = properties.getProperty(KEY_CK_SINK_MAX_BUFFER_SIZE).toInt
     val sinkBuffer = new SinkBuffer(writer, sinkParams.timeout, bufferSize, table)
     checker.addSinkBuffer(sinkBuffer)
     sinkBuffer
