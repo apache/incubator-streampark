@@ -295,8 +295,11 @@ class ClickHouseConfig(parameters: Properties) {
   var currentHostId: Int = 0
   var authorizationRequired: Boolean = false
   val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
-    case (null, null) => ""
+    case (null, null) =>
+      authorizationRequired = false
+      null
     case (u, p) =>
+      authorizationRequired = true
       val credentials = String.join(":", u, p)
       new String(Base64.getEncoder.encode(credentials.getBytes))
   }

@@ -24,7 +24,7 @@ object ClickHouseSinkApp extends FlinkStreaming {
     println(createTable)
 
     val source = context.addSource(new TestSource)
-    ClickHouseSink(context).sink[TestEntity](source,"default")(x => {
+    ClickHouseSink(context).sink[TestEntity](source,"test.orders")(x => {
       s"(${x.userId},${x.orderId},${x.siteId},${x.cityId},${x.orderStatus},${x.price},${x.quantity},${x.timestamp})"
     })
   }
