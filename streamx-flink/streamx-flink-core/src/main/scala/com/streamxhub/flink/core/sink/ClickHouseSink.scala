@@ -284,9 +284,8 @@ class ClickHouseConfig(parameters: Properties) {
   require(timeout > 0)
   require(maxRetries > 0)
 
-  private[this] val hostsString: String = parameters.getProperty(KEY_HOST)
+  val hostsString: String = parameters.getProperty(KEY_HOST)
   require(hostsString != null)
-
   val hostsWithPorts: util.List[String] = buildHosts(hostsString)
   require(hostsWithPorts.isEmpty)
 
