@@ -72,8 +72,8 @@ class ClickHouseSink(@transient ctx: StreamingContext,
   val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_PREFIX)(instance)
   overwriteParams.foreach { case (k, v) => prop.put(k, v) }
 
-  def sink[T](stream: DataStream[T],table:String)(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
-    prop.put(KEY_CLICKHOUSE_SINK_TABLE,table)
+  def sink[T](stream: DataStream[T], table: String)(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
+    prop.put(KEY_CLICKHOUSE_SINK_TABLE, table)
     val sinkFun = new AsyncClickHouseSinkFunction[T](prop)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
@@ -350,42 +350,36 @@ class ClickHouseRequest(val values: util.List[String], val table: String) {
   def incrementCounter(): Unit = this.attemptCounter += 1
 }
 
-class SinkWriter() extends AutoCloseable with Logger {
+class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
+  private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
+  private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
-  var sinkParams: ClickHouseConfig = _
-  var service: ExecutorService = _
-  var callbackService: ExecutorService = _
+  var callbackService: ExecutorService = new ThreadPoolExecutor(
+    Math.max(Runtime.getRuntime.availableProcessors / 4, 2),
+    Integer.MAX_VALUE,
+    60L,
+    TimeUnit.SECONDS,
+    new LinkedBlockingQueue[Runnable], callbackServiceFactory
+  )
+
   var tasks = new ArrayBuffer[WriterTask]
-  var commonQueue: BlockingQueue[ClickHouseRequest] = _
-  var asyncHttpClient: AsyncHttpClient = _
+  var commonQueue: BlockingQueue[ClickHouseRequest] = new LinkedBlockingQueue[ClickHouseRequest](sinkParams.queueMaxCapacity)
+  var asyncHttpClient: AsyncHttpClient = Dsl.asyncHttpClient
+  var service: ExecutorService = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
 
-  def this(sinkParams: ClickHouseConfig) = {
-    this()
-    this.sinkParams = sinkParams
-    asyncHttpClient = Dsl.asyncHttpClient
-    val numWriters = sinkParams.numWriters
-    commonQueue = new LinkedBlockingQueue[ClickHouseRequest](sinkParams.queueMaxCapacity)
-    val threadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
-    service = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
-    val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
-    val cores = Runtime.getRuntime.availableProcessors
-    val coreThreadsNum = Math.max(cores / 4, 2)
+  for (i <- 0 until sinkParams.numWriters) {
+    val task = new WriterTask(i, asyncHttpClient, commonQueue, sinkParams, callbackService)
+    tasks.add(task)
+    service.submit(task)
+  }
 
-    callbackService = new ThreadPoolExecutor(coreThreadsNum, Integer.MAX_VALUE, 60L, TimeUnit.SECONDS, new LinkedBlockingQueue[Runnable], callbackServiceFactory)
-
-    for (i <- 0 until numWriters) {
-      val task = new WriterTask(i, asyncHttpClient, commonQueue, sinkParams, callbackService)
-      tasks.add(task)
-      service.submit(task)
-    }
-    try {
-      val path = Paths.get(sinkParams.failedRecordsPath)
-      Files.createDirectories(path)
-    } catch {
-      case e: Exception =>
-        logError(s"[StreamX] Error while starting CH writer error:${e}")
-        throw new RuntimeException(e)
-    }
+  try {
+    val path = Paths.get(sinkParams.failedRecordsPath)
+    Files.createDirectories(path)
+  } catch {
+    case e: Exception =>
+      logError(s"[StreamX] Error while starting CH writer error:${e}")
+      throw new RuntimeException(e)
   }
 
   def put(params: ClickHouseRequest): Unit = {
@@ -527,7 +521,7 @@ class SinkBuffer(val writer: SinkWriter,
   }
 
   def tryAddToQueue(): Unit = {
-    this.synchronized{
+    this.synchronized {
       if (flushCondition) {
         addToQueue()
       }
