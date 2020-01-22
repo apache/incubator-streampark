@@ -305,13 +305,10 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 //---------------------------------------------------------------------------------------
 class ClickHouseConfig(parameters: Properties) {
   var currentHostId: Int = 0
-  var authorizationRequired: Boolean = false
   val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
     case (null, null) =>
-      authorizationRequired = false
       null
     case (u, p) =>
-      authorizationRequired = true
       val credentials = String.join(":", u, p)
       new String(Base64.getEncoder.encode(credentials.getBytes))
   }
@@ -426,7 +423,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
 class WriterTask(val id: Int,
                  val asyncHttpClient: AsyncHttpClient,
                  val queue: BlockingQueue[ClickHouseRequest],
-                 val sinkSettings: ClickHouseConfig,
+                 val sinkConf: ClickHouseConfig,
                  val callbackService: ExecutorService) extends Runnable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
@@ -457,16 +454,15 @@ class WriterTask(val id: Int,
   }
 
   def buildRequest(chRequest: ClickHouseRequest): Request = {
-    val resultCSV = String.join(" , ", chRequest.values)
-    val query = s"INSERT INTO ${chRequest.table} VALUES ${resultCSV}"
-    val host = sinkSettings.getRandomHostUrl
+    val query = s"INSERT INTO ${chRequest.table} VALUES ${chRequest.values.mkString(",")}"
+    val host = sinkConf.getRandomHostUrl
     val builder = asyncHttpClient
       .preparePost(host)
       .setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8")
       .setBody(query)
 
-    if (sinkSettings.authorizationRequired) {
-      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkSettings.credentials)
+    if (sinkConf.credentials != null) {
+      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkConf.credentials)
     }
     builder.build
   }
@@ -481,7 +477,7 @@ class WriterTask(val id: Int,
           logInfo(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.values.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
       } catch {
-        case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $sinkSettings,error = $e""")
+        case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $sinkConf,error = $e""")
           try {
             handleUnsuccessfulResponse(response, chRequest);
           } catch {
@@ -493,19 +489,19 @@ class WriterTask(val id: Int,
 
   @throws[Exception]
   def handleUnsuccessfulResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
-    if (chRequest.attemptCounter > sinkSettings.maxRetries) {
+    if (chRequest.attemptCounter > sinkConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
       logFailedRecords(chRequest)
     } else {
       chRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.values.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkSettings.maxRetries}, response = $response")
+      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.values.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkConf.maxRetries}, response = $response")
       queue.put(chRequest)
     }
   }
 
   @throws[Exception]
   def logFailedRecords(chRequest: ClickHouseRequest): Unit = {
-    val filePath = s"${sinkSettings.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
+    val filePath = s"${sinkConf.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
     try {
       chRequest.values.foreach(writer.println)
