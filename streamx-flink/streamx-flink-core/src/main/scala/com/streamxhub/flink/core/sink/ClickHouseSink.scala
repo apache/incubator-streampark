@@ -45,7 +45,6 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import scala.collection.JavaConversions._
 import scala.collection.Map
-import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 object ClickHouseSink {
@@ -152,11 +151,17 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
 
   @throws[Exception]
   override def close(): Unit = {
-    if (sinkBuffer != null) sinkBuffer.close()
-    if (sinkWriter != null) sinkWriter.close()
-    if (sinkChecker != null) sinkChecker.close()
-    isClosed = true
-    super.close()
+    if (!isClosed) {
+      Lock.lock.synchronized {
+        if (!isClosed) {
+          if (sinkBuffer != null) sinkBuffer.close()
+          if (sinkWriter != null) sinkWriter.close()
+          if (sinkChecker != null) sinkChecker.close()
+          isClosed = true
+          super.close()
+        }
+      }
+    }
   }
 }
 
@@ -310,20 +315,19 @@ class ClickHouseConfig(parameters: Properties) {
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
 
+  val jdbcUrl: String = parameters(KEY_JDBC_URL)
   val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
-  val numWriters: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
-  val queueMaxCapacity: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
-  val timeout: Long = parameters.getProperty(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
-  val maxRetries: Int = parameters.getProperty(KEY_CLICKHOUSE_SINK_RETRIES).toInt
+  val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
+  val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
+  val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
+  val maxRetries: Int = parameters(KEY_CLICKHOUSE_SINK_RETRIES).toInt
 
+  require(jdbcUrl != null)
   require(failedRecordsPath != null)
   require(queueMaxCapacity > 0)
   require(numWriters > 0)
   require(timeout > 0)
   require(maxRetries > 0)
-
-  val jdbcUrl: String = parameters.getProperty(KEY_JDBC_URL)
-  require(jdbcUrl != null)
 
   val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
   require(hostsWithPorts.nonEmpty)
@@ -369,10 +373,11 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
     Integer.MAX_VALUE,
     60L,
     TimeUnit.SECONDS,
-    new LinkedBlockingQueue[Runnable], callbackServiceFactory
+    new LinkedBlockingQueue[Runnable],
+    callbackServiceFactory
   )
 
-  var tasks = new ArrayBuffer[WriterTask]
+  var tasks: List[WriterTask] = List[WriterTask]()
   var commonQueue: BlockingQueue[ClickHouseRequest] = new LinkedBlockingQueue[ClickHouseRequest](sinkParams.queueMaxCapacity)
   var asyncHttpClient: AsyncHttpClient = Dsl.asyncHttpClient
   var service: ExecutorService = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
@@ -405,7 +410,6 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
 
   private def stopWriters(): Unit = tasks.foreach(_.setStopWorking())
 
-  @throws[Exception]
   override def close(): Unit = {
     logInfo("[StreamX] Closing ClickHouse-writer...")
     stopWriters()
@@ -485,7 +489,6 @@ class WriterTask(val id: Int,
     }
   }
 
-  @throws[Exception]
   def handleUnsuccessfulResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
     if (chRequest.attemptCounter > sinkConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
@@ -497,7 +500,6 @@ class WriterTask(val id: Int,
     }
   }
 
-  @throws[Exception]
   def logFailedRecords(chRequest: ClickHouseRequest): Unit = {
     val filePath = s"${sinkConf.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
@@ -521,7 +523,7 @@ class SinkBuffer(val writer: SinkWriter,
 
   private var lastAddTimeMillis = 0L
 
-  var localValues: CopyOnWriteArrayList[String] = new CopyOnWriteArrayList[String]()
+  var localValues = new CopyOnWriteArrayList[String]()
 
   def put(csv: String): Unit = {
     tryAddToQueue()
@@ -563,7 +565,7 @@ class SinkBuffer(val writer: SinkWriter,
 
 class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with Logger {
 
-  val sinkBuffers: ArrayBuffer[SinkBuffer] = new ArrayBuffer[SinkBuffer]()
+  val sinkBuffers: List[SinkBuffer] = List[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
   scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MILLISECONDS)
@@ -583,7 +585,6 @@ class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with 
     }
   }
 
-  @throws[Exception]
   override def close(): Unit = ThreadUtils.shutdownExecutorService(scheduledExecutorService)
 
 }
