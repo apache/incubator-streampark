@@ -102,20 +102,27 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     val lock = new Object()
   }
 
-  @volatile
-  @transient var sinkManager: SinkManager = _
+  val sinkConf: ClickHouseConfig = new ClickHouseConfig(properties)
   @transient var sinkBuffer: SinkBuffer = _
+  @transient var sinkWriter: SinkWriter = _
+  @transient var sinkChecker: SinkScheduledChecker = _
+  @volatile var isClosed: Boolean = false
 
   override def open(config: Configuration): Unit = {
     if (!Lock.initialized) {
       Lock.lock.synchronized {
         if (!Lock.initialized) {
-          sinkManager = new SinkManager(properties)
+          val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
+          val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
+          sinkWriter = new SinkWriter(sinkConf)
+          sinkChecker = new SinkScheduledChecker(sinkConf)
+          sinkBuffer = new SinkBuffer(sinkWriter, sinkConf.timeout, bufferSize, table)
+          sinkChecker.addSinkBuffer(sinkBuffer)
           Lock.initialized = true
+          logInfo("[StreamX] AsyncClickHouseSink initialize... ")
         }
       }
     }
-    sinkBuffer = sinkManager.getBuffer(properties)
   }
 
   override def invoke(value: T): Unit = {
@@ -146,15 +153,11 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
   @throws[Exception]
   override def close(): Unit = {
     if (sinkBuffer != null) sinkBuffer.close()
-    if (sinkManager != null && !sinkManager.isClosed) {
-      Lock.lock.synchronized {
-        if (!sinkManager.isClosed) sinkManager.close()
-      }
-    }
+    if (sinkWriter != null) sinkWriter.close()
+    if (sinkChecker != null) sinkChecker.close()
+    isClosed = true
     super.close()
   }
-
-
 }
 
 
@@ -588,27 +591,5 @@ class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with 
 
   @throws[Exception]
   override def close(): Unit = ThreadUtils.shutdownExecutorService(scheduledExecutorService)
-}
-
-class SinkManager(properties: Properties) extends AutoCloseable with Logger {
-  val sinkParams: ClickHouseConfig = new ClickHouseConfig(properties)
-  val writer = new SinkWriter(sinkParams)
-  val checker = new SinkScheduledChecker(sinkParams)
-  @volatile var isClosed: Boolean = false
-
-  def getBuffer(properties: Properties): SinkBuffer = {
-    val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
-    val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
-    val sinkBuffer = new SinkBuffer(writer, sinkParams.timeout, bufferSize, table)
-    checker.addSinkBuffer(sinkBuffer)
-    sinkBuffer
-  }
-
-  @throws[Exception]
-  override def close(): Unit = {
-    writer.close()
-    checker.close()
-    isClosed = true
-  }
 
 }
