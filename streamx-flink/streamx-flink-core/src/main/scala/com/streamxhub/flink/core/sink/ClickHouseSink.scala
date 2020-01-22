@@ -102,10 +102,10 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     val lock = new Object()
   }
 
-  @transient var sinkConf: ClickHouseConfig = _
-  @transient var sinkBuffer: SinkBuffer = _
-  @transient var sinkWriter: SinkWriter = _
-  @transient var sinkChecker: SinkScheduledChecker = _
+  @transient var clickHouseConf: ClickHouseConfig = _
+  @transient var clickHouseBuffer: ClickHouseBuffer = _
+  @transient var clickHouseWriter: ClickHouseWriter = _
+  @transient var clickHouseChecker: ClickHouseScheduledChecker = _
   @volatile var isClosed: Boolean = false
 
   override def open(config: Configuration): Unit = {
@@ -114,11 +114,11 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         if (!Lock.initialized) {
           val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
           val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
-          sinkConf = new ClickHouseConfig(properties)
-          sinkWriter = new SinkWriter(sinkConf)
-          sinkChecker = new SinkScheduledChecker(sinkConf)
-          sinkBuffer = new SinkBuffer(sinkWriter, sinkConf.timeout, bufferSize, table)
-          sinkChecker.addSinkBuffer(sinkBuffer)
+          clickHouseConf = new ClickHouseConfig(properties)
+          clickHouseWriter = new ClickHouseWriter(clickHouseConf)
+          clickHouseChecker = new ClickHouseScheduledChecker(clickHouseConf)
+          clickHouseBuffer = new ClickHouseBuffer(clickHouseWriter, clickHouseConf.timeout, bufferSize, table)
+          clickHouseChecker.addSinkBuffer(clickHouseBuffer)
           Lock.initialized = true
           logInfo("[StreamX] AsyncClickHouseSink initialize... ")
         }
@@ -143,7 +143,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
       case _ => toCSVFun(value)
     }
     try {
-      sinkBuffer.put(csv)
+      clickHouseBuffer.put(csv)
     } catch {
       case e: Exception =>
         logError(s"""[StreamX] Error while sending data to Clickhouse, record = $csv,error:$e""")
@@ -155,9 +155,9 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     if (!isClosed) {
       Lock.lock.synchronized {
         if (!isClosed) {
-          if (sinkBuffer != null) sinkBuffer.close()
-          if (sinkWriter != null) sinkWriter.close()
-          if (sinkChecker != null) sinkChecker.close()
+          if (clickHouseBuffer != null) clickHouseBuffer.close()
+          if (clickHouseWriter != null) clickHouseWriter.close()
+          if (clickHouseChecker != null) clickHouseChecker.close()
           isClosed = true
           super.close()
         }
@@ -357,7 +357,7 @@ class ClickHouseRequest(val records: util.List[String], val table: String) {
   def size: Int = records.size()
 }
 
-class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
+class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
@@ -411,7 +411,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
     asyncHttpClient.close()
     commonQueue.clear()
     tasks.clear()
-    logInfo(s"[StreamX] ${classOf[SinkWriter].getSimpleName} is closed")
+    logInfo(s"[StreamX] ${classOf[ClickHouseWriter].getSimpleName} is closed")
   }
 
 }
@@ -420,7 +420,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
 class WriterTask(val id: Int,
                  val asyncHttpClient: AsyncHttpClient,
                  val queue: BlockingQueue[ClickHouseRequest],
-                 val sinkConf: ClickHouseConfig,
+                 val clickHouseConf: ClickHouseConfig,
                  val callbackService: ExecutorService) extends Runnable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
@@ -452,14 +452,14 @@ class WriterTask(val id: Int,
 
   def buildRequest(chRequest: ClickHouseRequest): Request = {
     val query = s"INSERT INTO ${chRequest.table} VALUES ${chRequest.records.mkString(",")}"
-    val host = sinkConf.getRandomHostUrl
+    val host = clickHouseConf.getRandomHostUrl
     val builder = asyncHttpClient
       .preparePost(host)
       .setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8")
       .setBody(query)
 
-    if (sinkConf.credentials != null) {
-      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + sinkConf.credentials)
+    if (clickHouseConf.credentials != null) {
+      builder.setHeader(HttpHeaders.Names.AUTHORIZATION, "Basic " + clickHouseConf.credentials)
     }
     builder.build
   }
@@ -474,7 +474,7 @@ class WriterTask(val id: Int,
           logInfo(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
       } catch {
-        case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $sinkConf,error = $e""")
+        case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $clickHouseConf,error = $e""")
           try {
             handleFailedResponse(response, chRequest);
           } catch {
@@ -485,38 +485,42 @@ class WriterTask(val id: Int,
   }
 
   def handleFailedResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
-    if (chRequest.attemptCounter > sinkConf.maxRetries) {
+    if (chRequest.attemptCounter > clickHouseConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
       saveCheckPoint(chRequest)
     } else {
       chRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkConf.maxRetries}, response = $response")
+      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(chRequest)
     }
   }
 
-  def saveCheckPoint(chRequest: ClickHouseRequest): Unit = {
-    val filePath = s"${sinkConf.checkPoint}/${chRequest.table}_${System.currentTimeMillis}"
+  /**
+   * write Failed data to disk..
+   * @param request
+   */
+  def saveCheckPoint(request: ClickHouseRequest): Unit = {
+    val filePath = s"${clickHouseConf.checkPoint}/${request.table}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
     try {
-      chRequest.records.foreach(writer.println)
+      request.records.foreach(writer.println)
       writer.flush()
     } finally {
       if (writer != null) {
         writer.close()
       }
     }
-    logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${chRequest.size}")
+    logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${request.size}")
   }
 
   def setStopWorking(): Unit = isWorking = false
 }
 
 
-class SinkBuffer(val writer: SinkWriter,
-                 val timeoutMillis: Long,
-                 val bufferSize: Int,
-                 val table: String) extends AutoCloseable with Logger {
+class ClickHouseBuffer(val writer: ClickHouseWriter,
+                       val timeoutMillis: Long,
+                       val bufferSize: Int,
+                       val table: String) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
@@ -560,24 +564,24 @@ class SinkBuffer(val writer: SinkWriter,
 
 }
 
-class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with Logger {
+class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable with Logger {
 
-  val sinkBuffers: ListBuffer[SinkBuffer] = ListBuffer[SinkBuffer]()
+  val clickHouseBuffers: ListBuffer[ClickHouseBuffer] = ListBuffer[ClickHouseBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MILLISECONDS)
-  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = ${params.timeout}")
+  scheduledExecutorService.scheduleWithFixedDelay(getTask, config.timeout, config.timeout, TimeUnit.MILLISECONDS)
+  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = ${config.timeout}")
 
-  def addSinkBuffer(sinkBuffer: SinkBuffer): Unit = {
-    this.synchronized(sinkBuffers.add(sinkBuffer))
-    logger.debug(s"[StreamX] Add sinkBuffer, target table = ${sinkBuffer.table}")
+  def addSinkBuffer(clickHouseBuffer: ClickHouseBuffer): Unit = {
+    this.synchronized(clickHouseBuffers.add(clickHouseBuffer))
+    logger.debug(s"[StreamX] Add clickHouseBuffer, target table = ${clickHouseBuffer.table}")
   }
 
   def getTask: Runnable = new Runnable {
     override def run(): Unit = {
       this synchronized {
-        logger.debug(s"[StreamX] Start checking buffers. Current count of buffers = ${sinkBuffers.size}")
-        sinkBuffers.foreach(_.tryAddToQueue())
+        logger.debug(s"[StreamX] Start checking buffers. Current count of buffers = ${clickHouseBuffers.size}")
+        clickHouseBuffers.foreach(_.tryAddToQueue())
       }
     }
   }
