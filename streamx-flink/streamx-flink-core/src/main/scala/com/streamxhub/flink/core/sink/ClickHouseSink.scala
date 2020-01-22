@@ -72,8 +72,16 @@ class ClickHouseSink(@transient ctx: StreamingContext,
   val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_PREFIX)(instance)
   overwriteParams.foreach { case (k, v) => prop.put(k, v) }
 
-  def sink[T](stream: DataStream[T], table: String)(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
-    prop.put(KEY_CLICKHOUSE_SINK_TABLE, table)
+  /**
+   *
+   * @param stream
+   * @param dbAndTable database and table ,e.g test.user....
+   * @param toCSVFun
+   * @tparam T
+   * @return
+   */
+  def sink[T](stream: DataStream[T], dbAndTable: String)(implicit toCSVFun: T => String = null): DataStreamSink[T] = {
+    prop.put(KEY_CLICKHOUSE_SINK_TABLE, dbAndTable)
     val sinkFun = new AsyncClickHouseSinkFunction[T](prop)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
@@ -118,8 +126,8 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         fields.foreach(f => {
           val v = f.get(value)
           f.getType.getSimpleName match {
-            case "String" => buffer.append("\"").append(v).append("\"").append(",")
-            case _ => buffer.append(v).append(",")
+            case "String" => buffer.append(s""""$v",""".stripMargin)
+            case _ => buffer.append(s"""$v,""".stripMargin)
           }
         })
         buffer.toString().dropRight(1).concat(")")
