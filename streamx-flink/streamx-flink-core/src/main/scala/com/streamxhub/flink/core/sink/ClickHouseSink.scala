@@ -124,6 +124,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         val buffer = new StringBuilder("(")
         val fields = value.getClass.getDeclaredFields
         fields.foreach(f => {
+          f.setAccessible(true)
           val v = f.get(value)
           f.getType.getSimpleName match {
             case "String" => buffer.append(s""""$v",""".stripMargin)
