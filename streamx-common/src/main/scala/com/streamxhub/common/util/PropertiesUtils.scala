@@ -29,6 +29,9 @@ import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
 import scala.collection.Map
 
+/**
+ * @author benjobs
+ */
 object PropertiesUtils {
 
   def getFileSource(filename: String): String = {
@@ -145,10 +148,6 @@ object PropertiesUtils {
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from inputStream", e)
     }
-  }
-
-  def classForName(className: String): Class[_] = {
-    Class.forName(className, true, Thread.currentThread().getContextClassLoader)
   }
 
 }

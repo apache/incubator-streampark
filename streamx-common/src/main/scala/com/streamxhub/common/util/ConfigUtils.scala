@@ -32,10 +32,10 @@ import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  def getConf(parameter: JMap[String, String], prefix: String = "", headfix: String = "")(implicit instance: String = ""): Properties = {
+  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit instance: String = ""): Properties = {
     val map = filterParam(parameter, prefix + instance)
     val prop = new Properties()
-    map.foreach { case (k, v) => prop.put(headfix + k, v) }
+    map.foreach { case (k, v) => prop.put(addfix + k, v) }
     prop
   }
 
@@ -54,7 +54,7 @@ object ConfigUtils {
       param.foreach(x => kafkaProperty.put(x._1, x._2))
       val topic = inTopic match {
         case SIGN_EMPTY =>
-          val top = kafkaProperty.getProperty(KEY_KAFKA_TOPIC, null)
+          val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(SIGN_COMMA).length > 1) {
             throw new IllegalArgumentException(s"Can't find a unique topic!!!")
           } else top

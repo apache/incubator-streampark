@@ -35,6 +35,7 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 /**
+ * @author benjobs
  * 基于hikari连接池实现.呃,当然支持MySQL多数据源,需注意所有的修改和添加操作都是自动提交事物的...
  */
 object MySQLUtils {
