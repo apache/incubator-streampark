@@ -22,4 +22,4 @@ clickhouse.sink:
     queueCapacity: 1000
     timeout: 1000
     retries: 10
-    failedPath: /tmp/failed_records
+    checkpoint: /tmp/failed_records

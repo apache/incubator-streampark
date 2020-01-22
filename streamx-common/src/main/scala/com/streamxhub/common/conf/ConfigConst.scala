@@ -120,7 +120,7 @@ object ConfigConst {
   val KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY: String = "async.queueCapacity"
   val KEY_CLICKHOUSE_SINK_TIMEOUT: String = "async.timeout"
   val KEY_CLICKHOUSE_SINK_RETRIES: String = "async.retries"
-  val KEY_CLICKHOUSE_SINK_FAILED_PATH: String = "async.failedPath"
+  val KEY_CLICKHOUSE_SINK_CHECKPOINT: String = "async.checkpoint"
   /**
    * about config es
    */
