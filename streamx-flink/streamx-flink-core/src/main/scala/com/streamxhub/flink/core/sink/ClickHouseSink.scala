@@ -306,11 +306,8 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
 class ClickHouseConfig(parameters: Properties) {
   var currentHostId: Int = 0
   val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
-    case (null, null) =>
-      null
-    case (u, p) =>
-      val credentials = String.join(":", u, p)
-      new String(Base64.getEncoder.encode(credentials.getBytes))
+    case (null, null) => null
+    case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
 
   val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
@@ -327,6 +324,7 @@ class ClickHouseConfig(parameters: Properties) {
 
   val jdbcUrl: String = parameters.getProperty(KEY_JDBC_URL)
   require(jdbcUrl != null)
+
   val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
   require(hostsWithPorts.nonEmpty)
 
