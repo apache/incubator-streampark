@@ -30,6 +30,9 @@ import com.streamxhub.common.conf.ConfigConst._
 
 import scala.collection.JavaConversions._
 
+/**
+ * @author benjobs
+ */
 class HBaseClient(fun: () => Connection) extends Serializable {
   lazy val connection: Connection = fun()
 }

@@ -48,6 +48,9 @@ import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
+/**
+ * @author benjobs
+ */
 object ClickHouseSink {
 
   /**
