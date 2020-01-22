@@ -359,10 +359,10 @@ class ClickHouseConfig(parameters: Properties) {
   }
 }
 
-class ClickHouseRequest(val values: util.List[String], val table: String) {
+class ClickHouseRequest(val records: util.List[String], val table: String) {
   var attemptCounter = 0
-
   def incrementCounter(): Unit = this.attemptCounter += 1
+  def size:Int = records.size()
 }
 
 class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
@@ -452,14 +452,14 @@ class WriterTask(val id: Int,
 
   def send(chRequest: ClickHouseRequest): Unit = {
     val request = buildRequest(chRequest)
-    logger.debug(s"[StreamX] Ready to load data to ${chRequest.table}, size = ${chRequest.values.size}")
+    logger.debug(s"[StreamX] Ready to load data to ${chRequest.table}, size = ${chRequest.size}")
     val whenResponse = asyncHttpClient.executeRequest(request)
     val callback = respCallback(whenResponse, chRequest)
     whenResponse.addListener(callback, callbackService)
   }
 
   def buildRequest(chRequest: ClickHouseRequest): Request = {
-    val query = s"INSERT INTO ${chRequest.table} VALUES ${chRequest.values.mkString(",")}"
+    val query = s"INSERT INTO ${chRequest.table} VALUES ${chRequest.records.mkString(",")}"
     val host = sinkConf.getRandomHostUrl
     val builder = asyncHttpClient
       .preparePost(host)
@@ -479,7 +479,7 @@ class WriterTask(val id: Int,
         if (response.getStatusCode != HTTP_OK) {
           handleUnsuccessfulResponse(response, chRequest)
         } else {
-          logInfo(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.values.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
+          logInfo(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
       } catch {
         case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $sinkConf,error = $e""")
@@ -498,7 +498,7 @@ class WriterTask(val id: Int,
       logFailedRecords(chRequest)
     } else {
       chRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.values.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkConf.maxRetries}, response = $response")
+      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkConf.maxRetries}, response = $response")
       queue.put(chRequest)
     }
   }
@@ -507,12 +507,12 @@ class WriterTask(val id: Int,
     val filePath = s"${sinkConf.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
     try {
-      chRequest.values.foreach(writer.println)
+      chRequest.records.foreach(writer.println)
       writer.flush()
     } finally {
       if (writer != null) writer.close()
     }
-    logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${chRequest.values.size}")
+    logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${chRequest.size}")
   }
 
   def setStopWorking(): Unit = isWorking = false
@@ -545,7 +545,7 @@ class SinkBuffer(val writer: SinkWriter,
   private[this] def addToQueue(): Unit = {
     val deepCopy = buildDeepCopy(localValues)
     val params = new ClickHouseRequest(deepCopy, table)
-    logger.debug(s"[StreamX] Build blank with params: buffer size = ${params.values.size}, target table  = ${params.table}")
+    logger.debug(s"[StreamX] Build blank with params: buffer size = ${params.size}, target table  = ${params.table}")
     writer.put(params)
     localValues.clear()
   }
