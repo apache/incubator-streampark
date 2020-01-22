@@ -310,7 +310,7 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  */
 //---------------------------------------------------------------------------------------
 class ClickHouseConfig(parameters: Properties) {
-  val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
+  val checkPoint: String = parameters(KEY_CLICKHOUSE_SINK_CHECKPOINT)
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
   val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
@@ -328,7 +328,7 @@ class ClickHouseConfig(parameters: Properties) {
     .toList
 
   require(jdbcUrls.nonEmpty)
-  require(failedRecordsPath != null)
+  require(checkPoint != null)
   require(queueMaxCapacity > 0)
   require(numWriters > 0)
   require(timeout > 0)
@@ -382,7 +382,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
   }
 
   try {
-    val path = Paths.get(sinkParams.failedRecordsPath)
+    val path = Paths.get(sinkParams.checkPoint)
     Files.createDirectories(path)
   } catch {
     case e: Exception =>
@@ -469,14 +469,14 @@ class WriterTask(val id: Int,
       val response = whenResponse.get()
       try {
         if (response.getStatusCode != HTTP_OK) {
-          handleUnsuccessfulResponse(response, chRequest)
+          handleFailedResponse(response, chRequest)
         } else {
           logInfo(s"[StreamX] Successful send data to ClickHouse, batch size = ${chRequest.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
         }
       } catch {
         case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $sinkConf,error = $e""")
           try {
-            handleUnsuccessfulResponse(response, chRequest);
+            handleFailedResponse(response, chRequest);
           } catch {
             case e: Exception => logError("[StreamX] Error while handle unsuccessful response", e);
           }
@@ -484,10 +484,10 @@ class WriterTask(val id: Int,
     }
   }
 
-  def handleUnsuccessfulResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
+  def handleFailedResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
     if (chRequest.attemptCounter > sinkConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
-      logFailedRecords(chRequest)
+      saveCheckPoint(chRequest)
     } else {
       chRequest.incrementCounter()
       logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${sinkConf.maxRetries}, response = $response")
@@ -495,8 +495,8 @@ class WriterTask(val id: Int,
     }
   }
 
-  def logFailedRecords(chRequest: ClickHouseRequest): Unit = {
-    val filePath = s"${sinkConf.failedRecordsPath}/${chRequest}_${System.currentTimeMillis}"
+  def saveCheckPoint(chRequest: ClickHouseRequest): Unit = {
+    val filePath = s"${sinkConf.checkPoint}/${chRequest.table}_${System.currentTimeMillis}"
     val writer = new PrintWriter(filePath)
     try {
       chRequest.records.foreach(writer.println)
