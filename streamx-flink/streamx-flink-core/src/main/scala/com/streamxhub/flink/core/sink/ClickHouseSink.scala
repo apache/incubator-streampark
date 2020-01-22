@@ -310,7 +310,6 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  */
 //---------------------------------------------------------------------------------------
 class ClickHouseConfig(parameters: Properties) {
-  val jdbcUrl: String = parameters(KEY_JDBC_URL)
   val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
@@ -321,35 +320,32 @@ class ClickHouseConfig(parameters: Properties) {
     case (null, null) => null
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
-  require(jdbcUrl != null)
+
+  val jdbcUrls: util.List[String] = parameters.getOrElse(KEY_JDBC_URL,"")
+    .split(SIGN_COMMA)
+    .filter(_.nonEmpty)
+    .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
+    .toList
+
+  require(jdbcUrls.nonEmpty)
   require(failedRecordsPath != null)
   require(queueMaxCapacity > 0)
   require(numWriters > 0)
   require(timeout > 0)
   require(maxRetries > 0)
 
-  val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
-  require(hostsWithPorts.nonEmpty)
-
-  def buildHosts(urls: String): util.List[String] = {
-    urls
-      .split(SIGN_COMMA)
-      .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
-      .toList
-  }
-
   def getRandomHostUrl: String = {
-    currentHostId = ThreadLocalRandom.current.nextInt(hostsWithPorts.size)
-    hostsWithPorts.get(currentHostId)
+    currentHostId = ThreadLocalRandom.current.nextInt(jdbcUrls.size)
+    jdbcUrls.get(currentHostId)
   }
 
   def getNextHost: String = {
-    if (currentHostId >= hostsWithPorts.size - 1) {
+    if (currentHostId >= jdbcUrls.size - 1) {
       currentHostId = 0
     } else {
       currentHostId += 1
     }
-    hostsWithPorts.get(currentHostId)
+    jdbcUrls.get(currentHostId)
   }
 }
 
@@ -366,7 +362,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
   var callbackService: ExecutorService = new ThreadPoolExecutor(
-    Math.max(Runtime.getRuntime.availableProcessors / 4, 2),
+    math.max(Runtime.getRuntime.availableProcessors / 4, 2),
     Integer.MAX_VALUE,
     60L,
     TimeUnit.SECONDS,
