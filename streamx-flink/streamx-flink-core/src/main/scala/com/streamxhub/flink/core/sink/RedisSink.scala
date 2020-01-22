@@ -30,6 +30,7 @@ import com.streamxhub.flink.core.StreamingContext
 import scala.collection.JavaConversions._
 import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.util.ConfigUtils
 
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
@@ -49,8 +50,9 @@ class RedisSink(@transient ctx: StreamingContext,
   @Override
   def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
-    val config = ctx.parameter.toMap ++ overwriteParams
-    config.filter(_._1.startsWith(REDIS_PREFIX)).filter(_._2.nonEmpty).map(x => x._1.drop(REDIS_PREFIX.length) -> x._2).map {
+    val config = ConfigUtils.getConf(ctx.paramMap,REDIS_PREFIX)
+    overwriteParams.foreach(x => config.put(x._1, x._2))
+    config.map {
       case (KEY_HOST, host) => builder.setHost(host)
       case (KEY_PORT, port) => builder.setPort(port.toInt)
       case (KEY_DB, db) => builder.setDatabase(db.toInt)
