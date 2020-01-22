@@ -101,7 +101,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     val lock = new Object()
   }
 
-  val sinkConf: ClickHouseConfig = new ClickHouseConfig(properties)
+  @transient val sinkConf: ClickHouseConfig = new ClickHouseConfig(properties)
   @transient var sinkBuffer: SinkBuffer = _
   @transient var sinkWriter: SinkWriter = _
   @transient var sinkChecker: SinkScheduledChecker = _
