@@ -70,14 +70,14 @@ object ClassLoaderUtils {
   private def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
       addURL(file)
-      file.listFiles.foreach(x=>loopDirs(x))
+      file.listFiles.foreach(x => loopDirs(x))
     }
   }
 
 
   private def loopFiles(file: File): Unit = {
     if (file.isDirectory) {
-      file.listFiles.foreach(x=>loopFiles(x))
+      file.listFiles.foreach(x => loopFiles(x))
     } else if (file.getAbsolutePath.endsWith(".jar") || file.getAbsolutePath.endsWith(".zip")) {
       addURL(file)
     }
