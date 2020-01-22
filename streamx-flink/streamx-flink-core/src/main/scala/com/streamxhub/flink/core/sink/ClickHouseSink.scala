@@ -45,6 +45,7 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import scala.collection.JavaConversions._
 import scala.collection.Map
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 object ClickHouseSink {
@@ -377,7 +378,7 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
     callbackServiceFactory
   )
 
-  var tasks: List[WriterTask] = List[WriterTask]()
+  var tasks: ListBuffer[WriterTask] = ListBuffer[WriterTask]()
   var commonQueue: BlockingQueue[ClickHouseRequest] = new LinkedBlockingQueue[ClickHouseRequest](sinkParams.queueMaxCapacity)
   var asyncHttpClient: AsyncHttpClient = Dsl.asyncHttpClient
   var service: ExecutorService = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
