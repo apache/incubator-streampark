@@ -114,7 +114,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         if (!Lock.initialized) {
           val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
           val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
-          sinkConf =  new ClickHouseConfig(properties)
+          sinkConf = new ClickHouseConfig(properties)
           sinkWriter = new SinkWriter(sinkConf)
           sinkChecker = new SinkScheduledChecker(sinkConf)
           sinkBuffer = new SinkBuffer(sinkWriter, sinkConf.timeout, bufferSize, table)
@@ -167,7 +167,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
 }
 
 
-class AsyncClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+class AsyncClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String = null) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new AsyncClickHouseSinkFunction[T](prop)
 
@@ -310,19 +310,17 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  */
 //---------------------------------------------------------------------------------------
 class ClickHouseConfig(parameters: Properties) {
-  var currentHostId: Int = 0
-  val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
-    case (null, null) => null
-    case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
-  }
-
   val jdbcUrl: String = parameters(KEY_JDBC_URL)
   val failedRecordsPath: String = parameters(KEY_CLICKHOUSE_SINK_FAILED_PATH)
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
   val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
   val maxRetries: Int = parameters(KEY_CLICKHOUSE_SINK_RETRIES).toInt
-
+  var currentHostId: Int = 0
+  val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
+    case (null, null) => null
+    case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
+  }
   require(jdbcUrl != null)
   require(failedRecordsPath != null)
   require(queueMaxCapacity > 0)
@@ -333,11 +331,13 @@ class ClickHouseConfig(parameters: Properties) {
   val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
   require(hostsWithPorts.nonEmpty)
 
-  def buildHosts(hostsString: String): util.List[String] = hostsString.split(SIGN_COMMA).map(checkUrl).toList
+  def buildHosts(hostsString: String): util.List[String] = {
+    hostsString.split(SIGN_COMMA).map(checkUrl).toList
+  }
 
   def checkUrl(host: String): String = {
     val newHost = host.replaceAll("\\s+", "")
-    if (!newHost.contains("http")) {
+    if (!newHost.startsWith("http")) {
       "http://" + newHost
     } else {
       newHost
@@ -361,8 +361,10 @@ class ClickHouseConfig(parameters: Properties) {
 
 class ClickHouseRequest(val records: util.List[String], val table: String) {
   var attemptCounter = 0
+
   def incrementCounter(): Unit = this.attemptCounter += 1
-  def size:Int = records.size()
+
+  def size: Int = records.size()
 }
 
 class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
