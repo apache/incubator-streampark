@@ -331,17 +331,11 @@ class ClickHouseConfig(parameters: Properties) {
   val hostsWithPorts: util.List[String] = buildHosts(jdbcUrl)
   require(hostsWithPorts.nonEmpty)
 
-  def buildHosts(hostsString: String): util.List[String] = {
-    hostsString.split(SIGN_COMMA).map(checkUrl).toList
-  }
-
-  def checkUrl(host: String): String = {
-    val newHost = host.replaceAll("\\s+", "")
-    if (!newHost.startsWith("http")) {
-      "http://" + newHost
-    } else {
-      newHost
-    }
+  def buildHosts(urls: String): util.List[String] = {
+    urls
+      .split(SIGN_COMMA)
+      .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
+      .toList
   }
 
   def getRandomHostUrl: String = {
