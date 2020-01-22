@@ -101,7 +101,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     val lock = new Object()
   }
 
-  @transient val sinkConf: ClickHouseConfig = new ClickHouseConfig(properties)
+  @transient var sinkConf: ClickHouseConfig = _
   @transient var sinkBuffer: SinkBuffer = _
   @transient var sinkWriter: SinkWriter = _
   @transient var sinkChecker: SinkScheduledChecker = _
@@ -113,6 +113,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
         if (!Lock.initialized) {
           val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
           val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
+          sinkConf =  new ClickHouseConfig(properties)
           sinkWriter = new SinkWriter(sinkConf)
           sinkChecker = new SinkScheduledChecker(sinkConf)
           sinkBuffer = new SinkBuffer(sinkWriter, sinkConf.timeout, bufferSize, table)
@@ -149,7 +150,6 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     }
   }
 
-  @throws[Exception]
   override def close(): Unit = {
     if (!isClosed) {
       Lock.lock.synchronized {
