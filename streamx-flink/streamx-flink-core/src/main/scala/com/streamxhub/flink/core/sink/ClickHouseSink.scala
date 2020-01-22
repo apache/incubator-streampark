@@ -417,6 +417,8 @@ class SinkWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Lo
     ThreadUtils.shutdownExecutorService(service)
     ThreadUtils.shutdownExecutorService(callbackService)
     asyncHttpClient.close()
+    commonQueue.clear()
+    tasks.clear()
     logInfo(s"[StreamX] ${classOf[SinkWriter].getSimpleName} is closed")
   }
 
@@ -522,14 +524,14 @@ class SinkBuffer(val writer: SinkWriter,
                  val bufferSize: Int,
                  val table: String) extends AutoCloseable with Logger {
 
-  private var lastAddTimeMillis = 0L
+  private var timestamp = 0L
 
   var localValues = new CopyOnWriteArrayList[String]()
 
   def put(csv: String): Unit = {
     tryAddToQueue()
     localValues.add(csv)
-    lastAddTimeMillis = System.currentTimeMillis
+    timestamp = System.currentTimeMillis
   }
 
   def tryAddToQueue(): Unit = {
@@ -553,9 +555,9 @@ class SinkBuffer(val writer: SinkWriter,
   private[this] def checkSize: Boolean = localValues.size >= bufferSize
 
   private[this] def checkTime: Boolean = {
-    if (lastAddTimeMillis == 0) return false
+    if (timestamp == 0) return false
     val current = System.currentTimeMillis
-    current - lastAddTimeMillis > timeoutMillis
+    current - timestamp > timeoutMillis
   }
 
   private[this] def buildDeepCopy(original: util.List[String]): util.List[String] = Collections.unmodifiableList(new util.ArrayList[String](original))
@@ -566,7 +568,7 @@ class SinkBuffer(val writer: SinkWriter,
 
 class SinkScheduledChecker(params: ClickHouseConfig) extends AutoCloseable with Logger {
 
-  val sinkBuffers: List[SinkBuffer] = List[SinkBuffer]()
+  val sinkBuffers: ListBuffer[SinkBuffer] = ListBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
   scheduledExecutorService.scheduleWithFixedDelay(getTask, params.timeout, params.timeout, TimeUnit.MILLISECONDS)
