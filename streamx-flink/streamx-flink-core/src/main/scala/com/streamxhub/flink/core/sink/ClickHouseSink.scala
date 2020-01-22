@@ -502,7 +502,9 @@ class WriterTask(val id: Int,
       chRequest.records.foreach(writer.println)
       writer.flush()
     } finally {
-      if (writer != null) writer.close()
+      if (writer != null) {
+        writer.close()
+      }
     }
     logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${chRequest.size}")
   }
