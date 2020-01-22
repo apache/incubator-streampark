@@ -185,7 +185,7 @@ object ConfigConst {
        |                 +  事了拂衣去，深藏身与名  +
        |                 +----------------------+
        |
-       |          ======= StreamX let's flink|spark easy...
+       |              [StreamX] let's flink|spark easy ô‿ô!
        |
        |""".stripMargin
 
