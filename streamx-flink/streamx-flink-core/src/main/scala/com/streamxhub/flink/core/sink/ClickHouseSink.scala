@@ -485,14 +485,14 @@ class WriterTask(val id: Int,
   }
 
   /**
-   * if send data to ClickHouse Failed, retry $maxRetries, if still failed,flush data on disk
+   * if send data to ClickHouse Failed, retry $maxRetries, if still failed,flush data to $failoverStorage
    *
    * @param response
    * @param chRequest
    */
   def handleFailedResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
     if (chRequest.attemptCounter > clickHouseConf.maxRetries) {
-      logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
+      logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.failoverStorage}""")
       failoverWriter.write(chRequest)
       logInfo(s"[StreamX] failover Successful, StorageType = ${clickHouseConf.failoverStorage}, size = ${chRequest.size}")
     } else {
@@ -506,76 +506,6 @@ class WriterTask(val id: Int,
   override def close(): Unit = {
     isWorking = false
     failoverWriter.close()
-  }
-}
-
-
-class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable with Logger {
-
-  var mysqlConnect: Connection = _
-  var kafkaProducer: KafkaProducer[String, String] = _
-
-  def write(request: ClickHouseRequest): Unit = {
-
-    clickHouseConf.failoverStorage match {
-      case Kafka =>
-        if (kafkaProducer == null) {
-          this.synchronized {
-            if (kafkaProducer == null) {
-              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava, "async.failover")
-              props.remove(KEY_KAFKA_TOPIC)
-              props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              kafkaProducer = new KafkaProducer[String, String](props)
-            }
-          }
-        }
-        val topic = clickHouseConf.parameters.getProperty(KEY_KAFKA_TOPIC)
-        val timestamp = DateUtils.format(date = new Date())
-        val records = request.records.map(x => s""" "$x" """)
-        val sendData =
-          s"""
-             |"values":[${records.mkString(",")}]
-             |"timestamp":$timestamp
-             |""".stripMargin
-        val record = new ProducerRecord[String, String](topic, sendData)
-        kafkaProducer.send(record, new Callback() {
-          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-            logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: ${request.table},size:${request.size}")
-          }
-        }).get()
-      case MySQL =>
-        if (mysqlConnect == null) {
-          this.synchronized {
-            if (mysqlConnect == null) {
-              mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
-            }
-          }
-        }
-        val table = mysqlConnect.getMetaData.getTables(null, null, request.table, Array("TABLE", "VIEW"))
-        if (!table.next()) {
-          MySQLUtils.execute(
-            mysqlConnect,
-            s"create table ${request.table} (`values` text, `timestamp` timestamp)"
-          )
-          logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: ${request.table} is not exist,auto created...")
-        }
-        val records = request.records.map(x => s""" ("$x",CURRENT_TIMESTAMP()) """.stripMargin)
-        val sql = s"INSERT INTO ${request.table}(`values`,`timestamp`) VALUES ${records.mkString(",")} "
-        MySQLUtils.update(mysqlConnect, sql)
-        logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: ${request.table},size:${request.size}")
-      case HBase =>
-      //TODO
-      case HDFS =>
-      //TODO
-      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${clickHouseConf.failoverStorage}")
-    }
-
-  }
-
-  override def close(): Unit = {
-    if (mysqlConnect != null) mysqlConnect.close()
-    if (kafkaProducer != null) kafkaProducer.close()
   }
 }
 
@@ -651,4 +581,74 @@ class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable
 
   override def close(): Unit = ThreadUtils.shutdownExecutorService(scheduledExecutorService)
 
+}
+
+
+class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable with Logger {
+
+  var mysqlConnect: Connection = _
+  var kafkaProducer: KafkaProducer[String, String] = _
+
+  def write(request: ClickHouseRequest): Unit = {
+
+    clickHouseConf.failoverStorage match {
+      case Kafka =>
+        if (kafkaProducer == null) {
+          this.synchronized {
+            if (kafkaProducer == null) {
+              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava, "async.failover")
+              props.remove(KEY_KAFKA_TOPIC)
+              props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              kafkaProducer = new KafkaProducer[String, String](props)
+            }
+          }
+        }
+        val topic = clickHouseConf.parameters.getProperty(KEY_KAFKA_TOPIC)
+        val timestamp = DateUtils.format(date = new Date())
+        val records = request.records.map(x => s""" "$x" """)
+        val sendData =
+          s"""
+             |"values":[${records.mkString(",")}]
+             |"timestamp":$timestamp
+             |""".stripMargin
+        val record = new ProducerRecord[String, String](topic, sendData)
+        kafkaProducer.send(record, new Callback() {
+          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+            logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: ${request.table},size:${request.size}")
+          }
+        }).get()
+      case MySQL =>
+        if (mysqlConnect == null) {
+          this.synchronized {
+            if (mysqlConnect == null) {
+              mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
+            }
+          }
+        }
+        val table = mysqlConnect.getMetaData.getTables(null, null, request.table, Array("TABLE", "VIEW"))
+        if (!table.next()) {
+          MySQLUtils.execute(
+            mysqlConnect,
+            s"create table ${request.table} (`values` text, `timestamp` timestamp)"
+          )
+          logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: ${request.table} is not exist,auto created...")
+        }
+        val records = request.records.map(x => s""" ("$x",CURRENT_TIMESTAMP()) """.stripMargin)
+        val sql = s"INSERT INTO ${request.table}(`values`,`timestamp`) VALUES ${records.mkString(",")} "
+        MySQLUtils.update(mysqlConnect, sql)
+        logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: ${request.table},size:${request.size}")
+      case HBase =>
+      //TODO
+      case HDFS =>
+      //TODO
+      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${clickHouseConf.failoverStorage}")
+    }
+
+  }
+
+  override def close(): Unit = {
+    if (mysqlConnect != null) mysqlConnect.close()
+    if (kafkaProducer != null) kafkaProducer.close()
+  }
 }
