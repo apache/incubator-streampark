@@ -522,7 +522,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         if (kafkaProducer == null) {
           this.synchronized {
             if (kafkaProducer == null) {
-              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava,"async.failover")
+              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava, "async.failover")
               props.remove(KEY_KAFKA_TOPIC)
               props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
               props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
