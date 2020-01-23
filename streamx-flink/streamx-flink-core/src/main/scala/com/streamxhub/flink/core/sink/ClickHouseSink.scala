@@ -21,16 +21,16 @@
 
 package com.streamxhub.flink.core.sink
 
-import java.io.PrintWriter
-import java.nio.file.{Files, Paths}
 import java.sql.{Connection, PreparedStatement, Statement}
 import java.util
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
-import java.util.{Base64, Collections, Properties}
+import java.util.{Base64, Collections, Date, Properties}
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils, ThreadUtils}
+import com.streamxhub.common.conf.FailoverStorageType
+import com.streamxhub.common.conf.FailoverStorageType.FailoverStorageType
+import com.streamxhub.common.util.{ConfigUtils, DateUtils, JsonUtils, Logger, MySQLUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -44,9 +44,13 @@ import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+
 import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
+import com.streamxhub.common.conf.FailoverStorageType._
+import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
 /**
  * @author benjobs
@@ -312,30 +316,32 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  *
  */
 //---------------------------------------------------------------------------------------
-class ClickHouseConfig(parameters: Properties) {
-  val checkPoint: String = parameters(KEY_CLICKHOUSE_SINK_CHECKPOINT)
+
+class ClickHouseConfig(val parameters: Properties) {
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
   val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
-  val maxRetries: Int = parameters(KEY_CLICKHOUSE_SINK_RETRIES).toInt
   var currentHostId: Int = 0
   val credentials: String = (parameters.getProperty(KEY_JDBC_USER), parameters.getProperty(KEY_JDBC_PASSWORD)) match {
     case (null, null) => null
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
 
-  val jdbcUrls: util.List[String] = parameters.getOrElse(KEY_JDBC_URL,"")
+  val maxRetries: Int = parameters(KEY_CLICKHOUSE_FAILOVER_RETRIES).toInt
+  val failoverStorage: FailoverStorageType = Try(FailoverStorageType.withName(parameters.getProperty(KEY_CLICKHOUSE_FAILOVER_STORAGE))).getOrElse(null)
+
+  val jdbcUrls: util.List[String] = parameters.getOrElse(KEY_JDBC_URL, "")
     .split(SIGN_COMMA)
     .filter(_.nonEmpty)
     .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
     .toList
 
   require(jdbcUrls.nonEmpty)
-  require(checkPoint != null)
   require(queueMaxCapacity > 0)
   require(numWriters > 0)
   require(timeout > 0)
   require(maxRetries > 0)
+  require(failoverStorage != null)
 
   def getRandomHostUrl: String = {
     currentHostId = ThreadLocalRandom.current.nextInt(jdbcUrls.size)
@@ -384,15 +390,6 @@ class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable w
     service.submit(task)
   }
 
-  try {
-    val path = Paths.get(sinkParams.checkPoint)
-    Files.createDirectories(path)
-  } catch {
-    case e: Exception =>
-      logError(s"[StreamX] Error while starting CH writer error:${e}")
-      throw new RuntimeException(e)
-  }
-
   def put(params: ClickHouseRequest): Unit = {
     try {
       commonQueue.put(params)
@@ -404,11 +401,9 @@ class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable w
     }
   }
 
-  private def stopWriters(): Unit = tasks.foreach(_.setStopWorking())
-
   override def close(): Unit = {
     logInfo("[StreamX] Closing ClickHouse-writer...")
-    stopWriters()
+    tasks.foreach(_.close())
     ThreadUtils.shutdownExecutorService(service)
     ThreadUtils.shutdownExecutorService(callbackService)
     asyncHttpClient.close()
@@ -424,9 +419,11 @@ class WriterTask(val id: Int,
                  val asyncHttpClient: AsyncHttpClient,
                  val queue: BlockingQueue[ClickHouseRequest],
                  val clickHouseConf: ClickHouseConfig,
-                 val callbackService: ExecutorService) extends Runnable with Logger {
+                 val callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
+
+  val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf)
 
   override def run(): Unit = try {
     isWorking = true
@@ -487,10 +484,17 @@ class WriterTask(val id: Int,
     }
   }
 
+  /**
+   * if send data to ClickHouse Failed, retry $maxRetries, if still failed,flush data on disk
+   *
+   * @param response
+   * @param chRequest
+   */
   def handleFailedResponse(response: Response, chRequest: ClickHouseRequest): Unit = {
     if (chRequest.attemptCounter > clickHouseConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data on disk""")
-      saveCheckPoint(chRequest)
+      failoverWriter.write(chRequest)
+      logInfo(s"[StreamX] failover Successful, StorageType = ${clickHouseConf.failoverStorage}, size = ${chRequest.size}")
     } else {
       chRequest.incrementCounter()
       logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
@@ -498,25 +502,81 @@ class WriterTask(val id: Int,
     }
   }
 
-  /**
-   * write Failed data to disk..
-   * @param request
-   */
-  def saveCheckPoint(request: ClickHouseRequest): Unit = {
-    val filePath = s"${clickHouseConf.checkPoint}/${request.table}_${System.currentTimeMillis}"
-    val writer = new PrintWriter(filePath)
-    try {
-      request.records.foreach(writer.println)
-      writer.flush()
-    } finally {
-      if (writer != null) {
-        writer.close()
-      }
+
+  override def close(): Unit = {
+    isWorking = false
+    failoverWriter.close()
+  }
+}
+
+
+class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable with Logger {
+
+  var mysqlConnect: Connection = _
+  var kafkaProducer: KafkaProducer[String, String] = _
+
+  def write(request: ClickHouseRequest): Unit = {
+
+    clickHouseConf.failoverStorage match {
+      case Kafka =>
+        if (kafkaProducer == null) {
+          this.synchronized {
+            if (kafkaProducer == null) {
+              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava,"async.failover")
+              props.remove(KEY_KAFKA_TOPIC)
+              props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              kafkaProducer = new KafkaProducer[String, String](props)
+            }
+          }
+        }
+        val topic = clickHouseConf.parameters.getProperty(KEY_KAFKA_TOPIC)
+        val timestamp = DateUtils.format(date = new Date())
+        val records = request.records.map(x => s""" "$x" """)
+        val sendData =
+          s"""
+             |"values":[${records.mkString(",")}]
+             |"timestamp":$timestamp
+             |""".stripMargin
+        val record = new ProducerRecord[String, String](topic, sendData)
+        kafkaProducer.send(record, new Callback() {
+          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+            logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: ${request.table},size:${request.size}")
+          }
+        }).get()
+      case MySQL =>
+        if (mysqlConnect == null) {
+          this.synchronized {
+            if (mysqlConnect == null) {
+              mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
+            }
+          }
+        }
+        val table = mysqlConnect.getMetaData.getTables(null, null, request.table, Array("TABLE", "VIEW"))
+        if (!table.next()) {
+          MySQLUtils.execute(
+            mysqlConnect,
+            s"create table ${request.table} (`values` text, `timestamp` timestamp)"
+          )
+          logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: ${request.table} is not exist,auto created...")
+        }
+        val records = request.records.map(x => s""" ("$x",CURRENT_TIMESTAMP()) """.stripMargin)
+        val sql = s"INSERT INTO ${request.table}(`values`,`timestamp`) VALUES ${records.mkString(",")} "
+        MySQLUtils.update(mysqlConnect, sql)
+        logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: ${request.table},size:${request.size}")
+      case HBase =>
+      //TODO
+      case HDFS =>
+      //TODO
+      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${clickHouseConf.failoverStorage}")
     }
-    logInfo(s"[StreamX] Successful send data on disk, path = $filePath, size = ${request.size}")
+
   }
 
-  def setStopWorking(): Unit = isWorking = false
+  override def close(): Unit = {
+    if (mysqlConnect != null) mysqlConnect.close()
+    if (kafkaProducer != null) kafkaProducer.close()
+  }
 }
 
 
