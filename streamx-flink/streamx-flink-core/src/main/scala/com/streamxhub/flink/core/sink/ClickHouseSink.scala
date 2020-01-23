@@ -586,7 +586,6 @@ class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable
 
 class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable with Logger {
 
-  var mysqlConnect: Connection = _
   var kafkaProducer: KafkaProducer[String, String] = _
 
   def write(request: ClickHouseRequest): Unit = {
@@ -619,13 +618,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
           }
         }).get()
       case MySQL =>
-        if (mysqlConnect == null) {
-          this.synchronized {
-            if (mysqlConnect == null) {
-              mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
-            }
-          }
-        }
+        val mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
         val table = mysqlConnect.getMetaData.getTables(null, null, request.table, Array("TABLE", "VIEW"))
         if (!table.next()) {
           MySQLUtils.execute(
@@ -636,7 +629,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         }
         val records = request.records.map(x => s""" ("$x",CURRENT_TIMESTAMP()) """.stripMargin)
         val sql = s"INSERT INTO ${request.table}(`values`,`timestamp`) VALUES ${records.mkString(",")} "
-        MySQLUtils.update(mysqlConnect, sql)
+        MySQLUtils.update(sql)(clickHouseConf.parameters)
         logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: ${request.table},size:${request.size}")
       case HBase =>
       //TODO
@@ -648,7 +641,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
   }
 
   override def close(): Unit = {
-    if (mysqlConnect != null) mysqlConnect.close()
     if (kafkaProducer != null) kafkaProducer.close()
   }
 }
