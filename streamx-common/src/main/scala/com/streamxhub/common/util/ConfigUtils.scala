@@ -41,9 +41,9 @@ object ConfigUtils {
 
   def getHBaseConfig(parameter: JMap[String, String])(implicit instance: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
-  def getKafkaSinkConf(parameter: JMap[String, String], topic: String, instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + instance, topic)
+  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + instance, topic)
 
-  def getKafkaSourceConf(parameter: JMap[String, String], topic: String, instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
+  def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
 
   def getMySQLConf(parameter: JMap[String, String])(implicit prefix: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, prefix)
 
