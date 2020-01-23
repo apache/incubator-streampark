@@ -56,7 +56,7 @@ object MySQLUtils {
    */
   def select(sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = select(getConnection(jdbcConfig), sql)
 
-  def select(conn: Connection, sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
+  def select(conn: Connection, sql: String): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
       var stmt: Statement = null
       var result: ResultSet = null
@@ -94,7 +94,7 @@ object MySQLUtils {
    */
   def select2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
 
-  def select2[T](connection: Connection, sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
+  def select2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(x => JsonUtils.read[T](JsonUtils.write(x)))
 
@@ -129,7 +129,8 @@ object MySQLUtils {
     }
   }
 
-  /**
+  def update(sql: String)(implicit jdbcConfig: Properties): Int = update(getConnection(jdbcConfig),sql)
+    /**
    *
    * 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQL DDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE。
    * INSERT、UPDATE 或 DELETE 语句的效果是修改表中零行或多行中的一列或多列。
@@ -139,8 +140,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def update(sql: String)(implicit jdbcConfig: Properties): Int = {
-    val conn = getConnection(jdbcConfig)
+  def update(conn: Connection,sql: String): Int = {
     var statement: Statement = null
     try {
       statement = conn.createStatement
@@ -161,7 +161,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def unique(conn: Connection, sql: String)(implicit jdbcConfig: Properties): Map[String, _] = {
+  def unique(conn: Connection, sql: String): Map[String, _] = {
     var stmt: Statement = null
     var result: ResultSet = null
     try {
@@ -187,7 +187,7 @@ object MySQLUtils {
 
   def unique2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
 
-  def unique2[T](connection: Connection, sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
+  def unique2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
 
   /**
    *
@@ -200,8 +200,10 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean = {
-    val conn = getConnection(jdbcConfig)
+
+  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean =  execute(getConnection(jdbcConfig), sql)
+
+  def execute(conn: Connection,sql: String): Boolean = {
     var stmt: Statement = null
     try {
       stmt = conn.createStatement

@@ -20,6 +20,10 @@
  */
 package com.streamxhub.common.conf
 
+import java.util.Properties
+
+import com.streamxhub.common.conf.FailoverStorageType.FailoverStorageType
+
 object ConfigConst {
 
   /**
@@ -119,8 +123,12 @@ object ConfigConst {
   val KEY_CLICKHOUSE_SINK_NUM_WRITERS: String = "async.numWriters"
   val KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY: String = "async.queueCapacity"
   val KEY_CLICKHOUSE_SINK_TIMEOUT: String = "async.timeout"
-  val KEY_CLICKHOUSE_SINK_RETRIES: String = "async.retries"
-  val KEY_CLICKHOUSE_SINK_CHECKPOINT: String = "async.checkpoint"
+
+  val KEY_CLICKHOUSE_FAILOVER_RETRIES: String = "async.failover.retries"
+  val KEY_CLICKHOUSE_FAILOVER_STORAGE: String = "async.failover.storage"
+
+
+
   /**
    * about config es
    */
@@ -190,3 +198,11 @@ object ConfigConst {
        |""".stripMargin
 
 }
+
+
+object FailoverStorageType extends Enumeration {
+  type FailoverStorageType = Value
+  val MySQL, HBase, HDFS, Kafka = Value
+}
+
+

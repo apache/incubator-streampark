@@ -21,5 +21,19 @@ clickhouse.sink:
     numWriters: 3
     queueCapacity: 1000
     timeout: 1000
-    retries: 10
-    checkpoint: /tmp/failed_records
+    failover:
+      retries: 10 #一条记录当插入失败时重试的最大次数
+      storage: mysql #,hbase,hdfs
+      #storage: mysql
+      mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
+        jdbcUrl: jdbc:mysql://localhost:3306/test
+        username: root
+        password: 123322242
+      #storage: hbase
+      hbase:
+        zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
+        zookeeper.property.clientPort: 2181
+      hdfs:
+        path: hdfs://hadoop:9000/flink
+
+
