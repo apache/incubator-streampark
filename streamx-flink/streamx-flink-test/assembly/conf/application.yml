@@ -23,8 +23,7 @@ clickhouse.sink:
     timeout: 1000
     failover:
       retries: 10 #一条记录当插入失败时重试的最大次数
-      storage: mysql #,hbase,hdfs
-      #storage: mysql
+      storage: mysql #kafka,hbase,hdfs
       mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
         jdbcUrl: jdbc:mysql://localhost:3306/test
         username: root
