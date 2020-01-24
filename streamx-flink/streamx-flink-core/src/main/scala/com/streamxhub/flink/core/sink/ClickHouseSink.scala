@@ -319,7 +319,7 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  */
 //---------------------------------------------------------------------------------------
 
-case class ClickHouseConfig(val parameters: Properties) {
+case class ClickHouseConfig(parameters: Properties) {
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
   val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
@@ -370,7 +370,7 @@ case class ClickHouseConfig(val parameters: Properties) {
 
 }
 
-case class ClickHouseRequest(val records: util.List[String], val table: String) {
+case class ClickHouseRequest(records: util.List[String], table: String) {
   var attemptCounter = 0
 
   def incrementCounter(): Unit = this.attemptCounter += 1
@@ -378,7 +378,7 @@ case class ClickHouseRequest(val records: util.List[String], val table: String) 
   def size: Int = records.size()
 }
 
-case class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
+case class ClickHouseWriter(sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
@@ -427,11 +427,11 @@ case class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoClosea
 }
 
 
-case class WriterTask(val id: Int,
-                      val asyncHttpClient: AsyncHttpClient,
-                      val queue: BlockingQueue[ClickHouseRequest],
-                      val clickHouseConf: ClickHouseConfig,
-                      val callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+case class WriterTask(id: Int,
+                      asyncHttpClient: AsyncHttpClient,
+                      queue: BlockingQueue[ClickHouseRequest],
+                      clickHouseConf: ClickHouseConfig,
+                      callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
 
@@ -522,10 +522,10 @@ case class WriterTask(val id: Int,
 }
 
 
-case class ClickHouseBuffer(val writer: ClickHouseWriter,
-                            val timeoutMillis: Long,
-                            val bufferSize: Int,
-                            val table: String) extends AutoCloseable with Logger {
+case class ClickHouseBuffer(writer: ClickHouseWriter,
+                            timeoutMillis: Long,
+                            bufferSize: Int,
+                            table: String) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
