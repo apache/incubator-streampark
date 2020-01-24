@@ -30,7 +30,7 @@ import java.util.{Base64, Collections, Date, Properties}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FailoverStorageType
 import com.streamxhub.common.conf.FailoverStorageType.FailoverStorageType
-import com.streamxhub.common.util.{ConfigUtils, DateUtils, JsonUtils, Logger, MySQLUtils, ThreadUtils}
+import com.streamxhub.common.util.{ConfigUtils, DateUtils, HBaseClient, JsonUtils, Logger, MySQLUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -45,11 +45,13 @@ import ru.yandex.clickhouse.settings.ClickHouseProperties
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import com.streamxhub.common.conf.FailoverStorageType._
+import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
+import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}
+import org.apache.hadoop.hbase.util.Bytes
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
 /**
@@ -317,7 +319,7 @@ class ClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQ
  */
 //---------------------------------------------------------------------------------------
 
-class ClickHouseConfig(val parameters: Properties) {
+case class ClickHouseConfig(val parameters: Properties) {
   val numWriters: Int = parameters(KEY_CLICKHOUSE_SINK_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY).toInt
   val timeout: Long = parameters(KEY_CLICKHOUSE_SINK_TIMEOUT).toLong
@@ -356,9 +358,19 @@ class ClickHouseConfig(val parameters: Properties) {
     }
     jdbcUrls.get(currentHostId)
   }
+
+  def getFailoverConfig: Properties = {
+    failoverStorage match {
+      case Kafka => ConfigUtils.getConf(parameters.toMap.asJava, "async.failover.kafka.")
+      case MySQL => ConfigUtils.getConf(parameters.toMap.asJava, "async.failover.mysql.")
+      case HBase => ConfigUtils.getConf(parameters.toMap.asJava, "async.failover.hbase.", HBASE_PREFIX)
+      case HDFS => ConfigUtils.getConf(parameters.toMap.asJava, "async.failover.hdfs.")
+    }
+  }
+
 }
 
-class ClickHouseRequest(val records: util.List[String], val table: String) {
+case class ClickHouseRequest(val records: util.List[String], val table: String) {
   var attemptCounter = 0
 
   def incrementCounter(): Unit = this.attemptCounter += 1
@@ -366,7 +378,7 @@ class ClickHouseRequest(val records: util.List[String], val table: String) {
   def size: Int = records.size()
 }
 
-class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
+case class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
@@ -415,11 +427,11 @@ class ClickHouseWriter(val sinkParams: ClickHouseConfig) extends AutoCloseable w
 }
 
 
-class WriterTask(val id: Int,
-                 val asyncHttpClient: AsyncHttpClient,
-                 val queue: BlockingQueue[ClickHouseRequest],
-                 val clickHouseConf: ClickHouseConfig,
-                 val callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+case class WriterTask(val id: Int,
+                      val asyncHttpClient: AsyncHttpClient,
+                      val queue: BlockingQueue[ClickHouseRequest],
+                      val clickHouseConf: ClickHouseConfig,
+                      val callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
 
@@ -510,10 +522,10 @@ class WriterTask(val id: Int,
 }
 
 
-class ClickHouseBuffer(val writer: ClickHouseWriter,
-                       val timeoutMillis: Long,
-                       val bufferSize: Int,
-                       val table: String) extends AutoCloseable with Logger {
+case class ClickHouseBuffer(val writer: ClickHouseWriter,
+                            val timeoutMillis: Long,
+                            val bufferSize: Int,
+                            val table: String) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
@@ -557,7 +569,7 @@ class ClickHouseBuffer(val writer: ClickHouseWriter,
 
 }
 
-class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable with Logger {
+case class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable with Logger {
 
   val clickHouseBuffers: ListBuffer[ClickHouseBuffer] = ListBuffer[ClickHouseBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer-checker")
@@ -585,31 +597,37 @@ class ClickHouseScheduledChecker(config: ClickHouseConfig) extends AutoCloseable
 
 
 class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable with Logger {
+  val failoverStorage: FailoverStorageType = clickHouseConf.failoverStorage
+  val failoverConfig: Properties = clickHouseConf.getFailoverConfig
 
-  var kafkaProducer: KafkaProducer[String, String] = _
+  private var kafkaProducer: KafkaProducer[String, String] = _
+  private var hbaseConnect: HBaseConn = _
+  private var mutator: BufferedMutator = _
 
   def write(request: ClickHouseRequest): Unit = {
 
-    clickHouseConf.failoverStorage match {
+    failoverStorage match {
       case Kafka =>
+
         if (kafkaProducer == null) {
           this.synchronized {
             if (kafkaProducer == null) {
-              val props: Properties = ConfigUtils.getConf(clickHouseConf.parameters.toMap.asJava, "async.failover")
-              props.remove(KEY_KAFKA_TOPIC)
-              props.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              props.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              kafkaProducer = new KafkaProducer[String, String](props)
+              //failoverConfig.remove(KEY_KAFKA_TOPIC)
+              failoverConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              failoverConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              kafkaProducer = new KafkaProducer[String, String](failoverConfig)
             }
           }
         }
-        val topic = clickHouseConf.parameters.getProperty(KEY_KAFKA_TOPIC)
-        val timestamp = DateUtils.format(date = new Date())
+        val topic = failoverConfig.getProperty(KEY_KAFKA_TOPIC)
+        val timestamp = System.currentTimeMillis()
         val records = request.records.map(x => s""" "$x" """)
         val sendData =
           s"""
-             |"values":[${records.mkString(",")}]
+             |{
+             |"values":[${records.mkString(",")}],
              |"timestamp":$timestamp
+             |}
              |""".stripMargin
         val record = new ProducerRecord[String, String](topic, sendData)
         kafkaProducer.send(record, new Callback() {
@@ -617,30 +635,71 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
             logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: ${request.table},size:${request.size}")
           }
         }).get()
+
       case MySQL =>
-        val mysqlConnect = MySQLUtils.getConnection(clickHouseConf.parameters)
+
+        val mysqlConnect = MySQLUtils.getConnection(failoverConfig)
         val table = mysqlConnect.getMetaData.getTables(null, null, request.table, Array("TABLE", "VIEW"))
         if (!table.next()) {
           MySQLUtils.execute(
             mysqlConnect,
-            s"create table ${request.table} (`values` text, `timestamp` timestamp)"
+            s"create table ${request.table} (`values` text, `timestamp` bigint)"
           )
           logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: ${request.table} is not exist,auto created...")
         }
-        val records = request.records.map(x => s""" ("$x",CURRENT_TIMESTAMP()) """.stripMargin)
+        val timestamp = System.currentTimeMillis()
+        val records = request.records.map(x => s""" ("$x",$timestamp) """.stripMargin)
         val sql = s"INSERT INTO ${request.table}(`values`,`timestamp`) VALUES ${records.mkString(",")} "
-        MySQLUtils.update(sql)(clickHouseConf.parameters)
+        MySQLUtils.update(sql)(failoverConfig)
         logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: ${request.table},size:${request.size}")
+
       case HBase =>
-      //TODO
+        val tableName = TableName.valueOf(request.table)
+        if (hbaseConnect == null) {
+          this.synchronized {
+            if (hbaseConnect == null) {
+              hbaseConnect = HBaseClient(failoverConfig).connection
+              val admin = hbaseConnect.getAdmin
+              if (!admin.tableExists(tableName)) {
+                val desc = new HTableDescriptor(tableName)
+                desc.addFamily(new HColumnDescriptor("cf"))
+                admin.createTable(desc)
+                logInfo(s"[StreamX] ClickHouse failover storageType:HBase,table: ${request.table} is not exist,auto created...")
+              }
+              val mutatorParam = new BufferedMutatorParams(tableName)
+                .listener(new BufferedMutator.ExceptionListener {
+                  override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
+                    for (i <- 0.until(exception.getNumExceptions)) {
+                      logInfo(s"[StreamX] ClickHouse failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+                    }
+                  }
+                })
+              mutator = hbaseConnect.getBufferedMutator(mutatorParam)
+            }
+          }
+        }
+        val timestamp = System.currentTimeMillis()
+        for (i <- 0 until (request.size)) {
+          val rowKey = Long.MaxValue - timestamp - i //you know?...
+          val put = new Put(Bytes.toBytes(rowKey))
+          put.addColumn("cf".getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
+          put.addColumn("cf".getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
+          mutator.mutate(put)
+        }
+        mutator.flush()
+
       case HDFS =>
       //TODO
-      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${clickHouseConf.failoverStorage}")
+      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${failoverStorage}")
     }
 
   }
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
+    if (mutator != null) {
+      mutator.flush()
+      mutator.close()
+    }
   }
 }
