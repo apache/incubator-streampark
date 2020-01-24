@@ -655,6 +655,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
 
       case HBase =>
         val tableName = TableName.valueOf(request.table)
+        val familyName = "cf"
         if (hbaseConnect == null) {
           this.synchronized {
             if (hbaseConnect == null) {
@@ -662,7 +663,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
               val admin = hbaseConnect.getAdmin
               if (!admin.tableExists(tableName)) {
                 val desc = new HTableDescriptor(tableName)
-                desc.addFamily(new HColumnDescriptor("cf"))
+                desc.addFamily(new HColumnDescriptor(familyName))
                 admin.createTable(desc)
                 logInfo(s"[StreamX] ClickHouse failover storageType:HBase,table: ${request.table} is not exist,auto created...")
               }
@@ -682,8 +683,8 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         for (i <- 0 until (request.size)) {
           val rowKey = Long.MaxValue - timestamp - i //you know?...
           val put = new Put(Bytes.toBytes(rowKey))
-          put.addColumn("cf".getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
-          put.addColumn("cf".getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
+          put.addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
+          put.addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
           mutator.mutate(put)
         }
         mutator.flush()
