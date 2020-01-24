@@ -683,8 +683,8 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         for (i <- 0 until (request.size)) {
           val rowKey = Long.MaxValue - timestamp - i //you know?...
           val put = new Put(Bytes.toBytes(rowKey))
-          put.addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
-          put.addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
+            .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
+            .addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
           mutator.mutate(put)
         }
         mutator.flush()
