@@ -29,9 +29,13 @@ import scala.util.Try
 
 object DateUtils {
 
-  private[this] val format = "yyyy-MM-dd HH:mm:ss"
+  val fullFormat = "yyyy-MM-dd HH:mm:ss"
 
-  def parse(time: String, fmt: String = format): Date = {
+  val dayFormat1 = "yyyyMMdd"
+
+  val dayFormat2 = "yyyy-MM-dd"
+
+  def parse(time: String, fmt: String = fullFormat): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(fmt)
     df.parse(time)
   }
@@ -44,7 +48,7 @@ object DateUtils {
     milliSecond2Date(time * 1000)
   }
 
-  def now(dateFormat: String = "yyyyMMdd") = {
+  def now(dateFormat: String = dayFormat1) = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.format(new Date())
   }
@@ -69,11 +73,11 @@ object DateUtils {
     minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
 
-  def format(fmt: String = format, date: Date = new Date()): String = {
+  def format(fmt: String = fullFormat, date: Date = new Date()): String = {
     if (date == null) null else new SimpleDateFormat(fmt).format(date)
   }
 
-  def getTime(time: String, fmt: String = format): Long = {
+  def getTime(time: String, fmt: String = fullFormat): Long = {
     Try(new SimpleDateFormat(fmt).parse(time).getTime)
       .filter(_ > 0).getOrElse(System.currentTimeMillis())
   }
@@ -86,13 +90,13 @@ object DateUtils {
    * @param open
    * @return
    */
-  def rangeStr(start: String, end: String, fmt: String = "yyyyMMdd", open: Boolean = false): List[Date] = {
+  def rangeStr(start: String, end: String, fmt: String = dayFormat1, open: Boolean = false): List[Date] = {
     val df: SimpleDateFormat = new SimpleDateFormat(fmt)
     range(df.parse(start), df.parse(end), open)
   }
 
   //获取今天之前的n天
-  def +-(i: Int)(implicit format: String = "yyyyMMdd"): String = {
+  def +-(i: Int)(implicit format: String = dayFormat1): String = {
     val cal = Calendar.getInstance
     cal.add(Calendar.DATE, i)
     val statTime = new SimpleDateFormat(format).format(cal.getTime)

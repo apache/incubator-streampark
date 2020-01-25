@@ -192,6 +192,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.apache.flink</groupId>
+                <artifactId>flink-connector-filesystem_${scala.binary.version}</artifactId>
+                <version>${flink.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>org.asynchttpclient</groupId>
                 <artifactId>async-http-client</artifactId>
                 <version>${async.client.version}</version>
