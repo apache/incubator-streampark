@@ -33,6 +33,9 @@ clickhouse.sink:
         zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
         zookeeper.property.clientPort: 2181
       hdfs:
-        path: hdfs://hadoop:9000/flink
+        namenode: hdfs://hadoop:9000 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
+        user: hdfs # user
+        path: /clickhouse/failover # save path
+        format: yyyy-MM-dd
 
 
