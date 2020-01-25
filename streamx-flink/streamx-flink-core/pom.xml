@@ -64,9 +64,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.scalikejdbc</groupId>
-            <artifactId>scalikejdbc_${scala.binary.version}</artifactId>
-            <version>3.4.0</version>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-filesystem_${scala.binary.version}</artifactId>
         </dependency>
 
     </dependencies>

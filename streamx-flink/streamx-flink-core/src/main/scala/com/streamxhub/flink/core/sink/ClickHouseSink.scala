@@ -30,7 +30,7 @@ import java.util.{Base64, Collections, Date, Properties}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FailoverStorageType
 import com.streamxhub.common.conf.FailoverStorageType.FailoverStorageType
-import com.streamxhub.common.util.{ConfigUtils, DateUtils, HBaseClient, JsonUtils, Logger, MySQLUtils, ThreadUtils}
+import com.streamxhub.common.util.{ConfigUtils, DateUtils, HBaseClient, Logger, MySQLUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -39,6 +39,11 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.conf.{Configuration => HConf}
+import org.apache.hadoop.fs.{FileSystem => HFileSys}
+import java.io.ByteArrayInputStream
+import java.net.URI
+
 import org.asynchttpclient._
 import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
@@ -49,9 +54,11 @@ import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import com.streamxhub.common.conf.FailoverStorageType._
-import org.apache.hadoop.hbase.{HColumnDescriptor, HTableDescriptor, TableName}
+import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.hbase.{HColumnDescriptor, HConstants, HTableDescriptor, TableName}
 import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.io.IOUtils
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
 /**
@@ -681,7 +688,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         }
         val timestamp = System.currentTimeMillis()
         for (i <- 0 until (request.size)) {
-          val rowKey = Long.MaxValue - timestamp - i //you know?...
+          val rowKey = HConstants.LATEST_TIMESTAMP - timestamp - i //you know?...
           val put = new Put(Bytes.toBytes(rowKey))
             .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
             .addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
@@ -690,7 +697,34 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
         mutator.flush()
 
       case HDFS =>
-      //TODO
+
+        val namenode = failoverConfig("namenode")
+        val user = failoverConfig("user")
+        val path = failoverConfig("path")
+        val format = failoverConfig.getOrElse("format", DateUtils.dayFormat1)
+        require(namenode != null)
+        require(user != null)
+        require(path != null)
+
+        try {
+          val fileName = s"$path/${request.table}"
+          val rootPath = new Path(fileName)
+          val fileSystem: FileSystem = HFileSys.get(new URI(namenode), new HConf(), user)
+          if (!fileSystem.exists(rootPath)) {
+            fileSystem.mkdirs(rootPath)
+          }
+
+          val filePath = new Path(s"$fileName/${DateUtils.format(format, new Date())}/${System.currentTimeMillis()}")
+          val outStream = fileSystem.create(filePath)
+
+          val record = new StringBuilder
+          request.records.foreach(x => record.append(x).append("\n"))
+          val inputStream = new ByteArrayInputStream(record.toString().getBytes)
+
+          IOUtils.copyBytes(inputStream, outStream, 1024, true)
+        } catch {
+          case e: Exception => e.printStackTrace()
+        }
       case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${failoverStorage}")
     }
 
