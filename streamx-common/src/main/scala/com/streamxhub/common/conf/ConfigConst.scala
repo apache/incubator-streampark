@@ -22,7 +22,7 @@ package com.streamxhub.common.conf
 
 import java.util.Properties
 
-import com.streamxhub.common.conf.FailoverStorageType.FailoverStorageType
+import com.streamxhub.common.conf.FailoverStorageType.{FailoverStorageType, Value}
 
 object ConfigConst {
 
@@ -203,6 +203,9 @@ object ConfigConst {
 object FailoverStorageType extends Enumeration {
   type FailoverStorageType = Value
   val MySQL, HBase, HDFS, Kafka = Value
+
+  def get(key:String):Value = values.find(_.toString.equalsIgnoreCase(key)).get
+
 }
 
 
