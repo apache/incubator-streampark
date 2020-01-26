@@ -28,7 +28,9 @@ clickhouse.sink:
         jdbcUrl: jdbc:mysql://localhost:3306/test
         username: root
         password: 123322242
-      #storage: hbase
+      kafka:
+        topic: bigdata
+        bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
       hbase:
         zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
         zookeeper.property.clientPort: 2181
