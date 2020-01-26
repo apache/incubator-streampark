@@ -24,7 +24,9 @@ object ClickHouseSinkApp extends FlinkStreaming {
     println(createTable)
 
     val source = context.addSource(new TestSource)
-    ClickHouseSink(context).sink[TestEntity](source, "test.orders").setParallelism(4)
+    ClickHouseSink(context).sink[TestEntity](source, "test.orders")(x=>{
+      s""" "${x.orderId}","${x.userId}" """.stripMargin
+    }).setParallelism(1)
   }
 
 }
