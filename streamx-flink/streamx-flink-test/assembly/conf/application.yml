@@ -23,7 +23,7 @@ clickhouse.sink:
     timeout: 1000
     failover:
       retries: 10 #一条记录当插入失败时重试的最大次数
-      storage: mysql #kafka,hbase,hdfs
+      storage: hdfs #kafka,hbase,hdfs
       mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
         jdbcUrl: jdbc:mysql://localhost:3306/test
         username: root
@@ -32,11 +32,11 @@ clickhouse.sink:
         topic: bigdata
         bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
       hbase:
-        zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
+        zookeeper.quorum: localhost
         zookeeper.property.clientPort: 2181
       hdfs:
-        namenode: hdfs://hadoop:9000 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
-        user: hdfs # user
+        namenode: hdfs://localhost:8020 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
+        user: benjobs # user
         path: /clickhouse/failover # save path
         format: yyyy-MM-dd
 

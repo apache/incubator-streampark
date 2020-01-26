@@ -25,7 +25,7 @@ import java.sql.{Connection, PreparedStatement, Statement}
 import java.util
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
-import java.util.{Base64, Collections, Date, Properties}
+import java.util.{Base64, Collections, Date, Properties, UUID}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FailoverStorageType
@@ -128,6 +128,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
     if (!Lock.initialized) {
       Lock.lock.synchronized {
         if (!Lock.initialized) {
+          Lock.initialized = true
           val table = properties.getProperty(KEY_CLICKHOUSE_SINK_TABLE)
           val bufferSize = properties.getProperty(KEY_CLICKHOUSE_SINK_BUFFER_SIZE).toInt
           clickHouseConf = new ClickHouseConfig(properties)
@@ -135,7 +136,6 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
           clickHouseChecker = new ClickHouseScheduledChecker(clickHouseConf)
           clickHouseBuffer = new ClickHouseBuffer(clickHouseWriter, clickHouseConf.timeout, bufferSize, table)
           clickHouseChecker.addSinkBuffer(clickHouseBuffer)
-          Lock.initialized = true
           logInfo("[StreamX] AsyncClickHouseSink initialize... ")
         }
       }
@@ -616,144 +616,161 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
   private var hbaseConnect: HBaseConn = _
   private var mutator: BufferedMutator = _
   private var fileSystem: FileSystem = _
-
+  private var hdfsSeparator: String = _
+  private var counter: Long = 0
 
   def write(request: ClickHouseRequest): Unit = {
-    val table = request.table.split("\\.").last
-    failoverStorage match {
-      case Kafka =>
 
-        if (!Lock.initialized) {
-          Lock.lock.synchronized {
-            if (!Lock.initialized) {
-              Lock.initialized = true
-              //failoverConfig.remove(KEY_KAFKA_TOPIC)
-              failoverConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              failoverConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-              kafkaProducer = new KafkaProducer[String, String](failoverConfig)
-            }
-          }
-        }
-        val topic = failoverConfig.getProperty(KEY_KAFKA_TOPIC)
-        val timestamp = System.currentTimeMillis()
-        val records = request.records.map(cleanUp)
-        val sendData =
-          s"""
-             |{
-             |"values":[${records.mkString(",")}],
-             |"timestamp":$timestamp
-             |}
-             |""".stripMargin
-        val record = new ProducerRecord[String, String](topic, sendData)
-        kafkaProducer.send(record, new Callback() {
-          override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-            logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: $table,size:${request.size}")
-          }
-        }).get()
-
-      case MySQL =>
-        if (!Lock.initialized) {
-          Lock.lock.synchronized {
-            if (!Lock.initialized) {
-              Lock.initialized = true
-              failoverConfig.put(KEY_INSTANCE, s"failover-${table}")
-              val mysqlConnect = MySQLUtils.getConnection(failoverConfig)
-              val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
-              if (!mysqlTable.next()) {
-                MySQLUtils.execute(
-                  mysqlConnect,
-                  s"create table $table (`values` text, `timestamp` bigint)"
-                )
-                logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: $table is not exist,auto created...")
-              }
-            }
-          }
-        }
-        val timestamp = System.currentTimeMillis()
-        val records = request.records.map(x => {
-          val v = cleanUp(x)
-          s""" ($v,$timestamp) """.stripMargin
-        })
-        val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
-        MySQLUtils.update(sql)(failoverConfig)
-        logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: $table,size:${request.size}")
-
-      case HBase =>
-        val tableName = TableName.valueOf(table)
-        val familyName = "cf"
-        if (!Lock.initialized) {
-          Lock.lock.synchronized {
-            if (!Lock.initialized) {
-              Lock.initialized = true
-              hbaseConnect = HBaseClient(failoverConfig).connection
-              val admin = hbaseConnect.getAdmin
-              if (!admin.tableExists(tableName)) {
-                val desc = new HTableDescriptor(tableName)
-                desc.addFamily(new HColumnDescriptor(familyName))
-                admin.createTable(desc)
-                logInfo(s"[StreamX] ClickHouse failover storageType:HBase,table: $table is not exist,auto created...")
-              }
-              val mutatorParam = new BufferedMutatorParams(tableName)
-                .listener(new BufferedMutator.ExceptionListener {
-                  override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
-                    for (i <- 0.until(exception.getNumExceptions)) {
-                      logInfo(s"[StreamX] ClickHouse failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
-                    }
-                  }
-                })
-              mutator = hbaseConnect.getBufferedMutator(mutatorParam)
-            }
-          }
-        }
-        val timestamp = System.currentTimeMillis()
-        for (i <- 0 until (request.size)) {
-          val rowKey = HConstants.LATEST_TIMESTAMP - timestamp - i //you know?...
-          val put = new Put(Bytes.toBytes(rowKey))
-            .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
-            .addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
-          mutator.mutate(put)
-        }
-        mutator.flush()
-
-      case HDFS =>
-        val path = failoverConfig("path")
-        val format = failoverConfig.getOrElse("format", DateUtils.dayFormat1)
-        require(path != null)
-        val fileName = s"$path/$table"
-        try {
+    this.synchronized {
+      val table = request.table.split("\\.").last
+      failoverStorage match {
+        case Kafka =>
           if (!Lock.initialized) {
             Lock.lock.synchronized {
               if (!Lock.initialized) {
-                val rootPath = new Path(fileName)
-                val fileSystem: FileSystem = (Option(failoverConfig("namenode")), Option(failoverConfig("user"))) match {
-                  case (None, None) =>
-                    HFileSys.get(new HConf())
-                  case (Some(nn), Some(u)) =>
-                    HFileSys.get(new URI(nn), new HConf(), u)
-                  case (Some(nn), _) =>
-                    HFileSys.get(new URI(nn), new HConf())
-                  case _ =>
-                    throw new IllegalArgumentException("[StreamX] usage error..")
-                }
-                if (!fileSystem.exists(rootPath)) {
-                  fileSystem.mkdirs(rootPath)
+                Lock.initialized = true
+                //failoverConfig.remove(KEY_KAFKA_TOPIC)
+                failoverConfig.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+                failoverConfig.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+                kafkaProducer = new KafkaProducer[String, String](failoverConfig)
+              }
+            }
+          }
+          val topic = failoverConfig.getProperty(KEY_KAFKA_TOPIC)
+          val timestamp = System.currentTimeMillis()
+          val records = request.records.map(cleanUp)
+          val sendData =
+            s"""
+               |{
+               |"values":[${records.mkString(",")}],
+               |"timestamp":$timestamp
+               |}
+               |""".stripMargin
+          val record = new ProducerRecord[String, String](topic, sendData)
+          kafkaProducer.send(record, new Callback() {
+            override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
+              logInfo(s"[StreamX] ClickHouse failover successful!! storageType:Kafka,table: $table,size:${request.size}")
+            }
+          }).get()
+
+        case MySQL =>
+          if (!Lock.initialized) {
+            Lock.lock.synchronized {
+              if (!Lock.initialized) {
+                Lock.initialized = true
+                failoverConfig.put(KEY_INSTANCE, s"failover-${table}")
+                val mysqlConnect = MySQLUtils.getConnection(failoverConfig)
+                val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
+                if (!mysqlTable.next()) {
+                  MySQLUtils.execute(
+                    mysqlConnect,
+                    s"create table $table (`values` text, `timestamp` bigint)"
+                  )
+                  logWarning(s"[StreamX] ClickHouse failover storageType:MySQL,table: $table is not exist,auto created...")
                 }
               }
             }
           }
-          val filePath = new Path(s"$fileName/${DateUtils.format(format, new Date())}/${System.currentTimeMillis()}")
-          val outStream = fileSystem.create(filePath)
-          val record = new StringBuilder
-          request.records.foreach(x => record.append(x).append("\n"))
-          val inputStream = new ByteArrayInputStream(record.toString().getBytes)
+          val timestamp = System.currentTimeMillis()
+          val records = request.records.map(x => {
+            val v = cleanUp(x)
+            s""" ($v,$timestamp) """.stripMargin
+          })
+          val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
+          MySQLUtils.update(sql)(failoverConfig)
+          logInfo(s"[StreamX] ClickHouse failover successful!! storageType:MySQL,table: $table,size:${request.size}")
 
-          IOUtils.copyBytes(inputStream, outStream, 1024, true)
-        } catch {
-          case e: Exception => e.printStackTrace()
-        }
-      case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${failoverStorage}")
+        case HBase =>
+          val tableName = TableName.valueOf(table)
+          val familyName = "cf"
+          if (!Lock.initialized) {
+            Lock.lock.synchronized {
+              if (!Lock.initialized) {
+                Lock.initialized = true
+                hbaseConnect = HBaseClient(failoverConfig).connection
+                val admin = hbaseConnect.getAdmin
+                if (!admin.tableExists(tableName)) {
+                  val desc = new HTableDescriptor(tableName)
+                  desc.addFamily(new HColumnDescriptor(familyName))
+                  admin.createTable(desc)
+                  logInfo(s"[StreamX] ClickHouse failover storageType:HBase,table: $table is not exist,auto created...")
+                }
+                val mutatorParam = new BufferedMutatorParams(tableName)
+                  .listener(new BufferedMutator.ExceptionListener {
+                    override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
+                      for (i <- 0.until(exception.getNumExceptions)) {
+                        logInfo(s"[StreamX] ClickHouse failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+                      }
+                    }
+                  })
+                mutator = hbaseConnect.getBufferedMutator(mutatorParam)
+              }
+            }
+          }
+          val timestamp = System.currentTimeMillis()
+          for (i <- 0 until (request.size)) {
+            val rowKey = HConstants.LATEST_TIMESTAMP - timestamp - i //you know?...
+            val put = new Put(Bytes.toBytes(rowKey))
+              .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
+              .addColumn(familyName.getBytes, "timestamp".getBytes, Bytes.toBytes(timestamp))
+            mutator.mutate(put)
+          }
+          mutator.flush()
+
+        case HDFS =>
+          counter = counter + 1
+          val path = failoverConfig("path")
+          val format = failoverConfig.getOrElse("format", DateUtils.dayFormat1)
+          require(path != null)
+          val fileName = s"$path/$table"
+          val hdfsFormat = DateUtils.format(format, new Date())
+          val rootPath = new Path(s"$fileName/$hdfsFormat")
+          try {
+            if (!Lock.initialized) {
+              Lock.lock.synchronized {
+                if (!Lock.initialized) {
+                  Lock.initialized = true
+                  fileSystem = (Option(failoverConfig("namenode")), Option(failoverConfig("user"))) match {
+                    case (None, None) =>
+                      HFileSys.get(new HConf())
+                    case (Some(nn), Some(u)) =>
+                      HFileSys.get(new URI(nn), new HConf(), u)
+                    case (Some(nn), _) =>
+                      HFileSys.get(new URI(nn), new HConf())
+                    case _ =>
+                      throw new IllegalArgumentException("[StreamX] usage error..")
+                  }
+                  hdfsSeparator = hdfsFormat
+                  if (!fileSystem.exists(rootPath)) {
+                    fileSystem.mkdirs(rootPath)
+                  }
+                }
+              }
+            }
+
+            if (hdfsSeparator != hdfsFormat) {
+              hdfsSeparator = hdfsFormat
+              if (!fileSystem.exists(rootPath)) {
+                fileSystem.mkdirs(rootPath)
+              }
+            }
+
+            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_${UUID.randomUUID().toString.replace("-","")}")
+            var outStream = fileSystem.create(filePath)
+            var record = new StringBuilder
+            request.records.foreach(x => record.append(x).append("\n"))
+            var inputStream = new ByteArrayInputStream(record.toString().getBytes)
+            IOUtils.copyBytes(inputStream, outStream, 1024, true)
+            record.clear()
+            record = null
+            inputStream = null
+            outStream = null
+          } catch {
+            case e: Exception => e.printStackTrace()
+          }
+        case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${failoverStorage}")
+      }
     }
-
   }
 
   private[this] def cleanUp(record: String) = s""" "${record.replace("\"", "\\\"")}" """.stripMargin
@@ -761,7 +778,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
-    if (fileSystem != null) fileSystem.close()
     if (mutator != null) {
       mutator.flush()
       mutator.close()
