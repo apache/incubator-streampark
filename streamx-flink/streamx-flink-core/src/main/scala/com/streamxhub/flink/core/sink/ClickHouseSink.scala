@@ -617,7 +617,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
   private var mutator: BufferedMutator = _
   private var fileSystem: FileSystem = _
   private var hdfsSeparator: String = _
-  private var counter: Long = 0
 
   def write(request: ClickHouseRequest): Unit = {
 
@@ -718,7 +717,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
           mutator.flush()
 
         case HDFS =>
-          counter = counter + 1
           val path = failoverConfig("path")
           val format = failoverConfig.getOrElse("format", DateUtils.dayFormat1)
           require(path != null)
@@ -754,8 +752,8 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
                 fileSystem.mkdirs(rootPath)
               }
             }
-
-            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_${UUID.randomUUID().toString.replace("-","")}")
+            val uuid = UUID.randomUUID().toString.replace("-", "")
+            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_${uuid}")
             var outStream = fileSystem.create(filePath)
             var record = new StringBuilder
             request.records.foreach(x => record.append(x).append("\n"))
