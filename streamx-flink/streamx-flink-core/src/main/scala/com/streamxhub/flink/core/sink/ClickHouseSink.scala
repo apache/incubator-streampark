@@ -616,7 +616,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
   private var hbaseConnect: HBaseConn = _
   private var mutator: BufferedMutator = _
   private var fileSystem: FileSystem = _
-  private var hdfsSeparator: String = _
 
   def write(request: ClickHouseRequest): Unit = {
 
@@ -721,8 +720,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
           val format = failoverConfig.getOrElse("format", DateUtils.dayFormat1)
           require(path != null)
           val fileName = s"$path/$table"
-          val hdfsFormat = DateUtils.format(format, new Date())
-          val rootPath = new Path(s"$fileName/$hdfsFormat")
+          val rootPath = new Path(s"$fileName/${DateUtils.format(format, new Date())}")
           try {
             if (!Lock.initialized) {
               Lock.lock.synchronized {
@@ -738,18 +736,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
                     case _ =>
                       throw new IllegalArgumentException("[StreamX] usage error..")
                   }
-                  hdfsSeparator = hdfsFormat
-                  if (!fileSystem.exists(rootPath)) {
-                    fileSystem.mkdirs(rootPath)
-                  }
                 }
-              }
-            }
-
-            if (hdfsSeparator != hdfsFormat) {
-              hdfsSeparator = hdfsFormat
-              if (!fileSystem.exists(rootPath)) {
-                fileSystem.mkdirs(rootPath)
               }
             }
             val uuid = UUID.randomUUID().toString.replace("-", "")
@@ -772,7 +759,6 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
   }
 
   private[this] def cleanUp(record: String) = s""" "${record.replace("\"", "\\\"")}" """.stripMargin
-
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
