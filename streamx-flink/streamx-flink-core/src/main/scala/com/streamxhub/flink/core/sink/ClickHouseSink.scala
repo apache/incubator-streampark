@@ -762,6 +762,7 @@ class FailoverWriter(clickHouseConf: ClickHouseConfig) extends AutoCloseable wit
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
+    if (fileSystem != null) fileSystem.close()
     if (mutator != null) {
       mutator.flush()
       mutator.close()
