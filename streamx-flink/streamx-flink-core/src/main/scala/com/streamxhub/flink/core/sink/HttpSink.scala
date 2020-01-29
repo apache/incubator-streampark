@@ -54,31 +54,31 @@ class HttpSink(@transient ctx: StreamingContext,
                name: String = null,
                uid: String = null)(implicit instance: String = "") extends Sink with Logger {
 
-  def getSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "get")
+  def getSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)
 
-  def postSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "post")
+  def postSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPost.METHOD_NAME)
 
-  def patchSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "patch")
+  def patchSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPatch.METHOD_NAME)
 
-  def putSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "put")
+  def putSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPut.METHOD_NAME)
 
-  def deleteSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "delete")
+  def deleteSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpDelete.METHOD_NAME)
 
-  def optionsSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "options")
+  def optionsSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpOptions.METHOD_NAME)
 
-  def traceSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, "trace")
+  def traceSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpTrace.METHOD_NAME)
 
-  private[this] def sink(stream: DataStream[String], method: String = "post"): DataStreamSink[String] = {
-    val sinkFun = new HttpSinkFunction[String](header, method)
+  private[this] def sink(stream: DataStream[String], method: String): DataStreamSink[String] = {
+    val sinkFun = new HttpSinkFunction(header, method)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 }
 
 
-class HttpSinkFunction[T](header: Map[String, String],
-                          method: String,
-                          connectTimeout: Int = 5000) extends RichSinkFunction[String] with Logger {
+class HttpSinkFunction(header: Map[String, String],
+                       method: String,
+                       connectTimeout: Int = 5000) extends RichSinkFunction[String] with Logger {
 
   private var httpClient: CloseableHttpClient = _
 
@@ -98,34 +98,34 @@ class HttpSinkFunction[T](header: Map[String, String],
     val config: RequestConfig = RequestConfig.custom.setConnectTimeout(connectTimeout).setSocketTimeout(connectTimeout).build
 
     val uri = uriAndParams.head
-    val request: HttpUriRequest = method.toLowerCase match {
-      case "get" =>
+    val request: HttpUriRequest = method match {
+      case HttpGet.METHOD_NAME =>
         val httpGet = new HttpGet(uri)
         httpGet.setConfig(config)
         httpGet
-      case "delete" =>
+      case HttpDelete.METHOD_NAME =>
         val httpDelete = new HttpDelete(uri)
         httpDelete.setConfig(config)
         httpDelete
-      case "options" =>
+      case HttpOptions.METHOD_NAME =>
         val httpOptions = new HttpOptions(uri)
         httpOptions.setConfig(config)
         httpOptions
-      case "trace" =>
+      case HttpTrace.METHOD_NAME =>
         val httpTrace = new HttpTrace(uri)
         httpTrace.setConfig(config)
         httpTrace
-      case "post" =>
+      case HttpPost.METHOD_NAME =>
         val httpPost: HttpPost = new HttpPost(uri)
         httpPost.setEntity(entity)
         httpPost.setConfig(config)
         httpPost
-      case "patch" =>
+      case HttpPatch.METHOD_NAME =>
         val httpPatch: HttpPatch = new HttpPatch(uri)
         httpPatch.setEntity(entity)
         httpPatch.setConfig(config)
         httpPatch
-      case "put" =>
+      case HttpPut.METHOD_NAME =>
         val httpPut: HttpPut = new HttpPut(uri)
         httpPut.setEntity(entity)
         httpPut.setConfig(config)
