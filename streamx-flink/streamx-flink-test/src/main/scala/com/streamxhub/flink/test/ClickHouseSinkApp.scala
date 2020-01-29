@@ -1,7 +1,7 @@
 package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.{AsyncClickHouseOutputFormat, ClickHouseSink}
+import com.streamxhub.flink.core.sink.{AsyncClickHouseOutputFormat, ClickHouseSink, HttpSink}
 import org.apache.flink.streaming.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {
@@ -24,9 +24,8 @@ object ClickHouseSinkApp extends FlinkStreaming {
     println(createTable)
 
     val source = context.addSource(new TestSource)
-    ClickHouseSink(context).sink[TestEntity](source, "test.orders")(x=>{
-      s""" "${x.orderId}","${x.userId}" """.stripMargin
-    }).setParallelism(1)
+
+    ClickHouseSink(context).sink[TestEntity](source, "test.orders").setParallelism(1)
   }
 
 }
