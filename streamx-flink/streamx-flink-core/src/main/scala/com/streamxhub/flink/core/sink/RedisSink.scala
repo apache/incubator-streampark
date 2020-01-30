@@ -50,7 +50,7 @@ class RedisSink(@transient ctx: StreamingContext,
   @Override
   def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
-    val config = ConfigUtils.getConf(ctx.paramMap,REDIS_PREFIX)
+    val config = ConfigUtils.getConf(ctx.paramMap, REDIS_PREFIX)
     overwriteParams.foreach(x => config.put(x._1, x._2))
     config.map {
       case (KEY_HOST, host) => builder.setHost(host)

@@ -127,12 +127,14 @@ object ConfigConst {
   val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
   val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
   val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
-  val KEY_SINK_THRESHOLD_TIMEOUT: String = "threshold.timeout"
+  val KEY_SINK_THRESHOLD_CHECK_TIME: String = "threshold.checkTime"
+  val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
   val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
 
   val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
   val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
 
+  val DEFAULT_SINK_REQUEST_TIMEOUT = 2000
   /**
    * about config es
    */

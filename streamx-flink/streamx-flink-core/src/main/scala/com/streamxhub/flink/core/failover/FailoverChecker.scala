@@ -27,13 +27,13 @@ import scala.collection.JavaConversions._
 
 import scala.collection.mutable.ListBuffer
 
-case class FailoverChecker(timeout: Long) extends AutoCloseable with Logger {
+case class FailoverChecker(checkTimeout: Long) extends AutoCloseable with Logger {
 
   val sinkBuffers: ListBuffer[SinkBuffer] = ListBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("FailoverChecker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, timeout, timeout, TimeUnit.MILLISECONDS)
-  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = $timeout")
+  scheduledExecutorService.scheduleWithFixedDelay(getTask, checkTimeout, checkTimeout, TimeUnit.MILLISECONDS)
+  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = $checkTimeout")
 
   def addSinkBuffer(buffer: SinkBuffer): Unit = {
     this.synchronized(sinkBuffers.add(buffer))
