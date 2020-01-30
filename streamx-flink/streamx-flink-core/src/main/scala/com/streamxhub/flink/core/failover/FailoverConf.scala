@@ -33,13 +33,13 @@ import scala.collection.JavaConverters._
 case class FailoverConf(parameters: Properties) {
   val numWriters: Int = parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt
-  val timeout: Long = parameters(KEY_SINK_THRESHOLD_TIMEOUT).toLong
+  val checkTimeout: Long = parameters(KEY_SINK_THRESHOLD_CHECK_TIME).toLong
   val maxRetries: Int = parameters(KEY_SINK_THRESHOLD_RETRIES).toInt
   val failoverStorage: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[Streamx] usage error! failover.storage muse be not null! ")))
 
   require(queueMaxCapacity > 0)
   require(numWriters > 0)
-  require(timeout > 0)
+  require(checkTimeout > 0)
   require(maxRetries > 0)
 
   def getFailoverConfig: Properties = {

@@ -20,6 +20,7 @@ clickhouse.sink:
     bufferSize: 1000
     numWriters: 3
     queueCapacity: 1000
+    checkTime: 1000
     timeout: 1000
     retries: 10 #一条记录当插入失败时重试的最大次数
   failover:
@@ -44,7 +45,8 @@ http.sink:
   threshold:
     numWriters: 3
     queueCapacity: 1000
-    timeout: 1000
+    checkTime: 1000
+    requestTimeout: 1000
     retries: 3 #发送失败时的最大重试次数
   failover:
     table: record
