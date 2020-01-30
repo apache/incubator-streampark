@@ -16,28 +16,52 @@ clickhouse.sink:
   jdbcUrl: http://192.168.0.100:8123
   username: default
   password: 123322242
-  async:
+  threshold:
     bufferSize: 1000
     numWriters: 3
     queueCapacity: 1000
     timeout: 1000
-    failover:
-      retries: 10 #一条记录当插入失败时重试的最大次数
-      storage: hdfs #kafka,hbase,hdfs
-      mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
-        jdbcUrl: jdbc:mysql://localhost:3306/test
-        username: root
-        password: 123322242
-      kafka:
-        topic: bigdata
-        bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
-      hbase:
-        zookeeper.quorum: localhost
-        zookeeper.property.clientPort: 2181
-      hdfs:
-        namenode: hdfs://localhost:8020 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
-        user: benjobs # user
-        path: /clickhouse/failover # save path
-        format: yyyy-MM-dd
+    retries: 10 #一条记录当插入失败时重试的最大次数
+  failover:
+    storage: hdfs #kafka,hbase,hdfs
+    mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
+      jdbcUrl: jdbc:mysql://localhost:3306/test
+      username: root
+      password: 123322242
+    kafka:
+      topic: bigdata
+      bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
+    hbase:
+      zookeeper.quorum: localhost
+      zookeeper.property.clientPort: 2181
+    hdfs:
+      namenode: hdfs://localhost:8020 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
+      user: benjobs # user
+      path: /clickhouse/failover # save path
+      format: yyyy-MM-dd
 
+http.sink:
+  threshold:
+    numWriters: 3
+    queueCapacity: 1000
+    timeout: 1000
+    retries: 3 #发送失败时的最大重试次数
+  failover:
+    table: record
+    storage: mysql #kafka,hbase,hdfs
+    mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
+      jdbcUrl: jdbc:mysql://localhost:3306/test
+      username: root
+      password: 123322242
+    kafka:
+      topic: bigdata
+      bootstrap.servers: localhost:9091,localhost:9092,localhost:9093
+    hbase:
+      zookeeper.quorum: localhost
+      zookeeper.property.clientPort: 2181
+    hdfs:
+      namenode: hdfs://localhost:8020 # namenode rpc address and port, e.g: hdfs://hadoop:8020 , hdfs://hadoop:9000
+      user: benjobs # user
+      path: /clickhouse/failover # save path
+      format: yyyy-MM-dd
 
