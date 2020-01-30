@@ -25,7 +25,12 @@ object ClickHouseSinkApp extends FlinkStreaming {
 
     val source = context.addSource(new TestSource)
 
-    ClickHouseSink(context).sink[TestEntity](source, "test.orders").setParallelism(1)
+    val httpDs = source.map(_ =>"http://www.baidu.com")
+
+
+    HttpSink(context).getSink(httpDs).setParallelism(1)
+
+    //ClickHouseSink(context).sink[TestEntity](source, "test.orders").setParallelism(1)
   }
 
 }
