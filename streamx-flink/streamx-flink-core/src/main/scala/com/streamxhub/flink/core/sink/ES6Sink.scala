@@ -17,7 +17,8 @@
  * KIND, either express or implied. See the License for the
  * specific language governing permissions and limitations
  * under the License.
- */package com.streamxhub.flink.core.sink
+ */
+package com.streamxhub.flink.core.sink
 
 import com.streamxhub.common.util.Logger
 import org.apache.flink.streaming.api.datastream.DataStreamSink

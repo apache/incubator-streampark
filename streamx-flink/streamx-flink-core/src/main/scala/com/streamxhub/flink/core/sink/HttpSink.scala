@@ -83,7 +83,7 @@ class HttpSink(@transient ctx: StreamingContext,
   }
 }
 
-class HttpSinkFunction(paramConf: mutable.Map[String, String],
+class HttpSinkFunction(properties: mutable.Map[String, String],
                        header: Map[String, String],
                        method: String,
                        connectTimeout: Int = 5000) extends RichSinkFunction[String] with Logger {
@@ -106,16 +106,17 @@ class HttpSinkFunction(paramConf: mutable.Map[String, String],
           Lock.initialized = true
 
           val bufferSize = 1
-          val timeout = paramConf(KEY_SINK_THRESHOLD_TIMEOUT).toInt
-          val table = paramConf(KEY_SINK_FAILOVER_TABLE)
+          val checkTime = properties(KEY_SINK_THRESHOLD_CHECK_TIME).toInt
+          val requestTimeout = properties.getOrElse(KEY_SINK_THRESHOLD_REQ_TIMEOUT, DEFAULT_SINK_REQUEST_TIMEOUT).toString.toInt
+          val table = properties(KEY_SINK_FAILOVER_TABLE)
 
           val prop: Properties = new Properties()
-          paramConf.foreach { case (k, v) => prop.put(k, v) }
+          properties.foreach { case (k, v) => prop.put(k, v) }
           failoverConf = FailoverConf(prop)
 
-          httpSinkWriter = HttpSinkWriter(failoverConf, header)
-          failoverChecker = FailoverChecker(timeout)
-          sinkBuffer = SinkBuffer(httpSinkWriter, timeout, bufferSize, table)
+          httpSinkWriter = HttpSinkWriter(failoverConf, header, requestTimeout)
+          failoverChecker = FailoverChecker(checkTime)
+          sinkBuffer = SinkBuffer(httpSinkWriter, checkTime, bufferSize, table)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("[StreamX] HttpSink initialize... ")
         }
@@ -143,7 +144,7 @@ class HttpSinkFunction(paramConf: mutable.Map[String, String],
 }
 
 
-case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String]) extends SinkWriter with Logger {
+case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String], requestTimeout: Int = 2000) extends SinkWriter with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("HttpSink-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("HttpSink-writer")
 
@@ -163,7 +164,7 @@ case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String
   var service: ExecutorService = Executors.newFixedThreadPool(failoverConf.numWriters, threadFactory)
 
   for (i <- 0 until failoverConf.numWriters) {
-    val task = HttpWriterTask(i, asyncHttpClient, header, 5000, commonQueue, failoverConf, callbackService)
+    val task = HttpWriterTask(i, asyncHttpClient, header, requestTimeout, commonQueue, failoverConf, callbackService)
     tasks.add(task)
     service.submit(task)
   }
@@ -193,7 +194,7 @@ case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String
 case class HttpWriterTask(id: Int,
                           asyncHttpClient: AsyncHttpClient,
                           header: Map[String, String],
-                          connectTimeout: Int = 5000,
+                          connectTimeout: Int,
                           queue: BlockingQueue[SinkRequest],
                           failoverConf: FailoverConf,
                           callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
@@ -251,7 +252,7 @@ case class HttpWriterTask(id: Int,
   override def run(): Unit = try {
     isWorking = true
     logInfo(s"[StreamX] Start writer task, id = ${id}")
-    while (isWorking || queue.size > 0) {
+    while (isWorking || queue.nonEmpty) {
       val req = queue.poll(300, TimeUnit.MILLISECONDS)
       if (req != null) {
         val url = req.records.head
@@ -270,19 +271,19 @@ case class HttpWriterTask(id: Int,
     logInfo(s"[StreamX] Task id = $id is finished")
   }
 
-  def respCallback(whenResponse: ListenableFuture[Response], chRequest: SinkRequest): Runnable = new Runnable {
+  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
       val response = whenResponse.get()
       try {
         if (response.getStatusCode != HTTP_OK) {
-          handleFailedResponse(response, chRequest)
+          handleFailedResponse(response, sinkRequest)
         } else {
-          logInfo(s"[StreamX] Successful send data to Http, batch size = ${chRequest.size}, target table = ${chRequest.table}, current attempt = ${chRequest.attemptCounter}")
+          logInfo(s"[StreamX] Successful send data to Http, url = ${sinkRequest.records.head}, target table = ${sinkRequest.table}, current attempt = ${sinkRequest.attemptCounter}")
         }
       } catch {
         case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $failoverConf,error = $e""")
           try {
-            handleFailedResponse(response, chRequest)
+            handleFailedResponse(response, sinkRequest)
           } catch {
             case e: Exception => logError("[StreamX] Error while handle unsuccessful response", e)
           }
@@ -294,17 +295,17 @@ case class HttpWriterTask(id: Int,
    * if send data to Http Failed, retry $maxRetries, if still failed,flush data to $failoverStorage
    *
    * @param response
-   * @param chRequest
+   * @param sinkRequest
    */
-  def handleFailedResponse(response: Response, chRequest: SinkRequest): Unit = {
-    if (chRequest.attemptCounter > failoverConf.maxRetries) {
+  def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = {
+    if (sinkRequest.attemptCounter > failoverConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to Http, cause: limit of attempts is exceeded. Http response = $response. Ready to flush data to ${failoverConf.failoverStorage}""")
-      failoverWriter.write(chRequest)
-      logInfo(s"[StreamX] failover Successful, StorageType = ${failoverConf.failoverStorage}, size = ${chRequest.size}")
+      failoverWriter.write(sinkRequest)
+      logInfo(s"[StreamX] failover Successful, StorageType = ${failoverConf.failoverStorage}, size = ${sinkRequest.size}")
     } else {
-      chRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to Http, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${failoverConf.maxRetries}, response = $response")
-      queue.put(chRequest)
+      sinkRequest.incrementCounter()
+      logWarning(s"[StreamX] Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${failoverConf.maxRetries}, response = $response")
+      queue.put(sinkRequest)
     }
   }
 

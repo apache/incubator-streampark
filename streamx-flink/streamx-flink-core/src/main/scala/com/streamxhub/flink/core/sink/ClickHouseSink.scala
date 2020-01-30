@@ -117,10 +117,11 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
           Lock.initialized = true
           val table = properties(KEY_SINK_FAILOVER_TABLE)
           val bufferSize = properties(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt
+          val requestTimeout = properties.getOrElse(KEY_SINK_THRESHOLD_REQ_TIMEOUT, DEFAULT_SINK_REQUEST_TIMEOUT).toString.toInt
           clickHouseConf = new ClickHouseConfig(properties)
-          clickHouseWriter = ClickHouseSinkWriter(clickHouseConf)
-          failoverChecker = FailoverChecker(clickHouseConf.timeout)
-          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.timeout, bufferSize, table)
+          clickHouseWriter = ClickHouseSinkWriter(clickHouseConf, requestTimeout)
+          failoverChecker = FailoverChecker(clickHouseConf.checkTimeout)
+          sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.checkTimeout, bufferSize, table)
           failoverChecker.addSinkBuffer(sinkBuffer)
           logInfo("[StreamX] AsyncClickHouseSink initialize... ")
         }
@@ -323,6 +324,7 @@ class ClickHouseConfig(parameters: Properties) extends FailoverConf(parameters) 
     .filter(_.nonEmpty)
     .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
     .toList
+
   require(jdbcUrls.nonEmpty)
 
   def getRandomHostUrl: String = {
@@ -341,7 +343,7 @@ class ClickHouseConfig(parameters: Properties) extends FailoverConf(parameters) 
 
 }
 
-case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig) extends SinkWriter with Logger {
+case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig, requestTimeout: Int) extends SinkWriter with Logger {
   private val callbackServiceFactory = ThreadUtils.threadFactory("ClickHouse-writer-callback-executor")
   private val threadFactory: ThreadFactory = ThreadUtils.threadFactory("ClickHouse-writer")
 
@@ -360,7 +362,7 @@ case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig) extends SinkWriter
   var service: ExecutorService = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
 
   for (i <- 0 until sinkParams.numWriters) {
-    val task = ClickHouseWriterTask(i, asyncHttpClient, commonQueue, sinkParams, callbackService)
+    val task = ClickHouseWriterTask(i, asyncHttpClient, requestTimeout, commonQueue, sinkParams, callbackService)
     tasks.add(task)
     service.submit(task)
   }
@@ -392,21 +394,22 @@ case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig) extends SinkWriter
 
 case class ClickHouseWriterTask(id: Int,
                                 asyncHttpClient: AsyncHttpClient,
+                                requestTimeout: Int,
                                 queue: BlockingQueue[SinkRequest],
                                 clickHouseConf: ClickHouseConfig,
                                 callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
   val HTTP_OK = 200
   @volatile var isWorking = false
 
-  val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.failoverStorage,clickHouseConf.getFailoverConfig)
+  val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.failoverStorage, clickHouseConf.getFailoverConfig)
 
   override def run(): Unit = try {
     isWorking = true
     logInfo(s"[StreamX] Start writer task, id = ${id}")
     while (isWorking || queue.size > 0) {
-      val blank = queue.poll(300, TimeUnit.MILLISECONDS)
-      if (blank != null) {
-        send(blank)
+      val req = queue.poll(300, TimeUnit.MILLISECONDS)
+      if (req != null) {
+        send(req)
       }
     }
   } catch {
@@ -430,6 +433,7 @@ case class ClickHouseWriterTask(id: Int,
     val host = clickHouseConf.getRandomHostUrl
     val builder = asyncHttpClient
       .preparePost(host)
+      .setRequestTimeout(requestTimeout)
       .setHeader(HttpHeaders.Names.CONTENT_TYPE, "text/plain; charset=utf-8")
       .setBody(query)
 
