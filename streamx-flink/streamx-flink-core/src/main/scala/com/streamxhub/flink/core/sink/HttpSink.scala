@@ -273,11 +273,11 @@ case class HttpWriterTask(id: Int,
 
   def respCallback(whenResponse: ListenableFuture[Response], chRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
-      Try(Option(whenResponse.get())).getOrElse(None) match {
-        case None =>
+      Try(whenResponse.get()).getOrElse(null) match {
+        case null =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf,can not get Response. """)
           handleFailedResponse(null, chRequest)
-        case Some(resp) if resp.getStatusCode != HTTP_OK =>
+        case resp if resp.getStatusCode != HTTP_OK =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, chRequest)
         case _ =>
