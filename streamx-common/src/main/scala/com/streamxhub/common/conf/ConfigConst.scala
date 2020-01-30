@@ -117,17 +117,21 @@ object ConfigConst {
   /**
    * about clickhouse
    */
-  val CLICKHOUSE_PREFIX = "clickhouse.sink"
-  val KEY_CLICKHOUSE_SINK_TABLE: String = "table"
-  val KEY_CLICKHOUSE_SINK_BUFFER_SIZE: String = "async.bufferSize"
-  val KEY_CLICKHOUSE_SINK_NUM_WRITERS: String = "async.numWriters"
-  val KEY_CLICKHOUSE_SINK_QUEUE_CAPACITY: String = "async.queueCapacity"
-  val KEY_CLICKHOUSE_SINK_TIMEOUT: String = "async.timeout"
+  val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
-  val KEY_CLICKHOUSE_FAILOVER_RETRIES: String = "async.failover.retries"
-  val KEY_CLICKHOUSE_FAILOVER_STORAGE: String = "async.failover.storage"
+  val HTTP_SINK_PREFIX = "http.sink"
 
+  /**
+   * sink threshold and failover...
+   */
+  val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
+  val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
+  val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
+  val KEY_SINK_THRESHOLD_TIMEOUT: String = "threshold.timeout"
+  val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
 
+  val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
+  val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
 
   /**
    * about config es
