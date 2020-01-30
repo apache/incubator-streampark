@@ -271,22 +271,16 @@ case class HttpWriterTask(id: Int,
     logInfo(s"[StreamX] Task id = $id is finished")
   }
 
-  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
+  def respCallback(whenResponse: ListenableFuture[Response], chRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
-      val response = whenResponse.get()
-      try {
-        if (response.getStatusCode != HTTP_OK) {
-          handleFailedResponse(response, sinkRequest)
-        } else {
-          logInfo(s"[StreamX] Successful send data to Http, url = ${sinkRequest.records.head}, target table = ${sinkRequest.table}, current attempt = ${sinkRequest.attemptCounter}")
-        }
-      } catch {
-        case e: Exception => logError(s"""[StreamX] Error while executing callback, params = $failoverConf,error = $e""")
-          try {
-            handleFailedResponse(response, sinkRequest)
-          } catch {
-            case e: Exception => logError("[StreamX] Error while handle unsuccessful response", e)
-          }
+      Try(Option(whenResponse.get())).getOrElse(None) match {
+        case None =>
+          logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf,can not get Response. """)
+          handleFailedResponse(null, chRequest)
+        case Some(resp) if resp.getStatusCode != HTTP_OK =>
+          logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf, StatusCode = ${resp.getStatusCode} """)
+          handleFailedResponse(resp, chRequest)
+        case _ =>
       }
     }
   }
@@ -297,7 +291,7 @@ case class HttpWriterTask(id: Int,
    * @param response
    * @param sinkRequest
    */
-  def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = {
+  def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = try {
     if (sinkRequest.attemptCounter > failoverConf.maxRetries) {
       logWarning(s"""[StreamX] Failed to send data to Http, cause: limit of attempts is exceeded. Http response = $response. Ready to flush data to ${failoverConf.failoverStorage}""")
       failoverWriter.write(sinkRequest)
@@ -307,7 +301,10 @@ case class HttpWriterTask(id: Int,
       logWarning(s"[StreamX] Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${failoverConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
+  } catch {
+    case e: Exception => new RuntimeException(s"[StreamX] handleFailedResponse,error:$e")
   }
+
 
   override def close(): Unit = {
     isWorking = false
