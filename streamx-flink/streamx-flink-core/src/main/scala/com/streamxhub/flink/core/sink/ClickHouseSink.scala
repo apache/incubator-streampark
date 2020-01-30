@@ -445,11 +445,11 @@ case class ClickHouseWriterTask(id: Int,
 
   def respCallback(whenResponse: ListenableFuture[Response], chRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
-      Try(Option(whenResponse.get())).getOrElse(None) match {
-        case None =>
+      Try(whenResponse.get()).getOrElse(null) match {
+        case null =>
           logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
           handleFailedResponse(null, chRequest)
-        case Some(resp) if resp.getStatusCode != HTTP_OK =>
+        case resp if resp.getStatusCode != HTTP_OK =>
           logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, chRequest)
         case _ =>
