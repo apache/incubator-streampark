@@ -36,6 +36,7 @@ import scala.util.Try
 
 /**
  * 不要觉得神奇,这个类就是这么神奇....
+ *
  * @author benjobs
  * @param parameter
  * @param environment

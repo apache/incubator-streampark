@@ -30,7 +30,7 @@ object WatermarkUtils {
 
   def boundedOutOfOrdernessWatermark[T](fun: T => Long)(implicit maxOutOfOrderness: Time): AssignerWithPeriodicWatermarks[T] = {
     new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
-      override def extractTimestamp(element: T): Long =  fun(element)
+      override def extractTimestamp(element: T): Long = fun(element)
     }
   }
 
