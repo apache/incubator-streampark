@@ -98,7 +98,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                     mysqlConnect,
                     s"create table $table (`values` text, `timestamp` bigint)"
                   )
-                  logWarning(s"[StreamX] Failover storageType:MySQL,table: $table is not exist,auto created...")
+                  logWarn(s"[StreamX] Failover storageType:MySQL,table: $table is not exist,auto created...")
                 }
               }
             }

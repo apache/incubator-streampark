@@ -465,12 +465,12 @@ case class ClickHouseWriterTask(id: Int,
    */
   def handleFailedResponse(response: Response, chRequest: SinkRequest): Unit = {
     if (chRequest.attemptCounter > clickHouseConf.maxRetries) {
-      logWarning(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.failoverStorage}""")
+      logWarn(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.failoverStorage}""")
       failoverWriter.write(chRequest)
       logInfo(s"[StreamX] failover Successful, StorageType = ${clickHouseConf.failoverStorage}, size = ${chRequest.size}")
     } else {
       chRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
+      logWarn(s"[StreamX] Next attempt to send data to ClickHouse, table = ${chRequest.table}, buffer size = ${chRequest.size}, current attempt num = ${chRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(chRequest)
     }
   }

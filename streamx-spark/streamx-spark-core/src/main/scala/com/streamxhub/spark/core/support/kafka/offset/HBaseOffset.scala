@@ -105,7 +105,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         val topicPartition = new TopicPartition(topic, partition)
         val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
-            logWarning(s"[StreamX] storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
+            logWarn(s"[StreamX] storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
             left
           case _ => offset
         }

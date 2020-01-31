@@ -45,9 +45,9 @@ clickhouse.sink:
 http.sink:
   threshold:
     numWriters: 3
-    queueCapacity: 1000
+    queueCapacity: 100
     checkTime: 1000
-    requestTimeout: 1000
+    requestTimeout: 100
     retries: 3 #发送失败时的最大重试次数
     successCode: 200
   failover:

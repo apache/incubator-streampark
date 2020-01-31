@@ -53,7 +53,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
           """.stripMargin
           SQL(sql).execute.apply()
         }
-        logWarning(s"[StreamX] storeType:MySQL,table: $table is not exist,auto created...")
+        logWarn(s"[StreamX] storeType:MySQL,table: $table is not exist,auto created...")
         Map.empty[TopicPartition, Long]
       case Some(_) =>
         DB.readOnly { implicit session =>
