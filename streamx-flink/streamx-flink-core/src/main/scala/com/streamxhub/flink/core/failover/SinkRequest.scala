@@ -22,10 +22,8 @@ package com.streamxhub.flink.core.failover
 
 import java.util
 
-case class SinkRequest(records: util.List[String], table: String) {
-  var attemptCounter = 0
-
-  def incrementCounter(): Unit = this.attemptCounter += 1
+case class SinkRequest(records: util.List[String], table: String, var attemptCounter: Int = 0) {
+  def incrementCounter(): Unit = attemptCounter += 1
 
   def size: Int = records.size()
 }

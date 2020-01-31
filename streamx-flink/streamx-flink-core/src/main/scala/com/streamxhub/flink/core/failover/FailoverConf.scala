@@ -29,12 +29,14 @@ import com.streamxhub.common.util.ConfigUtils
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 case class FailoverConf(parameters: Properties) {
   val numWriters: Int = parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt
   val queueMaxCapacity: Int = parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt
   val checkTimeout: Long = parameters(KEY_SINK_THRESHOLD_CHECK_TIME).toLong
   val maxRetries: Int = parameters(KEY_SINK_THRESHOLD_RETRIES).toInt
+  val successCode: List[Int] = Try(parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
   val failoverStorage: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[Streamx] usage error! failover.storage muse be not null! ")))
 
   require(queueMaxCapacity > 0)

@@ -164,7 +164,7 @@ case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String
   var service: ExecutorService = Executors.newFixedThreadPool(failoverConf.numWriters, threadFactory)
 
   for (i <- 0 until failoverConf.numWriters) {
-    val task = HttpWriterTask(i, asyncHttpClient, header, requestTimeout, commonQueue, failoverConf, callbackService)
+    val task = HttpWriterTask(i, asyncHttpClient, header, requestTimeout, failoverConf.successCode, commonQueue, failoverConf, callbackService)
     tasks.add(task)
     service.submit(task)
   }
@@ -195,10 +195,10 @@ case class HttpWriterTask(id: Int,
                           asyncHttpClient: AsyncHttpClient,
                           header: Map[String, String],
                           connectTimeout: Int,
+                          successCode: List[Int],
                           queue: BlockingQueue[SinkRequest],
                           failoverConf: FailoverConf,
                           callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
-  val HTTP_OK = 200
   @volatile var isWorking = false
 
   val failoverWriter: FailoverWriter = new FailoverWriter(failoverConf.failoverStorage, failoverConf.getFailoverConfig)
@@ -253,14 +253,17 @@ case class HttpWriterTask(id: Int,
     isWorking = true
     logInfo(s"[StreamX] Start writer task, id = ${id}")
     while (isWorking || queue.nonEmpty) {
-      val req = queue.poll(300, TimeUnit.MILLISECONDS)
+      val req = queue.poll(100, TimeUnit.MILLISECONDS)
       if (req != null) {
         val url = req.records.head
         val request = buildRequest(url)
         val whenResponse = asyncHttpClient.executeRequest(request)
-        val sinkRequest = SinkRequest(List(url), req.table)
+        val sinkRequest = SinkRequest(List(url), req.table, req.attemptCounter)
         val callback = respCallback(whenResponse, sinkRequest)
         whenResponse.addListener(callback, callbackService)
+        if (req.attemptCounter > 0) {
+          logInfo(s"[StreamX] get retry url from queue,attemptCounter:${req.attemptCounter}")
+        }
       }
     }
   } catch {
@@ -277,10 +280,11 @@ case class HttpWriterTask(id: Int,
         case null =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf,can not get Response. """)
           handleFailedResponse(null, chRequest)
-        case resp if resp.getStatusCode != HTTP_OK =>
+        case resp if !successCode.contains(resp.getStatusCode) =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, chRequest)
-        case _ =>
+        case resp =>
+          println(s"[StreamX] ${resp.getStatusCode}")
       }
     }
   }

@@ -34,14 +34,18 @@ class TestSource extends SourceFunction[TestEntity] {
 
   val random = new Random()
 
+  var index = 0
+
   override def run(ctx: SourceFunction.SourceContext[TestEntity]): Unit = {
-    while (isRunning) {
+    while (isRunning && index <= 100) {
+      index += 1
+      println(index)
       val userId = System.currentTimeMillis()
       val orderId = random.nextInt(100)
       val status = random.nextInt(1)
       val price = random.nextDouble()
       val quantity = new Random().nextInt(10)
-      val order = TestEntity(userId, orderId, siteId = 1, cityId = 1, status,price, quantity, System.currentTimeMillis)
+      val order = TestEntity(userId, orderId, siteId = 1, cityId = 1, status, price, quantity, System.currentTimeMillis)
       ctx.collect(order)
     }
   }

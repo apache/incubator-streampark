@@ -130,11 +130,13 @@ object ConfigConst {
   val KEY_SINK_THRESHOLD_CHECK_TIME: String = "threshold.checkTime"
   val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
   val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
+  val KEY_SINK_THRESHOLD_SUCCESS_CODE:String = "threshold.successCode"
 
   val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
   val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
 
   val DEFAULT_SINK_REQUEST_TIMEOUT = 2000
+  val DEFAULT_HTTP_SUCCESS_CODE = 200
   /**
    * about config es
    */
