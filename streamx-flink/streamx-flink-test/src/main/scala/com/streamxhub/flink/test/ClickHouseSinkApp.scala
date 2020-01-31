@@ -27,7 +27,8 @@ object ClickHouseSinkApp extends FlinkStreaming {
 
     var index = 0
     val httpDs = source.map(x=>{
-      s"http://www.qq.com"
+      index+=1
+      s"""http://www.qq.com?id=$index"""
     })
 
     HttpSink(context).getSink(httpDs).setParallelism(1)

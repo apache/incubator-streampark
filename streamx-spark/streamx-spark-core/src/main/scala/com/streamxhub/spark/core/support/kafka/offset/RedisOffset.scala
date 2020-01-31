@@ -44,7 +44,7 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
             val tp = new TopicPartition(topic, partition.toInt)
             val finalOffset = earliestOffsets.get(tp) match {
               case Some(left) if left > offset.toLong =>
-                logWarning(s"[StreamX] storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
+                logWarn(s"[StreamX] storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
                 left
               case _ => offset.toLong
             }
