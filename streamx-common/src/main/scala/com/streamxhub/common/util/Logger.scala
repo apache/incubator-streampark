@@ -49,7 +49,7 @@ trait Logger {
     if (logger.isTraceEnabled) logger.trace(msg)
   }
 
-  def logWarning(msg: => String) {
+  def logWarn(msg: => String) {
     if (logger.isWarnEnabled) logger.warn(msg)
   }
 
@@ -69,7 +69,7 @@ trait Logger {
     if (logger.isTraceEnabled) logger.trace(msg, throwable)
   }
 
-  def logWarning(msg: => String, throwable: Throwable) {
+  def logWarn(msg: => String, throwable: Throwable) {
     if (logger.isWarnEnabled) logger.warn(msg, throwable)
   }
 

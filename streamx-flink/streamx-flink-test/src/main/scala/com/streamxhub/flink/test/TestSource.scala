@@ -37,9 +37,8 @@ class TestSource extends SourceFunction[TestEntity] {
   var index = 0
 
   override def run(ctx: SourceFunction.SourceContext[TestEntity]): Unit = {
-    while (isRunning && index <= 100) {
+    while (isRunning && index <= 100000) {
       index += 1
-      println(index)
       val userId = System.currentTimeMillis()
       val orderId = random.nextInt(100)
       val status = random.nextInt(1)

@@ -37,6 +37,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.streaming.api.scala.DataStream
 import org.asynchttpclient.{AsyncHttpClient, Dsl, ListenableFuture, Request, Response}
+import org.json4s.jackson.Serialization
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -85,8 +86,7 @@ class HttpSink(@transient ctx: StreamingContext,
 
 class HttpSinkFunction(properties: mutable.Map[String, String],
                        header: Map[String, String],
-                       method: String,
-                       connectTimeout: Int = 5000) extends RichSinkFunction[String] with Logger {
+                       method: String) extends RichSinkFunction[String] with Logger {
 
   private[this] object Lock {
     @volatile var initialized = false
@@ -125,7 +125,7 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
   }
 
   override def invoke(url: String): Unit = {
-    sinkBuffer.put(s"$method//$url")
+    sinkBuffer.put(s"$method///$url")
   }
 
   override def close(): Unit = {
@@ -169,8 +169,8 @@ case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String
     service.submit(task)
   }
 
-  def write(params: SinkRequest): Unit = try {
-    commonQueue.put(params)
+  def write(request: SinkRequest): Unit = try {
+    commonQueue.put(request)
   } catch {
     case e: InterruptedException =>
       logError(s"[StreamX] Interrupted error while putting data to queue,error:$e")
@@ -194,29 +194,30 @@ case class HttpSinkWriter(failoverConf: FailoverConf, header: Map[String, String
 case class HttpWriterTask(id: Int,
                           asyncHttpClient: AsyncHttpClient,
                           header: Map[String, String],
-                          connectTimeout: Int,
+                          requestTimeout: Int,
                           successCode: List[Int],
                           queue: BlockingQueue[SinkRequest],
                           failoverConf: FailoverConf,
                           callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
+
   @volatile var isWorking = false
+
+  val httpMethods: List[String] = List[String](
+    HttpGet.METHOD_NAME,
+    HttpPost.METHOD_NAME,
+    HttpPut.METHOD_NAME,
+    HttpPatch.METHOD_NAME,
+    HttpDelete.METHOD_NAME,
+    HttpOptions.METHOD_NAME,
+    HttpTrace.METHOD_NAME)
 
   val failoverWriter: FailoverWriter = new FailoverWriter(failoverConf.failoverStorage, failoverConf.getFailoverConfig)
 
   def buildRequest(url: String): Request = {
 
-    val methods = Array[String](
-      HttpGet.METHOD_NAME,
-      HttpPost.METHOD_NAME,
-      HttpPut.METHOD_NAME,
-      HttpPatch.METHOD_NAME,
-      HttpDelete.METHOD_NAME,
-      HttpOptions.METHOD_NAME,
-      HttpTrace.METHOD_NAME)
+    val method = httpMethods.filter(x => url.startsWith(x)).head
 
-    val method = methods.filter(x => url.startsWith(x)).head
-
-    val uriAndParams = url.drop(method.length + 2).split("\\?")
+    val uriAndParams = url.drop(method.length + 3).split("\\?")
 
     val uri = uriAndParams.head
 
@@ -243,10 +244,11 @@ case class HttpWriterTask(id: Int,
         })
         if (paramMap.nonEmpty) {
           builder.setHeader(HttpHeaders.Names.CONTENT_TYPE, HttpHeaders.Values.APPLICATION_JSON)
-          builder.setBody(JsonUtils.write(paramMap).getBytes)
+          val json = Serialization.write(paramMap)(org.json4s.DefaultFormats)
+          builder.setBody(json.getBytes)
         }
     }
-    builder.build()
+    builder.setRequestTimeout(requestTimeout).build()
   }
 
   override def run(): Unit = try {
@@ -256,9 +258,9 @@ case class HttpWriterTask(id: Int,
       val req = queue.poll(100, TimeUnit.MILLISECONDS)
       if (req != null) {
         val url = req.records.head
+        val sinkRequest = SinkRequest(List(url), req.table, req.attemptCounter)
         val request = buildRequest(url)
         val whenResponse = asyncHttpClient.executeRequest(request)
-        val sinkRequest = SinkRequest(List(url), req.table, req.attemptCounter)
         val callback = respCallback(whenResponse, sinkRequest)
         whenResponse.addListener(callback, callbackService)
         if (req.attemptCounter > 0) {
@@ -274,17 +276,16 @@ case class HttpWriterTask(id: Int,
     logInfo(s"[StreamX] Task id = $id is finished")
   }
 
-  def respCallback(whenResponse: ListenableFuture[Response], chRequest: SinkRequest): Runnable = new Runnable {
+  def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
       Try(whenResponse.get()).getOrElse(null) match {
         case null =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf,can not get Response. """)
-          handleFailedResponse(null, chRequest)
+          handleFailedResponse(null, sinkRequest)
         case resp if !successCode.contains(resp.getStatusCode) =>
           logError(s"""[StreamX] Error HttpSink executing callback, params = $failoverConf, StatusCode = ${resp.getStatusCode} """)
-          handleFailedResponse(resp, chRequest)
-        case resp =>
-          println(s"[StreamX] ${resp.getStatusCode}")
+          handleFailedResponse(resp, sinkRequest)
+        case _ =>
       }
     }
   }
@@ -296,13 +297,13 @@ case class HttpWriterTask(id: Int,
    * @param sinkRequest
    */
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = try {
-    if (sinkRequest.attemptCounter > failoverConf.maxRetries) {
-      logWarning(s"""[StreamX] Failed to send data to Http, cause: limit of attempts is exceeded. Http response = $response. Ready to flush data to ${failoverConf.failoverStorage}""")
-      failoverWriter.write(sinkRequest)
+    if (sinkRequest.attemptCounter >= failoverConf.maxRetries) {
+      logWarn(s"""[StreamX] Failed to send data to Http, cause: limit of attempts is exceeded. Http response = $response. Ready to flush data to ${failoverConf.failoverStorage}""")
+      failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]///",""))))
       logInfo(s"[StreamX] failover Successful, StorageType = ${failoverConf.failoverStorage}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
-      logWarning(s"[StreamX] Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${failoverConf.maxRetries}, response = $response")
+      logWarn(s"[StreamX] Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${failoverConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   } catch {
