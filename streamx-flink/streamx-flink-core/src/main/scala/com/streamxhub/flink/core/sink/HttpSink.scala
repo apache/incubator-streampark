@@ -299,7 +299,7 @@ case class HttpWriterTask(id: Int,
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = try {
     if (sinkRequest.attemptCounter >= failoverConf.maxRetries) {
       logWarn(s"""[StreamX] Failed to send data to Http, cause: limit of attempts is exceeded. Http response = $response. Ready to flush data to ${failoverConf.failoverStorage}""")
-      failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]///",""))))
+      failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
       logInfo(s"[StreamX] failover Successful, StorageType = ${failoverConf.failoverStorage}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
