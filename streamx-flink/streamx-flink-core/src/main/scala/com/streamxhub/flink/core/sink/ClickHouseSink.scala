@@ -362,7 +362,7 @@ case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig, requestTimeout: In
   var service: ExecutorService = Executors.newFixedThreadPool(sinkParams.numWriters, threadFactory)
 
   for (i <- 0 until sinkParams.numWriters) {
-    val task = ClickHouseWriterTask(i, asyncHttpClient, requestTimeout, commonQueue, sinkParams, callbackService)
+    val task = ClickHouseWriterTask(i, asyncHttpClient, requestTimeout, sinkParams.successCode, commonQueue, sinkParams, callbackService)
     tasks.add(task)
     service.submit(task)
   }
@@ -395,10 +395,10 @@ case class ClickHouseSinkWriter(sinkParams: ClickHouseConfig, requestTimeout: In
 case class ClickHouseWriterTask(id: Int,
                                 asyncHttpClient: AsyncHttpClient,
                                 requestTimeout: Int,
+                                successCode: List[Int],
                                 queue: BlockingQueue[SinkRequest],
                                 clickHouseConf: ClickHouseConfig,
                                 callbackService: ExecutorService) extends Runnable with AutoCloseable with Logger {
-  val HTTP_OK = 200
   @volatile var isWorking = false
 
   val failoverWriter: FailoverWriter = new FailoverWriter(clickHouseConf.failoverStorage, clickHouseConf.getFailoverConfig)
@@ -449,7 +449,7 @@ case class ClickHouseWriterTask(id: Int,
         case null =>
           logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
           handleFailedResponse(null, chRequest)
-        case resp if resp.getStatusCode != HTTP_OK =>
+        case resp if !successCode.contains(resp.getStatusCode) =>
           logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, chRequest)
         case _ =>
