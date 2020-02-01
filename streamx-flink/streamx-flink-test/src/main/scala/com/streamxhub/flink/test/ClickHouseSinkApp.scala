@@ -26,8 +26,8 @@ object ClickHouseSinkApp extends FlinkStreaming {
     val source = context.addSource(new TestSource)
 
     var index = 0
-    val httpDs = source.map(x=>{
-      index+=1
+    val httpDs = source.map(x => {
+      index += 1
       s"""http://www.qq.com?id=$index"""
     })
 

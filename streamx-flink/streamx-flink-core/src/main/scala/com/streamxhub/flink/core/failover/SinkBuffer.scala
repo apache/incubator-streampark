@@ -30,7 +30,7 @@ import com.streamxhub.common.util.Logger
 
 
 case class SinkBuffer(writer: SinkWriter,
-                      timeoutMillis: Long,
+                      delayTime: Long,
                       bufferSize: Int,
                       table: String) extends AutoCloseable with Logger {
 
@@ -60,14 +60,15 @@ case class SinkBuffer(writer: SinkWriter,
     localValues.clear()
   }
 
-  private[this] def flush: Boolean = localValues.nonEmpty && (checkSize || checkTime)
-
-  private[this] def checkSize: Boolean = localValues.size >= bufferSize
-
-  private[this] def checkTime: Boolean = {
-    if (timestamp == 0) return false
-    val current = System.currentTimeMillis
-    current - timestamp > timeoutMillis
+  private[this] def flush: Boolean = {
+    if (localValues.nonEmpty) {
+      localValues.size >= bufferSize || {
+        if (timestamp == 0) false else {
+          val current = System.currentTimeMillis
+          current - timestamp > delayTime
+        }
+      }
+    } else false
   }
 
   private[this] def buildDeepCopy(original: util.List[String]): util.List[String] = Collections.unmodifiableList(new util.ArrayList[String](original))

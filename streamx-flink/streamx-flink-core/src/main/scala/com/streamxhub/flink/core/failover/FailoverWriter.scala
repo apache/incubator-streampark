@@ -23,10 +23,13 @@ package com.streamxhub.flink.core.failover
 import java.io.ByteArrayInputStream
 import java.net.URI
 import java.util._
+import java.util.concurrent.locks.ReentrantLock
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.conf.FailoverStorageType
-import com.streamxhub.common.conf.FailoverStorageType._
+
+import com.streamxhub.flink.core.failover.FailoverStorageType.FailoverStorageType
+import com.streamxhub.flink.core.failover.FailoverStorageType.{MySQL,HBase,HDFS,Kafka}
+
 import com.streamxhub.common.util._
 import org.apache.hadoop.conf.{Configuration => HConf}
 import org.apache.hadoop.fs.{FileSystem, Path}
@@ -43,7 +46,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
 
   private[this] object Lock {
     @volatile var initialized = false
-    val lock = new Object()
+    val lock = new ReentrantLock()
   }
 
   private var kafkaProducer: KafkaProducer[String, String] = _
@@ -51,22 +54,22 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
   private var mutator: BufferedMutator = _
   private var fileSystem: FileSystem = _
 
-  def write(request: SinkRequest): Unit = {
 
+  def write(request: SinkRequest): Unit = {
     this.synchronized {
       val table = request.table.split("\\.").last
       failoverStorage match {
         case Kafka =>
           if (!Lock.initialized) {
-            Lock.lock.synchronized {
-              if (!Lock.initialized) {
-                Lock.initialized = true
-                //failoverConfig.remove(KEY_KAFKA_TOPIC)
-                properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-                properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
-                kafkaProducer = new KafkaProducer[String, String](properties)
-              }
+            Lock.lock.lock()
+            if (!Lock.initialized) {
+              Lock.initialized = true
+              //failoverConfig.remove(KEY_KAFKA_TOPIC)
+              properties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              properties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer")
+              kafkaProducer = new KafkaProducer[String, String](properties)
             }
+            Lock.lock.unlock()
           }
           val topic = properties.getProperty(KEY_KAFKA_TOPIC)
           val timestamp = System.currentTimeMillis()
@@ -87,20 +90,21 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
 
         case MySQL =>
           if (!Lock.initialized) {
-            Lock.lock.synchronized {
-              if (!Lock.initialized) {
-                Lock.initialized = true
-                properties.put(KEY_INSTANCE, s"failover-${table}")
-                val mysqlConnect = MySQLUtils.getConnection(properties)
-                val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
-                if (!mysqlTable.next()) {
-                  MySQLUtils.execute(
-                    mysqlConnect,
-                    s"create table $table (`values` text, `timestamp` bigint)"
-                  )
-                  logWarn(s"[StreamX] Failover storageType:MySQL,table: $table is not exist,auto created...")
-                }
+            try {
+              Lock.lock.lock()
+              Lock.initialized = true
+              properties.put(KEY_INSTANCE, s"failover-${table}")
+              val mysqlConnect = MySQLUtils.getConnection(properties)
+              val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
+              if (!mysqlTable.next()) {
+                MySQLUtils.execute(
+                  mysqlConnect,
+                  s"create table $table (`values` text, `timestamp` bigint)"
+                )
+                logWarn(s"[StreamX] Failover storageType:MySQL,table: $table is not exist,auto created...")
               }
+            } finally {
+              Lock.lock.unlock()
             }
           }
           val timestamp = System.currentTimeMillis()
@@ -116,7 +120,8 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           val tableName = TableName.valueOf(table)
           val familyName = "cf"
           if (!Lock.initialized) {
-            Lock.lock.synchronized {
+            try {
+              Lock.lock.lock()
               if (!Lock.initialized) {
                 Lock.initialized = true
                 hConnect = HBaseClient(properties).connection
@@ -137,6 +142,8 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                   })
                 mutator = hConnect.getBufferedMutator(mutatorParam)
               }
+            } finally {
+              Lock.lock.unlock()
             }
           }
           val timestamp = System.currentTimeMillis()
@@ -157,7 +164,8 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           val rootPath = new Path(s"$fileName/${DateUtils.format(format, new Date())}")
           try {
             if (!Lock.initialized) {
-              Lock.lock.synchronized {
+              try {
+                Lock.lock.lock()
                 if (!Lock.initialized) {
                   Lock.initialized = true
                   fileSystem = (Option(properties("namenode")), Option(properties("user"))) match {
@@ -171,6 +179,8 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                       throw new IllegalArgumentException("[StreamX] usage error..")
                   }
                 }
+              } finally {
+                Lock.lock.unlock()
               }
             }
             val uuid = UUID.randomUUID().toString.replace("-", "")
@@ -192,7 +202,9 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
     }
   }
 
-  private[this] def cleanUp(record: String) = s""" "${record.replace("\"", "\\\"")}" """.stripMargin
+  private[this] def cleanUp(record: String) = {
+    s""" "${record.replace("\"", "\\\"")}" """.stripMargin
+  }
 
   override def close(): Unit = {
     if (kafkaProducer != null) kafkaProducer.close()
