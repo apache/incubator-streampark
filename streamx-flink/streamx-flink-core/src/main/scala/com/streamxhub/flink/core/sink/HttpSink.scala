@@ -75,9 +75,7 @@ class HttpSink(@transient ctx: StreamingContext,
   def traceSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpTrace.METHOD_NAME)
 
   private[this] def sink(stream: DataStream[String], method: String): DataStreamSink[String] = {
-    val params = ctx.paramMap.filter(_._1.startsWith(HTTP_SINK_PREFIX)).map(x => {
-      x._1.drop(HTTP_SINK_PREFIX.length + 1) -> x._2
-    })
+    val params = ctx.paramMap.filter(_._1.startsWith(HTTP_SINK_PREFIX)).map(x => x._1.drop(HTTP_SINK_PREFIX.length + 1) -> x._2)
     val sinkFun = new HttpSinkFunction(params, header, method)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
