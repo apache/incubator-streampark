@@ -23,6 +23,7 @@ package com.streamxhub.flink.core.sink
 
 import java.util.Properties
 import java.util.concurrent._
+import java.util.concurrent.locks.ReentrantLock
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util._
@@ -88,7 +89,7 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
 
   private[this] object Lock {
     @volatile var initialized = false
-    val lock = new Object()
+    val lock = new ReentrantLock()
   }
 
   @transient var sinkBuffer: SinkBuffer = _
@@ -99,24 +100,24 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
 
   override def open(config: Configuration): Unit = {
     if (!Lock.initialized) {
-      Lock.lock.synchronized {
-        if (!Lock.initialized) {
-          Lock.initialized = true
+      Lock.lock.lock()
+      if (!Lock.initialized) {
+        Lock.initialized = true
 
-          val prop: Properties = new Properties()
-          properties.foreach { case (k, v) => prop.put(k, v) }
-          thresholdConf = ThresholdConf(prop)
+        val prop: Properties = new Properties()
+        properties.foreach { case (k, v) => prop.put(k, v) }
+        thresholdConf = ThresholdConf(prop)
 
-          val bufferSize = 1
-          val table = properties(KEY_SINK_FAILOVER_TABLE)
+        val bufferSize = 1
+        val table = properties(KEY_SINK_FAILOVER_TABLE)
 
-          httpSinkWriter = HttpSinkWriter(thresholdConf, header)
-          failoverChecker = FailoverChecker(thresholdConf.delayTime)
-          sinkBuffer = SinkBuffer(httpSinkWriter, thresholdConf.delayTime, bufferSize, table)
-          failoverChecker.addSinkBuffer(sinkBuffer)
-          logInfo("[StreamX] HttpSink initialize... ")
-        }
+        httpSinkWriter = HttpSinkWriter(thresholdConf, header)
+        failoverChecker = FailoverChecker(thresholdConf.delayTime)
+        sinkBuffer = SinkBuffer(httpSinkWriter, thresholdConf.delayTime, bufferSize, table)
+        failoverChecker.addSinkBuffer(sinkBuffer)
+        logInfo("[StreamX] HttpSink initialize... ")
       }
+      Lock.lock.unlock()
     }
   }
 
