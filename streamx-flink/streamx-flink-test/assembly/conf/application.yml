@@ -17,10 +17,9 @@ clickhouse.sink:
   username: default
   password: 123322242
   threshold:
-    bufferSize: 1000
+    bufferSize: 100
     numWriters: 3
-    queueCapacity: 1000
-    checkTime: 1000
+    queueCapacity: 100
     timeout: 1000
     successCode: 200
     retries: 10 #一条记录当插入失败时重试的最大次数
@@ -45,11 +44,10 @@ clickhouse.sink:
 http.sink:
   threshold:
     numWriters: 3
-    queueCapacity: 100
-    checkTime: 1000
-    requestTimeout: 100
+    queueCapacity: 10000 #队列最大容量,视单条记录大小而定,如值太大,上游数据源来的太快,下游写入数据跟不上可能会OOM.
+    timeout: 100
     retries: 3 #发送失败时的最大重试次数
-    successCode: 200
+    successCode: 200 #发送成功状态码,这里可以有多个值,用","号分隔
   failover:
     table: record
     storage: mysql #kafka,hbase,hdfs
@@ -68,4 +66,3 @@ http.sink:
       user: benjobs # user
       path: /clickhouse/failover # save path
       format: yyyy-MM-dd
-
