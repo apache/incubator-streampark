@@ -180,8 +180,7 @@ case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, Stri
     tasks.foreach(_.close())
     ThreadUtils.shutdownExecutorService(service)
     ThreadUtils.shutdownExecutorService(callbackService)
-    recordQueue.clear()
-    tasks.clear()
+    asyncHttpClient.close()
     logInfo(s"[StreamX] ${classOf[HttpSinkWriter].getSimpleName} is closed")
   }
 
