@@ -13,7 +13,7 @@ hbase:
 #clickhouse
 clickhouse.sink:
   driverClassName:
-  jdbcUrl: http://192.168.0.100:8123
+  jdbcUrl: http://192.168.0.101:8123
   username: default
   password: 123322242
   threshold:
@@ -24,7 +24,7 @@ clickhouse.sink:
     successCode: 200
     retries: 10 #一条记录当插入失败时重试的最大次数
   failover:
-    storage: hdfs #kafka,hbase,hdfs
+    storage: mysql #kafka,hbase,hdfs
     mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
       jdbcUrl: jdbc:mysql://localhost:3306/test
       username: root
