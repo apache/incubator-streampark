@@ -330,7 +330,7 @@ class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters)
     jdbcUrls.get(currentHostId)
   }
 
-  def getNextHost: String = {
+  def nextHost: String = {
     if (currentHostId >= jdbcUrls.size - 1) {
       currentHostId = 0
     } else {
