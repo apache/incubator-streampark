@@ -13,7 +13,7 @@ hbase:
 #clickhouse
 clickhouse.sink:
   driverClassName:
-  jdbcUrl: http://192.168.0.101:8123
+  jdbcUrl: http://192.168.0.100:8123
   username: default
   password: 123322242
   threshold:

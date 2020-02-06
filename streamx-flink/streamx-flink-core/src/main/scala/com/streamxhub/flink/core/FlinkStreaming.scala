@@ -56,7 +56,7 @@ trait FlinkStreaming extends Logger {
 
   private var context: StreamingContext = _
 
-  def config(env: StreamExecutionEnvironment): Unit = {}
+  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handler(context: StreamingContext): Unit
 
@@ -94,9 +94,11 @@ trait FlinkStreaming extends Logger {
     env.enableCheckpointing(checkpointInterval)
     env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
     //set config by yourself...
-    this.config(env)
+    this.config(env, parameter)
 
     env.getConfig.setGlobalJobParameters(parameter)
+
+    context = new StreamingContext(parameter, env)
   }
 
   /**
@@ -104,11 +106,7 @@ trait FlinkStreaming extends Logger {
    *
    * @param env
    */
-  def beforeStart(env: StreamExecutionEnvironment): Unit = {}
-
-  private[this] def createContext(): Unit = {
-    context = new StreamingContext(parameter, env)
-  }
+  def beforeStart(context: StreamingContext): Unit = {}
 
   private[this] def doStart(): JobExecutionResult = {
     println(s"\033[95;1m${LOGO}\033[1m\n")
@@ -119,16 +117,16 @@ trait FlinkStreaming extends Logger {
 
   def main(args: Array[String]): Unit = {
     initialize(args)
-    beforeStart(env)
-    createContext()
+    beforeStart(context)
     handler(context)
     doStart()
   }
+
 }
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+   def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {

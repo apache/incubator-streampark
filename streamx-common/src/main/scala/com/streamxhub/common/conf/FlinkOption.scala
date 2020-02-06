@@ -64,7 +64,7 @@ object FlinkOption {
 
   private[this] val PYMODULE_OPTION = new Option("pym", "pyModule", true, "Python module with the program entry point. " + "This option must be used in conjunction with `--pyFiles`.")
 
-  def getOptions(): Options = {
+  def allOptions: Options = {
     val commOptions = getRunCommandOptions
     val yarnOptions = getYARNOptions
     val resultOptions = new Options
