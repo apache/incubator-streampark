@@ -400,7 +400,7 @@ case class ClickHouseWriterTask(id: Int,
   override def run(): Unit = try {
     isWorking = true
     logInfo(s"[StreamX] Start writer task, id = $id")
-    while (isWorking || queue.size > 0) {
+    while (isWorking || queue.nonEmpty) {
       val req = queue.poll(300, TimeUnit.MILLISECONDS)
       if (req != null) {
         send(req)

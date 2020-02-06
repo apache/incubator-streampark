@@ -33,7 +33,9 @@ object ClickHouseSinkApp extends FlinkStreaming {
 
     //HttpSink(context).getSink(httpDs).setParallelism(1)
 
-    ClickHouseSink(context).sink[TestEntity](source, "test.orders").setParallelism(1)
+    ClickHouseSink(context).sink[TestEntity](source, "test.orders")(x=>{
+      s"${x.userId},${x.siteId}"
+    }).setParallelism(1)
   }
 
 }

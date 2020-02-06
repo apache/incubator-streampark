@@ -20,12 +20,11 @@
  */
 package com.streamxhub.common.util
 
-import java.io.StringWriter
-
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
+import org.json4s.jackson.Serialization
 
 object JsonUtils {
 
@@ -41,10 +40,6 @@ object JsonUtils {
     }
   }
 
-  def write(obj: AnyRef): String = {
-    val out = new StringWriter
-    mapper.writeValue(out, obj)
-    out.toString
-  }
+  def write(obj: AnyRef): String =  Serialization.write(obj)(org.json4s.DefaultFormats)
 
 }
