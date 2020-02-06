@@ -49,8 +49,7 @@ object ParameterCli {
           case array =>
             //覆盖的参数追加.....
             val parser = new DefaultParser
-            val allOptions = FlinkOption.getOptions()
-            val line = parser.parse(allOptions, array, false)
+            val line = parser.parse(FlinkOption.allOptions, array, false)
             line.getOptions.foreach(x => optionMap += x.getLongOpt -> x.getValue)
         }
         optionMap.foreach(x => buffer.append(x._1).append(" ").append(x._2).append(" "))
