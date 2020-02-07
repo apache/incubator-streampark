@@ -112,7 +112,7 @@ trait FlinkStreaming extends Logger {
     println(s"\033[95;1m${LOGO}\033[1m\n")
     val appName = parameter.get(KEY_FLINK_APP_NAME, "")
     println(s"[StreamX] FlinkStreaming $appName Starting...")
-    env.execute(appName)
+    context.execute(appName)
   }
 
   def main(args: Array[String]): Unit = {
