@@ -83,14 +83,14 @@ class JdbcSink(@transient ctx: StreamingContext,
   def sink[T](stream: DataStream[T], isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(instance)
     overwriteParams.foreach(x => prop.put(x._1, x._2))
-    val sinkFun = new JdbcSinkFunction[T](prop, isolationLevel, toSQLFn)
+    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
 }
 
-class JdbcSinkFunction[T](config: Properties, isolationLevel: Int, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
+class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String, isolationLevel: Int) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private val batchSize = config.remove(KEY_JDBC_INSERT_BATCH) match {
@@ -166,9 +166,9 @@ class JdbcSinkFunction[T](config: Properties, isolationLevel: Int, toSQLFn: T =>
 }
 
 
-class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String, isolationLevel: Int = -1) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun)
+  val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun, isolationLevel)
 
   var configuration: Configuration = _
 
