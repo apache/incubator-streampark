@@ -96,18 +96,9 @@ object DateUtils {
   }
 
   //获取今天之前的n天
-  def +-(date:Date,i: Int)(implicit format: String = dayFormat1): String = {
+  def +-(i: Int,date:Date = new Date)(implicit format: String = dayFormat2): String = {
     val cal = Calendar.getInstance
     cal.setTime(date)
-    cal.add(Calendar.DATE, i)
-    val statTime = new SimpleDateFormat(format).format(cal.getTime)
-    statTime
-  }
-
-
-  //获取今天之前的n天
-  def +-(i: Int)(implicit format: String = dayFormat1): String = {
-    val cal = Calendar.getInstance
     cal.add(Calendar.DATE, i)
     val statTime = new SimpleDateFormat(format).format(cal.getTime)
     statTime
