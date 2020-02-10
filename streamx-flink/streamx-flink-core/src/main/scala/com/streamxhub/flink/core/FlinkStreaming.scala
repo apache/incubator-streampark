@@ -104,7 +104,6 @@ trait FlinkStreaming extends Logger {
   /**
    * 用户可覆盖次方法...
    *
-   * @param env
    */
   def beforeStart(context: StreamingContext): Unit = {}
 
