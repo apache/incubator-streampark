@@ -92,7 +92,7 @@ object RedisClient extends Logger {
    */
   def createJedisPool(re: RedisEndpoint): JedisPool = {
     println(s"createJedisPool with $re ")
-    new JedisPool(poolConfig, re.host, re.port, re.timeout, re.auth, re.dbNum)
+    new JedisPool(poolConfig, re.host, re.port, re.timeout, re.auth, re.db)
   }
 
   private lazy val poolConfig = {
