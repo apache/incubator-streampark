@@ -80,17 +80,17 @@ class JdbcSink(@transient ctx: StreamingContext,
    * @tparam T : DataStream里的流的数据类型
    * @return
    */
-  def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(instance)
     overwriteParams.foreach(x => prop.put(x._1, x._2))
-    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
+    val sinkFun = new JdbcSinkFunction[T](prop, isolationLevel, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
 }
 
-class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
+class JdbcSinkFunction[T](config: Properties, isolationLevel: Int, toSQLFn: T => String) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private val batchSize = config.remove(KEY_JDBC_INSERT_BATCH) match {
@@ -106,6 +106,9 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String) extends Rich
     logInfo("[StreamX] JdbcSink Open....")
     connection = MySQLUtils.getConnection(config)
     connection.setAutoCommit(false)
+    if (isolationLevel > -1) {
+      connection.setTransactionIsolation(isolationLevel)
+    }
     if (batchSize > 1) {
       statement = connection.createStatement()
     }
