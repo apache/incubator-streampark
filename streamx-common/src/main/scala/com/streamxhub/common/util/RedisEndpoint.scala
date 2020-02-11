@@ -24,6 +24,7 @@ package com.streamxhub.common.util
 import java.net.URI
 import java.util.Properties
 
+import com.streamxhub.common.conf.ConfigConst._
 import redis.clients.jedis.{Jedis, Protocol}
 import redis.clients.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 
@@ -49,17 +50,17 @@ case class RedisEndpoint(host: String = Protocol.DEFAULT_HOST,
   extends Serializable {
 
   /**
-    * Constructor from spark config. set params with redis.host, redis.port, redis.auth and redis.db
+    * Constructor from Properties. set params with redis.host, redis.port, redis.password and redis.db
     *
-    * @param conf spark context config
+    * @param conf Properties
     */
   def this(conf: Properties) {
     this(
-      conf.getOrElse("host", Protocol.DEFAULT_HOST),
-      conf.getOrElse("port", Protocol.DEFAULT_PORT).toString.toInt,
-      conf.getOrElse("auth", null),
-      conf.getOrElse("db", Protocol.DEFAULT_DATABASE).toString.toInt,
-      conf.getOrElse("timeout", Protocol.DEFAULT_TIMEOUT).toString.toInt
+      conf.getOrElse(KEY_HOST, Protocol.DEFAULT_HOST),
+      conf.getOrElse(KEY_PORT, Protocol.DEFAULT_PORT).toString.toInt,
+      conf.getOrElse(KEY_PASSWORD, null),
+      conf.getOrElse(KEY_DB, Protocol.DEFAULT_DATABASE).toString.toInt,
+      conf.getOrElse(KEY_TIMEOUT, Protocol.DEFAULT_TIMEOUT).toString.toInt
     )
   }
 
