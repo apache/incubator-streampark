@@ -40,6 +40,7 @@ object ConfigConst {
 
   val KEY_PASSWORD = "password"
 
+  val KEY_TIMEOUT = "timeout"
 
   /**
    * sign....
