@@ -125,6 +125,8 @@ object RedisUtils extends Logger {
    */
   def setex(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.setex(key, seconds, value))
 
+
+  def hsetnx(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): Long = doRedis(_.hsetnx(key, field, value))
   /**
    * mget
    *
