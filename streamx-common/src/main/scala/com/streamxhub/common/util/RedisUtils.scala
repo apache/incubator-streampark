@@ -30,7 +30,7 @@ import scala.util.{Failure, Success, Try}
 
 
 /**
- *  <<出征>>
+ * <<出征>>
  *
  * 让我扭过头决绝地走
  * 擦干泪水松开了母亲的手
@@ -118,15 +118,51 @@ object RedisUtils extends Logger {
   def hget(key: String, field: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.hget(key, field))
 
   /**
-   * get
+   * Redis Setex 命令为指定的 key 设置值及其过期时间。如果 key 已经存在， SETEX 命令将会替换旧的值。
    *
    * @param key
    * @return
    */
-  def setex(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.setex(key, seconds, value))
+  def setex(key: String, ttl: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(_.setex(key, ttl, value))
 
+  /**
+   * Redis Setnx（SET if Not eXists） 命令在指定的 key 不存在时，为 key 设置指定的值。
+   *
+   * @param key
+   * @param value
+   * @param ttl
+   * @param endpoint
+   * @return
+   */
+  def setnx(key: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(r => {
+    val x = r.setnx(key, value)
+    if (x == 1 && ttl > -2) {
+      r.expire(key, ttl)
+    }
+    x
+  })
 
-  def hsetnx(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): Long = doRedis(_.hsetnx(key, field, value))
+  /**
+   * Redis Hsetnx 命令用于为哈希表中不存在的的字段赋值 。
+   * 如果哈希表不存在，一个新的哈希表被创建并进行 HSET 操作。
+   * 如果字段已经存在于哈希表中，操作无效
+   *
+   * @param key
+   * @param field
+   * @param value
+   * @param ttl
+   * @param endpoint
+   * @return
+   */
+
+  def hsetnx(key: String, field: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(r => {
+    val x = r.hsetnx(key, value, value)
+    if (x == 1 && ttl > -2) {
+      r.expire(key, ttl)
+    }
+    x
+  })
+
   /**
    * mget
    *
@@ -146,9 +182,9 @@ object RedisUtils extends Logger {
    */
   def del(key: String)(implicit endpoint: RedisEndpoint): Long = doRedis(_.del(key))
 
-  def set(key: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): String = doRedis(r => {
+  def set(key: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): String = doRedis(r => {
     val s = r.set(key, value)
-    if (ttl > 0) {
+    if (ttl > -2) {
       r.expire(key, ttl)
     }
     s
@@ -162,14 +198,13 @@ object RedisUtils extends Logger {
    * @param value
    * @return
    */
-  def hset(key: String, field: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(r => {
+  def hset(key: String, field: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(r => {
     val s = r.hset(key, field, value)
-    if (ttl > 0) {
+    if (ttl > -2) {
       r.expire(key, ttl)
     }
     s
   })
-
 
   /**
    *
@@ -179,9 +214,9 @@ object RedisUtils extends Logger {
    * @param endpoint
    * @return
    */
-  def hmset(key: String, hash: Map[String, String], ttl: Int = 0)(implicit endpoint: RedisEndpoint): String = doRedis(r => {
+  def hmset(key: String, hash: Map[String, String], ttl: Int = -2)(implicit endpoint: RedisEndpoint): String = doRedis(r => {
     val s = r.hmset(key, hash.asJava)
-    if (ttl > 0) {
+    if (ttl > -2) {
       r.expire(key, ttl)
     }
     s
@@ -229,108 +264,47 @@ object RedisUtils extends Logger {
 
   def srem(key: String, members: immutable.List[String])(implicit endpoint: RedisEndpoint): Long = doRedis(_.srem(key, members.toArray: _*))
 
-  /**
-   * 验证是否存在,如果不存在则插入(安装传入的过期时间和value)
-   *
-   * @param key
-   * @param seconds
-   * @param value
-   * @return
-   */
-  def existsElseSetex(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
-    if (x.exists(key)) true else {
-      x.setex(key, seconds, value)
-      false
-    }
-  })
-
-  def getOrElseSetex(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
-    val v = x.getSet(key,value)
-    if(v == null) {
-      x.setex(key, seconds, value)
-    }
-    v
-  })
-
-
-  def existsElseSetnx(key: String, value: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
-    if (x.exists(key)) true else {
-      x.setnx(key, value)
-      false
-    }
-  })
-
-  def getOrElseSetnx(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
-    val v = x.getSet(key,value)
-    if(v == null) {
-      x.setnx(key, value)
-    }
-    v
-  })
-
-  def existsElseHSetnx(key: String, field: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
-    if (x.hexists(key, field)) true else {
-      x.hsetnx(key, value, value)
-      if (ttl > 0) {
-        x.expire(key, ttl)
-      }
-      false
-    }
-  })
-
-  def getOrElseHSetnx(key: String, field: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
-    val v = x.hget(key,field)
-    if(v == null) {
-      x.hsetnx(key, value, value)
-      if (ttl > 0) {
-        x.expire(key, ttl)
-      }
-    }
-    v
-  })
-
-  /**
-   *
-   * @param key
-   * @param value
-   */
-  def hexistsElseHset(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
-    if (x.hexists(key, field)) true else {
-      x.hset(key, field, value)
-      false
-    }
-  })
-
-
   def getOrElseHset(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
-    val v = x.hget(key,field)
-    if(v == null) {
+    val v = x.hget(key, field)
+    if (v == null) {
       x.hset(key, field, value)
     }
     v
   })
 
-  def hincrBy(key: String, field: String, value: Long, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
+  def getOrElseSet(key: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+    val v = x.get(key)
+    if (v == null) {
+      x.set(key, value)
+      if (ttl > -2) {
+        x.expire(key, ttl)
+      }
+    }
+    v
+  })
+
+
+  def hincrBy(key: String, field: String, value: Long, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val ret = x.hincrBy(key, field, value)
-    if (ret == value && ttl > 0) x.expire(key, ttl)
+    if (ret == value && ttl > -2) x.expire(key, ttl)
     ret
   })
 
-  def hincrByFloat(key: String, field: String, value: Double, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
+  def hincrByFloat(key: String, field: String, value: Double, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
     val ret = x.hincrByFloat(key, field, value)
-    if (ret == value && ttl > 0) x.expire(key, ttl)
+    if (ret == value && ttl > -2) x.expire(key, ttl)
     ret
   })
 
-  def incrBy(key: String, value: Long, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
+  def incrBy(key: String, value: Long, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val ret = x.incrBy(key, value)
-    if (ret == value && ttl > 0) x.expire(key, ttl)
+    if (ret == value && ttl > -2) x.expire(key, ttl)
     ret
   })
 
-  def incrByFloat(key: String, value: Double, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
+  def incrByFloat(key: String, value: Double, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
     val ret = x.incrByFloat(key, value)
-    if (ret == value && ttl > 0) x.expire(key, ttl)
+    if (ret == value && ttl > -2) x.expire(key, ttl)
     ret
   })
 
@@ -340,22 +314,25 @@ object RedisUtils extends Logger {
    * @param kvs
    * @param ttl
    */
-  def mSets(kvs: Seq[(String, String)], ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
+  def mSets(kvs: Seq[(String, String)], ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val start = System.currentTimeMillis()
     val pipe = x.pipelined()
     kvs.foreach { case (k, v) =>
       pipe.mset(k, v)
-      if (ttl > 0) pipe.expire(k, ttl)
+      if (ttl > -2) pipe.expire(k, ttl)
     }
     pipe.sync()
     System.currentTimeMillis() - start
   })
 
-  def mSetex(kvs: Seq[(String, String)], ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
+  def mSetex(kvs: Seq[(String, String)], ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
     val start = System.currentTimeMillis()
     val pipe = x.pipelined()
     kvs.foreach { case (k, v) =>
-      pipe.setex(k, ttl, v)
+      pipe.setnx(k, v)
+      if (ttl > -1) {
+        pipe.expire(k, ttl)
+      }
     }
     pipe.sync()
     System.currentTimeMillis() - start
