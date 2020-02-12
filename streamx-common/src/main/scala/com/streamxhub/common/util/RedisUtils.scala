@@ -106,6 +106,8 @@ object RedisUtils extends Logger {
    */
   def exists(key: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(_.exists(key))
 
+  def hexists(key: String,field:String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(_.hexists(key,field))
+
   /**
    * get
    *
