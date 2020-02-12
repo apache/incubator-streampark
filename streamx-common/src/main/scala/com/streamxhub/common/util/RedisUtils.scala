@@ -242,11 +242,28 @@ object RedisUtils extends Logger {
     }
   })
 
+  def getOrElseSetex(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+    val v = x.getSet(key,value)
+    if(v == null) {
+      x.setex(key, seconds, value)
+    }
+    v
+  })
+
+
   def existsElseSetnx(key: String, value: String)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
     if (x.exists(key)) true else {
       x.setnx(key, value)
       false
     }
+  })
+
+  def getOrElseSetnx(key: String, seconds: Int, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+    val v = x.getSet(key,value)
+    if(v == null) {
+      x.setnx(key, value)
+    }
+    v
   })
 
   def existsElseHSetnx(key: String, field: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Boolean = doRedis(x => {
@@ -259,6 +276,17 @@ object RedisUtils extends Logger {
     }
   })
 
+  def getOrElseHSetnx(key: String, field: String, value: String, ttl: Int = 0)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+    val v = x.hget(key,field)
+    if(v == null) {
+      x.hsetnx(key, value, value)
+      if (ttl > 0) {
+        x.expire(key, ttl)
+      }
+    }
+    v
+  })
+
   /**
    *
    * @param key
@@ -269,6 +297,15 @@ object RedisUtils extends Logger {
       x.hset(key, field, value)
       false
     }
+  })
+
+
+  def getOrElseHset(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+    val v = x.hget(key,field)
+    if(v == null) {
+      x.hset(key, field, value)
+    }
+    v
   })
 
   def hincrBy(key: String, field: String, value: Long, ttl: Int = 0)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
