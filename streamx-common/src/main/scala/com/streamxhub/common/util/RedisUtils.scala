@@ -264,10 +264,13 @@ object RedisUtils extends Logger {
 
   def srem(key: String, members: immutable.List[String])(implicit endpoint: RedisEndpoint): Long = doRedis(_.srem(key, members.toArray: _*))
 
-  def getOrElseHset(key: String, field: String, value: String)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
+  def getOrElseHset(key: String, field: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): String = doRedis(x => {
     val v = x.hget(key, field)
     if (v == null) {
       x.hset(key, field, value)
+      if (ttl > -2) {
+        x.expire(key, ttl)
+      }
     }
     v
   })
