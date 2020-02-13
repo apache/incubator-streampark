@@ -36,7 +36,7 @@ import scala.util.Try
 
 /**
  * @author benjobs
- * 基于hikari连接池实现.呃,当然支持MySQL多数据源,需注意所有的修改和添加操作都是自动提交事物的...
+ *         基于hikari连接池实现.呃,当然支持MySQL多数据源,需注意所有的修改和添加操作都是自动提交事物的...
  */
 object MySQLUtils {
 
@@ -79,7 +79,7 @@ object MySQLUtils {
         case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
-        close(conn, stmt, result)
+        close(result, stmt, conn)
       }
     }
   }
@@ -129,8 +129,9 @@ object MySQLUtils {
     }
   }
 
-  def update(sql: String)(implicit jdbcConfig: Properties): Int = update(getConnection(jdbcConfig),sql)
-    /**
+  def update(sql: String)(implicit jdbcConfig: Properties): Int = update(getConnection(jdbcConfig), sql)
+
+  /**
    *
    * 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQL DDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE。
    * INSERT、UPDATE 或 DELETE 语句的效果是修改表中零行或多行中的一列或多列。
@@ -140,7 +141,7 @@ object MySQLUtils {
    * @param sql
    * @return
    */
-  def update(conn: Connection,sql: String): Int = {
+  def update(conn: Connection, sql: String): Int = {
     var statement: Statement = null
     try {
       statement = conn.createStatement
@@ -149,7 +150,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         -1
     } finally {
-      close(conn, statement)
+      close(statement, conn)
     }
   }
 
@@ -181,7 +182,7 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
-      close(conn, stmt, result)
+      close(result, stmt, conn)
     }
   }
 
@@ -201,9 +202,9 @@ object MySQLUtils {
    * @return
    */
 
-  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean =  execute(getConnection(jdbcConfig), sql)
+  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean = execute(getConnection(jdbcConfig), sql)
 
-  def execute(conn: Connection,sql: String): Boolean = {
+  def execute(conn: Connection, sql: String): Boolean = {
     var stmt: Statement = null
     try {
       stmt = conn.createStatement
@@ -212,12 +213,13 @@ object MySQLUtils {
       case ex: Exception => ex.printStackTrace()
         false
     } finally {
-      close(conn, stmt)
+      close(stmt, conn)
     }
   }
 
   /**
-   *以及Hikari连接池
+   * 以及Hikari连接池
+   *
    * @param prop
    * @return
    */
