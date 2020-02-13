@@ -45,7 +45,7 @@ object ConfigUtils {
 
   def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
 
-  def getMySQLConf(parameter: JMap[String, String])(implicit prefix: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, prefix)
+  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, alias)
 
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
@@ -70,13 +70,26 @@ object ConfigUtils {
     }
   }
 
-  private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, instance: String): Properties = {
-    val tmpFix = if (instance == null || instance.isEmpty) prefix else s"${prefix}.${instance}"
+  /**
+   *
+   * @param parameter
+   * @param prefix
+   * @param alias
+   * @return
+   */
+  private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, alias: String): Properties = {
+    alias match {
+      case "" =>
+      case other =>
+        val aliasList = parameter.getOrElse(s"$MYSQL_ALIAS","").split(SIGN_COMMA)
+        require(aliasList.contains(other))
+    }
+    val tmpFix = if (alias == null || alias.isEmpty) prefix else s"$prefix.$alias"
     val fix = tmpFix.replaceAll("\\.+", ".").replaceAll("\\.+$", "").concat(".")
-    val driver = parameter.toMap.getOrDefault(s"${prefix}${KEY_JDBC_DRIVER}", null)
-    val url = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_URL}", null)
-    val user = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_USER}", null)
-    val password = parameter.toMap.getOrDefault(s"${fix}${KEY_JDBC_PASSWORD}", null)
+    val driver = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_DRIVER", null)
+    val url = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_URL", null)
+    val user = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_USER", null)
+    val password = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL instance:${prefix} error,[driver|url] must be not null")
@@ -85,7 +98,7 @@ object ConfigUtils {
     }
     val param: SMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    val instanceName = if (StringUtils.isBlank(instance)) "default" else instance
+    val instanceName = if (StringUtils.isBlank(alias)) "default" else alias
     properties.put(KEY_INSTANCE, instanceName)
     properties.put(KEY_JDBC_DRIVER, driver)
     param.foreach(x => properties.put(x._1, x._2))

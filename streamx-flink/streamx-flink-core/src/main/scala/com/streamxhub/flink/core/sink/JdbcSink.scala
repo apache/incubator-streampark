@@ -58,7 +58,7 @@ class JdbcSink(@transient ctx: StreamingContext,
                overwriteParams: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
-               uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+               uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   //每隔10s进行启动一个检查点
   ctx.enableCheckpointing(10000)
@@ -81,7 +81,7 @@ class JdbcSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(instance)
+    val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(alias)
     overwriteParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
     val sink = stream.addSink(sinkFun)
