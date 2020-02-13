@@ -89,6 +89,7 @@ object ConfigConst {
    * about config jdbc...
    */
   val MYSQL_PREFIX = "mysql."
+  val MYSQL_ALIAS = "mysql.alias"
   val KEY_JDBC_DRIVER = "driverClassName"
   val KEY_JDBC_DATABASE = "database"
 

@@ -57,14 +57,14 @@ object MySQLSink {
 
   /**
    * @param ctx      : StreamingContext
-   * @param instance : MySQL的实例名称(用于区分多个不同的MySQL实例...)
+   * @param alias : MySQL的实例别名(用于区分多个不同的MySQL实例...)
    * @return
    */
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): MySQLSink = new MySQLSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): MySQLSink = new MySQLSink(ctx, overwriteParams, parallelism, name, uid)
 
 }
 
@@ -72,7 +72,7 @@ class MySQLSink(@transient ctx: StreamingContext,
                 overwriteParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
-                uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
 
   ctx.enableCheckpointing(5000)
@@ -90,7 +90,7 @@ class MySQLSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = getMySQLConf(ctx.paramMap)(instance)
+    val prop = getMySQLConf(ctx.paramMap)(alias)
     overwriteParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
