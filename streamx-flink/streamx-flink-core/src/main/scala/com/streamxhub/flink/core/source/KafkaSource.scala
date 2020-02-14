@@ -42,7 +42,7 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
     val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
     specialKafkaParams.foreach(x => prop.put(x._1, x._2))
     //强制设置offset自动提交
-    prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,"true")
+    prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,true)
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
     ctx.addSource(consumer)
   }
