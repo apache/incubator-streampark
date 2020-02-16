@@ -45,7 +45,7 @@ object ConfigUtils {
 
   def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
 
-  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = mysqlGetConf(parameter, MYSQL_PREFIX, alias)
+  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
@@ -73,27 +73,27 @@ object ConfigUtils {
   /**
    *
    * @param parameter
-   * @param prefix
+   * @param dialect
    * @param alias
    * @return
    */
-  private[this] def mysqlGetConf(parameter: JMap[String, String], prefix: String, alias: String): Properties = {
+  def getJdbcConf(parameter: JMap[String, String], dialect: String, alias: String): Properties = {
+    val prefix = if (dialect.endsWith(".")) dialect else s"$dialect."
     alias match {
       case "" =>
       case other =>
-        val aliasList = parameter.getOrElse(s"$MYSQL_ALIAS","").split(SIGN_COMMA)
+        val aliasList = parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
         require(aliasList.contains(other))
     }
-    val tmpFix = if (alias == null || alias.isEmpty) prefix else s"$prefix.$alias"
-    val fix = tmpFix.replaceAll("\\.+", ".").replaceAll("\\.+$", "").concat(".")
+    val fix = if (alias == null || alias.isEmpty) prefix else s"$prefix$alias"
     val driver = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_DRIVER", null)
     val url = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_URL", null)
     val user = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_USER", null)
     val password = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
-      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"MySQL instance:${prefix} error,[driver|url] must be not null")
-      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"MySQL instance:${prefix} error, [user|password] must be all null,or all not null ")
+      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must be not null")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"Jdbc instance:${prefix} error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: SMap[String, String] = filterParam(parameter, fix)

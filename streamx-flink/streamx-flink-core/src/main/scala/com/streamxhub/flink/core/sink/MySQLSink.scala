@@ -45,10 +45,7 @@ import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
- *
- * TODO  注意：
- * TODO  注意：
- * TODO  注意：
+ * TODO:(安全和稳定性有待验证)
  * TODO 1) 该MySQLSink实现可能针对不用的MySQL版本会出现问题,导致获取类型失败(	at com.esotericsoftware.kryo.Generics.getConcreteClass(Generics.java:44)... )
  * TODO 2) 该MySQLSink对MySQL的连接时长有要求,要连接等待时长(wait_timeout)设置的长一些,不然一个连接打开一直在invoke插入数据阶段由于还未提交,还一直在长时间插入可能会超时(Communications link failure during rollback(). Transaction resolution unknown.)
  *
@@ -57,7 +54,7 @@ object MySQLSink {
 
   /**
    * @param ctx      : StreamingContext
-   * @param alias : MySQL的实例别名(用于区分多个不同的MySQL实例...)
+   * @param alias :   MySQL的实例别名(用于区分多个不同的MySQL实例...)
    * @return
    */
   def apply(@transient ctx: StreamingContext,
@@ -100,7 +97,6 @@ class MySQLSink(@transient ctx: StreamingContext,
 }
 
 /**
- * MySQLSink基于两阶段提交实现,保证了数据的ExactlyOnce,可直接使用与生产环境。。。
  *
  * @param config
  * @param toSQLFn

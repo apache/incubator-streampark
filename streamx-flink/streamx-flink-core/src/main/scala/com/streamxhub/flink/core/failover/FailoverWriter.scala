@@ -94,10 +94,10 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               Lock.lock.lock()
               Lock.initialized = true
               properties.put(KEY_INSTANCE, s"failover-${table}")
-              val mysqlConnect = MySQLUtils.getConnection(properties)
+              val mysqlConnect = JdbcUtils.getConnection(properties)
               val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
               if (!mysqlTable.next()) {
-                MySQLUtils.execute(
+                JdbcUtils.execute(
                   mysqlConnect,
                   s"create table $table (`values` text, `timestamp` bigint)"
                 )
@@ -113,7 +113,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
             s""" ($v,$timestamp) """.stripMargin
           })
           val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
-          MySQLUtils.update(sql)(properties)
+          JdbcUtils.update(sql)(properties)
           logInfo(s"[StreamX] Failover successful!! storageType:MySQL,table: $table,size:${request.size}")
 
         case HBase =>
