@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.source
 
 import java.util.Properties
 
-import com.streamxhub.common.util.{Logger, MySQLUtils}
+import com.streamxhub.common.util.{Logger, JdbcUtils}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
@@ -49,7 +49,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](querySQL: String, fu
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
     while (isRunning) {
-      val list = MySQLUtils.select(querySQL)
+      val list = JdbcUtils.select(querySQL)
       list.foreach(x => ctx.collect(fun(x)))
     }
   }

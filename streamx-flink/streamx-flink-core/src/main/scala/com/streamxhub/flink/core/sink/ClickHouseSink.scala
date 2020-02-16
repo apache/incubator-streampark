@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Properties}
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils, ThreadUtils}
+import com.streamxhub.common.util.{ConfigUtils, Logger, JdbcUtils, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -268,7 +268,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
 
   override def close(): Unit = {
     execBatch()
-    MySQLUtils.close(statement, connection)
+    JdbcUtils.close(statement, connection)
   }
 
   private[this] def execBatch(): Unit = {
