@@ -28,8 +28,9 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, Logger, MySQLUtils}
+import com.streamxhub.common.util.{ConfigUtils, Logger, JdbcUtils}
 import com.streamxhub.flink.core.StreamingContext
+import com.streamxhub.flink.core.sink.Dialect.Dialect
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -42,15 +43,15 @@ import scala.collection.Map
 object JdbcSink {
 
   /**
-   * @param ctx      : StreamingContext
-   * @param instance : MySQL的实例名称(用于区分多个不同的MySQL实例...)
+   * @param ctx   : StreamingContext
+   * @param alias :    实例别名(用于区分多个不同的数据库实例...)
    * @return
    */
   def apply(@transient ctx: StreamingContext,
             overwriteParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): JdbcSink = new JdbcSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, overwriteParams, parallelism, name, uid)
 
 }
 
@@ -76,12 +77,13 @@ class JdbcSink(@transient ctx: StreamingContext,
   /**
    *
    * @param stream  : DataStream
+   * @param dialect : 数据库方言
    * @param toSQLFn : 转换成SQL的函数,有用户提供.
    * @tparam T : DataStream里的流的数据类型
    * @return
    */
-  def sink[T](stream: DataStream[T], isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getMySQLConf(ctx.paramMap)(alias)
+  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL, isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+    val prop = ConfigUtils.getJdbcConf(ctx.paramMap, dialect.toString.toLowerCase, alias)
     overwriteParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
     val sink = stream.addSink(sinkFun)
@@ -104,7 +106,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String, isolationLev
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
     logInfo("[StreamX] JdbcSink Open....")
-    connection = MySQLUtils.getConnection(config)
+    connection = JdbcUtils.getConnection(config)
     connection.setAutoCommit(false)
     if (isolationLevel > -1) {
       connection.setTransactionIsolation(isolationLevel)
@@ -148,7 +150,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String, isolationLev
 
   override def close(): Unit = {
     execBatch()
-    MySQLUtils.close(statement, connection)
+    JdbcUtils.close(statement, connection)
   }
 
   private[this] def execBatch(): Unit = {
@@ -181,6 +183,10 @@ class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: 
   override def close(): Unit = sinkFunction.close()
 }
 
+object Dialect extends Enumeration {
+  type Dialect = Value
+  val MYSQL, ORACLE, MSSQL, H2 = Value
+}
 
 
 
