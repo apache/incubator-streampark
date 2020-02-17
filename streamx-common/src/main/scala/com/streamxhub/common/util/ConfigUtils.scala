@@ -85,7 +85,7 @@ object ConfigUtils {
         val aliasList = parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
         require(aliasList.contains(other))
     }
-    val fix = if (alias == null || alias.isEmpty) prefix else s"$prefix$alias"
+    val fix = if (alias == null || alias.isEmpty) prefix else s"$prefix$alias.".replaceFirst("\\.+$",".")
     val driver = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_DRIVER", null)
     val url = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_URL", null)
     val user = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_USER", null)
