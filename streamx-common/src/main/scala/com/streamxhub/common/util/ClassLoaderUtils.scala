@@ -31,16 +31,16 @@ object ClassLoaderUtils {
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
-    require(jarFile.exists, s"[JobX] jarFilePath:$jarFilePath is not exists")
-    require(jarFile.isFile, s"[JobX] jarFilePath:$jarFilePath is not file")
+    require(jarFile.exists, s"[StreamX] jarFilePath:$jarFilePath is not exists")
+    require(jarFile.isFile, s"[StreamX] jarFilePath:$jarFilePath is not file")
     loadPath(jarFile.getAbsolutePath)
   }
 
   def loadJars(path: String): Unit = {
     val jarDir = new File(path)
-    require(jarDir.exists, s"[JobX] jarPath: $path is not exists")
-    require(jarDir.isFile, s"[JobX] jarPath: $path is not directory")
-    require(jarDir.listFiles.length > 0, s"[JobX] have not jar in path:$path")
+    require(jarDir.exists, s"[StreamX] jarPath: $path is not exists")
+    require(jarDir.isFile, s"[StreamX] jarPath: $path is not directory")
+    require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
     for (jarFile <- jarDir.listFiles) {
       loadPath(jarFile.getAbsolutePath)
     }
