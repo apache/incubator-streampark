@@ -1,3 +1,26 @@
+flink:
+  deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明细的问题的找不到jar文件
+    dynamic: ##这里放动态熟悉... -yD key=value
+    resource: ## 这里放启动资源相关配置...s
+      yarnname: dp-hopsonone-park-clean            # Set a custom name for the application on YARN
+      class: cn.com.hopson.parkclean.app.ShParkCleanApp                             # main class
+      detached:                         # -d   (If present, runs the job in detached mode)
+      jobmanager:                       # -m   (Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.)
+      shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
+      yarnapplicationType:              # -yat (Set a custom application type for the application on YARN)
+      yarndetached:                     # -yd  (If present, runs the job in detached mode (deprecated; use non-YARN specific option instead))
+      yarnapplicationId:                # -yid (Attach to running YARN session)
+      yarnjobManagerMemory: 1024M       # -yjm (Memory for JobManager Container with optional unit (default: MB))
+      yarncontainer:                    # -yn  (Number of YARN container to allocate (=Number of Task Managers)
+      yarnnodeLabel:                    # -ynl (Specify YARN node label for the YARN application)
+      yarnqueue:                        # -yqu (Specify YARN queue)
+      yarnslots: 1                      # -ys  (Number of slots per TaskManager)
+      yarntaskManagerMemory: 4096M      # -ytm
+  time.characteristic: EventTime
+  checkpoint:
+    interval: 1000
+    mode: EXACTLY_ONCE
+  parallelism: 1
 mysql:
   driverClassName: com.mysql.jdbc.Driver
   jdbcUrl: jdbc:mysql://localhost:3306/test
