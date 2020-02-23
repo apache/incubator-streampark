@@ -72,8 +72,11 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
 
     while (isRunning) {
       interval match {
-        case x if x <= 0 => doWork()
-        case y if System.currentTimeMillis() - queryTime >= y => doWork()
+        case x if x <= 0 =>
+          doWork()
+        case y if System.currentTimeMillis() - queryTime >= y =>
+          queryTime = System.currentTimeMillis()
+          doWork()
         case _ =>
       }
     }
