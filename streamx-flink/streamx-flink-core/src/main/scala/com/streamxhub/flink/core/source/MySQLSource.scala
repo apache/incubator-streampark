@@ -21,8 +21,6 @@
 package com.streamxhub.flink.core.source
 
 import java.util.Properties
-import java.util.concurrent.locks.ReentrantLock
-
 import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -43,8 +41,8 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 0, lock: Boolean = true)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval, lock)
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 0)(implicit config: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
     ctx.addSource(mysqlFun)
   }
 
@@ -59,24 +57,18 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
  * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long, lock: Boolean)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
   var queryTime = 0L
 
-  val queryLock = new ReentrantLock()
-
   override def cancel(): Unit = this.isRunning = false
 
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
-    def doWork(): Unit = {
-      if (lock) queryLock.lock()
-      val list = JdbcUtils.select(sqlFun)
-      resultFun(list).foreach(ctx.collect)
-      if (lock) queryLock.unlock()
-    }
+
+    def doWork(): Unit = resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
 
     while (isRunning) {
       interval match {
