@@ -71,23 +71,21 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
 
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
-    interval match {
-      case x if x <= 0 =>
-        while (isRunning) {
-          if (lock) queryLock.lock()
-          val list = JdbcUtils.select(sqlFun)
-          resultFun(list).foreach(ctx.collect)
-          if (lock) queryLock.unlock()
-        }
-      case _ =>
-        while (isRunning && System.currentTimeMillis() - queryTime >= interval) {
-          if (lock) queryLock.lock()
-          queryTime = System.currentTimeMillis()
-          val list = JdbcUtils.select(sqlFun)
-          resultFun(list).foreach(ctx.collect)
-          if (lock) queryLock.unlock()
-        }
+    def doWork(): Unit = {
+      if (lock) queryLock.lock()
+      val list = JdbcUtils.select(sqlFun)
+      resultFun(list).foreach(ctx.collect)
+      if (lock) queryLock.unlock()
     }
+
+    while (isRunning) {
+      interval match {
+        case x if x <= 0 => doWork()
+        case y if System.currentTimeMillis() - queryTime >= y => doWork()
+        case _ =>
+      }
+    }
+
   }
 
 }
