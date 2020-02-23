@@ -21,8 +21,9 @@
 package com.streamxhub.flink.core.source
 
 import java.util.Properties
+import java.util.concurrent.locks.ReentrantLock
 
-import com.streamxhub.common.util.{Logger, JdbcUtils}
+import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
@@ -42,8 +43,8 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 0)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 0, lock: Boolean = true)(implicit config: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval, lock)
     ctx.addSource(mysqlFun)
   }
 
@@ -58,11 +59,13 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
  * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long, lock: Boolean)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
   var queryTime = 0L
+
+  val queryLock = new ReentrantLock()
 
   override def cancel(): Unit = this.isRunning = false
 
@@ -71,14 +74,20 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
     interval match {
       case x if x <= 0 =>
         while (isRunning) {
+          if (lock) queryLock.lock()
           val list = JdbcUtils.select(sqlFun)
           resultFun(list).foreach(ctx.collect)
+          if (lock) {
+            queryLock.unlock()
+          }
         }
       case _ =>
         while (isRunning && System.currentTimeMillis() - queryTime >= interval) {
+          if (lock) queryLock.lock()
           queryTime = System.currentTimeMillis()
           val list = JdbcUtils.select(sqlFun)
           resultFun(list).foreach(ctx.collect)
+          if (lock) queryLock.unlock()
         }
     }
   }
