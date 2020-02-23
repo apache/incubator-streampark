@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.flink.monitor.system.dao.LoginLogMapper">
+    <select id="findTotalVisitCount" resultType="long">
+        select count(1) from t_login_log
+    </select>
+
+    <select id="findTodayVisitCount" resultType="long">
+        select count(1) from t_login_log where datediff(login_time,now())=0
+    </select>
+
+    <select id="findTodayIp" resultType="long">
+        select count(distinct(ip)) from t_login_log where datediff(login_time,now())=0
+    </select>
+
+    <select id="findLastSevenDaysVisitCount" resultType="map" parameterType="string">
+        select
+        date_format(l.login_time, '%m-%d') days,
+        count(1) count
+        from (
+            select *
+            from t_login_log
+            where date_sub(curdate(), interval 7 day) &lt;= date(login_time)
+        ) as l
+        <where>
+            <if test="username != null and username != ''">
+                and l.username = #{username}
+            </if>
+        </where>
+        group by days
+    </select>
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.flink.monitor.core.dao.ApplicationMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Application">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId"/>
+        <result column="CONFIG_FILE" jdbcType="VARCHAR" property="configFile"/>
+        <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
+        <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="STATE" jdbcType="INTEGER" property="state"/>
+        <result column="ARGS" jdbcType="VARCHAR" property="args"/>
+        <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
+    </resultMap>
+
+    <select id="findApplication" resultType="application" parameterType="application">
+        SELECT t.*,p.name as projectName FROM t_flink_app t inner join t_flink_project p
+        on t.project_id = p.id
+        <where>
+            <if test="application.projectName != null and application.projectName != ''">
+                AND p.name like '%${application.projectName}%'
+            </if>
+            <if test="application.appId != null and application.appId != ''">
+                AND t.app_id = #{application.appId}
+            </if>
+            <if test="application.appName != null and application.appName != ''">
+                AND t.app_name = #{application.appName}
+            </if>
+            <if test="application.state != null and application.state != ''">
+                AND t.state = #{application.state}
+            </if>
+            <if test="application.createTimeFrom != null and application.createTimeFrom !=''">
+                And t.create_time between #{application.createTimeFrom} and #{application.createTimeTo}
+            </if>
+        </where>
+    </select>
+</mapper>

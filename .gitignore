@@ -5,3 +5,4 @@ target/
 deployTo21.sh
 .DS_Store
 metastore_db
+/logs/2020-02-06/
