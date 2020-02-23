@@ -42,7 +42,7 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R, interval: Long = 0)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 0)(implicit config: Properties): DataStream[R] = {
     val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
     ctx.addSource(mysqlFun)
   }
@@ -58,7 +58,7 @@ class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
  * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: Map[String, _] => R, interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -72,13 +72,13 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
       case x if x <= 0 =>
         while (isRunning) {
           val list = JdbcUtils.select(sqlFun)
-          list.foreach(x => ctx.collect(resultFun(x)))
+          resultFun(list).foreach(ctx.collect)
         }
       case _ =>
         while (isRunning && System.currentTimeMillis() - queryTime >= interval) {
           queryTime = System.currentTimeMillis()
           val list = JdbcUtils.select(sqlFun)
-          list.foreach(x => ctx.collect(resultFun(x)))
+          resultFun(list).foreach(ctx.collect)
         }
     }
   }
