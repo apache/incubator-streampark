@@ -33,24 +33,54 @@ import scala.collection.Map
 
 class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[String, String] = Map.empty[String, String]) {
 
-  def getDataStream[R: TypeInformation](querySQL: String, fun: Map[String, _] => R)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](querySQL, fun)
+  /**
+   *
+   * @param sqlFun
+   * @param fun
+   * @param interval sql查询的间隔时间.
+   * @param config
+   * @tparam R
+   * @return
+   */
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R, interval: Long = 0)(implicit config: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
     ctx.addSource(mysqlFun)
   }
 
 }
 
-private[this] class MySQLSourceFunction[R: TypeInformation](querySQL: String, fun: Map[String, _] => R)(implicit config: Properties) extends SourceFunction[R] with Logger {
+/**
+ *
+ * @param sqlFun
+ * @param resultFun
+ * @param interval 两次sql执行查询的间隔.防止死循环密集的查询sql
+ * @param typeInformation$R$0
+ * @param config
+ * @tparam R
+ */
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: Map[String, _] => R, interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
+
+  var queryTime = 0L
 
   override def cancel(): Unit = this.isRunning = false
 
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
-    while (isRunning) {
-      val list = JdbcUtils.select(querySQL)
-      list.foreach(x => ctx.collect(fun(x)))
+    interval match {
+      case 0 =>
+        while (isRunning) {
+          val list = JdbcUtils.select(sqlFun)
+          list.foreach(x => ctx.collect(resultFun(x)))
+        }
+      case _ =>
+        while (isRunning && System.currentTimeMillis() - queryTime >= interval) {
+          queryTime = System.currentTimeMillis()
+          val list = JdbcUtils.select(sqlFun)
+          list.foreach(x => ctx.collect(resultFun(x)))
+        }
     }
   }
+
 }
