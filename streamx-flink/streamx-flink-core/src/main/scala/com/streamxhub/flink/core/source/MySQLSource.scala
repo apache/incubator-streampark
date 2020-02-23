@@ -77,9 +77,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
           if (lock) queryLock.lock()
           val list = JdbcUtils.select(sqlFun)
           resultFun(list).foreach(ctx.collect)
-          if (lock) {
-            queryLock.unlock()
-          }
+          if (lock) queryLock.unlock()
         }
       case _ =>
         while (isRunning && System.currentTimeMillis() - queryTime >= interval) {
