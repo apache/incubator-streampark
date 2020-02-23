@@ -69,7 +69,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
     interval match {
-      case 0 =>
+      case x if x <= 0 =>
         while (isRunning) {
           val list = JdbcUtils.select(sqlFun)
           list.foreach(x => ctx.collect(resultFun(x)))
