@@ -38,10 +38,10 @@ import scala.util.Try
   * 封装 Kafka Direct Api
   *
   * @param ssc
-  * @param specialKafkaParams 指定 Kafka 配置,可以覆盖配置文件
+  * @param overrideParams 指定 Kafka 配置,可以覆盖配置文件
   */
 class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext,
-                                                  specialKafkaParams: Map[String, String] = Map.empty[String, String]
+                                                  overrideParams: Map[String, String] = Map.empty[String, String]
                                                  ) extends Source {
 
   override val prefix: String = "spark.source.kafka.consume."
@@ -50,7 +50,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
   lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
   // kafka 消费 topic
-  private lazy val topicSet: Set[String] = specialKafkaParams.getOrElse("consume.topics",
+  private lazy val topicSet: Set[String] = overrideParams.getOrElse("consume.topics",
     sparkConf.get("spark.source.kafka.consume.topics")).split(",").map(_.trim).toSet
 
   // 组装 Kafka 参数
@@ -59,7 +59,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingC
       case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
       case _ => None
     } toMap
-  } ++ specialKafkaParams ++ Map("enable.auto.commit" -> "false")
+  } ++ overrideParams ++ Map("enable.auto.commit" -> "false")
 
   lazy val groupId: Option[String] = kafkaParams.get("group.id")
 
