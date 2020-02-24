@@ -58,15 +58,15 @@ object MySQLSink {
    * @return
    */
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): MySQLSink = new MySQLSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): MySQLSink = new MySQLSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
 class MySQLSink(@transient ctx: StreamingContext,
-                overwriteParams: Map[String, String] = Map.empty[String, String],
+                overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
                 uid: String = null)(implicit alias: String = "") extends Sink with Logger {
@@ -88,7 +88,7 @@ class MySQLSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = getMySQLConf(ctx.paramMap)(alias)
-    overwriteParams.foreach(x => prop.put(x._1, x._2))
+    overrideParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)

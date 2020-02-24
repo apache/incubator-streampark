@@ -58,21 +58,21 @@ object ClickHouseSink {
    * @return
    */
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): ClickHouseSink = new ClickHouseSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit instance: String = ""): ClickHouseSink = new ClickHouseSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
 class ClickHouseSink(@transient ctx: StreamingContext,
-                     overwriteParams: Map[String, String] = Map.empty[String, String],
+                     overrideParams: Map[String, String] = Map.empty[String, String],
                      parallelism: Int = 0,
                      name: String = null,
                      uid: String = null)(implicit instance: String = "") extends Sink with Logger {
 
   val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_SINK_PREFIX)(instance)
-  overwriteParams.foreach { case (k, v) => prop.put(k, v) }
+  overrideParams.foreach { case (k, v) => prop.put(k, v) }
 
   /**
    *
