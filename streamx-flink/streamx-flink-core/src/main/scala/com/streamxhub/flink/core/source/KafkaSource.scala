@@ -31,7 +31,7 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 import scala.collection.Map
 import scala.language.postfixOps
 
-class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[String, String] = Map.empty[String, String]) {
+class KafkaSource(@transient val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
    * 获取DStream 流
@@ -40,7 +40,7 @@ class KafkaSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[
    */
   def getDataStream(topic: String = "", instance: String = ""): DataStream[String] = {
     val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
-    specialKafkaParams.foreach(x => prop.put(x._1, x._2))
+    overrideParams.foreach(x => prop.put(x._1, x._2))
     //强制设置offset自动提交
     prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,"true")
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)

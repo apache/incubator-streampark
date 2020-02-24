@@ -30,7 +30,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.collection.Map
 
 
-class MySQLSource(@transient val ctx: StreamingContext, specialKafkaParams: Map[String, String] = Map.empty[String, String]) {
+class MySQLSource(@transient val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
    *
