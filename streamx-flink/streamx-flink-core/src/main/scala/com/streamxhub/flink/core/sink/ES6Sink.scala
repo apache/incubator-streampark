@@ -48,16 +48,16 @@ import scala.util.{Success, Try}
 object ES6Sink {
 
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): ES6Sink = new ES6Sink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null): ES6Sink = new ES6Sink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
 
 class ES6Sink(@transient ctx: StreamingContext,
-              overwriteParams: Map[String, String] = Map.empty[String, String],
+              overrideParams: Map[String, String] = Map.empty[String, String],
               parallelism: Int = 0,
               name: String = null,
               uid: String = null) extends Sink with Logger {
@@ -129,7 +129,7 @@ class ES6Sink(@transient ctx: StreamingContext,
     //set value from properties
     shortConfig.filter(_._1.startsWith(KEY_ES_BULK_PREFIX)).foreach(doConfig)
     //set value from method parameter...
-    overwriteParams.foreach(doConfig)
+    overrideParams.foreach(doConfig)
 
     val esSink = sinkBuilder.build()
 

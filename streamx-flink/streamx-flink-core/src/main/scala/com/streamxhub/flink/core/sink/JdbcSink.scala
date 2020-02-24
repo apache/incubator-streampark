@@ -48,15 +48,15 @@ object JdbcSink {
    * @return
    */
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
 class JdbcSink(@transient ctx: StreamingContext,
-               overwriteParams: Map[String, String] = Map.empty[String, String],
+               overrideParams: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
@@ -84,7 +84,7 @@ class JdbcSink(@transient ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL, isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getJdbcConf(ctx.paramMap, dialect.toString.toLowerCase, alias)
-    overwriteParams.foreach(x => prop.put(x._1, x._2))
+    overrideParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)

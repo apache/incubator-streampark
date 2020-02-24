@@ -32,15 +32,15 @@ import scala.collection.Map
 object ESSink {
 
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): ESSink = new ESSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null): ESSink = new ESSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
 class ESSink(@transient context: StreamingContext,
-             overwriteParams: Map[String, String] = Map.empty[String, String],
+             overrideParams: Map[String, String] = Map.empty[String, String],
              parallelism: Int = 0,
              name: String = null,
              uid: String = null) {
@@ -62,7 +62,7 @@ class ESSink(@transient context: StreamingContext,
 
     //TODO....
     null
-    //new sink5(context, overwriteParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
+    //new sink5(context, overrideParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
   }
 
   /**
@@ -82,7 +82,7 @@ class ESSink(@transient context: StreamingContext,
                failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
               (implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ES6Sink(context, overwriteParams, parallelism, name, uid).sink[T](stream, suffix, failureHandler)(f)
+    new ES6Sink(context, overrideParams, parallelism, name, uid).sink[T](stream, suffix, failureHandler)(f)
   }
 
 }

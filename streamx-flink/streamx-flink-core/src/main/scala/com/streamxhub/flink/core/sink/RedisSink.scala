@@ -34,14 +34,14 @@ import com.streamxhub.common.util.ConfigUtils
 
 object RedisSink {
   def apply(@transient ctx: StreamingContext,
-            overwriteParams: Map[String, String] = Map.empty[String, String],
+            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): RedisSink = new RedisSink(ctx, overwriteParams, parallelism, name, uid)
+            uid: String = null): RedisSink = new RedisSink(ctx, overrideParams, parallelism, name, uid)
 }
 
 class RedisSink(@transient ctx: StreamingContext,
-                overwriteParams: Map[String, String] = Map.empty[String, String],
+                overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
                 uid: String = null
@@ -51,7 +51,7 @@ class RedisSink(@transient ctx: StreamingContext,
   def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
     val config = ConfigUtils.getConf(ctx.paramMap, REDIS_PREFIX)
-    overwriteParams.foreach(x => config.put(x._1, x._2))
+    overrideParams.foreach(x => config.put(x._1, x._2))
     config.map {
       case (KEY_HOST, host) => builder.setHost(host)
       case (KEY_PORT, port) => builder.setPort(port.toInt)
