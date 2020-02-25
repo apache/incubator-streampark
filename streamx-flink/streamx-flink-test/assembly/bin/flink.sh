@@ -198,6 +198,8 @@ doStart() {
         "$name_params" \
         --jarfile "$flink_jar" \
         --flink.conf "$app_proper"
+
+      echo "${app_name}" > "${APP_TEMP}/.running"
     else
       # shellcheck disable=SC2006
       # shellcheck disable=SC2155
