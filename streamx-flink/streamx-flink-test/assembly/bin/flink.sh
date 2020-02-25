@@ -200,7 +200,7 @@ doStart() {
       flink run "$resource_params" "$dynamic_params" --jarfile "$flink_jar" --flink.conf "$app_proper" >> "$app_out" 2>&1 &
 
       echo "${app_name}" > "${APP_TEMP}/.running"
-      echo_r "${app_name} starting,more detail please log:${app_out}"
+      echo_g "${app_name} starting,more detail please log:${app_out}"
     fi
 }
 
