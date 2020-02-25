@@ -5,7 +5,7 @@ flink:
       yarnname: dp-hopsonone-park-clean            # Set a custom name for the application on YARN
       class: cn.com.hopson.parkclean.app.ShParkCleanApp                             # main class
       detached: false                    # -d   (If present, runs the job in detached mode)
-      jobmanager:                       # -m   (Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.)
+      jobmanager: yarn-cluster                      # -m   (Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.)
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
       yarnapplicationType:              # -yat (Set a custom application type for the application on YARN)
       yarnjobManagerMemory: 1024M       # -yjm (Memory for JobManager Container with optional unit (default: MB))
