@@ -42,37 +42,10 @@ object ParameterCli {
     }
     action match {
       case "--resource" =>
-        val optionMap = new mutable.HashMap[String, Any]()
-        map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => {
-          x._2 match {
-            case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> true
-            case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> v
-          }
-        })
+        val option = getOption(map, args.drop(2))
         val parser = new DefaultParser
-        //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
-        args.drop(2) match {
-          case Array() =>
-          case array => {
-            val line = parser.parse(FlinkOption.allOptions, array, false)
-            line.getOptions.foreach(x => {
-              if (x.hasArg) {
-                optionMap += s"-${x.getLongOpt}" -> x.getValue()
-              } else {
-                optionMap += s"-${x.getLongOpt}" -> true
-              }
-            })
-          }
-        }
-        val array = new ArrayBuffer[String]
-        optionMap.foreach(x => {
-          array += x._1
-          if (x._2.isInstanceOf[String]) {
-            array += x._2.toString
-          }
-        })
         val buffer = new StringBuffer()
-        val line = parser.parse(FlinkOption.allOptions, array.toArray, false)
+        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
         line.getOptions.foreach(x => {
           buffer.append(s" -${x.getOpt}")
           if (x.hasArg) {
@@ -89,9 +62,49 @@ object ParameterCli {
           case yarnName if yarnName.nonEmpty => println(" -yarnname " + yarnName)
           case _ => println("")
         }
+      //是否detached模式...
+      case "--detached" =>
+        val option = getOption(map, args.drop(2))
+        val parser = new DefaultParser
+        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
+        val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
+        println(detached)
       case _ =>
 
     }
+  }
+
+  def getOption(map: Map[String, String], args: Array[String]) = {
+    val optionMap = new mutable.HashMap[String, Any]()
+    map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => {
+      x._2 match {
+        case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> true
+        case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> v
+      }
+    })
+    val parser = new DefaultParser
+    //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
+    args match {
+      case Array() =>
+      case array => {
+        val line = parser.parse(FlinkOption.allOptions, array, false)
+        line.getOptions.foreach(x => {
+          if (x.hasArg) {
+            optionMap += s"-${x.getLongOpt}" -> x.getValue()
+          } else {
+            optionMap += s"-${x.getLongOpt}" -> true
+          }
+        })
+      }
+    }
+    val array = new ArrayBuffer[String]
+    optionMap.foreach(x => {
+      array += x._1
+      if (x._2.isInstanceOf[String]) {
+        array += x._2.toString
+      }
+    })
+    array
   }
 
 
