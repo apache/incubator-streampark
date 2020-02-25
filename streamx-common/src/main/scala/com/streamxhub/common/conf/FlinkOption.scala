@@ -46,12 +46,6 @@ object FlinkOption {
 
   private[this] val SHUTDOWN_IF_ATTACHED_OPTION = new Option("sae", "shutdownOnAttachedExit", false, "If the job is submitted in attached mode, perform a best-effort cluster shutdown " + "when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.")
 
-  /**
-   * @deprecated use non-prefixed variant { @link #DETACHED_OPTION} for both YARN and non-YARN deployments
-   */
-  @deprecated
-  private[this] val YARN_DETACHED_OPTION = new Option("yd", "yarndetached", false, "If present, runs " + "the job in detached mode (deprecated; use non-YARN specific option instead)")
-
   private[this] val ARGS_OPTION = new Option("a", "arguments", true, "Program arguments. Arguments can also be added without -a, simply as trailing parameters.")
 
   private[this] val SAVEPOINT_PATH_OPTION = new Option("s", "fromSavepoint", true, "Path to a savepoint to restore the job from (for example hdfs:///flink/savepoint-1537).")
@@ -111,7 +105,6 @@ object FlinkOption {
     options.addOption(dynamicproperties)
     options.addOption(DETACHED_OPTION)
     options.addOption(SHUTDOWN_IF_ATTACHED_OPTION)
-    options.addOption(YARN_DETACHED_OPTION)
     options.addOption(name)
     options.addOption(applicationId)
     options.addOption(applicationType)
@@ -137,7 +130,6 @@ object FlinkOption {
     options.addOption(LOGGING_OPTION)
     options.addOption(DETACHED_OPTION)
     options.addOption(SHUTDOWN_IF_ATTACHED_OPTION)
-    options.addOption(YARN_DETACHED_OPTION)
     options.addOption(PY_OPTION)
     options.addOption(PYFILES_OPTION)
     options.addOption(PYMODULE_OPTION)
