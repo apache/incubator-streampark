@@ -181,13 +181,13 @@ doStart() {
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
+    local detached_mode="`java -cp "${flink_jar}" $param_cli --detached "${app_proper}"` $*"
+    # shellcheck disable=SC2006
+    # shellcheck disable=SC2155
     local resource_params="`java -cp "${flink_jar}" $param_cli --resource "${app_proper}"` $*"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
-    # shellcheck disable=SC2006
-    # shellcheck disable=SC2155
-    local detached_mode="`java -cp "${flink_jar}" $param_cli --detached "${app_proper}"`"
 
     echo_g "${app_name} Starting..."
 
