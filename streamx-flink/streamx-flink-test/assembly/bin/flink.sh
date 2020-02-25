@@ -192,6 +192,13 @@ doStart() {
     echo_g "${app_name} Starting..."
 
     if [ x"$detached_mode" == x"true" ] ; then
+      flink run \
+        "$resource_params" \
+        "$dynamic_params" \
+        "$name_params" \
+        --jarfile "$flink_jar" \
+        --flink.conf "$app_proper"
+    else
       # shellcheck disable=SC2006
       # shellcheck disable=SC2155
       local app_log_date=`date "+%Y%m%d_%H%M%S"`
@@ -206,13 +213,6 @@ doStart() {
 
       echo "${app_name}" > "${APP_TEMP}/.running"
       echo_r "${app_name} starting,more detail please log:${app_out}"
-    else
-          flink run \
-          "$resource_params" \
-          "$dynamic_params" \
-          "$name_params" \
-          --jarfile "$flink_jar" \
-          --flink.conf "$app_proper"
     fi
 }
 
