@@ -59,7 +59,7 @@ object ParameterCli {
         println(buffer.toString.trim)
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
-          case yarnName if yarnName.nonEmpty => println(" -yarnname " + yarnName)
+          case yarnName if yarnName.nonEmpty => println(yarnName)
           case _ => println("")
         }
       //是否detached模式...
