@@ -187,7 +187,7 @@ doStart() {
     local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
 
 
-    if [ x"$detached_mode" == x"true" ] ; then
+    if [ x"${detached_mode// /}" == x"true" ] ; then
       echo_g "${app_name} Starting by:<Detached> mode"
       flink run \
         "$resource_params" \
