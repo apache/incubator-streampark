@@ -196,9 +196,7 @@ doStart() {
       # shellcheck disable=SC2155
       local app_log_date=`date "+%Y%m%d_%H%M%S"`
       local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
-
       flink run "$resource_params" "$dynamic_params" --jarfile "$flink_jar" --flink.conf "$app_proper" >> "$app_out" 2>&1 &
-
       echo "${app_name}" > "${APP_TEMP}/.running"
       echo_g "${app_name} starting,more detail please log:${app_out}"
     fi
