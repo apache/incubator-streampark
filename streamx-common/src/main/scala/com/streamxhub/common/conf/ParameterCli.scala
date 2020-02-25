@@ -25,6 +25,7 @@ import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.DefaultParser
 
 import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 object ParameterCli {
 
@@ -39,32 +40,59 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
-    val optionMap = new mutable.HashMap[String, String]()
-    val buffer = new StringBuffer()
     action match {
       case "--resource" =>
-        map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => optionMap += s" --${x._1.drop(resourcePrefix.length)}" -> x._2)
+        val optionMap = new mutable.HashMap[String, Any]()
+        map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => {
+          x._2 match {
+            case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> true
+            case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> v
+          }
+        })
+        val parser = new DefaultParser
+        //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
         args.drop(2) match {
           case Array() =>
-          case array =>
-            //覆盖的参数追加.....
-            val parser = new DefaultParser
+          case array => {
             val line = parser.parse(FlinkOption.allOptions, array, false)
-            line.getOptions.foreach(x => optionMap += x.getLongOpt -> x.getValue)
+            line.getOptions.foreach(x => {
+              if (x.hasArg) {
+                optionMap += s"-${x.getLongOpt}" -> x.getValue()
+              } else {
+                optionMap += s"-${x.getLongOpt}" -> true
+              }
+            })
+          }
         }
-        optionMap.foreach(x => buffer.append(x._1).append(" ").append(x._2).append(" "))
+        val array = new ArrayBuffer[String]
+        optionMap.foreach(x => {
+          array += x._1
+          if (x._2.isInstanceOf[String]) {
+            array += x._2.toString
+          }
+        })
+        val buffer = new StringBuffer()
+        val line = parser.parse(FlinkOption.allOptions, array.toArray, false)
+        line.getOptions.foreach(x => {
+          buffer.append(s" -${x.getOpt}")
+          if (x.hasArg) {
+            buffer.append(s" ${x.getValue()}")
+          }
+        })
         println(buffer.toString.trim)
       case "--dynamic" =>
+        val buffer = new StringBuffer()
         map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
         println(buffer.toString.trim)
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
-          case yarnName if yarnName.nonEmpty => println(" --yarnname " + yarnName)
+          case yarnName if yarnName.nonEmpty => println(" -yarnname " + yarnName)
           case _ => println("")
         }
       case _ =>
 
     }
   }
+
 
 }

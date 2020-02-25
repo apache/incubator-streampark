@@ -116,40 +116,7 @@
 import { select, fileList } from '@/api/project'
 import { create } from '@/api/application'
 
-/**
- * # -m/--jobmanager : yarn-cluster集群
- # -yd/--yarndetached : 后台
- # -yjm/--yarnjobManager : jobmanager的内存
- # -ytm/--yarntaskManager : taskmanager的内存
- # -yid/--yarnapplicationId : job依附的applicationId
- # -ynm/--yarnname : application的名称
- # -ys/--yarnslots : 分配的slots个数
- # flink run -m yarn-cluster -yd -yjm 1024m -ytm 1024m -ynm <name> -ys 1 <jar> <arguments>
- */
 const config = [
-  /**
-   * Required
-   Optional
-   -D <property=value>             use value for given property
-   -h,--help                       Help for the Yarn session CLI.
-   -id,--applicationId <arg>       Attach to running YARN session
-   -j,--jar <arg>                  Path to Flink jar file
-   -jm,--jobManagerMemory <arg>    Memory for JobManager Container with optional unit (default: MB)
-   -m,--jobmanager <arg>           Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.
-   -n,--container <arg>            Number of YARN container to allocate (=Number of Task Managers)
-   -nl,--nodeLabel <arg>           Specify YARN node label for the YARN application
-   -nm,--name <arg>                Set a custom name for the application on YARN
-   -q,--query                      Display available YARN resources (memory, cores)
-   -qu,--queue <arg>               Specify YARN queue.
-   -s,--slots <arg>                Number of slots per TaskManager
-   -sae,--shutdownOnAttachedExit   If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such
-   as typing Ctrl + C.
-   -st,--streaming                 Start Flink in streaming mode
-   -t,--ship <arg>                 Ship files in the specified directory (t for transfer)
-   -tm,--taskManagerMemory <arg>   Memory per TaskManager Container with optional unit (default: MB)
-   -yd,--yarndetached              If present, runs the job in detached mode (deprecated; use non-YARN specific option instead)
-   -z,--zookeeperNamespace <arg>   Namespace to create the Zookeeper sub-paths for high availability mode
-   */
   {
     title: '-n',
     name: 'container',
@@ -179,18 +146,6 @@ const config = [
     }
   },
   {
-    title: '-id',
-    name: 'applicationId',
-    placeholder: '-id,--applicationId <arg>',
-    description: '附着一个已存在的YARN Session',
-    group: 'yarn-session',
-    type: 'input',
-    value: '',
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
     title: '-jm',
     name: 'jobManagerMemory',
     placeholder: '-jm,--jobManagerMemory <arg>',
@@ -208,7 +163,7 @@ const config = [
     }
   },
 
-  //------------------------------------------------------- YARN -------------------------------------------------------------------------------------------------
+  //------------------------------------------------------- YARN -------------------------------------------------------
   {
     title: '-m',
     name: 'jobmanager',
@@ -328,22 +283,6 @@ const config = [
     }
   },
   {
-    title: '-yid',
-    name: 'yarnapplicationId',
-    placeholder: '-yid,--yarnapplicationId <arg> ',
-    group: 'yarn',
-    type: 'input',
-    description: '附着一个已存在的YARN Session',
-    value: '',
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('运行队列不能为空'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
     title: '-ynl',
     name: 'yarnnodeLabel',
     placeholder: '-ynl,--yarnnodeLabel <arg>',
@@ -359,7 +298,7 @@ const config = [
     title: '-sae',
     name: 'shutdownOnAttachedExit',
     placeholder: '-sae,--shutdownOnAttachedExit',
-    description: '如果是前台的方式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
+    description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
     group: 'yarn',
     type: 'switch',
     value: '',
