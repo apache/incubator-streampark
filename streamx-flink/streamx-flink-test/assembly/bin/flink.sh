@@ -170,14 +170,11 @@ doStart() {
     local param_cli="com.streamxhub.common.conf.ParameterCli"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local name_params="`java -cp "${flink_jar}" $param_cli --name "${app_proper}"`"
-    if [ x"${name_params}" == x"" ] ; then
+    local app_name="`java -cp "${flink_jar}" $param_cli --name "${app_proper}"`"
+    if [ x"${app_name}" == x"" ] ; then
        echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
        exit 1
     fi
-    # shellcheck disable=SC2206
-    local name_array=($name_params)
-    local app_name=${name_array[1]}
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
@@ -195,7 +192,6 @@ doStart() {
       flink run \
         "$resource_params" \
         "$dynamic_params" \
-        "$name_params" \
         --jarfile "$flink_jar" \
         --flink.conf "$app_proper"
 
@@ -209,7 +205,6 @@ doStart() {
       flink run \
         "$resource_params" \
         "$dynamic_params" \
-        "$name_params" \
         --jarfile "$flink_jar" \
         --flink.conf "$app_proper" \
         >> "$app_out" 2>&1 &
