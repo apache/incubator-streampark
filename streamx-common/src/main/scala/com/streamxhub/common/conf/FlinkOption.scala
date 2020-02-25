@@ -23,7 +23,6 @@ package com.streamxhub.common.conf
 import org.apache.commons.cli.{Option, Options}
 import scala.collection.JavaConversions._
 
-
 /**
  * copy from flink(1.9.1) sourceCode
  */
@@ -57,6 +56,49 @@ object FlinkOption {
   private[this] val PYFILES_OPTION = new Option("pyfs", "pyFiles", true, "Attach custom python files for job. " + "Comma can be used as the separator to specify multiple files. " + "The standard python resource file suffixes such as .py/.egg/.zip are all supported." + "(eg: --pyFiles file:///tmp/myresource.zip,hdfs:///$namenode_address/myresource2.zip)")
 
   private[this] val PYMODULE_OPTION = new Option("pym", "pyModule", true, "Python module with the program entry point. " + "This option must be used in conjunction with `--pyFiles`.")
+
+  /**
+   * @deprecated use non-prefixed variant { @link #DETACHED_OPTION} for both YARN and non-YARN deployments
+   */
+  @Deprecated
+  private[this] val YARN_DETACHED_OPTION = new Option("yd", "yarndetached", false, "If present, runs the job in detached mode (deprecated; use non-YARN specific option instead)");
+
+  private[this] val ADDRESS_OPTION = new Option("m", "jobmanager", true, "Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.");
+
+  private[this] val SAVEPOINT_DISPOSE_OPTION = new Option("d", "dispose", true, "Path of savepoint to dispose.");
+
+  // list specific options
+  private[this] val RUNNING_OPTION = new Option("r", "running", false, "Show only running programs and their JobIDs");
+
+  private[this] val SCHEDULED_OPTION = new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs");
+
+  private[this] val ALL_OPTION = new Option("a", "all", false, "Show all programs and their JobIDs");
+
+  private[this] val ZOOKEEPER_NAMESPACE_OPTION = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode");
+
+  lazy val SAVEPOINT_DIRECTORY: String = {
+    val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
+    val chkOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "state.savepoints.dir")
+    val option = chkOptBuilder.getClass.getMethod("noDefaultValue").invoke(chkOptBuilder)
+    option.getClass.getMethod("withDeprecatedKeys", classOf[Array[String]]).invoke(option, Array("savepoints.state.backend.fs.dir"))
+    option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The default directory for savepoints. Used by the state backends that write savepoints to file systems (MemoryStateBackend, FsStateBackend, RocksDBStateBackend).")
+    option.getClass.getMethod("key").invoke(option).toString
+  }
+
+  private[this] val CANCEL_WITH_SAVEPOINT_OPTION = new Option(
+    "s", "withSavepoint", true, "**DEPRECATION WARNING**: " +
+      "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" +
+      " savepoint and cancel job. The target directory is optional. If no directory is " +
+      "specified, the configured default directory (" + SAVEPOINT_DIRECTORY + ") is used.");
+
+  private[this] val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true,
+    "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " +
+      "If no directory is specified, the configured default will be used (\"" + SAVEPOINT_DIRECTORY + "\").");
+
+  private[this] val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.");
+
+  //----------------------------------------------------------------v
+
 
   def allOptions: Options = {
     val commOptions = getRunCommandOptions
@@ -133,6 +175,16 @@ object FlinkOption {
     options.addOption(PY_OPTION)
     options.addOption(PYFILES_OPTION)
     options.addOption(PYMODULE_OPTION)
+    options.addOption(YARN_DETACHED_OPTION)
+    options.addOption(ADDRESS_OPTION)
+    options.addOption(SAVEPOINT_DISPOSE_OPTION)
+    options.addOption(RUNNING_OPTION)
+    options.addOption(SCHEDULED_OPTION)
+    options.addOption(ALL_OPTION)
+    options.addOption(ZOOKEEPER_NAMESPACE_OPTION)
+    options.addOption(CANCEL_WITH_SAVEPOINT_OPTION)
+    options.addOption(STOP_WITH_SAVEPOINT_PATH)
+    options.addOption(STOP_AND_DRAIN)
     options
   }
 }
