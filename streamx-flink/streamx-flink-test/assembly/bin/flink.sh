@@ -185,26 +185,35 @@ doStart() {
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
-
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local app_log_date=`date "+%Y%m%d_%H%M%S"`
-    local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
+    local detached_mode="`java -cp "${flink_jar}" $param_cli --detached "${app_proper}"`"
 
     echo_g "${app_name} Starting..."
 
-    flink run \
-          -m yarn-cluster \
+    if [ x"$detached_mode" == x"true" ] ; then
+      # shellcheck disable=SC2006
+      # shellcheck disable=SC2155
+      local app_log_date=`date "+%Y%m%d_%H%M%S"`
+      local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
+      flink run \
+        "$resource_params" \
+        "$dynamic_params" \
+        "$name_params" \
+        --jarfile "$flink_jar" \
+        --flink.conf "$app_proper" \
+        >> "$app_out" 2>&1 &
+
+      echo "${app_name}" > "${APP_TEMP}/.running"
+      echo_r "${app_name} starting,more detail please log:${app_out}"
+    else
+          flink run \
           "$resource_params" \
           "$dynamic_params" \
           "$name_params" \
           --jarfile "$flink_jar" \
-          --flink.conf "$app_proper" \
-          >> "$app_out" 2>&1 &
-
-    echo "${app_name}" > "${APP_TEMP}/.running"
-
-    echo_r "${app_name} starting,more detail please log:${app_out}"
+          --flink.conf "$app_proper"
+    fi
 }
 
 doStop() {
