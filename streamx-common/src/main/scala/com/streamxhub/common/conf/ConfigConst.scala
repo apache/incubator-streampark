@@ -69,6 +69,14 @@ object ConfigConst {
 
   val KEY_FLINK_CHECKPOINT_MODE = "flink.checkpoint.mode"
 
+  val KEY_FLINK_CHECKPOINT_CLEANUP = "flink.checkpoint.cleanup"
+
+  val KEY_FLINK_CHECKPOINT_TIMEOUT = "flink.checkpoint.timeout"
+
+  val KEY_FLINK_CHECKPOINT_MAX_CONCURRENT = "flink.checkpoint.maxConcurrent"
+
+  val KEY_FLINK_CHECKPOINT_MIN_PAUSEBETWEEN = "flink.checkpoint.minPauseBetween"
+
   val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
 
   val KEY_FLINK_APP_NAME = "flink.deployment.resource.yarnname"
