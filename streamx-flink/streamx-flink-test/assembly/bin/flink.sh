@@ -192,26 +192,24 @@ doStart() {
     # trim...
     detached="`echo "$detached_mode" | sed "s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"`"
     if [ x"$detached" == x"Detached" ] ; then
-      local cmd="""flink run
-                  $resource_params
-                  $dynamic_params
-                  --jarfile $flink_jar
-                  --flink.conf $app_proper"""
-      echo_g "start command: $cmd"
-      exec "$cmd"
+      flink run \
+      "$resource_params" \
+      "$dynamic_params" \
+      --jarfile "$flink_jar" \
+      --flink.conf "$app_proper"
       echo "${app_name}" > "${APP_TEMP}/.running"
     else
       # shellcheck disable=SC2006
       # shellcheck disable=SC2155
       local app_log_date=`date "+%Y%m%d_%H%M%S"`
       local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
-      local cmd="""flink run
-                $resource_params
-                $dynamic_params
-                --jarfile $flink_jar
-                --flink.conf $app_proper >> $app_out 2>&1 & """
-      echo_g "start command: $cmd"
-      exec "$cmd"
+
+      flink run \
+      "$resource_params" \
+      "$dynamic_params" \
+      --jarfile "$flink_jar" \
+      --flink.conf "$app_proper" >> "$app_out" 2>&1 &
+
       echo "${app_name}" > "${APP_TEMP}/.running"
       echo_g "${app_name} starting,more detail please log:${app_out}"
     fi
