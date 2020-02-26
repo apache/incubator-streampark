@@ -29,8 +29,8 @@ import scala.collection.mutable.ArrayBuffer
 
 object ParameterCli {
 
-  private[conf] val resourcePrefix = "flink.deployment.resource."
-  private[conf] val dynamicPrefix = "flink.deployment.dynamic."
+  private[this] val resourcePrefix = "flink.deployment.resource."
+  private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
   def main(args: Array[String]): Unit = {
     val action = args(0)
