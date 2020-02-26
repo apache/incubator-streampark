@@ -2,29 +2,32 @@
   <a-drawer
     title="修改按钮"
     :maskClosable="false"
-    width=650
+    width="650"
     placement="right"
     :closable="false"
     @close="onClose"
     :visible="buttonEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='按钮名称' v-bind="formItemLayout">
-        <a-input v-decorator="['menuName',
-                   {rules: [
-                    { required: true, message: '按钮名称不能为空'},
-                    { max: 10, message: '长度不能超过10个字符'}
-                  ]}]"/>
+      <a-form-item label="按钮名称" v-bind="formItemLayout">
+        <a-input
+          v-decorator="['menuName',
+                        {rules: [
+                          { required: true, message: '按钮名称不能为空'},
+                          { max: 10, message: '长度不能超过10个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='相关权限' v-bind="formItemLayout">
-        <a-input v-decorator="['perms',
-                   {rules: [
-                    { max: 50, message: '长度不能超过50个字符'}
-                  ]}]"/>
+      <a-form-item label="相关权限" v-bind="formItemLayout">
+        <a-input
+          v-decorator="['perms',
+                        {rules: [
+                          { max: 50, message: '长度不能超过50个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='上级菜单'
-                   style="margin-bottom: 2rem"
-                   v-bind="formItemLayout">
+      <a-form-item
+        label="上级菜单"
+        style="margin-bottom: 2rem"
+        v-bind="formItemLayout">
         <a-tree
           :key="menuTreeKey"
           :checkable="true"
@@ -54,7 +57,7 @@
 </template>
 
 <script>
-import {update,list,post as submit} from '@/api/menu'
+import { update, list, post as submit } from '@/api/menu'
 const formItemLayout = {
   labelCol: { span: 3 },
   wrapperCol: { span: 18 }
@@ -103,11 +106,11 @@ export default {
     handleExpand (expandedKeys) {
       this.expandedKeys = expandedKeys
     },
-    setFormValues ({...menu}) {
+    setFormValues ({ ...menu }) {
       this.form.getFieldDecorator('menuName')
-      this.form.setFieldsValue({'menuName': menu.text})
+      this.form.setFieldsValue({ 'menuName': menu.text })
       this.form.getFieldDecorator('perms')
-      this.form.setFieldsValue({'perms': menu.permission})
+      this.form.setFieldsValue({ 'perms': menu.permission })
 
       this.defaultCheckedKeys.push(menu.parentId)
       this.checkedKeys = this.defaultCheckedKeys
@@ -115,7 +118,7 @@ export default {
       this.button.menuId = menu.id
     },
     handleSubmit () {
-      let checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
+      const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
       if (!checkedArr.length) {
         this.$message.error('请为按钮选择一个上级菜单')
         return
@@ -127,7 +130,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          let button = this.form.getFieldsValue()
+          const button = this.form.getFieldsValue()
           button.parentId = checkedArr[0]
           // 0 表示菜单 1 表示按钮
           button.type = '1'

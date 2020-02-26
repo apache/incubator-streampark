@@ -46,7 +46,7 @@
           </a-form-item>
 
           <a-form-item>
-            <a-switch defaultChecked @change='handleRember'/>
+            <a-switch defaultChecked @change="handleRember"/>
             <span style="margin-left: 10px; color: rgba(255,255,255,.65)">自动登录</span>
           </a-form-item>
 
@@ -96,68 +96,68 @@
 </template>
 
 <script type="application/ecmascript">
-	import {mapActions} from 'vuex'
-	import {mixinDevice} from '@/utils/mixin'
-	import {timeFix} from '@/utils/util'
+import { mapActions } from 'vuex'
+import { mixinDevice } from '@/utils/mixin'
+import { timeFix } from '@/utils/util'
 
-	export default {
-		mixins: [mixinDevice],
-		data() {
-			return {
-				loginBtn: false,
-				form: this.$form.createForm(this),
-				state: {
-					time: 60,
-					loginBtn: false
-				}
-			}
-		},
-		methods: {
-			...mapActions(['Login']),
-			// handler
-			handleRember() {
+export default {
+  mixins: [mixinDevice],
+  data () {
+    return {
+      loginBtn: false,
+      form: this.$form.createForm(this),
+      state: {
+        time: 60,
+        loginBtn: false
+      }
+    }
+  },
+  methods: {
+    ...mapActions(['Login']),
+    // handler
+    handleRember () {
 
-			},
-			handleSubmit(e) {
-				e.preventDefault()
-				const {
-					form: {validateFields},
-					state,
-					Login
-				} = this
-				state.loginBtn = true
-				const validateFieldsKey = ['username', 'password']
-				validateFields(validateFieldsKey, {force: true}, (err, values) => {
-					if (!err) {
-						const loginParams = {...values}
-						Login(loginParams)
-							.then(resp => this.loginSuccess(resp))
-							.catch(err => this.requestFailed(err))
-							.finally(() => {
-								state.loginBtn = false
-							})
-					} else {
-						setTimeout(() => {
-							state.loginBtn = false
-						}, 600)
-					}
-				})
-			},
-			loginSuccess(resp) {
-				this.$router.push({path: '/dashboard/analysis'})
-				// 延迟 1 秒显示欢迎信息
-				setTimeout(() => {
-					this.$notification.success({
-						message: '欢迎',
-						description: `${timeFix()}，欢迎回来`
-					})
-				}, 1000)
-			},
-			requestFailed(err) {
-				console.log(err)
-			}
-		}
-	}
+    },
+    handleSubmit (e) {
+      e.preventDefault()
+      const {
+        form: { validateFields },
+        state,
+        Login
+      } = this
+      state.loginBtn = true
+      const validateFieldsKey = ['username', 'password']
+      validateFields(validateFieldsKey, { force: true }, (err, values) => {
+        if (!err) {
+          const loginParams = { ...values }
+          Login(loginParams)
+            .then(resp => this.loginSuccess(resp))
+            .catch(err => this.requestFailed(err))
+            .finally(() => {
+              state.loginBtn = false
+            })
+        } else {
+          setTimeout(() => {
+            state.loginBtn = false
+          }, 600)
+        }
+      })
+    },
+    loginSuccess (resp) {
+      this.$router.push({ path: '/dashboard/analysis' })
+      // 延迟 1 秒显示欢迎信息
+      setTimeout(() => {
+        this.$notification.success({
+          message: '欢迎',
+          description: `${timeFix()}，欢迎回来`
+        })
+      }, 1000)
+    },
+    requestFailed (err) {
+      console.log(err)
+    }
+  }
+}
 </script>
 
 <style lang="less" scoped>
@@ -210,6 +210,7 @@
         .header {
           height: 160px;
           line-height: 160px;
+
           .badge {
             position: absolute;
             display: inline-block;
