@@ -186,17 +186,29 @@ doStart() {
     # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
 
-    if [ x"${detached_mode// /}" == x"true" ] ; then
-      echo_g "${app_name} Starting by:<Detached> mode"
-      flink run  "$resource_params" "$dynamic_params" --jarfile "$flink_jar" --flink.conf "$app_proper"
+    echo_g "${app_name} Starting by:<${detached_mode}> mode"
+
+    if [ x"${detached_mode// /}" == x"Detached" ] ; then
+      local cmd="""flink run
+                  $resource_params
+                  $dynamic_params
+                  --jarfile $flink_jar
+                  --flink.conf $app_proper"""
+      echo_g "start command: $cmd"
+      exec "$cmd"
       echo "${app_name}" > "${APP_TEMP}/.running"
     else
-      echo_g "${app_name} Starting by:<Attach> mode"
       # shellcheck disable=SC2006
       # shellcheck disable=SC2155
       local app_log_date=`date "+%Y%m%d_%H%M%S"`
       local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
-      flink run "$resource_params" "$dynamic_params" --jarfile "$flink_jar" --flink.conf "$app_proper" >> "$app_out" 2>&1 &
+      local cmd="""flink run
+                $resource_params
+                $dynamic_params
+                --jarfile $flink_jar
+                --flink.conf $app_proper >> $app_out 2>&1 & """
+      echo_g "start command: $cmd"
+      exec "$cmd"
       echo "${app_name}" > "${APP_TEMP}/.running"
       echo_g "${app_name} starting,more detail please log:${app_out}"
     fi
