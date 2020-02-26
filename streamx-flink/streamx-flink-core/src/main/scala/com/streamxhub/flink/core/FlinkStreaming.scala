@@ -88,11 +88,14 @@ trait FlinkStreaming extends Logger {
     env.setStreamTimeCharacteristic(timeCharacteristic)
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
 
-    //checkPoint
-    val checkpointInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
-    val checkpointMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
-    env.enableCheckpointing(checkpointInterval)
-    env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
+    //checkPoint,从配置文件读取是否开启checkpoint,默认开启
+    val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINT_ENABLE).toBoolean).getOrElse(true)
+    if(enableCheckpoint) {
+      val checkpointInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
+      val checkpointMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
+      env.enableCheckpointing(checkpointInterval)
+      env.getCheckpointConfig.setCheckpointingMode(checkpointMode)
+    }
     //set config by yourself...
     this.config(env, parameter)
 
