@@ -230,7 +230,7 @@ export default {
         sortField = sortedInfo.field
         sortOrder = sortedInfo.order
       }
-      $export ({
+      $export({
         sortField: sortField,
         sortOrder: sortOrder,
         ...this.queryParams

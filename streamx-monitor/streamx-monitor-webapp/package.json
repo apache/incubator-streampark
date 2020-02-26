@@ -41,7 +41,7 @@
     "@vue/cli-plugin-babel": "^3.7.0",
     "@vue/cli-plugin-eslint": "^3.7.0",
     "@vue/cli-plugin-unit-jest": "^4.1.1",
-    "@vue/cli-service": "^3.7.0",
+    "@vue/cli-service": "^4.2.2",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "^1.0.0-beta.20",
     "apexcharts": "^3.8.4",

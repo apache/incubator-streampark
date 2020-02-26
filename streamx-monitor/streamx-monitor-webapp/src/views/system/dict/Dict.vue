@@ -1,11 +1,11 @@
 <template>
-    
+
 </template>
 
 <script>
-	export default {
-		name: "Dict"
-	}
+export default {
+  name: 'Dict'
+}
 </script>
 
 <style scoped>
