@@ -57,6 +57,8 @@ object ConfigConst {
 
   val KEY_FLINK_APP_CONF = "flink.conf"
 
+  val KEY_FLINK_CHECKPOINT_ENABLE = "flink.checkpoint.enable"
+
   val KEY_FLINK_CHECKPOINT_INTERVAL = "flink.checkpoint.interval"
 
   val KEY_FLINK_PARALLELISM = "flink.parallelism"
