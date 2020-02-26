@@ -85,7 +85,7 @@ object ParameterCli {
     val parser = new DefaultParser
     //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
     args match {
-      case Array.empty =>
+      case Array() =>
       case array => {
         val line = parser.parse(FlinkOption.allOptions, array, false)
         line.getOptions.foreach(x => {
