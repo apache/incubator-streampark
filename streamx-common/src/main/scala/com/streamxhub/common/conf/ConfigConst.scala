@@ -113,7 +113,7 @@ object ConfigConst {
    */
   val HBASE_PREFIX = "hbase."
 
-  val KEY_HBASE_COMMIT_BATCH ="hbase.commit.batch"
+  val KEY_HBASE_COMMIT_BATCH = "hbase.commit.batch"
 
   val KEY_HBASE_WRITE_SIZE = "hbase.client.write.size"
 
@@ -139,7 +139,7 @@ object ConfigConst {
   val KEY_SINK_THRESHOLD_DELAY_TIME: String = "threshold.delayTime"
   val KEY_SINK_THRESHOLD_REQ_TIMEOUT: String = "threshold.requestTimeout"
   val KEY_SINK_THRESHOLD_RETRIES: String = "threshold.retries"
-  val KEY_SINK_THRESHOLD_SUCCESS_CODE:String = "threshold.successCode"
+  val KEY_SINK_THRESHOLD_SUCCESS_CODE: String = "threshold.successCode"
 
   val KEY_SINK_FAILOVER_TABLE: String = "failover.table"
   val KEY_SINK_FAILOVER_STORAGE: String = "failover.storage"
@@ -150,7 +150,7 @@ object ConfigConst {
   val DEFAULT_SINK_THRESHOLD_DELAY_TIME = 1000L
   val DEFAULT_SINK_THRESHOLD_BUFFER_SIZE = 1000
   val DEFAULT_SINK_THRESHOLD_RETRIES = 3
-  val DEFAULT_SINK_THRESHOLD_NUM_WRITERS:Int = Runtime.getRuntime.availableProcessors()
+  val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
    * about config es

@@ -28,7 +28,7 @@ import java.util.concurrent.locks.ReentrantLock
 import com.streamxhub.common.conf.ConfigConst._
 
 import com.streamxhub.flink.core.failover.FailoverStorageType.FailoverStorageType
-import com.streamxhub.flink.core.failover.FailoverStorageType.{MySQL,HBase,HDFS,Kafka}
+import com.streamxhub.flink.core.failover.FailoverStorageType.{MySQL, HBase, HDFS, Kafka}
 
 import com.streamxhub.common.util._
 import org.apache.hadoop.conf.{Configuration => HConf}

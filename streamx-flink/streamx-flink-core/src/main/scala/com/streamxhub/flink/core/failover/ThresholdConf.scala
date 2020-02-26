@@ -25,7 +25,7 @@ import java.util.Properties
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
 import com.streamxhub.flink.core.failover.FailoverStorageType.FailoverStorageType
-import com.streamxhub.flink.core.failover.FailoverStorageType.{MySQL,HBase,HDFS,Kafka}
+import com.streamxhub.flink.core.failover.FailoverStorageType.{MySQL, HBase, HDFS, Kafka}
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -33,10 +33,10 @@ import scala.util.Try
 
 case class ThresholdConf(parameters: Properties) {
 
-  val bufferSize:Int = Try(parameters(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_BUFFER_SIZE)
+  val bufferSize: Int = Try(parameters(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_BUFFER_SIZE)
   val queueCapacity: Int = Try(parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY)
   val delayTime: Long = Try(parameters(KEY_SINK_THRESHOLD_DELAY_TIME).toLong).getOrElse(DEFAULT_SINK_THRESHOLD_DELAY_TIME)
-  val timeout:Int = Try(parameters(KEY_SINK_THRESHOLD_REQ_TIMEOUT).toInt).getOrElse(DEFAULT_SINK_REQUEST_TIMEOUT)
+  val timeout: Int = Try(parameters(KEY_SINK_THRESHOLD_REQ_TIMEOUT).toInt).getOrElse(DEFAULT_SINK_REQUEST_TIMEOUT)
   val successCode: List[Int] = Try(parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
   val numWriters: Int = Try(parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_NUM_WRITERS)
   val maxRetries: Int = Try(parameters(KEY_SINK_THRESHOLD_RETRIES).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_RETRIES)
@@ -55,5 +55,6 @@ case class ThresholdConf(parameters: Properties) {
 object FailoverStorageType extends Enumeration {
   type FailoverStorageType = Value
   val MySQL, HBase, HDFS, Kafka = Value
-  def get(key:String):Value = values.find(_.toString.equalsIgnoreCase(key)).get
+
+  def get(key: String): Value = values.find(_.toString.equalsIgnoreCase(key)).get
 }

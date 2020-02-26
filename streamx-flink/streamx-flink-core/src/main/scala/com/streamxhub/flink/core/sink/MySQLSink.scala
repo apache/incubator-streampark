@@ -53,7 +53,7 @@ import scala.util.Try
 object MySQLSink {
 
   /**
-   * @param ctx      : StreamingContext
+   * @param ctx   : StreamingContext
    * @param alias :   MySQL的实例别名(用于区分多个不同的MySQL实例...)
    * @return
    */
