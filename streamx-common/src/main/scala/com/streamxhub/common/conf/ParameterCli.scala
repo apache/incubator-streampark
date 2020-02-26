@@ -40,13 +40,13 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
+    val parser = new DefaultParser
     action match {
       case "--resource" =>
         val option = getOption(map, args.drop(2))
-        val parser = new DefaultParser
         val buffer = new StringBuffer()
         val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
-        line.getOptions.foreach(x => {
+        line.getOptions.filter(_.getLongOpt != "class").foreach(x => {
           buffer.append(s" -${x.getOpt}")
           if (x.hasArg) {
             buffer.append(s" ${x.getValue()}")
@@ -57,6 +57,13 @@ object ParameterCli {
         val buffer = new StringBuffer()
         map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
         println(buffer.toString.trim)
+      case "--class" =>
+        val option = getOption(map, args.drop(2))
+        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
+        val main = line.getOptions.filter(_.getLongOpt == "class").head
+        if (main != null) {
+          println(main.getValue)
+        }
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
           case yarnName if yarnName.nonEmpty => println(yarnName)
@@ -65,7 +72,6 @@ object ParameterCli {
       //是否detached模式...
       case "--detached" =>
         val option = getOption(map, args.drop(2))
-        val parser = new DefaultParser
         val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
         val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
