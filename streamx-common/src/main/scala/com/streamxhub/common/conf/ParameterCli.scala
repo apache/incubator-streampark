@@ -46,7 +46,7 @@ object ParameterCli {
         val option = getOption(map, args.drop(2))
         val buffer = new StringBuffer()
         val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
-        line.getOptions.filter(_.getLongOpt != "class").foreach(x => {
+        line.getOptions.foreach(x => {
           buffer.append(s" -${x.getOpt}")
           if (x.hasArg) {
             buffer.append(s" ${x.getValue()}")
@@ -57,13 +57,6 @@ object ParameterCli {
         val buffer = new StringBuffer()
         map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
         println(buffer.toString.trim)
-      case "--class" =>
-        val option = getOption(map, args.drop(2))
-        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
-        val main = line.getOptions.filter(_.getLongOpt == "class").head
-        if (main != null) {
-          println(main.getValue)
-        }
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
           case yarnName if yarnName.nonEmpty => println(yarnName)
