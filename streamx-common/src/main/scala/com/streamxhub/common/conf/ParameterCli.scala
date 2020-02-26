@@ -68,7 +68,8 @@ object ParameterCli {
         val parser = new DefaultParser
         val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
         val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
-        print(detached.toString.trim)
+        val mode = if (detached) "Detached" else "Attach"
+        print(mode)
       case _ =>
 
     }
