@@ -61,19 +61,6 @@ class JdbcSink(@transient ctx: StreamingContext,
                name: String = null,
                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
-  //每隔10s进行启动一个检查点
-  ctx.enableCheckpointing(10000)
-  //设置模式为：exactly_one，仅一次语义
-  ctx.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
-  //确保检查点之间有1s的时间间隔【checkpoint最小间隔】
-  ctx.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
-  //检查点必须在10s之内完成，或者被丢弃【checkpoint超时时间】
-  ctx.getCheckpointConfig.setCheckpointTimeout(10000)
-  //同一时间只允许进行一次检查点
-  ctx.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
-  //被cancel会保留Checkpoint数据
-  ctx.getCheckpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-
   /**
    *
    * @param stream  : DataStream
