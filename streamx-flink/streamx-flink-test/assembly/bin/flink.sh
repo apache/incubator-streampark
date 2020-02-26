@@ -188,7 +188,10 @@ doStart() {
 
     echo_g "${app_name} Starting by:<${detached_mode}> mode"
 
-    if [ x"${detached_mode// /}" == x"Detached" ] ; then
+    # shellcheck disable=SC2006
+    # trim...
+    detached="`echo "$detached_mode" | sed "s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"`"
+    if [ x"$detached" == x"Detached" ] ; then
       local cmd="""flink run
                   $resource_params
                   $dynamic_params
