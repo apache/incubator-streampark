@@ -195,12 +195,6 @@ doStart() {
     # shellcheck disable=SC2006
     dynamic_params="`echo "$dynamic_params" | sed "$trim_reg"`"
 
-    # shellcheck disable=SC2006
-    # shellcheck disable=SC2155
-    local main_class="`java -cp "${flink_jar}" $param_cli --class "${app_proper}"`"
-    # shellcheck disable=SC2006
-    main_class="`echo "$main_class" | sed "$trim_reg"`"
-
     echo_g "${app_name} Starting by:<${detached_mode}> mode"
 
     # json all params...
@@ -208,15 +202,12 @@ doStart() {
     if [ x"$dynamic_params" != x"" ]; then
         allParam="$allParam $dynamic_params"
     fi
-    if [ x"$main_class" != x"" ]; then
-      allParam="$allParam --class $main_class"
-    fi
 
     if [ x"$detached_mode" == x"Detached" ] ; then
       flink run \
-      "$allParam" \
-      --jar "$flink_jar" \
-      --flink.conf "$app_proper"
+      $allParam \
+      --jarfile $flink_jar \
+      --flink.conf $app_proper
       echo "${app_name}" > "${APP_TEMP}/.running"
     else
       # shellcheck disable=SC2006
@@ -225,9 +216,9 @@ doStart() {
       local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
       flink run \
-      "$allParam" \
-      --jar "$flink_jar" \
-      --flink.conf "$app_proper" >> "$app_out" 2>&1 &
+      $allParam \
+      --jarfile $flink_jar \
+      --flink.conf $app_proper >> $app_out 2>&1 &
 
       echo "${app_name}" > "${APP_TEMP}/.running"
       echo_g "${app_name} starting,more detail please log:${app_out}"
