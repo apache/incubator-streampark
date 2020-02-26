@@ -30,10 +30,26 @@ import org.apache.kafka.clients.consumer.ConsumerConfig
 
 import scala.collection.Map
 import scala.language.postfixOps
+import scala.collection.JavaConversions._
 
+/*
+ * @param ctx
+ * @param overrideParams
+ */
 class KafkaSource(@transient val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
+   *
+   * commit offset 方式:
+   * Flink kafka consumer commit offset 方式需要区分是否开启了 checkpoint。
+   * 1) checkpoint 关闭: commit offset 要依赖于 kafka 客户端的 auto commit。
+   * 需设置 enable.auto.commit，auto.commit.interval.ms 参数到 consumer properties，
+   * 就会按固定的时间间隔定期 auto commit offset 到 kafka。
+   * 2) checkpoint 开启: 这个时候作业消费的 offset 是 Flink 在 state 中自己管理和容错。
+   * 此时提交 offset 到 kafka，一般都是作为外部进度的监控，想实时知道作业消费的位置和 lag 情况。
+   * 此时需要 setCommitOffsetsOnCheckpoints 为 true 来设置当 checkpoint 成功时提交 offset 到 kafka。
+   * 此时 commit offset 的间隔就取决于 checkpoint 的间隔
+   *
    * 获取DStream 流
    *
    * @return
@@ -41,9 +57,15 @@ class KafkaSource(@transient val ctx: StreamingContext, overrideParams: Map[Stri
   def getDataStream(topic: String = "", instance: String = ""): DataStream[String] = {
     val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
     overrideParams.foreach(x => prop.put(x._1, x._2))
-    //强制设置offset自动提交
-    prop.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG,"true")
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
+    val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
+    val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
+    (enableChk, autoCommit) match {
+      case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
+      case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
+      case _ =>
+    }
     ctx.addSource(consumer)
   }
+
 }
