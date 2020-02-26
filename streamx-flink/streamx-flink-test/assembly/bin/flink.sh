@@ -204,10 +204,12 @@ doStart() {
     fi
 
     if [ x"$detached_mode" == x"Detached" ] ; then
+
       flink run \
       $allParam \
       --jar $flink_jar \
       --flink.conf $app_proper
+
       echo "${app_name}" > "${APP_TEMP}/.running"
     else
       # shellcheck disable=SC2006
