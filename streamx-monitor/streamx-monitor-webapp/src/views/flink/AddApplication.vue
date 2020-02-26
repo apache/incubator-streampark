@@ -50,12 +50,12 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount=maxTagCount
+          :maxTagCount="maxTagCount"
           ref="confOpt"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['configOpt']">
-          <a-select-option v-for="(conf,index) in config" v-if="conf.group == mode" :key="index" :value="index">{{ conf.title }}({{conf.name}})</a-select-option>
+          <a-select-option v-for="(conf,index) in config" v-if="conf.group == mode" :key="index" :value="index">{{ conf.title }} ( {{ conf.name }} )</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
@@ -68,9 +68,9 @@
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input v-if="conf.type == 'input'" type="text" :placeholder="conf.placeholder" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch v-if="conf.type == 'switch'" @change="handleSwitch(conf)" checkedChildren="开" unCheckedChildren="关" defaultChecked/>
-        <a-input-number v-if="conf.type == 'number'" :min=conf.min v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-        <span v-if="conf.type == 'switch'" class="conf-switch">({{conf.placeholder}})</span>
-        <p class="conf-desc">{{conf.description}}</p>
+        <a-input-number v-if="conf.type == 'number'" :min="conf.min" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type == 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
       <a-form-item
         label="动态参数"
@@ -126,7 +126,7 @@ const config = [
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
-      if(!value||value.length == 0) {
+      if (!value || value.length === 0) {
         callback(new Error('TaskManager数量不能为空'))
       } else {
         callback()
@@ -163,7 +163,7 @@ const config = [
     }
   },
 
-  //------------------------------------------------------- YARN -------------------------------------------------------
+  // ------------------------------------------------------- YARN -------------------------------------------------------
   {
     title: '-m',
     name: 'jobmanager',
@@ -173,7 +173,7 @@ const config = [
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
-      if(!value||value.length == 0) {
+      if (!value || value.length === 0) {
         callback(new Error('JobManager不能为空'))
       } else {
         callback()
@@ -330,7 +330,7 @@ const config = [
     validator: (rule, value, callback) => {
       callback()
     }
-  },
+  }
 ]
 
 export default {
@@ -342,13 +342,13 @@ export default {
       project: [],
       configFile: null,
       configFileData: [],
-      configIndex:[],
+      configIndex: [],
       form: null,
       config: config,
       mode: 'yarn',
       deploymentModes: [
-        { id:'yarn',name: 'YARN',default: true },
-        { id:'yarn-session',name:'YARN Session',default: false }
+        { id: 'yarn', name: 'PreJob Cluster', default: true },
+        { id: 'yarn-session', name: 'Session Cluster', default: false }
       ]
     }
   },
@@ -388,9 +388,9 @@ export default {
 
     },
     handleMode (selectMode) {
-      if(this.mode!=selectMode) {
+      if (this.mode !== selectMode) {
         this.configIndex = []
-        this.form.resetFields(`configOpt`,[])
+        this.form.resetFields(`configOpt`, [])
       }
       this.mode = selectMode
     },
@@ -404,7 +404,7 @@ export default {
           const args = values.args
           const dynamicProp = values.dynamicProp
           const description = values.description
-          const skip = ['project', 'config','dynamicProp', 'args', 'description']
+          const skip = ['project', 'config', 'dynamicProp', 'args', 'description']
           skip.forEach((item, index, array) => {
             delete values[item]
           })
@@ -413,12 +413,16 @@ export default {
             projectId: projectId,
             configFile: conf,
             args: args,
-            dynamicProp:dynamicProp,
+            dynamicProp: dynamicProp,
             description: description,
             config: config
           }).then((resp) => {
             const created = resp.data
-            console.log(created)
+            if (created) {
+              this.$router.push({ path: '/flink/app' })
+            } else {
+              console.log(created)
+            }
           }).catch((error) => {
             this.$message.error(error.message)
           })

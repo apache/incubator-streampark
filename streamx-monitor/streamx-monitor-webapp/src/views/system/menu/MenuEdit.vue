@@ -2,61 +2,75 @@
   <a-drawer
     title="修改菜单"
     :maskClosable="false"
-    width=650
+    width="650"
     placement="right"
     :closable="false"
     @close="onClose"
     :visible="menuEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='菜单名称' v-bind="formItemLayout">
-        <a-input v-decorator="['menuName',
-                   {rules: [
-                    { required: true, message: '菜单名称不能为空'},
-                    { max: 10, message: '长度不能超过10个字符'}
-                  ]}]"/>
+      <a-form-item label="菜单名称" v-bind="formItemLayout">
+        <a-input
+          v-decorator="['menuName',
+                        {rules: [
+                          { required: true, message: '菜单名称不能为空'},
+                          { max: 10, message: '长度不能超过10个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='菜单URL'
-                   v-bind="formItemLayout">
-        <a-input v-decorator="['path',
-                 {rules: [
-                  { required: true, message: '菜单URL不能为空'},
-                  { max: 50, message: '长度不能超过50个字符'}
-                ]}]"/>
+      <a-form-item
+        label="菜单URL"
+        v-bind="formItemLayout">
+        <a-input
+          v-decorator="['path',
+                        {rules: [
+                          { required: true, message: '菜单URL不能为空'},
+                          { max: 50, message: '长度不能超过50个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='组件地址'
-                   v-bind="formItemLayout">
-        <a-input v-decorator="['component',
-                 {rules: [
-                  { required: true, message: '组件地址不能为空'},
-                  { max: 100, message: '长度不能超过100个字符'}
-                ]}]"/>
+      <a-form-item
+        label="组件地址"
+        v-bind="formItemLayout">
+        <a-input
+          v-decorator="['component',
+                        {rules: [
+                          { required: true, message: '组件地址不能为空'},
+                          { max: 100, message: '长度不能超过100个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='相关权限' v-bind="formItemLayout">
-        <a-input v-decorator="['perms',
-                   {rules: [
-                    { max: 50, message: '长度不能超过50个字符'}
-                  ]}]"/>
+      <a-form-item label="相关权限" v-bind="formItemLayout">
+        <a-input
+          v-decorator="['perms',
+                        {rules: [
+                          { max: 50, message: '长度不能超过50个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='菜单图标'
-                   v-decorator="['icon']"
-                   v-bind="formItemLayout">
+      <a-form-item
+        label="菜单图标"
+        v-decorator="['icon']"
+        v-bind="formItemLayout">
         <a-input placeholder="点击右侧按钮选择图标" v-model="menu.icon">
           <a-icon v-if="menu.icon" slot="suffix" type="close-circle" @click="deleteIcons"/>
           <a-icon slot="addonAfter" type="setting" style="cursor: pointer" @click="chooseIcons"/>
         </a-input>
       </a-form-item>
-      <a-form-item label='菜单排序' v-bind="formItemLayout">
+      <a-form-item label="菜单排序" v-bind="formItemLayout">
         <a-input-number v-decorator="['orderNum']" style="width: 100%"/>
       </a-form-item>
 
-      <a-form-item label='是否显示' v-bind="formItemLayout">
-        <a-switch v-decorator="['display']" checkedChildren="Yes" unCheckedChildren="No" defaultChecked  :checked="display" @change="display=!display"/>
+      <a-form-item label="是否显示" v-bind="formItemLayout">
+        <a-switch
+          v-decorator="['display']"
+          checkedChildren="Yes"
+          unCheckedChildren="No"
+          defaultChecked
+          :checked="display"
+          @change="display=!display"/>
       </a-form-item>
 
-      <a-form-item label='上级菜单'
-                   style="margin-bottom: 2rem"
-                   v-bind="formItemLayout">
+      <a-form-item
+        label="上级菜单"
+        style="margin-bottom: 2rem"
+        v-bind="formItemLayout">
         <a-tree
           ref="menuTree"
           :key="menuTreeKey"
@@ -93,21 +107,21 @@
 </template>
 <script>
 import Icons from './Icons'
-import {list, update} from '@/api/menu'
+import { list, update } from '@/api/menu'
 
 const formItemLayout = {
-  labelCol: {span: 3},
-  wrapperCol: {span: 18}
+  labelCol: { span: 3 },
+  wrapperCol: { span: 18 }
 }
 export default {
   name: 'MenuEdit',
-  components: {Icons},
+  components: { Icons },
   props: {
     menuEditVisiable: {
       default: false
     }
   },
-  data() {
+  data () {
     return {
       loading: false,
       formItemLayout,
@@ -158,26 +172,26 @@ export default {
       this.menu.icon = value
       this.iconChooseVisible = false
     },
-    deleteIcons() {
+    deleteIcons () {
       this.menu.icon = ''
     },
-    setFormValues ({...menu}) {
+    setFormValues ({ ...menu }) {
       this.display = menu.display == '1'
-      let fields = ['path', 'component', 'icon']
+      const fields = ['path', 'component', 'icon']
       Object.keys(menu).forEach((key) => {
         if (fields.indexOf(key) !== -1) {
           this.form.getFieldDecorator(key)
-          let obj = {}
+          const obj = {}
           obj[key] = menu[key]
           this.form.setFieldsValue(obj)
         }
       })
       this.form.getFieldDecorator('menuName')
-      this.form.setFieldsValue({'menuName': menu.text})
+      this.form.setFieldsValue({ 'menuName': menu.text })
       this.form.getFieldDecorator('perms')
-      this.form.setFieldsValue({'perms': menu.permission})
+      this.form.setFieldsValue({ 'perms': menu.permission })
       this.form.getFieldDecorator('orderNum')
-      this.form.setFieldsValue({'orderNum': menu.order})
+      this.form.setFieldsValue({ 'orderNum': menu.order })
 
       this.menu.icon = menu.icon
       if (menu.parentId !== '0') {
@@ -188,8 +202,8 @@ export default {
       this.menu.menuId = menu.id
       this.menuTreeKey = +new Date()
     },
-    handleSubmit() {
-      let checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
+    handleSubmit () {
+      const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
       if (checkedArr.length > 1) {
         this.$message.error('最多只能选择一个上级菜单，请修改')
         return
@@ -201,7 +215,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           this.loading = true
-          let menu = this.form.getFieldsValue()
+          const menu = this.form.getFieldsValue()
           Object.assign(menu, this.menu)
           if (checkedArr.length) {
             menu.parentId = checkedArr[0]
@@ -210,7 +224,7 @@ export default {
           }
           // 0 表示菜单 1 表示按钮
           menu.type = '0'
-          menu.display = this.display?'1':'0'
+          menu.display = this.display ? '1' : '0'
           update({
             ...menu
           }).then(() => {
@@ -224,7 +238,7 @@ export default {
     }
   },
   watch: {
-    menuEditVisiable() {
+    menuEditVisiable () {
       if (this.menuEditVisiable) {
         list({
           type: '0'

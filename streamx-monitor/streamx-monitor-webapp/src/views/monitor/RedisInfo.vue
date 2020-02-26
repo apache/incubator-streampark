@@ -2,19 +2,19 @@
   <div style="width: 100%;margin-top: 1rem;background-color: #fff;padding: 15px;">
     <a-row :gutter="8" >
       <a-col :span="12">
-        <apexchart ref="memoryInfo" type=area height=350 :options="memory.chartOptions" :series="memory.series" />
+        <apexchart ref="memoryInfo" type="area" height="350" :options="memory.chartOptions" :series="memory.series" />
       </a-col>
       <a-col :span="12">
-        <apexchart ref="keySize" type=area height=350  :options="key.chartOptions" :series="key.series" />
+        <apexchart ref="keySize" type="area" height="350" :options="key.chartOptions" :series="key.series" />
       </a-col>
     </a-row>
     <a-row :gutter="8">
       <a-divider orientation="left">Redis详细信息</a-divider>
       <table class="static-table-info">
         <tr v-for="(info, index) in redisInfo" :key="index" style="border-top: 1px solid #f1f1f1;">
-          <td style="padding: .7rem 1rem">{{info.key}}</td>
-          <td style="padding: .7rem 1rem">{{info.description}}</td>
-          <td style="padding: .7rem 1rem">{{info.value}}</td>
+          <td style="padding: .7rem 1rem">{{ info.key }}</td>
+          <td style="padding: .7rem 1rem">{{ info.description }}</td>
+          <td style="padding: .7rem 1rem">{{ info.value }}</td>
         </tr>
       </table>
     </a-row>
@@ -131,8 +131,8 @@ export default {
           this.$post('redis/keysSize'),
           this.$post('redis/memoryInfo')
         ]).then((r) => {
-          let currentMemory = r[1].used_memory / 1000
-          let currentSize = r[0].dbSize
+          const currentMemory = r[1].used_memory / 1000
+          const currentSize = r[0].dbSize
           if (currentMemory < minMemory) {
             minMemory = currentMemory
           }
@@ -145,7 +145,7 @@ export default {
           if (currentSize > maxSize) {
             maxSize = currentSize
           }
-          let time = moment().format('hh:mm:ss')
+          const time = moment().format('hh:mm:ss')
           this.memory.data.push(currentMemory)
           this.memory.xdata.push(time)
           this.key.data.push(currentSize)

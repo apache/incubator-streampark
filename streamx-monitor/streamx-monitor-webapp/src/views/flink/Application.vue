@@ -79,9 +79,9 @@
       <template slot="remark" slot-scope="text, record">
         <a-popover placement="topLeft">
           <template slot="content">
-            <div style="max-width: 200px">{{text}}</div>
+            <div style="max-width: 200px">{{ text }}</div>
           </template>
-          <p style="width: 200px;margin-bottom: 0">{{text}}</p>
+          <p style="width: 200px;margin-bottom: 0">{{ text }}</p>
         </a-popover>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -174,14 +174,13 @@ export default {
       }
     },
     batchDelete () {
-
       this.$router.push({ 'path': 'addtest' })
 
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
         return
       }
-      let that = this
+      const that = this
       that.$confirm({
         title: '确定删除所选中的记录?',
         content: '当您点击确定按钮后，这些记录将会被彻底删除',
@@ -211,7 +210,7 @@ export default {
         sortField = sortedInfo.field
         sortOrder = sortedInfo.order
       }
-      $export ({
+      $export({
         sortField: sortField,
         sortOrder: sortOrder,
         ...this.queryParams

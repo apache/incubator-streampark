@@ -4,18 +4,19 @@
       <div class="alert">
         <a-alert type="success" :show-icon="true">
           <div slot="message">
-            共追踪到 {{dataSource.length}} 条近期HTTP请求记录
+            共追踪到 {{ dataSource.length }} 条近期HTTP请求记录
             <a style="margin-left: 24px" @click="search">点击刷新</a>
           </div>
         </a-alert>
       </div>
       <!-- 表格区域 -->
-      <a-table :columns="columns"
-               :dataSource="dataSource"
-               :pagination="pagination"
-               :loading="loading"
-               :scroll="{ x: 900 }"
-               @change="handleTableChange">
+      <a-table
+        :columns="columns"
+        :dataSource="dataSource"
+        :pagination="pagination"
+        :loading="loading"
+        :scroll="{ x: 900 }"
+        @change="handleTableChange">
       </a-table>
     </div>
   </a-card>
@@ -127,11 +128,11 @@ export default {
     },
     fetch () {
       this.loading = true
-       this.$get("actuator/httptrace").then((resp) => {
-        let data = resp
+      this.$get('actuator/httptrace').then((resp) => {
+        const data = resp
         this.loading = false
-        let filterData = []
-        for (let d of data.traces) {
+        const filterData = []
+        for (const d of data.traces) {
           if (d.request.method !== 'OPTIONS' &&
             d.request.uri.indexOf('httptrace') === -1) {
             filterData.push(d)
@@ -143,4 +144,3 @@ export default {
   }
 }
 </script>
-

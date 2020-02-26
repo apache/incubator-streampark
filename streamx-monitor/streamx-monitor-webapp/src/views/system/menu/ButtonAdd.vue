@@ -2,31 +2,34 @@
   <a-drawer
     title="新增按钮"
     :maskClosable="false"
-    width=650
+    width="650"
     placement="right"
     :closable="false"
     @close="onClose"
     :visible="buttonAddVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form :form="form">
-      <a-form-item label='按钮名称' v-bind="formItemLayout">
-        <a-input v-model="button.menuName"
-                 v-decorator="['menuName',
-                   {rules: [
-                    { required: true, message: '按钮名称不能为空'},
-                    { max: 10, message: '长度不能超过10个字符'}
-                  ]}]"/>
+      <a-form-item label="按钮名称" v-bind="formItemLayout">
+        <a-input
+          v-model="button.menuName"
+          v-decorator="['menuName',
+                        {rules: [
+                          { required: true, message: '按钮名称不能为空'},
+                          { max: 10, message: '长度不能超过10个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='相关权限' v-bind="formItemLayout">
-        <a-input v-model="button.perms"
-                 v-decorator="['perms',
-                   {rules: [
-                    { max: 50, message: '长度不能超过50个字符'}
-                  ]}]"/>
+      <a-form-item label="相关权限" v-bind="formItemLayout">
+        <a-input
+          v-model="button.perms"
+          v-decorator="['perms',
+                        {rules: [
+                          { max: 50, message: '长度不能超过50个字符'}
+                        ]}]"/>
       </a-form-item>
-      <a-form-item label='上级菜单'
-                   style="margin-bottom: 2rem"
-                   v-bind="formItemLayout">
+      <a-form-item
+        label="上级菜单"
+        style="margin-bottom: 2rem"
+        v-bind="formItemLayout">
         <a-tree
           :key="menuTreeKey"
           :checkable="true"
@@ -54,7 +57,7 @@
   </a-drawer>
 </template>
 <script>
-import {list,post as submit} from '@/api/menu'
+import { list, post as submit } from '@/api/menu'
 
 const formItemLayout = {
   labelCol: { span: 3 },
@@ -104,7 +107,7 @@ export default {
       this.expandedKeys = expandedKeys
     },
     handleSubmit () {
-      let checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
+      const checkedArr = Object.is(this.checkedKeys.checked, undefined) ? this.checkedKeys : this.checkedKeys.checked
       if (!checkedArr.length) {
         this.$message.error('请为按钮选择一个上级菜单')
         return
