@@ -206,7 +206,7 @@ doStart() {
     if [ x"$detached_mode" == x"Detached" ] ; then
       flink run \
       $allParam \
-      --jarfile $flink_jar \
+      --jar $flink_jar \
       --flink.conf $app_proper
       echo "${app_name}" > "${APP_TEMP}/.running"
     else
@@ -217,7 +217,7 @@ doStart() {
 
       flink run \
       $allParam \
-      --jarfile $flink_jar \
+      --jar $flink_jar \
       --flink.conf $app_proper >> $app_out 2>&1 &
 
       echo "${app_name}" > "${APP_TEMP}/.running"
