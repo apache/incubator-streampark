@@ -96,7 +96,7 @@ object DateUtils {
   }
 
   //获取今天之前的n天
-  def +-(i: Int,date:Date = new Date)(implicit format: String = dayFormat2): String = {
+  def +-(i: Int, date: Date = new Date)(implicit format: String = dayFormat2): String = {
     val cal = Calendar.getInstance
     cal.setTime(date)
     cal.add(Calendar.DATE, i)

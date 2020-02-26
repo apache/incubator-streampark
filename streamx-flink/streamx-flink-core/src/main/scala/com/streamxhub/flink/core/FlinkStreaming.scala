@@ -91,7 +91,7 @@ trait FlinkStreaming extends Logger {
 
     //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
     val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINT_ENABLE).toBoolean).getOrElse(false)
-    if(enableCheckpoint) {
+    if (enableCheckpoint) {
       val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
       val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
       val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
@@ -144,7 +144,7 @@ trait FlinkStreaming extends Logger {
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-   def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {

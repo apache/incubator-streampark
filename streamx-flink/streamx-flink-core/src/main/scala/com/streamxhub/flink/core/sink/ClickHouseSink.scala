@@ -168,7 +168,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
 }
 
 
-class AsyncClickHouseOutputFormat[T : TypeInformation](implicit prop: Properties, toSQlFun: T => String = null) extends RichOutputFormat[T] with Logger {
+class AsyncClickHouseOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String = null) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new AsyncClickHouseSinkFunction[T](prop)
 
@@ -360,7 +360,7 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseConfig) extends Sink
   var service: ExecutorService = Executors.newFixedThreadPool(clickHouseConfig.numWriters, threadFactory)
 
   for (i <- 0 until clickHouseConfig.numWriters) {
-    val task = ClickHouseWriterTask(i,clickHouseConfig, asyncHttpClient, recordQueue, callbackService)
+    val task = ClickHouseWriterTask(i, clickHouseConfig, asyncHttpClient, recordQueue, callbackService)
     tasks.add(task)
     service.submit(task)
   }

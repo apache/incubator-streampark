@@ -40,6 +40,6 @@ object JsonUtils {
     }
   }
 
-  def write(obj: AnyRef): String =  Serialization.write(obj)(org.json4s.DefaultFormats)
+  def write(obj: AnyRef): String = Serialization.write(obj)(org.json4s.DefaultFormats)
 
 }
