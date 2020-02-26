@@ -66,15 +66,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         StringBuilder builder = new StringBuilder();
         for (Map.Entry<String, Object> objectEntry : jsonConf.entrySet()) {
             String k = objectEntry.getKey();
-            String v = objectEntry.getValue().toString();
-            builder.append("--")
-                    .append(k)
-                    .append(" ")
-                    .append(v)
-                    .append(" ");
+            Object v = objectEntry.getValue();
+            builder.append("--").append(k).append(" ");
+            if (!(v instanceof Boolean)) {
+                builder.append(v).append(" ");
+            }
         }
-        String args = builder.toString();
-
+        String args = builder.toString().trim();
         Deployment deployment = new Deployment(project, application);
         deployment.setArgs(args);
         deployment.startUp();

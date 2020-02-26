@@ -24,7 +24,7 @@
           :treeData="configFileData"
           placeholder="请选择配置文件"
           treeDefaultExpandAll
-          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
+          v-decorator="[ 'configFile', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
           >
         </a-tree-select>
       </a-form-item>
@@ -55,19 +55,24 @@
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['configOpt']">
-          <a-select-option v-for="(conf,index) in config" v-if="conf.group == mode" :key="index" :value="index">{{ conf.title }} ( {{ conf.name }} )</a-select-option>
+          <a-select-option v-for="(conf,index) in configOptions" v-if="conf.group == mode" :key="index" :value="conf.name">{{ conf.title }} ( {{ conf.name }} )</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
         class="conf_item"
-        v-for="(conf,index) in config"
-        v-if="configIndex.includes(index)"
+        v-for="(conf,index) in configOptions"
+        v-if="configItems.includes(conf.name)"
         :key="index"
         :label="conf.title"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input v-if="conf.type == 'input'" type="text" :placeholder="conf.placeholder" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-        <a-switch v-if="conf.type == 'switch'" @change="handleSwitch(conf)" checkedChildren="开" unCheckedChildren="关" defaultChecked/>
+        <a-switch
+          v-if="conf.type == 'switch'"
+          @change="(x) => handleSwitch(x,conf)"
+          checkedChildren="开"
+          unCheckedChildren="关"
+          v-decorator="[`${conf.name}`]"/>
         <a-input-number v-if="conf.type == 'number'" :min="conf.min" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type == 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
@@ -116,7 +121,7 @@
 import { select, fileList } from '@/api/project'
 import { create } from '@/api/application'
 
-const config = [
+const configOptions = [
   {
     title: '-n',
     name: 'container',
@@ -342,9 +347,9 @@ export default {
       project: [],
       configFile: null,
       configFileData: [],
-      configIndex: [],
+      configItems: [],
       form: null,
-      config: config,
+      configOptions: configOptions,
       mode: 'yarn',
       deploymentModes: [
         { id: 'yarn', name: 'PreJob Cluster', default: true },
@@ -357,7 +362,7 @@ export default {
   },
   beforeMount () {
     this.form = this.$form.createForm(this)
-    config.forEach((item, index, array) => {
+    configOptions.forEach((item, index, array) => {
       this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
     })
   },
@@ -381,41 +386,48 @@ export default {
         this.$message.error(error.message)
       })
     },
-    handleConf (index) {
-      this.configIndex = index
+    handleConf (name) {
+      this.configItems = name
     },
-    handleSwitch (conf) {
-
+    handleSwitch (bool, conf) {
+      const v = {}
+      v[conf.name] = bool
+      this.form.setFieldsValue(v)
     },
     handleMode (selectMode) {
       if (this.mode !== selectMode) {
-        this.configIndex = []
+        this.configItems = []
         this.form.resetFields(`configOpt`, [])
       }
       this.mode = selectMode
     },
     // handler
-    handleSubmit (e) {
+    handleSubmit: function (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
           const projectId = values.project
-          const conf = values.config
+          const configFile = values.configFile
           const args = values.args
           const dynamicProp = values.dynamicProp
           const description = values.description
-          const skip = ['project', 'config', 'dynamicProp', 'args', 'description']
-          skip.forEach((item, index, array) => {
-            delete values[item]
-          })
-          const config = JSON.stringify(values)
+          const config = {}
+          for (const k in values) {
+            if (this.configItems.includes(k)) {
+              const v = values[k]
+              if (v !== false && v !== '') {
+                config[k] = values[k]
+              }
+            }
+          }
+          console.log(config)
           create({
             projectId: projectId,
-            configFile: conf,
+            configFile: configFile,
             args: args,
             dynamicProp: dynamicProp,
             description: description,
-            config: config
+            config: JSON.stringify(config)
           }).then((resp) => {
             const created = resp.data
             if (created) {
