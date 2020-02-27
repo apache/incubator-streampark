@@ -307,7 +307,7 @@ fi
 
 MAIN_JAR="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
-JAVA_OPTS=" -server
+JAVA_OPTS="""-server
 -Xms1024m
 -Xmx1024m
 -Xmn256m
@@ -317,10 +317,10 @@ JAVA_OPTS=" -server
 -XX:PermSize=128m
 -XX:MaxPermSize=128m
 -XX:ThreadStackSize=512
--Xloggc:${APP_HOME}/logs/gc.log "
+-Xloggc:${APP_HOME}/logs/gc.log"""
 
 eval "${RUNJAVA}" \
-    "${JAVA_OPTS}" \
+    $JAVA_OPTS \
     -classpath "\"${CLASSPATH}\"" \
     -Dapp.home="${APP_HOME}" \
     -Dspring.config.location="${PROPER}" \
