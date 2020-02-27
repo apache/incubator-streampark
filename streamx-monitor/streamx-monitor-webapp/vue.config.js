@@ -84,19 +84,19 @@ module.exports = {
       }
     }
   },
-
+  /*
   devServer: {
     // development server port 8000
     port: 8000,
     proxy: {
-      '/api/*': {
+      '/api/!*': {
         target: 'http://localhost:10001',
         ws: false,
         changeOrigin: true,
         pathRewrite: { '^/api': '' }
       }
     }
-  },
+  }, */
 
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
