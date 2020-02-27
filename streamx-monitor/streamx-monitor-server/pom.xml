@@ -12,17 +12,6 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-core_2.11</artifactId>
-            <version>2.2.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-io</artifactId>
             <version>1.3.2</version>
@@ -143,6 +132,17 @@
             <groupId>org.crazycake</groupId>
             <artifactId>shiro-redis</artifactId>
             <version>3.1.0</version>
+            <exclusions>
+                 <exclusion>
+                     <artifactId>commons-cli</artifactId>
+                     <groupId>commons-cli</groupId>
+                 </exclusion>
+                 <exclusion>
+                     <artifactId>shiro-core</artifactId>
+                     <groupId>org.apache.shiro</groupId>
+                 </exclusion>
+
+            </exclusions>
         </dependency>
         <!-- ip2region -->
         <dependency>
@@ -171,6 +171,12 @@
             <groupId>com.wuwenze</groupId>
             <artifactId>ExcelKit</artifactId>
             <version>2.0.7</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
     </dependencies>
 
