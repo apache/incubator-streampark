@@ -42,7 +42,7 @@ public class Deployment implements Serializable {
             try {
                 log.info("[StreamX]execute Command {} ", command);
                 final Process process = new ProcessBuilder()
-                        .command(command)
+                        .command(command.split("\\s+"))
                         .inheritIO()
                         .start();
                 process.waitFor();
