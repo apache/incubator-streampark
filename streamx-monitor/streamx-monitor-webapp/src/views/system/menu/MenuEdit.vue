@@ -176,7 +176,7 @@ export default {
       this.menu.icon = ''
     },
     setFormValues ({ ...menu }) {
-      this.display = menu.display == '1'
+      this.display = menu.display === '1'
       const fields = ['path', 'component', 'icon']
       Object.keys(menu).forEach((key) => {
         if (fields.indexOf(key) !== -1) {

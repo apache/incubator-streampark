@@ -4,8 +4,8 @@
       <div class="account-settings-info-main" :class="device">
         <div class="account-settings-info-left">
           <a-menu
-            :mode="device == 'mobile' ? 'horizontal' : 'inline'"
-            :style="{ border: '0', width: device == 'mobile' ? '560px' : 'auto'}"
+            :mode="device === 'mobile' ? 'horizontal' : 'inline'"
+            :style="{ border: '0', width: device === 'mobile' ? '560px' : 'auto'}"
             :defaultSelectedKeys="defaultSelectedKeys"
             type="inner"
             @openChange="onOpenChange"

@@ -77,10 +77,10 @@
       :scroll="{ x: 900 }"
       @change="handleTableChange" >
       <template slot="state" slot-scope="state">
-        <a-tag color="#108ee9" v-if="state == 0">新建</a-tag>
-        <a-tag color="#87d068" v-if="state == 1">运行</a-tag>
-        <a-tag color="gray" v-if="state == 2">停止</a-tag>
-        <a-tag color="#f50" v-if="state == 3">异常</a-tag>
+        <a-tag color="#108ee9" v-if="state === 0">新建</a-tag>
+        <a-tag color="#87d068" v-if="state === 1">运行</a-tag>
+        <a-tag color="gray" v-if="state === 2">停止</a-tag>
+        <a-tag color="#f50" v-if="state === 3">异常</a-tag>
 
       </template>
       <template slot="operation" slot-scope="record">

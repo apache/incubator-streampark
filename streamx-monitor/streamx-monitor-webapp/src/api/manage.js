@@ -46,8 +46,8 @@ export function getOrgTree (parameter) {
   })
 }
 
-// id == 0 add     post
-// id != 0 update  put
+// id === 0 add     post
+// id !== 0 update  put
 export function saveService (parameter) {
   return http[parameter.id === 0 ? 'post' : 'put']({
     url: api.service,
