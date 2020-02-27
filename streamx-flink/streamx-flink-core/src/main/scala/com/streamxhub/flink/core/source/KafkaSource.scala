@@ -58,13 +58,13 @@ class KafkaSource(@transient val ctx: StreamingContext, overrideParams: Map[Stri
     val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
-    val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
+    /*val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (enableChk, autoCommit) match {
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
       case _ =>
-    }
+    }*/
     ctx.addSource(consumer)
   }
 
