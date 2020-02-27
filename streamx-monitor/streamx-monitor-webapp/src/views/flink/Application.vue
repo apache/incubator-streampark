@@ -83,7 +83,7 @@
         <a-tag color="#f50" v-if="state === 3">异常</a-tag>
 
       </template>
-      <template slot="operation" slot-scope="record">
+      <template slot="operation" slot-scope="text, record">
         <a-icon
           v-permit="'role:update'"
           type="setting"
