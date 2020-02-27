@@ -76,21 +76,20 @@
       :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 900 }"
       @change="handleTableChange" >
-      <template slot="remark" slot-scope="text, record">
-        <a-popover placement="topLeft">
-          <template slot="content">
-            <div style="max-width: 200px">{{ text }}</div>
-          </template>
-          <p style="width: 200px;margin-bottom: 0">{{ text }}</p>
-        </a-popover>
+      <template slot="state" slot-scope="state">
+        <a-tag color="#108ee9" v-if="state == 0">新建</a-tag>
+        <a-tag color="#87d068" v-if="state == 1">运行</a-tag>
+        <a-tag color="gray" v-if="state == 2">停止</a-tag>
+        <a-tag color="#f50" v-if="state == 3">异常</a-tag>
+
       </template>
-      <template slot="operation" slot-scope="text, record">
+      <template slot="operation" slot-scope="record">
         <a-icon
           v-permit="'role:update'"
           type="setting"
           theme="twoTone"
           twoToneColor="#4a9ff5"
-          @click="edit(record)"
+          @click="handleEdit(record)"
           title="修改角色">
         </a-icon>
         <a-icon
@@ -98,7 +97,7 @@
           type="play-circle"
           theme="twoTone"
           twoToneColor="#4a9ff5"
-          @click="startUp(record)"
+          @click="handleStartUp(record)"
           title="提交任务">
         </a-icon>
         <a-icon type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
@@ -137,14 +136,18 @@ export default {
         title: '所属项目',
         dataIndex: 'projectName'
       }, {
-        title: 'appName',
+        title: '应用名称',
         dataIndex: 'appName'
       }, {
-        title: 'appId',
+        title: '应用ID',
         dataIndex: 'appId'
       }, {
         title: '状态',
-        dataIndex: 'state'
+        dataIndex: 'state',
+        scopedSlots: { customRender: 'state' }
+      }, {
+        title: '创建人',
+        dataIndex: 'userName'
       }, {
         title: '创建时间',
         dataIndex: 'createTime',
@@ -160,7 +163,7 @@ export default {
     }
   },
   mounted () {
-    this.fetch()
+    this.handleFetch()
   },
   methods: {
     onSelectChange (selectedRowKeys) {
@@ -250,7 +253,7 @@ export default {
         ...filters
       })
     },
-    fetch (params = {}) {
+    handleFetch (params = {}) {
       this.loading = true
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
@@ -277,7 +280,7 @@ export default {
     addTask () {
       this.$router.push({ 'path': 'addapp' })
     },
-    startUp (app) {
+    handleStartUp (app) {
       startUp({
         id: app.id
       }).then((resp) => {
