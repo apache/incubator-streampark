@@ -81,7 +81,7 @@
             <p style="width: 200px;margin-bottom: 0">{{ text }}</p>
           </a-popover>
         </template>
-        <template slot="operation" slot-scope="text, record">
+        <template slot="operation" slot-scope="record">
           <a-icon
             v-permit="'role:update'"
             type="setting"
