@@ -305,12 +305,6 @@ else
     fi
 fi
 
-# shellcheck disable=SC2006
-JARS=`ls -1 "$APP_LIB"`
-for JAR in ${JARS}; do
-   CLASSPATH=${CLASSPATH}:${APP_LIB}/${JAR}
-done
-
 MAIN_JAR="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
 JAVA_OPTS=" -server
