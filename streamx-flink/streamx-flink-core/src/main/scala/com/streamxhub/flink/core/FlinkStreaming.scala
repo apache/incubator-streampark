@@ -99,10 +99,7 @@ trait FlinkStreaming extends Logger {
       val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINT_MAX_CONCURRENT).toInt).getOrElse(1)
       val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINT_MIN_PAUSEBETWEEN).toInt).getOrElse(500)
 
-      env.enableCheckpointing(cpInterval)
-      env.getCheckpointConfig.setCheckpointingMode(cpMode)
-
-      /* //默认:开启检查点,1s进行启动一个检查点
+       //默认:开启检查点,1s进行启动一个检查点
        env.enableCheckpointing(cpInterval)
        //默认:模式为exactly_one，精准一次语义
        env.getCheckpointConfig.setCheckpointingMode(cpMode)
@@ -113,7 +110,7 @@ trait FlinkStreaming extends Logger {
        //默认:同一时间只允许进行一次检查点
        env.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
        //默认:被cancel会保留Checkpoint数据
-       env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)*/
+       env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
     }
     //set config by yourself...
     this.config(env, parameter)
