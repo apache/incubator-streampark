@@ -38,9 +38,9 @@ spring:
     time-zone: GMT+8
 
   redis:
-    host: 127.0.0.1
+    host: test-hadoop-9
     port: 6379
-    password:
+    password: ipqQ23cMWZcGCFku
     jedis:
       pool:
         min-idle: 8
