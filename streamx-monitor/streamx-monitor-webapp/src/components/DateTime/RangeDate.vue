@@ -2,7 +2,8 @@
   <a-range-picker
     :key="id"
     ref="rangeDate"
-    @change="onChange" style="width: 100%"></a-range-picker>
+    @change="onChange"
+    style="width: 100%"></a-range-picker>
 </template>
 
 <script>

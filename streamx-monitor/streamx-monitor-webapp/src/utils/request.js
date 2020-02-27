@@ -1,11 +1,11 @@
 import axios from 'axios'
 import $qs from 'qs'
 import notification from 'ant-design-vue/es/notification'
-import {TOKEN} from '@/store/mutation-types'
+import { TOKEN } from '@/store/mutation-types'
 import storage from '@/utils/storage'
-import store from "@/store";
-import moment from "moment";
-import {message, Modal} from "ant-design-vue";
+import store from '@/store'
+import moment from 'moment'
+import { message, Modal } from 'ant-design-vue'
 
 axios.defaults.withCredentials = true
 
@@ -13,7 +13,7 @@ const http = axios.create({
   baseURL: '/api', // api 的 base_url
   timeout: 5000, // 请求超时时间
   responseType: 'json',
-  validateStatus(status) {
+  validateStatus (status) {
     // 200 外的状态码都认定为失败
     return status === 200
   }
@@ -21,9 +21,8 @@ const http = axios.create({
 
 // request interceptor
 http.interceptors.request.use(config => {
-
-  let expire = store.getters.expire
-  let now = moment().format('YYYYMMDDHHmmss')
+  const expire = store.getters.expire
+  const now = moment().format('YYYYMMDDHHmmss')
   // 让token早10秒种过期，提升“请重新登录”弹窗体验
   if (now - expire >= -10) {
     Modal.error({
@@ -58,7 +57,7 @@ http.interceptors.response.use((response) => {
   return response.data
 }, error => {
   if (error.response) {
-    let errorMessage = error.response.data === null ? '系统内部异常，请联系网站管理员' : error.response.data.message
+    const errorMessage = error.response.data === null ? '系统内部异常，请联系网站管理员' : error.response.data.message
     switch (error.response.status) {
       case 404:
         notification.error({
@@ -74,7 +73,7 @@ http.interceptors.response.use((response) => {
           description: '很抱歉，您无法访问该资源，可能是因为没有相应权限或者登录已失效',
           duration: 4
         })
-        store.dispatch('Logout', {}).then((resp)=>{
+        store.dispatch('Logout', {}).then((resp) => {
           storage.clear()
           location.reload()
         })
@@ -91,11 +90,11 @@ http.interceptors.response.use((response) => {
   return Promise.reject(error)
 })
 
-let respBlob = (content, fileName) => {
-  let blob = new Blob([content])
-  fileName = fileName ? fileName : `${new Date().getTime()}_导出结果.xlsx`
+const respBlob = (content, fileName) => {
+  const blob = new Blob([content])
+  fileName = fileName || `${new Date().getTime()}_导出结果.xlsx`
   if ('download' in document.createElement('a')) {
-    let link = document.createElement('a')
+    const link = document.createElement('a')
     link.download = fileName
     link.style.display = 'none'
     link.href = URL.createObjectURL(blob)
@@ -109,21 +108,21 @@ let respBlob = (content, fileName) => {
 }
 
 export default {
-  get(url, data = {}, headers = null) {
+  get (url, data = {}, headers = null) {
     if (headers) {
     }
-    return http.get(url, {params: data})
+    return http.get(url, { params: data })
   },
-  post(url, data = {}, headers = null) {
+  post (url, data = {}, headers = null) {
     return http.post(url, $qs.stringify(data))
   },
-  put(url, data = {}, headers = null) {
+  put (url, data = {}, headers = null) {
     return http.put(url, $qs.stringify(data))
   },
-  delete(url, params = {}, headers = null) {
-    return http.delete(url, {data: $qs.stringify(params)})
+  delete (url, params = {}, headers = null) {
+    return http.delete(url, { data: $qs.stringify(params) })
   },
-  patch(url, data = {}, headers = null) {
+  patch (url, data = {}, headers = null) {
     return http.patch(url, $qs.stringify(data))
   },
   export (url, params = {}) {
@@ -161,6 +160,5 @@ export default {
       }
     })
   }
-
 
 }

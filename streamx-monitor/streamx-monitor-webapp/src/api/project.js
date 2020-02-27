@@ -1,7 +1,6 @@
 import api from './index'
 import http from '@/utils/request'
 
-
 export function upload (params) {
   return http.upload(api.Project.Upload, params)
 }

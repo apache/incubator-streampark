@@ -1,6 +1,6 @@
 import config from '@/config/defaultSettings'
 
-let storage = {
+const storage = {
   /**
    * Set storage
    *
@@ -73,6 +73,5 @@ let storage = {
     window.localStorage.clear()
   }
 }
-
 
 export default storage

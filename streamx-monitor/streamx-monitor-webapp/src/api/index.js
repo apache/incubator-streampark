@@ -39,7 +39,7 @@ export default {
     EXPORT: '/user/export',
 
     CHECK_NAME: '/user/check/name',
-    CHECK_PASSWORD: '/user/check/password',
+    CHECK_PASSWORD: '/user/check/password'
   },
   Dept: {
     LIST: '/dept/list',
@@ -72,6 +72,3 @@ export default {
   }
 
 }
-
-
-

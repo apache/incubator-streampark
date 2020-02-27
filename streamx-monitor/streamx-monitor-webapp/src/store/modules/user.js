@@ -1,7 +1,7 @@
-import {login, logout} from '@/api/passport'
-import {TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_ROUTER} from '@/store/mutation-types'
+import { login, logout } from '@/api/passport'
+import { TOKEN, EXPIRE, PERMISSIONS, ROLES, USER_INFO, USER_ROUTER } from '@/store/mutation-types'
 import storage from '@/utils/storage'
-import {getRouter} from "@/api/menu";
+import { getRouter } from '@/api/menu'
 
 const user = {
   state: {
@@ -13,7 +13,7 @@ const user = {
     routers: storage.get(USER_ROUTER),
     name: '',
     welcome: '',
-    avatar: '',
+    avatar: ''
   },
 
   mutations: {
@@ -62,10 +62,10 @@ const user = {
 
   actions: {
     // 登录
-    Login({commit}, userInfo) {
+    Login ({ commit }, userInfo) {
       return new Promise((resolve, reject) => {
         login(userInfo).then(response => {
-          let respData = response.data
+          const respData = response.data
           if (respData.token) {
             commit('SET_EXPIRE', respData.expire)
             commit('SET_TOKEN', respData.token)
@@ -79,7 +79,7 @@ const user = {
         })
       })
     },
-    GetRouter({commit}, data) {
+    GetRouter ({ commit }, data) {
       return new Promise((resolve, reject) => {
         getRouter({}).then(resp => {
           commit('SET_ROUTERS', resp)
@@ -90,7 +90,7 @@ const user = {
       })
     },
     // 登出
-    Logout({commit, state}) {
+    Logout ({ commit, state }) {
       return new Promise((resolve) => {
         logout().then((resp) => {
           commit('SET_EMPTY', null)
@@ -99,7 +99,7 @@ const user = {
           resolve()
         })
       })
-    },
+    }
 
   }
 }

@@ -4,7 +4,7 @@ import Vue from 'vue'
 
 const doCheck = function (elems, values, filter, status, el) {
   let flag = !filter
-  for (let v of values) {
+  for (const v of values) {
     if (elems.includes(v) === filter) {
       flag = status
     }
@@ -16,11 +16,11 @@ const doCheck = function (elems, values, filter, status, el) {
 
 // 必须包含列出的所有权限，元素才显示
 const permit = {
-  install(Vue) {
+  install (Vue) {
     Vue.directive('permit', {
-      inserted(el, binding, vnode) {
-        let permissions = vnode.context.$store.getters.permissions
-        let value = binding.value.split(',')
+      inserted (el, binding, vnode) {
+        const permissions = vnode.context.$store.getters.permissions
+        const value = binding.value.split(',')
         doCheck(permissions, value, false, false, el)
       }
     })
@@ -29,11 +29,11 @@ const permit = {
 
 // 当不包含列出的权限时，渲染该元素
 const noPermit = {
-  install(Vue) {
+  install (Vue) {
     Vue.directive('noPermit', {
-      inserted(el, binding, vnode) {
-        let permissions = vnode.context.$store.getters.permissions
-        let value = binding.value.split(',')
+      inserted (el, binding, vnode) {
+        const permissions = vnode.context.$store.getters.permissions
+        const value = binding.value.split(',')
         doCheck(permissions, value, true, false, el)
       }
     })
@@ -42,11 +42,11 @@ const noPermit = {
 
 // 只要包含列出的任意一个权限，元素就会显示
 const anyPermit = {
-  install(Vue) {
+  install (Vue) {
     Vue.directive('anyPermit', {
-      inserted(el, binding, vnode) {
-        let permissions = vnode.context.$store.getters.permissions
-        let value = binding.value.split(',')
+      inserted (el, binding, vnode) {
+        const permissions = vnode.context.$store.getters.permissions
+        const value = binding.value.split(',')
         doCheck(permissions, value, true, true, el)
       }
     })
@@ -55,11 +55,11 @@ const anyPermit = {
 
 // 必须包含列出的所有角色，元素才显示
 const hasRole = {
-  install(Vue) {
+  install (Vue) {
     Vue.directive('hasRole', {
-      inserted(el, binding, vnode) {
-        let roles = vnode.context.$store.getters.roles
-        let value = binding.value.split(',')
+      inserted (el, binding, vnode) {
+        const roles = vnode.context.$store.getters.roles
+        const value = binding.value.split(',')
         doCheck(roles, value, false, false, el)
       }
     })
@@ -68,11 +68,11 @@ const hasRole = {
 
 // 只要包含列出的任意一个角色，元素就会显示
 const hasAnyRole = {
-  install(Vue) {
+  install (Vue) {
     Vue.directive('hasAnyRole', {
-      inserted(el, binding, vnode) {
-        let roles = vnode.context.$store.getters.roles
-        let value = binding.value.split(',')
+      inserted (el, binding, vnode) {
+        const roles = vnode.context.$store.getters.roles
+        const value = binding.value.split(',')
         doCheck(roles, value, true, true, el)
       }
     })
@@ -92,5 +92,3 @@ Plugins.map((plugin) => {
 })
 
 export default Vue
-
-

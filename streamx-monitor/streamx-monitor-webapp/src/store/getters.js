@@ -1,10 +1,10 @@
 const getters = {
-  //app
+  // app
   device: state => state.app.device,
   theme: state => state.app.theme,
   color: state => state.app.color,
 
-  //user
+  // user
   permissions: state => state.user.permissions,
   roles: state => state.user.roles,
   token: state => state.user.token,
