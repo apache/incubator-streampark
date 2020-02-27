@@ -321,7 +321,7 @@ JAVA_OPTS="""-server
 
 eval "${RUNJAVA}" \
     $JAVA_OPTS \
-    -classpath "\"${CLASSPATH}\"" \
+    -cp "\"${APP_LIB}\"" \
     -Dapp.home="${APP_HOME}" \
     -Dspring.config.location="${PROPER}" \
     -jar "${MAIN_JAR}" >> "${APP_OUT}" 2>&1 &
