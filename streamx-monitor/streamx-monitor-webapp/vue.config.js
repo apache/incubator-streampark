@@ -84,7 +84,7 @@ module.exports = {
       }
     }
   },
-  /*
+
   devServer: {
     // development server port 8000
     port: 8000,
@@ -96,7 +96,7 @@ module.exports = {
         pathRewrite: { '^/api': '' }
       }
     }
-  }, */
+  },
 
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
