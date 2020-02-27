@@ -99,18 +99,21 @@ trait FlinkStreaming extends Logger {
       val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINT_MAX_CONCURRENT).toInt).getOrElse(1)
       val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINT_MIN_PAUSEBETWEEN).toInt).getOrElse(500)
 
-      //默认:开启检查点,1s进行启动一个检查点
       env.enableCheckpointing(cpInterval)
-      //默认:模式为exactly_one，精准一次语义
       env.getCheckpointConfig.setCheckpointingMode(cpMode)
-      //默认: 检查点之间的时间间隔为1s【checkpoint最小间隔】
-      env.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
-      //默认:检查点必须在1分钟之内完成，或者被丢弃【checkpoint超时时间】
-      env.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
-      //默认:同一时间只允许进行一次检查点
-      env.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
-      //默认:被cancel会保留Checkpoint数据
-      env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
+
+      /* //默认:开启检查点,1s进行启动一个检查点
+       env.enableCheckpointing(cpInterval)
+       //默认:模式为exactly_one，精准一次语义
+       env.getCheckpointConfig.setCheckpointingMode(cpMode)
+       //默认: 检查点之间的时间间隔为1s【checkpoint最小间隔】
+       env.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
+       //默认:检查点必须在1分钟之内完成，或者被丢弃【checkpoint超时时间】
+       env.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
+       //默认:同一时间只允许进行一次检查点
+       env.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
+       //默认:被cancel会保留Checkpoint数据
+       env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)*/
     }
     //set config by yourself...
     this.config(env, parameter)
