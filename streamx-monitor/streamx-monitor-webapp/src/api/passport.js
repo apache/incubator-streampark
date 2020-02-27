@@ -9,6 +9,6 @@ export function logout () {
   return http.post(api.Passport.Logout)
 }
 
-export function kickout(queryParam) {
-  return http.delete(api.Passport.KICKOUT,queryParam)
+export function kickout (queryParam) {
+  return http.delete(api.Passport.KICKOUT, queryParam)
 }

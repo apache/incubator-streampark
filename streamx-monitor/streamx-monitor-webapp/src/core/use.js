@@ -13,22 +13,21 @@ import './directives/permission'
 
 // VueParticles
 import VueParticles from 'vue-particles'
-Vue.use(VueParticles)
-
-VueClipboard.config.autoSetContainer = true
 
 import ElementUI from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css'
+
+import VueApexCharts from 'vue-apexcharts'
+
+import http from '@/utils/request'
+Vue.use(VueParticles)
+
+VueClipboard.config.autoSetContainer = true
 Vue.use(ElementUI)
 
 Vue.use(Antd)
 Vue.use(Viser)
-
-import VueApexCharts from 'vue-apexcharts'
 Vue.component('apexchart', VueApexCharts)
-
-
-import http from '@/utils/request'
 Vue.prototype.$post = http.post
 Vue.prototype.$get = http.get
 Vue.prototype.$patch = http.patch
