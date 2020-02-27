@@ -11,7 +11,7 @@ import baseUrl from '@/api/baseUrl'
 
 const http = axios.create({
   baseURL: baseUrl,
-  withCredentials: true,
+  withCredentials: false,
   timeout: 5000, // 请求超时时间
   responseType: 'json',
   validateStatus (status) {
@@ -42,8 +42,7 @@ http.interceptors.request.use(config => {
   config.headers = {
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': config.headers['Content-Type'] || 'application/x-www-form-urlencoded; charset=UTF-8',
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Credentials': 'true'
+    'Access-Control-Allow-Origin': '*'
   }
   const token = storage.get(TOKEN)
   if (token) {
