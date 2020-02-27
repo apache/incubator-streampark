@@ -107,7 +107,7 @@ const respBlob = (content, fileName) => {
     navigator.msSaveBlob(blob, fileName)
   }
 }
-
+const blobTimeout = 1000 * 60 * 10
 export default {
   get (url, data = {}, headers = null) {
     if (headers) {
@@ -147,7 +147,7 @@ export default {
         return $qs.stringify(params)
       }],
       responseType: 'blob',
-      timeout: 1000 * 60 * 10 // 下载文件超时10分钟
+      timeout: blobTimeout // 上传文件超时10分钟
     }).then((resp) => {
       respBlob(resp, filename)
     }).catch((r) => {
@@ -160,7 +160,7 @@ export default {
       headers: {
         'Content-Type': 'multipart/form-data'
       },
-      timeout: 1000 * 60 * 10 // 上传文件超时10分钟
+      timeout: blobTimeout // 上传文件超时10分钟
     })
   }
 
