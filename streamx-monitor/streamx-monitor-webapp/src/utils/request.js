@@ -7,10 +7,12 @@ import store from '@/store'
 import moment from 'moment'
 import { message, Modal } from 'ant-design-vue'
 
+import baseUrl from '@/api/baseUrl'
+
 axios.defaults.withCredentials = true
 
 const http = axios.create({
-  baseURL: '/api', // api 的 base_url
+  baseURL: baseUrl, // api 的 base_url
   timeout: 5000, // 请求超时时间
   responseType: 'json',
   validateStatus (status) {
