@@ -9,12 +9,11 @@ import { message, Modal } from 'ant-design-vue'
 
 import baseUrl from '@/api/baseUrl'
 
-axios.defaults.withCredentials = true
-
 const http = axios.create({
   baseURL: baseUrl, // api 的 base_url
   timeout: 5000, // 请求超时时间
   responseType: 'json',
+  withCredentials: true,
   validateStatus (status) {
     // 200 外的状态码都认定为失败
     return status === 200
