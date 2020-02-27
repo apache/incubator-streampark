@@ -146,7 +146,8 @@ export default {
       transformRequest: [(params) => {
         return $qs.stringify(params)
       }],
-      responseType: 'blob'
+      responseType: 'blob',
+      timeout: 1000 * 60 * 10 // 下载文件超时10分钟
     }).then((resp) => {
       respBlob(resp, filename)
     }).catch((r) => {
@@ -158,7 +159,8 @@ export default {
     return http.post(url, params, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      timeout: 1000 * 60 * 10 // 上传文件超时10分钟
     })
   }
 
