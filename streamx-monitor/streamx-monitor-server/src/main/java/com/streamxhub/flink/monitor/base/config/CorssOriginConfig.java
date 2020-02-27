@@ -21,9 +21,11 @@
 package com.streamxhub.flink.monitor.base.config;
 
 import org.springframework.context.annotation.Configuration;
+
+import static org.springframework.http.HttpMethod.*;
+
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
 
 @Configuration
 public class CorssOriginConfig implements WebMvcConfigurer {
@@ -35,7 +37,7 @@ public class CorssOriginConfig implements WebMvcConfigurer {
                 //允许跨域访问的源
                 .allowedOrigins("*")
                 // 允许请求方法
-                .allowedMethods("POST", "GET", "PUT", "OPTIONS", "DELETE")
+                .allowedMethods(GET.name(), POST.name(), PUT.name(), OPTIONS.name(), DELETE.name())
                 // 预检间隔时间
                 .maxAge(168000)
                 // 允许头部设置
