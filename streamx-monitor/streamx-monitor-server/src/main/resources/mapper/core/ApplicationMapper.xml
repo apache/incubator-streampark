@@ -7,6 +7,7 @@
         <result column="CONFIG_FILE" jdbcType="VARCHAR" property="configFile"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
         <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
@@ -15,8 +16,11 @@
     </resultMap>
 
     <select id="findApplication" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName FROM t_flink_app t inner join t_flink_project p
+        SELECT t.*,p.name as projectName,u.username FROM t_flink_app t
+        inner join t_flink_project p
         on t.project_id = p.id
+        inner join t_user u
+        on t.user_id = u.user_id
         <where>
             <if test="application.projectName != null and application.projectName != ''">
                 AND p.name like '%${application.projectName}%'
@@ -34,5 +38,6 @@
                 And t.create_time between #{application.createTimeFrom} and #{application.createTimeTo}
             </if>
         </where>
+
     </select>
 </mapper>

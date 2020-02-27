@@ -15,6 +15,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.flink.monitor.core.enums.AppState;
+import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private ServerUtil serverUtil;
+
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
         Page<Application> page = new Page<>();
@@ -51,6 +56,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         }
+        app.setUserId(serverUtil.getUser().getUserId());
+        app.setState(AppState.CREATED.getValue());
         app.setCreateTime(new Date());
         return save(app);
     }
