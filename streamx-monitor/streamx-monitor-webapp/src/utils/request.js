@@ -10,10 +10,10 @@ import { message, Modal } from 'ant-design-vue'
 import baseUrl from '@/api/baseUrl'
 
 const http = axios.create({
-  baseURL: baseUrl, // api 的 base_url
+  baseURL: baseUrl,
+  withCredentials: true,
   timeout: 5000, // 请求超时时间
   responseType: 'json',
-  withCredentials: true,
   validateStatus (status) {
     // 200 外的状态码都认定为失败
     return status === 200
@@ -42,7 +42,8 @@ http.interceptors.request.use(config => {
   config.headers = {
     'X-Requested-With': 'XMLHttpRequest',
     'Content-Type': config.headers['Content-Type'] || 'application/x-www-form-urlencoded; charset=UTF-8',
-    'Access-Control-Allow-Origin': '*'
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true'
   }
   const token = storage.get(TOKEN)
   if (token) {
