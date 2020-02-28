@@ -7,7 +7,7 @@
 
     <groupId>com.streamxhub</groupId>
     <artifactId>streamx-monitor</artifactId>
-    <version>1.0.0-RELEASE</version>
+    <version>1.0.0</version>
 
     <modules>
         <module>streamx-monitor-server</module>

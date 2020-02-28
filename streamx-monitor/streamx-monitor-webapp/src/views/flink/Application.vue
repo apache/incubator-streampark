@@ -81,7 +81,6 @@
         <a-tag color="#87d068" v-if="state === 1">运行</a-tag>
         <a-tag color="gray" v-if="state === 2">停止</a-tag>
         <a-tag color="#f50" v-if="state === 3">异常</a-tag>
-
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-icon
@@ -203,20 +202,6 @@ export default {
           that.selectedRowKeys = []
           that.$message.info('已取消删除')
         }
-      })
-    },
-    exportExcel () {
-      const { sortedInfo } = this
-      let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
-      }
-      $export({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams
       })
     },
     search () {
