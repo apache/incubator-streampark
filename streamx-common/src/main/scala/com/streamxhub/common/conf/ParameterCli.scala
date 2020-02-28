@@ -32,7 +32,9 @@ object ParameterCli {
   private[this] val resourcePrefix = "flink.deployment.resource."
   private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
-  def main(args: Array[String]): Unit = {
+  def main(args: Array[String]) = print(read(args))
+
+  def read(args: Array[String]): String = {
     val action = args(0)
     val conf = args(1)
     val map = if (conf.endsWith(".properties")) {
@@ -52,15 +54,15 @@ object ParameterCli {
             buffer.append(s" ${x.getValue()}")
           }
         })
-        println(buffer.toString.trim)
+        buffer.toString.trim
       case "--dynamic" =>
         val buffer = new StringBuffer()
         map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
-        println(buffer.toString.trim)
+        buffer.toString.trim
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
-          case yarnName if yarnName.nonEmpty => println(yarnName)
-          case _ => println("")
+          case yarnName if yarnName.nonEmpty => yarnName
+          case _ => ""
         }
       //是否detached模式...
       case "--detached" =>
@@ -68,8 +70,8 @@ object ParameterCli {
         val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
         val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
-        print(mode)
-      case _ =>
+        mode
+      case _ => null
 
     }
   }

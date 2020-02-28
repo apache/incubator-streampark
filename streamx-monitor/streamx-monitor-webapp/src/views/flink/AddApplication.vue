@@ -61,7 +61,7 @@
       <a-form-item
         class="conf_item"
         v-for="(conf,index) in configOptions"
-        v-if="configItems.includes(conf.name)"
+        v-if="configItems.includes(conf.name) && mode == conf.group"
         :key="index"
         :label="conf.title"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -127,7 +127,7 @@ const configOptions = [
     name: 'container',
     placeholder: '-n,--container <arg>',
     description: 'TaskManager分配个数',
-    group: 'yarn-session',
+    group: 'session',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -143,7 +143,7 @@ const configOptions = [
     name: 'detached',
     placeholder: '-d,--detached',
     description: '以独立模式运行',
-    group: 'yarn-session',
+    group: 'session',
     type: 'switch',
     value: false,
     validator: (rule, value, callback) => {
@@ -155,7 +155,7 @@ const configOptions = [
     name: 'jobManagerMemory',
     placeholder: '-jm,--jobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
-    group: 'yarn-session',
+    group: 'session',
     type: 'number',
     min: 512,
     value: '',
@@ -183,6 +183,18 @@ const configOptions = [
       } else {
         callback()
       }
+    }
+  },
+  {
+    title: '-d',
+    name: 'detached',
+    placeholder: '-d,--detached',
+    description: '以独立模式运行',
+    group: 'yarn',
+    type: 'switch',
+    value: false,
+    validator: (rule, value, callback) => {
+      callback()
     }
   },
   {
@@ -353,7 +365,7 @@ export default {
       mode: 'yarn',
       deploymentModes: [
         { id: 'yarn', name: 'PreJob Cluster', default: true },
-        { id: 'yarn-session', name: 'Session Cluster', default: false }
+        { id: 'session', name: 'Session Cluster', default: false }
       ]
     }
   },
