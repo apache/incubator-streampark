@@ -231,7 +231,7 @@ object RedisUtils extends Logger {
    * @param endpoint
    * @return
    */
-  def hmget(key: String, fields: List[String])(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields: _*).asScala.toList)
+  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields:_*).asScala.toList)
 
   /**
    *
