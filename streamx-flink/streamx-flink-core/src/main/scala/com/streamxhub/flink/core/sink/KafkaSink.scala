@@ -20,13 +20,16 @@
  */
 package com.streamxhub.flink.core.sink
 
+import java.util.Optional
+
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.ConfigUtils
-import org.apache.flink.api.common.serialization.SimpleStringSchema
+import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
 
 import scala.collection.Map
 
@@ -44,11 +47,26 @@ class KafkaSink(@transient val ctx: StreamingContext,
                 name: String = null,
                 uid: String = null) extends Sink {
 
-  def sink[T](stream: DataStream[String])(implicit topic: String = ""): DataStreamSink[String] = {
+  /**
+   *
+   * @param stream
+   * @param topic
+   * @param serializationSchema 序列化Scheam,不知道默认使用SimpleStringSchema
+   * @param customPartitioner 指定kafka分区器(默认使用FlinkFixedPartitioner分区器,注意sink的并行度的设置和kafka的分区数有关,不然会出现往一个分区写...)
+   * @tparam T
+   * @return
+   */
+  def sink[T](stream: DataStream[T],topic: String = "")(implicit serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
+                                                        customPartitioner:FlinkKafkaPartitioner[T] = new FlinkFixedPartitioner[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getKafkaSinkConf(ctx.paramMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val topicName = prop.getProperty(ConfigConst.KEY_KAFKA_TOPIC)
-    val producer = new FlinkKafkaProducer011[String](topicName, new SimpleStringSchema, prop)
+    val producer = new FlinkKafkaProducer011[T](topicName,serializationSchema,prop,Optional.of(customPartitioner))
+    /**
+     * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
+     * this method is not available for earlier Kafka versions
+     */
+    producer.setWriteTimestampToKafka(true)
     val sink = stream.addSink(producer)
     afterSink(sink, parallelism, name, uid)
   }
