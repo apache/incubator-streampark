@@ -51,7 +51,7 @@ object HttpSink {
             header: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): HttpSink = new HttpSink(ctx, header, parallelism, name, uid)
+            uid: String = null): HttpSink = new HttpSink(ctx, header, parallelism, name, uid)
 
 }
 
@@ -59,7 +59,7 @@ class HttpSink(@transient ctx: StreamingContext,
                header: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
-               uid: String = null)(implicit instance: String = "") extends Sink {
+               uid: String = null) extends Sink {
 
   def getSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)
 
