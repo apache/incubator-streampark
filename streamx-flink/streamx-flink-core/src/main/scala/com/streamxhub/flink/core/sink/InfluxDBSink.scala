@@ -37,6 +37,7 @@ import org.influxdb.{InfluxDB, InfluxDBFactory}
 import org.influxdb.dto.Point
 
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.Map
 
 object InfluxDBSink {
@@ -75,7 +76,7 @@ class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEndpoint[
     require(url != null)
     val username = config.getOrElse(KEY_JDBC_USER, null)
     val password = config.getOrElse(KEY_JDBC_PASSWORD, null)
-    (username, password, url) match {
+    influxDB = (username, password, url) match {
       case (null, _, u) => InfluxDBFactory.connect(u)
       case _ => InfluxDBFactory.connect(url, username, password)
     }
@@ -86,7 +87,7 @@ class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEndpoint[
     val point = Point.measurement(endpoint.measurement)
       .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
       .tag(endpoint.tagFun(value))
-      .fields(endpoint.fieldFun(value))
+      .fields(endpoint.fieldFun(value).asInstanceOf[Map[String, Object]])
       .build()
     influxDB.write(endpoint.database, endpoint.retentionPolicy, point)
   }
@@ -126,7 +127,7 @@ case class InfluxEndpoint[T](database: String, //指定database
                              measurement: String, //指定measurement
                              retentionPolicy: String, //失效策略
                              tagFun: T => Map[String, String], //tags 函数
-                             fieldFun: T => Map[String, Object] //field 函数
+                             fieldFun: T => Map[String, _ <: AnyVal] //field 函数
                             ) {
 
 }
