@@ -51,7 +51,7 @@ class KafkaSink(@transient val ctx: StreamingContext,
    *
    * @param stream
    * @param topic
-   * @param serializationSchema 序列化Scheam,不知道默认使用SimpleStringSchema
+   * @param serializationSchema 序列化Scheam,不指定默认使用SimpleStringSchema
    * @param customPartitioner   指定kafka分区器(默认使用FlinkFixedPartitioner分区器,注意sink的并行度的设置和kafka的分区数有关,不然会出现往一个分区写...)
    * @tparam T
    * @return
