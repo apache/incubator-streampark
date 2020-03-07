@@ -17,14 +17,13 @@ object InfluxDBSinkApp extends FlinkStreaming {
     val source = context.addSource(new WeatherSource())
 
     //weather,altitude=1000,area=北 temperature=11,humidity=-4
-    implicit val end = InfluxEndpoint[Weather](
+
+    InfluxDBSink(context).sink(source,"mydb")(InfluxEndpoint[Weather](
       "mydb",
-      "weather",
+      "test",
       "autogen",
       x => Map("altitude" -> x.altitude.toString, "area" -> x.area.toString),
-      x => Map("temperature" -> x.temperature, "humidity" -> x.humidity))
-
-    InfluxDBSink(context).sink(source)
+      x => Map("temperature" -> x.temperature, "humidity" -> x.humidity)))
   }
 
 }

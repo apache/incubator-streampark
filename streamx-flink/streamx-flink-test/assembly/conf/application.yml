@@ -29,9 +29,10 @@ mysql:
   batch.size: 100
 
 influx:
-  jdbcUrl: http://test9:8086
-  #username: admin
-  #password: admin
+  mydb:
+    jdbcUrl: http://test9:8086
+    #username: admin
+    #password: admin
 
 # hbase
 hbase:

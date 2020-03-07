@@ -37,7 +37,6 @@ import org.influxdb.{InfluxDB, InfluxDBFactory}
 import org.influxdb.dto.Point
 
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.Map
 
 object InfluxDBSink {
@@ -127,7 +126,6 @@ case class InfluxEndpoint[T](database: String, //指定database
                              measurement: String, //指定measurement
                              retentionPolicy: String, //失效策略
                              tagFun: T => Map[String, String], //tags 函数
-                             fieldFun: T => Map[String, _ <: AnyVal] //field 函数
+                             fieldFun: T => Map[String, Any] //field 函数
                             ) {
-
 }
