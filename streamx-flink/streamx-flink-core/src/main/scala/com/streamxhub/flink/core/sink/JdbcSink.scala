@@ -33,9 +33,7 @@ import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.sink.Dialect.Dialect
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.collection.Map
