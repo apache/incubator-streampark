@@ -50,7 +50,7 @@ class WeatherSource extends SourceFunction[Weather] {
 
   override def run(ctx: SourceFunction.SourceContext[Weather]): Unit = {
     while (isRunning) {
-      val temperature = random.nextInt(1000)
+      val temperature = random.nextInt(100)
       val humidity = random.nextInt(30)
       val area = List("北","上","广","深")(random.nextInt(4))
       val altitude = random.nextInt(10000)
