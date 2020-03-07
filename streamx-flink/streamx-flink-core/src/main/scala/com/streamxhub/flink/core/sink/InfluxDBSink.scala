@@ -55,7 +55,7 @@ class InfluxDBSink(@transient ctx: StreamingContext,
                    name: String = null,
                    uid: String = null) extends Sink {
 
-  def sink[T](stream: DataStream[T], alias: String = "")(implicit endpoint: InfluxEndpoint[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.paramMap)(alias)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new InfluxDBFunction[T](prop)
@@ -65,7 +65,7 @@ class InfluxDBSink(@transient ctx: StreamingContext,
 
 }
 
-class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEndpoint[T]) extends RichSinkFunction[T] with Logger {
+class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
 
   var influxDB: InfluxDB = null
 
@@ -97,7 +97,7 @@ class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEndpoint[
 
 }
 
-class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEndpoint[T]) extends RichOutputFormat[T] with Logger {
+class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
 
   private val sinkFunction = new InfluxDBFunction[T](prop)
 
@@ -122,7 +122,7 @@ class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoi
  * @param fieldFun
  * @tparam T
  */
-case class InfluxEndpoint[T](database: String, //指定database
+case class InfluxEntity[T](database: String, //指定database
                              measurement: String, //指定measurement
                              retentionPolicy: String, //失效策略
                              tagFun: T => Map[String, String], //tags 函数

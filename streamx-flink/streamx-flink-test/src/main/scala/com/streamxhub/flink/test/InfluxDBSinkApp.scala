@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.{InfluxDBSink, InfluxEndpoint}
+import com.streamxhub.flink.core.sink.{InfluxDBSink, InfluxEntity}
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
@@ -18,7 +18,7 @@ object InfluxDBSinkApp extends FlinkStreaming {
 
     //weather,altitude=1000,area=北 temperature=11,humidity=-4
 
-    InfluxDBSink(context).sink(source,"mydb")(InfluxEndpoint[Weather](
+    InfluxDBSink(context).sink(source,"mydb")(InfluxEntity[Weather](
       "mydb",
       "test",
       "autogen",
