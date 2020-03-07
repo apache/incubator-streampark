@@ -41,7 +41,7 @@ object ConfigUtils {
 
   def getHBaseConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
-  def getInfluxConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX, alias)
+  def getInfluxConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX)
 
   def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + alias, topic)
 
