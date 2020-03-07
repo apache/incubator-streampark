@@ -79,6 +79,12 @@
             <artifactId>hbase-client</artifactId>
         </dependency>
 
+        <!--influxdb-->
+        <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

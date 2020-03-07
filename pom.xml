@@ -32,8 +32,10 @@
         <curator.version>4.0.1</curator.version>
         <redis.version>2.9.0</redis.version>
         <es.version>6.2.3</es.version>
+        <influxdb.version>2.17</influxdb.version>
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
+
         <project.build.jdk>1.8</project.build.jdk>
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -240,6 +242,12 @@
                         <artifactId>slf4j-log4j12</artifactId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+
+            <dependency>
+                <groupId>org.influxdb</groupId>
+                <artifactId>influxdb-java</artifactId>
+                <version>${influxdb.version}</version>
             </dependency>
 
         </dependencies>

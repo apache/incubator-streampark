@@ -11,7 +11,7 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
 import org.apache.flink.streaming.api.scala._
 
-object ConnectorApp extends FlinkStreaming with Logger {
+object ConnectorApp extends FlinkStreaming {
 
 
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
