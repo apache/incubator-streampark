@@ -91,8 +91,9 @@ class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]
     influxDB.write(endpoint.database, endpoint.retentionPolicy, point)
   }
 
-  override def close(): Unit = {
-    super.close()
+  override def close(): Unit = if (influxDB != null) {
+    influxDB.flush()
+    influxDB.close()
   }
 
 }
@@ -123,9 +124,9 @@ class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoi
  * @tparam T
  */
 case class InfluxEntity[T](database: String, //指定database
-                             measurement: String, //指定measurement
-                             retentionPolicy: String, //失效策略
-                             tagFun: T => Map[String, String], //tags 函数
-                             fieldFun: T => Map[String, Any] //field 函数
-                            ) {
+                           measurement: String, //指定measurement
+                           retentionPolicy: String, //失效策略
+                           tagFun: T => Map[String, String], //tags 函数
+                           fieldFun: T => Map[String, Any] //field 函数
+                          ) {
 }
