@@ -28,6 +28,12 @@ mysql:
   password: 123322242
   batch.size: 100
 
+influx:
+  mydb1:
+    jdbcUrl: http://192.168.4.41:8086
+    username: admin
+    password: admin
+
 # hbase
 hbase:
   zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6

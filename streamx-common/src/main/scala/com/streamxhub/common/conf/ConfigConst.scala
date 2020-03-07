@@ -124,6 +124,12 @@ object ConfigConst {
   val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
 
   /**
+   * about influx
+   */
+  val INFLUX_PREFIX = "influx."
+  val KEY_INFLUX_ACTIONS = "actions"
+  val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
+  /**
    * about clickhouse
    */
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
