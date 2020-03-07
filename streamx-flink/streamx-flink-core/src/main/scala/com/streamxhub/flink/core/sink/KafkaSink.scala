@@ -52,16 +52,17 @@ class KafkaSink(@transient val ctx: StreamingContext,
    * @param stream
    * @param topic
    * @param serializationSchema 序列化Scheam,不知道默认使用SimpleStringSchema
-   * @param customPartitioner 指定kafka分区器(默认使用FlinkFixedPartitioner分区器,注意sink的并行度的设置和kafka的分区数有关,不然会出现往一个分区写...)
+   * @param customPartitioner   指定kafka分区器(默认使用FlinkFixedPartitioner分区器,注意sink的并行度的设置和kafka的分区数有关,不然会出现往一个分区写...)
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T],topic: String = "")(implicit serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
-                                                        customPartitioner:FlinkKafkaPartitioner[T] = new FlinkFixedPartitioner[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], topic: String = "", serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]])(
+    implicit customPartitioner: FlinkKafkaPartitioner[T] = new FlinkFixedPartitioner[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getKafkaSinkConf(ctx.paramMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val topicName = prop.getProperty(ConfigConst.KEY_KAFKA_TOPIC)
-    val producer = new FlinkKafkaProducer011[T](topicName,serializationSchema,prop,Optional.of(customPartitioner))
+    val producer = new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(customPartitioner))
+
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
      * this method is not available for earlier Kafka versions

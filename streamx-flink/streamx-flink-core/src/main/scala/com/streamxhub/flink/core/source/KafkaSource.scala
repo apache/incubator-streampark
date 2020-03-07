@@ -54,8 +54,8 @@ class KafkaSource(@transient val ctx: StreamingContext, overrideParams: Map[Stri
    *
    * @return
    */
-  def getDataStream(topic: String = "", instance: String = ""): DataStream[String] = {
-    val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, instance)
+  def getDataStream(topic: String = "", alias: String = ""): DataStream[String] = {
+    val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, alias)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val consumer = new FlinkKafkaConsumer011[String](prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString, new SimpleStringSchema(), prop)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
