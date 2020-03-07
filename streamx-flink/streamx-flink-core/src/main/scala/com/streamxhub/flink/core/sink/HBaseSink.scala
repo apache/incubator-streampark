@@ -45,7 +45,7 @@ object HBaseSink {
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): HBaseSink = new HBaseSink(ctx, overrideParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): HBaseSink = new HBaseSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
@@ -53,7 +53,7 @@ class HBaseSink(@transient ctx: StreamingContext,
                 overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
-                uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   /**
    * @param stream
@@ -63,7 +63,7 @@ class HBaseSink(@transient ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
-    implicit val prop: Properties = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(instance)
+    implicit val prop: Properties = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     overrideParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](tableName, fun)
     val sink = stream.addSink(sinkFun)

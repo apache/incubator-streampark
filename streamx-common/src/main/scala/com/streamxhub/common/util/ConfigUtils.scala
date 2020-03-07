@@ -32,18 +32,18 @@ import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit instance: String = ""): Properties = {
-    val map = filterParam(parameter, prefix + instance)
+  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
+    val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.foreach { case (k, v) => prop.put(addfix + k, v) }
     prop
   }
 
-  def getHBaseConfig(parameter: JMap[String, String])(implicit instance: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
+  def getHBaseConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
-  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + instance, topic)
+  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + alias, topic)
 
-  def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", instance: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + instance, topic)
+  def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + alias, topic)
 
   def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
@@ -98,8 +98,8 @@ object ConfigUtils {
     }
     val param: SMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    val instanceName = if (StringUtils.isBlank(alias)) "default" else alias
-    properties.put(KEY_INSTANCE, instanceName)
+    val instance = if (StringUtils.isBlank(alias)) "default" else alias
+    properties.put(KEY_INSTANCE, instance)
     properties.put(KEY_JDBC_DRIVER, driver)
     param.foreach(x => properties.put(x._1, x._2))
     properties

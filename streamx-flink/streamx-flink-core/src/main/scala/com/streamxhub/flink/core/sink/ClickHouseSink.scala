@@ -54,14 +54,14 @@ object ClickHouseSink {
 
   /**
    * @param ctx      : StreamingContext
-   * @param instance : ClickHouse实例名称(用于区分多个不同的ClickHouse实例...)
+   * @param alias : ClickHouse实例名称(用于区分多个不同的ClickHouse实例...)
    * @return
    */
   def apply(@transient ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit instance: String = ""): ClickHouseSink = new ClickHouseSink(ctx, overrideParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): ClickHouseSink = new ClickHouseSink(ctx, overrideParams, parallelism, name, uid)
 
 }
 
@@ -69,9 +69,9 @@ class ClickHouseSink(@transient ctx: StreamingContext,
                      overrideParams: Map[String, String] = Map.empty[String, String],
                      parallelism: Int = 0,
                      name: String = null,
-                     uid: String = null)(implicit instance: String = "") extends Sink with Logger {
+                     uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
-  val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_SINK_PREFIX)(instance)
+  val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_SINK_PREFIX)(alias)
   overrideParams.foreach { case (k, v) => prop.put(k, v) }
 
   /**
