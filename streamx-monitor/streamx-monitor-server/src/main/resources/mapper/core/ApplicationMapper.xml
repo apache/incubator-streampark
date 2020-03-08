@@ -6,6 +6,7 @@
         <result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId"/>
         <result column="CONFIG_FILE" jdbcType="VARCHAR" property="configFile"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
+        <result column="YARN_NAME" jdbcType="VARCHAR" property="yarnName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
@@ -30,6 +31,9 @@
             </if>
             <if test="application.appName != null and application.appName != ''">
                 AND t.app_name = #{application.appName}
+            </if>
+            <if test="application.yarnName != null and application.yarnName != ''">
+                AND t.yarn_name = #{application.yarnName}
             </if>
             <if test="application.state != null and application.state != ''">
                 AND t.state = #{application.state}

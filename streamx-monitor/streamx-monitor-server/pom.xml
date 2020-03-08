@@ -10,6 +10,33 @@
     <name>streamx-monitor-server</name>
     <description>streamx-monitor-server</description>
 
+    <!-- 定义统一版本号-->
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <spark.version>2.2.0</spark.version>
+        <flink.version>1.9.1</flink.version>
+        <async.client.version>2.0.39</async.client.version>
+        <hadoop.version>2.6.0</hadoop.version>
+        <hbase.version>1.2.0</hbase.version>
+        <scala.version>2.11.12</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
+        <zkclient.version>0.11</zkclient.version>
+        <curator.version>4.0.1</curator.version>
+        <redis.version>2.9.0</redis.version>
+        <es.version>6.2.3</es.version>
+        <influxdb.version>2.17</influxdb.version>
+        <protobuf.version>2.5.0</protobuf.version>
+        <slf4j.version>1.7.25</slf4j.version>
+
+        <project.build.jdk>1.8</project.build.jdk>
+        <PermGen>64m</PermGen>
+        <MaxPermGen>512m</MaxPermGen>
+        <clickhouse.version>0.1.53</clickhouse.version>
+        <CodeCacheSize>512m</CodeCacheSize>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>com.streamxhub</groupId>
@@ -173,6 +200,18 @@
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-yarn-client</artifactId>
+            <version>${hadoop.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.influxdb</groupId>
+            <artifactId>influxdb-java</artifactId>
+            <version>${influxdb.version}</version>
         </dependency>
 
     </dependencies>

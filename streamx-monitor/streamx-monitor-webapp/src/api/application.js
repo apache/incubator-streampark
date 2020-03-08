@@ -13,6 +13,14 @@ export function list (params) {
   return http.post(api.Application.List, params)
 }
 
+export function name (params) {
+  return http.post(api.Application.Name, params)
+}
+
+export function exists (params) {
+  return http.post(api.Application.Exists, params)
+}
+
 export function create (params) {
   return http.post(api.Application.Create, params)
 }

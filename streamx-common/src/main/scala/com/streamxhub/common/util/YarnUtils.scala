@@ -6,7 +6,7 @@
  * distributed with this work for additional information
  * regarding copyright ownership. The ASF licenses this file
  * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
+ * "License") you may not use this file except in compliance
  * with the License. You may obtain a copy of the License at
  * <p>
  * http://www.apache.org/licenses/LICENSE-2.0
@@ -21,7 +21,6 @@
 package com.streamxhub.common.util
 
 
-import java.io.IOException
 import java.util.EnumSet
 import java.util.List
 
@@ -29,7 +28,6 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.client.api.YarnClient
-import org.apache.hadoop.yarn.exceptions.YarnException
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import scala.collection.JavaConversions._
@@ -66,13 +64,13 @@ object YarnUtils {
     val client = getYarnClient()
     val applicationId = ConverterUtils.toApplicationId(appId)
     val state = try {
-      val applicationReport = client.getApplicationReport(applicationId);
+      val applicationReport = client.getApplicationReport(applicationId)
       applicationReport.getYarnApplicationState()
     } catch {
-      case e: YarnException | IOException => e.printStackTrace()
+      case e:Exception => e.printStackTrace()
         null
     } finally {
-      client.close();
+      client.close()
     }
     state
   }
