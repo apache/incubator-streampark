@@ -90,6 +90,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
+        //deploying...
+        application.setState(AppState.DEPLOYING.getValue());
+        updateById(application);
 
         JSONObject jsonConf = JSON.parseObject(application.getConfig());
         StringBuilder builder = new StringBuilder();
@@ -105,7 +108,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Deployment deployment = new Deployment(project, application);
         deployment.setArgs(args);
         deployment.startUp();
-
         this.getAppId(application);
         return true;
     }
