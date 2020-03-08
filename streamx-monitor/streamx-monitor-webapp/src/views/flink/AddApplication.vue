@@ -24,9 +24,16 @@
           :treeData="configFileData"
           placeholder="请选择配置文件"
           treeDefaultExpandAll
+          @change="handleAppName"
           v-decorator="[ 'configFile', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
           >
         </a-tree-select>
+      </a-form-item>
+      <a-form-item
+        label="作业名称"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input type="text" v-model="appName" placeholder="请输入任务名称" v-decorator="['appName',{ rules: [{ required: true, message: '请输入任务名称' } ]}]"/>
       </a-form-item>
       <a-form-item
         label="部署模式"
@@ -119,7 +126,7 @@
 
 <script>
 import { select, fileList } from '@/api/project'
-import { create } from '@/api/application'
+import { create, name } from '@/api/application'
 
 const configOptions = [
   {
@@ -354,6 +361,7 @@ export default {
   name: 'BaseForm',
   data () {
     return {
+      appName: '',
       maxTagCount: 1,
       value: 1,
       project: [],
@@ -412,6 +420,15 @@ export default {
         this.form.resetFields(`configOpt`, [])
       }
       this.mode = selectMode
+    },
+    handleAppName (confFile) {
+      name({
+        configFile: confFile
+      }).then((resp) => {
+        this.appName = resp.data
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
     },
     // handler
     handleSubmit: function (e) {

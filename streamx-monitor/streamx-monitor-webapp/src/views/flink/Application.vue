@@ -106,7 +106,7 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { list, remove, startUp } from '@/api/application'
+import { list, remove, exists, startUp } from '@/api/application'
 export default {
   components: { RangeDate },
   data () {
@@ -266,10 +266,18 @@ export default {
       this.$router.push({ 'path': 'addapp' })
     },
     handleStartUp (app) {
-      startUp({
+      exists({
         id: app.id
       }).then((resp) => {
-        console.log(resp)
+        if (resp.data) {
+          this.$message.error('该任务正在运行中...')
+        } else {
+          startUp({
+            id: app.id
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
       })
     }
   }

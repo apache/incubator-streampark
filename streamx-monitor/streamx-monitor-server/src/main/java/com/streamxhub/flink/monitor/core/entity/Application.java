@@ -19,10 +19,19 @@ public class Application implements Serializable {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
     private String projectId;
-    //创建人
+    /**
+     * 创建人
+     */
     private Long userId;
     private String configFile;
+    /**
+     * 仅前端页面显示的任务名称
+     */
     private String appName;
+    /**
+     * 程序在yarn中的名称
+     */
+    private String yarnName;
     private String appId;
     private Integer state;
     private String args;

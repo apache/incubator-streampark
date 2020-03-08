@@ -27,6 +27,18 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(applicationList);
     }
 
+    @RequestMapping("name")
+    public RestResponse yarnName(Application app) {
+        String yarnName = applicationService.getYarnName(app);
+        return RestResponse.create().data(yarnName);
+    }
+
+    @RequestMapping("exists")
+    public RestResponse exists(Application app) {
+        boolean exists = applicationService.checkExists(app);
+        return RestResponse.create().data(exists);
+    }
+
     @RequestMapping("create")
     public RestResponse create(Application app) {
       boolean saved = applicationService.create(app);
