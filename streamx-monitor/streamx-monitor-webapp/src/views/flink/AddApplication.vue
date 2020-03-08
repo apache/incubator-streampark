@@ -33,7 +33,7 @@
         label="作业名称"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input type="text" v-model="appName" placeholder="请输入任务名称" v-decorator="['appName',{ rules: [{ required: true, message: '请输入任务名称' } ]}]"/>
+        <a-input type="text" placeholder="请输入任务名称" v-decorator="['appName',{ rules: [{ required: true, message: '请输入任务名称' } ]}]"/>
       </a-form-item>
       <a-form-item
         label="部署模式"
@@ -361,7 +361,6 @@ export default {
   name: 'BaseForm',
   data () {
     return {
-      appName: '',
       maxTagCount: 1,
       value: 1,
       project: [],
@@ -425,7 +424,7 @@ export default {
       name({
         configFile: confFile
       }).then((resp) => {
-        this.appName = resp.data
+        this.form.setFieldsValue({ 'appName': resp.data })
       }).catch((error) => {
         this.$message.error(error.message)
       })
