@@ -45,8 +45,7 @@ object YarnUtils {
    */
   def getAppId(appName: String): List[ApplicationId] = {
     val client = getYarnClient()
-    val appStates = EnumSet.noneOf(classOf[YarnApplicationState])
-    List(RUNNING, ACCEPTED, SUBMITTED).foreach(appStates.add)
+    val appStates = EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
       client.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
     } catch {
@@ -87,9 +86,9 @@ object YarnUtils {
    */
   def isContains(appName: String): Boolean = {
     val client = getYarnClient()
-    val appStates = EnumSet.noneOf(classOf[YarnApplicationState])
-    appStates.add(YarnApplicationState.RUNNING)
-    client.getApplications(appStates).filter(_.getName == appName).nonEmpty
+    val contains = client.getApplications(EnumSet.of(RUNNING)).filter(_.getName == appName).nonEmpty
+    client.close()
+    contains
   }
 
   private[this] def getYarnClient(): YarnClient = {
