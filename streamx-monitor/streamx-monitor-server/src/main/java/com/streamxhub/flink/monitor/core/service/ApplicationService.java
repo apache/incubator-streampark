@@ -12,4 +12,8 @@ public interface ApplicationService extends IService<Application> {
     boolean create(Application app);
 
     boolean startUp(String id);
+
+    String getYarnName(Application app);
+
+    boolean checkExists(Application app);
 }
