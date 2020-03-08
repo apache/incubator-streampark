@@ -26,7 +26,7 @@ import java.util.EnumSet
 import java.util.List
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.yarn.api.records.{ApplicationId, YarnApplicationState}
+import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.exceptions.YarnException
