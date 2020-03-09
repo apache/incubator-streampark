@@ -87,6 +87,7 @@ trait FlinkStreaming extends Logger {
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
     env.setParallelism(parallelism)
     env.setStreamTimeCharacteristic(timeCharacteristic)
+    //重启策略.
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
 
     //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
