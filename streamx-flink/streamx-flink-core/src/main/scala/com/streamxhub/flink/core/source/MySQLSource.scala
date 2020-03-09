@@ -61,26 +61,14 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
 
   private[this] var isRunning = true
 
-  var queryTime = 0L
-
   override def cancel(): Unit = this.isRunning = false
 
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
-
-    def doWork(): Unit = resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
-
     while (isRunning) {
-      interval match {
-        case x if x <= 0 =>
-          doWork()
-        case y if System.currentTimeMillis() - queryTime >= y =>
-          queryTime = System.currentTimeMillis()
-          doWork()
-        case _ =>
-      }
+      resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
+      Thread.sleep(interval)
     }
-
   }
 
 }
