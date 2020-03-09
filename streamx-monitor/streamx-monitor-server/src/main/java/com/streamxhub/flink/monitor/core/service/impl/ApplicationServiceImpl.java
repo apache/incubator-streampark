@@ -2,6 +2,7 @@ package com.streamxhub.flink.monitor.core.service.impl;
 
 
 import com.streamxhub.common.conf.ParameterCli;
+import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
@@ -19,8 +20,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.flink.monitor.core.enums.AppState;
 import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ServerUtil serverUtil;
+
 
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
@@ -115,9 +117,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     /**
      * 2秒钟从yarn里获取一次当前任务的appId,总共获取10次,如10次都未获取到则获取失败.
      */
+    @SneakyThrows
     private void getAppId(Application application) {
-        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(1,
-                new BasicThreadFactory.Builder().namingPattern("Flink-GetAppId-%d").daemon(true).build());
+        ThreadFactory namedThreadFactory = ThreadUtils.threadFactory("Flink-StartUp");
+        ExecutorService executorService = Executors.newSingleThreadExecutor(namedThreadFactory);
         executorService.submit(() -> {
             int index = 0;
             Long lastTime = 0L;
@@ -141,6 +144,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         });
+        ThreadUtils.shutdownExecutorService(executorService);
     }
 
 

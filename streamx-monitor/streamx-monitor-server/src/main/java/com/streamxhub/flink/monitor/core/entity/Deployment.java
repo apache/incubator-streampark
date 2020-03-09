@@ -2,9 +2,12 @@ package com.streamxhub.flink.monitor.core.entity;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.streamxhub.common.conf.ParameterCli;
+import com.streamxhub.common.util.ThreadUtils;
 import lombok.Data;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
+import reactor.core.publisher.Flux;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -33,8 +36,7 @@ public class Deployment implements Serializable {
     private String jarFile;
     private String[] cliParam;
 
-
-    private ThreadFactory namedThreadFactory = new ThreadFactoryBuilder().setNameFormat("Flink-StartUp-%d").build();
+    private ThreadFactory namedThreadFactory = ThreadUtils.threadFactory("Flink-StartUp");
 
     public Deployment(Project project, Application application) {
         this.name = project.getName();
@@ -50,6 +52,7 @@ public class Deployment implements Serializable {
         this.jarFile = this.libPath + "/" + this.name + ".jar";
     }
 
+    @SneakyThrows
     public void startUp() {
         ExecutorService threadPoolExecutor = Executors.newSingleThreadExecutor(namedThreadFactory);
         threadPoolExecutor.execute(() -> {
@@ -65,7 +68,7 @@ public class Deployment implements Serializable {
                 log.info(e.getMessage(), e);
             }
         });
-        threadPoolExecutor.shutdown();
+        ThreadUtils.shutdownExecutorService(threadPoolExecutor);
     }
 
     private String buildCommand() {
@@ -87,10 +90,7 @@ public class Deployment implements Serializable {
             List<String> args = new ArrayList<String>();
             args.add(action);
             args.add(this.conf);
-            String[] inputArgs = this.args.split("\\s+");
-            for (String a : inputArgs) {
-                args.add(a);
-            }
+            args.addAll(Arrays.asList(this.args.split("\\s+")));
             String[] params = new String[args.size()];
             this.cliParam = args.toArray(params);
         } else {
