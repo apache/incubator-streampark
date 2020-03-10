@@ -109,13 +109,13 @@ trait FlinkStreaming extends Logger {
         Try(parameter.get(KEY_FLINK_CHECKPOINTS_DIR)).getOrElse(null) match {
           //从flink-conf.yaml中读取.
           case null =>
-            logWarn("[StreamX] can't found flink.checkpoint.dir from properties,now try found from flink-conf.yml")
+            logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
             val flinkHome = System.getenv("FLINK_HOME")
-            require(flinkHome != null, "[StreamX] FLINK_HOME is not defined for your system.")
+            require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
             val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
             val dir = prop("state.checkpoints.dir")
-            require(dir != null, s"[StreamX] can't found flink.checkpoint.dir from $flinkConf ")
+            require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
           case dir => {
