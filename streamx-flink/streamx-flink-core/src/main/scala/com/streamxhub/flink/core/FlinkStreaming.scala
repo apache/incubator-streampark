@@ -159,7 +159,7 @@ trait FlinkStreaming extends Logger {
           }
           env.setStateBackend(rocksDBStateBackend)
         case _ =>
-          logError("[StreamX] stat.backend Type error,must be (jobmanager|filesystem|rocksdb)")
+          logError("[StreamX] usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
       }
     }
 
