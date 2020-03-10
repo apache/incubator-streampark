@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.core.source
 
-import java.util.{Properties, Timer, TimerTask}
+import java.util.Properties
 
 import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
@@ -66,11 +66,10 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
 
   @throws[Exception]
   override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
-    new Timer().schedule(new TimerTask {
-      override def run(): Unit = resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
-
-      override def cancel(): Boolean = isRunning
-    }, interval)
+    while (true) {
+      resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
+      Thread.sleep(interval)
+    }
   }
 
 }
