@@ -116,22 +116,29 @@ trait FlinkStreaming extends Logger {
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
             val dir = prop("state.checkpoints.dir")
             require(dir != null, s"[StreamX] can't found flink.checkpoint.dir from $flinkConf ")
+            logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
-          case dir => dir
+          case dir => {
+            logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in properties,$dir")
+            dir
+          }
         }
       }
 
       stateBackend match {
         case XStateBackend.jobmanager =>
+          logInfo(s"[StreamX] stat.backend Type: jobmanager...")
           val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val fs = new MemoryStateBackend(maxMemorySize, async)
           env.setStateBackend(fs)
         case XStateBackend.filesystem =>
+          logInfo(s"[StreamX] stat.backend Type: filesystem...")
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val fs = new FsStateBackend(dataDir, async)
           env.setStateBackend(fs)
         case XStateBackend.rocksdb =>
+          logInfo(s"[StreamX] stat.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
           val rocksDBStateBackend = new RocksDBStateBackend(dataDir, incremental)
@@ -152,6 +159,7 @@ trait FlinkStreaming extends Logger {
           }
           env.setStateBackend(rocksDBStateBackend)
         case _ =>
+          logError("[StreamX] stat.backend Type error,must be (jobmanager|filesystem|rocksdb)")
       }
     }
 
