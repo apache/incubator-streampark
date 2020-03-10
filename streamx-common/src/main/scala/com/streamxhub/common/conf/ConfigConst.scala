@@ -57,9 +57,17 @@ object ConfigConst {
 
   val KEY_FLINK_APP_CONF = "flink.conf"
 
-  val KEY_FLINK_CHECKPOINT_ENABLE = "flink.checkpoint.enable"
+  val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
-  val KEY_FLINK_CHECKPOINT_INTERVAL = "flink.checkpoint.interval"
+  val KEY_FLINK_CHECKPOINTS_INTERVAL = "flink.checkpoints.interval"
+
+  val KEY_FLINK_STATE_BACKEND = "state.backend"
+
+  val KEY_FLINK_STATE_BACKEND_ASYNC = "state.backend.async"
+
+  val KEY_FLINK_STATE_BACKEND_INCREMENTAL = "state.backend.incremental"
+
+  val KEY_FLINK_STATE_BACKEND_MEMORY = "state.backend.memory"
 
   val KEY_FLINK_PARALLELISM = "flink.parallelism"
 
@@ -67,19 +75,23 @@ object ConfigConst {
 
   val KEY_FLINK_DELAY_ATTEMPTS = "flink.delay.attempts"
 
-  val KEY_FLINK_CHECKPOINT_MODE = "flink.checkpoint.mode"
+  val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
 
-  val KEY_FLINK_CHECKPOINT_CLEANUP = "flink.checkpoint.cleanup"
+  val KEY_FLINK_CHECKPOINTS_DIR = "flink.checkpoints.dir"
 
-  val KEY_FLINK_CHECKPOINT_TIMEOUT = "flink.checkpoint.timeout"
+  val KEY_FLINK_CHECKPOINTS_CLEANUP = "flink.checkpoints.cleanup"
 
-  val KEY_FLINK_CHECKPOINT_MAX_CONCURRENT = "flink.checkpoint.maxConcurrent"
+  val KEY_FLINK_CHECKPOINTS_TIMEOUT = "flink.checkpoints.timeout"
 
-  val KEY_FLINK_CHECKPOINT_MIN_PAUSEBETWEEN = "flink.checkpoint.minPauseBetween"
+  val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
+
+  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
   val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
 
   val KEY_FLINK_APP_NAME = "flink.deployment.resource.yarnname"
+
+  val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
 
   /**
    * about config Kafka
