@@ -20,8 +20,6 @@
  */
 package com.streamxhub.flink.core
 
-import java.util
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
@@ -140,7 +138,8 @@ trait FlinkStreaming extends Logger {
            * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
            */
           val map = new java.util.HashMap[String, Object]()
-          parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).foreach(x => map.put(x._1, x._2))
+          val sinkKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)
+          parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).filter(x => sinkKey.exists(k => k != x)).foreach(x => map.put(x._1, x._2))
           if (map.nonEmpty) {
             val optionsFactory = new DefaultConfigurableOptionsFactory
             val config = new Configuration()
