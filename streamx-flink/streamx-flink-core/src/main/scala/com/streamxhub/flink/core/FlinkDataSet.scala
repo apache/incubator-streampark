@@ -54,7 +54,7 @@ trait FlinkDataSet extends Logger {
     require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
     val configArgs = config.split("\\.").last match {
       case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-      case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+      case "yml"|"yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
 
