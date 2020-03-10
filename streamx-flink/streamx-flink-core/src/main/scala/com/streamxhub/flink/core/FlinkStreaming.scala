@@ -82,7 +82,7 @@ trait FlinkStreaming extends Logger {
     require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
     val configArgs = config.split("\\.").last match {
       case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-      case "yml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+      case "yml"|"yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
 
@@ -107,12 +107,12 @@ trait FlinkStreaming extends Logger {
          * dataDir如果从配置文件中读取失败,则尝试从flink-conf.yml中读取..
          */
         Try(parameter.get(KEY_FLINK_CHECKPOINTS_DIR)).getOrElse(null) match {
-          //从flink-conf.yml中读取.
+          //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoint.dir from properties,now try found from flink-conf.yml")
             val flinkHome = System.getenv("FLINK_HOME")
             require(flinkHome != null, "[StreamX] FLINK_HOME is not defined for your system.")
-            val flinkConf = s"$flinkHome/conf/flink-conf.yml"
+            val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
             val dir = prop("state.checkpoints.dir")
             require(dir != null, s"[StreamX] can't found flink.checkpoint.dir from $flinkConf ")
