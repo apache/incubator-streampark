@@ -20,6 +20,8 @@
  */
 package com.streamxhub.flink.core
 
+import java.util
+
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
@@ -28,10 +30,14 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, OptionsFactory, PredefinedOptions, RocksDBStateBackend}
+import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.runtime.state.filesystem.FsStateBackend
+import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
-
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -61,6 +67,10 @@ trait FlinkStreaming extends Logger {
 
   def handler(context: StreamingContext): Unit
 
+  /**
+   *
+   * @param args
+   */
   private def initialize(args: Array[String]): Unit = {
     //read config and merge config......
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
@@ -90,15 +100,70 @@ trait FlinkStreaming extends Logger {
     //重启策略.
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
 
+    //state.backend
+    val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
+    if (stateBackend != null) {
+      val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
+        /**
+         * dataDir如果从配置文件中读取失败,则尝试从flink-conf.yml中读取..
+         */
+        Try(parameter.get(KEY_FLINK_CHECKPOINTS_DIR)).getOrElse(null) match {
+          //从flink-conf.yml中读取.
+          case null =>
+            logWarn("[StreamX] can't found flink.checkpoint.dir from properties,now try found from flink-conf.yml")
+            val flinkHome = SystemPropertyUtils.get("FLINK_HOME")
+            require(flinkHome != null, "[StreamX] FLINK_HOME is not defined for your system.")
+            val flinkConf = s"$flinkHome/conf/flink-conf.yml"
+            val prop = PropertiesUtils.fromYamlFile(flinkConf)
+            val dir = prop("state.checkpoints.dir")
+            require(dir != null, s"[StreamX] can't found flink.checkpoint.dir from $flinkConf ")
+            dir
+          case dir => dir
+        }
+      }
+
+      stateBackend match {
+        case XStateBackend.jobmanager =>
+          val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
+          val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
+          val fs = new MemoryStateBackend(maxMemorySize, async)
+          env.setStateBackend(fs)
+        case XStateBackend.filesystem =>
+          val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
+          val fs = new FsStateBackend(dataDir, async)
+          env.setStateBackend(fs)
+        case XStateBackend.rocksdb =>
+          // 默认开启增量.
+          val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
+          val rocksDBStateBackend = new RocksDBStateBackend(dataDir, incremental)
+          /**
+           * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
+           */
+          val map = new java.util.HashMap[String, Object]()
+          parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).foreach(x => map.put(x._1, x._2))
+          if (map.nonEmpty) {
+            val optionsFactory = new DefaultConfigurableOptionsFactory
+            val config = new Configuration()
+            val confData = classOf[Configuration].getDeclaredField("confData")
+            confData.setAccessible(true)
+            confData.set(map, config)
+            optionsFactory.configure(config)
+            rocksDBStateBackend.setOptions(optionsFactory)
+          }
+          env.setStateBackend(rocksDBStateBackend)
+        case _ =>
+      }
+    }
+
     //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
-    val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINT_ENABLE).toBoolean).getOrElse(false)
+    val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
     if (enableCheckpoint) {
-      val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINT_INTERVAL).toInt).getOrElse(1000)
-      val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
-      val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINT_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-      val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINT_TIMEOUT).toInt).getOrElse(60000)
-      val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINT_MAX_CONCURRENT).toInt).getOrElse(1)
-      val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINT_MIN_PAUSEBETWEEN).toInt).getOrElse(500)
+      val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINTS_INTERVAL).toInt).getOrElse(1000)
+      val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
+      val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
+      val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(60000)
+      val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT).toInt).getOrElse(1)
+      val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(500)
 
       //默认:开启检查点,1s进行启动一个检查点
       env.enableCheckpointing(cpInterval)
@@ -113,6 +178,7 @@ trait FlinkStreaming extends Logger {
       //默认:被cancel会保留Checkpoint数据
       env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
     }
+
     //set config by yourself...
     this.config(env, parameter)
 

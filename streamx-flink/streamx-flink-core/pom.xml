@@ -47,6 +47,11 @@
             <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+        </dependency>
+
         <!--es sink need httpcomponents -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
