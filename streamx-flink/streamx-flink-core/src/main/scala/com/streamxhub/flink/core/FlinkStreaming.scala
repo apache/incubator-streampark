@@ -36,6 +36,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
+
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -109,7 +110,7 @@ trait FlinkStreaming extends Logger {
           //从flink-conf.yml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoint.dir from properties,now try found from flink-conf.yml")
-            val flinkHome = SystemPropertyUtils.get("FLINK_HOME")
+            val flinkHome = System.getenv("FLINK_HOME")
             require(flinkHome != null, "[StreamX] FLINK_HOME is not defined for your system.")
             val flinkConf = s"$flinkHome/conf/flink-conf.yml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
