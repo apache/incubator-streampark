@@ -47,7 +47,7 @@ object ParameterCli {
       case "--resource" =>
         val option = getOption(map, args.drop(2))
         val buffer = new StringBuffer()
-        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
+        val line = parser.parse(FlinkOption.allOptions, option, false)
         line.getOptions.foreach(x => {
           buffer.append(s" -${x.getOpt}")
           if (x.hasArg) {
@@ -67,7 +67,7 @@ object ParameterCli {
       //是否detached模式...
       case "--detached" =>
         val option = getOption(map, args.drop(2))
-        val line = parser.parse(FlinkOption.allOptions, option.toArray, false)
+        val line = parser.parse(FlinkOption.allOptions, option, false)
         val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
         mode
@@ -76,12 +76,12 @@ object ParameterCli {
     }
   }
 
-  def getOption(map: Map[String, String], args: Array[String]) = {
+  def getOption(map: Map[String, String], args: Array[String]):Array[String] = {
     val optionMap = new mutable.HashMap[String, Any]()
     map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).foreach(x => {
       x._2 match {
-        case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> true
-        case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}" -> v
+        case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}".trim -> true
+        case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}".trim -> v
       }
     })
     val parser = new DefaultParser
@@ -92,9 +92,9 @@ object ParameterCli {
         val line = parser.parse(FlinkOption.allOptions, array, false)
         line.getOptions.foreach(x => {
           if (x.hasArg) {
-            optionMap += s"-${x.getLongOpt}" -> x.getValue()
+            optionMap += s"-${x.getLongOpt}".trim -> x.getValue()
           } else {
-            optionMap += s"-${x.getLongOpt}" -> true
+            optionMap += s"-${x.getLongOpt}".trim -> true
           }
         })
       }
@@ -106,7 +106,7 @@ object ParameterCli {
         array += x._2.toString
       }
     })
-    array
+    array.toArray
   }
 
 
