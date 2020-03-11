@@ -148,7 +148,7 @@ trait FlinkStreaming extends Logger {
     if (stateBackend != null) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
-         * dataDir如果从配置文件中读取失败,则尝试从flink-conf.yml中读取..
+         * dataDir如果从配置文件中读取失败(key:flink.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
         Try(parameter.get(KEY_FLINK_CHECKPOINTS_DIR)).getOrElse(null) match {
           //从flink-conf.yaml中读取.
@@ -158,7 +158,8 @@ trait FlinkStreaming extends Logger {
             require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
             val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
-            val dir = prop(KEY_FLINK_CHECKPOINTS_DIR)
+            //从flink-conf.yaml中读取,key: state.checkpoints.dir
+            val dir = prop("state.checkpoints.dir")
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
