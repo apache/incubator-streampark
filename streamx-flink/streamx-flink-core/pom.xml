@@ -18,6 +18,20 @@
             <groupId>ru.yandex.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
             <version>${clickhouse.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jackson-core</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpcore</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -30,37 +44,99 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-scala_${scala.binary.version}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>scala-parser-combinators_2.11</artifactId>
+                    <groupId>org.scala-lang.modules</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka-0.11_${scala.binary.version}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>snappy-java</artifactId>
+                    <groupId>org.xerial.snappy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>jackson-core</artifactId>
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>httpcore</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--es sink need httpcomponents -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>httpcore</artifactId>
+                    <groupId>org.apache.httpcomponents</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>reactive-streams</artifactId>
+                    <groupId>org.reactivestreams</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -77,11 +153,47 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>xml-apis</artifactId>
+                    <groupId>xml-apis</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>snappy-java</artifactId>
+                    <groupId>org.xerial.snappy</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-mapper-asl</artifactId>
+                    <groupId>org.codehaus.jackson</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-core-asl</artifactId>
+                    <groupId>org.codehaus.jackson</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
+            <exclusions>
+                <exclusion>
+                    <artifactId>slf4j-api</artifactId>
+                    <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <!--influxdb-->
