@@ -82,7 +82,7 @@ trait FlinkStreaming extends Logger {
     require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
     val configArgs = config.split("\\.").last match {
       case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-      case "yml"|"yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+      case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
 
@@ -114,7 +114,7 @@ trait FlinkStreaming extends Logger {
             require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
             val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
-            val dir = prop("state.checkpoints.dir")
+            val dir = prop(KEY_FLINK_CHECKPOINTS_DIR)
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
@@ -126,12 +126,18 @@ trait FlinkStreaming extends Logger {
       }
 
       stateBackend match {
+        /**
+         * The size of each individual state is by default limited to 5 MB. This value can be increased in the constructor of the MemoryStateBackend.
+         * Irrespective of the configured maximal state size, the state cannot be larger than the akka frame size (see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html">Configuration</a>).
+         * The aggregate state must fit into the JobManager memory.
+         */
         case XStateBackend.jobmanager =>
           logInfo(s"[StreamX] stat.backend Type: jobmanager...")
+          //default 5 MB,cannot be larger than the akka frame size
           val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
-          val fs = new MemoryStateBackend(maxMemorySize, async)
-          env.setStateBackend(fs)
+          val ms = new MemoryStateBackend(maxMemorySize, async)
+          env.setStateBackend(ms)
         case XStateBackend.filesystem =>
           logInfo(s"[StreamX] stat.backend Type: filesystem...")
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
@@ -202,7 +208,7 @@ trait FlinkStreaming extends Logger {
   def beforeStart(context: StreamingContext): Unit = {}
 
   private[this] def doStart(): JobExecutionResult = {
-    println(s"\033[95;1m${LOGO}\033[1m\n")
+    println(s"\033[95;1m$LOGO\033[1m\n")
     val appName = parameter.get(KEY_FLINK_APP_NAME, "")
     println(s"[StreamX] FlinkStreaming $appName Starting...")
     context.execute(appName)
