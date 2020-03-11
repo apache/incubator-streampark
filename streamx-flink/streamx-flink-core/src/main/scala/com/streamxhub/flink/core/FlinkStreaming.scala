@@ -62,17 +62,60 @@ trait FlinkStreaming extends Logger {
 
   private var context: StreamingContext = _
 
-  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
-
-  def handler(context: StreamingContext): Unit
+  def main(args: Array[String]): Unit = {
+    initialize(args)
+    beforeStart(context)
+    handler(context)
+    doStart()
+  }
 
   /**
    *
    * @param args
    */
   private def initialize(args: Array[String]): Unit = {
-    //read config and merge config......
+
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
+
+    //read config and merge config......
+    this.parameter = initParameter(args)
+
+    env = StreamExecutionEnvironment.getExecutionEnvironment
+
+    initEnvConfig()
+
+    //state.backend
+    setStatBackend()
+
+    //checkpoint
+    setCheckpoint()
+
+    //set config by yourself...
+    this.config(env, parameter)
+
+    env.getConfig.setGlobalJobParameters(parameter)
+
+    context = new StreamingContext(parameter, env)
+  }
+
+  /**
+   * 用户可覆盖次方法...
+   *
+   */
+  def beforeStart(context: StreamingContext): Unit = {}
+
+  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
+
+  def handler(context: StreamingContext): Unit
+
+  private[this] def doStart(): JobExecutionResult = {
+    println(s"\033[95;1m$LOGO\033[1m\n")
+    val appName = parameter.get(KEY_FLINK_APP_NAME, "")
+    println(s"[StreamX] FlinkStreaming $appName Starting...")
+    context.execute(appName)
+  }
+
+  private[this] def initParameter(args: Array[String]): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_FLINK_APP_CONF, null) match {
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
@@ -85,10 +128,10 @@ trait FlinkStreaming extends Logger {
       case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
     }
+    ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
+  }
 
-    this.parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
-
-    env = StreamExecutionEnvironment.getExecutionEnvironment
+  private[this] def initEnvConfig(): Unit = {
     //init env...
     val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT)
     val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
@@ -98,8 +141,9 @@ trait FlinkStreaming extends Logger {
     env.setStreamTimeCharacteristic(timeCharacteristic)
     //重启策略.
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
+  }
 
-    //state.backend
+  private[this] def setStatBackend(): Unit = {
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
     if (stateBackend != null) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
@@ -147,7 +191,7 @@ trait FlinkStreaming extends Logger {
           logInfo(s"[StreamX] stat.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
-          val rocksDBStateBackend = new RocksDBStateBackend(dataDir, incremental)
+          val rs = new RocksDBStateBackend(dataDir, incremental)
           /**
            * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
            */
@@ -161,14 +205,16 @@ trait FlinkStreaming extends Logger {
             confData.setAccessible(true)
             confData.set(map, config)
             optionsFactory.configure(config)
-            rocksDBStateBackend.setOptions(optionsFactory)
+            rs.setOptions(optionsFactory)
           }
-          env.setStateBackend(rocksDBStateBackend)
+          env.setStateBackend(rs)
         case _ =>
           logError("[StreamX] usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
       }
     }
+  }
 
+  private[this] def setCheckpoint(): Unit = {
     //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
     val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
     if (enableCheckpoint) {
@@ -192,33 +238,6 @@ trait FlinkStreaming extends Logger {
       //默认:被cancel会保留Checkpoint数据
       env.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
     }
-
-    //set config by yourself...
-    this.config(env, parameter)
-
-    env.getConfig.setGlobalJobParameters(parameter)
-
-    context = new StreamingContext(parameter, env)
-  }
-
-  /**
-   * 用户可覆盖次方法...
-   *
-   */
-  def beforeStart(context: StreamingContext): Unit = {}
-
-  private[this] def doStart(): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    val appName = parameter.get(KEY_FLINK_APP_NAME, "")
-    println(s"[StreamX] FlinkStreaming $appName Starting...")
-    context.execute(appName)
-  }
-
-  def main(args: Array[String]): Unit = {
-    initialize(args)
-    beforeStart(context)
-    handler(context)
-    doStart()
   }
 
 }
@@ -241,7 +260,4 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
   def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
 }
-
-
-
 
