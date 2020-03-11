@@ -85,7 +85,7 @@ trait FlinkStreaming extends Logger {
     initEnvConfig()
 
     //state.backend
-    setStatBackend()
+    setStateBackend()
 
     //checkpoint
     setCheckpoint()
@@ -143,7 +143,7 @@ trait FlinkStreaming extends Logger {
     env.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
   }
 
-  private[this] def setStatBackend(): Unit = {
+  private[this] def setStateBackend(): Unit = {
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
     if (stateBackend != null) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
