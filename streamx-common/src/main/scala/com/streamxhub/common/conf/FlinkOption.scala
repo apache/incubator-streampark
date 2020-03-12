@@ -77,13 +77,12 @@ object FlinkOption {
   val ZOOKEEPER_NAMESPACE_OPTION = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode");
 
   lazy val SAVEPOINT_DIRECTORY: String = {
-    ""
-/*    val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
+    val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
     val chkOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "state.savepoints.dir")
     val option = chkOptBuilder.getClass.getMethod("noDefaultValue").invoke(chkOptBuilder)
     option.getClass.getMethod("withDeprecatedKeys", classOf[Array[String]]).invoke(option, Array("savepoints.state.backend.fs.dir"))
     option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The default directory for savepoints. Used by the state backends that write savepoints to file systems (MemoryStateBackend, FsStateBackend, RocksDBStateBackend).")
-    option.getClass.getMethod("key").invoke(option).toString*/
+    option.getClass.getMethod("key").invoke(option).toString
   }
 
   val CANCEL_WITH_SAVEPOINT_OPTION = new Option(
