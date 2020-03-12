@@ -9,7 +9,7 @@ flink:
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
       yarnapplicationType:              # -yat (Set a custom application type for the application on YARN)
       yarnjobManagerMemory: 1024M       # -yjm (Memory for JobManager Container with optional unit (default: MB))
-      yarncontainer:                    # -yn  (Number of YARN container to allocate (=Number of Task Managers)
+      yarncontainer: 5                      # -yn  (Number of YARN container to allocate (=Number of Task Managers)
       yarnnodeLabel:                    # -ynl (Specify YARN node label for the YARN application)
       yarnqueue:                        # -yqu (Specify YARN queue)
       yarnslots: 1                      # -ys  (Number of slots per TaskManager)

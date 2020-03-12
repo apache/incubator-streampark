@@ -207,7 +207,7 @@ doStart() {
 
       flink run \
       $allParam \
-      --jar $flink_jar \
+      --jarfile $flink_jar \
       --flink.conf $app_proper
 
       echo "${app_name}" > "${APP_TEMP}/.running"
@@ -219,7 +219,7 @@ doStart() {
 
       flink run \
       $allParam \
-      --jar $flink_jar \
+      --jarfile $flink_jar \
       --flink.conf $app_proper >> $app_out 2>&1 &
 
       echo "${app_name}" > "${APP_TEMP}/.running"
