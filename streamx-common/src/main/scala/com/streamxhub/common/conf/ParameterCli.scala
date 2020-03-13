@@ -21,13 +21,13 @@
 package com.streamxhub.common.conf
 
 
-import com.streamxhub.common.util.{Logger, PropertiesUtils}
+import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.DefaultParser
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-object ParameterCli extends Logger {
+object ParameterCli {
 
   private[this] val resourcePrefix = "flink.deployment.resource."
   private[this] val dynamicPrefix = "flink.deployment.dynamic."
@@ -85,7 +85,7 @@ object ParameterCli extends Logger {
       val k = x._1.drop(resourcePrefix.length)
       val has = flinkOptions.hasLongOption(k) || flinkOptions.hasShortOption(k)
       if (!has) {
-        logWarn(s"[StreamX] config:$k is invalid or deprecated")
+        //logWarn(s"[StreamX] config:$k is invalid or deprecated")
       }
       has
     }).foreach(x => {
