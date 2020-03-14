@@ -24,7 +24,7 @@ import org.apache.commons.cli.{Option, Options}
 import scala.collection.JavaConversions._
 
 /**
- * copy from flink(1.9.1) sourceCode
+ * copy from flink(1.10.0) sourceCode
  */
 object FlinkOption {
 
@@ -97,7 +97,11 @@ object FlinkOption {
 
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.");
 
-  //----------------------------------------------------------------v
+  //----------------------------------------------------------------
+  /**
+   * 注意 flink run支持的参数全部在此,-yn(yarncontainer)参数从1.9.0开始已经过时,不推荐使用,从1.10开始已废除.如加上该参数会报错.
+   * @return
+   */
   def allOptions: Options = {
     val commOptions = getRunCommandOptions
     val resultOptions = new Options
