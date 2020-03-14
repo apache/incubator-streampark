@@ -25,6 +25,7 @@ import scala.collection.JavaConversions._
 
 /**
  * copy from flink(1.10.0) sourceCode
+ * 注意:该参数来自flink V1.10
  */
 object FlinkOption {
 
