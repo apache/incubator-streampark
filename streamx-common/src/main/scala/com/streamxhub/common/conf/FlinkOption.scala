@@ -105,10 +105,10 @@ object FlinkOption {
    */
   def allOptions: Options = {
     val commOptions = getRunCommandOptions
+    val yarnOptions = getYARNOptions
     val resultOptions = new Options
-    val options = commOptions.getOptions
-    options.addAll(getYARNOptions.getOptions)
-    options.foreach(x=>resultOptions.addOption(x))
+    commOptions.getOptions.foreach(resultOptions.addOption)
+    yarnOptions.getOptions.foreach(resultOptions.addOption)
     resultOptions
   }
 
