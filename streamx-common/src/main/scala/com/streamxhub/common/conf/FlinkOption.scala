@@ -98,14 +98,12 @@ object FlinkOption {
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.");
 
   //----------------------------------------------------------------v
-
-
   def allOptions: Options = {
     val commOptions = getRunCommandOptions
-    val yarnOptions = getYARNOptions
     val resultOptions = new Options
-    commOptions.getOptions.foreach(x => resultOptions.addOption(x))
-    yarnOptions.getOptions.foreach(x => resultOptions.addOption(x))
+    val options = commOptions.getOptions
+    options.addAll(getYARNOptions.getOptions)
+    options.foreach(x=>resultOptions.addOption(x))
     resultOptions
   }
 
@@ -116,11 +114,11 @@ object FlinkOption {
     options.addOption(SAVEPOINT_ALLOW_NON_RESTORED_OPTION)
   }
 
-
   def getYARNOptions: Options = {
     val shortPrefix = "y"
     val longPrefix = "yarn"
     //yarn
+    // Create the command line options
     val query = new Option(shortPrefix + "q", longPrefix + "query", false, "Display available YARN resources (memory, cores)")
     val applicationId = new Option(shortPrefix + "id", longPrefix + "applicationId", true, "Attach to running YARN session")
     val queue = new Option(shortPrefix + "qu", longPrefix + "queue", true, "Specify YARN queue.")
@@ -136,34 +134,35 @@ object FlinkOption {
     val nodeLabel = new Option(shortPrefix + "nl", longPrefix + "nodeLabel", true, "Specify YARN node label for the YARN application")
     val help = new Option(shortPrefix + "h", longPrefix + "help", false, "Help for the Yarn session CLI.")
 
-    val options = new Options()
-    options.addOption(flinkJar)
-    options.addOption(jmMemory)
-    options.addOption(tmMemory)
-    options.addOption(queue)
-    options.addOption(query)
-    options.addOption(shipPath)
-    options.addOption(slots)
-    options.addOption(dynamicproperties)
-    options.addOption(DETACHED_OPTION)
-    options.addOption(SHUTDOWN_IF_ATTACHED_OPTION)
-    options.addOption(name)
-    options.addOption(applicationId)
-    options.addOption(applicationType)
-    options.addOption(zookeeperNamespace)
-    options.addOption(nodeLabel)
-    options.addOption(help)
-    options
+    val allOptions = new Options
+    allOptions.addOption(flinkJar)
+    allOptions.addOption(jmMemory)
+    allOptions.addOption(tmMemory)
+    allOptions.addOption(queue)
+    allOptions.addOption(query)
+    allOptions.addOption(shipPath)
+    allOptions.addOption(slots)
+    allOptions.addOption(dynamicproperties)
+    allOptions.addOption(DETACHED_OPTION)
+    allOptions.addOption(SHUTDOWN_IF_ATTACHED_OPTION)
+    allOptions.addOption(YARN_DETACHED_OPTION)
+    allOptions.addOption(name)
+    allOptions.addOption(applicationId)
+    allOptions.addOption(applicationType)
+    allOptions.addOption(zookeeperNamespace)
+    allOptions.addOption(nodeLabel)
+    allOptions.addOption(help)
+    allOptions
   }
 
-  def buildGeneralOptions(options: Options) = {
+  private def buildGeneralOptions(options: Options) = {
     options.addOption(HELP_OPTION)
     // backwards compatibility: ignore verbose flag (-v)
     options.addOption(new Option("v", "verbose", false, "This option is deprecated."))
     options
   }
 
-  def getProgramSpecificOptions(options: Options) = {
+  private def getProgramSpecificOptions(options: Options) = {
     options.addOption(JAR_OPTION)
     options.addOption(CLASS_OPTION)
     options.addOption(CLASSPATH_OPTION)
@@ -172,19 +171,11 @@ object FlinkOption {
     options.addOption(LOGGING_OPTION)
     options.addOption(DETACHED_OPTION)
     options.addOption(SHUTDOWN_IF_ATTACHED_OPTION)
+    options.addOption(YARN_DETACHED_OPTION)
     options.addOption(PY_OPTION)
     options.addOption(PYFILES_OPTION)
     options.addOption(PYMODULE_OPTION)
-    options.addOption(YARN_DETACHED_OPTION)
-    options.addOption(ADDRESS_OPTION)
-    options.addOption(SAVEPOINT_DISPOSE_OPTION)
-    options.addOption(RUNNING_OPTION)
-    options.addOption(SCHEDULED_OPTION)
-    options.addOption(ALL_OPTION)
-    options.addOption(ZOOKEEPER_NAMESPACE_OPTION)
-    options.addOption(CANCEL_WITH_SAVEPOINT_OPTION)
-    options.addOption(STOP_WITH_SAVEPOINT_PATH)
-    options.addOption(STOP_AND_DRAIN)
     options
   }
+
 }
