@@ -26,10 +26,11 @@ import org.apache.commons.cli.DefaultParser
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 object ParameterCli {
 
-  private[this] val resourcePrefix = "flink.deployment.option."
+  private[this] val optionPrefix = "flink.deployment.option."
   private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
   val flinkOptions = FlinkRunOption.allOptions
@@ -46,9 +47,10 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
+    val programArgs = args.drop(2)
     action match {
       case "--option" =>
-        val option = getOption(map, args.drop(2))
+        val option = getOption(map, programArgs)
         val buffer = new StringBuffer()
         val line = parser.parse(flinkOptions, option, false)
         line.getOptions.foreach(x => {
@@ -60,7 +62,7 @@ object ParameterCli {
         buffer.toString.trim
       case "--dynamic" =>
         val buffer = new StringBuffer()
-        map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD ${x._1.drop(resourcePrefix.length)}=${x._2}"))
+        map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(optionPrefix.length)}=${x._2}"))
         buffer.toString.trim
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
@@ -69,7 +71,7 @@ object ParameterCli {
         }
       //是否detached模式...
       case "--detached" =>
-        val option = getOption(map, args.drop(2))
+        val option = getOption(map, programArgs)
         val line = parser.parse(FlinkRunOption.allOptions, option, false)
         val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
@@ -81,17 +83,14 @@ object ParameterCli {
 
   def getOption(map: Map[String, String], args: Array[String]): Array[String] = {
     val optionMap = new mutable.HashMap[String, Any]()
-    map.filter(x => x._1.startsWith(resourcePrefix) && x._2.nonEmpty).filter(x => {
-      val k = x._1.drop(resourcePrefix.length)
-      val has = flinkOptions.hasLongOption(k) || flinkOptions.hasShortOption(k)
-      if (!has) {
-        //logWarn(s"[StreamX] config:$k is invalid or deprecated")
-      }
-      has
+    map.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
+      val key = x._1.drop(optionPrefix.length)
+      //验证参数是否合法...
+      flinkOptions.hasOption(key)
     }).foreach(x => {
-      x._2 match {
-        case "true" | "false" => if (x._2 == "true") optionMap += s"-${x._1.drop(resourcePrefix.length)}".trim -> true
-        case v => optionMap += s"-${x._1.drop(resourcePrefix.length)}".trim -> v
+      Try(x._2.toBoolean).getOrElse(x._2.toString) match {
+        case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
+        case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
       }
     })
     //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
