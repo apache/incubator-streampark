@@ -89,7 +89,7 @@ object ConfigConst {
 
   val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
 
-  val KEY_FLINK_APP_NAME = "flink.deployment.resource.yarnname"
+  val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
 
   val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
 
