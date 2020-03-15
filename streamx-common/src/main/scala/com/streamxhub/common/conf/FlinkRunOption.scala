@@ -231,6 +231,7 @@ object FlinkRunOption {
 
     val allOptions = new Options
 
+    allOptions.addOption(ADDRESS_OPTION)
     allOptions.addOption(flinkJar)
     allOptions.addOption(jmMemory)
     allOptions.addOption(tmMemory)
@@ -275,6 +276,7 @@ object FlinkRunOption {
     options.addOption(PYREQUIREMENTS_OPTION)
     options.addOption(PYARCHIVE_OPTION)
     options.addOption(PYEXEC_OPTION)
+    options.addOption(ZOOKEEPER_NAMESPACE_OPTION)
     options
   }
 
