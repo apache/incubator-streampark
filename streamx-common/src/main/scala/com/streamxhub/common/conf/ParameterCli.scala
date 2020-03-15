@@ -29,10 +29,10 @@ import scala.collection.mutable.ArrayBuffer
 
 object ParameterCli {
 
-  private[this] val resourcePrefix = "flink.deployment.resource."
+  private[this] val resourcePrefix = "flink.deployment.option."
   private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
-  val flinkOptions = FlinkOption.allOptions
+  val flinkOptions = FlinkRunOption.allOptions
 
   val parser = new DefaultParser
 
@@ -47,7 +47,7 @@ object ParameterCli {
       PropertiesUtils.fromYamlFile(conf)
     }
     action match {
-      case "--resource" =>
+      case "--option" =>
         val option = getOption(map, args.drop(2))
         val buffer = new StringBuffer()
         val line = parser.parse(flinkOptions, option, false)
@@ -70,8 +70,8 @@ object ParameterCli {
       //是否detached模式...
       case "--detached" =>
         val option = getOption(map, args.drop(2))
-        val line = parser.parse(FlinkOption.allOptions, option, false)
-        val detached = line.hasOption(FlinkOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkOption.DETACHED_OPTION.getLongOpt)
+        val line = parser.parse(FlinkRunOption.allOptions, option, false)
+        val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
         mode
       case _ => null

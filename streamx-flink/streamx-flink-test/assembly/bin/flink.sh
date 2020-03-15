@@ -176,29 +176,29 @@ doStart() {
        exit 1
     fi
 
-    local trim_reg="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
+    local trim="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local detached_mode="`java -cp "${flink_jar}" $param_cli --detached "${app_proper}"` $*"
     # shellcheck disable=SC2006
     # trim...
-    detached_mode="`echo "$detached_mode" | sed "$trim_reg"`"
+    detached_mode="`echo "$detached_mode" | sed "$trim"`"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local resource_params="`java -cp "${flink_jar}" $param_cli --resource "${app_proper}"` $*"
+    local option_params="`java -cp "${flink_jar}" $param_cli --option "${app_proper}"` $*"
     # shellcheck disable=SC2006
-    resource_params="`echo "$resource_params" | sed "$trim_reg"`"
+    option_params="`echo "$option_params" | sed "$trim"`"
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
     local dynamic_params="`java -cp "${flink_jar}" $param_cli --dynamic "${app_proper}"`"
     # shellcheck disable=SC2006
-    dynamic_params="`echo "$dynamic_params" | sed "$trim_reg"`"
+    dynamic_params="`echo "$dynamic_params" | sed "$trim"`"
 
     echo_g "${app_name} Starting by:<${detached_mode}> mode"
 
     # json all params...
-    local allParam="$resource_params"
+    local allParam="$option_params"
     if [ x"$dynamic_params" != x"" ]; then
         allParam="$allParam $dynamic_params"
     fi
@@ -207,7 +207,7 @@ doStart() {
 
       flink run \
       $allParam \
-      --jarfile $flink_jar \
+      -j $flink_jar \
       --flink.conf $app_proper
 
       echo "${app_name}" > "${APP_TEMP}/.running"
@@ -219,7 +219,7 @@ doStart() {
 
       flink run \
       $allParam \
-      --jarfile $flink_jar \
+      -j $flink_jar \
       --flink.conf $app_proper >> $app_out 2>&1 &
 
       echo "${app_name}" > "${APP_TEMP}/.running"
