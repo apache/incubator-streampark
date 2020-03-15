@@ -80,10 +80,19 @@ object FlinkRunOption {
   val ZOOKEEPER_NAMESPACE_OPTION: Option =
     new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
 
-  val CANCEL_WITH_SAVEPOINT_OPTION: Option =
-    new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + "specified, the configured default directory (" + CheckpointingOptions.SAVEPOINT_DIRECTORY.key + ") is used.")
+  lazy val SAVEPOINT_DIRECTORY: String = {
+    val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
+    val chkOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "state.savepoints.dir")
+    val option = chkOptBuilder.getClass.getMethod("noDefaultValue").invoke(chkOptBuilder)
+    option.getClass.getMethod("withDeprecatedKeys", classOf[Array[String]]).invoke(option, Array("savepoints.state.backend.fs.dir"))
+    option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The default directory for savepoints. Used by the state backends that write savepoints to file systems (MemoryStateBackend, FsStateBackend, RocksDBStateBackend).")
+    option.getClass.getMethod("key").invoke(option).toString
+  }
 
-  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + "If no directory is specified, the configured default will be used (\"" + CheckpointingOptions.SAVEPOINT_DIRECTORY.key + "\").")
+  val CANCEL_WITH_SAVEPOINT_OPTION: Option =
+    new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + s"specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
+
+  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + s"If no directory is specified, the configured default will be used (\"$SAVEPOINT_DIRECTORY\").")
 
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
 
@@ -202,7 +211,23 @@ object FlinkRunOption {
     val zookeeperNamespace = new Option(shortPrefix + "z", longPrefix + "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
     val nodeLabel = new Option(shortPrefix + "nl", longPrefix + "nodeLabel", true, "Specify YARN node label for the YARN application")
     val help = new Option(shortPrefix + "h", longPrefix + "help", false, "Help for the Yarn session CLI.")
-    val executorOption: Option = new Option("e", "executor", true, "The name of the executor to be used for executing the given job, which is equivalent " + "to the exec:DeploymentOptions.TARGET.key() config option. The " + "currently available executors are: exec:getExecutorFactoryNames().")
+
+    val TARGET = {
+      /**
+       * val TARGET = ConfigOptions.key("execution.target")
+       * .stringType()
+       * .noDefaultValue()
+       * .withDescription("The deployment target for the execution, e.g. \"local\" for local execution.")
+       */
+      val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
+      val deployOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "execution.target")
+      val typedConfigOptBuilder =  deployOptBuilder.getClass.getMethod("stringType").invoke(deployOptBuilder)
+      val option = typedConfigOptBuilder.getClass.getMethod("noDefaultValue").invoke(typedConfigOptBuilder)
+      val target = option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The deployment target for the execution, e.g. \"local\" for local execution.")
+      target.getClass.getMethod("key").invoke(target).toString
+    }
+
+    val executorOption: Option = new Option("e", "executor", true, "The name of the executor to be used for executing the given job, which is equivalent " + s"to the $TARGET config option. The " + "currently available executors are: exec:getExecutorFactoryNames().")
     /**
      * Dynamic properties allow the user to specify additional configuration values with -D, such as
      * <tt> -Dfs.overwrite-files=true  -Dtaskmanager.memory.network.min=536346624</tt>.
