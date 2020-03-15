@@ -45,8 +45,8 @@ object FlinkRunOption {
   /**
    * @deprecated This has no effect anymore, we're keeping it to not break existing bash scripts.
    */
-  @deprecated val LOGGING_OPTION: Option =
-  new Option("q", "sysoutLogging", false, "If present, " + "suppress logging output to standard out.")
+  @deprecated
+  val LOGGING_OPTION: Option = new Option("q", "sysoutLogging", false, "If present, " + "suppress logging output to standard out.")
 
   val DETACHED_OPTION = new Option("d", "detached", false, "If present, runs " + "the job in detached mode")
 
@@ -68,17 +68,13 @@ object FlinkRunOption {
   val SAVEPOINT_DISPOSE_OPTION: Option = new Option("d", "dispose", true, "Path of savepoint to dispose.")
 
   // list specific options
-  val RUNNING_OPTION: Option =
-    new Option("r", "running", false, "Show only running programs and their JobIDs")
+  val RUNNING_OPTION: Option =  new Option("r", "running", false, "Show only running programs and their JobIDs")
 
-  val SCHEDULED_OPTION: Option =
-    new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs")
+  val SCHEDULED_OPTION: Option = new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs")
 
-  val ALL_OPTION: Option =
-    new Option("a", "all", false, "Show all programs and their JobIDs")
+  val ALL_OPTION: Option = new Option("a", "all", false, "Show all programs and their JobIDs")
 
-  val ZOOKEEPER_NAMESPACE_OPTION: Option =
-    new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
+  val ZOOKEEPER_NAMESPACE_OPTION: Option = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
 
   lazy val SAVEPOINT_DIRECTORY: String = {
     val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
@@ -89,8 +85,7 @@ object FlinkRunOption {
     option.getClass.getMethod("key").invoke(option).toString
   }
 
-  val CANCEL_WITH_SAVEPOINT_OPTION: Option =
-    new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + s"specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
+  val CANCEL_WITH_SAVEPOINT_OPTION: Option = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + s"specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
 
   val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + s"If no directory is specified, the configured default will be used (\"$SAVEPOINT_DIRECTORY\").")
 
@@ -221,7 +216,7 @@ object FlinkRunOption {
        */
       val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
       val deployOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "execution.target")
-      val typedConfigOptBuilder =  deployOptBuilder.getClass.getMethod("stringType").invoke(deployOptBuilder)
+      val typedConfigOptBuilder = deployOptBuilder.getClass.getMethod("stringType").invoke(deployOptBuilder)
       val option = typedConfigOptBuilder.getClass.getMethod("noDefaultValue").invoke(typedConfigOptBuilder)
       val target = option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The deployment target for the execution, e.g. \"local\" for local execution.")
       target.getClass.getMethod("key").invoke(target).toString
