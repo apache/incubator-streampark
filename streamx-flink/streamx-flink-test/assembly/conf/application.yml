@@ -1,7 +1,7 @@
 flink:
   deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明细的问题的找不到jar文件
     dynamic: ##这里放动态熟悉... -yD key=value
-    resource: ## 这里放启动资源相关配置...注意 -yn(yarncontainer)参数从1.9.0开始已经过时,不推荐使用,从1.10开始已废除.
+    option: ## 这里放启动资源相关配置...注意 -yn(yarncontainer)参数从1.9.0开始已经过时,不推荐使用,从1.10开始已废除.
       yarnname: dp-hopsonone-park-clean            # Set a custom name for the application on YARN
       class: cn.com.hopson.parkclean.app.ShParkCleanApp                             # main class
       detached: false                    # -d   (If present, runs the job in detached mode)
