@@ -87,7 +87,7 @@ object FlinkRunOption {
 
   val CANCEL_WITH_SAVEPOINT_OPTION: Option = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + s"specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
 
-  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + s"If no directory is specified, the configured default will be used (\"$SAVEPOINT_DIRECTORY\").")
+  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, s"Path to the savepoint (for example hdfs:///flink/savepoint-1537).If no directory is specified, the configured default will be used ($SAVEPOINT_DIRECTORY).")
 
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
 
