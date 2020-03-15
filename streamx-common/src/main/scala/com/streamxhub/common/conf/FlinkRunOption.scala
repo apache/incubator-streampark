@@ -20,7 +20,7 @@
  */
 package com.streamxhub.common.conf
 
-import org.apache.commons.cli.{Option,Options}
+import org.apache.commons.cli.{Option, Options}
 
 import scala.collection.JavaConversions._
 
@@ -170,8 +170,9 @@ object FlinkRunOption {
     val commOptions = getRunCommandOptions
     val yarnOptions = getYARNOptions
     val resultOptions = new Options
+
     commOptions.getOptions.foreach(resultOptions.addOption)
-    yarnOptions.getOptions.foreach(resultOptions.addOption)
+    yarnOptions.getOptions.filter(x => !resultOptions.hasOption(x.getOpt)).foreach(resultOptions.addOption)
     resultOptions
   }
 
