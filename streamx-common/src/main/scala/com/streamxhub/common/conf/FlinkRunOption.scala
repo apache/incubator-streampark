@@ -69,7 +69,7 @@ object FlinkRunOption {
   val SAVEPOINT_DISPOSE_OPTION: Option = new Option("d", "dispose", true, "Path of savepoint to dispose.")
 
   // list specific options
-  val RUNNING_OPTION: Option =  new Option("r", "running", false, "Show only running programs and their JobIDs")
+  val RUNNING_OPTION: Option = new Option("r", "running", false, "Show only running programs and their JobIDs")
 
   val SCHEDULED_OPTION: Option = new Option("s", "scheduled", false, "Show only scheduled programs and their JobIDs")
 
@@ -214,28 +214,27 @@ object FlinkRunOption {
     val dynamicProperties: Option = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Generic configuration options for execution/deployment and for the configured " + "executor. The available options can be found at " + "https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
 
     val allOptions = new Options
-    val TARGET = {
-      /**
-       *
-       * val TARGET = ConfigOptions.key("execution.target")
-       * .stringType()
-       * .noDefaultValue()
-       * .withDescription("The deployment target for the execution, e.g. \"local\" for local execution.")
-       */
-        Try{
-          val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
-          val deployOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "execution.target")
-          val typedConfigOptBuilder = deployOptBuilder.getClass.getMethod("stringType").invoke(deployOptBuilder)
-          val option = typedConfigOptBuilder.getClass.getMethod("noDefaultValue").invoke(typedConfigOptBuilder)
-          val target = option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The deployment target for the execution, e.g. \"local\" for local execution.")
-          target.getClass.getMethod("key").invoke(target).toString
-        } match {
-          case Success(TARGET) =>
-            //just for flink 1.10 or +
-            val executorOption: Option = new Option("e", "executor", true, "The name of the executor to be used for executing the given job, which is equivalent " + s"to the $TARGET config option. The " + "currently available executors are: exec:getExecutorFactoryNames().")
-            allOptions.addOption(executorOption)
-          case Failure(e) =>
-        }
+
+    /**
+     *
+     * val TARGET = ConfigOptions.key("execution.target")
+     * .stringType()
+     * .noDefaultValue()
+     * .withDescription("The deployment target for the execution, e.g. \"local\" for local execution.")
+     */
+    Try {
+      val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
+      val deployOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "execution.target")
+      val typedConfigOptBuilder = deployOptBuilder.getClass.getMethod("stringType").invoke(deployOptBuilder)
+      val option = typedConfigOptBuilder.getClass.getMethod("noDefaultValue").invoke(typedConfigOptBuilder)
+      val target = option.getClass.getMethod("withDescription", classOf[String]).invoke(option, "The deployment target for the execution, e.g. \"local\" for local execution.")
+      target.getClass.getMethod("key").invoke(target).toString
+    } match {
+      case Success(target) =>
+        //just for flink 1.10 or +
+        val executorOption: Option = new Option("e", "executor", true, "The name of the executor to be used for executing the given job, which is equivalent " + s"to the $target config option. The " + "currently available executors are: exec:getExecutorFactoryNames().")
+        allOptions.addOption(executorOption)
+      case Failure(e) =>
     }
 
     allOptions.addOption(ADDRESS_OPTION)
