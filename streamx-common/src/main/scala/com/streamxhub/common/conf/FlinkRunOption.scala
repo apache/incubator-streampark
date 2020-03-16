@@ -201,7 +201,6 @@ object FlinkRunOption {
     val jmMemory = new Option(shortPrefix + "jm", longPrefix + "jobManagerMemory", true, "Memory for JobManager Container with optional unit (default: MB)")
     val tmMemory = new Option(shortPrefix + "tm", longPrefix + "taskManagerMemory", true, "Memory per TaskManager Container with optional unit (default: MB)")
     val slots = new Option(shortPrefix + "s", longPrefix + "slots", true, "Number of slots per TaskManager")
-    val dynamicproperties = Option.builder(shortPrefix + "D").argName("property=value").numberOfArgs(2).valueSeparator.desc("use value for given property").build
     val name = new Option(shortPrefix + "nm", longPrefix + "name", true, "Set a custom name for the application on YARN")
     val applicationType = new Option(shortPrefix + "at", longPrefix + "applicationType", true, "Set a custom application type for the application on YARN")
     val zookeeperNamespace = new Option(shortPrefix + "z", longPrefix + "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
@@ -245,7 +244,7 @@ object FlinkRunOption {
     allOptions.addOption(query)
     allOptions.addOption(shipPath)
     allOptions.addOption(slots)
-    allOptions.addOption(dynamicproperties)
+    allOptions.addOption(dynamicProperties)
     allOptions.addOption(DETACHED_OPTION)
     allOptions.addOption(YARN_DETACHED_OPTION)
     allOptions.addOption(name)
@@ -254,7 +253,6 @@ object FlinkRunOption {
     allOptions.addOption(zookeeperNamespace)
     allOptions.addOption(nodeLabel)
     allOptions.addOption(help)
-    allOptions.addOption(dynamicProperties)
     allOptions
   }
 
