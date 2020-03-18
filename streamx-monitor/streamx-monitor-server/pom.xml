@@ -23,7 +23,7 @@
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.11</zkclient.version>
-        <curator.version>4.0.1</curator.version>
+        <curator.version>4.2.0</curator.version>
         <redis.version>2.9.0</redis.version>
         <es.version>6.2.3</es.version>
         <influxdb.version>2.17</influxdb.version>
