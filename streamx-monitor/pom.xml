@@ -53,7 +53,7 @@
         <fst.version>2.50</fst.version>
         <fastjson.version>1.2.45</fastjson.version>
         <zookeeper.version>3.4.11</zookeeper.version>
-        <curator.version>4.0.0</curator.version>
+        <curator.version>4.2.0</curator.version>
         <zkclient.version>0.10</zkclient.version>
         <asm.version>5.2</asm.version>
         <cglib.version>3.2.5</cglib.version>
