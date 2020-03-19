@@ -43,6 +43,22 @@
                     <artifactId>jackson-core</artifactId>
                     <groupId>com.fasterxml.jackson.core</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>paranamer</artifactId>
+                    <groupId>com.thoughtworks.paranamer</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-module-paranamer</artifactId>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>json4s-jackson_2.11</artifactId>
+                    <groupId>org.json4s</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>jackson-module-scala_2.11</artifactId>
+                    <groupId>com.fasterxml.jackson.module</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -55,6 +71,10 @@
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>flink-core</artifactId>
+                    <groupId>org.apache.flink</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -65,6 +85,10 @@
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>flink-streaming-java_2.11</artifactId>
+                    <groupId>org.apache.flink</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -95,6 +119,10 @@
                 <exclusion>
                     <artifactId>jackson-core</artifactId>
                     <groupId>com.fasterxml.jackson.core</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -180,6 +208,34 @@
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
                 </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>paranamer</artifactId>
+                    <groupId>com.thoughtworks.paranamer</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>avro</artifactId>
+                    <groupId>org.apache.avro</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-yarn-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-configuration</artifactId>
+                    <groupId>commons-configuration</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -194,6 +250,26 @@
                 <exclusion>
                     <artifactId>slf4j-api</artifactId>
                     <groupId>org.slf4j</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-codec</artifactId>
+                    <groupId>commons-codec</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hbase-common</artifactId>
+                    <groupId>org.apache.hbase</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>hadoop-common</artifactId>
+                    <groupId>org.apache.hadoop</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>commons-collections</artifactId>
+                    <groupId>commons-collections</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
