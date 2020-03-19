@@ -53,10 +53,6 @@
             <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
             <exclusions>
                 <exclusion>
-                    <artifactId>elasticsearch-x-content</artifactId>
-                    <groupId>org.elasticsearch</groupId>
-                </exclusion>
-                <exclusion>
                     <artifactId>commons-codec</artifactId>
                     <groupId>commons-codec</groupId>
                 </exclusion>
