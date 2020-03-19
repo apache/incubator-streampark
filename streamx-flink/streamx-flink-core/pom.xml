@@ -13,6 +13,32 @@
     <artifactId>streamx-flink-core</artifactId>
 
     <dependencies>
+
+        <dependency>
+            <groupId>com.streamxhub</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!--flink base-->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-scala_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!--clickhouse-->
         <dependency>
             <groupId>ru.yandex.clickhouse</groupId>
@@ -24,24 +50,6 @@
                     <groupId>com.fasterxml.jackson.core</groupId>
                 </exclusion>
             </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>streamx-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!--flink base-->
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-streaming-scala_${scala.binary.version}</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.flink</groupId>
-            <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
-            <scope>provided</scope>
         </dependency>
 
         <!--flink-connector-->
