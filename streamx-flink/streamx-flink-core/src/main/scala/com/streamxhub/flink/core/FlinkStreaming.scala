@@ -28,7 +28,7 @@ import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, OptionsFactory, PredefinedOptions, RocksDBStateBackend}
+import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory,RocksDBStateBackend}
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
@@ -36,6 +36,9 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
+
+import org.apache.flink.configuration.ConfigOptions
+
 
 import scala.collection.JavaConversions._
 import scala.util.Try
