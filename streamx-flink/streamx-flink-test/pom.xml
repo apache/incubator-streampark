@@ -18,6 +18,18 @@
             <artifactId>streamx-flink-core</artifactId>
             <version>1.0.0</version>
         </dependency>
+        <!--hbase-->
+        <dependency>
+            <groupId>org.apache.hadoop</groupId>
+            <artifactId>hadoop-client</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.hbase</groupId>
+            <artifactId>hbase-client</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
