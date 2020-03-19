@@ -37,8 +37,6 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedC
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
 
-import org.apache.flink.configuration.ConfigOptions
-
 
 import scala.collection.JavaConversions._
 import scala.util.Try
