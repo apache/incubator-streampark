@@ -35,13 +35,14 @@ import com.streamxhub.common.conf.ConfigConst._
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 
+import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.Map
 
 object HBaseSink {
 
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -49,7 +50,7 @@ object HBaseSink {
 
 }
 
-class HBaseSink(@transient ctx: StreamingContext,
+class HBaseSink(@(transient@param) ctx: StreamingContext,
                 overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,

@@ -40,6 +40,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 
+import scala.annotation.meta.param
 import scala.collection.Map
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -57,7 +58,7 @@ object MySQLSink {
    * @param alias :   MySQL的实例别名(用于区分多个不同的MySQL实例...)
    * @return
    */
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -65,7 +66,7 @@ object MySQLSink {
 
 }
 
-class MySQLSink(@transient ctx: StreamingContext,
+class MySQLSink(@(transient@param) ctx: StreamingContext,
                 overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,

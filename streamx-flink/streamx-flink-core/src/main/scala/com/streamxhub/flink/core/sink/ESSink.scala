@@ -27,11 +27,12 @@ import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExe
 import com.streamxhub.flink.core.StreamingContext
 import org.elasticsearch.action.index.IndexRequest
 
+import scala.annotation.meta.param
 import scala.collection.Map
 
 object ESSink {
 
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -39,7 +40,7 @@ object ESSink {
 
 }
 
-class ESSink(@transient context: StreamingContext,
+class ESSink(@(transient@param) context: StreamingContext,
              overrideParams: Map[String, String] = Map.empty[String, String],
              parallelism: Int = 0,
              name: String = null,

@@ -32,15 +32,17 @@ import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
 
+import scala.annotation.meta.param
+
 object RedisSink {
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
             uid: String = null): RedisSink = new RedisSink(ctx, overrideParams, parallelism, name, uid)
 }
 
-class RedisSink(@transient ctx: StreamingContext,
+class RedisSink(@(transient@param) ctx: StreamingContext,
                 overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
