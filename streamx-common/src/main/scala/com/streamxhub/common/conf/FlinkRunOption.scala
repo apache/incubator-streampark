@@ -77,7 +77,10 @@ object FlinkRunOption {
 
   val ZOOKEEPER_NAMESPACE_OPTION: Option = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
 
-  lazy val SAVEPOINT_DIRECTORY: String = {
+  /**
+   * maybe throw ClassNotFoundException: org.apache.flink.configuration.ConfigOptions
+   */
+  @deprecated lazy val SAVEPOINT_DIRECTORY: String = {
     val clazz = Class.forName("org.apache.flink.configuration.ConfigOptions")
     val chkOptBuilder = clazz.getMethod("key", classOf[String]).invoke(null, "state.savepoints.dir")
     val option = chkOptBuilder.getClass.getMethod("noDefaultValue").invoke(chkOptBuilder)
@@ -86,9 +89,9 @@ object FlinkRunOption {
     option.getClass.getMethod("key").invoke(option).toString
   }
 
-  val CANCEL_WITH_SAVEPOINT_OPTION: Option = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + s"specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
+  val CANCEL_WITH_SAVEPOINT_OPTION: Option = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + "specified, the configured default directory ($SAVEPOINT_DIRECTORY) is used.")
 
-  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, s"Path to the savepoint (for example hdfs:///flink/savepoint-1537).If no directory is specified, the configured default will be used ($SAVEPOINT_DIRECTORY).")
+  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537).If no directory is specified, the configured default will be used ($SAVEPOINT_DIRECTORY).")
 
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
 
