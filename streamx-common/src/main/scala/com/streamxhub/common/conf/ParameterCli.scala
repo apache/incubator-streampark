@@ -28,6 +28,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
+import org.apache.commons.cli.Options
+
 object ParameterCli {
 
   private[this] val optionPrefix = "flink.deployment.option."
