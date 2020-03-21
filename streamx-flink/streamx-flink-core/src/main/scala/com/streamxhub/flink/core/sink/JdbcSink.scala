@@ -115,7 +115,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String, isolationLev
           case e: Exception =>
             logError(s"[StreamX] JdbcSink invoke error:${sql}")
             throw e
-          case _ =>
+          case _: Throwable =>
         }
       case batch =>
         try {
@@ -129,7 +129,7 @@ class JdbcSinkFunction[T](config: Properties, toSQLFn: T => String, isolationLev
           case e: Exception =>
             logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
             throw e
-          case _ =>
+          case _: Throwable =>
         }
     }
   }
