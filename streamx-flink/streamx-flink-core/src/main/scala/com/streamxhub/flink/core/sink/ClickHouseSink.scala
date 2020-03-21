@@ -249,7 +249,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
           case e: Exception =>
             logError(s"""[StreamX] ClickHouseSink invoke error:$sql""")
             throw e
-          case _ =>
+          case _: Throwable =>
         }
       case batch =>
         try {
@@ -263,7 +263,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
           case e: Exception =>
             logError(s"""[StreamX] ClickHouseSink batch invoke error:$sql""")
             throw e
-          case _ =>
+          case _: Throwable =>
         }
     }
   }
