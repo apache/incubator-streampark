@@ -23,7 +23,6 @@ package com.streamxhub.common.util
 import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
-import org.apache.commons.lang3.StringUtils
 import java.util.{Map => JMap}
 import scala.collection.immutable.{Map => SMap}
 
@@ -100,7 +99,7 @@ object ConfigUtils {
     }
     val param: SMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    val instance = if (StringUtils.isBlank(alias)) "default" else alias
+    val instance = if (alias == null || alias.trim == "") "default" else alias
     properties.put(KEY_INSTANCE, instance)
     properties.put(KEY_JDBC_DRIVER, driver)
     param.foreach(x => properties.put(x._1, x._2))
