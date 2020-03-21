@@ -40,6 +40,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.asynchttpclient.{AsyncHttpClient, Dsl, ListenableFuture, Request, Response}
 import org.json4s.jackson.Serialization
 
+import scala.annotation.meta.param
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
@@ -47,7 +48,7 @@ import scala.util.Try
 
 object HttpSink {
 
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             header: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -55,7 +56,7 @@ object HttpSink {
 
 }
 
-class HttpSink(@transient ctx: StreamingContext,
+class HttpSink(@(transient@param) ctx: StreamingContext,
                header: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,

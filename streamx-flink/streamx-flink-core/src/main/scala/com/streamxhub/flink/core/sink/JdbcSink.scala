@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, Logger, JdbcUtils}
+import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.sink.Dialect.Dialect
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -36,6 +36,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 
+import scala.annotation.meta.param
 import scala.collection.Map
 
 object JdbcSink {
@@ -45,7 +46,7 @@ object JdbcSink {
    * @param alias :    实例别名(用于区分多个不同的数据库实例...)
    * @return
    */
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -53,7 +54,7 @@ object JdbcSink {
 
 }
 
-class JdbcSink(@transient ctx: StreamingContext,
+class JdbcSink(@(transient@param) ctx: StreamingContext,
                overrideParams: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,

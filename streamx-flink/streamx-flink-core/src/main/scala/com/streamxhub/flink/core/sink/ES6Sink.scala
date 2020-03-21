@@ -40,6 +40,7 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RestClientBuilder
 
+import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.Map
 import scala.util.{Success, Try}
@@ -47,7 +48,7 @@ import scala.util.{Success, Try}
 
 object ES6Sink {
 
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -56,7 +57,7 @@ object ES6Sink {
 }
 
 
-class ES6Sink(@transient ctx: StreamingContext,
+class ES6Sink(@(transient@param) ctx: StreamingContext,
               overrideParams: Map[String, String] = Map.empty[String, String],
               parallelism: Int = 0,
               name: String = null,

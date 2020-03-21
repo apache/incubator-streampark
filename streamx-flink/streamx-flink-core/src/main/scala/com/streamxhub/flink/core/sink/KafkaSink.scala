@@ -31,17 +31,18 @@ import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
 
+import scala.annotation.meta.param
 import scala.collection.Map
 
 object KafkaSink {
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
             uid: String = null): KafkaSink = new KafkaSink(ctx, overrideParams, parallelism, name, uid)
 }
 
-class KafkaSink(@transient val ctx: StreamingContext,
+class KafkaSink(@(transient@param) val ctx: StreamingContext,
                 overrideParams: Map[String, String] = Map.empty[String, String],
                 parallelism: Int = 0,
                 name: String = null,
