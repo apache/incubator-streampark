@@ -36,12 +36,13 @@ import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.influxdb.{InfluxDB, InfluxDBFactory}
 import org.influxdb.dto.Point
 
+import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.Map
 
 object InfluxDBSink {
 
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -49,7 +50,7 @@ object InfluxDBSink {
 
 }
 
-class InfluxDBSink(@transient ctx: StreamingContext,
+class InfluxDBSink(@(transient@param) ctx: StreamingContext,
                    overrideParams: Map[String, String] = Map.empty[String, String],
                    parallelism: Int = 0,
                    name: String = null,

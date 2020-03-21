@@ -28,10 +28,11 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.DataStream
 
+import scala.annotation.meta.param
 import scala.collection.Map
 
 
-class MySQLSource(@transient val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
+class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
    *
@@ -65,7 +66,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
   override def cancel(): Unit = this.isRunning = false
 
   @throws[Exception]
-  override def run(ctx: SourceFunction.SourceContext[R]): Unit = {
+  override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (true) {
       resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
       Thread.sleep(interval)

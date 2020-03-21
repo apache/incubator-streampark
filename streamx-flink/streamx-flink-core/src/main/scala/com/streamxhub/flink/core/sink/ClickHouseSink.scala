@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Properties}
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, Logger, JdbcUtils, ThreadUtils}
+import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -47,17 +47,19 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Try
 import com.streamxhub.flink.core.failover._
 
+import scala.annotation.meta.param
+
 /**
  * @author benjobs
  */
 object ClickHouseSink {
 
   /**
-   * @param ctx      : StreamingContext
+   * @param ctx   : StreamingContext
    * @param alias : ClickHouse实例名称(用于区分多个不同的ClickHouse实例...)
    * @return
    */
-  def apply(@transient ctx: StreamingContext,
+  def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
@@ -65,7 +67,7 @@ object ClickHouseSink {
 
 }
 
-class ClickHouseSink(@transient ctx: StreamingContext,
+class ClickHouseSink(@(transient@param) ctx: StreamingContext,
                      overrideParams: Map[String, String] = Map.empty[String, String],
                      parallelism: Int = 0,
                      name: String = null,
