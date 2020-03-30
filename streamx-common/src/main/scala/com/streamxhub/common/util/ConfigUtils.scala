@@ -24,8 +24,8 @@ import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
 import java.util.{Map => JMap}
-import scala.collection.immutable.{Map => SMap}
 
+import scala.collection.immutable.{Map => SMap}
 import scala.util.Try
 import scala.collection.JavaConversions._
 
@@ -47,6 +47,13 @@ object ConfigUtils {
   def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + alias, topic)
 
   def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
+
+  def getMongoClient(parameter: JMap[String, String])(implicit alias: String = ""): Properties = {
+
+    // 客户端配置（连接数、副本集群验证）
+    val builder = MongoConfig.builder(parameter,alias)
+
+  }
 
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
