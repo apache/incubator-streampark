@@ -1,7 +1,8 @@
 package com.streamxhub.common.util
 
 import com.mongodb.{MongoClient, MongoClientOptions, MongoCredential, ServerAddress}
-import java.util
+import java.util.Properties
+
 import com.streamxhub.common.conf.ConfigConst._
 
 import scala.collection.JavaConversions._
@@ -33,10 +34,22 @@ object MongoConfig {
   val local_threshold = "local-threshold"
   val authentication_database = "authentication-database"
 
-  def getClient(parameter: util.Map[String, String], alias: String): MongoClient = {
-    val mongoParam = parameter.filter(_._1.startsWith(MONGO_PREFIX)).map(x => {
-      x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "") -> x._2
+  def getProperty(properties: Properties, k: String)(implicit alias: String = ""): String = {
+    val prop = getProperties(properties)
+    prop.getProperty(k)
+  }
+
+  def getProperties(properties: Properties)(implicit alias: String = ""): Properties = {
+    val prop = new Properties()
+    properties.filter(_._1.startsWith(MONGO_PREFIX)).map(x => {
+      val k = x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
+      prop.put(k, x._2)
     })
+    prop
+  }
+
+  def getClient(properties: Properties)(implicit alias: String = ""): MongoClient = {
+    val mongoParam = getProperties(properties)
     // 客户端配置（连接数、副本集群验证）
     val builder = new MongoClientOptions.Builder
     if (mongoParam.contains(max_connections_per_host)) {
