@@ -38,7 +38,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  *
  * @param queryFun
  * @param resultFun
- * @param interval 两次sql执行查询的间隔.防止死循环密集的查询sql
+ * @param interval
  * @param typeInformation$R$0
  * @param config
  * @tparam R

@@ -48,13 +48,6 @@ object ConfigUtils {
 
   def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
-  def getMongoClient(parameter: JMap[String, String])(implicit alias: String = ""): Properties = {
-
-    // 客户端配置（连接数、副本集群验证）
-    val builder = MongoConfig.builder(parameter,alias)
-
-  }
-
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${inTopic} init error...") else {
