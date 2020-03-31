@@ -1,19 +1,21 @@
 package com.streamxhub.flink.test
 
-import java.util.Properties
 
-import com.streamxhub.common.util.JsonUtils
-import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.flink.core.source.MySQLSource
+import com.mongodb.client.model.Filters
+import com.streamxhub.flink.core.source.{MongoSource}
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 
 object MongoSourceApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
-
-    //MongoSource()
+    implicit val prop = context.parameter.getProperties
+    val source = new MongoSource(context)
+    source.getDataStream[String](
+      _.getCollection("shop").find(Filters.eq("updateTime", "1585152000000")),
+      _.toJson(),
+      1000L)
+      .print()
   }
 
 }
-
