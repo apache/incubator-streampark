@@ -34,9 +34,9 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
+import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.util.Collector
-
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -167,7 +167,7 @@ trait FlinkStreaming extends Logger {
     }
 
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
-    if (stateBackend != null) {
+    if ( !env.getJavaEnv.isInstanceOf[LocalStreamEnvironment] && stateBackend != null ) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * dataDir如果从配置文件中读取失败(key:flink.checkpoints.dir),则尝试从flink-conf.yml中读取..
