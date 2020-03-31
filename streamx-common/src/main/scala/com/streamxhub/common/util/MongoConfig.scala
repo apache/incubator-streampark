@@ -41,7 +41,7 @@ object MongoConfig {
 
   def getProperties(properties: Properties)(implicit alias: String = ""): Properties = {
     val prop = new Properties()
-    properties.filter(_._1.startsWith(MONGO_PREFIX)).map(x => {
+    properties.filter(_._1.startsWith(MONGO_PREFIX)).filter(_._2.trim!="").map(x => {
       val k = x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
       prop.put(k, x._2)
     })
@@ -116,10 +116,10 @@ object MongoConfig {
       new ServerAddress(host, port)
     })
 
-    if (mongoParam(username) != null) {
+    if (mongoParam.contains(username)) {
       val mongoCredential = MongoCredential.createScramSha1Credential(
         mongoParam(username),
-        if (mongoParam(authentication_database) != null) mongoParam(authentication_database) else mongoParam(database),
+        if (mongoParam.contains(authentication_database)) mongoParam(authentication_database) else mongoParam(database),
         mongoParam(database).toCharArray)
       new MongoClient(serverAddresses.toList, mongoCredential, mongoClientOptions)
     } else {

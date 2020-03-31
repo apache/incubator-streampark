@@ -121,7 +121,7 @@ object ConfigConst {
   val KEY_JDBC_INSERT_BATCH = "batch.size"
   val DEFAULT_JDBC_INSERT_BATCH = 1
 
-  val MONGO_PREFIX = "mongo."
+  val MONGO_PREFIX = "mongodb."
   /**
    * about config HBase
    */
