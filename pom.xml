@@ -35,7 +35,7 @@
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
 
-        <project.build.jdk>1.9</project.build.jdk>
+        <project.build.jdk>1.8</project.build.jdk>
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
         <clickhouse.version>0.1.53</clickhouse.version>
