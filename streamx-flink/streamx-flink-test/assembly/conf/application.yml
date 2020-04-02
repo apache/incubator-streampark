@@ -104,3 +104,4 @@ http.sink:
       user: benjobs # user
       path: /clickhouse/failover # save path
       format: yyyy-MM-dd
+

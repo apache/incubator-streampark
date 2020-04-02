@@ -4,7 +4,7 @@ import java.util.Properties
 
 import com.mongodb.MongoClient
 import org.bson.Document
-import com.mongodb.client.{FindIterable, MongoDatabase}
+import com.mongodb.client.{FindIterable, MongoCursor, MongoDatabase}
 import com.streamxhub.common.util.{Logger, MongoConfig}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -26,7 +26,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: Document => R, interval: Long)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R],, interval: Long)(implicit config: Properties): DataStream[R] = {
     val mongoFun = new MongoSourceFunction[R](queryFun, resultFun, interval)
     ctx.addSource(mongoFun)
   }
@@ -42,7 +42,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  * @param config
  * @tparam R
  */
-private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: Document => R, interval: Long)(implicit config: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R], interval: Long)(implicit config: Properties) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -62,10 +62,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (true) {
       val find = queryFun(database)
-      val cursor = find.cursor()
-      while (cursor.hasNext) {
-        ctx.collect(resultFun(cursor.next()))
-      }
+      resultFun(find.cursor()).foreach(ctx.collect)
       Thread.sleep(interval)
     }
   }
