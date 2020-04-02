@@ -7,6 +7,8 @@ import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 import com.streamxhub.common.util.DateUtils
 
+import scala.collection.mutable.ListBuffer
+
 object MongoSourceApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
@@ -16,7 +18,11 @@ object MongoSourceApp extends FlinkStreaming {
       val collection = x.getCollection("shop")
       collection.find(Filters.gte("updateTime", DateUtils.parse("2019-09-27 00:00:00")))
     }, x => {
-      x.toJson()
+      val list = new ListBuffer[String]
+      while (x.hasNext) {
+        list += x.next().toJson()
+      }
+      list.toList
     },
       1000000L)
       .print()
