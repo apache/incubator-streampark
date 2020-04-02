@@ -26,7 +26,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R],, interval: Long)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R], interval: Long)(implicit config: Properties): DataStream[R] = {
     val mongoFun = new MongoSourceFunction[R](queryFun, resultFun, interval)
     ctx.addSource(mongoFun)
   }
