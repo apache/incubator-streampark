@@ -35,9 +35,9 @@ object DateUtils {
 
   val dayFormat2 = "yyyy-MM-dd"
 
-  def parse(time: String, fmt: String = fullFormat): Date = {
-    val df: SimpleDateFormat = new SimpleDateFormat(fmt)
-    df.parse(time)
+  def parse(date: String, format: String = fullFormat): Date = {
+    val df: SimpleDateFormat = new SimpleDateFormat(format)
+    df.parse(date)
   }
 
   def milliSecond2Date(time: Long) = {

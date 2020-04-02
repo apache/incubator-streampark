@@ -15,7 +15,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.annotation.meta.param
 import scala.collection.Map
 
-
 class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
@@ -63,7 +62,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (true) {
       val find = queryFun(database)
-      val cursor = find.iterator()
+      val cursor = find.cursor()
       while (cursor.hasNext) {
         ctx.collect(resultFun(cursor.next()))
       }
