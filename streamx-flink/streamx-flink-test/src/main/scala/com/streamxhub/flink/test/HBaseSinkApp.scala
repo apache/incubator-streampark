@@ -16,14 +16,14 @@ object HBaseSinkApp extends FlinkStreaming {
     val random = new Random()
 
     //定义转换规则...
-    implicit def entry2Put(entity: TestEntity): Put = {
+    implicit def entry2Put(entity: TestEntity): List[Put] = {
       val put = new Put(Bytes.toBytes(System.nanoTime() + random.nextInt(1000000)), entity.timestamp)
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("cid"), Bytes.toBytes(entity.cityId))
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("oid"), Bytes.toBytes(entity.orderId))
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("os"), Bytes.toBytes(entity.orderStatus))
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("oq"), Bytes.toBytes(entity.quantity))
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("sid"), Bytes.toBytes(entity.siteId))
-      put
+      List(put,put)
     }
 
     //1）插入方式1
