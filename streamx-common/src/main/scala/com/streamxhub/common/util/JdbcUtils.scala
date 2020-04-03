@@ -69,6 +69,8 @@ object JdbcUtils {
           var map = Map[String, Any]()
           for (x <- 1 to count) {
             val key = result.getMetaData.getColumnLabel(x)
+            result.getMetaData.getColumnType(x)
+
             val value = result.getObject(x)
             map += key -> value
           }
