@@ -1,6 +1,9 @@
 package com.streamxhub.flink.test
 
 
+import java.util.Date
+
+import com.mongodb.BasicDBObject
 import com.mongodb.client.model.Filters
 import com.streamxhub.flink.core.source.MongoSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
@@ -16,7 +19,8 @@ object MongoSourceApp extends FlinkStreaming {
     val source = new MongoSource(context)
     source.getDataStream[String](x => {
       val collection = x.getCollection("shop")
-      collection.find(Filters.gte("updateTime", DateUtils.parse("2019-09-27 00:00:00")))
+      val cond = new BasicDBObject().append("updateTime", new BasicDBObject("$gte", DateUtils.parse("2019-09-27 00:00:00")))
+      collection.find(cond)
     }, x => {
       val list = new ListBuffer[String]
       while (x.hasNext) {
