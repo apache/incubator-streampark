@@ -9,7 +9,7 @@ import scala.collection.JavaConversions._
 
 object MongoConfig {
 
-  val uri = "uri"
+  val client_uri = "client-uri"
   val address = "address"
   val replica_set = "replica-set"
   val database = "database"
@@ -51,9 +51,9 @@ object MongoConfig {
 
   def getClient(properties: Properties)(implicit alias: String = ""): MongoClient = {
     val mongoParam = getProperties(properties)
-    if (mongoParam.containsKey(uri)) {
-      val uri = new MongoClientURI(mongoParam(uri))
-      new MongoClient(uri)
+    if (mongoParam.containsKey(client_uri)) {
+      val clientURI = new MongoClientURI(mongoParam(client_uri))
+      new MongoClient(clientURI)
     } else {
       // 客户端配置（连接数、副本集群验证）
       val builder = new MongoClientOptions.Builder
