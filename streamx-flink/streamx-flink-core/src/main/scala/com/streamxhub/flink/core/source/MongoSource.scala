@@ -15,6 +15,13 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.annotation.meta.param
 import scala.collection.Map
 
+
+object MongoSource {
+
+  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): MongoSource = new MongoSource(ctx, overrideParams)
+
+}
+
 class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
