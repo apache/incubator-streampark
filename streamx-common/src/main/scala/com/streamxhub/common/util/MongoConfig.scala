@@ -4,6 +4,7 @@ import com.mongodb.{MongoClient, MongoClientOptions, MongoCredential, ServerAddr
 import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
+import org.bson.codecs.configuration.CodecRegistry
 
 import scala.collection.JavaConversions._
 
@@ -122,7 +123,7 @@ object MongoConfig {
         db,
         mongoParam(password).toCharArray
       )
-      new MongoClient(serverAddresses.toList, mongoCredential, mongoClientOptions)
+      new MongoClient(serverAddresses.toList, List(mongoCredential), mongoClientOptions)
     } else {
       new MongoClient(serverAddresses.toList, mongoClientOptions)
     }
