@@ -63,7 +63,7 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => Mutation): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => List[Mutation]): DataStreamSink[T] = {
     implicit val prop: Properties = ConfigUtils.getConf(ctx.paramMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     overrideParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](tableName, fun)
@@ -72,7 +72,7 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
   }
 }
 
-class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
+class HBaseSinkFunction[T](tabName: String, fun: T => List[Mutation])(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = _
   private var table: Table = _
@@ -103,11 +103,10 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
   }
 
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
-    fun(value) match {
+    fun(value).foreach {
       case put: Put => putArray += put
       case other => mutations += other
     }
-
     (offset.incrementAndGet() % commitBatch, System.currentTimeMillis()) match {
       case (0, _) => execBatch()
       case (_, current) if current - timestamp > 1000 => execBatch()
@@ -146,7 +145,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => Mutation)(implicit prop: P
 
 }
 
-class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => Mutation)(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
+class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => List[Mutation])(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new HBaseSinkFunction[T](tabName, fun)
 
