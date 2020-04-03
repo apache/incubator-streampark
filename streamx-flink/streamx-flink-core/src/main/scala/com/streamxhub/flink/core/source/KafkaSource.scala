@@ -29,10 +29,14 @@ import com.streamxhub.flink.core.StreamingContext
 import org.apache.kafka.clients.consumer.ConsumerConfig
 
 import scala.annotation.meta.param
-import scala.collection.Map
-import scala.language.postfixOps
 import scala.collection.JavaConversions._
+import scala.collection.Map
 
+object KafkaSource {
+
+  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): KafkaSource = new KafkaSource(ctx, overrideParams)
+
+}
 /*
  * @param ctx
  * @param overrideParams

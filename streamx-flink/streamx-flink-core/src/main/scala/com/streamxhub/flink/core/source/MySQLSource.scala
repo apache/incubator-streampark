@@ -32,6 +32,12 @@ import scala.annotation.meta.param
 import scala.collection.Map
 
 
+object MySQLSource {
+
+  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): MySQLSource = new MySQLSource(ctx, overrideParams)
+
+}
+
 class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
