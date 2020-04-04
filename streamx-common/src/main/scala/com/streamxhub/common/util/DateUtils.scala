@@ -121,7 +121,11 @@ object DateUtils {
 
   def localToUTC(localTime: String, format: String = fullFormat): Date = {
     val value = new SimpleDateFormat(format).parse(localTime)
-    val localTimeInMillis = value.getTime
+    localToUTC(value)
+  }
+
+  def localToUTC(localTime: Date): Date = {
+    val localTimeInMillis = localTime.getTime
     /** long时间转换成Calendar */
     val calendar = Calendar.getInstance
     calendar.setTimeInMillis(localTimeInMillis)
@@ -129,31 +133,27 @@ object DateUtils {
     val zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET)
     /** 取得夏令时差 */
     val dstOffset = calendar.get(java.util.Calendar.DST_OFFSET)
-
     /** 从本地时间里扣除这些差量，即可以取得UTC时间 */
     calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset))
     /** 取得的时间就是UTC标准时间 */
-    val utcDate = new Date(calendar.getTimeInMillis)
-    utcDate
+    new Date(calendar.getTimeInMillis)
+  }
+
+  def utcToLocal(utcDate: Date): Date = {
+    val sdf = new SimpleDateFormat()
+    sdf.setTimeZone(TimeZone.getDefault)
+    val localTime = sdf.format(utcDate.getTime)
+    sdf.parse(localTime)
   }
 
   /**
-   *
    * <p>Description:UTC时间转化为本地时间 </p>
-   *
-   * @param utcTime
-   * @return
-   * @author wgs
-   * @date 2018年10月19日 下午2:23:24
-   *
    */
   def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
     val sdf = new SimpleDateFormat(format)
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     val utcDate: Date = sdf.parse(utcTime)
-    sdf.setTimeZone(TimeZone.getDefault)
-    val localTime = sdf.format(utcDate.getTime)
-    sdf.parse(localTime)
+    utcToLocal(utcDate)
   }
 
   def main(args: Array[String]): Unit = {
