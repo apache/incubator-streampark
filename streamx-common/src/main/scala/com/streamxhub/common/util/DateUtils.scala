@@ -23,8 +23,11 @@ package com.streamxhub.common.util
 import java.text.SimpleDateFormat
 import java.util.{Calendar, Date, TimeZone}
 
-import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.TimeZone
+import scala.util.{Failure, Success, Try}
 
 
 object DateUtils {
@@ -35,7 +38,7 @@ object DateUtils {
 
   val dayFormat2 = "yyyy-MM-dd"
 
-  def parse(date: String, format: String = fullFormat,timeZone:TimeZone = TimeZone.getDefault): Date = {
+  def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
     df.setTimeZone(timeZone)
     df.parse(date)
@@ -49,13 +52,13 @@ object DateUtils {
     milliSecond2Date(time * 1000)
   }
 
-  def now(dateFormat: String = dayFormat1,timeZone:TimeZone = TimeZone.getDefault) = {
+  def now(dateFormat: String = dayFormat1, timeZone: TimeZone = TimeZone.getDefault) = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
   }
 
-  def minuteOfDay(date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): Int = {
+  def minuteOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
@@ -70,22 +73,22 @@ object DateUtils {
     (date.getTime / 1000).toInt
   }
 
-  def secondOfDay(date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): Int = {
+  def secondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
     minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
 
-  def format(date: Date = new Date(),fmt: String = fullFormat,timeZone:TimeZone = TimeZone.getDefault): String = {
+  def format(date: Date = new Date(), fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): String = {
     if (date == null) null else {
       val simpleDateFormat = new SimpleDateFormat(fmt)
-        simpleDateFormat.setTimeZone(timeZone)
-        simpleDateFormat.format(date)
+      simpleDateFormat.setTimeZone(timeZone)
+      simpleDateFormat.format(date)
     }
   }
 
-  def getTime(time: String, fmt: String = fullFormat,timeZone:TimeZone = TimeZone.getDefault): Long = {
+  def getTime(time: String, fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Long = {
     val simpleDateFormat = new SimpleDateFormat(fmt)
     simpleDateFormat.setTimeZone(timeZone)
     Try(simpleDateFormat.parse(time).getTime)
@@ -94,7 +97,7 @@ object DateUtils {
 
 
   //获取今天之前的n天
-  def +-(i: Int, date: Date = new Date,timeZone:TimeZone = TimeZone.getDefault)(implicit format: String = dayFormat2): String = {
+  def +-(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault)(implicit format: String = dayFormat2): String = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
@@ -106,7 +109,7 @@ object DateUtils {
   }
 
   //获取今天之前的n天
-  def option(format: String, i: Int, date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): String = {
+  def option(format: String, i: Int, date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): String = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
@@ -116,8 +119,46 @@ object DateUtils {
     sdf.format(cal.getTime)
   }
 
+  def localToUTC(localTime: String, format: String = fullFormat): Date = {
+    val value = new SimpleDateFormat(format).parse(localTime)
+    val localTimeInMillis = value.getTime
+    /** long时间转换成Calendar */
+    val calendar = Calendar.getInstance
+    calendar.setTimeInMillis(localTimeInMillis)
+    /** 取得时间偏移量 */
+    val zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET)
+    /** 取得夏令时差 */
+    val dstOffset = calendar.get(java.util.Calendar.DST_OFFSET)
+
+    /** 从本地时间里扣除这些差量，即可以取得UTC时间 */
+    calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset))
+    /** 取得的时间就是UTC标准时间 */
+    val utcDate = new Date(calendar.getTimeInMillis)
+    utcDate
+  }
+
+  /**
+   *
+   * <p>Description:UTC时间转化为本地时间 </p>
+   *
+   * @param utcTime
+   * @return
+   * @author wgs
+   * @date 2018年10月19日 下午2:23:24
+   *
+   */
+  def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
+    val sdf = new SimpleDateFormat(format)
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
+    val utcDate: Date = sdf.parse(utcTime)
+    sdf.setTimeZone(TimeZone.getDefault)
+    val localTime = sdf.format(utcDate.getTime)
+    sdf.parse(localTime)
+  }
+
   def main(args: Array[String]): Unit = {
-    println(minuteOfDay())
+    val time = "2020-03-10 00:00:00"
+    println(localToUTC(time))
   }
 
 }
