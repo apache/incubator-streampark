@@ -55,8 +55,9 @@ object DateUtils {
     df.format(new Date())
   }
 
-  def minuteOfDay(date: Date = new Date()): Int = {
+  def minuteOfDay(date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
+    calendar.setTimeZone(timeZone)
     calendar.setTime(date)
     calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
   }
@@ -69,8 +70,9 @@ object DateUtils {
     (date.getTime / 1000).toInt
   }
 
-  def secondOfDay(date: Date = new Date()): Int = {
+  def secondOfDay(date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
+    calendar.setTimeZone(timeZone)
     calendar.setTime(date)
     minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
@@ -94,6 +96,7 @@ object DateUtils {
   //获取今天之前的n天
   def +-(i: Int, date: Date = new Date,timeZone:TimeZone = TimeZone.getDefault)(implicit format: String = dayFormat2): String = {
     val cal = Calendar.getInstance
+    cal.setTimeZone(timeZone)
     cal.setTime(date)
     cal.add(Calendar.DATE, i)
     val sdf = new SimpleDateFormat(format)
@@ -105,39 +108,13 @@ object DateUtils {
   //获取今天之前的n天
   def option(format: String, i: Int, date: Date = new Date(),timeZone:TimeZone = TimeZone.getDefault): String = {
     val cal = Calendar.getInstance
+    cal.setTimeZone(timeZone)
     cal.setTime(date)
     cal.add(Calendar.DATE, i)
     val sdf = new SimpleDateFormat(format)
     sdf.setTimeZone(timeZone)
     sdf.format(cal.getTime)
   }
-
-  /**
-   * 获取时间区间
-   *
-   * @param start
-   * @param end
-   * @param open 右闭区间？
-   * @return
-   */
-  def range(start: Date, end: Date, open: Boolean = false): List[Date] = {
-    var array = new ArrayBuffer[Date]()
-    //lDate.add(dBegin);
-    val calBegin: Calendar = Calendar.getInstance
-    // 使用给定的 Date 设置此 Calendar 的时间
-    calBegin.setTime(start)
-    val calEnd: Calendar = Calendar.getInstance
-    calEnd.setTime(end)
-
-    // 测试此日期是否在指定日期之后
-    while (end.after(calBegin.getTime)) {
-      array += calBegin.getTime
-      calBegin.add(Calendar.DAY_OF_MONTH, 1)
-    }
-    if (open) array += end
-    array.toList.sorted
-  }
-
 
   def main(args: Array[String]): Unit = {
     println(minuteOfDay())
