@@ -20,7 +20,6 @@
  */
 package com.streamxhub.common.util
 
-import java.lang._
 import java.util.Set
 import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
 
@@ -231,7 +230,7 @@ object RedisUtils extends Logger {
    * @param endpoint
    * @return
    */
-  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields:_*).asScala.toList)
+  def hmget(key: String, fields: String*)(implicit endpoint: RedisEndpoint): List[String] = doRedis(_.hmget(key, fields: _*).asScala.toList)
 
   /**
    *
@@ -346,16 +345,20 @@ object RedisUtils extends Logger {
   def expire(key: String, s: Int)(implicit endpoint: RedisEndpoint) = doRedis(_.expire(key, s))
 
   def delByPattern(key: String)(implicit endpoint: RedisEndpoint) = doRedis(r => {
+    /**
+     * 采用 scan 的方式,一次删除10000条记录,循环删除,防止一次加载的记录太多,内存撑爆
+     */
     val scanParams = new ScanParams
     scanParams.`match`(key)
     scanParams.count(10000)
     var cursor = ScanParams.SCAN_POINTER_START
     do {
       val scanResult = r.scan(cursor, scanParams)
-      cursor = scanResult.getStringCursor()
-      scanResult.getResult().asScala.foreach(x => {
-        r.del(x)
-      })
+      cursor = scanResult.getStringCursor
+      val keys = scanResult.getResult.asScala.toList
+      if (keys.nonEmpty) {
+        r.del(keys: _*)
+      }
     } while (cursor != "0")
   })
 
@@ -399,4 +402,5 @@ object RedisUtils extends Logger {
     }
     result
   }
+
 }
