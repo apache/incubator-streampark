@@ -161,7 +161,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           val format = properties.getOrElse("format", DateUtils.dayFormat1)
           require(path != null)
           val fileName = s"$path/$table"
-          val rootPath = new Path(s"$fileName/${DateUtils.format(format, new Date())}")
+          val rootPath = new Path(s"$fileName/${DateUtils.format(new Date(),format)}")
           try {
             if (!Lock.initialized) {
               try {
