@@ -85,8 +85,10 @@ trait FlinkStreaming extends Logger {
 
     initEnvConfig()
 
-    //checkpoint
-    checkpoint()
+    //checkpoint,not LocalModel
+    if(!env.getJavaEnv.isInstanceOf[LocalStreamEnvironment]) {
+      checkpoint()
+    }
 
     //set config by yourself...
     this.config(env, parameter)
@@ -167,7 +169,7 @@ trait FlinkStreaming extends Logger {
     }
 
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
-    if ( !env.getJavaEnv.isInstanceOf[LocalStreamEnvironment] && stateBackend != null ) {
+    if ( stateBackend != null ) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * dataDir如果从配置文件中读取失败(key:flink.checkpoints.dir),则尝试从flink-conf.yml中读取..
