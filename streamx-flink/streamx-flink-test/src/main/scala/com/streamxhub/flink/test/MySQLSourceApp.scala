@@ -7,6 +7,7 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
+import scala.collection.JavaConverters._
 
 object MySQLSourceApp extends FlinkStreaming {
 
@@ -14,17 +15,19 @@ object MySQLSourceApp extends FlinkStreaming {
     implicit val prop = new Properties()
     prop.put(KEY_INSTANCE, "test")
     prop.put(KEY_JDBC_DRIVER, "com.mysql.jdbc.Driver")
-    prop.put(KEY_JDBC_URL, "jdbc:mysql://localhost:3306/test")
+    prop.put(KEY_JDBC_URL, "jdbc:mysql://localhost:3306/test?useSSL=false")
     prop.put(KEY_JDBC_USER, "root")
     prop.put(KEY_JDBC_PASSWORD, "123322242")
     prop.put("readOnly", "false")
     prop.put("idleTimeout", "20000")
 
     val mysqlSource = new MySQLSource(context)
-    val ds = mysqlSource.getDataStream[MyPerson]("select * from student", x => x.map(r => JsonUtils.read[MyPerson](r)))
+    val ds = mysqlSource.getDataStream[Orders]("select * from orders limit 10", x => x.map(r => {
+      JsonUtils.read[Orders](r)
+    }))
     ds.print()
   }
 
 }
 
-case class MyPerson(name: String, age: Int, password: String)
+case class Orders(values: String, timestamp: Long)
