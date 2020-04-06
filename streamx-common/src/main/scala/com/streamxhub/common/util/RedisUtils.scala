@@ -157,7 +157,7 @@ object RedisUtils extends Logger {
    */
 
   def hsetnx(key: String, field: String, value: String, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(r => {
-    val x = r.hsetnx(key, value, value)
+    val x = r.hsetnx(key, field, value)
     if (x == 1 && ttl > -2) {
       r.expire(key, ttl)
     }
