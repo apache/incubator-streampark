@@ -289,27 +289,27 @@ object RedisUtils extends Logger {
 
 
   def hincrBy(key: String, field: String, value: Long, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
-    val ret = x.hincrBy(key, field, value)
-    if (ret == value && ttl > -2) x.expire(key, ttl)
-    ret
+    val reply = x.hincrBy(key, field, value)
+    if (ttl > -2) x.expire(key, ttl)
+    reply
   })
 
   def hincrByFloat(key: String, field: String, value: Double, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
-    val ret = x.hincrByFloat(key, field, value)
-    if (ret == value && ttl > -2) x.expire(key, ttl)
-    ret
+    val reply = x.hincrByFloat(key, field, value)
+    if (ttl > -2) x.expire(key, ttl)
+    reply
   })
 
   def incrBy(key: String, value: Long, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Long = doRedis(x => {
-    val ret = x.incrBy(key, value)
-    if (ret == value && ttl > -2) x.expire(key, ttl)
-    ret
+    val reply = x.incrBy(key, value)
+    if (ttl > -2) x.expire(key, ttl)
+    reply
   })
 
   def incrByFloat(key: String, value: Double, ttl: Int = -2)(implicit endpoint: RedisEndpoint): Double = doRedis(x => {
-    val ret = x.incrByFloat(key, value)
-    if (ret == value && ttl > -2) x.expire(key, ttl)
-    ret
+    val reply = x.incrByFloat(key, value)
+    if (ttl > -2) x.expire(key, ttl)
+    reply
   })
 
   /**
