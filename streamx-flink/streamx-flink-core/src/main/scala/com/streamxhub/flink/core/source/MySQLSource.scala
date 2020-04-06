@@ -30,6 +30,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
 import scala.collection.Map
+import scala.collection.JavaConverters._
 
 
 object MySQLSource {
@@ -49,7 +50,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 1000L)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => java.lang.Iterable[R], interval: Long = 1000L)(implicit config: Properties): DataStream[R] = {
     val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
     ctx.addSource(mysqlFun)
   }
@@ -65,7 +66,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => java.lang.Iterable[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -74,7 +75,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (true) {
-      resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
+      resultFun(JdbcUtils.select(sqlFun)).asScala.foreach(ctx.collect)
       Thread.sleep(interval)
     }
   }
