@@ -143,6 +143,7 @@ object DateUtils {
     val sdf = new SimpleDateFormat()
     sdf.setTimeZone(TimeZone.getDefault)
     val localTime = sdf.format(utcDate.getTime)
+    sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     sdf.parse(localTime)
   }
 
