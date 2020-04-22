@@ -98,7 +98,7 @@ object JdbcUtils {
 
   def select2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
-  private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(x => JsonUtils.read[T](JsonUtils.write(x)))
+  private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
 
   def batch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
