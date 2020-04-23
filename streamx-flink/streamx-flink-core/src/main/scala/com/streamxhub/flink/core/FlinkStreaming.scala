@@ -86,7 +86,7 @@ trait FlinkStreaming extends Logger {
     initEnvConfig()
 
     //checkpoint,not LocalModel
-    if(!env.getJavaEnv.isInstanceOf[LocalStreamEnvironment]) {
+    if (!env.getJavaEnv.isInstanceOf[LocalStreamEnvironment]) {
       checkpoint()
     }
 
@@ -169,7 +169,7 @@ trait FlinkStreaming extends Logger {
     }
 
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
-    if ( stateBackend != null ) {
+    if (stateBackend != null) {
       val dataDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * dataDir如果从配置文件中读取失败(key:flink.checkpoints.dir),则尝试从flink-conf.yml中读取..
@@ -244,15 +244,12 @@ trait FlinkStreaming extends Logger {
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R,nullable:Boolean = false, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       val outData = fun(value)
-      if(outData!=null) {
-        ctx.output(tag, outData)
-        //value为null的数据是否过滤.
-      }else if(!nullable) {
+      if (outData != null) {
         ctx.output(tag, outData)
       }
       //根据条件判断是否跳过主输出...
