@@ -244,12 +244,17 @@ trait FlinkStreaming extends Logger {
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => R,nullable:Boolean = false, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       val outData = fun(value)
-      ctx.output(tag, outData)
+      if(outData!=null) {
+        ctx.output(tag, outData)
+        //value为null的数据是否过滤.
+      }else if(!nullable) {
+        ctx.output(tag, outData)
+      }
       //根据条件判断是否跳过主输出...
       if (!skip) {
         out.collect(value)
