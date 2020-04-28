@@ -33,7 +33,6 @@ object FlinkSinkApp extends FlinkStreaming {
     //2)下沉到目标
     kfkSink.sink(ds1)
 
-
     val ds2 = source.flatMap(x => {
       x.split(",") match {
         case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
