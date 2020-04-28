@@ -112,7 +112,7 @@ object SystemPropertyUtils extends Logger {
   }
 
   def setAppHome(key: String, clazz: Class[_]): Unit = {
-    if (Try(get(key).toString).getOrElse("").trim.length > 0) { //获取主类所在jar位置或class位置.
+    if (Try(get(key)).getOrElse("").trim.length > 0) { //获取主类所在jar位置或class位置.
       val jarOrClassPath = clazz.getProtectionDomain.getCodeSource.getLocation.getPath
       val file = new File(jarOrClassPath)
       val appHome: String = if (jarOrClassPath.endsWith("jar")) { //jar包运行,将app.home定位到当前jar所在位置上两层目录
