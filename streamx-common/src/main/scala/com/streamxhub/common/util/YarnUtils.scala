@@ -21,7 +21,7 @@
 package com.streamxhub.common.util
 
 
-import java.util.EnumSet
+import java.util
 import java.util.List
 
 import org.apache.hadoop.conf.Configuration
@@ -43,7 +43,7 @@ object YarnUtils {
    */
   def getAppId(appName: String): List[ApplicationId] = {
     val client = getYarnClient()
-    val appStates = EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
+    val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
       client.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
     } catch {
@@ -65,7 +65,7 @@ object YarnUtils {
     val applicationId = ConverterUtils.toApplicationId(appId)
     val state = try {
       val applicationReport = client.getApplicationReport(applicationId)
-      applicationReport.getYarnApplicationState()
+      applicationReport.getYarnApplicationState
     } catch {
       case e:Exception => e.printStackTrace()
         null
@@ -84,7 +84,7 @@ object YarnUtils {
    */
   def isContains(appName: String): Boolean = {
     val client = getYarnClient()
-    val contains = client.getApplications(EnumSet.of(RUNNING)).filter(_.getName == appName).nonEmpty
+    val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName == appName)
     client.close()
     contains
   }
