@@ -24,10 +24,11 @@ import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.ConfigUtils
 import org.apache.flink.api.common.serialization.{DeserializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.scala.{DataStream, _}
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, KafkaDeserializationSchema}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.kafka.clients.consumer.ConsumerConfig
+import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
+import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
@@ -58,10 +59,10 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * 获取DStream 流
    * @param topic 一组topic或者单个topic
    * @param alias 别名,区分不同的kafka连接实例
-   * @param deserializer DeserializationSchema
+   * @param valueDeserializer DeserializationSchema
    * @tparam T
    */
-  def getDataStream[T:TypeInformation](topic: java.io.Serializable = "", alias: String = "",deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
+  def getDataStream[T:TypeInformation](topic: java.io.Serializable = "", alias: String = "",valueDeserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
     val topicInfo = topic match {
       case x if x.isInstanceOf[String] =>
         val topic = x.asInstanceOf[String]
@@ -77,6 +78,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
         x.asInstanceOf[List[String]] -> prop
       case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
     }
+    val deserializer = new KafkaMetricSchema(valueDeserializer)
     val consumer = new FlinkKafkaConsumer011(topicInfo._1, deserializer, topicInfo._2)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = topicInfo._2.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
@@ -88,4 +90,30 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
     ctx.addSource(consumer)
   }
 
+}
+
+
+case class KafkaRecord[T:TypeInformation](
+                        topic:String,
+                        partition:Long,
+                        timestamp:Long,
+                        offset:Long,
+                        key:String,
+                        value:T
+                      )
+
+class KafkaMetricSchema[T:TypeInformation](valueDeserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord] {
+
+  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
+    val key = if(record.key() == null) null else new String(record.key())
+    val value = valueDeserializer.deserialize(record.value())
+    val offset = record.offset()
+    val partition = record.partition()
+    val topic =  record.topic()
+    val timestamp = record.timestamp()
+
+    KafkaRecord[T](topic,partition,timestamp,offset,key,value)
+  }
+
+  override def getProducedType: TypeInformation[KafkaRecord] = getForClass(classOf[KafkaRecord[T]])
 }
