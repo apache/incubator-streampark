@@ -10,14 +10,14 @@ object KafkaSourceApp extends FlinkStreaming {
 
     //one topic
     new KafkaSource(context).getDataStream[String]("kfk1")
-      .uid("Kafka_Source")
-      .name("Kafka_Source")
+      .uid("kfkSource1")
+      .name("kfkSource1")
       .print()
 
     //more topic
     new KafkaSource(context).getDataStream[String](List("kfk1", "kfk2"))
-      .uid("Kafka_Source")
-      .name("Kafka_Source")
+      .uid("kfkSource2")
+      .name("kfkSource2")
       .print()
 
 
