@@ -28,6 +28,7 @@ import org.yaml.snakeyaml.Yaml
 import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
 import scala.collection.Map
+import collection.mutable.{Map => MMap}
 
 /**
  * @author benjobs
@@ -62,8 +63,8 @@ object PropertiesUtils {
           case other => other.toString
         }
         prefix match {
-          case "" => proper += k -> value.toString
-          case other => proper += s"$other.$k" -> value.toString
+          case "" => proper += k -> value
+          case other => proper += s"$other.$k" -> value
         }
         proper
     }
@@ -71,7 +72,7 @@ object PropertiesUtils {
 
   def fromYamlText(text: String) = {
     try {
-      val map = collection.mutable.Map[String, String]()
+      val map = MMap[String, String]()
       val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
     } catch {
@@ -96,7 +97,7 @@ object PropertiesUtils {
     require(file.isFile, s"Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
     try {
-      val map = collection.mutable.Map[String, String]()
+      val map = MMap[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
@@ -128,7 +129,7 @@ object PropertiesUtils {
   def fromYamlFile(inputStream: InputStream) = {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
-      val map = collection.mutable.Map[String, String]()
+      val map = MMap[String, String]()
       val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
       yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
