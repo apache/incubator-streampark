@@ -27,9 +27,12 @@ import com.streamxhub.common.util.ConfigUtils
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaProducer011, KafkaDeserializationSchema}
 import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
+import org.apache.kafka.clients.consumer.ConsumerRecord
 
 import scala.annotation.meta.param
 import scala.collection.Map
