@@ -7,7 +7,6 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
-import scala.collection.JavaConverters._
 
 object MySQLSourceApp extends FlinkStreaming {
 

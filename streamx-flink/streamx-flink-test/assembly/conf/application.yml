@@ -104,4 +104,9 @@ http.sink:
       user: benjobs # user
       path: /clickhouse/failover # save path
       format: yyyy-MM-dd
-
+# source config....
+kafka.source:
+  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  topic: kfk1,kfk2,kfk3
+  group.id: flink_test_20200429
+  auto.offset.reset: earliest
