@@ -31,7 +31,7 @@ object PolestarDashboardApp extends FlinkStreaming {
       .getDataStream[String]()
       .uid("Kafka_Source")
       .name("Kafka_Source")
-      .map(x => OrderEntity.build(x))
+      .map(x => OrderEntity.build(x.value))
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)

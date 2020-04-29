@@ -21,8 +21,8 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, DriverManager, SQLException}
-import java.util.Properties
+import java.sql.{Connection, DriverManager, SQLException, Statement}
+import java.util.{Optional, Properties}
 
 import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.StreamingContext
@@ -106,6 +106,8 @@ class MySQLSink(@(transient@param) ctx: StreamingContext,
 class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
   extends TwoPhaseCommitSinkFunction[T, Connection, Void](new KryoSerializer[Connection](classOf[Connection], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
+
+  override def initializeUserContext(): Optional[Void] = super.initializeUserContext()
 
   override def beginTransaction(): Connection = {
     logInfo("[StreamX] MySQLSink beginTransaction ....")
