@@ -60,9 +60,10 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @param deserializer DeserializationSchema
    * @tparam T
    */
-  def getDataStream[T](topics: List[String], alias: String = "",deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
+  def getDataStream[T](topics: List[String] = List.empty, alias: String = "",deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
     require(topics.nonEmpty,"[Streamx-Flink] topics can not be null")
-    val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topics.head, alias)
+    val headTopic = if(topics.isEmpty) "" else topics.head
+    val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, headTopic, alias)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val consumer = new FlinkKafkaConsumer011(topics, deserializer, prop)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
