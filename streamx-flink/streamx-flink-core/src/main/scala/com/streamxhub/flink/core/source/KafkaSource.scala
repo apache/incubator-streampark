@@ -20,11 +20,13 @@
  */
 package com.streamxhub.flink.core.source
 
+import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.ConfigUtils
-import org.apache.flink.api.common.serialization.{DeserializationSchema,SimpleStringSchema}
+import org.apache.flink.api.common.serialization.{DeserializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.scala.{DataStream, _}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011
 import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.kafka.clients.consumer.ConsumerConfig
 
 import scala.annotation.meta.param
@@ -41,7 +43,6 @@ object KafkaSource {
  * @param overrideParams
  */
 class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
-
   /**
    *
    * commit offset 方式:<br/>
@@ -55,19 +56,30 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    *    此时 commit offset 的间隔就取决于 checkpoint 的间隔
    *
    * 获取DStream 流
-   * @param topics topic集合
+   * @param topic 一组topic或者单个topic
    * @param alias 别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
    * @tparam T
    */
-  def getDataStream[T](topics: List[String] = List.empty, alias: String = "",deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
-    require(topics.nonEmpty,"[Streamx-Flink] topics can not be null")
-    val headTopic = if(topics.isEmpty) "" else topics.head
-    val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, headTopic, alias)
-    overrideParams.foreach(x => prop.put(x._1, x._2))
-    val consumer = new FlinkKafkaConsumer011(topics, deserializer, prop)
+  def getDataStream[T:TypeInformation](topic: java.io.Serializable = "", alias: String = "",deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
+    val topicInfo = topic match {
+      case x if x.isInstanceOf[String] =>
+        val topic = x.asInstanceOf[String]
+        val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, alias)
+        overrideParams.foreach(x => prop.put(x._1, x._2))
+        prop.remove(ConfigConst.KEY_KAFKA_TOPIC)
+        List(topic) -> prop
+      case x if x.isInstanceOf[List[String]] =>
+        val topic = x.asInstanceOf[List[String]].head
+        val prop = ConfigUtils.getKafkaSourceConf(ctx.paramMap, topic, alias)
+        overrideParams.foreach(x => prop.put(x._1, x._2))
+        prop.remove(ConfigConst.KEY_KAFKA_TOPIC)
+        x.asInstanceOf[List[String]] -> prop
+      case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
+    }
+    val consumer = new FlinkKafkaConsumer011(topicInfo._1, deserializer, topicInfo._2)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
-    val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
+    val autoCommit = topicInfo._2.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (enableChk, autoCommit) match {
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
