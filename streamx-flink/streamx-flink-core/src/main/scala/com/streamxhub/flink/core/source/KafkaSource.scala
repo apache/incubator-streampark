@@ -62,7 +62,9 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @param valueDeserializer DeserializationSchema
    * @tparam T
    */
-  def getDataStream[T:TypeInformation](topic: java.io.Serializable = "", alias: String = "",valueDeserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[T] = {
+  def getDataStream[T:TypeInformation](topic: java.io.Serializable = "",
+                                       alias: String = "",
+                                       valueDeserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[KafkaRecord[T]] = {
     val topicInfo = topic match {
       case x if x.isInstanceOf[String] =>
         val topic = x.asInstanceOf[String]
@@ -78,7 +80,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
         x.asInstanceOf[List[String]] -> prop
       case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
     }
-    val deserializer = new KafkaMetricSchema(valueDeserializer)
+    val deserializer = new KafkaMetricSchema[T](valueDeserializer)
     val consumer = new FlinkKafkaConsumer011(topicInfo._1, deserializer, topicInfo._2)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = topicInfo._2.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
@@ -93,16 +95,16 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 }
 
 
-case class KafkaRecord[T:TypeInformation](
-                        topic:String,
-                        partition:Long,
-                        timestamp:Long,
-                        offset:Long,
-                        key:String,
-                        value:T
+class KafkaRecord[T:TypeInformation](
+                       val topic:String,
+                       val partition:Long,
+                       val timestamp:Long,
+                       val offset:Long,
+                       val  key:String,
+                       val value:T
                       )
 
-class KafkaMetricSchema[T:TypeInformation](valueDeserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord] {
+class KafkaMetricSchema[T:TypeInformation](valueDeserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
     val key = if(record.key() == null) null else new String(record.key())
@@ -111,9 +113,11 @@ class KafkaMetricSchema[T:TypeInformation](valueDeserializer: DeserializationSch
     val partition = record.partition()
     val topic =  record.topic()
     val timestamp = record.timestamp()
-
-    KafkaRecord[T](topic,partition,timestamp,offset,key,value)
+    new KafkaRecord[T](topic,partition,timestamp,offset,key,value)
   }
 
-  override def getProducedType: TypeInformation[KafkaRecord] = getForClass(classOf[KafkaRecord[T]])
+  override def getProducedType: TypeInformation[KafkaRecord[T]] = getForClass(classOf[KafkaRecord[T]])
+
+  override def isEndOfStream(nextElement: KafkaRecord[T]): Boolean = false
+
 }
