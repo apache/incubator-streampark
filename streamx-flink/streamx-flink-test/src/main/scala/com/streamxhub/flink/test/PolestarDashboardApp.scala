@@ -28,7 +28,7 @@ object PolestarDashboardApp extends FlinkStreaming {
     implicit val outTime = Time.milliseconds(30 * 1000)
 
     val ds = data
-      .getDataStream()
+      .getDataStream[String]()
       .uid("Kafka_Source")
       .name("Kafka_Source")
       .map(x => OrderEntity.build(x))

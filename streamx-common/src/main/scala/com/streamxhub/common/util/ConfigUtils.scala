@@ -57,7 +57,7 @@ object ConfigUtils {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(SIGN_COMMA).length > 1) {
-            throw new IllegalArgumentException(s"Can't find a unique topic!!!")
+            throw new IllegalArgumentException(s"Can't find a unique topic!!!,you must be input a topic")
           } else top
         case t => t
       }
