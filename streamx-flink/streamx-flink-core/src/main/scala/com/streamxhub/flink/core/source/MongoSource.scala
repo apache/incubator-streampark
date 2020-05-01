@@ -34,6 +34,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @return
    */
   def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R], interval: Long)(implicit config: Properties): DataStream[R] = {
+    overrideParams.foreach(x => config.setProperty(x._1, x._2))
     val mongoFun = new MongoSourceFunction[R](queryFun, resultFun, interval)
     ctx.addSource(mongoFun)
   }
@@ -67,7 +68,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
 
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
-    while (true) {
+    while (isRunning) {
       val find = queryFun(database)
       resultFun(find.iterator).foreach(ctx.collect)
       Thread.sleep(interval)
