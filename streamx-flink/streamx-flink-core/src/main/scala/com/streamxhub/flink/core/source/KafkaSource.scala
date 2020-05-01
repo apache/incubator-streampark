@@ -59,12 +59,12 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * 获取DStream 流
    * @param topic 一组topic或者单个topic
    * @param alias 别名,区分不同的kafka连接实例
-   * @param valueDeserializer DeserializationSchema
+   * @param deserializer DeserializationSchema
    * @tparam T
    */
   def getDataStream[T:TypeInformation](topic: java.io.Serializable = "",
                                        alias: String = "",
-                                       valueDeserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[KafkaRecord[T]] = {
+                                       deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[KafkaRecord[T]] = {
     val topicInfo = topic match {
       case x if x.isInstanceOf[String] =>
         val topic = x.asInstanceOf[String]
@@ -80,8 +80,8 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
         x.asInstanceOf[List[String]] -> prop
       case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
     }
-    val deserializer = new KafkaMetricSchema[T](valueDeserializer)
-    val consumer = new FlinkKafkaConsumer011(topicInfo._1, deserializer, topicInfo._2)
+    val kfkDeserializer = new KafkaDeserializer[T](deserializer)
+    val consumer = new FlinkKafkaConsumer011(topicInfo._1, kfkDeserializer, topicInfo._2)
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = topicInfo._2.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (enableChk, autoCommit) match {
@@ -104,11 +104,11 @@ class KafkaRecord[T:TypeInformation](
                        val value:T
                       )
 
-class KafkaMetricSchema[T:TypeInformation](valueDeserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
+class KafkaDeserializer[T:TypeInformation](deserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
     val key = if(record.key() == null) null else new String(record.key())
-    val value = valueDeserializer.deserialize(record.value())
+    val value = deserializer.deserialize(record.value())
     val offset = record.offset()
     val partition = record.partition()
     val topic =  record.topic()
