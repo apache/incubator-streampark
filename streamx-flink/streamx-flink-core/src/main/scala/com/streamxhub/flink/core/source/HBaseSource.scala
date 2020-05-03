@@ -6,15 +6,14 @@ import com.streamxhub.common.util.{HBaseClient, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.hadoop.hbase.client.{Result, Scan, Table}
+import org.apache.hadoop.hbase.client._
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.TableName
-
 import scala.collection.JavaConverters._
 import scala.annotation.meta.param
-import scala.collection.Map
+import scala.collection.immutable.Map
 
 object HBaseSource {
 
@@ -26,17 +25,18 @@ object HBaseSource {
  * @param ctx
  * @param overrideParams
  */
-class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String],interval: Long) {
-  def getDataStream[R: TypeInformation](table: String, scan: Scan, fun: Result => R)(implicit config: Properties): DataStream[R] = {
+class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String], interval: Long = 0) {
+
+  def getDataStream[R: TypeInformation](table: String, query: List[Query], fun: Result => R)(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
-    val hbaseFun = new HBaseSourceFunction[R](table, scan, fun,interval)
+    val hbaseFun = new HBaseSourceFunction[R](table, query, fun, interval)
     ctx.addSource(hbaseFun)
   }
 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](table: String, scan: Scan, fun: Result => R,interval: Long)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
+class HBaseSourceFunction[R: TypeInformation](table: String, query: List[Query], fun: Result => R, interval: Long)(implicit prop: Properties) extends RichSourceFunction[R] with Serializable with Logger {
 
   private[this] var isRunning = true
 
@@ -49,9 +49,19 @@ class HBaseSourceFunction[R: TypeInformation](table: String, scan: Scan, fun: Re
   }
 
   override def run(ctx: SourceContext[R]): Unit = {
-    while (isRunning) {
-      htable.getScanner(scan).iterator().asScala.toList.foreach(x => ctx.collect(fun(x)))
-      Thread.sleep(interval)
+    query match {
+      case scan: List[Scan] =>
+        while (isRunning) {
+          scan.foreach(x => htable.getScanner(x).iterator().asScala.toList.foreach(x => ctx.collect(fun(x))))
+          Thread.sleep(interval)
+        }
+      case get: List[Get] =>
+        while (isRunning) {
+          htable.get(get.asInstanceOf[java.util.List[Get]]).toList.foreach(x => ctx.collect(fun(x)))
+          Thread.sleep(interval)
+        }
+      case _ =>
+        throw new IllegalArgumentException("[StreamX-Flink] HBaseSource error! query must Get or Scan!")
     }
   }
 

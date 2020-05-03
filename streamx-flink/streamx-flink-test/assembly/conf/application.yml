@@ -47,6 +47,9 @@ influx:
 hbase:
   zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
   zookeeper.property.clientPort: 2181
+  zookeeper.session.timeout: 1200000
+  rpc.timeout: 5000
+  client.pause: 20
 
 #clickhouse
 clickhouse.sink:
@@ -110,3 +113,4 @@ kafka.source:
   topic: kfk1,kak2,kfk3
   group.id: flink_test_20200429
   auto.offset.reset: earliest
+
