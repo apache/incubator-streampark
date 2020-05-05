@@ -57,11 +57,12 @@
                 </exclusion>
             </exclusions>
         </dependency>
+
         <!-- libthrift is required by chill-thrift -->
         <dependency>
             <groupId>org.apache.thrift</groupId>
             <artifactId>libthrift</artifactId>
-            <version>0.11.0</version>
+            <version>0.12.0</version>
             <exclusions>
                 <exclusion>
                     <groupId>javax.servlet</groupId>
