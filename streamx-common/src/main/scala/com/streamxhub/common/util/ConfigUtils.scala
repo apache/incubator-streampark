@@ -42,16 +42,13 @@ object ConfigUtils {
 
   def getInfluxConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX)
 
-  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + alias, topic)
-
-  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
-
-  private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
+  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = {
+    val prefix = KAFKA_SINK_PREFIX + alias
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
-    if (param.isEmpty) throw new IllegalArgumentException(s"${inTopic} init error...") else {
+    if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2))
-      val topic = inTopic match {
+      val _topic = topic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(SIGN_COMMA).length > 1) {
@@ -59,15 +56,17 @@ object ConfigUtils {
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(SIGN_COMMA).toSet.contains(topic))
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(SIGN_COMMA).toSet.contains(_topic))
       if (hasTopic) {
-        throw new IllegalArgumentException(s"Can't find a topic of:${topic}!!!")
+        throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
-        kafkaProperty.put(KEY_KAFKA_TOPIC, topic)
+        kafkaProperty.put(KEY_KAFKA_TOPIC, _topic)
         kafkaProperty
       }
     }
   }
+
+  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
   /**
    *
