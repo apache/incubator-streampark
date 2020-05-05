@@ -44,8 +44,6 @@ object ConfigUtils {
 
   def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SINK_PREFIX + alias, topic)
 
-  def getKafkaSourceConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = kafkaGetConf(parameter, KAFKA_SOURCE_PREFIX + alias, topic)
-
   def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
   private[this] def kafkaGetConf(parameter: JMap[String, String], prefix: String, inTopic: String): Properties = {
