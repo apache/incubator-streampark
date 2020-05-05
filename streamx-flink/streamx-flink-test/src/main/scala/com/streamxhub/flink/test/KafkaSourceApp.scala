@@ -9,10 +9,11 @@ object KafkaSourceApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
 
     //one topic
-    new KafkaSource(context).getDataStream[String]("kfk1")
+    new KafkaSource(context).getDataStream[String]()
       .uid("kfkSource1")
       .name("kfkSource1")
       .map(x=>{
+        println(x.topic)
         x.value
       })
       .print()
