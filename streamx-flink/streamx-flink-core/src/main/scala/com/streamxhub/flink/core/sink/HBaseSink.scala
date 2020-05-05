@@ -136,9 +136,9 @@ class HBaseSinkFunction[T](tabName: String, fun: T => java.lang.Iterable[Mutatio
       //mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
+        logInfo(s"[StreamX] HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
-      logInfo(s"[StreamX] HBaseSink batchSize:${commitBatch} use ${System.currentTimeMillis() - start} MS")
       timestamp = System.currentTimeMillis()
     }
   }
