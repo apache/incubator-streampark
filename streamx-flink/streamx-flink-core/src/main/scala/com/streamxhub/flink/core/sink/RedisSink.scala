@@ -20,10 +20,11 @@
  */
 package com.streamxhub.flink.core.sink
 
+import java.io.IOException
+
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
-import org.apache.flink.streaming.connectors.redis.common.config.FlinkJedisPoolConfig
+import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig}
 import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper}
 import com.streamxhub.flink.core.StreamingContext
 
@@ -31,10 +32,17 @@ import scala.collection.JavaConversions._
 import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
+import org.apache.commons.pool2.impl.GenericObjectPoolConfig
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
+import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand._
+import org.apache.flink.streaming.connectors.redis.common.container.{RedisCommandsContainer, RedisContainer => RContainer}
+import redis.clients.jedis.{Jedis, JedisPool}
 
 import scala.annotation.meta.param
 
 object RedisSink {
+
   def apply(@(transient@param) ctx: StreamingContext,
             overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
@@ -50,7 +58,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
                ) extends Sink {
 
   @Override
-  def sink[T](stream: DataStream[T])(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], ttl: Int = Int.MaxValue)(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
     val config = ConfigUtils.getConf(ctx.paramMap, REDIS_PREFIX)
     overrideParams.foreach(x => config.put(x._1, x._2))
@@ -61,17 +69,100 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
       case (KEY_PASSWORD, password) => builder.setPassword(password)
       case _ =>
     }
-    val sink = stream.addSink(new RSink[T](builder.build(), mapper))
+    val sink = stream.addSink(new RedisSinkFunction[T](builder.build(), mapper, ttl))
     afterSink(sink, parallelism, name, uid)
   }
 
 }
 
 case class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => String) extends RedisMapper[T] {
+
   override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, key)
 
   override def getKeyFromData(r: T): String = k(r)
 
   override def getValueFromData(r: T): String = v(r)
+
+}
+
+
+class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: RedisMapper[R], ttl: Int) extends RSink[R](jedisConfig, redisMapper) {
+
+  var redisContainer: RedisCommandsContainer = _
+  var additionalKey: String = _
+  var redisCommand: RedisCommand = _
+
+  @throws[Exception]
+  override def open(parameters: Configuration): Unit = {
+    val jedisPoolConfig = jedisConfig.asInstanceOf[FlinkJedisPoolConfig]
+    val genericObjectPoolConfig = new GenericObjectPoolConfig
+    genericObjectPoolConfig.setMaxIdle(jedisPoolConfig.getMaxIdle)
+    genericObjectPoolConfig.setMaxTotal(jedisPoolConfig.getMaxTotal)
+    genericObjectPoolConfig.setMinIdle(jedisPoolConfig.getMinIdle)
+    val jedisPool = new JedisPool(
+      genericObjectPoolConfig,
+      jedisPoolConfig.getHost,
+      jedisPoolConfig.getPort,
+      jedisPoolConfig.getConnectionTimeout,
+      jedisPoolConfig.getPassword,
+      jedisPoolConfig.getDatabase
+    )
+    redisContainer = new RedisContainer(jedisPool, ttl)
+    val redisCommandDescription = redisMapper.getCommandDescription
+    this.redisCommand = redisCommandDescription.getCommand
+    this.additionalKey = redisCommandDescription.getAdditionalKey
+  }
+
+  override def invoke(input: R): Unit = {
+    val key = redisMapper.getKeyFromData(input)
+    val value = redisMapper.getValueFromData(input)
+    this.redisCommand match {
+      case RPUSH => this.redisContainer.rpush(key, value)
+      case LPUSH => this.redisContainer.lpush(key, value)
+      case SADD => this.redisContainer.sadd(key, value)
+      case SET => this.redisContainer.set(key, value)
+      case PFADD => this.redisContainer.pfadd(key, value)
+      case PUBLISH => this.redisContainer.publish(key, value)
+      case ZADD => this.redisContainer.zadd(this.additionalKey, value, key)
+      case ZREM => this.redisContainer.zrem(this.additionalKey, key)
+      case HSET => this.redisContainer.hset(this.additionalKey, key, value)
+      case _ => throw new IllegalArgumentException("Cannot process such data type: " + redisCommand)
+    }
+  }
+
+  @throws[IOException]
+  override def close(): Unit = if (redisContainer != null) redisContainer.close()
+
+}
+
+class RedisContainer(jedisPool: JedisPool, ttl: Int) extends RContainer(jedisPool) {
+
+  override def hset(key: String, hashField: String, value: String): Unit = doRedis(r => r.hset(key, hashField, value), key)
+
+  override def rpush(key: String, value: String): Unit = doRedis(r => r.rpush(key, value), key)
+
+  override def lpush(key: String, value: String): Unit = doRedis(r => r.lpush(key, value), key)
+
+  override def sadd(key: String, value: String): Unit = doRedis(r => r.sadd(key, value), key)
+
+  override def publish(key: String, message: String): Unit = doRedis(r => r.publish(key, message), key)
+
+  override def set(key: String, value: String): Unit = doRedis(r => r.set(key, value), key)
+
+  override def pfadd(key: String, element: String): Unit = doRedis(r => r.pfadd(key, element), key)
+
+  override def zadd(key: String, score: String, element: String): Unit = doRedis(r => r.zadd(key, score.toDouble, element), key)
+
+  override def zrem(key: String, element: String): Unit = doRedis(r => r.zrem(key, element), key)
+
+  def doRedis(fun: Jedis => Unit, key: String): Unit = {
+    val jedis = jedisPool.getResource
+    fun(jedis)
+    if (ttl < Int.MaxValue) {
+      jedis.expire(key, ttl)
+    }
+    jedis.close()
+  }
+
 }
 
