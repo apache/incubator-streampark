@@ -76,7 +76,9 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
       case x if x.isInstanceOf[String] =>
         x.asInstanceOf[String] match {
           case "" => topics.toList -> prop
-          case t => List(t) -> prop
+          case t =>
+            require(topics.contains(t),s"[Streamx-Flink] can't found $t from config")
+            List(t) -> prop
         }
       case x if x.isInstanceOf[List[String]] => x.asInstanceOf[List[String]] -> prop
       case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
