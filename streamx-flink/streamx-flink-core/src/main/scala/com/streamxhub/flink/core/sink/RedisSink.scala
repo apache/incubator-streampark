@@ -125,7 +125,7 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: Redis
       case ZADD => this.redisContainer.zadd(redisMapper.getCommandDescription.getAdditionalKey, value, key)
       case ZREM => this.redisContainer.zrem(redisMapper.getCommandDescription.getAdditionalKey, key)
       case HSET => this.redisContainer.hset(redisMapper.getCommandDescription.getAdditionalKey, key, value)
-      case other => throw new IllegalArgumentException("Cannot process such data type: " + other)
+      case other => throw new IllegalArgumentException("[StreamX-Flink] RedisSink:Cannot process such data type: " + other)
     }
   }
 
