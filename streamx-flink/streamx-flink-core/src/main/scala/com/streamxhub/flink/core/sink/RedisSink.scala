@@ -31,7 +31,7 @@ import com.streamxhub.flink.core.StreamingContext
 import scala.collection.JavaConversions._
 import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
@@ -90,7 +90,7 @@ case class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => Str
 }
 
 
-class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: RedisMapper[R], ttl: Int) extends RSink[R](jedisConfig, redisMapper) {
+class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: RedisMapper[R], ttl: Int) extends RSink[R](jedisConfig, redisMapper) with Logger {
 
   private[this] var redisContainer: RedisCommandsContainer = _
 
@@ -109,7 +109,14 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: Redis
       jedisPoolConfig.getPassword,
       jedisPoolConfig.getDatabase
     )
-    redisContainer = new RedisContainer(jedisPool, ttl)
+    try {
+      redisContainer = new RedisContainer(jedisPool, ttl)
+      redisContainer.open()
+    } catch {
+      case e: Exception =>
+        logger.error("[StreamX-Flink] RedisSink:Redis has not been properly initialized: ", e)
+        throw e
+    }
   }
 
   override def invoke(input: R): Unit = {
