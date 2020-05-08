@@ -69,10 +69,11 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
       case (KEY_PASSWORD, password) => builder.setPassword(password)
       case _ =>
     }
-    val sink = ttl match {
-      case Int.MaxValue => stream.addSink(new RSink[T](builder.build(), mapper))
-      case _ => stream.addSink(new RedisSinkFunction[T](builder.build(), mapper, ttl))
+    val sinkFun = ttl match {
+      case Int.MaxValue => new RSink[T](builder.build(), mapper)
+      case _ => new RedisSinkFunction[T](builder.build(), mapper, ttl)
     }
+    val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
