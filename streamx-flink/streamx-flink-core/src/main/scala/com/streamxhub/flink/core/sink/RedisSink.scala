@@ -69,7 +69,10 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
       case (KEY_PASSWORD, password) => builder.setPassword(password)
       case _ =>
     }
-    val sink = stream.addSink(new RedisSinkFunction[T](builder.build(), mapper, ttl))
+    val sink = ttl match {
+      case Int.MaxValue => stream.addSink(new RSink[T](builder.build(), mapper))
+      case _ => stream.addSink(new RedisSinkFunction[T](builder.build(), mapper, ttl))
+    }
     afterSink(sink, parallelism, name, uid)
   }
 
@@ -88,9 +91,7 @@ case class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => Str
 
 class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: RedisMapper[R], ttl: Int) extends RSink[R](jedisConfig, redisMapper) {
 
-  var redisContainer: RedisCommandsContainer = _
-  var additionalKey: String = _
-  var redisCommand: RedisCommand = _
+  private[this] var redisContainer: RedisCommandsContainer = _
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
@@ -108,25 +109,22 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: Redis
       jedisPoolConfig.getDatabase
     )
     redisContainer = new RedisContainer(jedisPool, ttl)
-    val redisCommandDescription = redisMapper.getCommandDescription
-    this.redisCommand = redisCommandDescription.getCommand
-    this.additionalKey = redisCommandDescription.getAdditionalKey
   }
 
   override def invoke(input: R): Unit = {
     val key = redisMapper.getKeyFromData(input)
     val value = redisMapper.getValueFromData(input)
-    this.redisCommand match {
+    redisMapper.getCommandDescription.getCommand match {
       case RPUSH => this.redisContainer.rpush(key, value)
       case LPUSH => this.redisContainer.lpush(key, value)
       case SADD => this.redisContainer.sadd(key, value)
       case SET => this.redisContainer.set(key, value)
       case PFADD => this.redisContainer.pfadd(key, value)
       case PUBLISH => this.redisContainer.publish(key, value)
-      case ZADD => this.redisContainer.zadd(this.additionalKey, value, key)
-      case ZREM => this.redisContainer.zrem(this.additionalKey, key)
-      case HSET => this.redisContainer.hset(this.additionalKey, key, value)
-      case _ => throw new IllegalArgumentException("Cannot process such data type: " + redisCommand)
+      case ZADD => this.redisContainer.zadd(redisMapper.getCommandDescription.getAdditionalKey, value, key)
+      case ZREM => this.redisContainer.zrem(redisMapper.getCommandDescription.getAdditionalKey, key)
+      case HSET => this.redisContainer.hset(redisMapper.getCommandDescription.getAdditionalKey, key, value)
+      case other => throw new IllegalArgumentException("Cannot process such data type: " + other)
     }
   }
 
@@ -158,9 +156,7 @@ class RedisContainer(jedisPool: JedisPool, ttl: Int) extends RContainer(jedisPoo
   def doRedis(fun: Jedis => Unit, key: String): Unit = {
     val jedis = jedisPool.getResource
     fun(jedis)
-    if (ttl < Int.MaxValue) {
-      jedis.expire(key, ttl)
-    }
+    jedis.expire(key, ttl)
     jedis.close()
   }
 
