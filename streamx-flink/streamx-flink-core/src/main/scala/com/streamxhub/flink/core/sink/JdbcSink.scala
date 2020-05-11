@@ -69,7 +69,7 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL, isolationLevel: Int = -1)(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getJdbcConf(ctx.paramMap, dialect.toString.toLowerCase, alias)
+    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString.toLowerCase, alias)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
     val sink = stream.addSink(sinkFun)

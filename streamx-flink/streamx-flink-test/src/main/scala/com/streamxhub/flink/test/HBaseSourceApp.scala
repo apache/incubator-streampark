@@ -23,7 +23,7 @@ object HBaseSourceApp extends FlinkStreaming {
   }
 
   override def handler(context: StreamingContext): Unit = {
-    implicit val conf = ConfigUtils.getHBaseConfig(context.paramMap)
+    implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
     val scan = new Scan()
     new HBaseSource(context).getDataStream[String]("test:user",List(scan), x=>{
       print(x)

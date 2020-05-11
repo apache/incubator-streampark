@@ -88,7 +88,7 @@ class MySQLSink(@(transient@param) ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = getMySQLConf(ctx.paramMap)(alias)
+    val prop = getMySQLConf(ctx.parameter.toMap)(alias)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val sinkFun = new MySQLSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)

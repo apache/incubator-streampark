@@ -73,7 +73,7 @@ class ClickHouseSink(@(transient@param) ctx: StreamingContext,
                      name: String = null,
                      uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
-  val prop = ConfigUtils.getConf(ctx.paramMap, CLICKHOUSE_SINK_PREFIX)(alias)
+  val prop = ConfigUtils.getConf(ctx.parameter.toMap, CLICKHOUSE_SINK_PREFIX)(alias)
   overrideParams.foreach { case (k, v) => prop.put(k, v) }
 
   /**
