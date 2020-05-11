@@ -68,7 +68,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
                                         alias: String = "",
                                         deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]): DataStream[KafkaRecord[T]] = {
 
-    val prop = ConfigUtils.getConf(ctx.paramMap, KAFKA_SOURCE_PREFIX + alias)
+    val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
     val topics = prop.remove(KEY_KAFKA_TOPIC).toString.split(",")
     require(topics.nonEmpty)

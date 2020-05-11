@@ -29,7 +29,7 @@ import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
 
 
-class DataSetContext(val parameter: ParameterTool, val env: ExecutionEnvironment) extends ExecutionEnvironment(env.getJavaEnv)
+class DataSetContext(val parameter: ParameterTool,private val env: ExecutionEnvironment) extends ExecutionEnvironment(env.getJavaEnv)
 
 trait FlinkDataSet extends Logger {
 
