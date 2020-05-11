@@ -35,8 +35,7 @@ object RedisClient extends Logger {
 
   @transient
   @getter
-  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] =
-    new ConcurrentHashMap[RedisEndpoint, JedisPool]()
+  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] = new ConcurrentHashMap[RedisEndpoint, JedisPool]()
 
   @transient
   @getter
@@ -49,7 +48,7 @@ object RedisClient extends Logger {
    * @return
    */
   def connect(res: Array[RedisEndpoint]): Jedis = {
-    assert(res.length > 0, "The RedisEndpoint array is empty!!!")
+    require(res.length > 0, "The RedisEndpoint array is empty!!!")
     val rnd = scala.util.Random.nextInt().abs % res.length
     try {
       connect(res(rnd))
@@ -87,12 +86,13 @@ object RedisClient extends Logger {
   /**
    * 创建一个连接池
    *
-   * @param re
+   * @param endpoint
    * @return
    */
-  def createJedisPool(re: RedisEndpoint): JedisPool = {
-    println(s"createJedisPool with $re ")
-    new JedisPool(poolConfig, re.host, re.port, re.timeout, re.auth, re.db)
+  def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
+    val endnoAuth = endpoint.copy(auth = "********")
+    logger.info(s"[StreamX-Flink]RedisClient: createJedisPool with $endnoAuth ")
+    new JedisPool(poolConfig, endpoint.host, endpoint.port, endpoint.timeout, endpoint.auth, endpoint.db)
   }
 
   private lazy val poolConfig = {
@@ -116,16 +116,12 @@ object RedisClient extends Logger {
   }
 
   def connectCluster(res: RedisEndpoint*): JedisCluster = {
-
-    assert(res.nonEmpty, "The RedisEndpoint array is empty!!!")
-
+    require(res.nonEmpty, "The RedisEndpoint array is empty!!!")
     val head = res.head
-
     val cluster = clusters.getOrElseUpdate(head, {
       val haps = res.map(r => new HostAndPort(r.host, r.port)).toSet
       new JedisCluster(haps, head.timeout, 1000, 1, head.auth, poolConfig)
     })
-
     cluster
   }
 
@@ -146,8 +142,8 @@ object RedisClient extends Logger {
     Try {
       cluster.close()
     } match {
-      case Success(o) => logger.debug("jedis.close successful.")
-      case Failure(o) => logger.error("jedis.close failed.")
+      case Success(_) => logger.debug("jedis.close successful.")
+      case Failure(_) => logger.error("jedis.close failed.")
     }
     result
   }
@@ -160,8 +156,8 @@ object RedisClient extends Logger {
       pipe.close()
       jedis.close()
     } match {
-      case Success(o) => logger.debug("pipe.close successful.")
-      case Failure(o) => logger.error("pipe.close failed.")
+      case Success(_) => logger.debug("pipe.close successful.")
+      case Failure(_) => logger.error("pipe.close failed.")
     }
     result
   }
