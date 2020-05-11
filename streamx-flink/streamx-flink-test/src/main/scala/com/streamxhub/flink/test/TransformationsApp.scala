@@ -22,7 +22,7 @@ object TransformationsApp extends FlinkDataSet {
     /**
      * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html
      */
-    val stream = context.env.readTextFile("data/in/num.txt")
+    val stream = context.readTextFile("data/in/num.txt")
 
     /**
      *
@@ -59,7 +59,7 @@ object TransformationsApp extends FlinkDataSet {
       override def toString: String = s"word:${word},count:${count}"
     }
 
-    val words: DataSet[WC] = context.env.readTextFile("data/in/wordcount.txt")
+    val words: DataSet[WC] = context.readTextFile("data/in/wordcount.txt")
       .flatMap(_.split("\\s+"))
       .map(x => WC(x, 1))
 
@@ -88,7 +88,7 @@ object TransformationsApp extends FlinkDataSet {
      * 元祖类型的数据,根据数据的字段位置进行分组(必须是元祖类型的数据)
      * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#reduce-on-dataset-grouped-by-field-position-keys-tuple-datasets-only
      */
-    val tuples: DataSet[(String, Int, Double)] = context.env.fromCollection(
+    val tuples: DataSet[(String, Int, Double)] = context.fromCollection(
       List(
         ("a", 1, 1.001),
         ("a", 1, 1.002),
@@ -106,7 +106,7 @@ object TransformationsApp extends FlinkDataSet {
      * 根据case class的字段进行分组,reduce
      */
     case class MyClass(val a: String, b: Int, c: Double)
-    val tuples2: DataSet[MyClass] = context.env.fromCollection(List(
+    val tuples2: DataSet[MyClass] = context.fromCollection(List(
       MyClass("a", 1, 1.001),
       MyClass("a", 1, 1.002),
       MyClass("b", 2, 1.002),
@@ -123,7 +123,7 @@ object TransformationsApp extends FlinkDataSet {
      */
     println(" GroupReduce on Grouped DataSet)--------------------------------------")
 
-    val input: DataSet[(Int, String)] = context.env.fromCollection(List(
+    val input: DataSet[(Int, String)] = context.fromCollection(List(
       1 -> "g",
       1 -> "x",
       1 -> "i",
@@ -192,7 +192,7 @@ object TransformationsApp extends FlinkDataSet {
         out.collect(r)
       }
     }
-    val input2: DataSet[(String, Int)] = context.env.fromCollection(List(
+    val input2: DataSet[(String, Int)] = context.fromCollection(List(
       "a" -> 12,
       "a" -> 16,
       "a" -> 33,
@@ -218,7 +218,7 @@ object TransformationsApp extends FlinkDataSet {
       4 -> "react"
     )
     //分组取指定条数据
-    val groupData = context.env.fromCollection(listData)
+    val groupData = context.fromCollection(listData)
 
     groupData.groupBy(0).first(2).print()
 
@@ -253,7 +253,7 @@ object TransformationsApp extends FlinkDataSet {
      * GroupCombine on a Grouped DataSet
      */
     println(" GroupCombine on a Grouped DataSet --------------------------------------")
-    val input4 = context.env.readTextFile("data/in/wordcount.txt").flatMap(_.split("\\s+")).map(Tuple1(_))
+    val input4 = context.readTextFile("data/in/wordcount.txt").flatMap(_.split("\\s+")).map(Tuple1(_))
     val combinedWords: DataSet[(String, Int)] = input4
       .groupBy(0)
       .combineGroup {
