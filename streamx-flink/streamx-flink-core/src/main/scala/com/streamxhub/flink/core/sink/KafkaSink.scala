@@ -59,7 +59,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    */
   def sink[T](stream: DataStream[T], topic: String = "", serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]])(
     implicit customPartitioner: FlinkKafkaPartitioner[T] = new FlinkFixedPartitioner[T]): DataStreamSink[T] = {
-    val prop = ConfigUtils.getKafkaSinkConf(ctx.paramMap, topic)
+    val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
     val producer = new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(customPartitioner))
