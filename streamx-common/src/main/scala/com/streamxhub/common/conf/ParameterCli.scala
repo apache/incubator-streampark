@@ -28,8 +28,6 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
-import org.apache.commons.cli.Options
-
 object ParameterCli {
 
   private[this] val optionPrefix = "flink.deployment.option."
@@ -90,7 +88,7 @@ object ParameterCli {
       //验证参数是否合法...
       flinkOptions.hasOption(key)
     }).foreach(x => {
-      Try(x._2.toBoolean).getOrElse(x._2.toString) match {
+      Try(x._2.toBoolean).getOrElse(x._2) match {
         case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
         case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
       }
