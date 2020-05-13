@@ -48,7 +48,7 @@ import scala.util.Try
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool,private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
 }
 
