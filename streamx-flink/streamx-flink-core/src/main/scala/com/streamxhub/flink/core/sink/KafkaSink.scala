@@ -62,8 +62,10 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
     val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
-    val producer = new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(customPartitioner))
-
+    val producer = customPartitioner match {
+      case null => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]])
+      case other => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(other))
+    }
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
      * this method is not available for earlier Kafka versions
