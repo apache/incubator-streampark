@@ -23,13 +23,14 @@ package com.streamxhub.flink.core.sink
 import java.util.Optional
 
 import com.streamxhub.common.conf.ConfigConst
-import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
+import org.apache.flink.util.Preconditions
 
 import scala.annotation.meta.param
 import scala.collection.Map
@@ -57,15 +58,16 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], topic: String = "", serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]])(
-    implicit customPartitioner: FlinkKafkaPartitioner[T] = new FlinkFixedPartitioner[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T],
+              topic: String = "",
+              serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
+              customPartitioner: FlinkKafkaPartitioner[T] = new BalancePartitioner(ctx.getParallelism)): DataStreamSink[T] = {
+
     val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
     val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
-    val producer = customPartitioner match {
-      case null => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]])
-      case other => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(other))
-    }
+    val producer = new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(customPartitioner))
+
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
      * this method is not available for earlier Kafka versions
@@ -74,5 +76,38 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
     val sink = stream.addSink(producer)
     afterSink(sink, parallelism, name, uid)
   }
+
+}
+
+class BalancePartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] with Logger {
+
+  private var parallelInstanceId = 0
+
+  var partitionIndex: Int = 0
+
+  override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
+    logger.info(s"[StreamX-Flink] BalancePartitioner: parallelism $parallelism")
+    Preconditions.checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] BalancePartitioner:Id of this subtask cannot be negative.")
+    Preconditions.checkArgument(parallelInstances > 0, "[StreamX-Flink] BalancePartitioner:Number of subtasks must be larger than 0.")
+    this.parallelInstanceId = parallelInstanceId
+  }
+
+  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
+    Preconditions.checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] BalancePartitioner:Partitions of the target topic is empty.")
+    if (parallelism % partitions.length == 0) {
+      partitions(parallelInstanceId % partitions.length)
+    } else {
+      if (partitionIndex == partitions.length) {
+        partitionIndex = 1
+      } else {
+        partitionIndex += 1
+      }
+      partitionIndex
+    }
+  }
+
+  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[FlinkFixedPartitioner]
+
+  override def hashCode: Int = classOf[FlinkFixedPartitioner[T]].hashCode
 
 }
