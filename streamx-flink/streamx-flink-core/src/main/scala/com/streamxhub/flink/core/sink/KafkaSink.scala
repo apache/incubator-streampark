@@ -93,18 +93,18 @@ class BalancePartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] w
     this.parallelInstanceId = parallelInstanceId
   }
 
-  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]):Int = {
+  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
     checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] BalancePartitioner:Partitions of the target topic is empty.")
     if (parallelism % partitions.length == 0) partitions(parallelInstanceId % partitions.length) else {
-      if (partitionIndex == partitions.length) partitionIndex = 1 else partitionIndex += 1
+      if (partitionIndex == partitions.length - 1) partitionIndex = 0 else partitionIndex += 1
       partitionIndex
     }
   }
 
-  override def equals(o: Any):Boolean = this == o || o.isInstanceOf[BalancePartitioner[T]]
+  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[BalancePartitioner[T]]
 
-  override def hashCode:Int = classOf[BalancePartitioner[T]].hashCode
+  override def hashCode: Int = classOf[BalancePartitioner[T]].hashCode
 
-  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit =  if (!condition) throw new IllegalArgumentException(errorMessage)
+  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit = if (!condition) throw new IllegalArgumentException(errorMessage)
 
 }
