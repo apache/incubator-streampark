@@ -29,6 +29,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
+import javax.annotation.Nullable
 import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
 import org.apache.flink.util.Preconditions
 
@@ -61,7 +62,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
   def sink[T](stream: DataStream[T],
               topic: String = "",
               serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
-              customPartitioner: FlinkKafkaPartitioner[T] = new BalancePartitioner(ctx.getParallelism)): DataStreamSink[T] = {
+              customPartitioner: FlinkKafkaPartitioner[T] = new BalancePartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
 
     val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
@@ -87,27 +88,23 @@ class BalancePartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] w
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
     logger.info(s"[StreamX-Flink] BalancePartitioner: parallelism $parallelism")
-    Preconditions.checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] BalancePartitioner:Id of this subtask cannot be negative.")
-    Preconditions.checkArgument(parallelInstances > 0, "[StreamX-Flink] BalancePartitioner:Number of subtasks must be larger than 0.")
+    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] BalancePartitioner:Id of this subtask cannot be negative.")
+    checkArgument(parallelInstances > 0, "[StreamX-Flink] BalancePartitioner:Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 
-  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    Preconditions.checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] BalancePartitioner:Partitions of the target topic is empty.")
-    if (parallelism % partitions.length == 0) {
-      partitions(parallelInstanceId % partitions.length)
-    } else {
-      if (partitionIndex == partitions.length) {
-        partitionIndex = 1
-      } else {
-        partitionIndex += 1
-      }
+  override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]):Int = {
+    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] BalancePartitioner:Partitions of the target topic is empty.")
+    if (parallelism % partitions.length == 0) partitions(parallelInstanceId % partitions.length) else {
+      if (partitionIndex == partitions.length) partitionIndex = 1 else partitionIndex += 1
       partitionIndex
     }
   }
 
-  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[FlinkFixedPartitioner]
+  override def equals(o: Any):Boolean = this == o || o.isInstanceOf[BalancePartitioner[T]]
 
-  override def hashCode: Int = classOf[FlinkFixedPartitioner[T]].hashCode
+  override def hashCode:Int = classOf[BalancePartitioner[T]].hashCode
+
+  def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit =  if (!condition) throw new IllegalArgumentException(errorMessage)
 
 }
