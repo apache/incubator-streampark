@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.sink
 
 import java.util.Optional
-import java.util.concurrent.atomic.{AtomicInteger, AtomicLong}
+import java.util.concurrent.atomic.AtomicInteger
 
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.{ConfigUtils, Logger}
@@ -31,8 +31,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
-import org.apache.flink.streaming.connectors.kafka.partitioner.{FlinkFixedPartitioner, FlinkKafkaPartitioner}
-import org.apache.flink.util.Preconditions
+import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
 import scala.annotation.meta.param
 import scala.collection.Map
@@ -85,7 +84,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
 
 /**
  *
- * 水平写到kafka各个分区的分区器.
+ * <b>EqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去
  *
  * @param parallelism
  * @tparam T
@@ -98,14 +97,15 @@ class EqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] 
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
     logger.info(s"[StreamX-Flink] BalancePartitioner: parallelism $parallelism")
-    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] BalancePartitioner:Id of this subtask cannot be negative.")
-    checkArgument(parallelInstances > 0, "[StreamX-Flink] BalancePartitioner:Number of subtasks must be larger than 0.")
+    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] EqualityPartitioner:Id of this subtask cannot be negative.")
+    checkArgument(parallelInstances > 0, "[StreamX-Flink] EqualityPartitioner:Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 
   override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] BalancePartitioner:Partitions of the target topic is empty.")
+    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] EqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
+      case (_, 1) => 0 //kafka only have 1 partition
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
       case (_, y) => if (partitionIndex.get() == y - 1) partitionIndex.getAndSet(0) else partitionIndex.getAndIncrement()
     }
