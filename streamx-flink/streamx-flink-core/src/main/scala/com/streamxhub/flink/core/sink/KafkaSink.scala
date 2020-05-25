@@ -55,7 +55,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @param stream
    * @param topic
    * @param serializationSchema 序列化Scheam,不指定默认使用SimpleStringSchema
-   * @param customPartitioner   指定kafka分区器(默认使用<b>EqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
+   * @param customPartitioner   指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
    *                            注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
    *                            )
    * @tparam T
@@ -64,7 +64,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
   def sink[T](stream: DataStream[T],
               topic: String = "",
               serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
-              customPartitioner: FlinkKafkaPartitioner[T] = new EqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
+              customPartitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
 
     val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
     overrideParams.foreach(x => prop.put(x._1, x._2))
@@ -84,26 +84,26 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
 
 /**
  *
- * <b>EqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去
+ * <b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去
  *
  * @param parallelism
  * @tparam T
  */
-class EqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] with Logger {
+class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] with Logger {
 
   private[this] var parallelInstanceId = 0
 
   private[this] val partitionIndex: AtomicInteger = new AtomicInteger(0)
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
-    logger.info(s"[StreamX-Flink] BalancePartitioner: parallelism $parallelism")
-    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] EqualityPartitioner:Id of this subtask cannot be negative.")
-    checkArgument(parallelInstances > 0, "[StreamX-Flink] EqualityPartitioner:Number of subtasks must be larger than 0.")
+    logger.info(s"[StreamX-Flink] KafkaEqualityPartitioner: parallelism $parallelism")
+    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] KafkaEqualityPartitioner:Id of this subtask cannot be negative.")
+    checkArgument(parallelInstances > 0, "[StreamX-Flink] KafkaEqualityPartitioner:Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 
   override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] EqualityPartitioner:Partitions of the target topic is empty.")
+    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
       case (_, 1) => 0 //kafka only have 1 partition
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
@@ -111,9 +111,9 @@ class EqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitioner[T] 
     }
   }
 
-  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[EqualityPartitioner[T]]
+  override def equals(o: Any): Boolean = this == o || o.isInstanceOf[KafkaEqualityPartitioner[T]]
 
-  override def hashCode: Int = classOf[EqualityPartitioner[T]].hashCode
+  override def hashCode: Int = classOf[KafkaEqualityPartitioner[T]].hashCode
 
   def checkArgument(condition: Boolean, @Nullable errorMessage: String): Unit = if (!condition) throw new IllegalArgumentException(errorMessage)
 
