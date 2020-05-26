@@ -62,13 +62,11 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @param topic        一组topic或者单个topic
    * @param alias        别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
-   * @param consumerSetting
    * @tparam T
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
-                                        deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
-                                        consumerSetting: FlinkKafkaConsumer011[KafkaRecord[T]] => Unit = null
+                                        deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
@@ -94,9 +92,6 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
       case _ =>
-    }
-    if (consumerSetting != null) {
-      consumerSetting(consumer)
     }
     ctx.addSource(consumer)
   }
