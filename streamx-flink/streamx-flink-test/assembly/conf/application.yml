@@ -109,14 +109,8 @@ http.sink:
       format: yyyy-MM-dd
 # source config....
 kafka.source:
-  gmv:
-    bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-    topic: hopsonone_intel_order
-    group.id: flink_gmv_202004291911
-    auto.offset.reset: earliest
-  flow:
-    bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-    topic: shopsonone_dbo_transsku
-    group.id: flink_flow_202004291911
-    auto.offset.reset: earliest
+  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  topic: hopsonone_park_sh_tc_record
+  group.id: flink_test
+  auto.offset.reset: earliest
 

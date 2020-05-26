@@ -28,6 +28,8 @@ import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, Kafka
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
+import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
+import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import scala.annotation.meta.param
@@ -62,11 +64,13 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @param topic        一组topic或者单个topic
    * @param alias        别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
+   * @param ascendingFun AssignerWithPeriodicWatermarks
    * @tparam T
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
-                                        deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]]
+                                        deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
+                                        ascendingFun: KafkaRecord[T] => Long = null
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
@@ -93,6 +97,15 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
       case _ =>
     }
+
+    if (ascendingFun != null) {
+      val assignerWithPeriodicWatermarks = consumer.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
+      assignerWithPeriodicWatermarks.setAccessible(true)
+      assignerWithPeriodicWatermarks.invoke(consumer, new AscendingTimestampExtractor[KafkaRecord[T]]() {
+        override def extractAscendingTimestamp(element: KafkaRecord[T]): Long = ascendingFun(element)
+      })
+    }
+
     ctx.addSource(consumer)
   }
 
