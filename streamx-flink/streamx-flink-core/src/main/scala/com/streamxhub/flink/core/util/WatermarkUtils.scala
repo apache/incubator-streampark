@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.core.util
 
-import org.apache.flink.streaming.api.functions.timestamps.BoundedOutOfOrdernessTimestampExtractor
+import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks}
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
@@ -39,6 +39,12 @@ object WatermarkUtils {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
 
       override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag)
+    }
+  }
+
+  def ascendingWatermark[T](fun: T => Long): AscendingTimestampExtractor[T] = {
+    new AscendingTimestampExtractor[T] {
+      def extractAscendingTimestamp(element: T): Long = fun(element)
     }
   }
 
