@@ -46,7 +46,7 @@ object KafkaSource {
  * @param ctx
  * @param overrideParams
  */
-class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
+class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
   /**
    *
    * commit offset 方式:<br/>
@@ -74,6 +74,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
+    overrideParam.foreach(x => prop.put(x._1, x._2))
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
     val topics = prop.remove(KEY_KAFKA_TOPIC).toString.split(",")
     require(topics.nonEmpty)
