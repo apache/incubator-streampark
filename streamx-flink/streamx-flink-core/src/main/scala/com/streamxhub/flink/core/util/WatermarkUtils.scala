@@ -48,10 +48,10 @@ object WatermarkUtils {
    * @tparam T
    * @return
    */
-  def timeLagWatermarkWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
+  def timeLagWatermarkWatermark[T](fun: T => Long)(implicit maxTimeLag: Time): AssignerWithPeriodicWatermarks[T] = {
     new AssignerWithPeriodicWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long =  fun(element)
-      override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag)
+      override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
     }
   }
 
