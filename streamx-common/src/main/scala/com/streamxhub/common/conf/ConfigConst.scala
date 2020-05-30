@@ -87,7 +87,9 @@ object ConfigConst {
 
   val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
-  val KEY_FLINK_TIME_CHARACTERISTIC = "flink.time.characteristic"
+  val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
+
+  val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
 
   val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
 
