@@ -137,10 +137,8 @@ trait FlinkStreaming extends Logger {
     val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
     val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
-    val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
-    if (interval > 0) {
-      env.getConfig.setAutoWatermarkInterval(interval)
-    }
+    val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(200)
+    env.getConfig.setAutoWatermarkInterval(interval)
     env.setParallelism(parallelism)
     env.setStreamTimeCharacteristic(timeCharacteristic)
     //重启策略.
