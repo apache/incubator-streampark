@@ -28,34 +28,61 @@ import org.apache.flink.streaming.api.windowing.time.Time
 
 object WatermarkUtils {
 
+  /**
+   * 基于最大延迟时间的Watermark生成
+   * @param fun
+   * @param maxOutOfOrderness
+   * @tparam T
+   * @return
+   */
   def boundedOutOfOrdernessWatermark[T](fun: T => Long)(implicit maxOutOfOrderness: Time): AssignerWithPeriodicWatermarks[T] = {
     new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
       override def extractTimestamp(element: T): Long = fun(element)
     }
   }
 
-  def timeLagWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
+  /**
+   * 周期性时间戳抽取
+   * @param fun
+   * @param maxTimeLag
+   * @tparam T
+   * @return
+   */
+  def periodicWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
     new AssignerWithPeriodicWatermarks[T] {
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
+      var currentMaxTimestamp: Long = Long.MinValue + maxTimeLag //最大时间戳
+      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = {
+        //提取元素中的时间戳
+        val elemTimestamp =  fun(element)
+        currentMaxTimestamp = currentMaxTimestamp.max(elemTimestamp)
+        elemTimestamp
+      }
+      override def getCurrentWatermark: Watermark = new Watermark(currentMaxTimestamp - maxTimeLag)
+    }
+  }
 
+  def timeLagWatermarkWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
+    new AssignerWithPeriodicWatermarks[T] {
+      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long =  fun(element)
       override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag)
     }
   }
 
-  def ascendingWatermark[T](fun: T => Long): AscendingTimestampExtractor[T] = {
-    new AscendingTimestampExtractor[T] {
-      def extractAscendingTimestamp(element: T): Long = fun(element)
-    }
-  }
-
-  def punctuatedWatermark[T](maxTimeLag: Long)(implicit fun: T => Long, f1: T => Boolean): AssignerWithPunctuatedWatermarks[T] = {
+  def punctuatedWatermark[T](implicit fun: T => Long, f1: T => Boolean): AssignerWithPunctuatedWatermarks[T] = {
     new AssignerWithPunctuatedWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
-
       override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
         if (f1(lastElement)) new Watermark(extractedTimestamp) else null
       }
     }
   }
+
+  def ascendingTimestamp[T](fun: T => Long): AscendingTimestampExtractor[T] = {
+    new AscendingTimestampExtractor[T] {
+      def extractAscendingTimestamp(element: T): Long = fun(element)
+    }
+  }
+
+
 
 }
