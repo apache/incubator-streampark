@@ -42,25 +42,12 @@ object WatermarkUtils {
   }
 
   /**
-   * 周期性时间戳抽取
+   * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
    * @param fun
    * @param maxTimeLag
    * @tparam T
    * @return
    */
-  def periodicWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
-    new AssignerWithPeriodicWatermarks[T] {
-      var currentMaxTimestamp: Long = Long.MinValue + maxTimeLag //最大时间戳
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = {
-        //提取元素中的时间戳
-        val elemTimestamp =  fun(element)
-        currentMaxTimestamp = currentMaxTimestamp.max(elemTimestamp)
-        elemTimestamp
-      }
-      override def getCurrentWatermark: Watermark = new Watermark(currentMaxTimestamp - maxTimeLag)
-    }
-  }
-
   def timeLagWatermarkWatermark[T](fun: T => Long)(implicit maxTimeLag: Long): AssignerWithPeriodicWatermarks[T] = {
     new AssignerWithPeriodicWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long =  fun(element)
