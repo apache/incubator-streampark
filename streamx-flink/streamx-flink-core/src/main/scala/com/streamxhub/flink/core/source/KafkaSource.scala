@@ -64,13 +64,13 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
    * @param topic        一组topic或者单个topic
    * @param alias        别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
-   * @param ascendingFun AssignerWithPeriodicWatermarks
+   * @param assignerFun AssignerWithPeriodicWatermarks
    * @tparam T
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
                                         deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
-                                        ascendingFun: KafkaRecord[T] => Long = null
+                                        assignerFun: KafkaRecord[T] => AssignerWithPeriodicWatermarks[T] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
@@ -99,14 +99,11 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
       case _ =>
     }
 
-    if (ascendingFun != null) {
+    if (assignerFun != null) {
       val assignerWithPeriodicWatermarks = consumer.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
       assignerWithPeriodicWatermarks.setAccessible(true)
-      assignerWithPeriodicWatermarks.invoke(consumer, new AscendingTimestampExtractor[KafkaRecord[T]]() {
-        override def extractAscendingTimestamp(element: KafkaRecord[T]): Long = ascendingFun(element)
-      })
+      assignerWithPeriodicWatermarks.invoke(consumer,assignerFun)
     }
-
     ctx.addSource(consumer)
   }
 
