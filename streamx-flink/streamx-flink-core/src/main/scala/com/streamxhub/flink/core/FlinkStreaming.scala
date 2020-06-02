@@ -270,22 +270,20 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
    *
    * @param sideTag
    * @param fun
-   * @tparam R
    * @return
    */
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
-    val tag = new OutputTag[R](sideTag)
+  def sideOut(sideTag: String, fun: T => Boolean): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+    val tag = new OutputTag[T](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      val elem = fun(value)
-      if (elem != null) {
-        ctx.output(tag, elem)
+      if(fun(value)) {
+        ctx.output(tag, value)
       }
       out.collect(value)
     }
   })
 
-  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+  def sideGet(sideTag: String): DataStream[T] = dataStream.getSideOutput(new OutputTag[T](sideTag))
 
   /**
    * 基于最大延迟时间的Watermark生成
