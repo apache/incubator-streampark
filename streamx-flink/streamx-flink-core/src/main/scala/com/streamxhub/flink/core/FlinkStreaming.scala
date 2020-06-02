@@ -35,7 +35,10 @@ import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
-import org.apache.flink.streaming.api.functions.ProcessFunction
+import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
+import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
+import org.apache.flink.streaming.api.watermark.Watermark
+import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.util.Collector
 
 import scala.collection.JavaConversions._
@@ -248,22 +251,71 @@ trait FlinkStreaming extends Logger {
 
 class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
-  def sideOut[R: TypeInformation](sideTag: String, fun: T => R, skip: Boolean = false): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  /**
+   *
+   * @param sideTag
+   * @param fun
+   * @tparam R
+   * @return
+   */
+  def sideOut[R: TypeInformation](sideTag: String, fun: T => Boolean): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     val tag = new OutputTag[R](sideTag)
 
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      val outData = fun(value)
-      if (outData != null) {
-        ctx.output(tag, outData)
+      if (fun(value)) {
+        ctx.output(tag, value)
       }
-      //根据条件判断是否跳过主输出...
-      if (!skip) {
-        out.collect(value)
-      }
+      out.collect(value)
     }
   })
 
   def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+
+  /**
+   * 基于最大延迟时间的Watermark生成
+   *
+   * @param fun
+   * @param maxOutOfOrderness
+   * @tparam T
+   * @return
+   */
+  def boundedOutOfOrdernessWatermark[T](fun: T => Long)(implicit maxOutOfOrderness: Time): DataStream[T] = {
+    dataStream.assignTimestampsAndWatermarks(new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
+      override def extractTimestamp(element: T): Long = fun(element)
+    })
+  }
+
+  /**
+   * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
+   *
+   * @param fun
+   * @param maxTimeLag
+   * @tparam T
+   * @return
+   */
+  def timeLagWatermarkWatermark[T](fun: T => Long)(implicit maxTimeLag: Time): DataStream[T] = {
+    dataStream.assignTimestampsAndWatermarks(new AssignerWithPeriodicWatermarks[T] {
+      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
+
+      override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
+    })
+  }
+
+  def punctuatedWatermark[T](implicit fun: T => Long, f1: T => Boolean): DataStream[T] = {
+    dataStream.assignTimestampsAndWatermarks(new AssignerWithPunctuatedWatermarks[T] {
+      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
+
+      override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
+        if (f1(lastElement)) new Watermark(extractedTimestamp) else null
+      }
+    })
+  }
+
+  def ascendingTimestampWatermark[T](fun: T => Long): DataStream[T] = {
+    dataStream.assignTimestampsAndWatermarks(new AscendingTimestampExtractor[T] {
+      def extractAscendingTimestamp(element: T): Long = fun(element)
+    })
+  }
 
 }
 
