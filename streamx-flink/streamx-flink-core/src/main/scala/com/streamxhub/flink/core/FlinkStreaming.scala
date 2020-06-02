@@ -253,6 +253,7 @@ trait FlinkStreaming extends Logger {
 
 /**
  * DataStream 扩展方法.
+ *
  * @param dataStream
  * @tparam T
  */
@@ -319,12 +320,12 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     dataStream.asInstanceOf[DataStream[T]]
   }
 
-  def punctuatedWatermark(fun: T => Long, f1: T => Boolean): DataStream[T] = {
+  def punctuatedWatermark(extractTimeFun: T => Long, checkFun: T => Boolean): DataStream[T] = {
     val assigner = new AssignerWithPunctuatedWatermarks[T] {
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
+      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = extractTimeFun(element)
 
       override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
-        if (f1(lastElement)) new Watermark(extractedTimestamp) else null
+        if (checkFun(lastElement)) new Watermark(extractedTimestamp) else null
       }
     }
     assignerWithPunctuatedMethod.invoke(dataStream, assigner)
