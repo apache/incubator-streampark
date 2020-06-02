@@ -29,7 +29,6 @@ import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
-import org.apache.flink.streaming.api.functions.timestamps.AscendingTimestampExtractor
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import scala.annotation.meta.param
@@ -64,13 +63,13 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
    * @param topic        一组topic或者单个topic
    * @param alias        别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
-   * @param assignerFun AssignerWithPeriodicWatermarks
+   * @param assigner AssignerWithPeriodicWatermarks
    * @tparam T
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
                                         deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
-                                        assignerFun: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
+                                        assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
@@ -99,10 +98,10 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
       case _ =>
     }
 
-    if (assignerFun != null) {
+    if (assigner != null) {
       val assignerWithPeriodicWatermarks = consumer.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
       assignerWithPeriodicWatermarks.setAccessible(true)
-      assignerWithPeriodicWatermarks.invoke(consumer,assignerFun)
+      assignerWithPeriodicWatermarks.invoke(consumer,assigner)
     }
     ctx.addSource(consumer)
   }
