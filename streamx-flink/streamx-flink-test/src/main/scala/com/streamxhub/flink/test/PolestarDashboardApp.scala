@@ -6,7 +6,7 @@ import java.util.Date
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.sink.ESSink
 import com.streamxhub.flink.core.source.KafkaSource
-import com.streamxhub.flink.core.util.{EsIndexUtils, WatermarkUtils}
+import com.streamxhub.flink.core.util.EsIndexUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
@@ -34,7 +34,7 @@ object PolestarDashboardApp extends FlinkStreaming {
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)
-      .assignTimestampsAndWatermarks(WatermarkUtils.boundedOutOfOrdernessWatermark[OrderEntity](_.timestamp))
+      .boundedOutOfOrdernessWatermark(_.timestamp)
       .keyBy(_.client_id)
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
