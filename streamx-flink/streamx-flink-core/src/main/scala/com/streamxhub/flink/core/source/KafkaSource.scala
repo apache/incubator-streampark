@@ -70,7 +70,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
                                         deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
-                                        assignerFun: KafkaRecord[T] => AssignerWithPeriodicWatermarks[T] = null
+                                        assignerFun: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
