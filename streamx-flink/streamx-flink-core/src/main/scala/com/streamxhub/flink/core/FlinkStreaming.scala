@@ -272,12 +272,15 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
    * @param fun
    * @return
    */
-  def sideOut(@param @transient fun: (T, String => Unit) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut(fun: (T, String => Unit) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      fun(value, x => {
+
+      @transient def doSide(x: String): Unit = {
         val outTag = new OutputTag[T](x)
         ctx.output[T](outTag, value)
-      })
+      }
+
+      fun(value, doSide)
       out.collect(value)
     }
   })
