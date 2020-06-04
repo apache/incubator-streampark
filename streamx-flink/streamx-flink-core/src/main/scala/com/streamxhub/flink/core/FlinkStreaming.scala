@@ -347,8 +347,8 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
 }
 
-class SideCallBack[T: TypeInformation](ctx: ProcessFunction[T, T]#Context) extends Serializable {
-  def side[R: TypeInformation](tag: String, value: R): Unit = {
+class SideCallBack[T: TypeInformation](@transient ctx: ProcessFunction[T, T]#Context) extends Serializable {
+  def out[R: TypeInformation](tag: String, value: R): Unit = {
     val outTag = new OutputTag[R](tag)
     ctx.output[R](outTag, value)
   }
