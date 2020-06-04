@@ -36,14 +36,6 @@ object SideOutApp extends FlinkStreaming {
     //官方写法,获取侧输出流
     side1.getSideOutput(new OutputTag[SideEntry]("flink")).print("flink:========>")
 
-    /**
-     * Streamx 封装之后的写法....
-     */
-    //侧输出写出....
-    val side2 = source.sideOut("streamx", _.userId < 100)
-    //侧输出获取....
-    side2.sideGet("streamx").print("streamx:========>")
-
   }
 
 }
