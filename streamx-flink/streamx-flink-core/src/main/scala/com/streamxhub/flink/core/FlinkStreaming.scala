@@ -278,7 +278,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     }
   })
 
-  def sideGet(sideTag: String): DataStream[T] = dataStream.getSideOutput(new OutputTag[T](sideTag))
+  def sideGet[R:TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
   /**
    * 基于最大延迟时间的Watermark生成
