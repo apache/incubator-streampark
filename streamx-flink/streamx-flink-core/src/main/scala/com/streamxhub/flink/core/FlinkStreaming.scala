@@ -43,7 +43,6 @@ import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.util.Collector
 
-import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -274,20 +273,18 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
    */
   def sideOut(fun: (T, String => Unit) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-
-      @transient def doSide(x: String): Unit = {
+      fun(value, x => {
         val outTag = new OutputTag[T](x)
         ctx.output[T](outTag, value)
-      }
-
-      fun(value, doSide)
+      })
       out.collect(value)
     }
   })
 
-  def sideOut2(fun: (T, ProcessFunction[T, T]#Context) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut2(fun: (T, SideCallBack[T]) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      fun(value, ctx)
+      val callback = new SideCallBack[T](value, ctx)
+      fun(value, callback)
       out.collect(value)
     }
   })
@@ -348,5 +345,12 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     dataStream.asInstanceOf[DataStream[T]]
   }
 
+}
+
+class SideCallBack[T:TypeInformation](value: T, ctx: ProcessFunction[T, T]#Context) extends Serializable {
+  def side(tag: String): Unit = {
+    val outTag = new OutputTag[T](tag)
+    ctx.output[T](outTag, value)
+  }
 }
 
