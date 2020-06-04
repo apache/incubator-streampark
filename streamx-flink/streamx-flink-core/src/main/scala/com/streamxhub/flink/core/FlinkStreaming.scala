@@ -20,8 +20,6 @@
  */
 package com.streamxhub.flink.core
 
-import java.lang.reflect.Method
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
@@ -32,16 +30,13 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
+import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFunctionExt}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
-import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
-import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
-import org.apache.flink.streaming.api.watermark.Watermark
-import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.util.{Collector}
+import org.apache.flink.streaming.api.functions.{ProcessFunction}
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -253,103 +248,5 @@ trait FlinkStreaming extends Logger {
 
 }
 
-/**
- * DataStream 扩展方法.
- *
- * @param dataStream
- * @tparam T
- */
 
-class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
-
-  private[this] val assignerWithPeriodicMethod: Method = dataStream.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
-  assignerWithPeriodicMethod.setAccessible(true)
-
-  private[this] val assignerWithPunctuatedMethod: Method = dataStream.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPunctuatedWatermarks[T]])
-  assignerWithPunctuatedMethod.setAccessible(true)
-
-  /**
-   *
-   * @param fun
-   * @return
-   */
-  def sideOut(fun: (T, ProcessFunction[T, T]#Context) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
-    override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      fun(value, ctx)
-      out.collect(value)
-    }
-  })
-
-  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
-
-  /**
-   * 基于最大延迟时间的Watermark生成
-   *
-   * @param fun
-   * @param maxOutOfOrderness
-   * @return
-   **/
-
-  def boundedOutOfOrdernessWatermark(fun: T => Long)(implicit maxOutOfOrderness: Time): DataStream[T] = {
-    val assigner = new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
-      override def extractTimestamp(element: T): Long = fun(element)
-    }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DataStream[T]]
-  }
-
-  /**
-   * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
-   *
-   * @param fun
-   * @param maxTimeLag
-   * @return
-   */
-  def timeLagWatermarkWatermark(fun: T => Long)(implicit maxTimeLag: Time): DataStream[T] = {
-    val assigner = new AssignerWithPeriodicWatermarks[T] {
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
-
-      override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
-    }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DataStream[T]]
-  }
-
-  def punctuatedWatermark(extractTimeFun: T => Long, checkFun: T => Boolean): DataStream[T] = {
-    val assigner = new AssignerWithPunctuatedWatermarks[T] {
-      override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = extractTimeFun(element)
-
-      override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
-        if (checkFun(lastElement)) new Watermark(extractedTimestamp) else null
-      }
-    }
-    assignerWithPunctuatedMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DataStream[T]]
-  }
-
-  def ascendingTimestampWatermark(fun: T => Long): DataStream[T] = {
-    val assigner = new AscendingTimestampExtractor[T] {
-      def extractAscendingTimestamp(element: T): Long = fun(element)
-    }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DataStream[T]]
-  }
-
-}
-
-/**
- * 扩展 ProcessFunction方法
- *
- * @param ctx
- * @tparam IN
- * @tparam OUT
- */
-class ProcessFunctionExt[IN, OUT](val ctx: ProcessFunction[IN, OUT]#Context) {
-
-  def sideOut[R: TypeInformation](outputTag: String, value: R): Unit = {
-    val tag = new OutputTag[R](outputTag)
-    ctx.output[R](tag, value)
-  }
-
-}
 
