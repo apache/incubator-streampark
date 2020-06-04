@@ -43,6 +43,7 @@ import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.util.Collector
 
+import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -271,7 +272,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
    * @param fun
    * @return
    */
-  def sideOut(fun: (T, String => Unit) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut(@param @transient fun: (T, String => Unit) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       fun(value, x => {
         val outTag = new OutputTag[T](x)
