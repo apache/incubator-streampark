@@ -285,6 +285,14 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     }
   })
 
+  def sideOut2(fun: (T, ProcessFunction[T, T]#Context) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+    override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
+      fun(value, ctx)
+      out.collect(value)
+    }
+  })
+
+
   def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
   /**
