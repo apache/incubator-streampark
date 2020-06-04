@@ -283,7 +283,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
   def sideOut2(fun: (T, SideCallBack[T]) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      val callback = new SideCallBack[T](value, ctx)
+      val callback = new SideCallBack[T](ctx)
       fun(value, callback)
       out.collect(value)
     }
@@ -347,10 +347,10 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
 }
 
-class SideCallBack[T:TypeInformation](value: T, ctx: ProcessFunction[T, T]#Context) extends Serializable {
-  def side(tag: String): Unit = {
-    val outTag = new OutputTag[T](tag)
-    ctx.output[T](outTag, value)
+class SideCallBack[T: TypeInformation](ctx: ProcessFunction[T, T]#Context) extends Serializable {
+  def side[R: TypeInformation](tag: String, value: R): Unit = {
+    val outTag = new OutputTag[R](tag)
+    ctx.output[R](outTag, value)
   }
 }
 
