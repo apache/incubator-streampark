@@ -27,7 +27,7 @@ import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
 import org.apache.flink.api.common.{ExecutionConfig, JobExecutionResult}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic, TimerService}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
@@ -41,7 +41,7 @@ import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampEx
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.util.Collector
+import org.apache.flink.util.{Collector}
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -59,7 +59,9 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
 
 trait FlinkStreaming extends Logger {
 
-  implicit def ++[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+  implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+
+  implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFunctionExt[IN, OUT] = new ProcessFunctionExt[IN, OUT](ctx)
 
   @transient
   private var env: StreamExecutionEnvironment = _
@@ -346,10 +348,18 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
 }
 
-class SideCallBack[T: TypeInformation](@transient ctx: ProcessFunction[T, T]#Context) extends Serializable {
-  def out[R: TypeInformation](tag: String, value: R): Unit = {
-    val outTag = new OutputTag[R](tag)
-    ctx.output[R](outTag, value)
+/**
+ * 扩展 ProcessFunction方法
+ * @param ctx
+ * @tparam IN
+ * @tparam OUT
+ */
+class ProcessFunctionExt[IN, OUT](val ctx: ProcessFunction[IN, OUT]#Context) {
+
+  def sideOut[R: TypeInformation](outputTag: String, value: R): Unit = {
+    val tag = new OutputTag[R](outputTag)
+    ctx.output[R](tag, value)
   }
+
 }
 
