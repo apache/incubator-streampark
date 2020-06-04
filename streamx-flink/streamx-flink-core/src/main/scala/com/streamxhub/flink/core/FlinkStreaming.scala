@@ -281,10 +281,9 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
     }
   })
 
-  def sideOut2(fun: (T, SideCallBack[T]) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut2(fun: (T, ProcessFunction[T, T]#Context) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
-      val callback = new SideCallBack[T](ctx)
-      fun(value, callback)
+      fun(value, ctx)
       out.collect(value)
     }
   })
