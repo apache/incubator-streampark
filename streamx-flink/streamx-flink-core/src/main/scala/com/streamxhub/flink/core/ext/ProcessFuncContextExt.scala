@@ -11,7 +11,7 @@ import org.apache.flink.streaming.api.scala.OutputTag
  * @tparam IN
  * @tparam OUT
  */
-class ProcessFunctionExt[IN, OUT](val ctx: ProcessFunction[IN, OUT]#Context) {
+class ProcessFuncContextExt[IN, OUT](val ctx: ProcessFunction[IN, OUT]#Context) {
 
   def sideOut[R: TypeInformation](outputTag: String, value: R): Unit = {
     val tag = new OutputTag[R](outputTag)
