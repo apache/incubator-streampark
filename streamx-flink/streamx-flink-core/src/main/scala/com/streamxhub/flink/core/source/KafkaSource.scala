@@ -75,7 +75,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
     overrideParam.foreach(x => prop.put(x._1, x._2))
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
-    val topics = prop.remove(KEY_KAFKA_TOPIC).toString.split(",")
+    val topics = prop.remove(KEY_KAFKA_TOPIC).toString.split("\\,|\\s+")
     require(topics.nonEmpty)
     val topicInfo = topic match {
       case x if x.isInstanceOf[String] =>
