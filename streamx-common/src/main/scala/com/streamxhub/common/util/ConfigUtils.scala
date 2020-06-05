@@ -47,16 +47,16 @@ object ConfigUtils {
     val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
       val kafkaProperty = new Properties()
-      param.foreach(x => kafkaProperty.put(x._1, x._2))
+      param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
-          if (top == null || top.split(SIGN_COMMA).length > 1) {
+          if (top == null || top.split("\\,|\\s+").length > 1) {
             throw new IllegalArgumentException(s"Can't find a unique topic!!!,you must be input a topic")
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(SIGN_COMMA).toSet.contains(_topic))
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split("\\,|\\s+").toSet.contains(_topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
@@ -82,7 +82,7 @@ object ConfigUtils {
       case other =>
         val aliasList = parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
         require(aliasList.contains(other))
-        s"$prefix$alias".replaceFirst("\\.+$|$",".")
+        s"$prefix$alias".replaceFirst("\\.+$|$", ".")
     }
     val driver = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_DRIVER", null)
     val url = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_URL", null)
