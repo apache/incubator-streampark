@@ -30,7 +30,7 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
-import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFunctionExt}
+import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFuncContextExt}
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
@@ -56,7 +56,7 @@ trait FlinkStreaming extends Logger {
 
   implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
-  implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFunctionExt[IN, OUT] = new ProcessFunctionExt[IN, OUT](ctx)
+  implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFuncContextExt[IN, OUT] = new ProcessFuncContextExt[IN, OUT](ctx)
 
   @transient
   private var env: StreamExecutionEnvironment = _
