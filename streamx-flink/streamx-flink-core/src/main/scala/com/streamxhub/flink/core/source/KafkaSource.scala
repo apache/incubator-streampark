@@ -136,18 +136,8 @@ class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSc
 
 }
 
-class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[KafkaRecord[String]] {
-  override def isEndOfStream(nextElement: KafkaRecord[String]): Boolean = false
-
-  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[String] = {
-    val key = if (record.key() == null) null else new String(record.key())
-    val value = new String(record.value())
-    val offset = record.offset()
-    val partition = record.partition()
-    val topic = record.topic()
-    val timestamp = record.timestamp()
-    new KafkaRecord[String](topic, partition, timestamp, offset, key, value)
-  }
-
-  override def getProducedType: TypeInformation[KafkaRecord[String]] = getForClass(classOf[KafkaRecord[String]])
+class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String] {
+  override def isEndOfStream(nextElement: String): Boolean = false
+  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value())
+  override def getProducedType: TypeInformation[String] = getForClass(classOf[String])
 }
