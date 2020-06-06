@@ -68,7 +68,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
                                         alias: String = "",
-                                        deserializer: DeserializationSchema[T] = new SimpleStringSchema().asInstanceOf[DeserializationSchema[T]],
+                                        deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
                                         assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
@@ -118,11 +118,11 @@ class KafkaRecord[T: TypeInformation](
                                        val value: T
                                      )
 
-class KafkaDeserializer[T: TypeInformation](deserializer: DeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
+class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
     val key = if (record.key() == null) null else new String(record.key())
-    val value = deserializer.deserialize(record.value())
+    val value = deserializer.deserialize(record)
     val offset = record.offset()
     val partition = record.partition()
     val topic = record.topic()
@@ -134,4 +134,20 @@ class KafkaDeserializer[T: TypeInformation](deserializer: DeserializationSchema[
 
   override def isEndOfStream(nextElement: KafkaRecord[T]): Boolean = false
 
+}
+
+class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[KafkaRecord[String]] {
+  override def isEndOfStream(nextElement: KafkaRecord[String]): Boolean = false
+
+  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[String] = {
+    val key = if (record.key() == null) null else new String(record.key())
+    val value = new String(record.value())
+    val offset = record.offset()
+    val partition = record.partition()
+    val topic = record.topic()
+    val timestamp = record.timestamp()
+    new KafkaRecord[String](topic, partition, timestamp, offset, key, value)
+  }
+
+  override def getProducedType: TypeInformation[KafkaRecord[String]] = getForClass(classOf[KafkaRecord[String]])
 }
