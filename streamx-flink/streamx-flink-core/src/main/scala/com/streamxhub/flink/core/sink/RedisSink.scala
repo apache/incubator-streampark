@@ -58,7 +58,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
                ) extends Sink {
 
   @Override
-  def sink[T](stream: DataStream[T], ttl: Int = Int.MaxValue)(implicit mapper: RedisMapper[T]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], mapper: RedisMapper[T], ttl: Int = Int.MaxValue): DataStreamSink[T] = {
     val builder = new FlinkJedisPoolConfig.Builder()
     val config = ConfigUtils.getConf(ctx.parameter.toMap, REDIS_PREFIX)
     overrideParams.foreach(x => config.put(x._1, x._2))
@@ -145,23 +145,23 @@ class RedisContainer(jedisPool: JedisPool, ttl: Int) extends RContainer(jedisPoo
 
   override def hset(key: String, hashField: String, value: String): Unit = doRedis(r => r.hset(key, hashField, value), key)
 
-  override def rpush(key: String, value: String): Unit = doRedis(r => r.rpush(key, value), key)
+  override def rpush(key: String, value: String): Unit = doRedis(_.rpush(key, value), key)
 
-  override def lpush(key: String, value: String): Unit = doRedis(r => r.lpush(key, value), key)
+  override def lpush(key: String, value: String): Unit = doRedis(_.lpush(key, value), key)
 
-  override def sadd(key: String, value: String): Unit = doRedis(r => r.sadd(key, value), key)
+  override def sadd(key: String, value: String): Unit = doRedis(_.sadd(key, value), key)
 
-  override def publish(key: String, message: String): Unit = doRedis(r => r.publish(key, message), key)
+  override def publish(key: String, message: String): Unit = doRedis(_.publish(key, message), key)
 
-  override def set(key: String, value: String): Unit = doRedis(r => r.set(key, value), key)
+  override def set(key: String, value: String): Unit = doRedis(_.set(key, value), key)
 
-  override def pfadd(key: String, element: String): Unit = doRedis(r => r.pfadd(key, element), key)
+  override def pfadd(key: String, element: String): Unit = doRedis(_.pfadd(key, element), key)
 
-  override def zadd(key: String, score: String, element: String): Unit = doRedis(r => r.zadd(key, score.toDouble, element), key)
+  override def zadd(key: String, score: String, element: String): Unit = doRedis(_.zadd(key, score.toDouble, element), key)
 
-  override def zrem(key: String, element: String): Unit = doRedis(r => r.zrem(key, element), key)
+  override def zrem(key: String, element: String): Unit = doRedis(_.zrem(key, element), key)
 
-  def doRedis(fun: Jedis => Unit, key: String): Unit = {
+  private[this] def doRedis(fun: Jedis => Unit, key: String): Unit = {
     val jedis = jedisPool.getResource
     fun(jedis)
     jedis.expire(key, ttl)
