@@ -253,9 +253,9 @@ object JdbcUtils {
                     m.setAccessible(true)
                     m.getParameterTypes.head.getSimpleName match {
                       case "String" => m.invoke(jdbcConfig, Array(x._2))
-                      case "int" => field.set(jdbcConfig, Array(x._2.toInt))
-                      case "long" => field.set(jdbcConfig, Array(x._2.toLong))
-                      case "boolean" => field.set(jdbcConfig, Array(x._2.toBoolean))
+                      case "int" => m.invoke(jdbcConfig, Array(x._2.toInt))
+                      case "long" => m.invoke(jdbcConfig, Array(x._2.toLong))
+                      case "boolean" => m.invoke(jdbcConfig, Array(x._2.toBoolean))
                     }
                   case null =>
                     throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
