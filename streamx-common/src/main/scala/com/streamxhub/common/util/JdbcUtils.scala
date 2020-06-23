@@ -247,11 +247,13 @@ object JdbcUtils {
                 }
               case None =>
                 val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                Try(Option(jdbcConfig.getClass.getDeclaredMethod(setMethod))).getOrElse(None) match {
-                  case Some(method) if method.getParameterCount == 1 =>
-                    method.setAccessible(true)
-                    method.invoke(jdbcConfig, x._2)
-                  case None => throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
+                val method = Try(jdbcConfig.getClass.getDeclaredMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
+                method match {
+                  case m =>
+                    m.setAccessible(true)
+                    m.invoke(jdbcConfig, x._2)
+                  case null =>
+                    throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
             }
           })
