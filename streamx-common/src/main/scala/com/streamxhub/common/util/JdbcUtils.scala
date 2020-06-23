@@ -250,13 +250,7 @@ object JdbcUtils {
                 Try(Option(jdbcConfig.getClass.getDeclaredMethod(setMethod))).getOrElse(None) match {
                   case Some(method) if method.getParameterCount == 1 =>
                     method.setAccessible(true)
-                    method.getParameterTypes.head.getSimpleName match {
-                      case "String" => method.invoke(jdbcConfig, x._2)
-                      case "int" => method.invoke(jdbcConfig, x._2.toInt)
-                      case "long" => method.invoke(jdbcConfig, x._2.toLong)
-                      case "boolean" => method.invoke(jdbcConfig, x._2.toBoolean)
-                      case _ =>
-                    }
+                    method.invoke(jdbcConfig, x._2)
                   case None => throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
             }
