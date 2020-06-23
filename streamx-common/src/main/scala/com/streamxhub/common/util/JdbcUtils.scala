@@ -256,6 +256,7 @@ object JdbcUtils {
                       case "int" => m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]):_*)
                       case "long" => m.invoke(jdbcConfig, Seq(x._2.toLong.asInstanceOf[Object]):_*)
                       case "boolean" => m.invoke(jdbcConfig, Seq(x._2.toBoolean.asInstanceOf[Object]):_*)
+                      case _ =>
                     }
                   case null =>
                     throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
