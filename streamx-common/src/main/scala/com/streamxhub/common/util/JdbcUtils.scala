@@ -235,22 +235,30 @@ object JdbcUtils {
           //创建一个数据源对象
           val jdbcConfig = new HikariConfig()
           prop.filter(_._1 != KEY_INSTANCE).foreach(x => {
-            val field = Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+            Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+              case Some(field) =>
+                field.setAccessible(true)
+                field.getType.getSimpleName match {
+                  case "String" => field.set(jdbcConfig, x._2)
+                  case "int" => field.set(jdbcConfig, x._2.toInt)
+                  case "long" => field.set(jdbcConfig, x._2.toLong)
+                  case "boolean" => field.set(jdbcConfig, x._2.toBoolean)
+                  case _ =>
+                }
               case None =>
-                val boolMethod = s"is${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                Try(Option(jdbcConfig.getClass.getDeclaredField(boolMethod))).getOrElse(None) match {
-                  case Some(x) => x
+                val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+                Try(Option(jdbcConfig.getClass.getDeclaredMethod(setMethod))).getOrElse(None) match {
+                  case Some(method) if method.getParameterCount == 1 =>
+                    method.setAccessible(true)
+                    method.getParameterTypes.head.getSimpleName match {
+                      case "String" => method.invoke(jdbcConfig, x._2)
+                      case "int" => method.invoke(jdbcConfig, x._2.toInt)
+                      case "long" => method.invoke(jdbcConfig, x._2.toLong)
+                      case "boolean" => method.invoke(jdbcConfig, x._2.toBoolean)
+                      case _ =>
+                    }
                   case None => throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
-              case Some(x) => x
-            }
-            field.setAccessible(true)
-            field.getType.getSimpleName match {
-              case "String" => field.set(jdbcConfig, x._2)
-              case "int" => field.set(jdbcConfig, x._2.toInt)
-              case "long" => field.set(jdbcConfig, x._2.toLong)
-              case "boolean" => field.set(jdbcConfig, x._2.toBoolean)
-              case _ =>
             }
           })
           val ds = new HikariDataSource(jdbcConfig)
