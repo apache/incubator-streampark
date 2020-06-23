@@ -247,7 +247,7 @@ object JdbcUtils {
                 }
               case None =>
                 val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                val method = Try(jdbcConfig.getClass.getDeclaredMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
+                val method = Try(jdbcConfig.getClass.getMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
                 method match {
                   case m =>
                     m.setAccessible(true)
