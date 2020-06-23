@@ -239,10 +239,10 @@ object JdbcUtils {
               case Some(field) =>
                 field.setAccessible(true)
                 field.getType.getSimpleName match {
-                  case "String" => field.set(jdbcConfig, x._2)
-                  case "int" => field.set(jdbcConfig, x._2.toInt)
-                  case "long" => field.set(jdbcConfig, x._2.toLong)
-                  case "boolean" => field.set(jdbcConfig, x._2.toBoolean)
+                  case "String" => field.set(jdbcConfig, x._2.asInstanceOf[Object])
+                  case "int" => field.set(jdbcConfig, x._2.toInt.asInstanceOf[Object])
+                  case "long" => field.set(jdbcConfig, x._2.toLong.asInstanceOf[Object])
+                  case "boolean" => field.set(jdbcConfig, x._2.toBoolean.asInstanceOf[Object])
                   case _ =>
                 }
               case None =>
@@ -251,14 +251,12 @@ object JdbcUtils {
                 method match {
                   case m =>
                     m.setAccessible(true)
-                    val value:Object = x._2
-                    m.invoke(jdbcConfig, Seq(value): _*)
-                    /*m.getParameterTypes.head.getSimpleName match {
-                      case "String" => m.invoke(jdbcConfig, Seq(value): _*)
-                      case "int" => m.invoke(jdbcConfig, Seq(value):_*)
-                      case "long" => m.invoke(jdbcConfig, Seq(value):_*)
-                      case "boolean" => m.invoke(jdbcConfig, Seq(value):_*)
-                    }*/
+                    m.getParameterTypes.head.getSimpleName match {
+                      case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)
+                      case "int" => m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]):_*)
+                      case "long" => m.invoke(jdbcConfig, Seq(x._2.toLong.asInstanceOf[Object]):_*)
+                      case "boolean" => m.invoke(jdbcConfig, Seq(x._2.toBoolean.asInstanceOf[Object]):_*)
+                    }
                   case null =>
                     throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
