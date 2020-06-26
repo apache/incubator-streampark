@@ -10,7 +10,7 @@
     <version>1.0.0</version>
 
     <modules>
-        <module>streamx-monitor-server</module>
+        <module>streamx-monitor-service</module>
         <module>streamx-monitor-webapp</module>
     </modules>
 
