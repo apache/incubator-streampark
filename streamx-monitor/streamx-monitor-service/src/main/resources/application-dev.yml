@@ -2,8 +2,7 @@ server:
   port: 10001
 
 spring:
-  application:
-    name: streamx
+  application.name: streamx
   servlet:
     multipart:
       enabled: true
@@ -29,11 +28,8 @@ spring:
           password: 123322242
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/adminx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
-  aop:
-    proxy-target-class: true
-
-  messages:
-    encoding: utf-8
+  aop.proxy-target-class: true
+  messages.encoding: utf-8
 
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
@@ -52,11 +48,7 @@ spring:
     timeout: 0
     database: 1
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: ['httptrace', 'metrics']
+management.endpoints.web.exposure.include: ['httptrace', 'metrics']
 
 #mybatis plus 设置
 mybatis-plus:
@@ -72,10 +64,7 @@ adminx:
   # 是否异步记录用户操作日志
   openAopLog: true
   # 单次最大批量入库数量
-  max:
-    batch:
-      insert:
-        num: 1000
+  max.batch.insert.num: 1000
   shiro:
     # 后端免认证接口 url
     anonUrl: /passport/**,/systemName,/user/check/**
