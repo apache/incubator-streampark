@@ -10,7 +10,7 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>streamx-flink-core-${flink.version}</artifactId>
+    <artifactId>streamx-flink-core</artifactId>
 
     <dependencies>
 
