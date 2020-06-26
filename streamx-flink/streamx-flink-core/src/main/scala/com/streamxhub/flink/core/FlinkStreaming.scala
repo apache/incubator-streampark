@@ -32,11 +32,12 @@ import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFacto
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
 import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFuncContextExt}
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
-import org.apache.flink.streaming.api.functions.{ProcessFunction}
+import org.apache.flink.streaming.api.functions.ProcessFunction
 
 import scala.collection.JavaConversions._
 import scala.util.Try
