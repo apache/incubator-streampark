@@ -16,7 +16,7 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
-            <artifactId>streamx-flink-core-${flink.version}</artifactId>
+            <artifactId>streamx-flink-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
