@@ -147,7 +147,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
             }
           }
           val timestamp = System.currentTimeMillis()
-          for (i <- 0 until (request.size)) {
+          for (i <- 0 until request.size) {
             val rowKey = HConstants.LATEST_TIMESTAMP - timestamp - i //you know?...
             val put = new Put(Bytes.toBytes(rowKey))
               .addColumn(familyName.getBytes, "values".getBytes, Bytes.toBytes(request.records(i)))
