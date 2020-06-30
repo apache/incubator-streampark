@@ -112,7 +112,18 @@ http.sink:
 # source config....
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  #pattern: hopsonone_park_*_tc_record
   topic: hopsonone_park_sh_tc_record,aa,bbb
   group.id: flink_test
   auto.offset.reset: earliest
-
+  start.from:
+    topic: hopsonone_park_sh_tc_record,aa,bb
+    hopsonone_park_sh_tc_record:
+      timestamp: 1233242424
+      offset: 1:2344,2:3455,3:4566
+    aa:
+      timestamp: 1233242424
+      offset: 1:2344,2:3455,3:4566
+    bb:
+      timestamp: 1233242424
+      offset: 1:2344,2:3455,3:4566

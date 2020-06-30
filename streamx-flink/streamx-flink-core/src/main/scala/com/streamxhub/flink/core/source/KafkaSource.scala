@@ -20,20 +20,24 @@
  */
 package com.streamxhub.flink.core.source
 
+import java.util.Properties
+import java.util.regex.Pattern
+
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
-import org.apache.flink.api.common.serialization.{DeserializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.scala.{DataStream, _}
 import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, KafkaDeserializationSchema}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
+import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.Map
+import scala.collection.{Map, mutable}
+import scala.util.Try
 
 object KafkaSource {
 
@@ -66,7 +70,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
    * @param assigner     AssignerWithPeriodicWatermarks
    * @tparam T
    */
-  def getDataStream[T: TypeInformation](topic: java.io.Serializable = "",
+  def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,
                                         alias: String = "",
                                         deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
                                         assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
@@ -74,24 +78,42 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
     overrideParam.foreach(x => prop.put(x._1, x._2))
-    require(prop != null && prop.nonEmpty && prop.exists(_._1 == KEY_KAFKA_TOPIC))
-    val topics = prop.remove(KEY_KAFKA_TOPIC).toString.split("\\,|\\s+")
-    require(topics.nonEmpty)
-    val topicInfo = topic match {
-      case x if x.isInstanceOf[String] =>
-        x.asInstanceOf[String] match {
-          case "" => topics.toList -> prop
-          case t =>
-            require(topics.contains(t), s"[Streamx-Flink] can't found $t from config")
-            List(t) -> prop
-        }
-      case x if x.isInstanceOf[List[String]] => x.asInstanceOf[List[String]] -> prop
-      case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
-    }
+    require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
+
+    //offset parameter..
+    val startFrom = StartFrom.startForm(prop)
+
+
+    //topic parameter
+    val topicOpt = Try(Some(prop.remove(KEY_KAFKA_TOPIC).toString)).getOrElse(None)
+    val regexOpt = Try(Some(prop.remove(KEY_KAFKA_PATTERN).toString)).getOrElse(None)
+
     val kfkDeserializer = new KafkaDeserializer[T](deserializer)
-    val consumer = new FlinkKafkaConsumer011(topicInfo._1, kfkDeserializer, topicInfo._2)
+
+    val consumer = (topicOpt, regexOpt) match {
+      case (Some(_), Some(_)) =>
+        throw new IllegalArgumentException("[Streamx-Flink] topic and regex cannot be defined at the same time")
+      case (Some(top), _) =>
+        val topics = top.split("\\,|\\s+")
+        val topicList = topic match {
+          case null => topics.toList
+          case x: String => List(x)
+          case x: List[String] => x
+          case _ => throw new IllegalArgumentException("[Streamx-Flink] topic type must be String(one topic) or List[String](more topic)")
+        }
+        new FlinkKafkaConsumer011(topicList, kfkDeserializer, prop)
+      case (_, Some(reg)) =>
+        val pattern: Pattern = topic match {
+          case null => Pattern.compile(reg)
+          case x: String => Pattern.compile(x)
+          case _ => throw new IllegalArgumentException("[Streamx-Flink] subscriptionPattern type must be String(regex)")
+        }
+        val kfkDeserializer = new KafkaDeserializer[T](deserializer)
+        new FlinkKafkaConsumer011(pattern, kfkDeserializer, prop)
+    }
+
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
-    val autoCommit = topicInfo._2.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
+    val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (enableChk, autoCommit) match {
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
@@ -103,6 +125,33 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
       assignerWithPeriodicWatermarks.setAccessible(true)
       assignerWithPeriodicWatermarks.invoke(consumer, assigner)
     }
+
+    if (startFrom != null) {
+      (topicOpt, regexOpt) match {
+        //topic方式...
+        case (Some(top), _) =>
+          val topicArray = top.split("\\,|\\s+")
+          val startFroms = topic match {
+            case x: String =>
+              startFrom.filter(_.topic == x).toList
+            case x: List[String] =>
+              val topics = if (topic == null) topicArray.toList else x
+              startFrom.filter(s => topics.filter(t => s.topic == t).nonEmpty).toList
+            case _ => List.empty[StartFrom]
+          }
+          startFroms.foreach(start => {
+            val specificStartOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
+            start.partitionOffset.foreach(x => {
+              specificStartOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2)
+            })
+            consumer.setStartFromSpecificOffsets(specificStartOffsets)
+          })
+        case (_, Some(reg)) =>
+        //.......
+      }
+
+    }
+
     ctx.addSource(consumer)
   }
 
@@ -138,6 +187,35 @@ class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSc
 
 class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String] {
   override def isEndOfStream(nextElement: String): Boolean = false
+
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value())
+
   override def getProducedType: TypeInformation[String] = getForClass(classOf[String])
 }
+
+
+object StartFrom {
+
+  def startForm(prop: Properties): Array[StartFrom] = {
+    val topic = Try(prop(KEY_KAFKA_START_FROM_TOPIC).split(",")).getOrElse(Array.empty[String])
+    val startFrom = if (topic.isEmpty) null else {
+      topic.map(x => {
+        val timestamp = Try(prop(s"$KEY_KAFKA_START_FROM.$x.timestamp").toLong).getOrElse(throw new IllegalArgumentException("[Streamx-Flink] start.from timestamp must be long"))
+        val offset = prop(s"$KEY_KAFKA_START_FROM.$x.offset").split(",").map(x => {
+          val array = x.split(":")
+          array.head.toInt -> array.last.toLong
+        })
+        prop.remove(x)
+        new StartFrom(x, timestamp.toLong, offset)
+      })
+    }
+    prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM)).foreach(x => prop.remove(x._1))
+    startFrom
+  }
+
+}
+
+class StartFrom(val topic: String, val timestamp: Long, val partitionOffset: Array[(Int, Long)]) {
+
+}
+
