@@ -109,11 +109,11 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM = "start.from"
 
-  val KEY_KAFKA_START_FROM_TOPIC = "start.from.topic"
+  val KEY_KAFKA_START_FROM_TOPIC = "start.from"
 
-  val KEY_KAFKA_START_FROM_OFFSET = "start.from.offset"
+  val KEY_KAFKA_START_FROM_OFFSET = "offset"
 
-  val KEY_KAFKA_START_FROM_TIMESTAMP = "start.from.timestamp"
+  val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
   val REDIS_PREFIX = "redis."
 
