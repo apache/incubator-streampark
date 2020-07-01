@@ -36,8 +36,8 @@ import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.{Map, mutable}
-import scala.util.Try
+import scala.collection.Map
+import scala.util.{Failure, Success, Try}
 
 object KafkaSource {
 
@@ -80,9 +80,10 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
     overrideParam.foreach(x => prop.put(x._1, x._2))
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
-    //offset parameter..
+    //start.form parameter...
+    val timestamp = Try(Some(prop(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_TIMESTAMP").toLong)).getOrElse(None)
     val startFrom = StartFrom.startForm(prop)
-
+    require(!(timestamp.nonEmpty && startFrom != null), s"[Streamx-Flink] start.form timestamp and offset cannot be defined at the same time")
 
     //topic parameter
     val topicOpt = Try(Some(prop.remove(KEY_KAFKA_TOPIC).toString)).getOrElse(None)
@@ -111,7 +112,6 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
         new FlinkKafkaConsumer011(pattern, kfkDeserializer, prop)
     }
-
     val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (enableChk, autoCommit) match {
@@ -127,29 +127,43 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
     }
 
     if (startFrom != null) {
-      (topicOpt, regexOpt) match {
+      val startFroms = (topicOpt, regexOpt) match {
         //topic方式...
         case (Some(top), _) =>
-          val topicArray = top.split("\\,|\\s+")
-          val startFroms = topic match {
+          topic match {
+            case null => startFrom.toList
             case x: String =>
               startFrom.filter(_.topic == x).toList
             case x: List[String] =>
-              val topics = if (topic == null) topicArray.toList else x
+              val topics = if (topic == null) top.split("\\,|\\s+").toList else x
               startFrom.filter(s => topics.filter(t => s.topic == t).nonEmpty).toList
             case _ => List.empty[StartFrom]
           }
-          startFroms.foreach(start => {
-            val specificStartOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
-            start.partitionOffset.foreach(x => {
-              specificStartOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2)
-            })
-            consumer.setStartFromSpecificOffsets(specificStartOffsets)
-          })
         case (_, Some(reg)) =>
-        //.......
+          topic match {
+            case null =>
+              startFrom.filter(s => Pattern.compile(reg).matcher(s.topic).matches()).toList
+            case x: String =>
+              startFrom.filter(s => Pattern.compile(x).matcher(s.topic).matches()).toList
+            case _ => List.empty[StartFrom]
+          }
       }
 
+      //startOffsets...
+      val startOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
+      startFroms.filter(x => x != null && x.partitionOffset != null).foreach(start => {
+        start.partitionOffset.foreach(x => startOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2))
+      })
+
+      if (startOffsets.nonEmpty) {
+        consumer.setStartFromSpecificOffsets(startOffsets)
+      }
+
+    }
+
+    //setStartFromTimestamp...
+    if (timestamp.nonEmpty) {
+      consumer.setStartFromTimestamp(timestamp.get)
     }
 
     ctx.addSource(consumer)
@@ -197,25 +211,34 @@ class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String
 object StartFrom {
 
   def startForm(prop: Properties): Array[StartFrom] = {
-    val topic = Try(prop(KEY_KAFKA_START_FROM_TOPIC).split(",")).getOrElse(Array.empty[String])
-    val startFrom = if (topic.isEmpty) null else {
+    val startProp = prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM))
+    startProp.foreach(x => prop.remove(x._1))
+    val topic = Try(startProp(s"$KEY_KAFKA_START_FROM_TOPIC.$KEY_KAFKA_START_FROM_OFFSET.$KEY_KAFKA_TOPIC").split(",")).getOrElse(Array.empty[String])
+    if (topic.isEmpty) null else {
       topic.map(x => {
-        val timestamp = Try(prop(s"$KEY_KAFKA_START_FROM.$x.timestamp").toLong).getOrElse(throw new IllegalArgumentException("[Streamx-Flink] start.from timestamp must be long"))
-        val offset = prop(s"$KEY_KAFKA_START_FROM.$x.offset").split(",").map(x => {
-          val array = x.split(":")
-          array.head.toInt -> array.last.toLong
-        })
-        prop.remove(x)
-        new StartFrom(x, timestamp.toLong, offset)
+        val offset = Try(Some(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$x"))).getOrElse(None)
+        offset match {
+          case Some(o) =>
+            Try {
+              o.split(",").map(x => {
+                val array = x.split(":")
+                array.head.toInt -> array.last.toLong
+              })
+            } match {
+              case Success(v) => new StartFrom(x, v)
+              case Failure(_) => throw new IllegalArgumentException(s"[Streamx-Flink] topic:$x start.form offset error, e.g: 1:10000,2:10000,3:10002")
+            }
+          case _ => null
+        }
       })
     }
-    prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM)).foreach(x => prop.remove(x._1))
-    startFrom
+
+
   }
 
 }
 
-class StartFrom(val topic: String, val timestamp: Long, val partitionOffset: Array[(Int, Long)]) {
+class StartFrom(val topic: String, val partitionOffset: Array[(Int, Long)]) {
 
 }
 
