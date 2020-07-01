@@ -126,44 +126,43 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
       assignerWithPeriodicWatermarks.invoke(consumer, assigner)
     }
 
-    if (startFrom != null) {
-      val startFroms = (topicOpt, regexOpt) match {
-        //topic方式...
-        case (Some(top), _) =>
-          topic match {
-            case null => startFrom.toList
-            case x: String =>
-              startFrom.filter(_.topic == x).toList
-            case x: List[String] =>
-              val topics = if (topic == null) top.split("\\,|\\s+").toList else x
-              startFrom.filter(s => topics.filter(t => s.topic == t).nonEmpty).toList
-            case _ => List.empty[StartFrom]
-          }
-        case (_, Some(reg)) =>
-          topic match {
-            case null =>
-              startFrom.filter(s => Pattern.compile(reg).matcher(s.topic).matches()).toList
-            case x: String =>
-              startFrom.filter(s => Pattern.compile(x).matcher(s.topic).matches()).toList
-            case _ => List.empty[StartFrom]
-          }
-      }
+    (timestamp, startFrom) match {
+      case (Some(t), _) =>
+        //全局设定Timestamp,对所有的topic生效.
+        consumer.setStartFromTimestamp(t)
+      case _ =>
+        //精确为每个topic,partition指定offset
+        val startFroms = (topicOpt, regexOpt) match {
+          //topic方式...
+          case (Some(top), _) =>
+            topic match {
+              case null => startFrom.toList
+              case x: String =>
+                startFrom.filter(_.topic == x).toList
+              case x: List[String] =>
+                val topics = if (topic == null) top.split("\\,|\\s+").toList else x
+                startFrom.filter(s => topics.filter(t => s.topic == t).nonEmpty).toList
+              case _ => List.empty[StartFrom]
+            }
+          case (_, Some(reg)) =>
+            topic match {
+              case null =>
+                startFrom.filter(s => Pattern.compile(reg).matcher(s.topic).matches()).toList
+              case x: String =>
+                startFrom.filter(s => Pattern.compile(x).matcher(s.topic).matches()).toList
+              case _ => List.empty[StartFrom]
+            }
+        }
 
-      //startOffsets...
-      val startOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
-      startFroms.filter(x => x != null && x.partitionOffset != null).foreach(start => {
-        start.partitionOffset.foreach(x => startOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2))
-      })
+        //startOffsets...
+        val startOffsets = new java.util.HashMap[KafkaTopicPartition, java.lang.Long]()
+        startFroms.filter(x => x != null && x.partitionOffset != null).foreach(start => {
+          start.partitionOffset.foreach(x => startOffsets.put(new KafkaTopicPartition(start.topic, x._1), x._2))
+        })
 
-      if (startOffsets.nonEmpty) {
-        consumer.setStartFromSpecificOffsets(startOffsets)
-      }
-
-    }
-
-    //setStartFromTimestamp...
-    if (timestamp.nonEmpty) {
-      consumer.setStartFromTimestamp(timestamp.get)
+        if (startOffsets.nonEmpty) {
+          consumer.setStartFromSpecificOffsets(startOffsets)
+        }
     }
 
     ctx.addSource(consumer)
