@@ -32,7 +32,6 @@ import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFacto
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
 import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFuncContextExt}
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.StateBackend
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
@@ -55,9 +54,9 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
 
 trait FlinkStreaming extends Logger {
 
-  implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
 
-  implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFuncContextExt[IN, OUT] = new ProcessFuncContextExt[IN, OUT](ctx)
+  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFuncContextExt[IN, OUT] = new ProcessFuncContextExt[IN, OUT](ctx)
 
   @transient
   private var env: StreamExecutionEnvironment = _
@@ -66,7 +65,7 @@ trait FlinkStreaming extends Logger {
 
   private var context: StreamingContext = _
 
-  def main(args: Array[String]): Unit = {
+  final def main(args: Array[String]): Unit = {
     initialize(args)
     beforeStart(context)
     handler(context)

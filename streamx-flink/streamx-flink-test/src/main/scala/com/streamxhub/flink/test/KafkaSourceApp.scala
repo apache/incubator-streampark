@@ -1,10 +1,16 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.source.{KafkaRecord, KafkaSource}
+import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 
 object KafkaSourceApp extends FlinkStreaming {
+
+  /**
+   * 用户可覆盖次方法...
+   *
+   */
+  override def beforeStart(context: StreamingContext): Unit = super.beforeStart(context)
 
   override def handler(context: StreamingContext): Unit = {
 
@@ -15,8 +21,10 @@ object KafkaSourceApp extends FlinkStreaming {
       .map(x => {
         x.topic
       })
+      .keyBy(0)
       .print()
 
   }
 
 }
+
