@@ -109,8 +109,6 @@ object ConfigConst {
 
   val KEY_KAFKA_START_FROM = "start.from"
 
-  val KEY_KAFKA_START_FROM_TOPIC = "start.from"
-
   val KEY_KAFKA_START_FROM_OFFSET = "offset"
 
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
