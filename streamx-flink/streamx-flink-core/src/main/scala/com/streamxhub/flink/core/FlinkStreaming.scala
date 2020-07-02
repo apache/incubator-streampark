@@ -192,10 +192,9 @@ trait FlinkStreaming extends Logger {
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
-          case dir => {
+          case dir =>
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in properties,$dir")
             dir
-          }
         }
       }
 
