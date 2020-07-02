@@ -212,7 +212,7 @@ object StartFrom {
   def startForm(prop: Properties): Array[StartFrom] = {
     val startProp = prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM))
     startProp.foreach(x => prop.remove(x._1))
-    val topic = Try(startProp(s"$KEY_KAFKA_START_FROM_TOPIC.$KEY_KAFKA_START_FROM_OFFSET.$KEY_KAFKA_TOPIC").split(",")).getOrElse(Array.empty[String])
+    val topic = Try(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$KEY_KAFKA_TOPIC").split(",")).getOrElse(Array.empty[String])
     if (topic.isEmpty) null else {
       topic.map(x => {
         val offset = Try(Some(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$x"))).getOrElse(None)
