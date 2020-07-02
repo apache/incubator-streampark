@@ -105,8 +105,8 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
         new FlinkKafkaConsumer011(topicList, kfkDeserializer, prop)
       case (_, Some(reg)) =>
         val pattern: Pattern = topic match {
-          case null => Pattern.compile(reg)
-          case x: String => Pattern.compile(x)
+          case null => reg.r.pattern
+          case x: String => x.r.pattern
           case _ => throw new IllegalArgumentException("[Streamx-Flink] subscriptionPattern type must be String(regex)")
         }
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
@@ -137,8 +137,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
           case (Some(top), _) =>
             topic match {
               case null => startFrom.toList
-              case x: String =>
-                startFrom.filter(_.topic == x).toList
+              case x: String => startFrom.filter(_.topic == x).toList
               case x: List[String] =>
                 val topics = if (topic == null) top.split(",|\\s+").toList else x
                 startFrom.filter(s => topics.contains(s.topic)).toList
@@ -146,10 +145,8 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
             }
           case (_, Some(reg)) =>
             topic match {
-              case null =>
-                startFrom.filter(s => reg.r.findFirstIn(s.topic).nonEmpty).toList
-              case x: String =>
-                startFrom.filter(s => x.r.findFirstIn(s.topic).nonEmpty).toList
+              case null => startFrom.filter(s => reg.r.findFirstIn(s.topic).nonEmpty).toList
+              case x: String => startFrom.filter(s => x.r.findFirstIn(s.topic).nonEmpty).toList
               case _ => List.empty[StartFrom]
             }
         }
