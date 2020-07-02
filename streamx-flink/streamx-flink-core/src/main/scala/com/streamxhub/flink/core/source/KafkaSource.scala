@@ -95,7 +95,7 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
       case (Some(_), Some(_)) =>
         throw new IllegalArgumentException("[Streamx-Flink] topic and regex cannot be defined at the same time")
       case (Some(top), _) =>
-        val topics = top.split("\\,|\\s+")
+        val topics = top.split(",|\\s+")
         val topicList = topic match {
           case null => topics.toList
           case x: String => List(x)
@@ -140,16 +140,16 @@ class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: M
               case x: String =>
                 startFrom.filter(_.topic == x).toList
               case x: List[String] =>
-                val topics = if (topic == null) top.split("\\,|\\s+").toList else x
-                startFrom.filter(s => topics.filter(t => s.topic == t).nonEmpty).toList
+                val topics = if (topic == null) top.split(",|\\s+").toList else x
+                startFrom.filter(s => topics.contains(s.topic)).toList
               case _ => List.empty[StartFrom]
             }
           case (_, Some(reg)) =>
             topic match {
               case null =>
-                startFrom.filter(s => Pattern.compile(reg).matcher(s.topic).matches()).toList
+                startFrom.filter(s => reg.r.findFirstIn(s.topic).nonEmpty).toList
               case x: String =>
-                startFrom.filter(s => Pattern.compile(x).matcher(s.topic).matches()).toList
+                startFrom.filter(s => x.r.findFirstIn(s.topic).nonEmpty).toList
               case _ => List.empty[StartFrom]
             }
         }
@@ -218,12 +218,12 @@ object StartFrom {
         val offset = Try(Some(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$x"))).getOrElse(None)
         offset match {
           case Some(o) =>
-            Try {
+            Try(
               o.split(",").map(x => {
                 val array = x.split(":")
                 array.head.toInt -> array.last.toLong
               })
-            } match {
+            ) match {
               case Success(v) => new StartFrom(x, v)
               case Failure(_) => throw new IllegalArgumentException(s"[Streamx-Flink] topic:$x start.form offset error, e.g: 1:10000,2:10000,3:10002")
             }
