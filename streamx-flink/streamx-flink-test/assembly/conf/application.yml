@@ -112,16 +112,17 @@ http.sink:
 # source config....
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-  pattern: kafka*
+  pattern: hopsonone_park_(.*)_tjd_specilog
   topic: kafka01,kafka02
-  group.id: flink_test
+  group.id: flink_test01
   auto.offset.reset: earliest
   enable.auto.commit: true
   start.from:
-    timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
+    #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
     offset: # 给每个topic的partition指定offset
-      topic: kafka01,kafka02
+      topic: kafka01,kafka02,hopsonone_park_gz_tjd_specilog
       kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
       kafka02: 0:182,1:183,2:182
+      hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
 
 
