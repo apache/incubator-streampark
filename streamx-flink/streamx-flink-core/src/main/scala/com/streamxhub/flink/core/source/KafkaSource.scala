@@ -20,6 +20,7 @@
  */
 package com.streamxhub.flink.core.source
 
+import java.io
 import java.util.Properties
 import java.util.regex.Pattern
 
@@ -30,6 +31,7 @@ import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, Kafka
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
+import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
@@ -43,41 +45,14 @@ object KafkaSource {
 
   def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): KafkaSource = new KafkaSource(ctx, overrideParams)
 
-}
-
-/*
- * @param ctx
- * @param overrideParams
- */
-class KafkaSource(@(transient@param)private[this] val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
-  /**
-   *
-   * commit offset 方式:<br/>
-   * &nbsp;&nbsp;Flink kafka consumer commit offset 方式需要区分是否开启了 checkpoint。<br/>
-   * &nbsp;&nbsp; 1) checkpoint 关闭: commit offset 要依赖于 kafka 客户端的 auto commit。
-   * 需设置 enable.auto.commit，auto.commit.interval.ms 参数到 consumer properties，
-   * 就会按固定的时间间隔定期 auto commit offset 到 kafka。<br/>
-   * &nbsp;&nbsp; 2) checkpoint 开启: 这个时候作业消费的 offset 是 Flink 在 state 中自己管理和容错。
-   * 此时提交 offset 到 kafka，一般都是作为外部进度的监控，想实时知道作业消费的位置和 lag 情况。
-   * 此时需要 setCommitOffsetsOnCheckpoints 为 true 来设置当 checkpoint 成功时提交 offset 到 kafka。
-   * 此时 commit offset 的间隔就取决于 checkpoint 的间隔
-   *
-   * 获取DStream 流
-   *
-   * @param topic        一组topic或者单个topic
-   * @param alias        别名,区分不同的kafka连接实例
-   * @param deserializer DeserializationSchema
-   * @param assigner     AssignerWithPeriodicWatermarks
-   * @tparam T
-   */
-  def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,
-                                        alias: String = "",
-                                        deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
-                                        assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
-                                       ): DataStream[KafkaRecord[T]] = {
+  def getSource[T: TypeInformation](ctx: StreamingContext,
+                                    topic: io.Serializable,
+                                    alias: String,
+                                    deserializer: KafkaDeserializationSchema[T],
+                                    assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]]
+                                   ): FlinkKafkaConsumer011[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
-    overrideParam.foreach(x => prop.put(x._1, x._2))
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
     //start.form parameter...
@@ -112,9 +87,8 @@ class KafkaSource(@(transient@param)private[this] val ctx: StreamingContext, ove
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
         new FlinkKafkaConsumer011(pattern, kfkDeserializer, prop)
     }
-    val enableChk = ctx.getCheckpointConfig.isCheckpointingEnabled
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
-    (enableChk, autoCommit) match {
+    (ctx.getCheckpointConfig.isCheckpointingEnabled, autoCommit) match {
       case (true, _) => consumer.setCommitOffsetsOnCheckpoints(true)
       case (_, false) => throw new IllegalArgumentException("[StreamX] error:flink checkpoint was disable,and kafka autoCommit was false.you can enable checkpoint or enable kafka autoCommit...")
       case _ =>
@@ -161,7 +135,43 @@ class KafkaSource(@(transient@param)private[this] val ctx: StreamingContext, ove
           consumer.setStartFromSpecificOffsets(startOffsets)
         }
     }
+    consumer
+  }
 
+}
+
+/*
+ * @param ctx
+ * @param overrideParams
+ */
+class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
+  /**
+   *
+   * commit offset 方式:<br/>
+   * &nbsp;&nbsp;Flink kafka consumer commit offset 方式需要区分是否开启了 checkpoint。<br/>
+   * &nbsp;&nbsp; 1) checkpoint 关闭: commit offset 要依赖于 kafka 客户端的 auto commit。
+   * 需设置 enable.auto.commit，auto.commit.interval.ms 参数到 consumer properties，
+   * 就会按固定的时间间隔定期 auto commit offset 到 kafka。<br/>
+   * &nbsp;&nbsp; 2) checkpoint 开启: 这个时候作业消费的 offset 是 Flink 在 state 中自己管理和容错。
+   * 此时提交 offset 到 kafka，一般都是作为外部进度的监控，想实时知道作业消费的位置和 lag 情况。
+   * 此时需要 setCommitOffsetsOnCheckpoints 为 true 来设置当 checkpoint 成功时提交 offset 到 kafka。
+   * 此时 commit offset 的间隔就取决于 checkpoint 的间隔
+   *
+   * 获取DStream 流
+   *
+   * @param topic        一组topic或者单个topic
+   * @param alias        别名,区分不同的kafka连接实例
+   * @param deserializer DeserializationSchema
+   * @param assigner     AssignerWithPeriodicWatermarks
+   * @tparam T
+   */
+  def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,
+                                        alias: String = "",
+                                        deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
+                                        assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
+                                       ): DataStream[KafkaRecord[T]] = {
+
+    val consumer = KafkaSource.getSource[T](this.ctx, topic, alias, deserializer, assigner)
     ctx.addSource(consumer)
   }
 
