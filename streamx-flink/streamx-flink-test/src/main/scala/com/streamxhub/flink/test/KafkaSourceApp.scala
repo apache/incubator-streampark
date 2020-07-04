@@ -21,7 +21,6 @@ object KafkaSourceApp extends FlinkStreaming {
       .map(x => {
         x.topic
       })
-      .keyBy(0)
       .print()
 
   }

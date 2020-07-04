@@ -112,8 +112,8 @@ http.sink:
 # source config....
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-  topic: kafka01,kafka02
-  group.id: flink_test02
+  topic: hopsonone_park_sh_tc_record
+  group.id: flink_test03
   auto.offset.reset: earliest
   enable.auto.commit: true
   start.from:
