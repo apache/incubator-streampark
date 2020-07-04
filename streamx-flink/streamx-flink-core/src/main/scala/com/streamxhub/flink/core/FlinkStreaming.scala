@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{Logger,SystemPropertyUtils}
+import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
@@ -35,9 +35,24 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
+  def this(flinkInitializer: FlinkInitializer) = {
+    this(flinkInitializer.parameter, flinkInitializer.initStreamEnv())
+  }
+
+  override def execute(): JobExecutionResult = {
+    val appName = parameter.get(KEY_FLINK_APP_NAME, "")
+    execute(appName)
+  }
+
+  override def execute(jobName: String): JobExecutionResult = {
+    println(s"\033[95;1m$LOGO\033[1m\n")
+    println(s"[StreamX] FlinkStreaming $jobName Starting...")
+    super.execute(jobName)
+  }
 }
+
 
 trait FlinkStreaming extends Logger {
 
@@ -52,24 +67,17 @@ trait FlinkStreaming extends Logger {
 
   private var context: StreamingContext = _
 
-  def main(args: Array[String]): Unit = {
-    initialize(args)
+  final def main(args: Array[String]): Unit = {
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
+    //init......
+    val initializer = new FlinkInitializer(args, config)
+    parameter = initializer.parameter
+    env = initializer.initStreamEnv()
+    context = new StreamingContext(parameter, env)
+    //
     beforeStart(context)
     handler(context)
-    doStart()
-  }
-
-  /**
-   *
-   * @param args
-   */
-  private def initialize(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val initializer = new FlinkInitializer(args)
-    //read config and merge config......
-    parameter = initializer.parameter
-    env = initializer.initStreamEnv(config)
-    context = new StreamingContext(parameter, env)
+    context.execute()
   }
 
   /**
@@ -81,14 +89,6 @@ trait FlinkStreaming extends Logger {
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handler(context: StreamingContext): Unit
-
-  private[this] def doStart(): JobExecutionResult = {
-    println(s"\033[95;1m$LOGO\033[1m\n")
-    val appName = parameter.get(KEY_FLINK_APP_NAME, "")
-    println(s"[StreamX] FlinkStreaming $appName Starting...")
-    context.execute(appName)
-  }
-
 
 }
 

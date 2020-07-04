@@ -12,13 +12,20 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
-import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
+import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
 import scala.collection.JavaConversions._
 import scala.util.Try
 
 class FlinkInitializer(args: Array[String]) extends Logger {
+
+  var configFun:(StreamExecutionEnvironment, ParameterTool) => Unit = _
+
+  def this(args: Array[String],config: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
+    this(args)
+    configFun = config
+  }
 
   val parameter: ParameterTool = initParameter()
 
@@ -40,7 +47,7 @@ class FlinkInitializer(args: Array[String]) extends Logger {
     ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
   }
 
-  private[core] def initStreamEnv(config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
+  private[core] def initStreamEnv() = {
 
     def envConfig(): Unit = {
       //init env...
@@ -158,8 +165,8 @@ class FlinkInitializer(args: Array[String]) extends Logger {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     envConfig()
     checkpoint()
-    if (config != null) {
-      config(this.streamEnv, this.parameter)
+    if (configFun != null) {
+      configFun(this.streamEnv, this.parameter)
     }
     this.streamEnv.getConfig.setGlobalJobParameters(parameter)
     this.streamEnv
