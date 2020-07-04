@@ -43,23 +43,8 @@ trait FlinkDataSet extends Logger {
   def handler(context: DataSetContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
-    //read config and merge config......
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_APP_CONF, null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
-      case file => file
-    }
-    val configFile = new java.io.File(config)
-    require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
-    val configArgs = config.split("\\.").last match {
-      case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-      case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
-    }
-
-    this.parameter = ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
-
+    val initializer = new FlinkInitializer(args)
+    this.parameter = initializer.parameter
     env = ExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameter)
   }

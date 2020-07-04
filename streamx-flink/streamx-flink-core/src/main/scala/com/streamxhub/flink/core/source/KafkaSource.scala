@@ -49,7 +49,7 @@ object KafkaSource {
  * @param ctx
  * @param overrideParams
  */
-class KafkaSource(@(transient@param) val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
+class KafkaSource(@(transient@param)private[this] val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
   /**
    *
    * commit offset 方式:<br/>
