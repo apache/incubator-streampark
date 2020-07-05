@@ -1,5 +1,6 @@
 package com.streamxhub.flink.javacase;
 
+import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
 import com.streamxhub.flink.core.source.KafakJavaSource;
 import com.streamxhub.flink.core.source.KafkaRecord;
@@ -12,7 +13,12 @@ public class KafkaSourceApp {
 
     public static void main(String[] args) {
 
-        StreamingContext context = new StreamingContext(args,null);
+        StreamEnvConfig javaConfig = new StreamEnvConfig(args, (environment, parameterTool) -> {
+            //用户可以给environment设置参数...
+            System.out.println("environment argument set...");
+        });
+
+        StreamingContext context = new StreamingContext(javaConfig);
 
         new KafakJavaSource<LogBean>(context)
                 .deserializer(new KafkaDeserializationSchema<LogBean>() {
@@ -29,17 +35,13 @@ public class KafkaSourceApp {
                     @Override
                     public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
                         String value = new String(record.value());
+                        System.out.println(value);
                         LogBean logBean = new LogBean();
                         //value to logBean....
                         return logBean;
                     }
                 }).getDataStream()
-                .map(new MapFunction<KafkaRecord<LogBean>, String>() {
-                    @Override
-                    public String map(KafkaRecord<LogBean> value) throws Exception {
-                        return value.value().getControlid();
-                    }
-                }).print();
+                .map((MapFunction<KafkaRecord<LogBean>, String>) value -> value.value().getControlid()).print();
 
         context.execute();
     }
