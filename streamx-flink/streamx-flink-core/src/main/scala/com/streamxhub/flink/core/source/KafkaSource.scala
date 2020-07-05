@@ -31,7 +31,6 @@ import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, Kafka
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
-import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}

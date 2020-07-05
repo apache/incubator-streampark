@@ -37,8 +37,8 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
  */
 class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
-  def this(flinkInitializer: FlinkInitializer) = {
-    this(flinkInitializer.parameter, flinkInitializer.initStreamEnv())
+  def this(array: Array[String]) = {
+    this(FlinkInitializer.get(array).parameter, FlinkInitializer.get(array).streamEnvironment)
   }
 
   override def execute(): JobExecutionResult = {
@@ -72,7 +72,7 @@ trait FlinkStreaming extends Logger {
     //init......
     val initializer = new FlinkInitializer(args, config)
     parameter = initializer.parameter
-    env = initializer.initStreamEnv()
+    env = initializer.streamEnvironment
     context = new StreamingContext(parameter, env)
     //
     beforeStart(context)

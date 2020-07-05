@@ -19,28 +19,28 @@ public class KafakJavaSource<T> {
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
-    public KafakJavaSource topic(String... topic) {
+    public KafakJavaSource<T> topic(String... topic) {
         this.topics = topic;
         return this;
     }
 
-    public KafakJavaSource alias(String alias) {
+    public KafakJavaSource<T> alias(String alias) {
         this.alias = alias;
         return this;
     }
 
-    public KafakJavaSource deserializer(KafkaDeserializationSchema<T> deserializer) {
+    public KafakJavaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
         this.deserializer = deserializer;
         return this;
     }
 
-    public KafakJavaSource assigner(AssignerWithPeriodicWatermarks<KafkaRecord<T>> assigner) {
+    public KafakJavaSource<T> assigner(AssignerWithPeriodicWatermarks<KafkaRecord<T>> assigner) {
         this.assigner = assigner;
         return this;
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(ctx,this.topics,this.alias,this.deserializer,this.assigner,null);
+        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(ctx, this.topics, this.alias, this.deserializer, this.assigner, null);
         return ctx.getJavaEnv().addSource(consumer);
     }
 

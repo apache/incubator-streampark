@@ -18,18 +18,36 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-class FlinkInitializer(args: Array[String]) extends Logger {
+object FlinkInitializer {
 
-  var configFun:(StreamExecutionEnvironment, ParameterTool) => Unit = _
+  private var flinkInitializer: FlinkInitializer = _
 
-  def this(args: Array[String],config: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
+  def get(args: Array[String]): FlinkInitializer = {
+    if (flinkInitializer == null) {
+      this.synchronized {
+        if (flinkInitializer == null) {
+          flinkInitializer = new FlinkInitializer(args)
+        }
+      }
+    }
+    flinkInitializer
+  }
+
+}
+
+class FlinkInitializer private(args: Array[String]) extends Logger {
+
+  def this(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
     this(args)
     configFun = config
+    initStreamEnv()
   }
+
+  private[this] var configFun: (StreamExecutionEnvironment, ParameterTool) => Unit = _
 
   val parameter: ParameterTool = initParameter()
 
-  var streamEnv: StreamExecutionEnvironment = _
+  private[this] var streamEnv: StreamExecutionEnvironment = _
 
   private[this] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
@@ -47,8 +65,18 @@ class FlinkInitializer(args: Array[String]) extends Logger {
     ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
   }
 
-  private[core] def initStreamEnv() = {
+  def streamEnvironment: StreamExecutionEnvironment = {
+    if (streamEnv == null) {
+      this.synchronized {
+        if (streamEnv == null) {
+          initStreamEnv()
+        }
+      }
+    }
+    streamEnv
+  }
 
+  private[this] def initStreamEnv() = {
     def envConfig(): Unit = {
       //init env...
       val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT)
