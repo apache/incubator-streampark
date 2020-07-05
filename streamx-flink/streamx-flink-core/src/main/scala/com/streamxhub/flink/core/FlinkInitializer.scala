@@ -13,6 +13,7 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedC
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
+import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
 import scala.collection.JavaConversions._
@@ -22,11 +23,11 @@ object FlinkInitializer {
 
   private var flinkInitializer: FlinkInitializer = _
 
-  def get(args: Array[String]): FlinkInitializer = {
+  def get(args: Array[String],config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): FlinkInitializer = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
-          flinkInitializer = new FlinkInitializer(args)
+          flinkInitializer = new FlinkInitializer(args,config)
         }
       }
     }
@@ -39,11 +40,13 @@ class FlinkInitializer private(args: Array[String]) extends Logger {
 
   def this(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
     this(args)
-    configFun = config
+    streamConfFun = config
     initStreamEnv()
   }
 
-  private[this] var configFun: (StreamExecutionEnvironment, ParameterTool) => Unit = _
+  private[this] var streamConfFun: (StreamExecutionEnvironment, ParameterTool) => Unit = _
+
+  private[this] var datasetConfFun: (ExecutionEnvironment, ParameterTool) => Unit = _
 
   val parameter: ParameterTool = initParameter()
 
@@ -193,12 +196,15 @@ class FlinkInitializer private(args: Array[String]) extends Logger {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     envConfig()
     checkpoint()
-    if (configFun != null) {
-      configFun(this.streamEnv, this.parameter)
+    if (streamConfFun != null) {
+      streamConfFun(this.streamEnv, this.parameter)
     }
     this.streamEnv.getConfig.setGlobalJobParameters(parameter)
     this.streamEnv
   }
 
+  def initDatasetEnv() = {
+
+  }
 
 }
