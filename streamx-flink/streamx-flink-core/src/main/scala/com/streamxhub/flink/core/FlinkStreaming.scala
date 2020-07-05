@@ -37,10 +37,19 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
  */
 class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
+  /**
+   * for scala...
+   * @param array
+   * @param config
+   */
   def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
     this(FlinkInitializer.get(array, config).parameter, FlinkInitializer.get(array, config).streamEnvironment)
   }
 
+  /**
+   * for Java
+   * @param args
+   */
   def this(args: StreamEnvConfig) = {
     this(FlinkInitializer.get(args).parameter, FlinkInitializer.get(args).streamEnvironment)
   }
