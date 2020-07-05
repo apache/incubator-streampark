@@ -20,12 +20,11 @@
  */
 package com.streamxhub.flink.core
 
-import com.streamxhub.common.util.{Logger, PropertiesUtils, SystemPropertyUtils}
+import com.streamxhub.common.util.Logger
 import com.streamxhub.common.conf.ConfigConst._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.api.scala._
 
-import scala.collection.JavaConversions._
 import scala.annotation.meta.getter
 
 
@@ -43,8 +42,7 @@ trait FlinkDataSet extends Logger {
   def handler(context: DataSetContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
-    val initializer = new FlinkInitializer(args)
-    this.parameter = initializer.parameter
+    this.parameter = FlinkInitializer.get(args,null).parameter
     env = ExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameter)
   }
@@ -55,6 +53,8 @@ trait FlinkDataSet extends Logger {
    * @param env
    */
   def beforeStart(env: ExecutionEnvironment): Unit = {}
+
+  def config(env: ExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   private def createContext(): Unit = {
     context = new DataSetContext(parameter, env)
