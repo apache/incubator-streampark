@@ -37,8 +37,8 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
  */
 class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
-  def this(array: Array[String]) = {
-    this(FlinkInitializer.get(array).parameter, FlinkInitializer.get(array).streamEnvironment)
+  def this(array: Array[String],config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
+    this(FlinkInitializer.get(array,config).parameter, FlinkInitializer.get(array,config).streamEnvironment)
   }
 
   override def execute(): JobExecutionResult = {
