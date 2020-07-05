@@ -35,10 +35,11 @@ import org.apache.flink.streaming.api.functions.ProcessFunction
  * @param parameter
  * @param environment
  */
-class StreamingContext(val parameter: ParameterTool, val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /**
    * for scala...
+   *
    * @param array
    * @param config
    */
@@ -48,6 +49,7 @@ class StreamingContext(val parameter: ParameterTool, val environment: StreamExec
 
   /**
    * for Java
+   *
    * @param args
    */
   def this(args: StreamEnvConfig) = {
@@ -86,7 +88,7 @@ trait FlinkStreaming extends Logger {
     val initializer = new FlinkInitializer(args, config)
     parameter = initializer.parameter
     env = initializer.streamEnvironment
-    context = new StreamingContext(parameter, env)
+    context = new StreamingContext(parameter,env)
     //
     beforeStart(context)
     handler(context)
