@@ -1,8 +1,11 @@
 package com.streamxhub.flink.core.source;
 
+import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.common.util.JdbcUtils;
 import com.streamxhub.flink.core.StreamingContext;
-import com.streamxhub.flink.core.function.MySQLResultFunction;
+import com.streamxhub.flink.core.function.ResultSetFunction;
+import com.streamxhub.flink.core.function.SQLFunction;
+import com.streamxhub.flink.core.sink.Dialect;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.api.functions.source.SourceFunction;
 
@@ -17,13 +20,22 @@ public class MySQLJavaSource<T> {
     private StreamingContext context;
     private Properties jdbc;
 
+    public MySQLJavaSource(StreamingContext context) {
+        this(context,(String) null);
+    }
+
+    public MySQLJavaSource(StreamingContext context, String alias) {
+        this.context = context;
+        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(),alias);
+    }
+
     public MySQLJavaSource(StreamingContext context, Properties jdbc) {
         this.context = context;
         this.jdbc = jdbc;
     }
 
-    public DataStreamSource<T> getDataStream(String sql, int interval, MySQLResultFunction<T> fun) {
-        MySQLJavaSourceFunction<T> sourceFunction = new MySQLJavaSourceFunction<>(jdbc, sql, interval, fun);
+    public DataStreamSource<T> getDataStream(SQLFunction sqlFun,ResultSetFunction<T> fun) {
+        MySQLJavaSourceFunction<T> sourceFunction = new MySQLJavaSourceFunction<>(jdbc, sqlFun, fun);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 }
@@ -32,24 +44,21 @@ public class MySQLJavaSource<T> {
 class MySQLJavaSourceFunction<T> implements SourceFunction<T>, Serializable {
 
     private Properties jdbc;
-    private String sql;
-    private MySQLResultFunction<T> fun;
-    private int interval;
+    private SQLFunction sqlFun;
+    private ResultSetFunction<T> fun;
 
     private boolean isRunning = true;
 
-    public MySQLJavaSourceFunction(Properties jdbc, String sql, int interval, MySQLResultFunction<T> fun) {
+    public MySQLJavaSourceFunction(Properties jdbc, SQLFunction sqlFun,ResultSetFunction<T> fun) {
         this.jdbc = jdbc;
-        this.sql = sql;
+        this.sqlFun = sqlFun;
         this.fun = fun;
-        this.interval = interval;
     }
 
     @Override
     public void run(SourceContext<T> ctx) throws Exception {
         while (isRunning) {
-            Stream.of(asJavaIterable(JdbcUtils.select(sql, jdbc))).forEach((x) -> x.forEach(m -> ctx.collect(fun.result(mapAsJavaMap(m)))));
-            Thread.sleep(interval);
+            Stream.of(asJavaIterable(JdbcUtils.select(sqlFun.getSQL(), jdbc))).forEach((x) -> x.forEach(m -> ctx.collect(fun.result(mapAsJavaMap(m)))));
         }
     }
 

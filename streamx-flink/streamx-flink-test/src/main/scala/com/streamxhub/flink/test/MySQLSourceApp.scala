@@ -21,9 +21,12 @@ object MySQLSourceApp extends FlinkStreaming {
     prop.put("idleTimeout", "20000")
 
     val mysqlSource = new MySQLSource(context)
-    val ds = mysqlSource.getDataStream[Orders]("select * from orders limit 10", x => x.map(r => {
+    val ds = mysqlSource.getDataStream[Orders]({
+      Thread.sleep(10000)
+      "select * from orders limit 10"
+    }, r => {
       JsonUtils.read[Orders](r)
-    }))
+    })
     ds.print()
   }
 
