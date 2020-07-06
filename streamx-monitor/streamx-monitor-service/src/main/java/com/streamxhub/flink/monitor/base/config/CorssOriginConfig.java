@@ -27,6 +27,9 @@ import static org.springframework.http.HttpMethod.*;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * @author benjobs
+ */
 @Configuration
 public class CorssOriginConfig implements WebMvcConfigurer {
 
