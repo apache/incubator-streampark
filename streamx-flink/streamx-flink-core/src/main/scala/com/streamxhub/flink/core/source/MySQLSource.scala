@@ -49,8 +49,8 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R], interval: Long = 1000L)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, interval)
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit config: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun)
     ctx.addSource(mysqlFun)
   }
 
@@ -65,7 +65,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: List[Map[String, _]] => List[R], interval: Long)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: Map[String, _] => R)(implicit config: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -74,8 +74,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (this.isRunning) {
-      resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
-      Thread.sleep(interval)
+      JdbcUtils.select(sqlFun).map(resultFun).foreach(ctx.collect)
     }
   }
 

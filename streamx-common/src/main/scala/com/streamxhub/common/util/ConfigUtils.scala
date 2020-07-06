@@ -75,7 +75,7 @@ object ConfigUtils {
    * @return
    */
   def getJdbcConf(parameter: JMap[String, String], dialect: String, alias: String): Properties = {
-    val prefix = if (dialect.endsWith(".")) dialect else s"$dialect."
+    val prefix = if (dialect.endsWith(".")) dialect.toLowerCase() else s"${dialect.toLowerCase()}."
     val fix = alias match {
       case "" | null => prefix
       case other =>
