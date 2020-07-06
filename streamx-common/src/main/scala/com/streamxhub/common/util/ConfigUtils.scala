@@ -24,7 +24,6 @@ import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
 import java.util.{Map => JMap}
-
 import scala.collection.immutable.{Map => SMap}
 import scala.util.Try
 import scala.collection.JavaConversions._
