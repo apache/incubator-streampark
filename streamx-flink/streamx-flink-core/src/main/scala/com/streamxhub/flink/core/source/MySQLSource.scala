@@ -73,7 +73,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, r
 
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
-    while (true) {
+    while (this.isRunning) {
       resultFun(JdbcUtils.select(sqlFun)).foreach(ctx.collect)
       Thread.sleep(interval)
     }
