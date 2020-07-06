@@ -5,6 +5,7 @@ import java.io.Serializable;
 import java.util.Map;
 
 @FunctionalInterface
-public interface MySQLResultFunction<T> extends Serializable {
+public interface ResultSetFunction<T> extends Serializable {
     T result(Map<String,?> map);
 }
+
