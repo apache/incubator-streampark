@@ -45,18 +45,18 @@ object HBaseSource {
  * @param ctx
  * @param overrideParams
  */
-class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String], interval: Long = 0) {
+class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   def getDataStream[R: TypeInformation](table: String, query: List[Query], fun: Result => R)(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
-    val hbaseFun = new HBaseSourceFunction[R](table, query, fun, interval)
+    val hbaseFun = new HBaseSourceFunction[R](table, query, fun)
     ctx.addSource(hbaseFun)
   }
 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](table: String, query: List[Query], fun: Result => R, interval: Long)(implicit prop: Properties) extends RichSourceFunction[R] with Serializable with Logger {
+class HBaseSourceFunction[R: TypeInformation](table: String, query: List[Query], fun: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Serializable with Logger {
 
   private[this] var isRunning = true
 
@@ -73,12 +73,10 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: List[Query],
       case scan: List[Scan] =>
         while (isRunning) {
           scan.foreach(x => htable.getScanner(x).iterator().asScala.toList.foreach(x => ctx.collect(fun(x))))
-          Thread.sleep(interval)
         }
       case get: List[Get] =>
         while (isRunning) {
           htable.get(get.asInstanceOf[java.util.List[Get]]).toList.foreach(x => ctx.collect(fun(x)))
-          Thread.sleep(interval)
         }
       case _ =>
         throw new IllegalArgumentException("[StreamX-Flink] HBaseSource error! query must Get or Scan!")
