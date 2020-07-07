@@ -107,7 +107,7 @@ eg:
           'link-color': '#F5222D',
           'border-radius-base': '4px',
         },
-        javascriptEnabled: true,
+        javascriptEnabled: true
       }
     }
   }
