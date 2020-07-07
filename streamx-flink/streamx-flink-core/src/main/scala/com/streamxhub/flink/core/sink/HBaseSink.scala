@@ -70,6 +70,7 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
+
 }
 
 class HBaseSinkFunction[T](tabName: String, fun: T => java.lang.Iterable[Mutation])(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
