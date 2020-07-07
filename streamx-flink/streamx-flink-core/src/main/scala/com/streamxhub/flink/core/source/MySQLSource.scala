@@ -53,7 +53,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @return
    */
   def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit jdbc: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](jdbc,sqlFun, fun)
+    val mysqlFun = new MySQLSourceFunction[R](jdbc, sqlFun, fun)
     ctx.addSource(mysqlFun)
   }
 
@@ -66,15 +66,15 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
-  private var jdbc: Properties = null
-  private var scalaSqlFunc: String = _
-  private var scalaResultFunc: Function[Map[String, _], R] = _
-  private var javaSqlFunc: SQLFunction = null
-  private var javaResultFunc: ResultSetFunction[R] = null
-  private var apiType: ApiType = ApiType.Scala
+  private[this] var jdbc: Properties = null
+  private[this] var scalaSqlFunc: String = _
+  private[this] var scalaResultFunc: Function[Map[String, _], R] = _
+  private[this] var javaSqlFunc: SQLFunction = null
+  private[this] var javaResultFunc: ResultSetFunction[R] = null
+  private[this] var apiType: ApiType = ApiType.Scala
 
   //for Scala
-  def this(jdbc: Properties,sqlFunc: => String, resultFunc: Map[String, _] => R) = {
+  def this(jdbc: Properties, sqlFunc: => String, resultFunc: Map[String, _] => R) = {
     this()
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
@@ -91,8 +91,6 @@ private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunc
     this.apiType = ApiType.JAVA
   }
 
-  override def cancel(): Unit = this.isRunning = false
-
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (this.isRunning) {
@@ -102,4 +100,6 @@ private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunc
       }
     }
   }
+
+  override def cancel(): Unit = this.isRunning = false
 }
