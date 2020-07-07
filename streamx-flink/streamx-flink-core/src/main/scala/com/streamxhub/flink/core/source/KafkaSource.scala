@@ -45,6 +45,7 @@ object KafkaSource {
   def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): KafkaSource = new KafkaSource(ctx, overrideParams)
 
   def getSource[T: TypeInformation](ctx: StreamingContext,
+                                    overrideParam: Map[String, String],
                                     topic: io.Serializable,
                                     alias: String,
                                     deserializer: KafkaDeserializationSchema[T],
@@ -52,6 +53,7 @@ object KafkaSource {
                                    ): FlinkKafkaConsumer011[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
+    overrideParam.foreach { case (k, v) => prop.put(k, v) }
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
     //start.form parameter...
@@ -170,7 +172,7 @@ class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, ov
                                         assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
-    val consumer = KafkaSource.getSource[T](this.ctx, topic, alias, deserializer, assigner)
+    val consumer = KafkaSource.getSource[T](this.ctx, overrideParam, topic, alias, deserializer, assigner)
     ctx.addSource(consumer)
   }
 

@@ -40,7 +40,6 @@ import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
-import scala.collection.Map
 
 object JdbcSink {
 
@@ -50,15 +49,13 @@ object JdbcSink {
    * @return
    */
   def apply(@(transient@param) ctx: StreamingContext,
-            overrideParams: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, overrideParams, parallelism, name, uid)
+            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
 
 }
 
 class JdbcSink(@(transient@param) ctx: StreamingContext,
-               overrideParams: Map[String, String] = Map.empty[String, String],
                parallelism: Int = 0,
                name: String = null,
                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
@@ -71,33 +68,33 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
    * @tparam T : DataStream里的流的数据类型
    * @return
    */
-  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL, isolationLevel: Integer = null)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
-    overrideParams.foreach(x => prop.put(x._1, x._2))
-    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn, isolationLevel)
+    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
 }
 
-class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties, isolationLevel: Integer = null) extends RichSinkFunction[T] with Logger {
+class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: ToSQLFunction[T] = _
+
   private val batchSize = jdbc.remove(KEY_JDBC_INSERT_BATCH) match {
     case null => DEFAULT_JDBC_INSERT_BATCH
     case batch => batch.toString.toInt
   }
 
-  def this(jdbc: Properties, toSQLFn: T => String, isolationLevel: Integer) {
-    this(ApiType.Scala, jdbc, isolationLevel)
+  def this(jdbc: Properties, toSQLFn: T => String) {
+    this(ApiType.Scala, jdbc)
     this.scalaToSQLFn = toSQLFn
   }
 
-  def this(jdbc: Properties, toSQLFn: ToSQLFunction[T], isolationLevel: Integer) {
-    this(ApiType.JAVA, jdbc, isolationLevel)
+  def this(jdbc: Properties, toSQLFn: ToSQLFunction[T]) {
+    this(ApiType.JAVA, jdbc)
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
   }
@@ -111,9 +108,6 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties, is
     logInfo("[StreamX] JdbcSink Open....")
     connection = JdbcUtils.getConnection(jdbc)
     connection.setAutoCommit(false)
-    if (isolationLevel != null) {
-      connection.setTransactionIsolation(isolationLevel)
-    }
     if (batchSize > 1) {
       statement = connection.createStatement()
     }
@@ -174,9 +168,9 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties, is
 }
 
 
-class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String, isolationLevel: Integer = null) extends RichOutputFormat[T] with Logger {
+class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
-  val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun, isolationLevel)
+  val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun)
 
   var configuration: Configuration = _
 
