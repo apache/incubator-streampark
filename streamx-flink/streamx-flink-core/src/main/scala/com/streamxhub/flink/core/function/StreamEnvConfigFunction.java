@@ -23,6 +23,8 @@ package com.streamxhub.flink.core.function;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
+import java.io.Serializable;
+
 @FunctionalInterface
 public interface StreamEnvConfigFunction {
     /**
