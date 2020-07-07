@@ -63,32 +63,26 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  *
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.Scala, jdbc: Properties) extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
-  private[this] var jdbc: Properties = null
   private[this] var scalaSqlFunc: String = _
   private[this] var scalaResultFunc: Function[Map[String, _], R] = _
   private[this] var javaSqlFunc: SQLFunction = null
   private[this] var javaResultFunc: ResultSetFunction[R] = null
-  private[this] var apiType: ApiType = ApiType.Scala
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: => String, resultFunc: Map[String, _] => R) = {
-    this()
+    this(ApiType.Scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
-    this.jdbc = jdbc
-    this.apiType = ApiType.Scala
   }
 
   //for JAVA
   def this(jdbc: Properties, javaSqlFunc: SQLFunction, javaResultFunc: ResultSetFunction[R]) {
-    this()
-    this.jdbc = jdbc
+    this(ApiType.JAVA, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
-    this.apiType = ApiType.JAVA
   }
 
   @throws[Exception]
