@@ -1,25 +1,20 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <parent>
-    <groupId>com.streamxhub</groupId>
-    <artifactId>streamx-monitor</artifactId>
-    <version>1.0.0</version>
+    <groupId>cn.benhub.opensource</groupId>
+    <artifactId>adminx</artifactId>
+    <version>1.0.0-RELEASE</version>
   </parent>
-
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>streamx-monitor-webapp</artifactId>
-  <name>streamx-monitor-webapp</name>
-  <description>streamx-monitor-webapp</description>
-
+  <artifactId>adminx-webapp</artifactId>
+  <name>adminx-webapp</name>
+  <description>adminx-webapp</description>
   <build>
-
     <plugins>
-
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
         <executions>
-
           <execution>
             <id>exec-npm-install</id>
             <phase>prepare-package</phase>
@@ -33,7 +28,6 @@
               </arguments>
             </configuration>
           </execution>
-
           <execution>
             <id>exec-npm-run-build</id>
             <phase>prepare-package</phase>
@@ -48,11 +42,8 @@
               </arguments>
             </configuration>
           </execution>
-
         </executions>
-
       </plugin>
     </plugins>
   </build>
-
 </project>
