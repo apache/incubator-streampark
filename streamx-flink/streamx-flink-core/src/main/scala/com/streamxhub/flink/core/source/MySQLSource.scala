@@ -24,11 +24,15 @@ import java.util.Properties
 
 import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
+import com.streamxhub.flink.core.enums.ApiType
+import com.streamxhub.flink.core.enums.ApiType.ApiType
+import com.streamxhub.flink.core.function.{ResultSetFunction, SQLFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
+import scala.collection.JavaConverters._
 import scala.collection.Map
 
 
@@ -44,13 +48,12 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    *
    * @param sqlFun
    * @param fun
-   * @param interval sql查询的间隔时间.
    * @param config
    * @tparam R
    * @return
    */
   def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun)
+    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, config)
     ctx.addSource(mysqlFun)
   }
 
@@ -58,24 +61,45 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 
 /**
  *
- * @param sqlFun
- * @param resultFun
- * @param interval 两次sql执行查询的间隔.防止死循环密集的查询sql
- * @param typeInformation$R$0
- * @param config
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](sqlFun: => String, resultFun: Map[String, _] => R)(implicit config: Properties) extends SourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunction[R] with Logger {
 
   private[this] var isRunning = true
+  private var jdbc: Properties = null
+  private var scalaSqlFunc: String = _
+  private var scalaResultFunc: Function[Map[String, _], R] = _
+  private var javaSqlFunc: SQLFunction = null
+  private var javaResultFunc: ResultSetFunction[R] = null
+  private var apiType: ApiType = ApiType.Scala
+
+  //for Scala
+  def this(sqlFunc: => String, resultFunc: Map[String, _] => R, jdbc: Properties) = {
+    this()
+    this.scalaSqlFunc = sqlFunc
+    this.scalaResultFunc = resultFunc
+    this.jdbc = jdbc
+    this.apiType = ApiType.Scala
+  }
+
+  //for JAVA
+  def this(jdbc: Properties, javaSqlFunc: SQLFunction, javaResultFunc: ResultSetFunction[R]) {
+    this()
+    this.jdbc = jdbc
+    this.javaSqlFunc = javaSqlFunc
+    this.javaResultFunc = javaResultFunc
+    this.apiType = ApiType.JAVA
+  }
 
   override def cancel(): Unit = this.isRunning = false
 
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (this.isRunning) {
-      JdbcUtils.select(sqlFun).map(resultFun).foreach(ctx.collect)
+      apiType match {
+        case ApiType.Scala => JdbcUtils.select(scalaSqlFunc)(jdbc).map(scalaResultFunc).foreach(ctx.collect)
+        case ApiType.JAVA => JdbcUtils.select(javaSqlFunc.getSQL)(jdbc).map(x => javaResultFunc.result(x.asJava))
+      }
     }
   }
-
 }
