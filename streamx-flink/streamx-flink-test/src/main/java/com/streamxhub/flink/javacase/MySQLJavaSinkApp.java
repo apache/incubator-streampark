@@ -32,11 +32,11 @@ public class MySQLJavaSinkApp {
 
         //读取MySQL数据源
         DataStream<LogBean> stream = new MySQLJavaSource<LogBean>(context, prop)
-                .sql((GetSQLFunction) () -> {
+                .sql(() -> {
                     Thread.sleep(1000);
                     return "select * from orders limit 10";
                 })
-                .result((ResultSetFunction<LogBean>) map -> {
+                .result(map -> {
                     LogBean logBean = new LogBean();
                     logBean.setCard_type("123");
                     logBean.setControlid("345");
@@ -48,7 +48,7 @@ public class MySQLJavaSinkApp {
         //写入MySQL表...
         new JdbcJavaSink<LogBean>(context)
                 .jdbc(prop)
-                .toSQL(bean -> String.format("insert into sink(name,value)value('%s','%s')", bean.getCard_type(), bean.getControlid()))
+                .sql(bean -> String.format("insert into sink(name,value)value('%s','%s')", bean.getCard_type(), bean.getControlid()))
                 .sink(stream);
 
         context.execute();
