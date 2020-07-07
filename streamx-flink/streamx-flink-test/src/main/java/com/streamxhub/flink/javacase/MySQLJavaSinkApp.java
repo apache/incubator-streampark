@@ -2,8 +2,7 @@ package com.streamxhub.flink.javacase;
 
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
-import com.streamxhub.flink.core.function.GetSQLFunction;
-import com.streamxhub.flink.core.function.ResultSetFunction;
+
 import com.streamxhub.flink.core.sink.JdbcJavaSink;
 import com.streamxhub.flink.core.source.MySQLJavaSource;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -14,7 +13,9 @@ import java.util.Properties;
 import static com.streamxhub.common.conf.ConfigConst.*;
 
 public class MySQLJavaSinkApp {
+
     public static void main(String[] args) {
+
         StreamingContext context = new StreamingContext(new StreamEnvConfig(args, (environment, parameterTool) -> {
             //用户可以给environment设置参数...
             System.out.println("environment argument set...");
