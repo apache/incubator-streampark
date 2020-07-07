@@ -8,8 +8,7 @@
     "build:preview": "vue-cli-service build --mode preview",
     "lint": "vue-cli-service lint",
     "lint:nofix": "vue-cli-service lint --no-fix",
-    "test:unit": "vue-cli-service test:unit",
-    "postinstall": "opencollective-postinstall"
+    "test:unit": "vue-cli-service test:unit"
   },
   "dependencies": {
     "@antv/data-set": "^0.10.1",
@@ -134,9 +133,5 @@
     "> 1%",
     "last 2 versions",
     "not ie <= 10"
-  ],
-  "collective": {
-    "type": "opencollective",
-    "url": "https://opencollective.com/ant-design-pro-vue"
-  }
+  ]
 }
