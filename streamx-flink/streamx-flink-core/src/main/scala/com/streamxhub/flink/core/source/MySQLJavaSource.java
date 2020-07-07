@@ -26,6 +26,7 @@ import com.streamxhub.flink.core.function.ResultSetFunction;
 import com.streamxhub.flink.core.function.SQLFunction;
 import com.streamxhub.flink.core.sink.Dialect;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
+
 import java.util.Properties;
 
 public class MySQLJavaSource<T> {
@@ -36,12 +37,12 @@ public class MySQLJavaSource<T> {
     private ResultSetFunction<T> resultSetFunc;
 
     public MySQLJavaSource(StreamingContext context) {
-        this(context,(String) null);
+        this(context, (String) null);
     }
 
     public MySQLJavaSource(StreamingContext context, String alias) {
         this.context = context;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(),alias);
+        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
     }
 
     public MySQLJavaSource(StreamingContext context, Properties jdbc) {
@@ -50,11 +51,11 @@ public class MySQLJavaSource<T> {
     }
 
     public DataStreamSource<T> getDataStream() {
-        return getDataStream(this.sqlFunc,this.resultSetFunc);
+        return getDataStream(this.sqlFunc, this.resultSetFunc);
     }
 
-    public DataStreamSource<T> getDataStream(SQLFunction sqlFun,ResultSetFunction<T> resultSetFunc) {
-        MySQLSourceFunction<T> sourceFunction =  new MySQLSourceFunction(jdbc,sqlFun,resultSetFunc,null);
+    public DataStreamSource<T> getDataStream(SQLFunction sqlFun, ResultSetFunction<T> resultSetFunc) {
+        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction(jdbc, sqlFun, resultSetFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 

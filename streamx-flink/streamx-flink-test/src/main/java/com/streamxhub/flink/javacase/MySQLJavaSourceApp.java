@@ -61,7 +61,8 @@ public class MySQLJavaSourceApp {
                     System.out.println(map);
                     return new LogBean();
                 })
-                .getDataStream().returns(TypeInformation.of(LogBean.class))
+                .getDataStream()
+                .returns(TypeInformation.of(LogBean.class))
                 .print("Java MySQLSource");
 
         context.execute();
