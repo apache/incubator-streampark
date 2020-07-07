@@ -24,7 +24,7 @@ import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
 import com.streamxhub.flink.core.function.ResultSetFunction;
-import com.streamxhub.flink.core.function.SQLFunction;
+import com.streamxhub.flink.core.function.GetSQLFunction;
 import com.streamxhub.flink.core.sink.Dialect;
 import com.streamxhub.flink.core.source.MySQLJavaSource;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
@@ -56,7 +56,7 @@ public class MySQLJavaSourceApp {
         Properties jdbc1 = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), "");
 
         new MySQLJavaSource<LogBean>(context, prop)
-                .sql((SQLFunction) () -> "select * from orders limit 10")
+                .sql((GetSQLFunction) () -> "select * from orders limit 10")
                 .result((ResultSetFunction<LogBean>) map -> {
                     System.out.println(map);
                     return new LogBean();

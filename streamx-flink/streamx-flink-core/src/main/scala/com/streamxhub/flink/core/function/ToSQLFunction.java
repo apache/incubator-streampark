@@ -22,18 +22,15 @@ package com.streamxhub.flink.core.function;
 
 
 import java.io.Serializable;
-import java.util.Map;
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface ResultSetFunction<T> extends Serializable {
+public interface ToSQLFunction<T> extends Serializable {
     /**
-     * 将查下结果以Map的方式返回,用户去实现转成对象.
-     * @param map
+     * @param bean
      * @return
      */
-    T result(Map<String,?> map);
+    String toSQL(T bean);
 }
-

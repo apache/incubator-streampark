@@ -26,7 +26,7 @@ import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.enums.ApiType
 import com.streamxhub.flink.core.enums.ApiType.ApiType
-import com.streamxhub.flink.core.function.{ResultSetFunction, SQLFunction}
+import com.streamxhub.flink.core.function.{ResultSetFunction, GetSQLFunction}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala.DataStream
@@ -68,7 +68,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   private[this] var isRunning = true
   private[this] var scalaSqlFunc: String = _
   private[this] var scalaResultFunc: Function[Map[String, _], R] = _
-  private[this] var javaSqlFunc: SQLFunction = null
+  private[this] var javaSqlFunc: GetSQLFunction = null
   private[this] var javaResultFunc: ResultSetFunction[R] = null
 
   //for Scala
@@ -79,7 +79,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   }
 
   //for JAVA
-  def this(jdbc: Properties, javaSqlFunc: SQLFunction, javaResultFunc: ResultSetFunction[R]) {
+  def this(jdbc: Properties, javaSqlFunc: GetSQLFunction, javaResultFunc: ResultSetFunction[R]) {
     this(ApiType.JAVA, jdbc)
     this.javaSqlFunc = javaSqlFunc
     this.javaResultFunc = javaResultFunc
@@ -90,7 +90,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     while (this.isRunning) {
       apiType match {
         case ApiType.Scala => JdbcUtils.select(scalaSqlFunc)(jdbc).map(scalaResultFunc).foreach(ctx.collect)
-        case ApiType.JAVA => JdbcUtils.select(javaSqlFunc.getSQL)(jdbc).map(x => javaResultFunc.result(x.asJava))
+        case ApiType.JAVA => JdbcUtils.select(javaSqlFunc.getSQL)(jdbc).map(x => javaResultFunc.result(x.asJava)).foreach(ctx.collect)
       }
     }
   }

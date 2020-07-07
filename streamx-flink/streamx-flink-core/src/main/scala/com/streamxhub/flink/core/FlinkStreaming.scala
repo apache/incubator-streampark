@@ -56,16 +56,25 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
     this(FlinkInitializer.get(args).parameter, FlinkInitializer.get(args).streamEnvironment)
   }
 
+  /**
+   * 推荐使用该Api启动任务...
+   * @return
+   */
+  def start(): JobExecutionResult = execute()
+
+  @Deprecated
   override def execute(): JobExecutionResult = {
     val appName = parameter.get(KEY_FLINK_APP_NAME, "")
     execute(appName)
   }
 
+  @Deprecated
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
+
 }
 
 
@@ -88,7 +97,7 @@ trait FlinkStreaming extends Logger {
     val initializer = new FlinkInitializer(args, config)
     parameter = initializer.parameter
     env = initializer.streamEnvironment
-    context = new StreamingContext(parameter,env)
+    context = new StreamingContext(parameter, env)
     //
     beforeStart(context)
     handler(context)
