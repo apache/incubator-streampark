@@ -48,12 +48,12 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    *
    * @param sqlFun
    * @param fun
-   * @param config
+   * @param jdbc
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit config: Properties): DataStream[R] = {
-    val mysqlFun = new MySQLSourceFunction[R](sqlFun, fun, config)
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit jdbc: Properties): DataStream[R] = {
+    val mysqlFun = new MySQLSourceFunction[R](jdbc,sqlFun, fun)
     ctx.addSource(mysqlFun)
   }
 
@@ -74,7 +74,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation]() extends SourceFunc
   private var apiType: ApiType = ApiType.Scala
 
   //for Scala
-  def this(sqlFunc: => String, resultFunc: Map[String, _] => R, jdbc: Properties) = {
+  def this(jdbc: Properties,sqlFunc: => String, resultFunc: Map[String, _] => R) = {
     this()
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
