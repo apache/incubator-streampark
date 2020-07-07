@@ -1,7 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 
-function resolve (dir) {
+function resolve(dir) {
   return path.join(__dirname, dir)
 }
 
@@ -89,11 +89,11 @@ module.exports = {
     // development server port 8000
     port: 10000,
     proxy: {
-      '/api/!*': {
-        target: 'http://localhost:10001',
+      '/api/*': {
+        target: 'http://127.0.0.1:10001',
         ws: false,
         changeOrigin: true,
-        pathRewrite: { '^/api': '' }
+        pathRewrite: {"^/api": ""}
       }
     }
   },
