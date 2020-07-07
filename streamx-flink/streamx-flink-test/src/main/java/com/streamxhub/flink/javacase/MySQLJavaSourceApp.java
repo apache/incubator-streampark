@@ -33,7 +33,7 @@ import static com.streamxhub.common.conf.ConfigConst.*;
 
 import java.util.Properties;
 
-public class MySQLSourceApp {
+public class MySQLJavaSourceApp {
 
     public static void main(String[] args) {
 
@@ -46,7 +46,7 @@ public class MySQLSourceApp {
         Properties prop = new Properties();
         prop.put(KEY_INSTANCE(), "test");
         prop.put(KEY_JDBC_DRIVER(), "com.mysql.jdbc.Driver");
-        prop.put(KEY_JDBC_URL(), "jdbc:mysql://127.0.0.1:3306/test?useSSL=false");
+        prop.put(KEY_JDBC_URL(), "jdbc:mysql://127.0.0.1:3306/test?useSSL=false&allowPublicKeyRetrieval=true");
         prop.put(KEY_JDBC_USER(), "root");
         prop.put(KEY_JDBC_PASSWORD(), "123322242");
         prop.put("readOnly", "false");
