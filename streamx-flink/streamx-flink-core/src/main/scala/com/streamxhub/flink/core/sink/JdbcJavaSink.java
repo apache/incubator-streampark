@@ -43,7 +43,7 @@ public class JdbcJavaSink<T> {
         return this;
     }
 
-    public JdbcJavaSink<T> toSQL(ToSQLFunction<T> func) {
+    public JdbcJavaSink<T> sql(ToSQLFunction<T> func) {
         this.toSQLFunc = func;
         return this;
     }
