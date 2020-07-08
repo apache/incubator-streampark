@@ -22,6 +22,7 @@ package com.streamxhub.flink.core
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils}
+import com.streamxhub.flink.core.enums.ApiType.ApiType
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.java.utils.ParameterTool
@@ -32,7 +33,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
-import com.streamxhub.flink.core.enums.{StateBackend => XStateBackend}
+import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
 import org.apache.flink.api.scala.ExecutionEnvironment
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
@@ -73,21 +74,21 @@ class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction
 
 }
 
-class FlinkInitializer private(args: Array[String]) extends Logger {
+class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
 
-  def this(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
-    this(args)
-    streamConfFun = config
+  def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
+    this(args, ApiType.Scala)
+    streamConfFunc = func
     initStreamEnv()
   }
 
-  def this(javaInitializerArgs: StreamEnvConfig) = {
-    this(javaInitializerArgs.args)
-    javaEnvConf = javaInitializerArgs.conf
+  def this(streamEnvConfig: StreamEnvConfig) = {
+    this(streamEnvConfig.args, ApiType.JAVA)
+    javaEnvConf = streamEnvConfig.conf
     initStreamEnv()
   }
 
-  private[this] var streamConfFun: (StreamExecutionEnvironment, ParameterTool) => Unit = _
+  private[this] var streamConfFunc: (StreamExecutionEnvironment, ParameterTool) => Unit = _
 
   private[this] var javaEnvConf: StreamEnvConfigFunction = _
 
@@ -241,13 +242,11 @@ class FlinkInitializer private(args: Array[String]) extends Logger {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     envConfig()
     checkpoint()
-    if (streamConfFun != null) {
-      streamConfFun(this.streamEnv, this.parameter)
+    apiType match {
+      case ApiType.JAVA if javaEnvConf != null => javaEnvConf.envConfig(this.streamEnv.getJavaEnv, this.parameter)
+      case ApiType.Scala if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
+      case _ =>
     }
-    if (javaEnvConf != null) {
-      javaEnvConf.envConfig(this.streamEnv.getJavaEnv, this.parameter)
-    }
-
     this.streamEnv.getConfig.setGlobalJobParameters(parameter)
     this.streamEnv
   }
