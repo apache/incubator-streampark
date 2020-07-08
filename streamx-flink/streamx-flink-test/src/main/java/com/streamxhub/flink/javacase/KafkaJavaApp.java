@@ -23,7 +23,6 @@ package com.streamxhub.flink.javacase;
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
 import com.streamxhub.flink.core.sink.KafkaJavaSink;
-import com.streamxhub.flink.core.sink.KafkaSink;
 import com.streamxhub.flink.core.source.KafakJavaSource;
 import com.streamxhub.flink.core.source.KafkaRecord;
 import org.apache.flink.api.common.functions.MapFunction;
@@ -43,7 +42,7 @@ public class KafkaJavaApp {
 
         StreamingContext context = new StreamingContext(javaConfig);
 
-        DataStream<String> source = new KafakJavaSource<LogBean>(context)
+        DataStream<LogBean> source = new KafakJavaSource<LogBean>(context)
                 .deserializer(new KafkaDeserializationSchema<LogBean>() {
                     @Override
                     public TypeInformation<LogBean> getProducedType() {
@@ -64,10 +63,11 @@ public class KafkaJavaApp {
                         return logBean;
                     }
                 }).getDataStream()
-                .map((MapFunction<KafkaRecord<LogBean>, String>) value -> value.value().getControlid());
+                .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
 
+        new KafkaJavaSink<LogBean>(context).sink(source);
 
-        context.execute();
+        context.start();
     }
 
 
