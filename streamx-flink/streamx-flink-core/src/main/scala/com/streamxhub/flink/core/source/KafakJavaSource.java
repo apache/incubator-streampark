@@ -26,6 +26,11 @@ import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
+import static scala.collection.JavaConversions.*;
+
+import java.util.Collections;
+import java.util.Map;
+
 public class KafakJavaSource<T> {
 
     private StreamingContext ctx;
@@ -33,34 +38,50 @@ public class KafakJavaSource<T> {
     private String alias = "";
     private KafkaDeserializationSchema<T> deserializer;
     private AssignerWithPeriodicWatermarks<KafkaRecord<T>> assigner;
+    private Map<String, String> param = Collections.emptyMap();
 
     public KafakJavaSource(StreamingContext ctx) {
         this.ctx = ctx;
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
+    public KafakJavaSource<T> param(Map<String, String> param) {
+        if (param != null) {
+            this.param = param;
+        }
+        return this;
+    }
+
     public KafakJavaSource<T> topic(String... topic) {
-        this.topics = topic;
+        if (topic != null) {
+            this.topics = topic;
+        }
         return this;
     }
 
     public KafakJavaSource<T> alias(String alias) {
-        this.alias = alias;
+        if (alias != null) {
+            this.alias = alias;
+        }
         return this;
     }
 
     public KafakJavaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
-        this.deserializer = deserializer;
+        if (deserializer != null) {
+            this.deserializer = deserializer;
+        }
         return this;
     }
 
     public KafakJavaSource<T> assigner(AssignerWithPeriodicWatermarks<KafkaRecord<T>> assigner) {
-        this.assigner = assigner;
+        if (assigner != null) {
+            this.assigner = assigner;
+        }
         return this;
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(ctx, this.topics, this.alias, this.deserializer, this.assigner, null);
+        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(this.ctx, mapAsScalaMap(this.param), this.topics, this.alias, this.deserializer, this.assigner, null);
         return ctx.getJavaEnv().addSource(consumer);
     }
 

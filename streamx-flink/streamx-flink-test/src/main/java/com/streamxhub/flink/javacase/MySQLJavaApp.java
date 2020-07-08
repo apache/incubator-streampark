@@ -12,11 +12,13 @@ import java.util.Properties;
 
 import static com.streamxhub.common.conf.ConfigConst.*;
 
-public class MySQLJavaSinkApp {
+public class MySQLJavaApp {
 
     public static void main(String[] args) {
 
         StreamingContext context = new StreamingContext(new StreamEnvConfig(args, (environment, parameterTool) -> {
+            System.out.println(environment);
+            System.out.println(parameterTool);
             //用户可以给environment设置参数...
             System.out.println("environment argument set...");
         }));
@@ -52,7 +54,7 @@ public class MySQLJavaSinkApp {
                 .sql(bean -> String.format("insert into sink(name,value)value('%s','%s')", bean.getCard_type(), bean.getControlid()))
                 .sink(stream);
 
-        context.execute();
+        context.start();
 
     }
 }
