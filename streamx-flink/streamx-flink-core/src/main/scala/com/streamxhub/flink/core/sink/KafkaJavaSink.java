@@ -3,17 +3,24 @@ package com.streamxhub.flink.core.sink;
 import com.streamxhub.flink.core.StreamingContext;
 import org.apache.flink.api.common.serialization.SerializationSchema;
 import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner;
 import java.util.Map;
+import static scala.collection.JavaConversions.*;
 
-public class KafkaJavaSink<T>  {
+public class KafkaJavaSink<T> {
 
     private StreamingContext context;
+    //common param...
+    private Map<String,String> param;
+    private Integer parallelism;
+    private String name;
+    private String uid;
+    //---end---
+
     private String topic;
-    private String alias;
     private SerializationSchema<T> serializer;
     private FlinkKafkaPartitioner<T> partitioner;
-    private Map<String,String> param;
 
     public KafkaJavaSink(StreamingContext context) {
         this.context = context;
@@ -21,8 +28,23 @@ public class KafkaJavaSink<T>  {
         partitioner = new KafkaEqualityPartitioner<T>(context.getParallelism());
     }
 
-    public KafkaJavaSink<T> alias(String v) {
-        this.alias = alias;
+    public KafkaJavaSink<T> parallelism(Integer parallelism) {
+        this.parallelism = parallelism;
+        return this;
+    }
+
+    public KafkaJavaSink<T> name(String name) {
+        this.name = name;
+        return this;
+    }
+
+    public KafkaJavaSink<T> uid(String uid) {
+        this.uid = uid;
+        return this;
+    }
+
+    public KafkaJavaSink<T> param(Map<String,String> param) {
+        this.param = param;
         return this;
     }
 
@@ -59,16 +81,13 @@ public class KafkaJavaSink<T>  {
         return this;
     }
 
-    public KafkaJavaSink<T> param(Map<String,String> param) {
-        this.param = param;
-        return this;
+    public DataStreamSink<T> sink(DataStream<T> source) {
+        return this.sink(source, this.topic);
     }
 
-    public void sink(DataStream<T> source) {
-        this.sink(source, this.topic);
-    }
-
-    public void sink(DataStream<T> source, String topic) {
+    public DataStreamSink<T> sink(DataStream<T> source, String topic) {
         this.topic(topic);
+        KafkaSink sink = new KafkaSink(this.context,mapAsScalaMap(this.param),this.parallelism,this.name,this.uid);
+       return sink.javaSink(source,this.topic,this.serializer,this.partitioner);
     }
 }
