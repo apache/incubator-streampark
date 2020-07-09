@@ -27,10 +27,13 @@ import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
+import com.streamxhub.flink.core.enums.ApiType
+import com.streamxhub.flink.core.enums.ApiType.ApiType
 import javax.annotation.Nullable
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
 import scala.annotation.meta.param
@@ -58,6 +61,36 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @param partitioner         指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
    *                            注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
    *                            )
+   * @tparam T
+   * @return
+   */
+
+
+  /**
+   * for java
+   *
+   * @param stream
+   * @param topic
+   * @param serializationSchema
+   * @param partitioner
+   * @tparam T
+   * @return
+   */
+  private[core] def javaSink[T](stream: JavaStream[T],
+                                topic: String = "",
+                                serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
+                                partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)
+                               ): DataStreamSink[T] = {
+    sink(new DataStream[T](stream), topic, serializationSchema, partitioner)
+  }
+
+  /**
+   * for scala
+   *
+   * @param stream
+   * @param topic
+   * @param serializationSchema
+   * @param partitioner
    * @tparam T
    * @return
    */
