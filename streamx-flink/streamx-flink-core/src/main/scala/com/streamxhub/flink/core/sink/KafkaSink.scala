@@ -29,8 +29,6 @@ import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStr
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.flink.core.enums.ApiType
-import com.streamxhub.flink.core.enums.ApiType.ApiType
 import javax.annotation.Nullable
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
@@ -53,17 +51,6 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
                 name: String = null,
                 uid: String = null) extends Sink {
 
-  /**
-   *
-   * @param stream
-   * @param topic
-   * @param serializationSchema 序列化Scheam,不指定默认使用SimpleStringSchema
-   * @param partitioner         指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
-   *                            注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
-   *                            )
-   * @tparam T
-   * @return
-   */
 
 
   /**
@@ -84,13 +71,16 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
     sink(new DataStream[T](stream), topic, serializationSchema, partitioner)
   }
 
+
   /**
    * for scala
    *
    * @param stream
    * @param topic
-   * @param serializationSchema
-   * @param partitioner
+   * @param serializationSchema 序列化Scheam,不指定默认使用SimpleStringSchema
+   * @param partitioner         指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
+   *                            注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
+   *                            )
    * @tparam T
    * @return
    */
