@@ -8,7 +8,6 @@ import java.util.{Collections, Random}
 
 import org.apache.flink.streaming.api.scala._
 
-import scala.collection.JavaConverters._
 import com.streamxhub.common.util.ConfigUtils
 
 object HBaseSinkApp extends FlinkStreaming {
