@@ -24,18 +24,23 @@ import java.util.Optional
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.streamxhub.common.conf.ConfigConst
+import com.streamxhub.common.conf.ConfigConst.KEY_FLINK_CHECKPOINTS_MODE
 import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
+import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.Semantic
+import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
 import scala.annotation.meta.param
 import scala.collection.Map
+import scala.util.Try
 
 object KafkaSink {
   def apply(@(transient@param) ctx: StreamingContext,
@@ -50,7 +55,6 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
                 parallelism: Int = 0,
                 name: String = null,
                 uid: String = null) extends Sink {
-
 
 
   /**
@@ -89,19 +93,30 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
               serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
               partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
 
-    val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
-    overrideParams.foreach(x => prop.put(x._1, x._2))
-    val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
-    val producer = partitioner match {
-      case null => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]])
-      case other => new FlinkKafkaProducer011[T](topicName, serializationSchema, prop, Optional.of(other))
-    }
+    val producer = {
+      val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
+      overrideParams.foreach(x => prop.put(x._1, x._2))
+      val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
 
+      val semantic = Try(CheckpointingMode.valueOf(ctx.parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE) match {
+        case CheckpointingMode.EXACTLY_ONCE => Semantic.EXACTLY_ONCE
+        case CheckpointingMode.AT_LEAST_ONCE => Semantic.AT_LEAST_ONCE
+        case _ => Semantic.NONE
+      }
+
+      val kafkaProducersPoolSize = FlinkKafkaProducer011.DEFAULT_KAFKA_PRODUCERS_POOL_SIZE
+      val serialization = new KeyedSerializationSchemaWrapper[T](serializationSchema)
+      partitioner match {
+        case null => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]], semantic, kafkaProducersPoolSize)
+        case other => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.of(other), semantic, kafkaProducersPoolSize)
+      }
+    }
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
      * this method is not available for earlier Kafka versions
      */
     producer.setWriteTimestampToKafka(true)
+
     val sink = stream.addSink(producer)
     afterSink(sink, parallelism, name, uid)
   }
