@@ -29,6 +29,7 @@ import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.DEFAULT_KAFKA_PRODUCERS_POOL_SIZE
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
 import org.apache.flink.streaming.api.CheckpointingMode
@@ -97,20 +98,22 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
       val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
       overrideParams.foreach(x => prop.put(x._1, x._2))
       val topicName = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
-
-      val semantic = Try(CheckpointingMode.valueOf(ctx.parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE) match {
-        case CheckpointingMode.EXACTLY_ONCE => Semantic.EXACTLY_ONCE
-        case CheckpointingMode.AT_LEAST_ONCE => Semantic.AT_LEAST_ONCE
-        case _ => Semantic.NONE
-      }
-
-      val kafkaProducersPoolSize = FlinkKafkaProducer011.DEFAULT_KAFKA_PRODUCERS_POOL_SIZE
       val serialization = new KeyedSerializationSchemaWrapper[T](serializationSchema)
+
+      /**
+       * EXACTLY_ONCE语义下会使用到 kafkaProducersPoolSize
+       */
+      val (semantic, poolSize) = Try(CheckpointingMode.valueOf(ctx.parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE) match {
+        case CheckpointingMode.EXACTLY_ONCE => (Semantic.EXACTLY_ONCE, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
+        case CheckpointingMode.AT_LEAST_ONCE => (Semantic.AT_LEAST_ONCE, 0)
+        case _ => (Semantic.NONE, 0)
+      }
       partitioner match {
-        case null => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]], semantic, kafkaProducersPoolSize)
-        case other => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.of(other), semantic, kafkaProducersPoolSize)
+        case null => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]], semantic, poolSize)
+        case other => new FlinkKafkaProducer011[T](topicName, serialization, prop, Optional.of(other), semantic, poolSize)
       }
     }
+
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;
      * this method is not available for earlier Kafka versions
