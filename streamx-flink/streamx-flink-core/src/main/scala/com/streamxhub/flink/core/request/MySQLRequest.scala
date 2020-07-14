@@ -61,12 +61,12 @@ class MySQLRequest[T: TypeInformation](@(transient@param) val stream: DataStream
    */
   def requestOrdered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
-    AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
+    AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
-    AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
+    AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
 }
