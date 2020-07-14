@@ -70,8 +70,8 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   private[this] var isRunning = true
   private[this] var scalaSqlFunc: String = _
   private[this] var scalaResultFunc: Function[List[Map[String, _]], List[R]] = _
-  private[this] var javaSqlFunc: GetSQLFunction = null
-  private[this] var javaResultFunc: ResultSetFunction[R] = null
+  private[this] var javaSqlFunc: GetSQLFunction = _
+  private[this] var javaResultFunc: ResultSetFunction[R] = _
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: => String, resultFunc: List[Map[String, _]] => List[R]) = {

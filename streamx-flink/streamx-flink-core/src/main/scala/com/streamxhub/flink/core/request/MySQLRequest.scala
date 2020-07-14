@@ -50,7 +50,7 @@ object MySQLRequest {
 
 }
 
-class MySQLRequest[T: TypeInformation](@(transient@param) val stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]) {
+class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]) {
 
   /**
    *

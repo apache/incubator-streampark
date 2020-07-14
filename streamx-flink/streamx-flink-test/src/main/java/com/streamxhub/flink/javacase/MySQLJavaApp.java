@@ -8,6 +8,7 @@ import com.streamxhub.flink.core.source.MySQLJavaSource;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
+import java.util.Arrays;
 import java.util.Properties;
 
 import static com.streamxhub.common.conf.ConfigConst.*;
@@ -43,7 +44,7 @@ public class MySQLJavaApp {
                     LogBean logBean = new LogBean();
                     logBean.setCard_type("123");
                     logBean.setControlid("345");
-                    return logBean;
+                    return Arrays.asList(logBean);
                 })
                 .getDataStream()
                 .returns(TypeInformation.of(LogBean.class));
