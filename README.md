@@ -1,5 +1,5 @@
 # StreamX
-let't spark|flink easy!
+let't spark|flink easy
     
 ### BUILD和使用方法
 #### 1.构建方法
