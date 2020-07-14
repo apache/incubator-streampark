@@ -20,6 +20,20 @@
             <version>${project.version}</version>
         </dependency>
 
+
+        <!--mysql async-->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-jdbc-client</artifactId>
+            <version>3.8.3</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>3.8.3</version>
+        </dependency>
+
         <!--flink base-->
         <dependency>
             <groupId>org.apache.flink</groupId>
