@@ -25,7 +25,7 @@ object MySQLSourceApp extends FlinkStreaming {
       Thread.sleep(10000)
       "select * from orders limit 10"
     }, r => {
-      JsonUtils.read[Orders](r)
+      r.map(x => JsonUtils.read[Orders](x))
     })
     ds.print()
   }

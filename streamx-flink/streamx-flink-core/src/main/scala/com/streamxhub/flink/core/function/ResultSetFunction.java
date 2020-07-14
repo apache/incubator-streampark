@@ -34,6 +34,6 @@ public interface ResultSetFunction<T> extends Serializable {
      * @param map
      * @return
      */
-    T result(Map<String,?> map);
+    Iterable<T> result(Iterable<Map<String,?>> map);
 }
 

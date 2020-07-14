@@ -33,6 +33,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.Map
 
 
@@ -52,7 +53,8 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: => String, fun: Map[String, _] => R)(implicit jdbc: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](sqlFun: => String, fun: List[Map[String, _]] => List[R])(implicit jdbc: Properties): DataStream[R] = {
+    overrideParams.foreach(x => jdbc.put(x._1, x._2))
     val mysqlFun = new MySQLSourceFunction[R](jdbc, sqlFun, fun)
     ctx.addSource(mysqlFun)
   }
@@ -67,12 +69,12 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
 
   private[this] var isRunning = true
   private[this] var scalaSqlFunc: String = _
-  private[this] var scalaResultFunc: Function[Map[String, _], R] = _
+  private[this] var scalaResultFunc: Function[List[Map[String, _]], List[R]] = _
   private[this] var javaSqlFunc: GetSQLFunction = null
   private[this] var javaResultFunc: ResultSetFunction[R] = null
 
   //for Scala
-  def this(jdbc: Properties, sqlFunc: => String, resultFunc: Map[String, _] => R) = {
+  def this(jdbc: Properties, sqlFunc: => String, resultFunc: List[Map[String, _]] => List[R]) = {
     this(ApiType.Scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
@@ -89,8 +91,8 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (this.isRunning) {
       apiType match {
-        case ApiType.Scala => JdbcUtils.select(scalaSqlFunc)(jdbc).map(scalaResultFunc).foreach(ctx.collect)
-        case ApiType.JAVA => JdbcUtils.select(javaSqlFunc.getSQL)(jdbc).map(x => javaResultFunc.result(x.asJava)).foreach(ctx.collect)
+        case ApiType.Scala => scalaResultFunc(JdbcUtils.select(scalaSqlFunc)(jdbc)).foreach(ctx.collect)
+        case ApiType.JAVA => javaResultFunc.result(JdbcUtils.select(javaSqlFunc.getSQL)(jdbc).map(_.asJava).asJava).foreach(ctx.collect)
       }
     }
   }
