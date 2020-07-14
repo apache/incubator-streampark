@@ -20,6 +20,93 @@
  */
 package com.streamxhub.flink.core.request
 
-class MySQLRequest {
+import java.util.Properties
+import java.util.concurrent.TimeUnit
+
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
+
+import io.vertx.core.Handler
+import io.vertx.core.json.JsonObject
+import io.vertx.ext.sql.ResultSet
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
+
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.annotation.meta.param
+
+object MySQLRequest {
+
+  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]): MySQLRequest[T] = new MySQLRequest[T](stream, overrideParams)
+
+}
+
+class MySQLRequest[T: TypeInformation](@(transient@param) val stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]) {
+
+  /**
+   *
+   * @param sqlFun
+   * @param jdbc
+   * @tparam R
+   * @return
+   */
+  def requestOrdered[R: TypeInformation](sqlFun:T => String, resultFun: java.util.Map[String, _] => R,timeout:Long = 1000,capacity:Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    val async = new ASyncIOClientFunction[T,R](sqlFun,resultFun,jdbc)
+    AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
+  }
+
+  def requestUnordered[R: TypeInformation](sqlFun:T => String, resultFun: java.util.Map[String, _] => R,timeout:Long = 1000,capacity:Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    val async = new ASyncIOClientFunction[T,R](sqlFun,resultFun,jdbc)
+    AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
+  }
+
+}
+
+import io.vertx.core.AsyncResult
+import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
+import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.ext.sql.SQLClient
+import io.vertx.ext.sql.SQLConnection
+import java.util.Collections
+
+
+class ASyncIOClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+  private var client: SQLClient = null
+
+  override def open(parameters: Configuration): Unit = {
+    super.open(parameters)
+    val clientConfig = new JsonObject()
+    jdbc.foreach(x => clientConfig.put(x._1, x._2))
+    val vo = new VertxOptions()
+    val vertx = Vertx.vertx(vo)
+    client = JDBCClient.createNonShared(vertx, clientConfig)
+  }
+
+  override def close(): Unit = {
+    super.close()
+    client.close()
+  }
+
+  @throws[Exception]
+  def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
+    client.getConnection(new Handler[AsyncResult[SQLConnection]]() {
+      def handle(asyncResult: AsyncResult[SQLConnection]): Unit = {
+        if (!asyncResult.failed) {
+          val connection = asyncResult.result()
+          connection.query(sqlFun(input), new Handler[AsyncResult[ResultSet]] {
+            override def handle(event: AsyncResult[ResultSet]): Unit = {
+              if (event.succeeded) {
+                event.result().getRows().foreach(x => {
+                  resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala)))
+                })
+              }
+            }
+          })
+        }
+      }
+    })
+  }
 
 }
