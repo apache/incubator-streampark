@@ -1,3 +1,23 @@
+/**
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.streamxhub.flink.core.source
 
 import java.util.Properties
@@ -28,14 +48,13 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    *
    * @param queryFun
    * @param resultFun
-   * @param interval
    * @param config
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R], interval: Long)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
-    val mongoFun = new MongoSourceFunction[R](queryFun, resultFun, interval)
+    val mongoFun = new MongoSourceFunction[R](queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
 
@@ -45,12 +64,11 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  *
  * @param queryFun
  * @param resultFun
- * @param interval
  * @param typeInformation$R$0
  * @param config
  * @tparam R
  */
-private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R], interval: Long)(implicit config: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit config: Properties) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -69,9 +87,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (isRunning) {
-      val find = queryFun(database)
-      resultFun(find.iterator).foreach(ctx.collect)
-      Thread.sleep(interval)
+      resultFun(queryFun(database).iterator).foreach(ctx.collect)
     }
   }
 

@@ -5,7 +5,7 @@
 
 ## 按需引入组件依赖
 
-`adminx-webapp` 默认编码工作并不支持按需引入，不过可以通过以下操作结合 [Ant Design Of Vue](https://vuecomponent.github.io/ant-design-vue/docs/vue/introduce-cn/) 官方文档来进行按需引入。
+`streamx-monitor-webapp` 默认编码工作并不支持按需引入，不过可以通过以下操作结合 [Ant Design Of Vue](https://vuecomponent.github.io/ant-design-vue/docs/vue/introduce-cn/) 官方文档来进行按需引入。
 
 - 增加项目按需引入依赖
 - 修改引入组件方式

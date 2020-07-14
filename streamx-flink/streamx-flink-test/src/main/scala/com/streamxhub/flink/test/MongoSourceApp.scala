@@ -1,10 +1,8 @@
 package com.streamxhub.flink.test
 
 
-import java.util.Date
 
 import com.mongodb.BasicDBObject
-import com.mongodb.client.model.Filters
 import com.streamxhub.flink.core.source.MongoSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
@@ -27,9 +25,7 @@ object MongoSourceApp extends FlinkStreaming {
         list += x.next().toJson()
       }
       list.toList
-    },
-      1000000L)
-      .print()
+    }).print()
   }
 
 }
