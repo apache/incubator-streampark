@@ -126,7 +126,6 @@
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>
-
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

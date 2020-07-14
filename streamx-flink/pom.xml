@@ -18,38 +18,5 @@
         <module>streamx-flink-test</module>
     </modules>
 
-    <build>
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>net.alchim31.maven</groupId>
-                    <artifactId>scala-maven-plugin</artifactId>
-                    <version>4.3.0</version>
-                    <executions>
-                        <execution>
-                            <id>install-scala</id>
-                            <phase>process-resources</phase>
-                            <goals>
-                                <goal>compile</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>test-compile-scala</id>
-                            <phase>test-compile</phase>
-                            <goals>
-                                <goal>add-source</goal>
-                                <goal>testCompile</goal>
-                            </goals>
-                        </execution>
-                    </executions>
-                    <configuration>
-                        <scalaVersion>${scala.version}</scalaVersion>
-                    </configuration>
-                </plugin>
-            </plugins>
-
-        </pluginManagement>
-
-    </build>
 
 </project>
