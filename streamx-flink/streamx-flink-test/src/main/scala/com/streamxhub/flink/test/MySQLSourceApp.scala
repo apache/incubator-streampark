@@ -4,6 +4,7 @@ import java.util.Properties
 
 import com.streamxhub.common.util.JsonUtils
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.flink.core.request.MySQLRequest
 import com.streamxhub.flink.core.source.MySQLSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
@@ -22,12 +23,24 @@ object MySQLSourceApp extends FlinkStreaming {
 
     val mysqlSource = new MySQLSource(context)
     val ds = mysqlSource.getDataStream[Orders]({
-      Thread.sleep(10000)
       "select * from orders limit 10"
     }, r => {
-      r.map(x => JsonUtils.read[Orders](x))
+      r.map(x => {
+        val y = JsonUtils.read[Orders](x)
+        println(y)
+        y
+      })
     })
-    ds.print()
+
+    ds.print("ds----------->")
+
+   val ds1 = MySQLRequest(ds).requestOrdered[Orders](
+      x=>s"select * from orders where timestamp='${x.timestamp}'",
+      x=> JsonUtils.read[Orders](x)
+    )
+
+    ds1.print()
+
   }
 
 }
