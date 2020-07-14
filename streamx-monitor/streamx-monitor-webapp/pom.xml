@@ -1,12 +1,10 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <parent>
-    <groupId>cn.benhub.opensource</groupId>
-    <artifactId>adminx</artifactId>
-    <version>1.0.0-RELEASE</version>
-  </parent>
-  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.streamxhub</groupId>
   <artifactId>streamx-monitor-webapp</artifactId>
+  <version>1.0.0</version>
+  <modelVersion>4.0.0</modelVersion>
+
   <name>streamx-monitor-webapp</name>
   <description>streamx-monitor-webapp</description>
   <build>
