@@ -34,6 +34,14 @@ import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFuncti
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import io.vertx.core.AsyncResult
+import io.vertx.core.Vertx
+import io.vertx.core.VertxOptions
+import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.ext.sql.SQLClient
+import io.vertx.ext.sql.SQLConnection
+import java.util.Collections
+
 import scala.annotation.meta.param
 
 object MySQLRequest {
@@ -51,25 +59,17 @@ class MySQLRequest[T: TypeInformation](@(transient@param) val stream: DataStream
    * @tparam R
    * @return
    */
-  def requestOrdered[R: TypeInformation](sqlFun:T => String, resultFun: java.util.Map[String, _] => R,timeout:Long = 1000,capacity:Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new ASyncIOClientFunction[T,R](sqlFun,resultFun,jdbc)
+  def requestOrdered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
   }
 
-  def requestUnordered[R: TypeInformation](sqlFun:T => String, resultFun: java.util.Map[String, _] => R,timeout:Long = 1000,capacity:Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new ASyncIOClientFunction[T,R](sqlFun,resultFun,jdbc)
+  def requestUnordered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.SECONDS, capacity)
   }
 
 }
-
-import io.vertx.core.AsyncResult
-import io.vertx.core.Vertx
-import io.vertx.core.VertxOptions
-import io.vertx.ext.jdbc.JDBCClient
-import io.vertx.ext.sql.SQLClient
-import io.vertx.ext.sql.SQLConnection
-import java.util.Collections
 
 
 class ASyncIOClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
@@ -79,6 +79,8 @@ class ASyncIOClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T =>
     super.open(parameters)
     val clientConfig = new JsonObject()
     jdbc.foreach(x => clientConfig.put(x._1, x._2))
+    //HikariCP连接池.
+    clientConfig.put("provider_class","io.vertx.ext.jdbc.spi.impl.HikariCPDataSourceProvider")
     val vo = new VertxOptions()
     val vertx = Vertx.vertx(vo)
     client = JDBCClient.createNonShared(vertx, clientConfig)
