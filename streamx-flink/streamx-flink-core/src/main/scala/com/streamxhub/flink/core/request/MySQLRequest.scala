@@ -60,19 +60,19 @@ class MySQLRequest[T: TypeInformation](@(transient@param) val stream: DataStream
    * @return
    */
   def requestOrdered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new MySQLASyncIOFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new ASyncIOClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new MySQLASyncIOFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
 }
 
 
-class ASyncIOClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: java.util.Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
   private var client: SQLClient = null
 
   override def open(parameters: Configuration): Unit = {
