@@ -78,10 +78,9 @@ class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => 
     val clientConfig = new JsonObject()
     jdbc.foreach(x => clientConfig.put(x._1, x._2))
     //HikariCP连接池.
-    clientConfig.put("provider_class","io.vertx.ext.jdbc.spi.impl.HikariCPDataSourceProvider")
+    clientConfig.put("provider_class", "io.vertx.ext.jdbc.spi.impl.HikariCPDataSourceProvider")
     val vertxOpts = new VertxOptions()
-    val factory = ServiceHelper.loadFactory(classOf[VertxFactory])
-    val vertx = factory.vertx(vertxOpts)
+    val vertx = Vertx.vertx(vertxOpts)
     client = JDBCClient.createNonShared(vertx, clientConfig)
   }
 
@@ -94,7 +93,7 @@ class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => 
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
     client.getConnection(new Handler[AsyncResult[SQLConnection]]() {
       def handle(asyncResult: AsyncResult[SQLConnection]): Unit = {
-        if (!asyncResult.failed) {
+        if (asyncResult.succeeded()) {
           val connection = asyncResult.result()
           connection.query(sqlFun(input), new Handler[AsyncResult[ResultSet]] {
             override def handle(event: AsyncResult[ResultSet]): Unit = {
@@ -102,9 +101,13 @@ class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => 
                 event.result().getRows().foreach(x => {
                   resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala)))
                 })
+              } else {
+                throw event.cause()
               }
             }
           })
+        } else {
+          throw asyncResult.cause()
         }
       }
     })
