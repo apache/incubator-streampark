@@ -114,7 +114,7 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: Redis
       redisContainer.open()
     } catch {
       case e: Exception =>
-        logger.error("[StreamX-Flink] RedisSink:Redis has not been properly initialized: ", e)
+        logger.error("[Streamx] RedisSink:Redis has not been properly initialized: ", e)
         throw e
     }
   }
@@ -132,7 +132,7 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, redisMapper: Redis
       case ZADD => this.redisContainer.zadd(redisMapper.getCommandDescription.getAdditionalKey, value, key)
       case ZREM => this.redisContainer.zrem(redisMapper.getCommandDescription.getAdditionalKey, key)
       case HSET => this.redisContainer.hset(redisMapper.getCommandDescription.getAdditionalKey, key, value)
-      case other => throw new IllegalArgumentException("[StreamX-Flink] RedisSink:Cannot process such data type: " + other)
+      case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
     }
   }
 
