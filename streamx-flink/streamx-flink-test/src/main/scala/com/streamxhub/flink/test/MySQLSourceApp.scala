@@ -1,5 +1,6 @@
 package com.streamxhub.flink.test
 
+import java.lang
 import java.util.Properties
 
 import com.streamxhub.common.util.JsonUtils
@@ -14,24 +15,32 @@ object MySQLSourceApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
     implicit val prop = new Properties()
     prop.put(KEY_INSTANCE, "test")
-    prop.put(KEY_JDBC_DRIVER, "com.mysql.jdbc.Driver")
-    prop.put(KEY_JDBC_URL, "jdbc:mysql://localhost:3306/test?useSSL=false")
+    prop.put(KEY_JDBC_DRIVER, "com.mysql.cj.jdbc.Driver")
+    prop.put(KEY_JDBC_URL, "jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true")
     prop.put(KEY_JDBC_USER, "root")
     prop.put(KEY_JDBC_PASSWORD, "123322242")
     prop.put("readOnly", "false")
-    prop.put("idleTimeout", "20000")
+    prop.put("idleTimeout","20000")
 
     val mysqlSource = new MySQLSource(context)
     val ds = mysqlSource.getDataStream[Orders](
       "select * from orders limit 10",
-      r => r.map(x => JsonUtils.read[Orders](x))
+      r => {
+        r.map(x => {
+          val values =  x("values").toString
+          val timestamp = x("timestamp").toString.toLong
+          new Orders(values,timestamp)
+        })
+      }
     )
 
-    ds.print("ds----------->")
-
-    val ds1 = MySQLRequest(ds).requestOrdered[Orders](
+    val ds1 = MySQLRequest(ds).requestUnordered[Orders](
       x => s"select * from orders where timestamp='${x.timestamp}'",
-      x => JsonUtils.read[Orders](x)
+      x => {
+        val values =  x("values").toString
+        val timestamp = x("timestamp").toString.toLong
+        new Orders(values,timestamp)
+      }
     )
 
     ds1.print()
@@ -40,4 +49,7 @@ object MySQLSourceApp extends FlinkStreaming {
 
 }
 
-case class Orders(values: String, timestamp: Long)
+class Orders(val values: String,val timestamp: Long) extends Serializable {
+
+  override def toString = s"Orders($values, $timestamp)"
+}

@@ -72,6 +72,12 @@
             </dependency>
 
             <dependency>
+                <groupId>io.vertx</groupId>
+                <artifactId>vertx-lang-scala_${scala.binary.version}</artifactId>
+                <version>${vertx.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>redis.clients</groupId>
                 <artifactId>jedis</artifactId>
                 <version>${redis.version}</version>
