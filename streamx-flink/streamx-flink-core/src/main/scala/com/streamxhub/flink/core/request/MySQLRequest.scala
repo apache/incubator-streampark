@@ -156,7 +156,12 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
     executorService = Executors.newFixedThreadPool(capacity)
   }
 
-  override def close(): Unit = super.close()
+  override def close(): Unit = {
+    super.close()
+    if (!executorService.isShutdown) {
+      executorService.shutdown()
+    }
+  }
 
   @throws[Exception]
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
