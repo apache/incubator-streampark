@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.request
 
 import java.util.Properties
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
 
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
@@ -38,8 +38,10 @@ import io.vertx.ext.sql.SQLClient
 import io.vertx.ext.sql.SQLConnection
 import io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME
 import java.util.Collections
+import java.util.function.{Consumer, Supplier}
 
 import com.streamxhub.common.conf.ConfigConst.KEY_INSTANCE
+import com.streamxhub.common.util.JdbcUtils
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import javax.sql.DataSource
 
@@ -61,19 +63,28 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @return
    */
   def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new MySQLASyncIOFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
-    val async = new MySQLASyncIOFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
 }
 
+/**
+ * 基于异步IO客户端实现
+ *
+ * @param sqlFun
+ * @param resultFun
+ * @param jdbc
+ * @tparam T
+ * @tparam R
+ */
 
-class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
   private var client: SQLClient = null
 
   override def open(parameters: Configuration): Unit = {
@@ -111,11 +122,48 @@ class MySQLASyncIOFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => 
               }
             }
           })
+          connection.close()
         } else {
           throw asyncResult.cause()
         }
       }
     })
+  }
+
+}
+
+/**
+ * 基于线程池实现
+ *
+ * @param sqlFun
+ * @param resultFun
+ * @param jdbc
+ * @tparam T
+ * @tparam R
+ */
+
+class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+  private[this] var executorService: ExecutorService = _
+  private[this] val threadCount = 10
+
+  override def open(parameters: Configuration): Unit = {
+    super.open(parameters)
+    executorService = Executors.newFixedThreadPool(threadCount)
+  }
+
+  override def close(): Unit = {
+    super.close()
+  }
+
+  @throws[Exception]
+  def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
+
+    CompletableFuture.supplyAsync(new Supplier[Iterable[Map[String, _]]] {
+      override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
+    }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
+      override def accept(result: Iterable[Map[String, _]]): Unit = resultFuture.complete(result.map(resultFun))
+    })
+
   }
 
 }
