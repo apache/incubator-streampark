@@ -82,6 +82,8 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties) ex
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: ToSQLFunction[T] = _
+  private val offset: AtomicLong = new AtomicLong(0L)
+  private var timestamp: Long = 0L
 
   private val batchSize = jdbc.remove(KEY_JDBC_INSERT_BATCH) match {
     case null => DEFAULT_JDBC_INSERT_BATCH
@@ -98,9 +100,6 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties) ex
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
   }
-
-  private val offset: AtomicLong = new AtomicLong(0L)
-  private var timestamp: Long = 0L
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
