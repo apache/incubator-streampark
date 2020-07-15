@@ -41,7 +41,7 @@ import java.util.Collections
 import java.util.function.{Consumer, Supplier}
 
 import com.streamxhub.common.conf.ConfigConst.KEY_INSTANCE
-import com.streamxhub.common.util.JdbcUtils
+import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import javax.sql.DataSource
 
@@ -84,7 +84,7 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
  * @tparam R
  */
 
-class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
   private var client: SQLClient = null
 
   override def open(parameters: Configuration): Unit = {
@@ -110,24 +110,29 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
     client.getConnection(new Handler[AsyncResult[SQLConnection]]() {
       def handle(asyncResult: AsyncResult[SQLConnection]): Unit = {
         if (asyncResult.succeeded()) {
-          val connection = asyncResult.result()
-          connection.query(sqlFun(input), new Handler[AsyncResult[ResultSet]] {
-            override def handle(event: AsyncResult[ResultSet]): Unit = {
-              if (event.succeeded) {
-                event.result().getRows().foreach(x => {
-                  resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala.toMap)))
-                })
-              } else {
-                throw event.cause()
+          asyncResult
+            .result()
+            .query(sqlFun(input), new Handler[AsyncResult[ResultSet]] {
+              override def handle(event: AsyncResult[ResultSet]): Unit = {
+                if (event.succeeded) {
+                  event.result().getRows().foreach(x => {
+                    resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala.toMap)))
+                  })
+                } else {
+                  throw event.cause()
+                }
               }
-            }
-          })
-          connection.close()
+            }).close()
         } else {
           throw asyncResult.cause()
         }
       }
     })
+  }
+
+  override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
+    logger.warn("[Streamx] MySQLASyncClient request timeout. retrying... ")
+    asyncInvoke(input, resultFuture)
   }
 
 }
@@ -142,18 +147,16 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
  * @tparam R
  */
 
-class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] {
+class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties, capacity: Int = 10) extends RichAsyncFunction[T, R] with Logger {
+
   private[this] var executorService: ExecutorService = _
-  private[this] val threadCount = 10
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    executorService = Executors.newFixedThreadPool(threadCount)
+    executorService = Executors.newFixedThreadPool(capacity)
   }
 
-  override def close(): Unit = {
-    super.close()
-  }
+  override def close(): Unit = super.close()
 
   @throws[Exception]
   def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
@@ -166,6 +169,10 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
 
   }
 
+  override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
+    logger.warn("[Streamx] MySQLASync request timeout. retrying... ")
+    asyncInvoke(input, resultFuture)
+  }
 }
 
 class HikariCPDataSourceProvider extends io.vertx.ext.jdbc.spi.impl.HikariCPDataSourceProvider {

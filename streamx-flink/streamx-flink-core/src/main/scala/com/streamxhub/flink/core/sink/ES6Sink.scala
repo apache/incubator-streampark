@@ -149,7 +149,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
       //userName,password must be all set,or all not set..
       require(
         (userName != null && password != null) || (userName == null && password == null),
-        "[StreamX-Flink] elasticsearch auth info error,userName,password must be all set,or all not set."
+        "[Streamx] elasticsearch auth info error,userName,password must be all set,or all not set."
       )
       val credentialsProvider = (userName, password) match {
         case (null, null) => null
@@ -163,7 +163,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
         override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-            logger.info("[StreamX-Flink] elasticsearch auth by userName,password...")
+            logger.info("[Streamx] elasticsearch auth by userName,password...")
           }
           //other config....
           httpClientBuilder
@@ -193,7 +193,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
       val maxRetry = Try(config.get(KEY_ES_REST_MAX_RETRY).toString.toInt) match {
         case Success(value) => value
         case _ =>
-          logger.warn(s"[StreamX-Flink] config error: $KEY_ES_REST_MAX_RETRY is not set or invalid,use 10000 ")
+          logger.warn(s"[Streamx] config error: $KEY_ES_REST_MAX_RETRY is not set or invalid,use 10000 ")
           10000
       }
 

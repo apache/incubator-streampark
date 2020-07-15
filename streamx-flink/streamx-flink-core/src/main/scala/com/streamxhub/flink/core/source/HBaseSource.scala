@@ -79,7 +79,7 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: List[Query],
           htable.get(get.asInstanceOf[java.util.List[Get]]).toList.foreach(x => ctx.collect(fun(x)))
         }
       case _ =>
-        throw new IllegalArgumentException("[StreamX-Flink] HBaseSource error! query must Get or Scan!")
+        throw new IllegalArgumentException("[Streamx] HBaseSource error! query must Get or Scan!")
     }
   }
 

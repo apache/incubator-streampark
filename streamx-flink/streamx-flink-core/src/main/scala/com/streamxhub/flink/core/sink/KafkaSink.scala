@@ -140,14 +140,14 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
   private[this] val partitionIndex: AtomicInteger = new AtomicInteger(0)
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
-    logger.info(s"[StreamX-Flink] KafkaEqualityPartitioner: parallelism $parallelism")
-    checkArgument(parallelInstanceId >= 0, "[StreamX-Flink] KafkaEqualityPartitioner:Id of this subtask cannot be negative.")
-    checkArgument(parallelInstances > 0, "[StreamX-Flink] KafkaEqualityPartitioner:Number of subtasks must be larger than 0.")
+    logger.info(s"[Streamx] KafkaEqualityPartitioner: parallelism $parallelism")
+    checkArgument(parallelInstanceId >= 0, "[Streamx] KafkaEqualityPartitioner:Id of this subtask cannot be negative.")
+    checkArgument(parallelInstances > 0, "[Streamx] KafkaEqualityPartitioner:Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 
   override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    checkArgument(partitions != null && partitions.length > 0, "[StreamX-Flink] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
+    checkArgument(partitions != null && partitions.length > 0, "[Streamx] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
       case (_, 1) => 0 //kafka only have 1 partition
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
