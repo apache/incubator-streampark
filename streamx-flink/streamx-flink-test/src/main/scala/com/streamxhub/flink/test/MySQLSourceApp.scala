@@ -1,9 +1,6 @@
 package com.streamxhub.flink.test
 
-import java.lang
 import java.util.Properties
-
-import com.streamxhub.common.util.JsonUtils
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.request.MySQLRequest
 import com.streamxhub.flink.core.source.MySQLSource
