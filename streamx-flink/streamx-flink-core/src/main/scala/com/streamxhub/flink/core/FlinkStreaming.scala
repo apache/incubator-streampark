@@ -101,7 +101,7 @@ trait FlinkStreaming extends Logger {
     //
     beforeStart(context)
     handler(context)
-    context.execute()
+    context.start()
   }
 
   /**
