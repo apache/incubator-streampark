@@ -47,7 +47,7 @@ influx:
 
 # hbase
 hbase:
-  zookeeper.quorum: test-hadoop-1,test-hadoop-2,test-hadoop-6
+  zookeeper.quorum: test1,test2,test6
   zookeeper.property.clientPort: 2181
   zookeeper.session.timeout: 1200000
   rpc.timeout: 5000
