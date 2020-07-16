@@ -71,20 +71,18 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: List[HBaseQu
   }
 
   override def run(ctx: SourceContext[R]): Unit = {
-    query match {
-      case scan: List[HBaseScan] =>
-        while (isRunning) {
+    while (isRunning) {
+      query match {
+        case scan: List[HBaseScan] =>
           scan.foreach(x => {
             val iter = htable.getScanner(new Scan(x)).iterator()
             iter.foreach(x => ctx.collect(func(x)))
           })
-        }
-      case get: List[HBaseGet] =>
-        while (isRunning) {
-          htable.get(get.map(x=>new Get(x))).toList.foreach(x => ctx.collect(func(x)))
-        }
-      case _ =>
-        throw new IllegalArgumentException("[Streamx] HBaseSource error! query must Get or Scan!")
+        case get: List[HBaseGet] =>
+          htable.get(get.map(x => new Get(x))).foreach(x => ctx.collect(func(x)))
+        case _ =>
+          throw new IllegalArgumentException("[Streamx] HBaseSource error! query must Get or Scan!")
+      }
     }
   }
 
