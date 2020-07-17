@@ -18,11 +18,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.wrapper
+package com.streamxhub.flink.core.wrapper;
 
+import org.apache.hadoop.hbase.client.Get;
+import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.Filter;
 
-import org.apache.hadoop.hbase.client.Get
+import java.io.IOException;
+import java.io.Serializable;
 
-class HBaseGet(bytes: Array[Byte]) extends Get(bytes) with HBaseQuery with Serializable {
+public class HBaseQuery extends Scan implements Serializable {
 
+    public HBaseQuery() {
+        super();
+    }
+
+    public HBaseQuery(byte[] startRow, Filter filter) {
+        super(startRow, filter);
+    }
+
+    public HBaseQuery(byte[] startRow) {
+        super(startRow);
+    }
+
+    public HBaseQuery(byte[] startRow, byte[] stopRow) {
+        super(startRow, stopRow);
+    }
+
+    public HBaseQuery(Scan scan) throws IOException {
+        super(scan);
+    }
+
+    public HBaseQuery(Get get) {
+        super(get);
+    }
 }
