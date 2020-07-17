@@ -71,9 +71,17 @@ object ConfigConst {
 
   val KEY_FLINK_PARALLELISM = "flink.parallelism"
 
-  val KEY_FLINK_RESTART_ATTEMPTS = "flink.restart.attempts"
+  val KEY_FLINK_RESTART_STRATEGY = "restart-strategy"
 
-  val KEY_FLINK_DELAY_ATTEMPTS = "flink.delay.attempts"
+  val KEY_FLINK_RESTART_FAILURE_PER_INTERVAL = "restart-strategy.failure-rate.max-failures-per-interval"
+
+  val KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL = "restart-strategy.failure-rate.failure-rate-interval"
+
+  val KEY_FLINK_RESTART_FAILURE_RATE_DELAY = "restart-strategy.failure-rate.delay"
+
+  val KEY_FLINK_RESTART_ATTEMPTS = "restart-strategy.fixed-delay.attempts"
+
+  val KEY_FLINK_RESTART_DELAY = "restart-strategy.fixed-delay.delay"
 
   val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
 
