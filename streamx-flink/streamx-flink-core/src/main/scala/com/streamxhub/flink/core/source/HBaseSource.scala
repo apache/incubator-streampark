@@ -24,13 +24,14 @@ import java.util.Properties
 
 import com.streamxhub.common.util.{HBaseClient, Logger}
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.flink.core.wrapper.{HBaseGet, HBaseQuery, HBaseScan}
+import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.hadoop.hbase.client._
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
+
 import scala.collection.JavaConversions._
 import scala.annotation.meta.param
 import scala.collection.immutable.Map
@@ -70,19 +71,8 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: => HBaseQuer
 
   override def run(ctx: SourceContext[R]): Unit = {
     while (isRunning) {
-
-      query match {
-        case scan: HBaseScan =>
-          val iter = htable.getScanner(new Scan(scan))
-          iter.foreach(x => {
-            ctx.collect(func(x))
-          })
-        case get: HBaseGet =>
-          val r = htable.get(new Get(get))
-          ctx.collect(func(r))
-        case _ =>
-          throw new IllegalArgumentException("[Streamx] HBaseSource error! 'query' type must be HBaseGet or HBaseScan!")
-      }
+      val iter = htable.getScanner(query)
+      iter.foreach(x => ctx.collect(func(x)))
     }
   }
 
