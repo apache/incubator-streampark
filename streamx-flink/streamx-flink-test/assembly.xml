@@ -4,15 +4,22 @@
         <format>tar.gz</format>
     </formats>
     <fileSets>
+
         <fileSet>
             <directory>assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>assembly/lib</directory>
+            <directory>${project.build.directory}</directory>
             <outputDirectory>lib</outputDirectory>
             <fileMode>0755</fileMode>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+            <excludes>
+                <exclude>original-*.jar</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>assembly/conf</directory>
