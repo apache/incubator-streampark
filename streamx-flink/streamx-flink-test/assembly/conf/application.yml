@@ -26,13 +26,13 @@ flink:
 # 重启策略
 restart-strategy:
   fixed-delay:
-    attempts:
-    delay:
-  failure-rate:
-    max-failures-per-interval:
-    failure-rate-interval:
-    delay:
-  none:
+    attempts: 3
+    delay: 5000
+  #failure-rate:
+  #  max-failures-per-interval:
+  #  failure-rate-interval:
+  #  delay:
+  #none:
 
 #state.backend
 state.backend: rocksdb #保存类型(jobmanager,filesystem,rocksdb)
