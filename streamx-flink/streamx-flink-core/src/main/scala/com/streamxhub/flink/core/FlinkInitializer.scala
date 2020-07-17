@@ -160,8 +160,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   }
 
   private[this] def restartStrategy() = {
-    def getTimeUnit(time: String): (TimeUnit, Int) = time match {
-      case null => (TimeUnit.MINUTES, 5)
+    def getTimeUnit(time: String): (Int, TimeUnit) = time match {
+      case null => (5, TimeUnit.MINUTES)
       case x: String =>
         val num = x.replaceAll("\\s+[a-z|A-Z]$", "").toInt
         val unit = x.replaceAll("^[0-9]+\\s+", "") match {
@@ -171,7 +171,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
           case "d" | "day" => TimeUnit.DAYS
           case _ => throw new IllegalArgumentException()
         }
-        (unit, num)
+        (num, unit)
     }
 
     val strategy = Try(XStateBackend.withName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse(RestartStrategy.none)
@@ -188,8 +188,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
         val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
         streamEnv.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
-          Time.of(rateInterval._2, rateInterval._1),
-          Time.of(delay._2, delay._1)
+          Time.of(rateInterval._1, rateInterval._2),
+          Time.of(delay._1, delay._2)
         ))
       case RestartStrategy.`fixed-delay` =>
 
