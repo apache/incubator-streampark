@@ -29,11 +29,9 @@ import com.streamxhub.common.util.{HBaseClient, Logger}
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.shaded.guava18.com.google.common.cache.Cache
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream, async}
-import org.apache.hadoop.hbase.TableName
-import org.apache.hadoop.hbase.client.{Connection, Result, ResultScanner, Table}
+import org.apache.hadoop.hbase.client.{Result, ResultScanner, Table}
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.param
@@ -83,8 +81,8 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
 }
 
 class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](tableName: String, prop: Properties, queryFunc: T => HBaseQuery, resultFunc: Result => R, capacity: Int) extends RichAsyncFunction[T, R] with Logger {
-  @transient var table: Table = _
-  @transient var executorService: ExecutorService = _
+  @transient private[this] var table: Table = _
+  @transient private[this] var executorService: ExecutorService = _
 
   override def open(parameters: Configuration): Unit = {
     table = HBaseClient(prop).table(tableName)
