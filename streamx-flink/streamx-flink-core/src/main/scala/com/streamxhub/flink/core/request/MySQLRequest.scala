@@ -85,7 +85,7 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
  */
 
 class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
-  private var client: SQLClient = null
+  @transient private[this] var client: SQLClient = _
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
@@ -149,7 +149,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
 
 class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties, capacity: Int = 10) extends RichAsyncFunction[T, R] with Logger {
 
-  private[this] var executorService: ExecutorService = _
+  @transient private[this] var executorService: ExecutorService = _
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
