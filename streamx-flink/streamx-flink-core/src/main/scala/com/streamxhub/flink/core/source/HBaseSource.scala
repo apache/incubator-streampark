@@ -71,8 +71,7 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: => HBaseQuer
 
   override def run(ctx: SourceContext[R]): Unit = {
     while (isRunning) {
-      val iter = htable.getScanner(query)
-      iter.foreach(x => ctx.collect(func(x)))
+      htable.getScanner(query).foreach(x => ctx.collect(func(x)))
     }
   }
 
