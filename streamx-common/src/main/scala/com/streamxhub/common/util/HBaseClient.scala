@@ -23,8 +23,8 @@ package com.streamxhub.common.util
 import java.util.Properties
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.HBaseConfiguration
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory}
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
 import org.apache.hadoop.security.UserGroupInformation
 import com.streamxhub.common.conf.ConfigConst._
 
@@ -33,8 +33,10 @@ import scala.collection.JavaConversions._
 /**
  * @author benjobs
  */
-class HBaseClient(fun: () => Connection) extends Serializable {
-  lazy val connection: Connection = fun()
+class HBaseClient(func: () => Connection) extends Serializable {
+  lazy val connection: Connection = func()
+
+  def table(table: String): Table = connection.getTable(TableName.valueOf(table))
 }
 
 object HBaseClient {
@@ -43,7 +45,7 @@ object HBaseClient {
   def apply(prop: Properties): HBaseClient = {
     val user = prop.remove(KEY_HBASE_AUTH_USER)
     prop.foreach(x => conf.set(x._1, x._2))
-    val fun = () => {
+    new HBaseClient(() => {
       if (user != null) {
         UserGroupInformation.setConfiguration(conf)
         val remoteUser: UserGroupInformation = UserGroupInformation.createRemoteUser(user.toString)
@@ -54,7 +56,6 @@ object HBaseClient {
         connection.close()
       }
       connection
-    }
-    new HBaseClient(fun)
+    })
   }
 }

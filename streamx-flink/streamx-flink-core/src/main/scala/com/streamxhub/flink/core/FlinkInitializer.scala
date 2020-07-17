@@ -20,6 +20,8 @@
  */
 package com.streamxhub.flink.core
 
+import java.util.concurrent.TimeUnit
+
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
@@ -36,6 +38,8 @@ import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
 import org.apache.flink.api.scala.ExecutionEnvironment
+import com.streamxhub.flink.core.enums.RestartStrategy
+import org.apache.flink.api.common.time.Time
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
 import scala.collection.JavaConversions._
@@ -125,12 +129,11 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     streamEnv
   }
 
+
   private[this] def initStreamEnv() = {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
     val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT)
-    val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
-    val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_DELAY_ATTEMPTS).toInt).getOrElse(50000)
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {
@@ -138,14 +141,12 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     }
     streamEnv.setParallelism(parallelism)
     streamEnv.setStreamTimeCharacteristic(timeCharacteristic)
-    //重启策略.
-    streamEnv.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
 
-    //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
-    val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
-    if (enableCheckpoint) {
-      checkpoint()
-    }
+    //重启策略.
+    restartStrategy()
+
+    //checkpoint
+    checkpoint()
 
     apiType match {
       case ApiType.JAVA if javaEnvConf != null => javaEnvConf.envConfig(this.streamEnv.getJavaEnv, this.parameter)
@@ -158,8 +159,60 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     this.streamEnv
   }
 
-  private[this] def checkpoint(): Unit = {
+  private[this] def restartStrategy() = {
+    def getTimeUnit(time: String): (TimeUnit, Int) = time match {
+      case null => (TimeUnit.MINUTES, 5)
+      case x: String =>
+        val num = x.replaceAll("\\s+[a-z|A-Z]$", "").toInt
+        val unit = x.replaceAll("^[0-9]+\\s+", "") match {
+          case "s" => TimeUnit.SECONDS
+          case "m" | "min" => TimeUnit.MINUTES
+          case "h" => TimeUnit.HOURS
+          case "d" | "day" => TimeUnit.DAYS
+          case _ => throw new IllegalArgumentException()
+        }
+        (unit, num)
+    }
 
+    val strategy = Try(XStateBackend.withName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse(RestartStrategy.none)
+    strategy match {
+      case RestartStrategy.`failure-rate` =>
+
+        /**
+         * restart-strategy.failure-rate.max-failures-per-interval: 在一个Job认定为失败之前,最大的重启次数
+         * restart-strategy.failure-rate.failure-rate-interval: 计算失败率的时间间隔
+         * restart-strategy.failure-rate.delay: 两次连续重启尝试之间的时间间隔
+         */
+        val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
+        val rateInterval = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null))
+        val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
+        streamEnv.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
+          interval,
+          Time.of(rateInterval._2, rateInterval._1),
+          Time.of(delay._2, delay._1)
+        ))
+      case RestartStrategy.`fixed-delay` =>
+
+        /**
+         *
+         * restart-strategy.fixed-delay.attempts: 在Job最终宣告失败之前，Flink尝试执行的次数
+         * restart-strategy.fixed-delay.delay: 一个任务失败之后不会立即重启,这里指定间隔多长时间重启
+         */
+        val restartAttempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
+        val delayBetweenAttempts = Try(parameter.get(KEY_FLINK_RESTART_DELAY).toInt).getOrElse(50000)
+
+        /**
+         * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
+         */
+        streamEnv.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(restartAttempts, delayBetweenAttempts))
+      case RestartStrategy.none => streamEnv.getConfig.setRestartStrategy(RestartStrategies.noRestart())
+    }
+  }
+
+  private[this] def checkpoint(): Unit = {
+    //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
+    val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
+    if (!enableCheckpoint) return
     val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINTS_INTERVAL).toInt).getOrElse(1000)
     val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
     val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)

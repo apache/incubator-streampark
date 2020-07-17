@@ -31,8 +31,6 @@ import org.apache.hadoop.hbase.client._
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.hadoop.hbase.TableName
-
 import scala.collection.JavaConversions._
 import scala.annotation.meta.param
 import scala.collection.immutable.Map
@@ -49,7 +47,7 @@ object HBaseSource {
  */
 class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
-  def getDataStream[R: TypeInformation](table: String, query: List[HBaseQuery], func: Result => R)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](table: String, query: => HBaseQuery, func: Result => R)(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
     val hBaseFunc = new HBaseSourceFunction[R](table, query, func)
     ctx.addSource(hBaseFunc)
@@ -58,7 +56,7 @@ class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](table: String, query: List[HBaseQuery], func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
+class HBaseSourceFunction[R: TypeInformation](table: String, query: => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -67,21 +65,23 @@ class HBaseSourceFunction[R: TypeInformation](table: String, query: List[HBaseQu
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    htable = HBaseClient(prop).connection.getTable(TableName.valueOf(table))
+    htable = HBaseClient(prop).table(table)
   }
 
   override def run(ctx: SourceContext[R]): Unit = {
     while (isRunning) {
+
       query match {
-        case scan: List[HBaseScan] =>
-          scan.foreach(x => {
-            val iter = htable.getScanner(new Scan(x)).iterator()
-            iter.foreach(x => ctx.collect(func(x)))
+        case scan: HBaseScan =>
+          val iter = htable.getScanner(new Scan(scan))
+          iter.foreach(x => {
+            ctx.collect(func(x))
           })
-        case get: List[HBaseGet] =>
-          htable.get(get.map(x => new Get(x))).foreach(x => ctx.collect(func(x)))
+        case get: HBaseGet =>
+          val r = htable.get(new Get(get))
+          ctx.collect(func(r))
         case _ =>
-          throw new IllegalArgumentException("[Streamx] HBaseSource error! query must Get or Scan!")
+          throw new IllegalArgumentException("[Streamx] HBaseSource error! 'query' type must be HBaseGet or HBaseScan!")
       }
     }
   }

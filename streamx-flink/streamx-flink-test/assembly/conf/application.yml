@@ -23,6 +23,17 @@ flink:
     mode: EXACTLY_ONCE
     #dir: hdfs:///
 
+# 重启策略
+restart-strategy:
+  fixed-delay:
+    attempts:
+    delay:
+  failure-rate:
+    max-failures-per-interval:
+    failure-rate-interval:
+    delay:
+  none:
+
 #state.backend
 state.backend: rocksdb #保存类型(jobmanager,filesystem,rocksdb)
 state.backend.memory: 5242880 #针对jobmanager有效,最大内存
@@ -49,9 +60,9 @@ influx:
 hbase:
   zookeeper.quorum: test1,test2,test6
   zookeeper.property.clientPort: 2181
-  zookeeper.session.timeout: 1200000
-  rpc.timeout: 5000
-  client.pause: 20
+  #zookeeper.session.timeout: 1200000
+  #rpc.timeout: 5000
+  #client.pause: 20
 
 #clickhouse
 clickhouse.sink:
