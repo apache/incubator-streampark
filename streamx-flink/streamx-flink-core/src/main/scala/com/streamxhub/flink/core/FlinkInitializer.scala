@@ -185,7 +185,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
     val strategyString = parameter.toMap.filter(_._1.startsWith(KEY_FLINK_RESTART_STRATEGY)).map(_._1.split("\\.")(1)).head
 
-    val strategy = Try(RestartStrategy.byName(strategyString)).getOrElse(RestartStrategy.none)
+    val strategy = Try(RestartStrategy.byName(strategyString)).getOrElse(null)
     strategy match {
       case RestartStrategy.`failure-rate` =>
 
@@ -219,7 +219,10 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
          */
         streamEnv.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(attempts, Time.of(delay._1, delay._2)))
+
       case RestartStrategy.none => streamEnv.getConfig.setRestartStrategy(RestartStrategies.noRestart())
+
+      case null => logger.info("[StreamX] RestartStrategy not set,use default from $flink_conf")
     }
   }
 
