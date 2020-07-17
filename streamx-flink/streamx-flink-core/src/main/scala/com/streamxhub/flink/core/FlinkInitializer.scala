@@ -161,19 +161,26 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] def restartStrategy() = {
 
-    def getTimeUnit(time: String): (Int, TimeUnit) = time match {
-      case "" => null
-      case x: String =>
-        val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
-        val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
-          case "" => null
-          case "s" => TimeUnit.SECONDS
-          case "m" | "min" => TimeUnit.MINUTES
-          case "h" => TimeUnit.HOURS
-          case "d" | "day" => TimeUnit.DAYS
-          case _ => throw new IllegalArgumentException()
-        }
-        (num, unit)
+    def getTimeUnit(time: String): (Int, TimeUnit) = {
+      val timeUnit = time match {
+        case "" => null
+        case x: String =>
+          val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
+          val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
+            case "" => null
+            case "s" => TimeUnit.SECONDS
+            case "m" | "min" => TimeUnit.MINUTES
+            case "h" => TimeUnit.HOURS
+            case "d" | "day" => TimeUnit.DAYS
+            case _ => throw new IllegalArgumentException()
+          }
+          (num, unit)
+      }
+      timeUnit match {
+        case null => (5, TimeUnit.MINUTES) //给默认值
+        case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS) //未带单位,值必须为毫秒,这里转成对应的秒...
+        case other => other
+      }
     }
 
     val strategyString = parameter.toMap.filter(_._1.startsWith(KEY_FLINK_RESTART_STRATEGY)).map(_._1.split("\\.")(1)).head
@@ -189,17 +196,9 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
          */
         val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
 
-        val rateInterval = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null)) match {
-          case null => (5, TimeUnit.MINUTES) //给默认值
-          case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
-          case other => other
-        }
+        val rateInterval = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null))
 
-        val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null)) match {
-          case null => (5, TimeUnit.MINUTES) //给默认值
-          case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
-          case other => other
-        }
+        val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
 
         streamEnv.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
@@ -214,11 +213,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
          * restart-strategy.fixed-delay.delay: 一个任务失败之后不会立即重启,这里指定间隔多长时间重启
          */
         val attempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
-        val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null)) match {
-          case null => (5, TimeUnit.MINUTES) //给默认值
-          case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
-          case other => other
-        }
+        val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
 
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
