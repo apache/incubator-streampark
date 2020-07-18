@@ -23,6 +23,7 @@ package com.streamxhub.flink.test
 import java.util
 
 import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.flink.core.request.HBaseRequest
 import com.streamxhub.flink.core.source.HBaseSource
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
@@ -36,8 +37,20 @@ object HBaseSourceApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
 
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
-    val get = new HBaseQuery("person",new Get("123322242".getBytes()))
-    new HBaseSource(context).getDataStream[String](get, r => {
+
+    val id = new HBaseSource(context).getDataStream[String](() => {
+      Thread.sleep(10000)
+      new HBaseQuery("person", new Get("123322242".getBytes()))
+    }, r => {
+      val rowKey = new String(r.getRow)
+      println(s"row:------->${rowKey}")
+      rowKey
+    })
+
+
+    HBaseRequest(id).requestOrdered(x => {
+      new HBaseQuery("person", new Get(x.getBytes()))
+    }, r => {
       val map = new util.HashMap[String, String]()
       val cellScanner = r.cellScanner()
       while (cellScanner.advance()) {
@@ -56,7 +69,8 @@ object HBaseSourceApp extends FlinkStreaming {
         map.put(name.toString, v.toString)
       }
       map.toString
-    }).print("result--->")
+    })
+
 
   }
 
