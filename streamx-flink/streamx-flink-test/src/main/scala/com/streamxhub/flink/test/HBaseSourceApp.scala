@@ -41,12 +41,7 @@ object HBaseSourceApp extends FlinkStreaming {
     val id = new HBaseSource(context).getDataStream[String](() => {
       Thread.sleep(10000)
       new HBaseQuery("person", new Get("123322242".getBytes()))
-    }, r => {
-      val rowKey = new String(r.getRow)
-      println(s"row:------->${rowKey}")
-      rowKey
-    })
-
+    }, r => new String(r.getRow))
 
     HBaseRequest(id).requestOrdered(x => {
       new HBaseQuery("person", new Get(x.getBytes()))
@@ -69,7 +64,7 @@ object HBaseSourceApp extends FlinkStreaming {
         map.put(name.toString, v.toString)
       }
       map.toString
-    })
+    }).print("Async")
 
 
   }
