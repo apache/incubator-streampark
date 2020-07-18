@@ -26,12 +26,18 @@ object RestartStrategy extends Enumeration {
   val `fixed-delay`, `failure-rate`, `none` = Value
 
   /**
-   * fuck....
    *
    * @param name
    * @return
    */
-  def byName(name: String): Value = values.find(_.toString.replace("$minus", "-").equalsIgnoreCase(name)).get
+  def byName(name: String): Value = {
+    if (name == null) null else {
+      values.find(_.toString.replace("$minus", "-").equalsIgnoreCase(name)) match {
+        case Some(v) => v
+        case _ => throw new IllegalArgumentException("[StreamX] RestartStrategy muse be (fixed-delay|failure-rate|none)")
+      }
+    }
+  }
 
 }
 
