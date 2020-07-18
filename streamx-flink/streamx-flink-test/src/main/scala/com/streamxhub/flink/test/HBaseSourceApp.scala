@@ -36,8 +36,8 @@ object HBaseSourceApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
 
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
-    val get = new HBaseQuery(new Get("123322242".getBytes()))
-    new HBaseSource(context).getDataStream[String]("person", get, r => {
+    val get = new HBaseQuery("person",new Get("123322242".getBytes()))
+    new HBaseSource(context).getDataStream[String](get, r => {
       val map = new util.HashMap[String, String]()
       val cellScanner = r.cellScanner()
       while (cellScanner.advance()) {

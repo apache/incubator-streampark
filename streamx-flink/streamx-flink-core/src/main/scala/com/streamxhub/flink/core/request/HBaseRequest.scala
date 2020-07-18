@@ -25,7 +25,7 @@ import java.util.Properties
 import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
 import java.util.function.{Consumer, Supplier}
 
-import com.streamxhub.common.util.{HBaseClient, Logger}
+import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -48,7 +48,6 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
 
   /**
    *
-   * @param tableName
    * @param queryFunc
    * @param resultFunc
    * @param timeout
@@ -57,14 +56,13 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @tparam R
    * @return
    */
-  def requestOrdered[R: TypeInformation](tableName: String, queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
-    val async = new HBaseAsyncFunction[T, R](tableName, prop, queryFunc, resultFunc, capacity)
+  def requestOrdered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
+    val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   /**
    *
-   * @param tableName
    * @param queryFunc
    * @param resultFunc
    * @param timeout
@@ -73,25 +71,29 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @tparam R
    * @return
    */
-  def requestUnordered[R: TypeInformation](tableName: String, queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
-    val async = new HBaseAsyncFunction[T, R](tableName, prop, queryFunc, resultFunc, capacity)
+  def requestUnordered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
+    val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
 }
 
-class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](tableName: String, prop: Properties, queryFunc: T => HBaseQuery, resultFunc: Result => R, capacity: Int) extends RichAsyncFunction[T, R] with Logger {
+class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Properties, queryFunc: T => HBaseQuery, resultFunc: Result => R, capacity: Int) extends RichAsyncFunction[T, R] with Logger {
   @transient private[this] var table: Table = _
   @transient private[this] var executorService: ExecutorService = _
 
   override def open(parameters: Configuration): Unit = {
-    table = HBaseClient(prop).table(tableName)
     executorService = Executors.newFixedThreadPool(capacity)
   }
 
   override def asyncInvoke(input: T, resultFuture: async.ResultFuture[R]): Unit = {
     CompletableFuture.supplyAsync(new Supplier[ResultScanner]() {
-      override def get(): ResultScanner = table.getScanner(queryFunc(input))
+      override def get(): ResultScanner = {
+        val query = queryFunc(input)
+        require(query != null && query.getTable != null, "[StreamX] HBaseRequest query and query's param table muse be not null ")
+        table = query.getTable(prop)
+        table.getScanner(query)
+      }
     }).thenAccept(new Consumer[ResultScanner] {
       override def accept(result: ResultScanner): Unit = resultFuture.complete(result.map(resultFunc))
     })

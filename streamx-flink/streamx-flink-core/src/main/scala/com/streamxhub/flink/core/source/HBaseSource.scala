@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.source
 
 import java.util.Properties
 
-import com.streamxhub.common.util.{HBaseClient, Logger}
+import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -48,38 +48,41 @@ object HBaseSource {
  */
 class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
-  def getDataStream[R: TypeInformation](table: String, query: => HBaseQuery, func: Result => R)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](query: () => HBaseQuery, func: Result => R)(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
-    val hBaseFunc = new HBaseSourceFunction[R](table, query, func)
+    val hBaseFunc = new HBaseSourceFunction[R](query, func)
     ctx.addSource(hBaseFunc)
   }
 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](table: String, query: => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
+class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
-  private[this] var htable: Table = _
+  private[this] var table: Table = _
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    htable = HBaseClient(prop).table(table)
   }
 
   override def run(ctx: SourceContext[R]): Unit = {
     while (isRunning) {
-      htable.getScanner(query).foreach(x => ctx.collect(func(x)))
+      val query = queryFunc()
+      require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
+      table = query.getTable(prop)
+      table.getScanner(query).foreach(x => ctx.collect(func(x)))
     }
   }
 
   override def cancel(): Unit = this.isRunning = false
 
   override def close(): Unit = {
-    if (htable != null) {
-      htable.close()
+    super.close()
+    if (table != null) {
+      table.close()
     }
   }
 }
