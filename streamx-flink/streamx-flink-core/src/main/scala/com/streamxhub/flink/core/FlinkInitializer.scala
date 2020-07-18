@@ -161,7 +161,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] def restartStrategy() = {
 
-    def getTimeUnit(time: String): (Int, TimeUnit) = {
+    def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
       val timeUnit = time match {
         case "" => null
         case x: String =>
@@ -177,15 +177,13 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
           (num, unit)
       }
       timeUnit match {
-        case null => (5, TimeUnit.MINUTES) //给默认值
+        case null => default
         case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS) //未带单位,值必须为毫秒,这里转成对应的秒...
         case other => other
       }
     }
 
-    val strategyString = parameter.toMap.filter(_._1.startsWith(KEY_FLINK_RESTART_STRATEGY)).map(_._1.split("\\.")(1)).head
-
-    val strategy = Try(RestartStrategy.byName(strategyString)).getOrElse(null)
+    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse(null)
     strategy match {
       case RestartStrategy.`failure-rate` =>
 
@@ -193,10 +191,17 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
          * restart-strategy.failure-rate.max-failures-per-interval: 在一个Job认定为失败之前,最大的重启次数
          * restart-strategy.failure-rate.failure-rate-interval: 计算失败率的时间间隔
          * restart-strategy.failure-rate.delay: 两次连续重启尝试之间的时间间隔
+         * e.g:
+         * >>>
+         * max-failures-per-interval: 10
+         * failure-rate-interval: 5 min
+         * delay: 2 s
+         * <<<
+         * 即:每次异常重启的时间间隔是"2秒",如果在"5分钟"内,失败总次数到达"10次" 则任务失败.
          */
         val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
 
-        val rateInterval = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null))
+        val rateInterval = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
 
         val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
 
@@ -211,6 +216,10 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
          *
          * restart-strategy.fixed-delay.attempts: 在Job最终宣告失败之前，Flink尝试执行的次数
          * restart-strategy.fixed-delay.delay: 一个任务失败之后不会立即重启,这里指定间隔多长时间重启
+         * e.g:
+         * attempts: 5,delay: 3 s
+         * 即:
+         * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
          */
         val attempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
         val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
