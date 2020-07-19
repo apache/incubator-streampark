@@ -179,13 +179,13 @@ doStart() {
     local trim="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local detached_mode="`java -cp "${jarfile}" $param_cli --detached "${app_proper}"` $*"
+    local detached_mode="`java -cp "${jarfile}" $param_cli --detached "${app_proper}" "$*"`"
     # shellcheck disable=SC2006
     # trim...
     detached_mode="`echo "$detached_mode" | sed "$trim"`"
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local option="`java -cp "${jarfile}" $param_cli --option "${app_proper}"` $*"
+    local option="`java -cp "${jarfile}" $param_cli --option "${app_proper}" "$*"`"
     # shellcheck disable=SC2006
     option="`echo "$option" | sed "$trim"`"
 
