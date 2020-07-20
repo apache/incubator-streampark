@@ -25,16 +25,18 @@ import java.util.Properties
 import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.wrapper.HBaseQuery
+import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.hadoop.hbase.client._
+import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.hbase.client._
 
-import scala.collection.JavaConversions._
 import scala.annotation.meta.param
-import scala.collection.immutable.Map
+import scala.collection.JavaConversions._
 
 object HBaseSource {
 
@@ -57,11 +59,17 @@ class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with Logger {
+class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with CheckpointListener with CheckpointedFunction with Logger {
 
-  private[this] var isRunning = true
+  @volatile private[this] var running = true
 
-  private[this] var table: Table = _
+  @transient private[this] var table: Table = _
+
+  @transient private var query: HBaseQuery = _
+
+  @transient private var state: ListState[HBaseQuery] = _
+
+  private val OFFSETS_STATE = "offset-states"
 
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
@@ -69,20 +77,40 @@ class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func:
   }
 
   override def run(ctx: SourceContext[R]): Unit = {
-    while (isRunning) {
-      val query = queryFunc()
-      require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
-      table = query.getTable(prop)
-      table.getScanner(query).foreach(x => ctx.collect(func(x)))
+    while (running) {
+      ctx.getCheckpointLock.synchronized {
+        query = queryFunc()
+        require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
+        table = query.getTable(prop)
+        table.getScanner(query).foreach(x => ctx.collect(func(x)))
+      }
     }
   }
 
-  override def cancel(): Unit = this.isRunning = false
+  override def cancel(): Unit = this.running = false
 
   override def close(): Unit = {
     super.close()
     if (table != null) {
       table.close()
     }
+  }
+
+  override def snapshotState(context: FunctionSnapshotContext): Unit = {
+    if (!running) {
+      logger.error("[StreamX] HBaseSource snapshotState called on closed source")
+    } else {
+      state.clear()
+      state.add(query)
+    }
+  }
+
+  override def initializeState(context: FunctionInitializationContext): Unit = {
+    state = context.getOperatorStateStore.getListState(new ListStateDescriptor(OFFSETS_STATE, TypeInformation.of(classOf[HBaseQuery])))
+    state.get.foreach(x => query = x)
+  }
+
+  override def notifyCheckpointComplete(checkpointId: Long): Unit = {
+    logger.info(s"[StreamX] HBaseSource checkpointComplete: $checkpointId")
   }
 }
