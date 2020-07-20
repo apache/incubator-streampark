@@ -22,19 +22,21 @@ package com.streamxhub.flink.core.request
 
 
 import java.util.Properties
-import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
+import java.util.concurrent.{CompletableFuture, ExecutorService, TimeUnit, Executors => JExec}
 import java.util.function.{Consumer, Supplier}
 
 import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.runtime.concurrent.Executors
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
-import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream, async}
+import org.apache.flink.streaming.api.scala._
 import org.apache.hadoop.hbase.client.{Result, ResultScanner, Table}
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.param
+import scala.concurrent.ExecutionContext
 
 
 object HBaseRequest {
@@ -83,7 +85,8 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
   @transient private[this] var executorService: ExecutorService = _
 
   override def open(parameters: Configuration): Unit = {
-    executorService = Executors.newFixedThreadPool(capacity)
+    super.open(parameters)
+    executorService = JExec.newFixedThreadPool(capacity)
   }
 
   override def asyncInvoke(input: T, resultFuture: async.ResultFuture[R]): Unit = {
@@ -94,7 +97,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
         table = query.getTable(prop)
         table.getScanner(query)
       }
-    }).thenAccept(new Consumer[ResultScanner] {
+    }, executorService).thenAccept(new Consumer[ResultScanner] {
       override def accept(result: ResultScanner): Unit = resultFuture.complete(result.map(resultFunc))
     })
   }
