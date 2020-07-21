@@ -103,19 +103,18 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
-        val callQuery = if(jdbcQuery == null) null else jdbcQuery.nextQuery()
+        val callQuery = if (jdbcQuery == null) null else {
+          jdbcQuery.setTimestamp(jdbcQuery.getLastTimestamp)
+          jdbcQuery
+        }
         jdbcQuery = apiType match {
           case ApiType.Scala => scalaSqlFunc(callQuery)
           case ApiType.JAVA => javaSqlFunc.getSQL(callQuery)
         }
         println(jdbcQuery.getSQL)
-        if (jdbcQuery.getPageNo == 1200) {
-          println("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-          9 / 0
-        }
         val result: List[Map[String, _]] = apiType match {
-          case ApiType.Scala => JdbcUtils.select(jdbcQuery.getSQL)(jdbc)
-          case ApiType.JAVA => JdbcUtils.select(jdbcQuery.getSQL)(jdbc)
+          case ApiType.Scala => JdbcUtils.fetch(jdbcQuery.getSQL, jdbcQuery.getFetchSize)(jdbc)
+          case ApiType.JAVA => JdbcUtils.fetch(jdbcQuery.getSQL, jdbcQuery.getFetchSize)(jdbc)
         }
         apiType match {
           case ApiType.Scala => scalaResultFunc(result).foreach(ctx.collect)
@@ -142,7 +141,6 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      println(s"snapshotState:_______________________________${jdbcQuery.getSQL}_________________________________________")
       state.add(jdbcQuery)
     } else {
       logger.error("[StreamX] MySQLSource snapshotState called on closed source")
@@ -155,12 +153,9 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
    * @param context
    */
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    state = context.getOperatorStateStore.getListState(new ListStateDescriptor(OFFSETS_STATE, classOf[MySQLQuery]))
+    state = context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(OFFSETS_STATE, classOf[MySQLQuery]))
     Try(state.get.head) match {
-      case Success(q) => {
-        jdbcQuery = q
-        println(s"initializeState:_______________________________${jdbcQuery.getSQL}_________________________________________")
-      }
+      case Success(q) => jdbcQuery = q
       case _ =>
     }
   }
