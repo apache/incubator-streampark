@@ -19,14 +19,14 @@ object MySQLSourceApp extends FlinkStreaming {
 
     val mysqlSource = new MySQLSource(context)
     mysqlSource.getDataStream[Orders]({
-      ""
+    ""
     },
       r => {
         r.map(x => {
           new Orders(x("market_id").toString, x("sync_time").toString)
         })
       }
-    ).map(x=>{
+    ).map(x => {
       x.timestamp
     }).print()
 
