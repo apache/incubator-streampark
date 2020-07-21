@@ -13,7 +13,7 @@ object MySQLSourceApp extends FlinkStreaming {
     implicit val prop = new Properties()
     prop.put(KEY_INSTANCE, "test")
     prop.put(KEY_JDBC_DRIVER, "com.mysql.cj.jdbc.Driver")
-    prop.put(KEY_JDBC_URL, "jdbc:mysql://rm-2zer0v9g25bgu4rx43o.mysql.rds.aliyuncs.com:3306/hopsonone_park_sh_real_time?user=hopsononebi_ro&password=7RH1UX0bisVDot0v&useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&autoReconnect=true&failOverReadOnly=false")
+    prop.put(KEY_JDBC_URL, "jdbc:mysql://localhost:3306")
     prop.put("readOnly", "false")
     prop.put("idleTimeout", "20000")
 
