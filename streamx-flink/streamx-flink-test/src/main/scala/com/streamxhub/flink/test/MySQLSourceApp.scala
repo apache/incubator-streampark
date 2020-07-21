@@ -30,8 +30,7 @@ object MySQLSourceApp extends FlinkStreaming {
         query.setField("sync_time")
         query.setOption(">=")
         query.setTimestamp(time)
-        query.setOffset(0)
-        query.setRows(50)
+        query.setFetchSize(100)
         query
       }
     },
