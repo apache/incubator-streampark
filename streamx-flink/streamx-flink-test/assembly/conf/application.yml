@@ -19,7 +19,8 @@ flink:
   parallelism: 1
   checkpoints:
     enable: true
-    interval: 500
+    interval: 10
+    minPauseBetween: 20
     mode: EXACTLY_ONCE
 
 # 重启策略

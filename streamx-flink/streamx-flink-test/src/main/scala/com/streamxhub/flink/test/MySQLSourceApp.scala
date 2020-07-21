@@ -19,7 +19,7 @@ object MySQLSourceApp extends FlinkStreaming {
     prop.put("idleTimeout", "20000")
 
     val mysqlSource = new MySQLSource(context)
-    val ds = mysqlSource.getDataStream[Orders](q => {
+    mysqlSource.getDataStream[Orders](q => {
       Thread.sleep(1000)
       //没有上次记录的消费信息
       if (q != null) q else {
@@ -40,8 +40,9 @@ object MySQLSourceApp extends FlinkStreaming {
           new Orders(x("market_id").toString, x("sync_time").toString)
         })
       }
-    )
-    ds.print()
+    ).map(x=>{
+      x.timestamp
+    }).print()
 
   }
 
