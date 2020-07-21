@@ -39,7 +39,7 @@ object HBaseSourceApp extends FlinkStreaming {
 
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
 
-    val id = new HBaseSource(context).getDataStream[String](query => {
+    val id = new HBaseSource(context).getDataStream[String](() => {
       Thread.sleep(10000)
       new HBaseQuery("person", new Get("123322242".getBytes()))
     }, r => new String(r.getRow))
