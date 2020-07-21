@@ -242,9 +242,9 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINTS_INTERVAL).toInt).getOrElse(1000)
     val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
     val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(60000)
+    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(1000 * 60)
     val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT).toInt).getOrElse(1)
-    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(500)
+    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(1000)
 
     //默认:开启检查点,1s进行启动一个检查点
     streamEnv.enableCheckpointing(cpInterval)
@@ -259,18 +259,15 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //默认:被cancel会保留Checkpoint数据
     streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
-    val stateBackend = streamEnv.getJavaEnv match {
-      case _: LocalStreamEnvironment => XStateBackend.jobmanager //localMode stateBackend will be "jobmanager"
-      case _ => Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
-    }
+    val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
 
     //stateBackend
     if (stateBackend != null) {
       val cpDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
-         * cpDir如果从配置文件中读取失败(key:flink.checkpoints.dir),则尝试从flink-conf.yml中读取..
+         * cpDir如果从配置文件中读取失败(key:state.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
-        Try(parameter.get(KEY_FLINK_CHECKPOINTS_DIR)).getOrElse(null) match {
+        Try(parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR)).getOrElse(null) match {
           //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
@@ -279,7 +276,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
             val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
             val prop = PropertiesUtils.fromYamlFile(flinkConf)
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
-            val dir = prop("state.checkpoints.dir")
+            val dir = prop(KEY_FLINK_STATE_CHECKPOINTS_DIR)
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
