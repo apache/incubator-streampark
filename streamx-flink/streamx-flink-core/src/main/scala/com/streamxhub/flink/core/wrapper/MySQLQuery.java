@@ -10,13 +10,12 @@ public class MySQLQuery implements Serializable {
     private String table;
     private String field;
     private String timestamp;
-    private String option; // >= 0r > ...
-    /**
-     * 记录分页数据...
-     */
-    private Integer offset = 0;
-    private Integer rows = 5000; // 默认每页5000条记录
+    private String option;
 
+    /**
+     * 采用fetch模式拉取,每次拉取的大小
+     */
+    private Integer fetchSize = 2000;
     private Integer size = 0;
     private String lastTimestamp;
 
@@ -30,50 +29,11 @@ public class MySQLQuery implements Serializable {
         this.option = option;
     }
 
-    /**
-     * 构建下一次的查询条件
-     */
-    public MySQLQuery nextQuery() {
-        //分页和不分页是两套逻辑
-        if (isLimit()) {
-            if (this.size > this.rows) {
-                this.firsePage();
-                this.timestamp = this.lastTimestamp;
-            } else if (this.size.equals(this.rows)) {
-                this.nextPage();
-            }
-        } else {
-            this.timestamp = this.lastTimestamp;
-        }
-        return this;
-    }
-
-    private boolean isLimit() {
-        return this.offset != null;
-    }
-
-    private void nextPage() {
-        //如果查询结果集是空,并且分页的offset大于0
-        this.offset += 1;
-    }
-
-    public int getPageNo() {
-        return this.offset * rows;
-    }
-
-    public void firsePage() {
-        this.offset = 0;
-    }
-
     public boolean isEmpty() {
         return this.size == 0;
     }
 
     public String getSQL() {
-        if (isLimit()) {
-            String format = "select * from %s where %s %s '%s' order by %s asc limit %s,%s ";
-            return String.format(format, table, field, option, timestamp, field, getPageNo(), rows);
-        }
         String format = "select * from %s where %s %s '%s' order by %s asc";
         return String.format(format, table, field, option, timestamp, field);
     }
@@ -110,20 +70,12 @@ public class MySQLQuery implements Serializable {
         this.option = option;
     }
 
-    public Integer getOffset() {
-        return offset;
+    public Integer getFetchSize() {
+        return fetchSize;
     }
 
-    public void setOffset(Integer offset) {
-        this.offset = offset;
-    }
-
-    public Integer getRows() {
-        return rows;
-    }
-
-    public void setRows(Integer rows) {
-        this.rows = rows;
+    public void setFetchSize(Integer fetchSize) {
+        this.fetchSize = fetchSize;
     }
 
     public Integer getSize() {
