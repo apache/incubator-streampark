@@ -24,8 +24,8 @@ import java.sql.{Connection, ResultSet, Statement}
 import java.util.Properties
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.ReentrantLock
-import com.streamxhub.common.conf.ConfigConst._
 
+import com.streamxhub.common.conf.ConfigConst._
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.json4s.DefaultFormats
 
@@ -47,22 +47,18 @@ object JdbcUtils {
 
   private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
 
-  /**
-   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
-   *
-   * @param sql
-   * @param jdbcConfig
-   * @return
-   */
-  def select(sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = select(getConnection(jdbcConfig), sql)
-
-  def select(conn: Connection, sql: String): List[Map[String, _]] = {
+  def fetch(sql: String, fetchSize: Integer = 1000, direction: Integer = 1000)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
+      val conn = getConnection(jdbcConfig)
       var stmt: Statement = null
       var result: ResultSet = null
       try {
         stmt = createStatement(conn)
         result = stmt.executeQuery(sql)
+        if (fetchSize != null && direction != null) {
+          result.setFetchDirection(direction)
+          result.setFetchSize(fetchSize)
+        }
         val count = result.getMetaData.getColumnCount
         val array = ArrayBuffer[Map[String, Any]]()
         while (result.next()) {
@@ -70,7 +66,6 @@ object JdbcUtils {
           for (x <- 1 to count) {
             val key = result.getMetaData.getColumnLabel(x)
             result.getMetaData.getColumnType(x)
-
             val value = result.getObject(x)
             map += key -> value
           }
@@ -87,6 +82,15 @@ object JdbcUtils {
   }
 
   /**
+   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
+   *
+   * @param sql
+   * @param jdbcConfig
+   * @return
+   */
+  def select(sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = fetch(sql, null, null)
+
+  /**
    * 直接查询一个对象
    *
    * @param sql
@@ -95,8 +99,6 @@ object JdbcUtils {
    * @return
    */
   def select2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
-
-  def select2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): List[T] = toObject[T](select(connection, sql))
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
 
@@ -253,9 +255,9 @@ object JdbcUtils {
                     m.setAccessible(true)
                     m.getParameterTypes.head.getSimpleName match {
                       case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)
-                      case "int" => m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]):_*)
-                      case "long" => m.invoke(jdbcConfig, Seq(x._2.toLong.asInstanceOf[Object]):_*)
-                      case "boolean" => m.invoke(jdbcConfig, Seq(x._2.toBoolean.asInstanceOf[Object]):_*)
+                      case "int" => m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]): _*)
+                      case "long" => m.invoke(jdbcConfig, Seq(x._2.toLong.asInstanceOf[Object]): _*)
+                      case "boolean" => m.invoke(jdbcConfig, Seq(x._2.toBoolean.asInstanceOf[Object]): _*)
                       case _ =>
                     }
                   case null =>
