@@ -50,7 +50,7 @@ object HBaseSource {
  */
 class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
 
-  def getDataStream[R: TypeInformation](query: () => HBaseQuery, func: Result => R)(implicit config: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](query: HBaseQuery => HBaseQuery, func: Result => R)(implicit config: Properties): DataStream[R] = {
     overrideParams.foreach(x => config.setProperty(x._1, x._2))
     val hBaseFunc = new HBaseSourceFunction[R](query, func)
     ctx.addSource(hBaseFunc)
@@ -59,7 +59,7 @@ class HBaseSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with CheckpointListener with CheckpointedFunction with Logger {
+class HBaseSourceFunction[R: TypeInformation](queryFunc: HBaseQuery => HBaseQuery, func: Result => R)(implicit prop: Properties) extends RichSourceFunction[R] with CheckpointListener with CheckpointedFunction with Logger {
 
   @volatile private[this] var running = true
 
@@ -79,7 +79,8 @@ class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func:
   override def run(ctx: SourceContext[R]): Unit = {
     while (running) {
       ctx.getCheckpointLock.synchronized {
-        query = queryFunc()
+        //将上次的保存的信息传入...
+        query = queryFunc(query)
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
         table.getScanner(query).foreach(x => ctx.collect(func(x)))
@@ -113,4 +114,9 @@ class HBaseSourceFunction[R: TypeInformation](queryFunc: () => HBaseQuery, func:
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
     logger.info(s"[StreamX] HBaseSource checkpointComplete: $checkpointId")
   }
+}
+
+
+class HQuery(table:String) extends Scan with Serializable{
+
 }

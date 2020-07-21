@@ -53,13 +53,31 @@ object ConfigConst {
 
   val SIGN_EMPTY = ""
 
-  //flink.....
-
+  //
   val KEY_FLINK_APP_CONF = "flink.conf"
 
+  val KEY_FLINK_PARALLELISM = "flink.parallelism"
+
+  val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
+
+  // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
   val KEY_FLINK_CHECKPOINTS_INTERVAL = "flink.checkpoints.interval"
+
+  val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
+
+  val KEY_FLINK_CHECKPOINTS_CLEANUP = "flink.checkpoints.cleanup"
+
+  val KEY_FLINK_CHECKPOINTS_TIMEOUT = "flink.checkpoints.timeout"
+
+  val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
+
+  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
+
+  //---state---
+
+  val KEY_FLINK_STATE_CHECKPOINTS_DIR = "state.checkpoints.dir"
 
   val KEY_FLINK_STATE_BACKEND = "state.backend"
 
@@ -69,7 +87,10 @@ object ConfigConst {
 
   val KEY_FLINK_STATE_BACKEND_MEMORY = "state.backend.memory"
 
-  val KEY_FLINK_PARALLELISM = "flink.parallelism"
+  val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
+
+
+  //---restart-strategy---
 
   val KEY_FLINK_RESTART_STRATEGY = "restart-strategy"
 
@@ -83,25 +104,11 @@ object ConfigConst {
 
   val KEY_FLINK_RESTART_DELAY = "restart-strategy.fixed-delay.delay"
 
-  val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"
-
-  val KEY_FLINK_CHECKPOINTS_DIR = "flink.checkpoints.dir"
-
-  val KEY_FLINK_CHECKPOINTS_CLEANUP = "flink.checkpoints.cleanup"
-
-  val KEY_FLINK_CHECKPOINTS_TIMEOUT = "flink.checkpoints.timeout"
-
-  val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
-
-  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
-
+  // ---watermark---
   val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
 
   val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
 
-  val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
-
-  val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
 
   /**
    * about config Kafka
