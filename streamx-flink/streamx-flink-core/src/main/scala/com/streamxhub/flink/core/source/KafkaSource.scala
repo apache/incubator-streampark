@@ -221,7 +221,7 @@ object StartFrom {
     val startProp = prop.filter(_._1.startsWith(KEY_KAFKA_START_FROM))
     startProp.foreach(x => prop.remove(x._1))
     val topic = Try(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$KEY_KAFKA_TOPIC").split(",")).getOrElse(Array.empty[String])
-    if (topic.isEmpty) null else {
+    if (topic.isEmpty) Array.empty[StartFrom] else {
       topic.map(x => {
         val offset = Try(Some(startProp(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_OFFSET.$x"))).getOrElse(None)
         offset match {
@@ -237,7 +237,7 @@ object StartFrom {
             }
           case _ => null
         }
-      })
+      }).filter(x => x != null)
     }
   }
 
