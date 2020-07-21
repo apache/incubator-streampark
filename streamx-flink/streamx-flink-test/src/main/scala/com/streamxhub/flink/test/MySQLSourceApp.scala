@@ -4,7 +4,6 @@ import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.flink.core.source.MySQLSource
-import com.streamxhub.flink.core.wrapper.MySQLQuery
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 
@@ -19,20 +18,8 @@ object MySQLSourceApp extends FlinkStreaming {
     prop.put("idleTimeout", "20000")
 
     val mysqlSource = new MySQLSource(context)
-    mysqlSource.getDataStream[Orders](q => {
-      Thread.sleep(1000)
-      //没有上次记录的消费信息
-      if (q != null) q else {
-        println("init...................")
-        val query = new MySQLQuery()
-        val time = "2020-07-19 00:00:00"
-        query.setTable("tc_record")
-        query.setField("sync_time")
-        query.setOption(">=")
-        query.setTimestamp(time)
-        query.setFetchSize(100)
-        query
-      }
+    mysqlSource.getDataStream[Orders]({
+      ""
     },
       r => {
         r.map(x => {
