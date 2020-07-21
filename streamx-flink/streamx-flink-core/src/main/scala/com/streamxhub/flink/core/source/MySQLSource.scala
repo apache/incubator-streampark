@@ -142,6 +142,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
+      println(s"snapshotState:_______________________________${jdbcQuery.getSQL}_________________________________________")
       state.add(jdbcQuery)
     } else {
       logger.error("[StreamX] MySQLSource snapshotState called on closed source")
@@ -156,7 +157,10 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def initializeState(context: FunctionInitializationContext): Unit = {
     state = context.getOperatorStateStore.getListState(new ListStateDescriptor(OFFSETS_STATE, classOf[MySQLQuery]))
     Try(state.get.head) match {
-      case Success(q) => jdbcQuery = q
+      case Success(q) => {
+        jdbcQuery = q
+        println(s"initializeState:_______________________________${jdbcQuery.getSQL}_________________________________________")
+      }
       case _ =>
     }
   }
