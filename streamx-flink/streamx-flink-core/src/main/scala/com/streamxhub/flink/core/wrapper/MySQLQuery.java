@@ -8,8 +8,19 @@ import java.io.Serializable;
  */
 public class MySQLQuery implements Serializable {
     private String table;
+
+    /**
+     * 偏移字段
+     */
     private String field;
-    private String timestamp;
+    /**
+     * 偏移字段的值,可以是时间戳,或者自增ID,必须是单调递增(可以相等)参考该值往后拉取数据.
+     */
+    private String offset;
+
+    /**
+     * 条件连接操作符
+     */
     private String option;
 
     /**
@@ -17,15 +28,15 @@ public class MySQLQuery implements Serializable {
      */
     private Integer fetchSize = 2000;
     private Integer size = 0;
-    private String lastTimestamp;
+    private String lastOffset;
 
     public MySQLQuery() {
     }
 
-    public MySQLQuery(String table, String field, String timestamp, String option) {
+    public MySQLQuery(String table, String field, String offset, String option) {
         this.table = table;
         this.field = field;
-        this.timestamp = timestamp;
+        this.offset = offset;
         this.option = option;
     }
 
@@ -34,8 +45,7 @@ public class MySQLQuery implements Serializable {
     }
 
     public String getSQL() {
-        String format = "select * from %s where %s %s '%s' order by %s asc";
-        return String.format(format, table, field, option, timestamp, field);
+        return String.format("SELECT * FROM %s WHERE %s %s '%s' ORDER BY %s ASC", table, field, option, offset, field);
     }
 
     public String getTable() {
@@ -54,12 +64,12 @@ public class MySQLQuery implements Serializable {
         this.field = field;
     }
 
-    public String getTimestamp() {
-        return timestamp;
+    public String getOffset() {
+        return offset;
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public void setOffset(String offset) {
+        this.offset = offset;
     }
 
     public String getOption() {
@@ -86,11 +96,11 @@ public class MySQLQuery implements Serializable {
         this.size = size;
     }
 
-    public String getLastTimestamp() {
-        return lastTimestamp;
+    public String getLastOffset() {
+        return lastOffset;
     }
 
-    public void setLastTimestamp(String lastTimestamp) {
-        this.lastTimestamp = lastTimestamp;
+    public void setLastOffset(String lastOffset) {
+        this.lastOffset = lastOffset;
     }
 }
