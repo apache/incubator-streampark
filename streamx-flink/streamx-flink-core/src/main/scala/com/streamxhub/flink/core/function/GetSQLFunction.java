@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.function;
 
 
-import com.streamxhub.flink.core.wrapper.MySQLQuery;
+import com.streamxhub.flink.core.wrapper.JdbcQuery;
 
 import java.io.Serializable;
 
@@ -36,5 +36,5 @@ public interface GetSQLFunction extends Serializable {
      * @return
      * @throws Exception
      */
-    MySQLQuery getSQL(MySQLQuery query) throws Exception;
+    JdbcQuery getSQL(JdbcQuery query) throws Exception;
 }
