@@ -30,18 +30,21 @@ import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.flink.api.scala._
-import org.apache.hadoop.hbase.client.Get
+import org.apache.hadoop.hbase.client.{Get, Scan}
 
 object HBaseSourceApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
 
-
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
 
-    val id = new HBaseSource(context).getDataStream[String](() => {
-      Thread.sleep(10000)
-      new HBaseQuery("person", new Get("123322242".getBytes()))
+    val id = new HBaseSource(context).getDataStream[String](query => {
+      Thread.sleep(10)
+      if (query == null) {
+        new HBaseQuery("person", new Scan())
+      } else {
+        query
+      }
     }, r => new String(r.getRow))
 
     HBaseRequest(id).requestOrdered(x => {
