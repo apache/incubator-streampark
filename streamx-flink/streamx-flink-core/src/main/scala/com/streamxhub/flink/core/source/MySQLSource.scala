@@ -27,7 +27,7 @@ import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.enums.ApiType
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import com.streamxhub.flink.core.function.{GetSQLFunction, ResultSetFunction}
-import com.streamxhub.flink.core.wrapper.MySQLQuery
+import com.streamxhub.flink.core.wrapper.JdbcQuery
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
@@ -41,7 +41,9 @@ import scala.collection.JavaConverters._
 import scala.collection.Map
 import scala.util.{Failure, Success, Try}
 
-
+/**
+ * 提供端到端的精准一次.可回放,需要用户参与才能完成...
+ */
 object MySQLSource {
 
   def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): MySQLSource = new MySQLSource(ctx, overrideParams)
@@ -58,7 +60,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: MySQLQuery => MySQLQuery, fun: List[Map[String, _]] => List[R])(implicit jdbc: Properties): DataStream[R] = {
+  def getDataStream[R: TypeInformation](sqlFun: JdbcQuery => JdbcQuery, fun: List[Map[String, _]] => List[R])(implicit jdbc: Properties): DataStream[R] = {
     overrideParams.foreach(x => jdbc.put(x._1, x._2))
     val mysqlFun = new MySQLSourceFunction[R](jdbc, sqlFun, fun)
     ctx.addSource(mysqlFun)
@@ -73,20 +75,20 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
 private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.Scala, jdbc: Properties) extends RichSourceFunction[R] with CheckpointListener with CheckpointedFunction with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaSqlFunc: MySQLQuery => MySQLQuery = _
+  private[this] var scalaSqlFunc: JdbcQuery => JdbcQuery = _
   private[this] var scalaResultFunc: Function[List[Map[String, _]], List[R]] = _
   private[this] var javaSqlFunc: GetSQLFunction = _
   private[this] var javaResultFunc: ResultSetFunction[R] = _
 
-  @transient private var jdbcQuery: MySQLQuery = _
+  @transient private var jdbcQuery: JdbcQuery = _
 
   //value保存的是sql查询条件..
-  @transient private var state: ListState[MySQLQuery] = _
+  @transient private var state: ListState[JdbcQuery] = _
 
   private val OFFSETS_STATE = "mysql-source-query-states"
 
   //for Scala
-  def this(jdbc: Properties, sqlFunc: MySQLQuery => MySQLQuery, resultFunc: List[Map[String, _]] => List[R]) = {
+  def this(jdbc: Properties, sqlFunc: JdbcQuery => JdbcQuery, resultFunc: List[Map[String, _]] => List[R]) = {
     this(ApiType.Scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
@@ -153,7 +155,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
    * @param context
    */
   override def initializeState(context: FunctionInitializationContext): Unit = {
-    state = context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(OFFSETS_STATE, classOf[MySQLQuery]))
+    state = context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(OFFSETS_STATE, classOf[JdbcQuery]))
     Try(state.get.head) match {
       case Success(q) => jdbcQuery = q
       case _ =>

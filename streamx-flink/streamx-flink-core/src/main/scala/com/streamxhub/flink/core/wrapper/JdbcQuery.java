@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * @author benjobs
  */
-public class MySQLQuery implements Serializable {
+public class JdbcQuery implements Serializable {
     private String table;
 
     /**
@@ -30,10 +30,10 @@ public class MySQLQuery implements Serializable {
     private Integer size = 0;
     private String lastOffset;
 
-    public MySQLQuery() {
+    public JdbcQuery() {
     }
 
-    public MySQLQuery(String table, String field, String offset, String option) {
+    public JdbcQuery(String table, String field, String offset, String option) {
         this.table = table;
         this.field = field;
         this.offset = offset;
