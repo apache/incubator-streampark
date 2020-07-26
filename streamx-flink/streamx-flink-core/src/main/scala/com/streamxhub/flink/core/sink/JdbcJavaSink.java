@@ -71,4 +71,9 @@ public class JdbcJavaSink<T> {
         return dataStream.addSink(sinkFun);
     }
 
+    public DataStreamSink<T> towPcSink(DataStream<T> dataStream) {
+        Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.toSQLFunc);
+        return dataStream.addSink(sinkFun);
+    }
+
 }
