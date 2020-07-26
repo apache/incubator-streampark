@@ -2,7 +2,7 @@ package com.streamxhub.flink.test
 
 import java.util.Random
 
-import com.streamxhub.flink.core.sink.{JdbcSink, MySQLSink}
+import com.streamxhub.flink.core.sink.JdbcSink
 import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
@@ -22,7 +22,7 @@ object MySQLSinkApp extends FlinkStreaming {
       })
 
 
-    MySQLSink(context).sink[String](source)(x => {
+    JdbcSink(context).towPcSink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
 

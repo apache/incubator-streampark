@@ -22,10 +22,10 @@ package com.streamxhub.flink.core.sink
 
 
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction, TwoPhaseCommitSinkFunction}
 import java.sql._
 import java.util.concurrent.atomic.AtomicLong
-import java.util.Properties
+import java.util.{Optional, Properties}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger}
@@ -34,12 +34,21 @@ import com.streamxhub.flink.core.enums.ApiType
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import com.streamxhub.flink.core.function.ToSQLFunction
 import com.streamxhub.flink.core.sink.Dialect.Dialect
+import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.common.typeutils.base.VoidSerializer
+import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
+import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
+import scala.collection.mutable.ListBuffer
+import scala.collection.JavaConversions._
+import scala.util.Try
+
 
 object JdbcSink {
 
@@ -71,6 +80,13 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
   def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
+    val sink = stream.addSink(sinkFun)
+    afterSink(sink, parallelism, name, uid)
+  }
+
+  def towPcSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
+    val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
@@ -186,6 +202,139 @@ object Dialect extends Enumeration {
   type Dialect = Value
   val MYSQL, ORACLE, MSSQL, H2 = Value
 }
+
+
+//-------------Jdbc2PCSinkFunction---------------------------------------------------------------------------------------
+/**
+ *
+ * @param apiType
+ * @param jdbc
+ * @tparam T
+ */
+class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
+  extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
+    with Logger {
+
+  @transient private[this] var transactionState: ListState[Transaction] = _
+  private var scalaToSQLFn: T => String = _
+  private var javaToSQLFunc: ToSQLFunction[T] = _
+
+  private val SINK_2PC_STATE = "jdbc-sink-2pc-state"
+
+  def this(jdbc: Properties, toSQLFn: T => String) {
+    this(ApiType.Scala, jdbc)
+    this.scalaToSQLFn = toSQLFn
+  }
+
+  def this(jdbc: Properties, toSQLFn: ToSQLFunction[T]) {
+    this(ApiType.JAVA, jdbc)
+    require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
+    this.javaToSQLFunc = toSQLFn
+  }
+
+  override def initializeUserContext(): Optional[Void] = super.initializeUserContext()
+
+  override def beginTransaction(): Transaction = {
+    logInfo("[StreamX] Jdbc2PCSink beginTransaction.")
+    Transaction()
+  }
+
+  override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context[_]): Unit = {
+    val sql = apiType match {
+      case ApiType.Scala => scalaToSQLFn(value)
+      case ApiType.JAVA => javaToSQLFunc.toSQL(value)
+    }
+    if (!sql.toUpperCase.trim.startsWith("INSERT")) {
+      transaction.copy(insertMode = false)
+    }
+    transaction.add(sql)
+  }
+
+  /**
+   * call on snapshotState
+   *
+   * @param transaction
+   */
+  override def preCommit(transaction: Transaction): Unit = {
+    logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
+    transactionState.add(transaction)
+  }
+
+  /**
+   * 在数据checkpoint完成或者恢复完成的时候会调用该方法
+   *
+   * @param transaction
+   */
+  override def commit(transaction: Transaction): Unit = {
+    logInfo(s"[StreamX] Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
+    val state = Try(transactionState.get().filter(_.transactionId == transaction.transactionId).head).getOrElse(null)
+    if (state != null && state.sqlList.nonEmpty) {
+      //获取jdbc连接....
+      val connection = JdbcUtils.getConnection(jdbc)
+      var statement: Statement = null
+      try {
+        connection.setAutoCommit(false)
+        //全部是插入则走批量插入
+        if (state.insertMode) {
+          statement = connection.createStatement()
+          state.sqlList.foreach(statement.addBatch)
+          statement.executeBatch
+          statement.clearBatch()
+        } else {
+          //单条记录插入...
+          state.sqlList.foreach(sql => {
+            statement = connection.createStatement()
+            statement.executeUpdate(sql)
+          })
+        }
+        connection.commit()
+      } catch {
+        case e: SQLException =>
+          logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
+          throw e
+        case t: Throwable =>
+          logError(s"[StreamX] Jdbc2PCSink commit Exception:${t.getMessage}")
+          throw t
+      } finally {
+        JdbcUtils.close(statement, connection)
+        transactionState.clear()
+      }
+    }
+  }
+
+  override def abort(transaction: Transaction): Unit = {
+    logInfo(s"[StreamX] Jdbc2PCSink abort,TransactionId:${transaction.transactionId}")
+    transactionState.clear()
+  }
+
+  override def initializeState(context: FunctionInitializationContext): Unit = {
+    logInfo("[StreamX] Jdbc2PCSink initializeState ....")
+    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Transaction]))
+    super.initializeState(context)
+  }
+
+}
+
+
+class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
+
+  private val sinkFunction = new Jdbc2PCSinkFunction[T](prop, toSQlFun)
+
+  private var configuration: Configuration = _
+
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
+
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
+
+  override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
+
+  override def close(): Unit = sinkFunction.close()
+}
+
+case class Transaction(transactionId: String = System.currentTimeMillis().toString, sqlList: ListBuffer[String] = ListBuffer.empty, insertMode: Boolean = true) extends Serializable {
+  def add(sql: String): Unit = sqlList.add(sql)
+}
+
 
 
 
