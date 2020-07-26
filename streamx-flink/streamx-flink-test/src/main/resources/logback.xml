@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
     <!-- 日志文件存储路径 -->
-    <property name="LOG_HOME" value="logs/"/>
+    <property name="LOG_HOME" value="/Users/benjobs/Github/StreamX/streamx-flink/streamx-flink-test/assembly/logs/"/>
     <property name="FILE_SIZE" value="50MB"/>
     <property name="MAX_HISTORY" value="100"/>
     <timestamp key="DATE_TIME" datePattern="yyyy-MM-dd HH:mm:ss"/>
@@ -113,7 +113,7 @@
     </appender>
 
     <!-- Logger 根目录 -->
-    <root level="DEBUG">
+    <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="DEBUG"/>
         <appender-ref ref="ERROR"/>
