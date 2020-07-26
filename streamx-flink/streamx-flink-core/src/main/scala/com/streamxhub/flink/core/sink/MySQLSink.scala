@@ -21,34 +21,33 @@
 package com.streamxhub.flink.core.sink
 
 
-import java.sql.{Connection, DriverManager, SQLException, Statement}
+import java.sql.{SQLException, Statement}
 import java.util.{Optional, Properties}
 
-import com.streamxhub.common.util.Logger
+import com.streamxhub.common.util.{JdbcUtils, Logger}
 import com.streamxhub.flink.core.StreamingContext
-import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils._
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.state._
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.api.CheckpointingMode
-import org.apache.flink.streaming.api.environment.CheckpointConfig
 
 import scala.annotation.meta.param
 import scala.collection.Map
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 import scala.util.Try
 
 /**
- * TODO:(安全和稳定性有待验证)
- * TODO 1) 该MySQLSink实现可能针对不用的MySQL版本会出现问题,导致获取类型失败(	at com.esotericsoftware.kryo.Generics.getConcreteClass(Generics.java:44)... )
- * TODO 2) 该MySQLSink对MySQL的连接时长有要求,要连接等待时长(wait_timeout)设置的长一些,不然一个连接打开一直在invoke插入数据阶段由于还未提交,还一直在长时间插入可能会超时(Communications link failure during rollback(). Transaction resolution unknown.)
+ *
+ * 真正实现MySQL端到端精准一次sink.
  *
  */
 object MySQLSink {
@@ -71,14 +70,6 @@ class MySQLSink(@(transient@param) ctx: StreamingContext,
                 parallelism: Int = 0,
                 name: String = null,
                 uid: String = null)(implicit alias: String = "") extends Sink with Logger {
-
-
-  ctx.enableCheckpointing(5000)
-  ctx.getCheckpointConfig.setCheckpointingMode(CheckpointingMode.EXACTLY_ONCE)
-  ctx.getCheckpointConfig.setMinPauseBetweenCheckpoints(1000)
-  ctx.getCheckpointConfig.setCheckpointTimeout(5000)
-  ctx.getCheckpointConfig.setMaxConcurrentCheckpoints(1)
-  ctx.getCheckpointConfig.enableExternalizedCheckpoints(CheckpointConfig.ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
 
   /**
    *
@@ -104,61 +95,84 @@ class MySQLSink(@(transient@param) ctx: StreamingContext,
  * @tparam T
  */
 class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
-  extends TwoPhaseCommitSinkFunction[T, Connection, Void](new KryoSerializer[Connection](classOf[Connection], new ExecutionConfig), VoidSerializer.INSTANCE)
+  extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
+
+  @transient private[this] var transactionState: ListState[Transaction] = _
+
+  private val SINK_2PC_STATE = "mysql-sink-2pc-state"
 
   override def initializeUserContext(): Optional[Void] = super.initializeUserContext()
 
-  override def beginTransaction(): Connection = {
-    logInfo("[StreamX] MySQLSink beginTransaction ....")
-    Class.forName(config(KEY_JDBC_DRIVER))
-    val connection = Try(config(KEY_JDBC_USER)).getOrElse(null) match {
-      case null => DriverManager.getConnection(config(KEY_JDBC_URL))
-      case _ => DriverManager.getConnection(config(KEY_JDBC_URL), config(KEY_JDBC_USER), config(KEY_JDBC_PASSWORD))
-    }
-    connection.setAutoCommit(false)
-    connection
+  override def beginTransaction(): Transaction = {
+    logInfo("[StreamX] MySQLSink beginTransaction.")
+    Transaction()
   }
 
-  override def invoke(transaction: Connection, value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context[_]): Unit = {
     val sql = toSQLFn(value)
-    transaction.prepareStatement(sql).executeUpdate()
+    if (!sql.toUpperCase.trim.startsWith("INSERT")) {
+      transaction.copy(insertMode = false)
+    }
+    transaction.add(sql)
   }
 
-  override def preCommit(transaction: Connection): Unit = {
-    logInfo("[StreamX] MySQLSink preCommit ....")
+  /**
+   * call on snapshotState
+   *
+   * @param transaction
+   */
+  override def preCommit(transaction: Transaction): Unit = {
+    logInfo(s"[StreamX] MySQLSink preCommit.TransactionId:${transaction.transactionId}")
+    transactionState.add(transaction)
   }
 
-  override def commit(transaction: Connection): Unit = {
-    if (transaction != null) {
+  /**
+   * 在数据checkpoint完成或者恢复完成的时候会调用该方法
+   *
+   * @param transaction
+   */
+  override def commit(transaction: Transaction): Unit = {
+    logInfo("[StreamX] MySQLSink commit,TransactionId:${transaction.transactionId}")
+    val state = Try(transactionState.get().filter(_.transactionId == transaction.transactionId).head).getOrElse(null)
+    if (state != null && state.sqlList.nonEmpty) {
+      //获取jdbc连接....
+      val connection = JdbcUtils.getConnection(config)
+      var statement: Statement = null
       try {
-        logInfo("[StreamX] MySQLSink commit ....")
-        transaction.commit()
-        //前一个连接提交事务,则重新获取一个新连接
-        this.beginTransaction()
+        connection.setAutoCommit(false)
+        //全部是插入则走批量插入
+        if (state.insertMode) {
+          statement = connection.createStatement()
+          state.sqlList.foreach(statement.addBatch)
+          statement.executeBatch
+          statement.clearBatch()
+        } else {
+          //单条记录插入...
+          state.sqlList.foreach(sql => {
+            statement = connection.createStatement()
+            statement.executeUpdate(sql)
+          })
+        }
+        connection.commit()
       } catch {
         case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
       } finally {
-        close(transaction)
+        JdbcUtils.close(statement, connection)
+        transactionState.clear()
       }
     }
   }
 
-  override def abort(transaction: Connection): Unit = {
-    if (transaction != null) {
-      try {
-        logInfo(s"[StreamX] MySQLSink abort ...")
-        transaction.rollback()
-      } catch {
-        case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
-      } finally {
-        close(transaction)
-      }
-    }
+  override def abort(transaction: Transaction): Unit = {
+    transactionState.clear()
   }
 
-  private def close(conn: Connection): Unit = if (conn != null) conn.close()
-
+  override def initializeState(context: FunctionInitializationContext): Unit = {
+    logInfo("[StreamX] MySQLSink initializeState ....")
+    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Transaction]))
+    super.initializeState(context)
+  }
 
 }
 
@@ -178,5 +192,8 @@ class MySQLOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun:
   override def close(): Unit = sinkFunction.close()
 }
 
+case class Transaction(transactionId: String = System.currentTimeMillis().toString, sqlList: ListBuffer[String] = ListBuffer.empty, insertMode: Boolean = true) extends Serializable {
+  def add(sql: String): Unit = sqlList.add(sql)
+}
 
 

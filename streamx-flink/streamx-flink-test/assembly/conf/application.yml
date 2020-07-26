@@ -19,8 +19,7 @@ flink:
   parallelism: 1
   checkpoints:
     enable: true
-    interval: 2000
-    minPauseBetween: 20
+    interval: 10000
     mode: EXACTLY_ONCE
 
 # 重启策略
@@ -47,10 +46,9 @@ state:
 
 mysql:
   driverClassName: com.mysql.jdbc.Driver
-  jdbcUrl: jdbc:mysql://localhost:3306/test
+  jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=300000000&socketTimeout=300000000
   username: root
   password: 123322242
-  batch.size: 100
 
 influx:
   mydb:
