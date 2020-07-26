@@ -33,7 +33,7 @@ import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFacto
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
-import org.apache.flink.streaming.api.environment.LocalStreamEnvironment
+import org.apache.flink.streaming.api.environment.{CheckpointConfig, LocalStreamEnvironment}
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
@@ -239,20 +239,21 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //checkPoint,从配置文件读取是否开启checkpoint,默认不启用.
     val enableCheckpoint = Try(parameter.get(KEY_FLINK_CHECKPOINTS_ENABLE).toBoolean).getOrElse(false)
     if (!enableCheckpoint) return
+
     val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINTS_INTERVAL).toInt).getOrElse(1000)
     val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
     val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(1000 * 60)
-    val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT).toInt).getOrElse(1)
-    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(1000)
+    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(CheckpointConfig.DEFAULT_TIMEOUT)
+    val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT).toInt).getOrElse(CheckpointConfig.DEFAULT_MAX_CONCURRENT_CHECKPOINTS)
+    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(CheckpointConfig.DEFAULT_MIN_PAUSE_BETWEEN_CHECKPOINTS)
 
     //默认:开启检查点,1s进行启动一个检查点
     streamEnv.enableCheckpointing(cpInterval)
     //默认:模式为exactly_one，精准一次语义
     streamEnv.getCheckpointConfig.setCheckpointingMode(cpMode)
-    //默认: 检查点之间的时间间隔为1s【checkpoint最小间隔】
+    //默认: 检查点之间的时间间隔为0s【checkpoint最小间隔】
     streamEnv.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
-    //默认:检查点必须在1分钟之内完成，或者被丢弃【checkpoint超时时间】
+    //默认:检查点必须在10分钟之内完成，或者被丢弃【checkpoint超时时间】
     streamEnv.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
     //默认:同一时间只允许进行一次检查点
     streamEnv.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
