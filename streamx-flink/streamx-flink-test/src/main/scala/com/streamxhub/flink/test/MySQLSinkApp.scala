@@ -13,6 +13,9 @@ object MySQLSinkApp extends FlinkStreaming {
   override def handler(context: StreamingContext): Unit = {
     val source = context.addSource(new OrderBeanSource())
     MySQLSink(context, parallelism = 3).sink[OrderBean](source)(x => {
+      if(x.userId == 2000) {
+        9/0
+      }
       s"insert into orders(id,timestamp) values(${x.userId},${x.timestamp})"
     }).name("jdbcSink")
   }
