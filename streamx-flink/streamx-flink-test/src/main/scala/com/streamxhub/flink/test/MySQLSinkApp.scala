@@ -3,6 +3,7 @@ package com.streamxhub.flink.test
 import java.util.Random
 
 import com.streamxhub.flink.core.sink.{JdbcSink, MySQLSink}
+import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
@@ -11,13 +12,21 @@ import org.apache.flink.streaming.api.scala._
 object MySQLSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
-    val source = context.addSource(new OrderBeanSource())
-    MySQLSink(context).sink[OrderBean](source)(x => {
-      if(x.userId == 1000) {
-        9/0
-      }
-      s"insert into orders(id,timestamp) values(${x.userId},${x.timestamp})"
-    }).name("jdbcSink")
+
+    //one topic
+    val source = new KafkaSource(context).getDataStream[String]()
+      .uid("kfkSource1")
+      .name("kfkSource1")
+      .map(x=>{
+        x.value
+      })
+
+
+    MySQLSink(context).sink[String](source)(x => {
+      s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
+    }).uid("mysqlSink").name("mysqlSink")
+
+
   }
 
 }

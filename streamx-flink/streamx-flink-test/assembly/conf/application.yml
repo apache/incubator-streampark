@@ -19,7 +19,7 @@ flink:
   parallelism: 1
   checkpoints:
     enable: true
-    interval: 10
+    interval: 1000
     mode: EXACTLY_ONCE
 
 # 重启策略
@@ -123,16 +123,16 @@ http.sink:
 # source config....
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-  topic: hopsonone_park_sh_tc_record
+  topic: hello
   group.id: flink_test03
   auto.offset.reset: earliest
   enable.auto.commit: true
-  start.from:
+  #start.from:
     #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
-    offset: # 给每个topic的partition指定offset
-      topic: kafka01,kafka02
-      kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
-      kafka02: 0:182,1:183,2:182
-      hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
+    #offset: # 给每个topic的partition指定offset
+      #topic: kafka01,kafka02
+      #kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
+      #kafka02: 0:182,1:183,2:182
+      #hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
 
 
