@@ -133,7 +133,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
    * @param transaction
    */
   override def commit(transaction: Transaction): Unit = {
-    println(s"[StreamX] MySQLSink commit,TransactionId:${transaction.transactionId}")
+    logInfo(s"[StreamX] MySQLSink commit,TransactionId:${transaction.transactionId}")
     val state = Try(transactionState.get().filter(_.transactionId == transaction.transactionId).head).getOrElse(null)
     if (state != null && state.sqlList.nonEmpty) {
       //获取jdbc连接....
@@ -165,6 +165,7 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
   }
 
   override def abort(transaction: Transaction): Unit = {
+    logInfo(s"[StreamX] MySQLSink abort,TransactionId:${transaction.transactionId}")
     transactionState.clear()
   }
 

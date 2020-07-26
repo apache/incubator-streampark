@@ -243,22 +243,22 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     val cpInterval = Try(parameter.get(KEY_FLINK_CHECKPOINTS_INTERVAL).toInt).getOrElse(1000)
     val cpMode = Try(CheckpointingMode.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE)
     val cpCleanUp = Try(ExternalizedCheckpointCleanup.valueOf(parameter.get(KEY_FLINK_CHECKPOINTS_CLEANUP))).getOrElse(ExternalizedCheckpointCleanup.RETAIN_ON_CANCELLATION)
-    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toInt).getOrElse(CheckpointConfig.DEFAULT_TIMEOUT)
+    val cpTimeout = Try(parameter.get(KEY_FLINK_CHECKPOINTS_TIMEOUT).toLong).getOrElse(CheckpointConfig.DEFAULT_TIMEOUT)
     val cpMaxConcurrent = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT).toInt).getOrElse(CheckpointConfig.DEFAULT_MAX_CONCURRENT_CHECKPOINTS)
-    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toInt).getOrElse(CheckpointConfig.DEFAULT_MIN_PAUSE_BETWEEN_CHECKPOINTS)
+    val cpMinPauseBetween = Try(parameter.get(KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN).toLong).getOrElse(CheckpointConfig.DEFAULT_MIN_PAUSE_BETWEEN_CHECKPOINTS)
 
     //默认:开启检查点,1s进行启动一个检查点
     streamEnv.enableCheckpointing(cpInterval)
     //默认:模式为exactly_one，精准一次语义
     streamEnv.getCheckpointConfig.setCheckpointingMode(cpMode)
     //默认: 检查点之间的时间间隔为0s【checkpoint最小间隔】
-    streamEnv.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
+    //streamEnv.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
     //默认:检查点必须在10分钟之内完成，或者被丢弃【checkpoint超时时间】
-    streamEnv.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
+    //streamEnv.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
     //默认:同一时间只允许进行一次检查点
-    streamEnv.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
+    //streamEnv.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
     //默认:被cancel会保留Checkpoint数据
-    streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
+    //streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
     val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
 
