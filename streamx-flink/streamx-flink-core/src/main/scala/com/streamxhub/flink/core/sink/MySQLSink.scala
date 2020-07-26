@@ -156,7 +156,12 @@ class MySQLSinkFunction[T](config: Properties, toSQLFn: T => String)
         }
         connection.commit()
       } catch {
-        case e: SQLException => logError(s"[StreamX] MySQLSink commit error:${e.getMessage}")
+        case e: SQLException =>
+          logError(s"[StreamX] MySQLSink commit SQLException:${e.getMessage}")
+          throw e
+        case ex:Exception =>
+          logError(s"[StreamX] MySQLSink commit Exception:${ex.getMessage}")
+          throw ex
       } finally {
         JdbcUtils.close(statement, connection)
         transactionState.clear()
