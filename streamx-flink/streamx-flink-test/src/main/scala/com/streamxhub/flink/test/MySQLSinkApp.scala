@@ -18,8 +18,7 @@ object MySQLSinkApp extends FlinkStreaming {
         x.value
       })
 
-
-    JdbcSink(context).towPCSink[String](source)(x => {
+    JdbcSink(context,parallelism = 3).towPCSink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
 

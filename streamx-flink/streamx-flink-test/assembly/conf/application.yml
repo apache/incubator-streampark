@@ -16,7 +16,7 @@ flink:
   watermark:
     time.characteristic: EventTime
     interval: 5000
-  parallelism: 1
+  parallelism: 3
   checkpoints:
     enable: true
     interval: 1000
@@ -124,7 +124,7 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_test03
+  group.id: flink_test08
   auto.offset.reset: earliest
   enable.auto.commit: true
   #start.from:
