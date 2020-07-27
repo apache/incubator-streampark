@@ -204,7 +204,7 @@ object Dialect extends Enumeration {
 }
 
 
-//-------------Jdbc2PCSinkFunction---------------------------------------------------------------------------------------
+//-------------Jdbc2PCSinkFunction,端到端精准一次---------------------------------------------------------------------------------------
 /**
  *
  * @param apiType
@@ -252,7 +252,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
 
   /**
    * call on snapshotState
-   *
+   * 将要操作的sql语句保存到状态里.如果这一步失败,会回滚
    * @param transaction
    */
   override def preCommit(transaction: Transaction): Unit = {
@@ -261,7 +261,11 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
   }
 
   /**
-   * 在数据checkpoint完成或者恢复完成的时候会调用该方法
+   * 在数据checkpoint完成或者恢复完成的时候会调用该方法,这里直接利用db的事务特性
+   * 当前操作处于第二阶段:
+   * 如果当前一批数据保存成功则整个过程成功
+   * 如果失败,会抛出异常,导致本次完成的checkpoint也会回滚
+   * 进而下次启动的时候还是从上次消费的位置开始.做到端到端精准一次.
    *
    * @param transaction
    */
