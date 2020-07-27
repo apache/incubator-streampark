@@ -84,7 +84,7 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
     afterSink(sink, parallelism, name, uid)
   }
 
-  def towPcSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+  def towPCSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
     val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
     val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
