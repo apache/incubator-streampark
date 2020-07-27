@@ -323,7 +323,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
             confData.setAccessible(true)
             confData.set(map, config)
             optionsFactory.configure(config)
-            rs.setOptions(optionsFactory)
+            rs.setRocksDBOptions(optionsFactory)
           }
           streamEnv.setStateBackend(rs)
         case _ =>

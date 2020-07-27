@@ -22,10 +22,11 @@ package com.streamxhub.flink.core.ext
 
 import java.lang.reflect.Method
 
+import com.streamxhub.flink.core.sink.EchoSink
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
 import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
-import org.apache.flink.streaming.api.scala.{DataStream => DStream, OutputTag}
+import org.apache.flink.streaming.api.scala.{OutputTag, DataStream => DStream}
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.util.Collector
@@ -56,6 +57,8 @@ class DataStreamExt[T: TypeInformation](val dataStream: DStream[T]) {
   })
 
   def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+
+  def echo(name: String = null): Unit = EchoSink(dataStream, name)
 
   /**
    * 基于最大延迟时间的Watermark生成
