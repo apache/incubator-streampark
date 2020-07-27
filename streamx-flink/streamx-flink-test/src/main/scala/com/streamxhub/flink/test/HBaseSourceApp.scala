@@ -47,6 +47,8 @@ object HBaseSourceApp extends FlinkStreaming {
       }
     }, r => new String(r.getRow))
 
+    id.echo()
+
     HBaseRequest(id).requestOrdered(x => {
       new HBaseQuery("person", new Get(x.getBytes()))
     }, r => {

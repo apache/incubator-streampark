@@ -19,7 +19,7 @@ flink:
   parallelism: 3
   checkpoints:
     enable: true
-    interval: 1000
+    interval: 30000
     mode: EXACTLY_ONCE
 
 # 重启策略
@@ -124,7 +124,7 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_test08
+  group.id: flink_test10
   auto.offset.reset: earliest
   enable.auto.commit: true
   #start.from:
