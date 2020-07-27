@@ -1,13 +1,10 @@
 package com.streamxhub.flink.test
 
-import java.util.Random
-
 import com.streamxhub.flink.core.sink.JdbcSink
 import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
-
 
 object MySQLSinkApp extends FlinkStreaming {
 
@@ -17,12 +14,12 @@ object MySQLSinkApp extends FlinkStreaming {
     val source = new KafkaSource(context).getDataStream[String]()
       .uid("kfkSource1")
       .name("kfkSource1")
-      .map(x=>{
+      .map(x => {
         x.value
       })
 
 
-    JdbcSink(context).towPcSink[String](source)(x => {
+    JdbcSink(context).towPCSink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
 
