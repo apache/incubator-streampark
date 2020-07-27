@@ -47,7 +47,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 import scala.annotation.meta.param
 import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
-import scala.util.Try
 
 object JdbcSink {
 
@@ -214,7 +213,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
   extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
 
-  @transient private[this] var transactionState: ListState[Map[String, Transaction]] = _
+  @transient private[this] var transactionState: ListState[Transaction] = _
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: ToSQLFunction[T] = _
 
@@ -261,10 +260,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
       logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
-      val map = transactionState.get().head.toBuffer
-      map.add(transaction.transactionId -> transaction)
-      transactionState.clear()
-      transactionState.add(map.toMap)
+      transactionState.add(transaction)
     }
   }
 
@@ -282,29 +278,28 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
     //防止未调用invoke方法直接调用preCommit和commit...
     if (transaction.invoked) {
       logInfo(s"[StreamX] Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
-      val state = Try(transactionState.get().head(transaction.transactionId)).getOrElse(null)
-      if (state != null && state.sqlList.nonEmpty) {
+      if (transaction != null && transaction.sql.nonEmpty) {
         //获取jdbc连接....
         val connection = JdbcUtils.getConnection(jdbc)
         var statement: Statement = null
         try {
           connection.setAutoCommit(false)
           //全部是插入则走批量插入
-          if (state.insertMode) {
+          if (transaction.insertMode) {
             statement = connection.createStatement()
-            state.sqlList.foreach(statement.addBatch)
+            transaction.sql.foreach(statement.addBatch)
             statement.executeBatch
             statement.clearBatch()
           } else {
             //单条记录插入...
-            state.sqlList.foreach(sql => {
+            transaction.sql.foreach(sql => {
               statement = connection.createStatement()
               statement.executeUpdate(sql)
             })
           }
           connection.commit()
           //成功,清除state...
-          clearState(transaction.transactionId)
+          transactionState.clear()
         } catch {
           case e: SQLException =>
             logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
@@ -321,24 +316,13 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
 
   override def abort(transaction: Transaction): Unit = {
     logInfo(s"[StreamX] Jdbc2PCSink abort,TransactionId:${transaction.transactionId}")
-    clearState(transaction.transactionId)
+    transactionState.clear()
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     logInfo("[StreamX] Jdbc2PCSink initializeState ....")
-    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Map[String, Transaction]]))
-    if (transactionState.get().isEmpty) {
-      transactionState.add(Map.empty[String, Transaction])
-    }
+    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Transaction]))
     super.initializeState(context)
-  }
-
-  private[this] def clearState(transactionId: String) = {
-    if (transactionState.get().head.exists(_._1 == transactionId)) {
-      val map = transactionState.get().head.filter(x => x._1 != transactionId)
-      transactionState.clear()
-      transactionState.add(map)
-    }
   }
 
 }
@@ -359,8 +343,8 @@ class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFu
   override def close(): Unit = sinkFunction.close()
 }
 
-case class Transaction(transactionId: String = System.currentTimeMillis().toString, sqlList: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
-  def add(sql: String): Unit = sqlList.add(sql)
+case class Transaction(transactionId: String = System.currentTimeMillis().toString, sql: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
+  def add(text: String): Unit = sql.add(text)
 }
 
 
