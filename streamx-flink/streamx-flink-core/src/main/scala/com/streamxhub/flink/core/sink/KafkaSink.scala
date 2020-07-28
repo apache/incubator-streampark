@@ -23,14 +23,12 @@ package com.streamxhub.flink.core.sink
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.streamxhub.common.conf.ConfigConst
-import com.streamxhub.common.conf.ConfigConst.KEY_FLINK_CHECKPOINTS_MODE
 import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
-import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer
@@ -98,10 +96,16 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
       /**
        * EXACTLY_ONCE语义下会使用到 kafkaProducersPoolSize
        */
-      val (semantic, poolSize) = Try(CheckpointingMode.valueOf(ctx.parameter.get(KEY_FLINK_CHECKPOINTS_MODE))).getOrElse(CheckpointingMode.EXACTLY_ONCE) match {
-        case CheckpointingMode.EXACTLY_ONCE => (Semantic.EXACTLY_ONCE, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
-        case CheckpointingMode.AT_LEAST_ONCE => (Semantic.AT_LEAST_ONCE, 0)
-        case _ => (Semantic.NONE, 0)
+      val semantic = Try(Some(prop.remove(ConfigConst.KEY_KAFKA_SEMANTIC).toString.toUpperCase)).getOrElse(None) match {
+        case None => Semantic.AT_LEAST_ONCE //默认采用AT_LEAST_ONCE
+        case Some("AT_LEAST_ONCE") => Semantic.AT_LEAST_ONCE
+        case Some("EXACTLY_ONCE") => Semantic.EXACTLY_ONCE
+        case Some("NONE") => Semantic.NONE
+        case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,muse be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
+      }
+      val poolSize = semantic match {
+        case Semantic.EXACTLY_ONCE => DEFAULT_KAFKA_PRODUCERS_POOL_SIZE
+        case _ => 0
       }
       new FlinkKafkaProducer[T](topicId, serializationSchema, prop, partitioner, semantic, poolSize)
     }

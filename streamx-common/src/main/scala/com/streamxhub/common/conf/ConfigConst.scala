@@ -120,6 +120,8 @@ object ConfigConst {
 
   val KEY_KAFKA_TOPIC = "topic"
 
+  val KEY_KAFKA_SEMANTIC = "semantic"
+
   val KEY_KAFKA_PATTERN = "pattern"
 
   val KEY_KAFKA_START_FROM = "start.from"
