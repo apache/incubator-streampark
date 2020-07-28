@@ -12,8 +12,8 @@
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <module>streamx-monitor</module>
-        <!--<module>streamx-spark</module>-->
+        <!--<module>streamx-monitor</module>
+        <module>streamx-spark</module>-->
     </modules>
 
     <!-- 定义统一版本号-->

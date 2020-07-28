@@ -25,12 +25,11 @@ object FlinkSinkApp extends FlinkStreaming {
       })
 
     //Kafka sink..................
-    //1)定义 KafkaSink
-    val kfkSink = KafkaSink(context)
     //2)下沉到目标
-    kfkSink.sink(source).setParallelism(1)
+    KafkaSink(context).sink(source)
 
-    /*val ds2 = source.flatMap(x => {
+    /**
+    val ds2 = source.flatMap(x => {
       x.split(",") match {
         case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
         case _ => None
