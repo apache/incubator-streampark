@@ -276,40 +276,38 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
    */
   override def commit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit和commit...
-    if (transaction.invoked) {
+    if (transaction != null && transaction.invoked && transaction.sql.nonEmpty) {
       logInfo(s"[StreamX] Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
-      if (transaction != null && transaction.sql.nonEmpty) {
+      var connection: Connection = null
+      var statement: Statement = null
+      try {
         //获取jdbc连接....
-        val connection = JdbcUtils.getConnection(jdbc)
-        var statement: Statement = null
-        try {
-          connection.setAutoCommit(false)
-          //全部是插入则走批量插入
-          if (transaction.insertMode) {
-            statement = connection.createStatement()
-            transaction.sql.foreach(statement.addBatch)
-            statement.executeBatch
-            statement.clearBatch()
-          } else {
-            //单条记录插入...
-            transaction.sql.foreach(sql => {
-              statement = connection.createStatement()
-              statement.executeUpdate(sql)
-            })
-          }
-          connection.commit()
-          //成功,清除state...
-          transactionState.clear()
-        } catch {
-          case e: SQLException =>
-            logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
-            throw e
-          case t: Throwable =>
-            logError(s"[StreamX] Jdbc2PCSink commit Exception:${t.getMessage}")
-            throw t
-        } finally {
-          JdbcUtils.close(statement, connection)
+        connection = JdbcUtils.getConnection(jdbc)
+        connection.setAutoCommit(false)
+        statement = connection.createStatement()
+        //全部是插入则走批量插入
+        if (transaction.insertMode) {
+          transaction.sql.foreach(statement.addBatch)
+          statement.executeBatch
+          statement.clearBatch()
+        } else {
+          //单条记录插入...
+          transaction.sql.foreach(sql => {
+            statement.executeUpdate(sql)
+          })
         }
+        connection.commit()
+        //成功,清除state...
+        transactionState.clear()
+      } catch {
+        case e: SQLException =>
+          logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
+          throw e
+        case t: Throwable =>
+          logError(s"[StreamX] Jdbc2PCSink commit Exception:${t.getMessage}")
+          throw t
+      } finally {
+        JdbcUtils.close(statement, connection)
       }
     }
   }
