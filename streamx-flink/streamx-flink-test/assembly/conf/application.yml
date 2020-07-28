@@ -124,7 +124,7 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_03
+  group.id: flink_05
   auto.offset.reset: earliest
   enable.auto.commit: true
   #start.from:
@@ -139,3 +139,5 @@ kafka.sink:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello2
   transaction.timeout.ms: 1000
+  semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
+  batch.size: 1
