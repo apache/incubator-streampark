@@ -103,11 +103,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
         case Some("NONE") => Semantic.NONE
         case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,muse be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
       }
-      val poolSize = semantic match {
-        case Semantic.EXACTLY_ONCE => DEFAULT_KAFKA_PRODUCERS_POOL_SIZE
-        case _ => 0
-      }
-      new FlinkKafkaProducer[T](topicId, serializationSchema, prop, partitioner, semantic, poolSize)
+      new FlinkKafkaProducer[T](topicId, serializationSchema, prop, partitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
     }
 
     /**
