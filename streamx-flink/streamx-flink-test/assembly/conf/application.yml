@@ -46,7 +46,7 @@ state:
 
 mysql:
   driverClassName: com.mysql.jdbc.Driver
-  jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=300000000&socketTimeout=300000000
+  jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true
   username: root
   password: 123322242
 
