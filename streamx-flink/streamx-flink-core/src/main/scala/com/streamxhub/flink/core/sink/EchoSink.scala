@@ -42,7 +42,7 @@ import scala.collection.mutable.ListBuffer
 object EchoSink {
 
   def apply[T](@(transient@param) stream: DataStream[T], sinkIdentifier: String): DataStreamSink[T] = {
-    stream.addSink(new EchoSinkFunction[T](sinkIdentifier))
+    stream.addSink(new EchoSinkFunction[T](sinkIdentifier)).name("Echo to Std. Out")
   }
 
 }
