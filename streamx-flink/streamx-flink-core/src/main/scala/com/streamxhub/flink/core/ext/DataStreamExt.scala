@@ -58,7 +58,13 @@ class DataStreamExt[T: TypeInformation](val dataStream: DStream[T]) {
 
   def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
-  def echo(name: String = null): Unit = EchoSink(dataStream, name)
+  /**
+   *
+   * 两阶段精准一次的print...
+   *
+   * @param sinkIdentifier
+   */
+  def echo(sinkIdentifier: String = null): Unit = EchoSink(dataStream, sinkIdentifier)
 
   /**
    * 基于最大延迟时间的Watermark生成

@@ -20,14 +20,17 @@
  */
 package com.streamxhub.flink.core.sink
 
+import java.io.Serializable
+
 import com.streamxhub.common.util.Logger
 import org.apache.flink.api.common.ExecutionConfig
-import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
+import org.apache.flink.api.common.functions.util.PrintSinkOutputWriter
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
-import org.apache.flink.runtime.state.FunctionInitializationContext
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
+import org.apache.flink.streaming.api.operators.StreamingRuntimeContext
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
@@ -38,48 +41,58 @@ import scala.collection.mutable.ListBuffer
  */
 object EchoSink {
 
-  def apply[T](@(transient@param) stream: DataStream[T], name: String): DataStreamSink[T] = {
-    stream.addSink(new EchoSinkFunction[T](name))
+  def apply[T](@(transient@param) stream: DataStream[T], sinkIdentifier: String): DataStreamSink[T] = {
+    stream.addSink(new EchoSinkFunction[T](sinkIdentifier))
   }
 
 }
 
-class EchoSinkFunction[T](name: String) extends TwoPhaseCommitSinkFunction[T, Echo, Void](new KryoSerializer[Echo](classOf[Echo], new ExecutionConfig), VoidSerializer.INSTANCE)
+/**
+ * @param sinkIdentifier
+ * @tparam T
+ */
+class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunction[T, Echo[T], Void](new KryoSerializer[Echo[T]](classOf[Echo[T]], new ExecutionConfig), VoidSerializer.INSTANCE)
   with Logger {
 
-  private val SINK_2PC_STATE = "echo-sink-2pc-state"
+  private[this] val buffer: collection.mutable.Map[String, Echo[T]] = collection.mutable.Map.empty
 
-  @transient private[this] var transactionState: ListState[Echo] = _
+  private[this] val writer: PrintSinkOutputWriter[T] = new PrintSinkOutputWriter[T](sinkIdentifier, false)
 
-  override def beginTransaction(): Echo = Echo()
-
-  override def invoke(echo: Echo, in: T, context: SinkFunction.Context[_]): Unit = {
-    echo.index = getRuntimeContext.getIndexOfThisSubtask
-    echo.name = name
-    echo.list + in.toString
+  override def open(parameters: Configuration): Unit = {
+    super.open(parameters)
+    val ctx = getRuntimeContext.asInstanceOf[StreamingRuntimeContext]
+    writer.open(ctx.getIndexOfThisSubtask, ctx.getNumberOfParallelSubtasks)
   }
 
-  override def preCommit(txn: Echo): Unit = {
-    if (txn.list.nonEmpty) {
-      transactionState.add(txn)
+  override def beginTransaction(): Echo[T] = Echo[T]
+
+  override def invoke(transaction: Echo[T], value: T, context: SinkFunction.Context[_]): Unit = {
+    transaction.invoked = true
+    transaction.add(value)
+  }
+
+  override def preCommit(transaction: Echo[T]): Unit = {
+    if (transaction.invoked) {
+      buffer += (transaction.transactionId -> transaction)
     }
   }
 
-  override def commit(txn: Echo): Unit = {
-    val prefix = if (name == null || name.trim.isEmpty) txn.index.toString else name
-    if (txn.list.nonEmpty) {
-      txn.list.foreach(x => println(s"$prefix > $x"))
-      transactionState.clear()
+  override def commit(transaction: Echo[T]): Unit = {
+    if (transaction.invoked) {
+      /**
+       * 此步骤理论上讲有发生异常的可能,如循环到一半机器挂了.会导致已经输出的打印无法被撤回,下面的清理也无法完成,出现重复打印的情况....
+       */
+      transaction.buffer.foreach(writer.write)
+      //提交完成清空...
+      buffer -= transaction.transactionId
     }
   }
 
-  override def abort(txn: Echo): Unit = transactionState.clear()
-
-  override def initializeState(context: FunctionInitializationContext): Unit = {
-    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Echo]))
-    super.initializeState(context)
+  override def abort(transaction: Echo[T]): Unit = {
+    buffer -= transaction.transactionId
   }
-
 }
 
-case class Echo(var index: Int = null, var list: ListBuffer[String] = ListBuffer.empty[String], var name: String = "") extends Serializable
+case class Echo[T](transactionId: String = System.currentTimeMillis().toString, buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
+  def add(value: T): Unit = buffer += value
+}
