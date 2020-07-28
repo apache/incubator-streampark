@@ -64,7 +64,7 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
     writer.open(ctx.getIndexOfThisSubtask, ctx.getNumberOfParallelSubtasks)
   }
 
-  override def beginTransaction(): Echo[T] = Echo[T]
+  override def beginTransaction(): Echo[T] = new Echo[T]()
 
   override def invoke(transaction: Echo[T], value: T, context: SinkFunction.Context[_]): Unit = {
     transaction.invoked = true
