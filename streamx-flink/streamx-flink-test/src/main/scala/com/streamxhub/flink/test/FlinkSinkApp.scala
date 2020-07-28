@@ -1,12 +1,11 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
-import com.streamxhub.flink.core.sink.{KafkaSink, Mapper, RedisSink}
+import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.sink.KafkaSink
+import com.streamxhub.flink.core.source.KafkaSource
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
-import org.json4s.jackson.Serialization
 
 object FlinkSinkApp extends FlinkStreaming {
 
@@ -15,25 +14,23 @@ object FlinkSinkApp extends FlinkStreaming {
 
   override def handler(context: StreamingContext): Unit = {
 
-    //1)读取数据源
-    val source = context.readTextFile("data/in/person.txt")
-
-    val ds = source.flatMap(x => {
-      x.split(",") match {
-        case Array(d, a, b, c) => Some(Person(d.toInt, a, b.toInt, c.toInt))
-        case _ => None
-      }
-    })
-
-    val ds1 = ds.map(x => Serialization.write(x))
+    /**
+     * 从kafka里读数据.这里的数据是数字或者字母,每次读取1条
+     */
+    val source = new KafkaSource(context).getDataStream[String]()
+      .uid("kfkSource1")
+      .name("kfkSource1")
+      .map(x => {
+        x.value
+      })
 
     //Kafka sink..................
     //1)定义 KafkaSink
     val kfkSink = KafkaSink(context)
     //2)下沉到目标
-    kfkSink.sink(ds1)
+    kfkSink.sink(source).setParallelism(1)
 
-    val ds2 = source.flatMap(x => {
+    /*val ds2 = source.flatMap(x => {
       x.split(",") match {
         case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
         case _ => None
@@ -49,7 +46,7 @@ object FlinkSinkApp extends FlinkStreaming {
 
     //3)下沉数据.done
     sink.sink[User](ds2,userMapper)
-    sink.sink[Person](ds,personMapper)
+    sink.sink[Person](ds,personMapper)*/
 
   }
 

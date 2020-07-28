@@ -15,11 +15,11 @@ flink:
       yarntaskManagerMemory: 4096M      # -ytm
   watermark:
     time.characteristic: EventTime
-    interval: 5000
-  parallelism: 3
+    interval: 10
+  parallelism: 1
   checkpoints:
     enable: true
-    interval: 30000
+    interval: 20
     mode: EXACTLY_ONCE
 
 # 重启策略
@@ -124,7 +124,7 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_test10
+  group.id: flink_03
   auto.offset.reset: earliest
   enable.auto.commit: true
   #start.from:
@@ -135,4 +135,7 @@ kafka.source:
       #kafka02: 0:182,1:183,2:182
       #hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
 
-
+kafka.sink:
+  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  topic: hello2
+  transaction.timeout.ms: 1000
