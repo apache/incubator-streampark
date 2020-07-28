@@ -35,7 +35,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
 import scala.collection.mutable.ListBuffer
-
 /**
  * println()升级版.精准一次的打印
  */
@@ -53,7 +52,6 @@ object EchoSink {
  */
 class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunction[T, Echo[T], Void](new KryoSerializer[Echo[T]](classOf[Echo[T]], new ExecutionConfig), VoidSerializer.INSTANCE)
   with Logger {
-
   private[this] val buffer: collection.mutable.Map[String, Echo[T]] = collection.mutable.Map.empty
 
   private[this] val writer: PrintSinkOutputWriter[T] = new PrintSinkOutputWriter[T](sinkIdentifier, false)

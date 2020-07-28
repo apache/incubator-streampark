@@ -27,11 +27,11 @@ import java.util.regex.Pattern
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
 import org.apache.flink.streaming.api.scala.{DataStream, _}
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011, KafkaDeserializationSchema}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
 import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
-import org.apache.flink.streaming.api.functions.AssignerWithPeriodicWatermarks
 import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
@@ -49,8 +49,8 @@ object KafkaSource {
                                     topic: io.Serializable,
                                     alias: String,
                                     deserializer: KafkaDeserializationSchema[T],
-                                    assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]]
-                                   ): FlinkKafkaConsumer011[KafkaRecord[T]] = {
+                                    strategy: WatermarkStrategy[KafkaRecord[T]]
+                                   ): FlinkKafkaConsumer[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
     overrideParam.foreach { case (k, v) => prop.put(k, v) }
@@ -78,7 +78,7 @@ object KafkaSource {
           case x: List[String] => x
           case _ => throw new IllegalArgumentException("[Streamx] topic type must be String(one topic) or List[String](more topic)")
         }
-        new FlinkKafkaConsumer011(topicList, kfkDeserializer, prop)
+        new FlinkKafkaConsumer(topicList, kfkDeserializer, prop)
       case (_, Some(reg)) =>
         val pattern: Pattern = topic match {
           case null => reg.r.pattern
@@ -86,7 +86,7 @@ object KafkaSource {
           case _ => throw new IllegalArgumentException("[Streamx] subscriptionPattern type must be String(regex)")
         }
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
-        new FlinkKafkaConsumer011(pattern, kfkDeserializer, prop)
+        new FlinkKafkaConsumer(pattern, kfkDeserializer, prop)
     }
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
     (ctx.getCheckpointConfig.isCheckpointingEnabled, autoCommit) match {
@@ -95,10 +95,10 @@ object KafkaSource {
       case _ =>
     }
 
-    if (assigner != null) {
-      val assignerWithPeriodicWatermarks = consumer.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
+    if (strategy != null) {
+      val assignerWithPeriodicWatermarks = consumer.getClass.getMethod("assignTimestampsAndWatermarks", classOf[WatermarkStrategy[T]])
       assignerWithPeriodicWatermarks.setAccessible(true)
-      assignerWithPeriodicWatermarks.invoke(consumer, assigner)
+      assignerWithPeriodicWatermarks.invoke(consumer, strategy)
     }
 
     (timestamp, startFrom) match {
@@ -163,16 +163,16 @@ class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, ov
    * @param topic        一组topic或者单个topic
    * @param alias        别名,区分不同的kafka连接实例
    * @param deserializer DeserializationSchema
-   * @param assigner     AssignerWithPeriodicWatermarks
+   * @param strategy     Watermarks 策略
    * @tparam T
    */
   def getDataStream[T: TypeInformation](topic: java.io.Serializable = null,
                                         alias: String = "",
                                         deserializer: KafkaDeserializationSchema[T] = new KafkaStringDeserializationSchema().asInstanceOf[KafkaDeserializationSchema[T]],
-                                        assigner: AssignerWithPeriodicWatermarks[KafkaRecord[T]] = null
+                                        strategy: WatermarkStrategy[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
-    val consumer = KafkaSource.getSource[T](this.ctx, overrideParam, topic, alias, deserializer, assigner)
+    val consumer = KafkaSource.getSource[T](this.ctx, overrideParam, topic, alias, deserializer, strategy)
     ctx.addSource(consumer)
   }
 
