@@ -276,7 +276,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
    */
   override def commit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit和commit...
-    if (transaction != null && transaction.invoked && transaction.sql.nonEmpty) {
+    if (transaction.invoked && transaction.sql.nonEmpty) {
       logInfo(s"[StreamX] Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
       var connection: Connection = null
       var statement: Statement = null
