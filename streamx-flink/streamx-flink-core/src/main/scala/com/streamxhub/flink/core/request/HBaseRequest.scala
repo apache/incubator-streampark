@@ -29,15 +29,12 @@ import com.streamxhub.common.util.Logger
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.concurrent.Executors
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 import org.apache.flink.streaming.api.scala._
 import org.apache.hadoop.hbase.client.{Result, ResultScanner, Table}
 
 import scala.collection.JavaConversions._
 import scala.annotation.meta.param
-import scala.concurrent.ExecutionContext
-
 
 object HBaseRequest {
 
