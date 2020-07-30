@@ -58,7 +58,6 @@ public class KafkaJavaApp {
                     public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
                         String value = new String(record.value());
                         LogBean logBean = new LogBean();
-                        logBean.setControlid("benjobs");
                         //value to logBean....
                         return logBean;
                     }
