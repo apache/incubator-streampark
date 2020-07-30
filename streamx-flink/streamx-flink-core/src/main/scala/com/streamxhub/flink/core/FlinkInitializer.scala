@@ -110,6 +110,9 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     }
     val fileType = config.split("\\.").last
     val configArgs = if (config.startsWith("hdfs://")) {
+      /**
+       * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+       */
       val text = HdfsUtils.readFile(config)
       fileType match {
         case "properties" => PropertiesUtils.fromPropertiesText(text)
