@@ -16,6 +16,7 @@
     <modules>
         <module>streamx-flink-core</module>
         <module>streamx-flink-test</module>
+        <module>streamx-flink-submit</module>
     </modules>
 
 </project>

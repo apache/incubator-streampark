@@ -4,9 +4,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.sink.ESSink
 import com.streamxhub.flink.core.source.KafkaSource
+import com.streamxhub.flink.core.util.EsIndexUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
+import org.elasticsearch.action.index.IndexRequest
 import org.json4s
 import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
@@ -36,6 +39,16 @@ object PolestarDashboardApp extends FlinkStreaming {
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
 
+    implicit def indexReq(x: OrderEntity): IndexRequest =
+      EsIndexUtils.indexRequest(
+        s"polestar_dash_${x.ymd}",
+        "_doc",
+        s"${x.timestamp}",
+        x.toJson
+      )
+
+    //数据下沉到es
+    ESSink(context).sink6[OrderEntity](ds)
   }
 
   def now(fmt: String = "yyyyMMdd"): String = {
