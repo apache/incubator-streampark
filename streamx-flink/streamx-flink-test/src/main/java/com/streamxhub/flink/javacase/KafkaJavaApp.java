@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.test;
+package com.streamxhub.flink.javacase;
 
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
@@ -58,6 +58,7 @@ public class KafkaJavaApp {
                     public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
                         String value = new String(record.value());
                         LogBean logBean = new LogBean();
+                        logBean.setControlid("benjobs");
                         //value to logBean....
                         return logBean;
                     }
