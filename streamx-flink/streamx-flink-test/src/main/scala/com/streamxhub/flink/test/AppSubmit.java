@@ -27,14 +27,18 @@ import java.util.Collections;
 public class AppSubmit {
 
     public static void main(String[] args) {
+
+        org.apache.hadoop.conf.Configuration configuration = new org.apache.hadoop.conf.Configuration();
+        configuration.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem");
+
         //flink的本地配置目录，为了得到flink的配置
         String configurationDirectory = System.getenv("FLINK_HOME").concat("/conf");
         //存放flink集群相关的jar包目录
-        Path flinkLibs = new Path("/streamx/flink/flink-1.9.2/lib");
-        Path plugins = new Path("/streamx/flink/flink-1.9.2/plugins");
+        Path flinkLibs = new Path("hdfs:///streamx/flink/flink-1.9.2/lib");
+        Path plugins = new Path("hdfs:///streamx/flink/flink-1.9.2/plugins");
         //用户jar
-        String userJarPath = "/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
-        String flinkDistJar = "/streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
+        String userJarPath = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
+        String flinkDistJar = "hdfs:///streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
 
         YarnClient yarnClient = YarnClient.createYarnClient();
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
