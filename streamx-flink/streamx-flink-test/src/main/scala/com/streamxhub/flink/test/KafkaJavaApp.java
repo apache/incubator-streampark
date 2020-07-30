@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.javacase;
+package com.streamxhub.flink.test;
 
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
