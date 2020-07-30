@@ -71,15 +71,14 @@ public class AppSubmit {
 
         ClusterClientProvider<ApplicationId> clusterClientProvider = null;
         try {
-            clusterClientProvider = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, appConfig);
+            clusterClientProvider = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, appConfig);  assert clusterClientProvider != null;
+            ClusterClient<ApplicationId> clusterClient = clusterClientProvider.getClusterClient();
+            ApplicationId applicationId = clusterClient.getClusterId();
+            System.out.println(applicationId);
         } catch (ClusterDeploymentException e) {
             e.printStackTrace();
         }
 
-        assert clusterClientProvider != null;
-        ClusterClient<ApplicationId> clusterClient = clusterClientProvider.getClusterClient();
-        ApplicationId applicationId = clusterClient.getClusterId();
-        System.out.println(applicationId);
     }
 
 }
