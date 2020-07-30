@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.sink
 
 import java.io.Serializable
 
-import com.streamxhub.common.util.Logger
+import com.streamxhub.common.util.{Logger, Utils}
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.functions.util.PrintSinkOutputWriter
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
@@ -35,6 +35,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
 import scala.collection.mutable.ListBuffer
+
 /**
  * println()升级版.精准一次的打印
  */
@@ -52,6 +53,7 @@ object EchoSink {
  */
 class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunction[T, Echo[T], Void](new KryoSerializer[Echo[T]](classOf[Echo[T]], new ExecutionConfig), VoidSerializer.INSTANCE)
   with Logger {
+
   private[this] val buffer: collection.mutable.Map[String, Echo[T]] = collection.mutable.Map.empty
 
   private[this] val writer: PrintSinkOutputWriter[T] = new PrintSinkOutputWriter[T](sinkIdentifier, false)
@@ -82,7 +84,7 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
        */
       transaction.buffer.foreach(writer.write)
       //提交完成清空...
-      buffer -= transaction.transactionId
+      abort(transaction)
     }
   }
 
@@ -91,6 +93,6 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
   }
 }
 
-case class Echo[T](transactionId: String = System.currentTimeMillis().toString, buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
+case class Echo[T](transactionId: String = Utils.uuid(), buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
   def add(value: T): Unit = buffer += value
 }

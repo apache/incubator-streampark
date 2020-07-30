@@ -28,7 +28,7 @@ import java.util.concurrent.atomic.AtomicLong
 import java.util.{Optional, Properties}
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger}
+import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
 import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.enums.ApiType
 import com.streamxhub.flink.core.enums.ApiType.ApiType
@@ -36,11 +36,9 @@ import com.streamxhub.flink.core.function.ToSQLFunction
 import com.streamxhub.flink.core.sink.Dialect.Dialect
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
-import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
-import org.apache.flink.runtime.state.FunctionInitializationContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 
@@ -213,11 +211,10 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
   extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
 
-  @transient private[this] var transactionState: ListState[Transaction] = _
+  private[this] val buffer: collection.mutable.Map[String, Transaction] = collection.mutable.Map.empty[String, Transaction]
+
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: ToSQLFunction[T] = _
-
-  private val SINK_2PC_STATE = "jdbc-sink-2pc-state"
 
   def this(jdbc: Properties, toSQLFn: T => String) {
     this(ApiType.Scala, jdbc)
@@ -260,7 +257,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
       logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
-      transactionState.add(transaction)
+      buffer += (transaction.transactionId -> transaction)
     }
   }
 
@@ -298,7 +295,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
         }
         connection.commit()
         //成功,清除state...
-        transactionState.clear()
+        abort(transaction)
       } catch {
         case e: SQLException =>
           logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
@@ -314,13 +311,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
 
   override def abort(transaction: Transaction): Unit = {
     logInfo(s"[StreamX] Jdbc2PCSink abort,TransactionId:${transaction.transactionId}")
-    transactionState.clear()
-  }
-
-  override def initializeState(context: FunctionInitializationContext): Unit = {
-    logInfo("[StreamX] Jdbc2PCSink initializeState ....")
-    transactionState = context.getOperatorStateStore.getListState(new ListStateDescriptor(SINK_2PC_STATE, classOf[Transaction]))
-    super.initializeState(context)
+    buffer -= transaction.transactionId
   }
 
 }
@@ -341,7 +332,7 @@ class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFu
   override def close(): Unit = sinkFunction.close()
 }
 
-case class Transaction(transactionId: String = System.currentTimeMillis().toString, sql: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
+case class Transaction(transactionId: String = Utils.uuid(), sql: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
   def add(text: String): Unit = sql.add(text)
 }
 
