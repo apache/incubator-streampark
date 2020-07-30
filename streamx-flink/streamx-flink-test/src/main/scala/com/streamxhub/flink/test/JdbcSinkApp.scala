@@ -37,22 +37,23 @@ object JdbcSinkApp extends FlinkStreaming {
      * what fuck....
      * 官方提供的jdbc
      */
-    source.addSink(JSink.sink[String](
-      "insert into orders (id,timestamp) values (?,?)",
-      new JdbcStatementBuilder[String]() {
-        override def accept(t: PreparedStatement, u: String): Unit = {
-          t.setString(1, u)
-          t.setLong(2, System.currentTimeMillis())
-        }
-      },
-      new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
-        .withUrl("jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true")
-        .withDriverName("com.mysql.jdbc.Driver")
-        .withUsername("root")
-        .withPassword("123322242")
-        .build()))
+    if (1 == 2) {
+      source.addSink(JSink.sink[String](
+        "insert into orders (id,timestamp) values (?,?)",
+        new JdbcStatementBuilder[String]() {
+          override def accept(t: PreparedStatement, u: String): Unit = {
+            t.setString(1, u)
+            t.setLong(2, System.currentTimeMillis())
+          }
+        },
+        new JdbcConnectionOptions.JdbcConnectionOptionsBuilder()
+          .withUrl("jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true")
+          .withDriverName("com.mysql.jdbc.Driver")
+          .withUsername("root")
+          .withPassword("123322242")
+          .build()))
 
-
+    }
   }
 
 }
