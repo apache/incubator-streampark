@@ -23,7 +23,7 @@ package com.streamxhub.flink.core
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{Logger, PropertiesUtils}
+import com.streamxhub.common.util.{HdfsUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
@@ -33,7 +33,7 @@ import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFacto
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
-import org.apache.flink.streaming.api.environment.{CheckpointConfig, LocalStreamEnvironment}
+import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
@@ -108,12 +108,22 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }
-    val configFile = new java.io.File(config)
-    require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
-    val configArgs = config.split("\\.").last match {
-      case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-      case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+    val fileType = config.split("\\.").last
+    val configArgs = if (config.startsWith("hdfs://")) {
+      val text = HdfsUtils.readFile(config)
+      fileType match {
+        case "properties" => PropertiesUtils.fromPropertiesText(text)
+        case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+      }
+    } else {
+      val configFile = new java.io.File(config)
+      require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
+      fileType match {
+        case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+        case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+      }
     }
     ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
   }
