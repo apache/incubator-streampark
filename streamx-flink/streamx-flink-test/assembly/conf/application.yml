@@ -15,11 +15,11 @@ flink:
       yarntaskManagerMemory: 4096M      # -ytm
   watermark:
     time.characteristic: EventTime
-    interval: 10
+    interval: 1000
   parallelism: 1
   checkpoints:
     enable: true
-    interval: 20
+    interval: 10000
     mode: EXACTLY_ONCE
 
 # 重启策略
