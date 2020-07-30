@@ -62,7 +62,6 @@ object KafkaSource {
     require(!(timestamp.nonEmpty && startFrom != null), s"[Streamx] start.form timestamp and offset cannot be defined at the same time")
 
     //topic parameter
-    val resetOpt = Try(Some(prop.remove(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG))).getOrElse(None)
     val topicOpt = Try(Some(prop.remove(KEY_KAFKA_TOPIC).toString)).getOrElse(None)
     val regexOpt = Try(Some(prop.remove(KEY_KAFKA_PATTERN).toString)).getOrElse(None)
 
@@ -88,14 +87,6 @@ object KafkaSource {
         }
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
         new FlinkKafkaConsumer(pattern, kfkDeserializer, prop)
-    }
-
-    resetOpt match {
-      case None =>
-      case Some("none") =>
-      case Some("latest") => consumer.setStartFromLatest()
-      case Some("earliest") => consumer.setStartFromEarliest()
-      case _ => throw new IllegalArgumentException("[Streamx] kafka auto.offset.reset param error,muse be latest|earliest|none ")
     }
 
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
