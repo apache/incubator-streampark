@@ -1,4 +1,4 @@
-package com.streamxhub.flink.javacase;
+package com.streamxhub.flink.test;
 
 import com.streamxhub.flink.core.StreamEnvConfig;
 import com.streamxhub.flink.core.StreamingContext;
@@ -33,27 +33,6 @@ public class MySQLJavaApp {
         prop.put(KEY_JDBC_PASSWORD(), "123322242");
         prop.put("readOnly", "false");
         prop.put("idleTimeout", "20000");
-
-        //读取MySQL数据源
-        DataStream<LogBean> stream = new MySQLJavaSource<LogBean>(context, prop)
-                .sql(() -> {
-                    Thread.sleep(1000);
-                    return "select * from orders limit 10";
-                })
-                .result(map -> {
-                    LogBean logBean = new LogBean();
-                    logBean.setCard_type("123");
-                    logBean.setControlid("345");
-                    return Arrays.asList(logBean);
-                })
-                .getDataStream()
-                .returns(TypeInformation.of(LogBean.class));
-
-        //写入MySQL表...
-        new JdbcJavaSink<LogBean>(context)
-                .jdbc(prop)
-                .sql(bean -> String.format("insert into sink(name,value)value('%s','%s')", bean.getCard_type(), bean.getControlid()))
-                .sink(stream);
 
         context.start();
 
