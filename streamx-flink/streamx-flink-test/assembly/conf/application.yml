@@ -122,7 +122,7 @@ http.sink:
       format: yyyy-MM-dd
 # source config....
 kafka.source:
-  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  bootstrap.servers: pro-hadoop-7:9092,pro-hadoop-8:9092,pro-hadoop-9:9092
   topic: hello
   group.id: flink_06
   auto.offset.reset: earliest
@@ -136,7 +136,7 @@ kafka.source:
       #hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
 
 kafka.sink:
-  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  bootstrap.servers: pro-hadoop-7:9092,pro-hadoop-8:9092,pro-hadoop-9:9092
   topic: hello2
   transaction.timeout.ms: 1000
   semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
