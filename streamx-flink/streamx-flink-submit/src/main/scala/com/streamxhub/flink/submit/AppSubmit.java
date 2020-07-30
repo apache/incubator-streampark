@@ -34,7 +34,7 @@ public class AppSubmit {
         Path flinkLibs = new Path("hdfs:///streamx/flink/flink-1.9.2/lib");
         Path plugins = new Path("hdfs:///streamx/flink/flink-1.9.2/plugins");
         //用户jar
-        String userJarPath = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
+        String userJarPath = "hdfs:///streamx/flink/flink-1.9.2/examples/streaming/TopSpeedWindowing.jar";
         String flinkDistJar = "hdfs:///streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
 
         YarnClient yarnClient = YarnClient.createYarnClient();
@@ -61,7 +61,7 @@ public class AppSubmit {
         param[0] = "--flink.conf";
         param[1] = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml";
 
-        ApplicationConfiguration appConfig = new ApplicationConfiguration(param, "com.streamxhub.flink.test.FlinkSinkApp");
+        ApplicationConfiguration appConfig = new ApplicationConfiguration(args, null);
 
         YarnClusterDescriptor yarnClusterDescriptor = new YarnClusterDescriptor(
                 flinkConfiguration,
