@@ -22,18 +22,22 @@ package com.streamxhub.common.util
 
 import java.io.FileWriter
 import java.io.IOException
+
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FSDataOutputStream
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
 
-
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 object HdfsUtils {
 
-  lazy val hdfs: FileSystem = Try(FileSystem.get(new Configuration)).getOrElse(new IllegalArgumentException("[StreamX] access hdfs error."))
+  lazy val hdfs: FileSystem = Try(FileSystem.get(new Configuration)) match {
+    case Success(fs) => fs
+    case Failure(e) => new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
+      null
+  }
 
   /**
    * 在hdfs 上创建一个新的文件，将某些数据写入到hdfs中
