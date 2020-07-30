@@ -54,7 +54,8 @@ object HdfsUtils {
   @throws[IOException] def readFile(fileName: String): String = {
     val path: Path = getPath(fileName)
     require(!hdfs.exists(path) | hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
-    hdfs.open(path).readUTF
+    val in = hdfs.open(path)
+    try in.readUTF finally in.close()
   }
 
   @throws[IOException] def deleteFile(fileName: String): Unit = {
