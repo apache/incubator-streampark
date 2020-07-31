@@ -1,6 +1,7 @@
 package com.streamxhub.flink.submit;
 
 
+import com.streamxhub.common.conf.ParameterCli;
 import org.apache.flink.client.deployment.ClusterDeploymentException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
@@ -32,8 +33,11 @@ public class AppSubmit {
         //存放flink集群相关的jar包目录
         File flinkLibs = new File(flink_home.concat("/lib"));
         File plugins = new File(flink_home.concat("/plugins"));
+
         //用户jar
         String app_home = "/home/hst/workspace/streamx/streamx-flink/streamx-flink-test/target/streamx-flink-test-1.0.0";
+        String app_conf = app_home.concat("/conf/application.yml");
+
         File flinkUserJar = new File(app_home.concat("/lib/streamx-flink-test-1.0.0.jar"));
         File flinkDistJar = new File(flink_home.concat("/lib/flink-dist_2.11-1.11.1.jar"));
 
@@ -46,6 +50,8 @@ public class AppSubmit {
         //获取flink的配置
         Configuration flinkConfiguration = GlobalConfiguration.loadConfiguration(flink_home.concat("/conf"));
 
+        String appName = ParameterCli.read(new String[]{"--name", app_conf});
+
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
@@ -54,7 +60,7 @@ public class AppSubmit {
                 //设置用户的jar
                 .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar.toString()))
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName()) //设置为application模式
-                .set(YarnConfigOptions.APPLICATION_NAME, "jobName");//yarn application name
+                .set(YarnConfigOptions.APPLICATION_NAME, appName);//yarn application name
         //.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
         //.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar);
 
@@ -95,7 +101,7 @@ public class AppSubmit {
         //设置启动参数
         flinkConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(
                 "--flink.conf",
-                app_home.concat("/conf/application.yml")
+                app_conf
         ));
 
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration);
@@ -105,7 +111,11 @@ public class AppSubmit {
                 .getClusterClient()) {
 
             ApplicationId applicationId = clusterClient.getClusterId();
-            System.out.println(applicationId.getId());
+            System.out.println("---------------------------------------");
+            System.out.println();
+            System.out.println("Flink Job Started: appId: " + applicationId.getId());
+            System.out.println();
+            System.out.println("---------------------------------------");
         }
 
     }
