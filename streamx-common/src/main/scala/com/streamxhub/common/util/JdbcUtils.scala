@@ -47,7 +47,14 @@ object JdbcUtils {
 
   private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
 
-  def fetch(sql: String, fetchSize: Integer = 1000, direction: Integer = 1000)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
+  /**
+   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
+   *
+   * @param sql
+   * @param jdbcConfig
+   * @return
+   */
+  def select(sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
     if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
       val conn = getConnection(jdbcConfig)
       var stmt: Statement = null
@@ -55,9 +62,8 @@ object JdbcUtils {
       try {
         stmt = createStatement(conn)
         result = stmt.executeQuery(sql)
-        if (fetchSize != null && direction != null) {
-          result.setFetchDirection(direction)
-          result.setFetchSize(fetchSize)
+        if (func != null) {
+          func(result)
         }
         val count = result.getMetaData.getColumnCount
         val array = ArrayBuffer[Map[String, Any]]()
@@ -82,15 +88,6 @@ object JdbcUtils {
   }
 
   /**
-   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
-   *
-   * @param sql
-   * @param jdbcConfig
-   * @return
-   */
-  def select(sql: String)(implicit jdbcConfig: Properties): List[Map[String, _]] = fetch(sql, null, null)
-
-  /**
    * 直接查询一个对象
    *
    * @param sql
@@ -98,7 +95,7 @@ object JdbcUtils {
    * @tparam T
    * @return
    */
-  def select2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql))
+  def select2[T](sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql, func))
 
   private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
 
