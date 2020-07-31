@@ -1,7 +1,7 @@
 package com.streamxhub.flink.submit;
 
 
-import com.streamxhub.common.conf.ParameterCli;
+import com.streamxhub.common.util.PropertiesUtils;
 import org.apache.flink.client.deployment.ClusterDeploymentException;
 import org.apache.flink.client.deployment.ClusterSpecification;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
@@ -18,6 +18,9 @@ import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import scala.collection.immutable.Map;
+
+import static com.streamxhub.common.conf.ConfigConst.*;
 
 import java.io.File;
 import java.util.*;
@@ -50,7 +53,8 @@ public class AppSubmit {
         //获取flink的配置
         Configuration flinkConfiguration = GlobalConfiguration.loadConfiguration(flink_home.concat("/conf"));
 
-        String appName = ParameterCli.read(new String[]{"--name", app_conf});
+        Map<String, String> map = PropertiesUtils.fromYamlFile(app_conf);
+        String appName = map.get(KEY_FLINK_APP_NAME()).get();
 
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
