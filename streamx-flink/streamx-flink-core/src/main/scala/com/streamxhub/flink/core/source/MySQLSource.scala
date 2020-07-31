@@ -114,8 +114,8 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
           case ApiType.JAVA => javaSqlFunc.getSQL(backQuery)
         }
         val result: List[Map[String, _]] = apiType match {
-          case ApiType.Scala => JdbcUtils.fetch(jdbcQuery.getSQL, jdbcQuery.getFetchSize)(jdbc)
-          case ApiType.JAVA => JdbcUtils.fetch(jdbcQuery.getSQL, jdbcQuery.getFetchSize)(jdbc)
+          case ApiType.Scala => JdbcUtils.select(jdbcQuery.getSQL, _.setFetchSize(jdbcQuery.getFetchSize))(jdbc)
+          case ApiType.JAVA => JdbcUtils.select(jdbcQuery.getSQL, _.setFetchSize(jdbcQuery.getFetchSize))(jdbc)
         }
         apiType match {
           case ApiType.Scala => scalaResultFunc(result).foreach(ctx.collect)
