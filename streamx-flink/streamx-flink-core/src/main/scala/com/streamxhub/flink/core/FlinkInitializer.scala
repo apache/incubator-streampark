@@ -105,7 +105,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_APP_CONF, null) match {
+    val config = argsMap.get(KEY_FLINK_APP_CONF(), null) match {
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }

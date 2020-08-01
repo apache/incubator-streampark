@@ -1,6 +1,7 @@
 package com.streamxhub.flink.submit;
 
 
+import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.PropertiesUtils;
 import org.apache.flink.client.deployment.ClusterDeploymentException;
 import org.apache.flink.client.deployment.ClusterSpecification;
@@ -107,12 +108,9 @@ public class AppSubmit {
 
         //------------设置用户jar的参数和主类
         //设置启动主类
-        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.flink.test.FlinkSinkApp");
+        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, map.get(KEY_FLINK_APP_MAIN()).get());
         //设置启动参数
-        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(
-                "--flink.conf",
-                app_conf
-        ));
+        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf));
 
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration);
 
