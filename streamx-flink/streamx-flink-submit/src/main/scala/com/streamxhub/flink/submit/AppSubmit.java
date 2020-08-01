@@ -46,7 +46,7 @@ public class AppSubmit {
         String appMain = null;
         if (app_conf.startsWith("hdfs:")) {
             String text = HdfsUtils.readFile(app_conf);
-            Map<String, String> map = PropertiesUtils.fromYamlFile(text);
+            Map<String, String> map = PropertiesUtils.fromYamlText(text);
             appName = map.get(KEY_FLINK_APP_NAME()).get();
             appMain = map.get(KEY_FLINK_APP_MAIN()).get();
         } else {

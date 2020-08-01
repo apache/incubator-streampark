@@ -74,7 +74,7 @@ object PropertiesUtils {
     try {
       val map = MMap[String, String]()
       val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
     }
