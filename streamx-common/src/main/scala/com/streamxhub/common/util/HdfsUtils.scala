@@ -92,6 +92,6 @@ object HdfsUtils {
     input.close()
   }
 
-  private[this] def getPath(hdfsPath: String) = new Path(hdfsPath)
+  private[this] def getPath(hdfsPath: String) = new Path(hdfsPath.replaceFirst("^hdfs://", ""))
 
 }
