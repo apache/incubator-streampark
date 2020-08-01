@@ -59,6 +59,8 @@ public class AppSubmit {
         Path flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/lib");
         Path plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/plugins");
         //用户jar
+        String flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
+
         String flinkUserJar = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
 
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
@@ -68,6 +70,8 @@ public class AppSubmit {
                 .set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.FIRST.toString())
                 //设置yarn.provided.lib.dirs
                 .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
+                //设置flinkDistJar
+                .set(YarnConfigOptions.FLINK_DIST_JAR,flinkDistJar)
                 //设置用户的jar
                 .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar))
                 //设置为application模式
