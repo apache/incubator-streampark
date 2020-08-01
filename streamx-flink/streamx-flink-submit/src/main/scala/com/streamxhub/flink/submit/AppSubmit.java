@@ -25,8 +25,6 @@ import static com.streamxhub.common.conf.ConfigConst.*;
 
 import java.util.*;
 
-import static org.apache.flink.yarn.configuration.YarnConfigOptions.CLASSPATH_INCLUDE_USER_JAR;
-
 public class AppSubmit {
 
     public static void main(String[] args) throws Exception {
@@ -56,10 +54,10 @@ public class AppSubmit {
         }
 
         //存放flink集群相关的jar包目录
-        Path flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/lib");
-        Path plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/plugins");
+        Path flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/lib");
+        Path plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/plugins");
         //用户jar
-        String flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.11.1/lib/flink-dist_2.11-1.11.1.jar";
+        String flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
 
         String flinkUserJar = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
 
@@ -67,7 +65,7 @@ public class AppSubmit {
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
-                //当有jar包冲突的时间优先从flink包里找相关依赖还是从用户包里找依赖
+                //当有jar包冲突的时候优先从flink包里找相关依赖还是从用户包里找依赖
                 .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
                 //设置yarn.provided.lib.dirs
                 .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
