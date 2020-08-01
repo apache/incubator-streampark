@@ -40,7 +40,7 @@ public class AppSubmit {
 
         //用户jar
         String app_home = "/home/hst/workspace/streamx/streamx-flink/streamx-flink-test/target/streamx-flink-test-1.0.0";
-        String app_conf = app_home.concat("/conf/application.yml");
+        String app_conf = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml";
 
         File flinkUserJar = new File(app_home.concat("/lib/streamx-flink-test-1.0.0.jar"));
         File flinkDistJar = new File(flink_home.concat("/lib/flink-dist_2.11-1.11.1.jar"));
