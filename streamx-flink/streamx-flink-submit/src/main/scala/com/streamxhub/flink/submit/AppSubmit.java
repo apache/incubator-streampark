@@ -67,11 +67,12 @@ public class AppSubmit {
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
-                //.set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.DISABLED.toString())
+                //当有jar包冲突的时间优先从flink包里找相关依赖还是从用户包里找依赖
+                .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
                 //设置yarn.provided.lib.dirs
                 .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
                 //设置flinkDistJar
-                .set(YarnConfigOptions.FLINK_DIST_JAR,flinkDistJar)
+                .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
                 //设置用户的jar
                 .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar))
                 //设置为application模式
