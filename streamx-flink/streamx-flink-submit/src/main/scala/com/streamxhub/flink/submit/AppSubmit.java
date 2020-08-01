@@ -1,7 +1,6 @@
 package com.streamxhub.flink.submit;
 
 
-import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.common.util.PropertiesUtils;
 import org.apache.flink.client.deployment.ClusterDeploymentException;
@@ -24,7 +23,6 @@ import scala.collection.immutable.Map;
 
 import static com.streamxhub.common.conf.ConfigConst.*;
 
-import java.io.File;
 import java.util.*;
 
 import static org.apache.flink.yarn.configuration.YarnConfigOptions.CLASSPATH_INCLUDE_USER_JAR;
@@ -35,12 +33,16 @@ public class AppSubmit {
 
         String flink_home = System.getenv("FLINK_HOME");
 
+        //flink的本地配置目录，为了得到flink的配置
         //存放flink集群相关的jar包目录
-        File flinkLibs = new File(flink_home.concat("/lib"));
-        File plugins = new File(flink_home.concat("/plugins"));
+        Path flinkLibs = new Path("hdfs:///streamx/flink/flink-1.9.2/lib");
+        Path plugins = new Path("hdfs:///streamx/flink/flink-1.9.2/plugins");
 
         //用户jar
-        String app_home = "/home/hst/workspace/streamx/streamx-flink/streamx-flink-test/target/streamx-flink-test-1.0.0";
+        String userJarPath = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
+        String flinkDistJar = "hdfs:///streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
+
+        //用户jar
         String app_conf = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml";
         String appName = null;
         String appMain = null;
@@ -54,9 +56,6 @@ public class AppSubmit {
             appName = map.get(KEY_FLINK_APP_NAME()).get();
             appMain = map.get(KEY_FLINK_APP_MAIN()).get();
         }
-
-        File flinkUserJar = new File(app_home.concat("/lib/streamx-flink-test-1.0.0.jar"));
-        File flinkDistJar = new File(flink_home.concat("/lib/flink-dist_2.11-1.11.1.jar"));
 
         YarnClient yarnClient = YarnClient.createYarnClient();
         YarnConfiguration yarnConfiguration = new YarnConfiguration();
@@ -74,17 +73,17 @@ public class AppSubmit {
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
                 .set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.FIRST.toString())
                 //设置用户的jar
-                .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar.toString()))
+                .set(PipelineOptions.JARS, Collections.singletonList(userJarPath))
                 //设置为application模式
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
                 //yarn application name
                 .set(YarnConfigOptions.APPLICATION_NAME, appName)
                 //yarn application Type
                 .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
-        ;
 
-        //.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
-        //.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar);
+                .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
+
+                .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar);
 
         YarnClusterDescriptor yarnClusterDescriptor = new YarnClusterDescriptor(
                 flinkConfiguration,
@@ -94,9 +93,9 @@ public class AppSubmit {
                 true);
 
         //设置flink_disk.jar
-        yarnClusterDescriptor.setLocalJarPath(new Path(flinkDistJar.toURI()));
+        // yarnClusterDescriptor.setLocalJarPath(new Path(flinkDistJar.toURI()));
         //设置flink/lib
-        yarnClusterDescriptor.addShipFiles(Arrays.asList(flinkLibs, plugins));
+        // yarnClusterDescriptor.addShipFiles(Arrays.asList(flinkLibs, plugins));
 
         final int masterMemory = yarnClusterDescriptor.getFlinkConfiguration().get(JobManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes();
         ClusterSpecification clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
