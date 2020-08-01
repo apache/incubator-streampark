@@ -67,7 +67,7 @@ public class AppSubmit {
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
                 .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
-                .set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.FIRST.toString())
+                .set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.ORDER.toString())
                 //设置yarn.provided.lib.dirs
                 .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
                 //设置flinkDistJar
