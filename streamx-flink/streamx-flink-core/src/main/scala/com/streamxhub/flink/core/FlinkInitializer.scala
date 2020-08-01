@@ -20,6 +20,7 @@
  */
 package com.streamxhub.flink.core
 
+import java.io.File
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -108,21 +109,21 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }
-    val fileType = config.split("\\.").last
+    val extension = config.split("\\.").last.toLowerCase
     val configArgs = if (config.startsWith("hdfs://")) {
       /**
        * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
        */
       val text = HdfsUtils.readFile(config)
-      fileType match {
+      extension match {
         case "properties" => PropertiesUtils.fromPropertiesText(text)
         case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
         case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
       }
     } else {
-      val configFile = new java.io.File(config)
+      val configFile = new File(config)
       require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
-      fileType match {
+      extension match {
         case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
         case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
         case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
@@ -172,7 +173,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     this.streamEnv
   }
 
-  private[this] def restartStrategy() = {
+  private[this] def restartStrategy(): Unit = {
 
     def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
       val timeUnit = time match {
