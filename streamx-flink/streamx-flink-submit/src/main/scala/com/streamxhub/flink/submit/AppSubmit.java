@@ -2,6 +2,7 @@ package com.streamxhub.flink.submit;
 
 
 import com.streamxhub.common.conf.ConfigConst;
+import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.common.util.PropertiesUtils;
 import org.apache.flink.client.deployment.ClusterDeploymentException;
 import org.apache.flink.client.deployment.ClusterSpecification;
@@ -41,6 +42,18 @@ public class AppSubmit {
         //用户jar
         String app_home = "/home/hst/workspace/streamx/streamx-flink/streamx-flink-test/target/streamx-flink-test-1.0.0";
         String app_conf = "hdfs:///streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml";
+        String appName = null;
+        String appMain = null;
+        if (app_conf.startsWith("hdfs:")) {
+            String text = HdfsUtils.readFile(app_conf);
+            Map<String, String> map = PropertiesUtils.fromYamlFile(text);
+            appName = map.get(KEY_FLINK_APP_NAME()).get();
+            appMain = map.get(KEY_FLINK_APP_MAIN()).get();
+        } else {
+            Map<String, String> map = PropertiesUtils.fromYamlFile(app_conf);
+            appName = map.get(KEY_FLINK_APP_NAME()).get();
+            appMain = map.get(KEY_FLINK_APP_MAIN()).get();
+        }
 
         File flinkUserJar = new File(app_home.concat("/lib/streamx-flink-test-1.0.0.jar"));
         File flinkDistJar = new File(flink_home.concat("/lib/flink-dist_2.11-1.11.1.jar"));
@@ -54,8 +67,6 @@ public class AppSubmit {
         //获取flink的配置
         Configuration flinkConfiguration = GlobalConfiguration.loadConfiguration(flink_home.concat("/conf"));
 
-        Map<String, String> map = PropertiesUtils.fromYamlFile(app_conf);
-        String appName = map.get(KEY_FLINK_APP_NAME()).get();
 
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
@@ -108,7 +119,7 @@ public class AppSubmit {
 
         //------------设置用户jar的参数和主类
         //设置启动主类
-        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, map.get(KEY_FLINK_APP_MAIN()).get());
+        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain);
         //设置启动参数
         flinkConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf));
 
