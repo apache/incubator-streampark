@@ -20,20 +20,27 @@
  */
 package com.streamxhub.common.util
 
-import java.io.FileWriter
-import java.io.IOException
+import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FSDataOutputStream
-import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.fs.FSDataInputStream
+import org.apache.hadoop.fs.FileSystem
+
+import org.apache.hadoop.io.IOUtils
 
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils {
 
-  lazy val hdfs: FileSystem = Try(FileSystem.get(new Configuration)) match {
+  lazy val conf: Configuration = {
+    val conf = new Configuration()
+    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
+    conf
+  }
+
+  lazy val hdfs: FileSystem = Try(FileSystem.get(conf)) match {
     case Success(fs) => fs
     case Failure(e) => new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
       null
@@ -59,9 +66,12 @@ object HdfsUtils {
     val path: Path = getPath(fileName)
     require(hdfs.exists(path) && !hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
     val in = hdfs.open(path)
-    val context = in.readUTF
-    in.close()
-    context
+    val out = new ByteArrayOutputStream()
+    IOUtils.copyBytes(in, out, 4096, false)
+    out.flush()
+    IOUtils.closeStream(in)
+    IOUtils.closeStream(out)
+    new String(out.toByteArray)
   }
 
   @throws[IOException] def deleteFile(fileName: String): Unit = {
