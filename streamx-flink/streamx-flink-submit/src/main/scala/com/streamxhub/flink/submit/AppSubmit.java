@@ -63,8 +63,14 @@ public class AppSubmit {
                 .set(CLASSPATH_INCLUDE_USER_JAR, YarnConfigOptions.UserJarInclusion.FIRST.toString())
                 //设置用户的jar
                 .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar.toString()))
-                .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName()) //设置为application模式
-                .set(YarnConfigOptions.APPLICATION_NAME, appName);//yarn application name
+                //设置为application模式
+                .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
+                //yarn application name
+                .set(YarnConfigOptions.APPLICATION_NAME, appName)
+                //yarn application Type
+                .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
+        ;
+
         //.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString(), plugins.toString()))
         //.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar);
 
@@ -117,9 +123,10 @@ public class AppSubmit {
             ApplicationId applicationId = clusterClient.getClusterId();
             System.out.println("---------------------------------------");
             System.out.println();
-            System.out.println("Flink Job Started: appId: " + applicationId.getId());
+            System.out.println("Flink Job Started: applicationId: " + applicationId);
             System.out.println();
             System.out.println("---------------------------------------");
+
         }
 
     }
