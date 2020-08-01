@@ -56,10 +56,10 @@ public class AppSubmit {
         }
 
         //存放flink集群相关的jar包目录
-        Path flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/lib");
-        Path plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/plugins");
+        Path flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/lib");
+        Path plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/plugins");
         //用户jar
-        String flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar";
+        String flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.11.1/lib/flink-dist_2.11-1.11.1.jar";
 
         String flinkUserJar = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
 
