@@ -64,7 +64,6 @@ public class AppSubmit {
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
-                .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName())
                 //当有jar包冲突的时候优先从flink包里找相关依赖还是从用户包里找依赖
                 .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
                 //设置yarn.provided.lib.dirs
