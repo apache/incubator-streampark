@@ -57,7 +57,7 @@ object HdfsUtils {
 
   @throws[IOException] def readFile(fileName: String): String = {
     val path: Path = getPath(fileName)
-    require(!hdfs.exists(path) | hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
+    require(hdfs.exists(path) && !hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
     val in = hdfs.open(path)
     try in.readUTF finally in.close()
   }
@@ -92,6 +92,6 @@ object HdfsUtils {
     input.close()
   }
 
-  private[this] def getPath(hdfsPath: String) = new Path(hdfsPath.replaceFirst("^hdfs://", ""))
+  private[this] def getPath(hdfsPath: String) = new Path(hdfsPath)
 
 }
