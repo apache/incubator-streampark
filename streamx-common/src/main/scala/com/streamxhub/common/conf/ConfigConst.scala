@@ -54,11 +54,13 @@ object ConfigConst {
   val SIGN_EMPTY = ""
 
   //
-  val KEY_FLINK_APP_CONF = "flink.conf"
+  def KEY_FLINK_APP_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
   val KEY_FLINK_PARALLELISM = "flink.parallelism"
 
   val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
+
+  val KEY_FLINK_APP_MAIN = "flink.deployment.option.class"
 
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
