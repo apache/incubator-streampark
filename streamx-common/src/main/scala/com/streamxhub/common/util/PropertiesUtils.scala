@@ -27,6 +27,7 @@ import org.yaml.snakeyaml.Yaml
 
 import java.util.{LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.Map
 import collection.mutable.{Map => MMap}
 
@@ -51,7 +52,7 @@ object PropertiesUtils {
   private[this] def eachAppendYamlItem(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
     v match {
       case map: JavaLinkedMap[String, Any] =>
-        map.asScala.flatMap(x => {
+        map.flatMap(x => {
           prefix match {
             case "" => eachAppendYamlItem(k, x._1, x._2, proper)
             case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
@@ -73,8 +74,10 @@ object PropertiesUtils {
   def fromYamlText(text: String) = {
     try {
       val map = MMap[String, String]()
-      val yaml = new Yaml().load(text).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+      new Yaml()
+        .load(text)
+        .asInstanceOf[java.util.Map[String, Map[String, Any]]]
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
     }
@@ -98,8 +101,10 @@ object PropertiesUtils {
     val inputStream: InputStream = new FileInputStream(file)
     try {
       val map = MMap[String, String]()
-      val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+      new Yaml()
+        .load(inputStream)
+        .asInstanceOf[java.util.Map[String, Map[String, Any]]]
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
@@ -130,8 +135,10 @@ object PropertiesUtils {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
       val map = MMap[String, String]()
-      val yaml = new Yaml().load(inputStream).asInstanceOf[java.util.Map[String, Map[String, Any]]].asScala
-      yaml.flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+      new Yaml()
+        .load(inputStream)
+        .asInstanceOf[java.util.Map[String, Map[String, Any]]]
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)
     } finally {
