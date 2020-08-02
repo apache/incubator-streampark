@@ -29,15 +29,6 @@ public class AppSubmit {
 
     public static void main(String[] args) throws Exception {
 
-        YarnClient yarnClient = YarnClient.createYarnClient();
-        YarnConfiguration yarnConfiguration = new YarnConfiguration();
-        yarnClient.init(yarnConfiguration);
-        yarnClient.start();
-
-        YarnClusterInformationRetriever clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient);
-        //获取flink的配置
-        Configuration flinkConfiguration = GlobalConfiguration.loadConfiguration(System.getenv("FLINK_HOME").concat("/conf"));
-
         //配置文件必须在hdfs上
         String app_conf = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml";
         String appName = null;
@@ -61,6 +52,9 @@ public class AppSubmit {
 
         String flinkUserJar = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar";
 
+        //获取flink的配置
+        Configuration flinkConfiguration = GlobalConfiguration.loadConfiguration(System.getenv("FLINK_HOME").concat("/conf"));
+
         flinkConfiguration.set(JobManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.ofMebiBytes(768))
                 .set(TaskManagerOptions.TOTAL_PROCESS_MEMORY, MemorySize.parse("1g"))
                 .set(AkkaOptions.ASK_TIMEOUT, "30 s")
@@ -83,6 +77,13 @@ public class AppSubmit {
                 //设置启动参数
                 .set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf));
 
+
+        YarnClient yarnClient = YarnClient.createYarnClient();
+        YarnConfiguration yarnConfiguration = new YarnConfiguration();
+        yarnClient.init(yarnConfiguration);
+        yarnClient.start();
+        YarnClusterInformationRetriever clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient);
+
         YarnClusterDescriptor yarnClusterDescriptor = new YarnClusterDescriptor(
                 flinkConfiguration,
                 yarnConfiguration,
@@ -96,7 +97,6 @@ public class AppSubmit {
                 .setTaskManagerMemoryMB(1024)
                 .setSlotsPerTaskManager(1)
                 .createClusterSpecification();
-
 
         final YarnDeploymentTarget deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration);
         if (YarnDeploymentTarget.APPLICATION != deploymentTarget) {
