@@ -77,7 +77,11 @@ public class AppSubmit {
                 //yarn application name
                 .set(YarnConfigOptions.APPLICATION_NAME, appName)
                 //yarn application Type
-                .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink");
+                .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
+                //设置启动主类
+                .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
+                //设置启动参数
+                .set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf));
 
         YarnClusterDescriptor yarnClusterDescriptor = new YarnClusterDescriptor(
                 flinkConfiguration,
@@ -105,11 +109,6 @@ public class AppSubmit {
         final List<String> pipelineJars = flinkConfiguration.getOptional(PipelineOptions.JARS).orElse(Collections.emptyList());
         Preconditions.checkArgument(pipelineJars.size() == 1, "Should only have one jar");
 
-        //------------设置用户jar的参数和主类
-        //设置启动主类
-        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain);
-        //设置启动参数
-        flinkConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf));
 
         ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration);
 
