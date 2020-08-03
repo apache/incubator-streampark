@@ -96,7 +96,7 @@ object ParameterCli {
     //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
     args match {
       case Array() =>
-      case array => {
+      case array =>
         val line = parser.parse(flinkOptions, array, false)
         line.getOptions.foreach(x => {
           if (x.hasArg) {
@@ -105,7 +105,6 @@ object ParameterCli {
             optionMap += s"-${x.getLongOpt}".trim -> true
           }
         })
-      }
     }
     val array = new ArrayBuffer[String]
     optionMap.foreach(x => {
