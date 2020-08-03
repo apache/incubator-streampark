@@ -2,8 +2,7 @@ package com.streamxhub.flink.submit
 
 
 import java.net.{MalformedURLException, URL}
-import java.util
-import java.util.{ArrayList, Collections, List}
+import java.util._
 
 import com.streamxhub.common.util.{HdfsUtils, PropertiesUtils}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -15,7 +14,7 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
-import org.apache.flink.client.cli.CliFrontendParser.{SHUTDOWN_IF_ATTACHED_OPTION, YARN_DETACHED_OPTION}
+import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -59,7 +58,7 @@ object AppSubmit {
 
       .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, util.Arrays.asList(flinkLibs.toString, plugins.toString))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibs.toString, plugins.toString))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
       //设置用户的jar
@@ -73,7 +72,7 @@ object AppSubmit {
       //设置启动主类
       .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
       //设置启动参数
-      .set(ApplicationConfiguration.APPLICATION_ARGS, util.Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf))
+      .set(ApplicationConfiguration.APPLICATION_ARGS, Arrays.asList(KEY_FLINK_APP_CONF("--"), app_conf))
 
     val customCommandLines = loadCustomCommandLines(flinkConfiguration, flinkConfDir)
 
@@ -145,9 +144,9 @@ object AppSubmit {
    * @throws
    * @return
    */
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: util.List[String]) = {
+  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: List[String]) = {
     val configuration = new Configuration
-    val classpath = new util.ArrayList[URL]
+    val classpath = new ArrayList[URL]
     if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
       try classpath.add(new URL(path)) catch {
         case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:${path},err:$e")
@@ -170,11 +169,11 @@ object AppSubmit {
     val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
     configuration.setBoolean(DeploymentOptions.ATTACHED, !detachedMode)
     configuration.setBoolean(DeploymentOptions.SHUTDOWN_IF_ATTACHED, shutdownOnAttachedExit)
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new util.function.Function[URL, String] {
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
       override def apply(url: URL): String = url.toString
     })
     SavepointRestoreSettings.toConfiguration(savepointSettings, configuration)
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, new util.function.Function[String, String] {
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, new function.Function[String, String] {
       override def apply(t: String): String = t
     })
     val executorConfig = checkNotNull(activeCustomCommandLine).applyCommandLineOptionsToConfiguration(commandLine)
