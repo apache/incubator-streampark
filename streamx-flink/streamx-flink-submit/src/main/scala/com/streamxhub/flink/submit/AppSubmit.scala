@@ -3,6 +3,7 @@ package com.streamxhub.flink.submit
 
 import java.net.{MalformedURLException, URL}
 import java.util._
+import java.util.concurrent._
 
 import com.streamxhub.common.util.{HdfsUtils, PropertiesUtils}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -16,10 +17,11 @@ import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
-import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification}
 import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
-import org.apache.flink.util.{FlinkException, Preconditions}
+import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
+import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.{YarnClientYarnClusterInformationRetriever, YarnClusterDescriptor}
 import org.apache.hadoop.yarn.client.api.YarnClient
@@ -150,19 +152,39 @@ object AppSubmit {
       .createClusterSpecification
 
     val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
-    if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." + " Expected deployment.target=" + YarnDeploymentTarget.APPLICATION.getName + " but actual one was \"" + deploymentTarget.getName + "\"")
+    if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) {
+      throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." +
+        " Expected deployment.target=" +
+        YarnDeploymentTarget.APPLICATION.getName +
+        " but actual one was \"" +
+        deploymentTarget.getName + "\""
+      )
+    }
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
 
-    val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-    try {
-      val applicationId = clusterClient.getClusterId
-      System.out.println("---------------------------------------")
-      System.out.println()
-      System.out.println("Flink Job Started: applicationId: " + applicationId)
-      System.out.println()
-      System.out.println("---------------------------------------")
-    } finally if (clusterClient != null) clusterClient.close()
+    SecurityUtils.install(new SecurityConfiguration(flinkConfiguration))
+    val retCode = SecurityUtils.getInstalledContext.runSecured[Int](new Callable[Int] {
+      override def call(): Int = {
+        val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+        try {
+          val applicationId = clusterClient.getClusterId
+          System.out.println("---------------------------------------")
+          System.out.println()
+          System.out.println("Flink Job Started: applicationId: " + applicationId)
+          System.out.println()
+          System.out.println("---------------------------------------")
+          0
+        } catch {
+          case e: Exception =>
+            println(s"[StreamX] Flink Job Start error.$e")
+            1
+        } finally if (clusterClient != null) clusterClient.close()
+      }
+    })
+
+    System.exit(retCode)
+
   }
 
   /**
