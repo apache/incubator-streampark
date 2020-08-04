@@ -16,12 +16,14 @@ import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
-import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer
-import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
+import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
-import org.apache.flink.util.FlinkException
+import org.apache.flink.util.{FlinkException, Preconditions}
 import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.flink.yarn.{YarnClientYarnClusterInformationRetriever, YarnClusterDescriptor}
+import org.apache.hadoop.yarn.client.api.YarnClient
+import org.apache.hadoop.yarn.conf.YarnConfiguration
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -129,14 +131,48 @@ object AppSubmit {
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-    val appConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
-    val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-    val deployer = new ApplicationClusterDeployer(clusterClientServiceLoader)
-    deployer.run(effectiveConfiguration, appConfiguration)
+
+    val yarnClient = YarnClient.createYarnClient
+    val yarnConfiguration = new YarnConfiguration
+    yarnClient.init(yarnConfiguration)
+    yarnClient.start()
+    val clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient)
+
+    val yarnClusterDescriptor = new YarnClusterDescriptor(effectiveConfiguration, yarnConfiguration, yarnClient, clusterInformationRetriever, true)
+    val masterMemory = yarnClusterDescriptor.getFlinkConfiguration.get(JobManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
+    val taskManagerMemory = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
+    val slot = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.NUM_TASK_SLOTS).intValue()
+
+    val clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
+      .setMasterMemoryMB(masterMemory)
+      .setTaskManagerMemoryMB(taskManagerMemory)
+      .setSlotsPerTaskManager(slot)
+      .createClusterSpecification
+
+    val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
+    if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." + " Expected deployment.target=" + YarnDeploymentTarget.APPLICATION.getName + " but actual one was \"" + deploymentTarget.getName + "\"")
+
+    val pipelineJars = flinkConfiguration.getOptional(PipelineOptions.JARS).orElse(Collections.emptyList)
+    Preconditions.checkArgument(pipelineJars.size == 1, "Should only have one jar")
+
+    val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
+
+    try {
+      val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+      try {
+        val applicationId = clusterClient.getClusterId
+        System.out.println("---------------------------------------")
+        System.out.println()
+        System.out.println("Flink Job Started: applicationId: " + applicationId)
+        System.out.println()
+        System.out.println("---------------------------------------")
+      } finally if (clusterClient != null) clusterClient.close()
+    }
   }
 
   /**
    * just create from flink v1.11.1 source
+   *
    * @param activeCustomCommandLine
    * @param commandLine
    * @param jobJars
