@@ -152,50 +152,6 @@ object AppSubmit {
       } finally if (clusterDescriptor != null) clusterDescriptor.close()
     }
 
-    /* val yarnClient = YarnClient.createYarnClient
-     val yarnConfiguration = new YarnConfiguration
-     yarnClient.init(yarnConfiguration)
-     yarnClient.start()
-     val clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient)
-
-     val yarnClusterDescriptor = new YarnClusterDescriptor(effectiveConfiguration, yarnConfiguration, yarnClient, clusterInformationRetriever, true)
-     val masterMemory = yarnClusterDescriptor.getFlinkConfiguration.get(JobManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
-     val taskManagerMemory = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
-     val slot = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.NUM_TASK_SLOTS).intValue()
-
-     val clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
-       .setMasterMemoryMB(masterMemory)
-       .setTaskManagerMemoryMB(taskManagerMemory)
-       .setSlotsPerTaskManager(slot)
-       .createClusterSpecification
-
-     val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
-     if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) {
-       throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." +
-         " Expected deployment.target=" +
-         YarnDeploymentTarget.APPLICATION.getName +
-         " but actual one was \"" +
-         deploymentTarget.getName + "\""
-       )
-     }
-
-     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
-     val clusterClient: ClusterClient[ApplicationId] = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-     try {
-       val applicationId = clusterClient.getClusterId
-       System.out.println("---------------------------------------")
-       System.out.println()
-       System.out.println("Flink Job Started: applicationId: " + applicationId)
-       System.out.println()
-       System.out.println("---------------------------------------")
-     } catch {
-       case e: Exception =>
-         println(s"[StreamX] Flink Job Start error.$e")
-     } finally if (clusterClient != null) clusterClient.close()
-
-     */
-
-
   }
 
 
