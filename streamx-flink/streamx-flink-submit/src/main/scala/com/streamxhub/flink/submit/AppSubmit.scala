@@ -157,17 +157,15 @@ object AppSubmit {
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
 
+    val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
     try {
-      val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-      try {
-        val applicationId = clusterClient.getClusterId
-        System.out.println("---------------------------------------")
-        System.out.println()
-        System.out.println("Flink Job Started: applicationId: " + applicationId)
-        System.out.println()
-        System.out.println("---------------------------------------")
-      } finally if (clusterClient != null) clusterClient.close()
-    }
+      val applicationId = clusterClient.getClusterId
+      System.out.println("---------------------------------------")
+      System.out.println()
+      System.out.println("Flink Job Started: applicationId: " + applicationId)
+      System.out.println()
+      System.out.println("---------------------------------------")
+    } finally if (clusterClient != null) clusterClient.close()
   }
 
   /**
