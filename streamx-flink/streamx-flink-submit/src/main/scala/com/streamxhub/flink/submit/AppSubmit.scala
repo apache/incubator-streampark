@@ -48,10 +48,10 @@ object AppSubmit {
     val appMain = map(KEY_FLINK_APP_MAIN)
 
     //存放flink集群相关的jar包目录
-    val flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/lib")
-    val plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.9.2/plugins")
+    val flinkLibs = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/lib")
+    val plugins = new Path("hdfs://nameservice1/streamx/flink/flink-1.11.1/plugins")
     //用户jar
-    val flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.9.2/lib/flink-dist_2.11-1.11.1.jar"
+    val flinkDistJar = "hdfs://nameservice1/streamx/flink/flink-1.11.1/lib/flink-dist_2.11-1.11.1.jar"
 
     val flinkUserJar = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/lib/streamx-flink-test-1.0.0.jar"
 
