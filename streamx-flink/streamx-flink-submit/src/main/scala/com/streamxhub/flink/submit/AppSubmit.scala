@@ -163,29 +163,18 @@ object AppSubmit {
     }
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
-
-    SecurityUtils.install(new SecurityConfiguration(flinkConfiguration))
-    val retCode = SecurityUtils.getInstalledContext.runSecured[Int](new Callable[Int] {
-      override def call(): Int = {
-        var clusterClient: ClusterClient[ApplicationId] = null
-        try {
-          clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-          val applicationId = clusterClient.getClusterId
-          System.out.println("---------------------------------------")
-          System.out.println()
-          System.out.println("Flink Job Started: applicationId: " + applicationId)
-          System.out.println()
-          System.out.println("---------------------------------------")
-          0
-        } catch {
-          case e: Throwable =>
-            println(s"[StreamX] Flink Job Start error.$e")
-            1
-        } finally if (clusterClient != null) clusterClient.close()
-      }
-    })
-
-    System.exit(retCode)
+    val clusterClient: ClusterClient[ApplicationId] = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+    try {
+      val applicationId = clusterClient.getClusterId
+      System.out.println("---------------------------------------")
+      System.out.println()
+      System.out.println("Flink Job Started: applicationId: " + applicationId)
+      System.out.println()
+      System.out.println("---------------------------------------")
+    } catch {
+      case e: Exception =>
+        println(s"[StreamX] Flink Job Start error.$e")
+    } finally if (clusterClient != null) clusterClient.close()
 
   }
 
