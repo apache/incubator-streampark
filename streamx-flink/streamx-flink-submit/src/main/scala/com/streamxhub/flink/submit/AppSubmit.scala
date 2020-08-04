@@ -18,12 +18,13 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification}
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider, PackagedProgramUtils}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.{YarnClientYarnClusterInformationRetriever, YarnClusterDescriptor}
+import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
 
@@ -166,8 +167,9 @@ object AppSubmit {
     SecurityUtils.install(new SecurityConfiguration(flinkConfiguration))
     val retCode = SecurityUtils.getInstalledContext.runSecured[Int](new Callable[Int] {
       override def call(): Int = {
-        val clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+        var clusterClient: ClusterClient[ApplicationId] = null
         try {
+          clusterClient = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
           val applicationId = clusterClient.getClusterId
           System.out.println("---------------------------------------")
           System.out.println()
