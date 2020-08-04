@@ -3,6 +3,7 @@ package com.streamxhub.flink.submit
 
 import java.net.{MalformedURLException, URL}
 import java.util._
+
 import com.streamxhub.common.util.{HdfsUtils, PropertiesUtils}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
@@ -16,10 +17,11 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -130,7 +132,7 @@ object AppSubmit {
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration)
+    val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
     try {
       val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
@@ -140,7 +142,7 @@ object AppSubmit {
         println(clusterSpecification)
         println("------------------------------------")
 
-        val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+        val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
         val applicationId = clusterClient.getClusterId
         println("------------------<<applicationId>>------------------")
         println()
