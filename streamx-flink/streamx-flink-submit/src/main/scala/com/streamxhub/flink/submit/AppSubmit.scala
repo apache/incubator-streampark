@@ -17,7 +17,8 @@ import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
-import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification}
+import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer
+import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider, PackagedProgramUtils}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
@@ -134,8 +135,12 @@ object AppSubmit {
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
+    val appConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
+    val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
+    val deployer = new ApplicationClusterDeployer(clusterClientServiceLoader)
+    deployer.run(effectiveConfiguration, appConfiguration)
 
-    val yarnClient = YarnClient.createYarnClient
+   /* val yarnClient = YarnClient.createYarnClient
     val yarnConfiguration = new YarnConfiguration
     yarnClient.init(yarnConfiguration)
     yarnClient.start()
@@ -176,7 +181,11 @@ object AppSubmit {
         println(s"[StreamX] Flink Job Start error.$e")
     } finally if (clusterClient != null) clusterClient.close()
 
+    */
+
+
   }
+
 
   /**
    * just create from flink v1.11.1 source
