@@ -105,9 +105,10 @@
                             </artifactSet>
 
                             <transformers>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                <transformers>
+                                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
                                     <mainClass>com.streamxhub.flink.submit.AppSubmit</mainClass>
-                                </transformer>
+                                </transformers>
                             </transformers>
 
                             <filters>
