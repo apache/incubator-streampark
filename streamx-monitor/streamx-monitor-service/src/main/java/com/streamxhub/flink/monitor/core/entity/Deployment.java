@@ -40,7 +40,7 @@ public class Deployment implements Serializable {
 
     public Deployment(Project project, Application application) {
         this.name = project.getName();
-        this.basePath = project.getHome() + File.separator + this.name;
+        //this.basePath = project.getHome() + File.separator + this.name;
         this.confPath = this.basePath + "/conf";
         this.binPath = this.basePath + "/bin";
         this.libPath = this.basePath + "/lib";

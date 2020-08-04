@@ -2,13 +2,17 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.streamxhub.flink.monitor.core.dao.ProjectMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Project">
-        <id column="ID" jdbcType="VARCHAR" property="id"/>
+        <id column="ID" jdbcType="INTEGER" property="id"/>
         <result column="NAME" jdbcType="VARCHAR" property="name"/>
-        <result column="HOME" jdbcType="VARCHAR" property="home"/>
-        <result column="PATH" jdbcType="VARCHAR" property="path"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="PROTOCOL" jdbcType="VARCHAR" property="protocol"/>
+        <result column="URL" jdbcType="VARCHAR" property="url"/>
+        <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+        <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
+        <result column="BRANCHES" jdbcType="VARCHAR" property="branches"/>
         <result column="DATE" jdbcType="TIMESTAMP" property="date"/>
-        <result column="SIZE" jdbcType="BIGINT" property="size"/>
-        <result column="TYPE" jdbcType="INTEGER" property="type"/>
+        <result column="RESPTYPE" jdbcType="INTEGER" property="resptype"/>
+        <result column="cloned" javaType="BOOLEAN" property="cloned"/>
     </resultMap>
 
     <select id="findProject" resultType="project" parameterType="project">
@@ -17,12 +21,17 @@
             <if test="project.name != null and project.name != ''">
                 AND t.name like '%${project.name}%'
             </if>
-            <if test="project.type != null and project.type != ''">
-                AND t.type = #{project.type}
+            <if test="project.resptype != null and project.resptype != ''">
+                AND t.resptype = #{project.resptype}
             </if>
             <if test="project.dateFrom != null and project.dateFrom !=''">
                 And t.date between #{project.dateFrom} and #{project.dateTo}
             </if>
         </where>
     </select>
+
+    <update id="cloned" parameterType="project">
+        update t_flink_project set cloned = 1 where id=#{project.id}
+    </update>
+
 </mapper>

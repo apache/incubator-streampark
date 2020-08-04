@@ -218,6 +218,18 @@
             <artifactId>influxdb-java</artifactId>
             <version>${influxdb.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.scala-lang.modules</groupId>
+            <artifactId>scala-xml_2.11</artifactId>
+            <version>1.0.5</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jgit</groupId>
+            <artifactId>org.eclipse.jgit</artifactId>
+            <version>5.8.1.202007141445-r</version>
+        </dependency>
 
     </dependencies>
 

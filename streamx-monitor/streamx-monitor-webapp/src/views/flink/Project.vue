@@ -1,12 +1,5 @@
 <template>
   <div>
-    <a-upload-dragger name="file" :showUploadList="loading" :customRequest="customRequest" :beforeUpload="beforeUpload" @change="handleChange">
-      <p class="ant-upload-drag-icon">
-        <a-icon type="inbox"/>
-      </p>
-      <p class="ant-upload-text">Click or drag file to this area to upload</p>
-      <p class="ant-upload-hint">please Click or drag your flink application to upload!</p>
-    </a-upload-dragger>
     <a-card :bordered="false" style="margin-top: 20px;">
       <div class="table-page-search-wrapper">
         <a-form layout="inline">
@@ -53,6 +46,13 @@
                     v-permit="'role:delete'"
                     type="primary"
                     shape="circle"
+                    icon="plus"
+                    @click="addProject">
+                  </a-button>
+                  <a-button
+                    v-permit="'role:delete'"
+                    type="primary"
+                    shape="circle"
                     icon="minus"
                     @click="batchDelete">
                   </a-button>
@@ -73,15 +73,15 @@
         :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
         :scroll="{ x: 900 }"
         @change="handleTableChange" >
-        <template slot="remark" slot-scope="text, record">
-          <a-popover placement="topLeft">
-            <template slot="content">
-              <div style="max-width: 200px">{{ text }}</div>
-            </template>
-            <p style="width: 200px;margin-bottom: 0">{{ text }}</p>
-          </a-popover>
-        </template>
-        <template slot="operation" slot-scope="record">
+        <template slot="operation" slot-scope="text, record">
+          <a-popconfirm
+            title="确定要pull最新代码并重新编译该项目吗?"
+            cancel-text="No"
+            ok-text="Yes"
+            @confirm="handleBuild(record)"
+          >
+            <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#4a9ff5" title="编译"></a-icon>
+          </a-popconfirm>
           <a-icon
             v-permit="'role:update'"
             type="setting"
@@ -90,7 +90,7 @@
             @click="edit(record)"
             title="修改角色">
           </a-icon>
-          <a-icon type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+          <a-icon type="eye" theme="twoTone" twoToneColor="#4a9ff5" @click="handleView(record)" title="查看"></a-icon>
         </template>
       </a-table>
 
@@ -100,7 +100,7 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { upload, list, remove } from '@/api/project'
+import { build, list, remove } from '@/api/project'
 export default {
   components: { RangeDate },
   data () {
@@ -121,25 +121,56 @@ export default {
       }
     }
   },
+  filters: {
+    subString (value,length) {
+      if (!value) return ''
+      value = value.toString().substring(0,length)
+      return value
+    }
+  },
   computed: {
     columns () {
       let { sortedInfo } = this
       sortedInfo = sortedInfo || {}
       return [{
-        title: '名称',
+        title: '项目名称',
         dataIndex: 'name'
       }, {
-        title: '类型',
-        dataIndex: 'type'
-      }, {
-        title: '大小',
-        dataIndex: 'size'
-      }, {
-        title: '上传时间',
-        dataIndex: 'date',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order
-      }, {
+        title: '托管平台',
+        dataIndex: 'resptype',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case 1:
+              return <a-icon type="github"></a-icon>
+            case 2:
+              return <a-icon type="medium"></a-icon>
+            default:
+              return text
+          }
+        },
+      },
+      {
+        title: 'Branches',
+        dataIndex: 'branches'
+      },
+      {
+        title: 'Repository URL',
+        dataIndex: 'url',
+        customRender: (text, row, index) => {
+          return <span><a-tooltip>
+            <template slot="title">
+              {{ text }}
+            </template>
+            {{text}}
+          </a-tooltip>
+            <a-icon type="copy"></a-icon>
+          </span>
+        },
+      },{
+        title: 'Last Build',
+        dataIndex: 'date'
+      },
+        {
         title: '操作',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' },
@@ -166,34 +197,23 @@ export default {
         this.$message.error(`${info.file.name} file upload failed.`)
       }
     },
-    beforeUpload (file) {
-      const tar = file.type === 'application/x-gzip'
-      if (!tar) {
-        this.loading = false
-        this.$message.error('You can only upload x-gzip file !')
-        return false
-      }
-      this.loading = true
-      return true
-    },
-    customRequest (data) {
-      const formData = new FormData()
-      formData.append('file', data.file)
-      upload(formData).then((response) => {
-        this.$message.success(response.message)
-        this.loading = false
-        this.fetch()
-      }).catch((error) => {
-        this.$message.error(error.message)
-        this.loading = false
-      })
-    },
-
     handleDateChange (value) {
       if (value) {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
+    },
+    handleBuild (record) {
+      this.$notification.open({
+        message: '编译通知',
+        description: '已发送编译请求,后台正在执行编译,该操作可能花几分钟甚至更多时间来完成编译,请耐心等待',
+        icon: <a-icon type="smile" style="color: #108ee9" />,
+      })
+      build({
+        id: record.id
+      }).then(() => {
+        that.$message.success('编译成功')
+      })
     },
     batchDelete () {
       if (!this.selectedRowKeys.length) {
@@ -250,6 +270,9 @@ export default {
         ...this.queryParams
       })
     },
+    addProject () {
+      this.$router.push({ 'path': 'addproject' })
+    },
     reset () {
       // 取消选中
       this.selectedRowKeys = []
@@ -298,7 +321,10 @@ export default {
 </script>
 
 <style>
-  .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
-    font-size: 100px;
-  }
+.ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
+  font-size: 100px;
+}
+.tooltip {
+  width: 150px;
+}
 </style>
