@@ -3,8 +3,6 @@ package com.streamxhub.flink.submit
 
 import java.net.{MalformedURLException, URL}
 import java.util._
-import java.util.concurrent._
-
 import com.streamxhub.common.util.{HdfsUtils, PropertiesUtils}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration._
@@ -17,17 +15,11 @@ import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
-import org.apache.flink.client.deployment.application.cli.ApplicationClusterDeployer
-import org.apache.flink.client.deployment.{ClusterDeploymentException, ClusterSpecification, DefaultClusterClientServiceLoader}
-import org.apache.flink.client.program.{ClusterClient, ClusterClientProvider, PackagedProgramUtils}
+import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
+import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
-import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.flink.yarn.{YarnClientYarnClusterInformationRetriever, YarnClusterDescriptor}
-import org.apache.hadoop.yarn.api.records.ApplicationId
-import org.apache.hadoop.yarn.client.api.YarnClient
-import org.apache.hadoop.yarn.conf.YarnConfiguration
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -40,6 +32,7 @@ object AppSubmit {
   private[this] val optionPrefix = "flink.deployment.option."
 
   def main(args: Array[String]): Unit = {
+
     //配置文件必须在hdfs上
     val app_conf = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml"
     //val app_conf = "/Users/benjobs/Github/StreamX/streamx-flink/streamx-flink-test/assembly/conf/application.yml"
@@ -135,53 +128,70 @@ object AppSubmit {
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-    val appConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
+
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
-    val deployer = new ApplicationClusterDeployer(clusterClientServiceLoader)
-    deployer.run(effectiveConfiguration, appConfiguration)
+    val clientFactory = clusterClientServiceLoader.getClusterClientFactory(effectiveConfiguration)
+    val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
+    try {
+      val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
+      try {
+        val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
+        println("------------------<<specification>>------------------")
+        println(clusterSpecification)
+        println("------------------------------------")
 
-   /* val yarnClient = YarnClient.createYarnClient
-    val yarnConfiguration = new YarnConfiguration
-    yarnClient.init(yarnConfiguration)
-    yarnClient.start()
-    val clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient)
-
-    val yarnClusterDescriptor = new YarnClusterDescriptor(effectiveConfiguration, yarnConfiguration, yarnClient, clusterInformationRetriever, true)
-    val masterMemory = yarnClusterDescriptor.getFlinkConfiguration.get(JobManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
-    val taskManagerMemory = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
-    val slot = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.NUM_TASK_SLOTS).intValue()
-
-    val clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
-      .setMasterMemoryMB(masterMemory)
-      .setTaskManagerMemoryMB(taskManagerMemory)
-      .setSlotsPerTaskManager(slot)
-      .createClusterSpecification
-
-    val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
-    if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) {
-      throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." +
-        " Expected deployment.target=" +
-        YarnDeploymentTarget.APPLICATION.getName +
-        " but actual one was \"" +
-        deploymentTarget.getName + "\""
-      )
+        val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+        val applicationId = clusterClient.getClusterId
+        println("------------------<<applicationId>>------------------")
+        println()
+        println("Flink Job Started: applicationId: " + applicationId)
+        println()
+        println("------------------------------------")
+      } finally if (clusterDescriptor != null) clusterDescriptor.close()
     }
 
-    val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
-    val clusterClient: ClusterClient[ApplicationId] = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-    try {
-      val applicationId = clusterClient.getClusterId
-      System.out.println("---------------------------------------")
-      System.out.println()
-      System.out.println("Flink Job Started: applicationId: " + applicationId)
-      System.out.println()
-      System.out.println("---------------------------------------")
-    } catch {
-      case e: Exception =>
-        println(s"[StreamX] Flink Job Start error.$e")
-    } finally if (clusterClient != null) clusterClient.close()
+    /* val yarnClient = YarnClient.createYarnClient
+     val yarnConfiguration = new YarnConfiguration
+     yarnClient.init(yarnConfiguration)
+     yarnClient.start()
+     val clusterInformationRetriever = YarnClientYarnClusterInformationRetriever.create(yarnClient)
 
-    */
+     val yarnClusterDescriptor = new YarnClusterDescriptor(effectiveConfiguration, yarnConfiguration, yarnClient, clusterInformationRetriever, true)
+     val masterMemory = yarnClusterDescriptor.getFlinkConfiguration.get(JobManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
+     val taskManagerMemory = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.TOTAL_PROCESS_MEMORY).getMebiBytes
+     val slot = yarnClusterDescriptor.getFlinkConfiguration.get(TaskManagerOptions.NUM_TASK_SLOTS).intValue()
+
+     val clusterSpecification = new ClusterSpecification.ClusterSpecificationBuilder()
+       .setMasterMemoryMB(masterMemory)
+       .setTaskManagerMemoryMB(taskManagerMemory)
+       .setSlotsPerTaskManager(slot)
+       .createClusterSpecification
+
+     val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
+     if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) {
+       throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." +
+         " Expected deployment.target=" +
+         YarnDeploymentTarget.APPLICATION.getName +
+         " but actual one was \"" +
+         deploymentTarget.getName + "\""
+       )
+     }
+
+     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
+     val clusterClient: ClusterClient[ApplicationId] = yarnClusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+     try {
+       val applicationId = clusterClient.getClusterId
+       System.out.println("---------------------------------------")
+       System.out.println()
+       System.out.println("Flink Job Started: applicationId: " + applicationId)
+       System.out.println()
+       System.out.println("---------------------------------------")
+     } catch {
+       case e: Exception =>
+         println(s"[StreamX] Flink Job Start error.$e")
+     } finally if (clusterClient != null) clusterClient.close()
+
+     */
 
 
   }
