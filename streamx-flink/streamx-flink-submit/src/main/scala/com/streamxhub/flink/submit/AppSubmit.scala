@@ -152,7 +152,7 @@ object AppSubmit {
     val deploymentTarget = YarnDeploymentTarget.fromConfig(flinkConfiguration)
     if (YarnDeploymentTarget.APPLICATION ne deploymentTarget) throw new ClusterDeploymentException("Couldn't deploy Yarn Application Cluster." + " Expected deployment.target=" + YarnDeploymentTarget.APPLICATION.getName + " but actual one was \"" + deploymentTarget.getName + "\"")
 
-    val pipelineJars = flinkConfiguration.getOptional(PipelineOptions.JARS).orElse(Collections.emptyList)
+    val pipelineJars = flinkConfiguration.getOptional(PipelineOptions.JARS).orElse(Collections.emptyList[String])
     Preconditions.checkArgument(pipelineJars.size == 1, "Should only have one jar")
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfiguration)
