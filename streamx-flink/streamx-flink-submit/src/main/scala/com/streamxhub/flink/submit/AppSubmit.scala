@@ -178,7 +178,7 @@ object AppSubmit {
           System.out.println("---------------------------------------")
           0
         } catch {
-          case e: Exception =>
+          case e: Throwable =>
             println(s"[StreamX] Flink Job Start error.$e")
             1
         } finally if (clusterClient != null) clusterClient.close()
