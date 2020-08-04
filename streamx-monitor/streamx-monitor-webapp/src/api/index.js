@@ -15,7 +15,8 @@ export default {
     GetJob: '/job/getJob'
   },
   Project: {
-    Upload: '/flink/project/upload',
+    Create: '/flink/project/create',
+    Build: '/flink/project/build',
     List: '/flink/project/list',
     FileList: '/flink/project/filelist',
     Delete: '/flink/project/delete',

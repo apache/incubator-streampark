@@ -26,6 +26,7 @@ object HBaseSinkApp extends FlinkStreaming {
       put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("sid"), Bytes.toBytes(entity.siteId))
       Collections.singleton(put)
     }
+    //source ===> trans ===> sink
 
     //1）插入方式1
     HBaseSink(context).sink[TestEntity](source, "order")

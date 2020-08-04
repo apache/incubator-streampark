@@ -1,10 +1,10 @@
 package com.streamxhub.flink.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.domain.RestResponse;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
-import com.streamxhub.flink.monitor.base.utils.GZipUtil;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ProjectMapper;
 import com.streamxhub.flink.monitor.core.entity.Project;
@@ -13,12 +13,12 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.FileUtils;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.ResetCommand;
+import org.eclipse.jgit.lib.ProgressMonitor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.File;
@@ -33,71 +33,28 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     private StreamXProperties streamXProperties;
 
     @Override
-    public RestResponse upload(MultipartFile file) {
-        String uploadSuffix = ".*tar\\.gz$|.*jar$";
-        String tarSuffix = ".tar.gz";
-        if (Objects.requireNonNull(file.getOriginalFilename()).matches(uploadSuffix)) {
-            try {
-                File saveFile = new File(streamXProperties.getUploadDir() + file.getOriginalFilename());
-                // delete when exsit
-                if (saveFile.exists()) {
-                    saveFile.delete();
-                }
-                // save file to app.home
-                FileUtils.writeByteArrayToFile(saveFile, file.getBytes());
-                File project = null;
-                if (Objects.requireNonNull(file.getOriginalFilename()).endsWith(tarSuffix)) {
-                    project = GZipUtil.decompress(saveFile.getAbsolutePath(), streamXProperties.getWorkSpace());
-                }
-                this.save(saveFile, project, file.getSize());
-                return new RestResponse().message("上传成功");
-            } catch (Exception e) {
-                log.info(e.getMessage());
-                return new RestResponse().message("上传失败");
+    public RestResponse create(Project project) {
+        QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(Project::getName, project.getName());
+        int saved = count(queryWrapper);
+        RestResponse response = RestResponse.create();
+        if (saved == 0) {
+            project.setDate(new Date());
+            project.setProtocol(project.getUrl().split(":")[0]);
+            boolean status = save(project);
+            if (status) {
+                return response.message("添加任务成功");
+            } else {
+                return response.message("添加任务失败");
             }
-        }
-        return new RestResponse().message("上传格式错误");
-    }
-
-    private void save(File jarFile, File projectFile, Long size) {
-        File file;
-        int type;
-        if (projectFile == null) {
-            file = jarFile;
-            type = 1;
         } else {
-            file = projectFile;
-            type = 2;
+            return response.message("该名称的项目已存在,添加任务失败");
         }
-
-        String path = file.getParent();
-        String name = file.getName();
-
-        Project project = new Project();
-        project.setName(name);
-        project.setId(DigestUtils.md5DigestAsHex(name.getBytes()));
-        //项目的home路径
-        project.setHome(path);
-        //保存上传文件的原始路径
-        project.setPath(jarFile.getAbsolutePath());
-        project.setType(type);
-        project.setSize(size);
-        project.setDate(new Date());
-        this.saveOrUpdate(project);
     }
 
     @Override
     public boolean delete(String id) {
-        String[] ids = id.split(",");
-        Collection<Project> projects = super.listByIds(Arrays.asList(ids));
-        projects.forEach((Project x) -> {
-            super.removeById(x.getId());
-            File file = new File(x.getHome() + File.separator + x.getName());
-            deleteFile(file);
-            file = new File(x.getPath());
-            deleteFile(file);
-        });
-        return true;
+        return false;
     }
 
     @Override
@@ -114,50 +71,116 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     @Override
-    public List<Map<String,Object>> filelist(String id) {
-        Project project = getById(id);
+    public List<Map<String, Object>> filelist(String id) {
+       /* Project project = getById(id);
         if (project == null) {
             return null;
         }
-        String path = project.getHome() + File.separator + project.getName();
         File file = new File(path);
-        List<Map<String,Object>> list = new ArrayList<>();
+        List<Map<String, Object>> list = new ArrayList<>();
         //只过滤conf这个目录
         File[] files = file.listFiles(item -> item.getName().equals("conf"));
         assert files != null;
-        for (File item:files) {
-            eachFile(item,list,true);
+        for (File item : files) {
+            eachFile(item, list, true);
         }
-        return list;
+        return list;*/
+        return null;
     }
 
-    private void eachFile(File file,List<Map<String,Object>> list,Boolean isRoot) {
-        if(file!=null && file.exists() && file.listFiles()!=null) {
+    @Override
+    public RestResponse build(Long id) throws Exception {
+        boolean success = cloneOrPull(id);
+        if (success) {
+            return RestResponse.create();
+        } else {
+            return RestResponse.create().message("clone or pull error.");
+        }
+    }
+
+    private boolean cloneOrPull(Long id) {
+        Project project = getById(id);
+        try {
+            if (!project.isCloned()) {
+                Git git = Git.cloneRepository()
+                        .setURI(project.getUrl())
+                        .setDirectory(project.getHome(streamXProperties.getWorkSpace()))
+                        .setBranch(project.getBranches())
+                        .setCredentialsProvider(project.getCredentialsProvider())
+                        .call();
+                git.close();
+                this.baseMapper.cloned(project);
+            } else {
+                Git git = new Git(project.getRepository(streamXProperties.getWorkSpace()));
+                git.reset().setMode(ResetCommand.ResetType.HARD).setRef(project.getBranches()).call();
+
+                log.info("[StreamX] pull starting...");
+                git.pull()
+                        .setRemote("origin")
+                        .setRemoteBranchName(project.getBranches())
+                        .setCredentialsProvider(project.getCredentialsProvider())
+                        .setProgressMonitor(new ProgressMonitor() {
+                            @Override
+                            public void start(int totalTasks) {
+                                System.out.println("[StreamX] start pull...s");
+                            }
+
+                            @Override
+                            public void beginTask(String title, int totalWork) {
+                                System.out.println("[StreamX] beginTask,title:" + title + ",totalWork:" + totalWork);
+                            }
+
+                            @Override
+                            public void update(int completed) {
+                                System.out.println("[StreamX] update, Progress :" + completed + "%");
+                            }
+
+                            @Override
+                            public void endTask() {
+                                System.out.println("[StreamX] end pull...s");
+                            }
+
+                            @Override
+                            public boolean isCancelled() {
+                                return false;
+                            }
+                        }).call();
+                git.close();
+            }
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
+        if (file != null && file.exists() && file.listFiles() != null) {
             if (isRoot) {
                 String title = file.getName();
                 String value = file.getAbsolutePath();
-                Map<String,Object> map = new HashMap<>(0);
-                map.put("key",title);
-                map.put("title",title);
-                map.put("value",value);
-                List<Map<String,Object>> children = new ArrayList<>();
-                eachFile(file,children,false);
-                if(!children.isEmpty()) {
-                    map.put("children",children);
+                Map<String, Object> map = new HashMap<>(0);
+                map.put("key", title);
+                map.put("title", title);
+                map.put("value", value);
+                List<Map<String, Object>> children = new ArrayList<>();
+                eachFile(file, children, false);
+                if (!children.isEmpty()) {
+                    map.put("children", children);
                 }
                 list.add(map);
-            }else {
-                for (File item: file.listFiles()) {
+            } else {
+                for (File item : file.listFiles()) {
                     String title = item.getName();
                     String value = item.getAbsolutePath();
-                    Map<String,Object> map = new HashMap<>(0);
-                    map.put("key",title);
-                    map.put("title",title);
-                    map.put("value",value);
-                    List<Map<String,Object>> children = new ArrayList<>();
-                    eachFile(item,children,false);
-                    if(!children.isEmpty()) {
-                        map.put("children",children);
+                    Map<String, Object> map = new HashMap<>(0);
+                    map.put("key", title);
+                    map.put("title", title);
+                    map.put("value", value);
+                    List<Map<String, Object>> children = new ArrayList<>();
+                    eachFile(item, children, false);
+                    if (!children.isEmpty()) {
+                        map.put("children", children);
                     }
                     list.add(map);
                 }

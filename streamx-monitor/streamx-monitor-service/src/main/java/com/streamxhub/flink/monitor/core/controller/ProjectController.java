@@ -7,12 +7,12 @@ import com.streamxhub.flink.monitor.core.entity.Project;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
+import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
@@ -29,9 +29,14 @@ public class ProjectController extends BaseController {
     @Autowired
     private ProjectService projectService;
 
-    @RequestMapping("upload")
-    public RestResponse upload(@RequestParam("file") MultipartFile file) {
-        return projectService.upload(file);
+    @PostMapping("create")
+    public RestResponse create(Project project) {
+        return projectService.create(project);
+    }
+
+    @PostMapping("build")
+    public RestResponse build(Long id) throws Exception {
+        return projectService.build(id);
     }
 
     @RequestMapping("list")
