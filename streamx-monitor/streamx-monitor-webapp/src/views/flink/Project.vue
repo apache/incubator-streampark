@@ -401,7 +401,7 @@ export default {
       })
       const container = document.getElementById("terminal")
       this.terminal.open(container, true)
-      const socket = new SockJS('http://localhost:10001/websocket')
+      const socket = new SockJS('http://test2:10001/websocket')
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/tail', (msg) => this.terminal.writeln(msg.body) )
