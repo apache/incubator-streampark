@@ -44,7 +44,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
+import java.io.*;
 import java.util.*;
 
 @Slf4j
@@ -316,7 +316,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         builder.append(project.getLog4BuildStart());
         tailBuffer.put(project.getId(), builder);
         try {
-            Process process = Runtime.getRuntime().exec(project.getMavenBuildCmd());
+            Process process = Runtime.getRuntime().exec("/bin/bash", null, null);
+            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream())), true);
+            project.getMavenBuildCmd().forEach(out::println);
+            out.println("exit");
             Scanner scanner = new Scanner(process.getInputStream());
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
@@ -330,11 +333,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 }
                 builder.append(line).append("\n");
             }
-            scanner.close();
             process.waitFor();
+            scanner.close();
             process.getErrorStream().close();
             process.getInputStream().close();
             process.getOutputStream().close();
+            process.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
