@@ -76,6 +76,7 @@ public class Project implements Serializable {
 
     /**
      * 获取项目源码路径
+     *
      * @return
      */
     public File getAppSource() {
@@ -115,12 +116,11 @@ public class Project implements Serializable {
     }
 
     public String getMavenBuildCmd() {
-        return String.format(
-                "mvn clean install -DskipTests -f %s",
-                CommonUtil.notEmpty(this.getPom())
-                        ? this.getAppSource().getAbsolutePath().concat("/").concat(this.getPom())
-                        : this.getAppSource().getAbsolutePath()
-        );
+        String buildHome = this.getAppSource().getAbsolutePath();
+        if (CommonUtil.notEmpty(this.getPom())) {
+            buildHome = new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+        }
+        return String.format("cd %s && mvn clean install -DskipTests", buildHome);
     }
 
     public String getLog4BuildStart() {
