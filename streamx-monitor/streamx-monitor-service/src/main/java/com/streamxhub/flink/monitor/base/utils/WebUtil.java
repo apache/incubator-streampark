@@ -12,6 +12,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -108,13 +109,5 @@ public class WebUtil {
             }
         });
         return StringUtils.lowerCase(result.toString());
-    }
-
-    public static Map<String, String> getRequestMap(HttpServletRequest request) {
-        Map<String, String> map = new HashMap<>(0);
-        request.getParameterMap().forEach((k, v) -> {
-            map.put(k, v[0]);
-        });
-        return map;
     }
 }
