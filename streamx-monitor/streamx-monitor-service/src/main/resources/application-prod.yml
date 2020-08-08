@@ -74,5 +74,5 @@ adminx:
     jwtTimeOut: 86400
 
 streamx:
-  app-home: /Users/benjobs/Workspace/deploy/workspace
+  app-home: /home/hst/workspace/deploy
   workspace: hdfs:///streamx/workspace
