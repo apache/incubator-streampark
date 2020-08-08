@@ -319,7 +319,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             Process process = Runtime.getRuntime().exec("/bin/bash", null, null);
             PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream())), true);
             project.getMavenBuildCmd().forEach(out::println);
-            out.println("exit");
             Scanner scanner = new Scanner(process.getInputStream());
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
