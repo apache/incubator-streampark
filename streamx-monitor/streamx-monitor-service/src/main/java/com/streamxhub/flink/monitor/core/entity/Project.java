@@ -11,7 +11,9 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 /**
  * @author benjobs
@@ -115,12 +117,12 @@ public class Project implements Serializable {
         return repository.exists();
     }
 
-    public String getMavenBuildCmd() {
+    public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtil.notEmpty(this.getPom())) {
             buildHome = new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
         }
-        return String.format("cd %s && mvn clean install -DskipTests", buildHome);
+        return Arrays.asList(buildHome, "mvn clean install -Dmaven.test.skip=true");
     }
 
     public String getLog4BuildStart() {
