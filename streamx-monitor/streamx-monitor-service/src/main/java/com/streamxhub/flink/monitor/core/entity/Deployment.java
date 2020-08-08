@@ -48,7 +48,7 @@ public class Deployment implements Serializable {
         this.tempPath = this.basePath + "/temp";
         this.startup = this.binPath + "/startup.sh";
         this.stop = this.binPath + "/stop.sh";
-        this.conf = application.getConfigFile();
+        this.conf = application.getConfig();
         this.jarFile = this.libPath + "/" + this.name + ".jar";
     }
 

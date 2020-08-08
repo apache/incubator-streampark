@@ -90,7 +90,7 @@ public class PassportController {
         loginLog.setUsername(username);
         this.loginLogService.saveLoginLog(loginLog);
 
-        String token = AdminXUtil.encryptToken(JWTUtil.sign(username, password));
+        String token = WebUtil.encryptToken(JWTUtil.sign(username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);

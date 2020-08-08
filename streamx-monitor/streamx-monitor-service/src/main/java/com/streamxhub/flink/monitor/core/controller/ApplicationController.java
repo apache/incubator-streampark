@@ -12,6 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+
 @Slf4j
 @Validated
 @RestController
@@ -40,7 +42,7 @@ public class ApplicationController extends BaseController {
     }
 
     @RequestMapping("create")
-    public RestResponse create(Application app) {
+    public RestResponse create(Application app) throws IOException {
       boolean saved = applicationService.create(app);
       return RestResponse.create().data(saved);
     }
