@@ -21,7 +21,7 @@ import java.util.stream.IntStream;
  * WEBX工具类
  */
 @Slf4j
-public class AdminXUtil {
+public class WebUtil {
 
     public static User getCurrentUser() {
         String token = (String) SecurityUtils.getSubject().getPrincipal();

@@ -25,8 +25,8 @@ public class SortUtil {
         page.setSize(request.getPageSize());
         String sortField = request.getSortField();
         if (camelToUnderscore) {
-            sortField = AdminXUtil.camelToUnderscore(sortField);
-            defaultSort = AdminXUtil.camelToUnderscore(defaultSort);
+            sortField = WebUtil.camelToUnderscore(sortField);
+            defaultSort = WebUtil.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())
@@ -81,8 +81,8 @@ public class SortUtil {
     public static void handleWrapperSort(RestRequest request, QueryWrapper wrapper, String defaultSort, String defaultOrder, boolean camelToUnderscore) {
         String sortField = request.getSortField();
         if (camelToUnderscore) {
-            sortField = AdminXUtil.camelToUnderscore(sortField);
-            defaultSort = AdminXUtil.camelToUnderscore(defaultSort);
+            sortField = WebUtil.camelToUnderscore(sortField);
+            defaultSort = WebUtil.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())

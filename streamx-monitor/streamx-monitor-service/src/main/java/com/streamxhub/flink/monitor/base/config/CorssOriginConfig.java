@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2015 The AdminX Project
+ * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -20,32 +20,35 @@
  */
 package com.streamxhub.flink.monitor.base.config;
 
+
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import static org.springframework.http.HttpMethod.*;
-
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 /**
  * @author benjobs
  */
 @Configuration
-public class CorssOriginConfig implements WebMvcConfigurer {
+public class CorssOriginConfig {
 
-    @Override
-    public void addCorsMappings(CorsRegistry registry) {
-        //允许跨域访问的路径
-        registry.addMapping("/**")
-                //允许跨域访问的源
-                .allowedOrigins("*")
-                // 允许请求方法
-                .allowedMethods(GET.name(), POST.name(), PUT.name(), OPTIONS.name(), DELETE.name())
-                // 预检间隔时间
-                .maxAge(168000)
-                // 允许头部设置
-                .allowedHeaders("*")
-                // 是否发送cookie
-                .allowCredentials(true);
+    private CorsConfiguration buildConfig() {
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        //允许任何域名访问
+        corsConfiguration.addAllowedOrigin("*");
+        //允许任何header访问
+        corsConfiguration.addAllowedHeader("*");
+        //允许任何方法访问
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.setAllowCredentials(true);
+        return corsConfiguration;
     }
+
+    @Bean
+    public CorsFilter corsFilter() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", buildConfig());
+        return new CorsFilter(source);
+    }
+
 }

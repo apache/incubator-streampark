@@ -19,6 +19,8 @@ export default {
     Build: '/flink/project/build',
     List: '/flink/project/list',
     FileList: '/flink/project/filelist',
+    ListApp: '/flink/project/listapp',
+    ListConf: '/flink/project/listconf',
     Delete: '/flink/project/delete',
     Select: '/flink/project/select'
   },

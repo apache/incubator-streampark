@@ -4,14 +4,17 @@
     <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Application">
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId"/>
-        <result column="CONFIG_FILE" jdbcType="VARCHAR" property="configFile"/>
+        <result column="MODULE" jdbcType="VARCHAR" property="module"/>
+        <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
+        <result column="ARGS" jdbcType="VARCHAR" property="args"/>
+        <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
+        <result column="SHORTOPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
+        <result column="WORKSPACE" jdbcType="VARCHAR" property="workspace"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
         <result column="YARN_NAME" jdbcType="VARCHAR" property="yarnName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
-        <result column="ARGS" jdbcType="VARCHAR" property="args"/>
-        <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>

@@ -7,7 +7,7 @@ import com.streamxhub.flink.monitor.system.entity.User;
 import com.streamxhub.flink.monitor.system.entity.UserConfig;
 import com.streamxhub.flink.monitor.base.domain.router.RouterMeta;
 import com.streamxhub.flink.monitor.base.domain.router.VueRouter;
-import com.streamxhub.flink.monitor.base.utils.AdminXUtil;
+import com.streamxhub.flink.monitor.base.utils.WebUtil;
 import com.streamxhub.flink.monitor.base.utils.TreeUtil;
 import com.streamxhub.flink.monitor.system.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,7 +46,7 @@ public class UserManager {
      * @return 用户基本信息
      */
     public User getUser(String username) {
-        return AdminXUtil.selectCacheByTemplate(
+        return WebUtil.selectCacheByTemplate(
                 () -> this.cacheService.getUser(username),
                 () -> this.userService.findByName(username));
     }
@@ -58,7 +58,7 @@ public class UserManager {
      * @return 角色集合
      */
     public Set<String> getUserRoles(String username) {
-        List<Role> roleList = AdminXUtil.selectCacheByTemplate(
+        List<Role> roleList = WebUtil.selectCacheByTemplate(
                 () -> this.cacheService.getRoles(username),
                 () -> this.roleService.findUserRole(username));
         return roleList.stream().map(Role::getRoleName).collect(Collectors.toSet());
@@ -71,7 +71,7 @@ public class UserManager {
      * @return 权限集合
      */
     public Set<String> getUserPermissions(String username) {
-        List<Menu> permissionList = AdminXUtil.selectCacheByTemplate(
+        List<Menu> permissionList = WebUtil.selectCacheByTemplate(
                 () -> this.cacheService.getPermissions(username),
                 () -> this.menuService.findUserPermissions(username));
         return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
@@ -111,7 +111,7 @@ public class UserManager {
      * @return 前端系统个性化配置
      */
     public UserConfig getUserConfig(String userId) {
-        return AdminXUtil.selectCacheByTemplate(
+        return WebUtil.selectCacheByTemplate(
                 () -> this.cacheService.getUserConfig(userId),
                 () -> this.userConfigService.findByUserId(userId));
     }

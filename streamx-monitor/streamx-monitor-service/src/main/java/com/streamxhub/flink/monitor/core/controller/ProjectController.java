@@ -7,7 +7,6 @@ import com.streamxhub.flink.monitor.core.entity.Project;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -45,6 +44,18 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(page);
     }
 
+    @RequestMapping("listapp")
+    public RestResponse listApp(Long id) {
+        List<Map<String, String>> result = projectService.listApp(id);
+        return RestResponse.create().data(result);
+    }
+
+    @RequestMapping("listconf")
+    public RestResponse listConf(String path) {
+        List<Map<String,Object>> list = projectService.listConf(path);
+        return RestResponse.create().data(list);
+    }
+
     @RequestMapping("select")
     public RestResponse select() {
         return RestResponse.create().data(projectService.list());
@@ -54,12 +65,6 @@ public class ProjectController extends BaseController {
     public RestResponse delete(String id) {
         boolean result = projectService.delete(id);
         return RestResponse.create().message(result ? "删除成功" : "删除失败");
-    }
-
-    @RequestMapping("filelist")
-    public RestResponse filelist(String id) {
-        List<Map<String,Object>> result = projectService.filelist(id);
-        return RestResponse.create().data(result);
     }
 
 }

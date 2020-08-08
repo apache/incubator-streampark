@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Copyright (c) 2015 The adminx Project
+# Copyright (c) 2019 The StreamX Project
 #
 # Licensed to the Apache Software Foundation (ASF) under one
 # or more contributor license agreements. See the NOTICE file

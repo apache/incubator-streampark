@@ -2,7 +2,7 @@
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
     <a-form @submit="handleSubmit" :form="form">
       <a-form-item
-        label="项目"
+        label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -11,8 +11,23 @@
           :filterOption="filterOption"
           placeholder="请选择项目"
           @change="handleProject"
-          v-decorator="[ 'project', {rules: [{ required: true, message: '请选择项目'}]} ]">
+          v-decorator="[ 'projectId', {rules: [{ required: true, message: '请选择项目'}]} ]">
           <a-select-option v-for="p in project" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
+        </a-select>
+      </a-form-item>
+      <a-form-item
+        label="Application"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          label="应用"
+          showSearch
+          optionFilterProp="children"
+          :filterOption="filterOption"
+          placeholder="请选择部署模式"
+          @change="handleApp"
+          v-decorator="[ 'module', {rules: [{ required: true, message: '请选择应用'}]} ]">
+          <a-select-option v-for="p in appList" :key="p.name" :value="p.path">{{ p.name }}</a-select-option>
         </a-select>
       </a-form-item>
       <a-form-item
@@ -21,11 +36,11 @@
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-tree-select
           :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
-          :treeData="configFileData"
+          :treeData="configSource"
           placeholder="请选择配置文件"
           treeDefaultExpandAll
           @change="handleAppName"
-          v-decorator="[ 'configFile', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
+          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
           >
         </a-tree-select>
       </a-form-item>
@@ -49,6 +64,7 @@
           <a-select-option v-for="p in deploymentModes" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
         </a-select>
       </a-form-item>
+
       <a-form-item
         label="资源参数"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -58,19 +74,19 @@
           allowClear
           mode="multiple"
           :maxTagCount="maxTagCount"
-          ref="confOpt"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
-          v-decorator="['configOpt']">
-          <a-select-option v-for="(conf,index) in configOptions" v-if="conf.group === mode" :key="index" :value="conf.name">{{ conf.title }} ( {{ conf.name }} )</a-select-option>
+          v-decorator="['options']">
+          <a-select-option v-for="(conf,index) in options" v-if="conf.group === mode" :key="index" :value="conf.name">{{ conf.key }} ( {{ conf.name }} )</a-select-option>
         </a-select>
       </a-form-item>
+
       <a-form-item
         class="conf_item"
-        v-for="(conf,index) in configOptions"
-        v-if="configItems.includes(conf.name) && mode == conf.group"
+        v-for="(conf,index) in options"
+        v-if="configItems.includes(conf.name) && mode === conf.group"
         :key="index"
-        :label="conf.title"
+        :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input v-if="conf.type === 'input'" type="text" :placeholder="conf.placeholder" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
@@ -84,6 +100,7 @@
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
+
       <a-form-item
         label="动态参数"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -125,12 +142,12 @@
 </template>
 
 <script>
-import { select, fileList } from '@/api/project'
+import { select, listApp, listConf } from '@/api/project'
 import { create, name } from '@/api/application'
 
 const configOptions = [
   {
-    title: '-n',
+    key: '-n',
     name: 'container',
     placeholder: '-n,--container <arg>',
     description: 'TaskManager分配个数',
@@ -146,7 +163,7 @@ const configOptions = [
     }
   },
   {
-    title: '-d',
+    key: '-d',
     name: 'detached',
     placeholder: '-d,--detached',
     description: '以独立模式运行',
@@ -158,7 +175,7 @@ const configOptions = [
     }
   },
   {
-    title: '-jm',
+    key: '-jm',
     name: 'jobManagerMemory',
     placeholder: '-jm,--jobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
@@ -177,7 +194,7 @@ const configOptions = [
 
   // ------------------------------------------------------- YARN -------------------------------------------------------
   {
-    title: '-m',
+    key: '-m',
     name: 'jobmanager',
     placeholder: '-m,--jobmanager <arg>',
     description: 'JobManager 地址(yarn-cluster)',
@@ -193,7 +210,7 @@ const configOptions = [
     }
   },
   {
-    title: '-d',
+    key: '-d',
     name: 'detached',
     placeholder: '-d,--detached',
     description: '以独立模式运行',
@@ -205,7 +222,7 @@ const configOptions = [
     }
   },
   {
-    title: '-yjm',
+    key: '-yjm',
     name: 'yarnjobManagerMemory',
     placeholder: '-yjm,--yarnjobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
@@ -222,7 +239,7 @@ const configOptions = [
     }
   },
   {
-    title: '-ytm',
+    key: '-ytm',
     name: 'yarntaskManagerMemory',
     placeholder: '-ytm,--yarntaskManagerMemory <arg>',
     description: 'TaskManager内存大小 (单位: MB)',
@@ -239,7 +256,7 @@ const configOptions = [
     }
   },
   {
-    title: '-ys',
+    key: '-ys',
     name: 'yarnslots',
     placeholder: '-ys,--yarnslots <arg> ',
     description: '每个TaskManager可分配的slot数量',
@@ -256,7 +273,7 @@ const configOptions = [
     }
   },
   {
-    title: '-ynm',
+    key: '-ynm',
     name: 'yarnname',
     placeholder: '-ynm,--yarnname <arg> ',
     description: '自定义应用程序名称(on YARN)',
@@ -268,7 +285,7 @@ const configOptions = [
     }
   },
   {
-    title: '-yat',
+    key: '-yat',
     name: 'yarnapplicationType',
     placeholder: '-yat,--yarnapplicationType <arg>',
     group: 'yarn',
@@ -279,7 +296,7 @@ const configOptions = [
     }
   },
   {
-    title: '-yqu',
+    key: '-yqu',
     name: 'yarnqueue',
     placeholder: '-yqu,--yarnqueue <arg> ',
     group: 'yarn',
@@ -295,7 +312,7 @@ const configOptions = [
     }
   },
   {
-    title: '-yz',
+    key: '-yz',
     name: 'yarnzookeeperNamespace',
     placeholder: '-yz,--yarnzookeeperNamespace <arg>',
     description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
@@ -307,7 +324,7 @@ const configOptions = [
     }
   },
   {
-    title: '-ynl',
+    key: '-ynl',
     name: 'yarnnodeLabel',
     placeholder: '-ynl,--yarnnodeLabel <arg>',
     description: 'Specify YARN node label for the YARN application',
@@ -319,7 +336,7 @@ const configOptions = [
     }
   },
   {
-    title: '-sae',
+    key: '-sae',
     name: 'shutdownOnAttachedExit',
     placeholder: '-sae,--shutdownOnAttachedExit',
     description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
@@ -332,7 +349,7 @@ const configOptions = [
   },
 
   {
-    title: '-yq',
+    key: '-yq',
     name: 'yarnquery',
     placeholder: '-yq,--yarnquery',
     description: '显示YARN上可用的资源(memory, cores)',
@@ -344,7 +361,7 @@ const configOptions = [
     }
   },
   {
-    title: '-yh',
+    key: '-yh',
     name: 'yarnhelp',
     placeholder: '-yh,--yarnhelp',
     description: 'YRAN Session帮助信息',
@@ -364,11 +381,13 @@ export default {
       maxTagCount: 1,
       value: 1,
       project: [],
-      configFile: null,
-      configFileData: [],
+      appList: [],
+      app: null,
+      config: null,
+      configSource: [],
       configItems: [],
       form: null,
-      configOptions: configOptions,
+      options: configOptions,
       mode: 'yarn',
       deploymentModes: [
         { id: 'yarn', name: 'PreJob Cluster', default: true },
@@ -397,10 +416,10 @@ export default {
       })
     },
     handleProject (value) {
-      fileList({
+      listApp({
         id: value
       }).then((resp) => {
-        this.configFileData = resp.data
+        this.appList = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -408,6 +427,7 @@ export default {
     handleConf (name) {
       this.configItems = name
     },
+
     handleSwitch (bool, conf) {
       const v = {}
       v[conf.name] = bool
@@ -416,15 +436,24 @@ export default {
     handleMode (selectMode) {
       if (this.mode !== selectMode) {
         this.configItems = []
-        this.form.resetFields(`configOpt`, [])
+        this.form.resetFields(`options`, [])
       }
       this.mode = selectMode
     },
     handleAppName (confFile) {
       name({
-        configFile: confFile
+        config: confFile
       }).then((resp) => {
         this.form.setFieldsValue({ 'appName': resp.data })
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+    handleApp (app) {
+      listConf({
+        path:app
+      }).then((resp) => {
+        this.configSource = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -434,28 +463,33 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          const projectId = values.project
-          const configFile = values.configFile
-          const args = values.args
-          const dynamicProp = values.dynamicProp
-          const description = values.description
-          const config = {}
+          const options = {}
+          let shortOptions = ""
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
+              const option = configOptions.filter((elem) => k === elem.name )[0]
+              const key = option.key
               if (v !== false && v !== '') {
-                config[k] = values[k]
+                options[k] = v
+                shortOptions += key + ' '
+                if ( option.type !== 'switch') {
+                  shortOptions += v + ' '
+                }
               }
             }
           }
-          console.log(config)
+
           create({
-            projectId: projectId,
-            configFile: configFile,
-            args: args,
-            dynamicProp: dynamicProp,
-            description: description,
-            config: JSON.stringify(config)
+            projectId: values.projectId,
+            module: values.module,
+            config: values.config,
+            appName: values.appName,
+            args: values.args,
+            options: JSON.stringify(options),
+            shortOptions: shortOptions,
+            dynamicProp: values.dynamicProp,
+            description: values.description
           }).then((resp) => {
             const created = resp.data
             if (created) {

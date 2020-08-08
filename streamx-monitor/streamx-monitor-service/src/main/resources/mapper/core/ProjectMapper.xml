@@ -4,15 +4,16 @@
     <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Project">
         <id column="ID" jdbcType="INTEGER" property="id"/>
         <result column="NAME" jdbcType="VARCHAR" property="name"/>
-        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
-        <result column="PROTOCOL" jdbcType="VARCHAR" property="protocol"/>
         <result column="URL" jdbcType="VARCHAR" property="url"/>
+        <result column="REPOSITORY" jdbcType="INTEGER" property="repository"/>
+        <result column="BRANCHES" jdbcType="VARCHAR" property="branches"/>
         <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
         <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
-        <result column="BRANCHES" jdbcType="VARCHAR" property="branches"/>
+        <result column="POM" jdbcType="VARCHAR" property="pom"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="LASTBUILD" jdbcType="TIMESTAMP" property="lastBuild"/>
+        <result column="BUILDSTATE" jdbcType="INTEGER" property="buildState"/>
         <result column="DATE" jdbcType="TIMESTAMP" property="date"/>
-        <result column="RESPTYPE" jdbcType="INTEGER" property="resptype"/>
-        <result column="cloned" javaType="BOOLEAN" property="cloned"/>
     </resultMap>
 
     <select id="findProject" resultType="project" parameterType="project">
@@ -21,8 +22,8 @@
             <if test="project.name != null and project.name != ''">
                 AND t.name like '%${project.name}%'
             </if>
-            <if test="project.resptype != null and project.resptype != ''">
-                AND t.resptype = #{project.resptype}
+            <if test="project.repository != null and project.repository != ''">
+                AND t.repository = #{project.repository}
             </if>
             <if test="project.dateFrom != null and project.dateFrom !=''">
                 And t.date between #{project.dateFrom} and #{project.dateTo}
@@ -30,8 +31,22 @@
         </where>
     </select>
 
-    <update id="cloned" parameterType="project">
-        update t_flink_project set cloned = 1 where id=#{project.id}
+    <update id="successBuild" parameterType="project">
+        update t_flink_project
+        set lastBuild = now(),BUILDSTATE=1
+        where id=#{project.id}
+    </update>
+
+    <update id="failureBuild" parameterType="project">
+        update t_flink_project
+        set BUILDSTATE=2
+        where id=#{project.id}
+    </update>
+
+    <update id="startBuild" parameterType="project">
+        update t_flink_project
+        set BUILDSTATE = 0
+        where id=#{project.id}
     </update>
 
 </mapper>
