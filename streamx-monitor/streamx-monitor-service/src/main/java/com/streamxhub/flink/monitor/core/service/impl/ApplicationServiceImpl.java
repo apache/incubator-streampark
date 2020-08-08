@@ -93,7 +93,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     private String upload2Workspace(Application app) throws IOException {
-        //HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace().replaceFirst("hdfs:/+", "/"));
+        HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace().replaceFirst("hdfs:/+", "/"));
         return properties.getWorkspace().concat("/").concat(app.getModule().replaceAll(".*/", ""));
     }
 
