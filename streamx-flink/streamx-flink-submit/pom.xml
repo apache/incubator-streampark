@@ -89,7 +89,7 @@
 
     </dependencies>
 
-    <build>
+   <!-- <build>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -114,12 +114,12 @@
                                 </excludes>
                             </artifactSet>
 
-                          <!--  <transformers>
+                          &lt;!&ndash;  <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <mainClass>com.streamxhub.flink.submit.AppSubmit</mainClass>
                                 </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-                            </transformers>-->
+                            </transformers>&ndash;&gt;
 
                             <filters>
                                 <filter>
@@ -136,6 +136,6 @@
                 </executions>
             </plugin>
         </plugins>
-    </build>
+    </build>-->
 
 </project>
