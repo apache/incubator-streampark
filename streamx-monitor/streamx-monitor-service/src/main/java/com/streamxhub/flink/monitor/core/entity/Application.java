@@ -3,9 +3,12 @@ package com.streamxhub.flink.monitor.core.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
+import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -23,7 +26,7 @@ public class Application implements Serializable {
      * 创建人
      */
     private Long userId;
-    private String configFile;
+    private String config;
     /**
      * 仅前端页面显示的任务名称
      */
@@ -35,13 +38,20 @@ public class Application implements Serializable {
     private String appId;
     private Integer state;
     private String args;
-    private String config;
+    private String module;//应用程序模块
+    private String options;
+    private String shortOptions;
+
     private String description;
     private Date createTime;
+    private String workspace;
     private transient String userName;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;
 
-
+    public File getAppBase() {
+        String localWorkspace = SpringContextUtil.getBean(StreamXProperties.class).getAppHome();
+        return new File(localWorkspace.concat("/app/").concat(projectId));
+    }
 }

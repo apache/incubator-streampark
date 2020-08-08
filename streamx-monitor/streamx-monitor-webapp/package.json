@@ -23,7 +23,10 @@
     "md5": "^2.2.1",
     "mockjs2": "^1.0.5",
     "moment": "^2.24.0",
+    "net": "^1.0.2",
     "nprogress": "^0.2.0",
+    "sockjs-client": "^1.5.0",
+    "stompjs": "^2.3.3",
     "viser-vue": "^2.3.3",
     "vue": "^2.5.22",
     "vue-clipboard2": "^0.2.1",
@@ -31,9 +34,12 @@
     "vue-ls": "^3.2.0",
     "vue-quill-editor": "^3.0.6",
     "vue-router": "^3.0.1",
+    "vue-stomp": "0.0.5",
     "vue-svg-component-runtime": "^1.0.1",
     "vuex": "^3.1.0",
-    "wangeditor": "^3.1.1"
+    "wangeditor": "^3.1.1",
+    "xterm": "^4.8.1",
+    "xterm-addon-fit": "^0.4.0"
   },
   "devDependencies": {
     "@ant-design/colors": "^3.1.0",

@@ -9,5 +9,9 @@ import org.apache.ibatis.annotations.Param;
 public interface ProjectMapper extends BaseMapper<Project> {
     IPage<Project> findProject(Page<Project> page,@Param("project") Project project);
 
-    void cloned(@Param("project") Project project);
+    void failureBuild(@Param("project") Project project);
+
+    void successBuild(@Param("project") Project project);
+
+    void startBuild(@Param("project") Project project);
 }

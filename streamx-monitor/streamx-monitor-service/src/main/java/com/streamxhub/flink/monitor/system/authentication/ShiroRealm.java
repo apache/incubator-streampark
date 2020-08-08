@@ -5,7 +5,7 @@ import com.streamxhub.flink.monitor.system.manager.UserManager;
 import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.utils.HttpContextUtil;
 import com.streamxhub.flink.monitor.base.utils.IPUtil;
-import com.streamxhub.flink.monitor.base.utils.AdminXUtil;
+import com.streamxhub.flink.monitor.base.utils.WebUtil;
 import com.streamxhub.flink.monitor.system.service.RedisService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
@@ -77,7 +77,7 @@ public class ShiroRealm extends AuthorizingRealm {
         HttpServletRequest request = HttpContextUtil.getHttpServletRequest();
         String ip = IPUtil.getIpAddr(request);
 
-        String encryptToken = AdminXUtil.encryptToken(token);
+        String encryptToken = WebUtil.encryptToken(token);
         String encryptTokenInRedis = null;
         try {
             encryptTokenInRedis = redisService.get(Constant.TOKEN_CACHE_PREFIX + encryptToken + "." + ip);

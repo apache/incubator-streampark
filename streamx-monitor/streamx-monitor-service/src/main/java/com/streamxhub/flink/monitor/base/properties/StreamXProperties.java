@@ -13,26 +13,6 @@ public class StreamXProperties {
 
     private String appHome;
 
-    public String getAppHome() {
-        if (this.appHome == null) {
-            return null;
-        }
-        return appHome.endsWith("/") ? appHome : appHome + "/";
-    }
+    private String workspace;
 
-    public String getUploadDir() {
-        File path = new File(getAppHome() + "upload");
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        return path.getAbsolutePath().concat("/");
-    }
-
-    public String getWorkSpace() {
-        File path = new File(getAppHome() + "workspace");
-        if (!path.exists()) {
-            path.mkdirs();
-        }
-        return path.getAbsolutePath().concat("/");
-    }
 }

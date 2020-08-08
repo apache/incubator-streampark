@@ -18,30 +18,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.monitor.core.service;
+package com.streamxhub.flink.monitor.base.config;
 
-import com.streamxhub.flink.monitor.base.domain.RestRequest;
-import com.streamxhub.flink.monitor.base.domain.RestResponse;
-import com.streamxhub.flink.monitor.core.entity.Project;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.List;
-import java.util.Map;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.simp.config.MessageBrokerRegistry;
+import org.springframework.web.socket.config.annotation.*;
 
-public interface ProjectService extends IService<Project> {
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
-    RestResponse create(Project project);
+    @Override
+    public void registerStompEndpoints(StompEndpointRegistry registry) {
+        registry.addEndpoint("/websocket")
+                .setAllowedOrigins("*")
+                .withSockJS();
+    }
 
-    boolean delete(String id);
+    @Override
+    public void configureMessageBroker(MessageBrokerRegistry registry) {
 
-    IPage<Project> page(Project project, RestRequest restRequest);
+        registry.setApplicationDestinationPrefixes("/req");
 
-    RestResponse build(Long id) throws Exception;
-
-    void tailBuildLog(Long id);
-
-    List<Map<String, String>> listApp(Long id);
-
-    List<Map<String,Object>> listConf(String path);
+        registry.enableSimpleBroker("/resp");
+    }
 }

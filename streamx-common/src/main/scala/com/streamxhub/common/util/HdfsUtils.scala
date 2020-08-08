@@ -34,6 +34,8 @@ import scala.util.{Failure, Success, Try}
 
 object HdfsUtils {
 
+
+
   lazy val conf: Configuration = {
     val conf = new Configuration()
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
@@ -61,6 +63,8 @@ object HdfsUtils {
     outputStream.flush()
     outputStream.close()
   }
+
+  def exists(path: String) =  hdfs.exists(getPath(path))
 
   @throws[IOException] def readFile(fileName: String): String = {
     val path: Path = getPath(fileName)

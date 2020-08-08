@@ -18,12 +18,13 @@
           optionFilterProp="children"
           :filterOption="filterOption"
           placeholder="请选择托管平台"
-          ref="codeResp"
+          ref="repository"
           @change="handleResp"
-          v-decorator="[ 'codeResp', {rules: [{ required: true, message: '请选择托管平台'}]} ]">
-          <a-select-option v-for="p in options.codeResp" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
+          v-decorator="[ 'repository', {rules: [{ required: true, message: '请选择托管平台'}]} ]">
+          <a-select-option v-for="p in options.repository" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
         </a-select>
       </a-form-item>
+
       <a-form-item
         label="Repository URL"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -34,6 +35,7 @@
                  @change="handleSchema"
                  v-decorator="['url',{ rules: [{ required: true, message: '请输入项目仓库地址' } ]}]"/>
       </a-form-item>
+
       <a-form-item
         label="Branches"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -43,6 +45,34 @@
                  defaultValue="master"
                  v-decorator="['branches',{ rules: [{ required: true, message: '请输入项目分支' } ],initialValue:'master'}]"/>
       </a-form-item>
+
+      <a-form-item
+        label="用户名"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input type="text"
+                 placeholder="请输入项目访问的认证用户名"
+                 v-decorator="['username',{ rules: [{ message: '请输入项目访问的认证用户名' } ]}]"/>
+      </a-form-item>
+
+      <a-form-item
+        label="密码"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input type="password"
+                 placeholder="请输入项目访问的认证密码"
+                 v-decorator="['password',{ rules: [{ message: '请输入项目访问的认证密码' } ]}]"/>
+      </a-form-item>
+
+      <a-form-item
+        label="POM"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input type="text"
+                 placeholder="默认在根路径下寻找pom.xml,可手动指定要编译模块的pom.xml相对路径"
+                 v-decorator="['pom',{ rules: [{ message: '指定要编译的模块pom.xml的相对路径,如不指定则在根路径下寻找pom.xml' } ]}]"/>
+      </a-form-item>
+
       <a-form-item
         label="应用描述"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -73,7 +103,7 @@ export default {
     return {
       schema: 'ssh',
       options: {
-        codeResp: [
+        repository: [
           {id: 1, name: 'GitHub/GitLab', default: true},
           {id: 2, name: 'Subversion', default: false}
         ]
@@ -91,7 +121,7 @@ export default {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
     handleResp(selected) {
-      this.codeResp = selected
+      this.repository = selected
     },
 
     handleSchema() {
@@ -104,9 +134,12 @@ export default {
         if (!err) {
           create({
             name: values.name,
-            resptype: values.codeResp,
             url: values.url,
+            repository: values.repository,
             branches: values.branches,
+            username: values.username,
+            password: values.password,
+            pom: values.pom,
             description: values.description
           }).then((resp) => {
             const created = resp.data

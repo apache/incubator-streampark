@@ -2,24 +2,24 @@ package com.streamxhub.flink.monitor.core.service.impl;
 
 
 import com.streamxhub.common.conf.ParameterCli;
+import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
+import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
-import com.streamxhub.flink.monitor.core.entity.Deployment;
 import com.streamxhub.flink.monitor.core.entity.Project;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
-import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.flink.monitor.core.enums.AppState;
 import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
+import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -28,11 +28,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -46,6 +46,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private ServerUtil serverUtil;
 
+    @Autowired
+    private StreamXProperties properties;
 
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
@@ -58,7 +60,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public String getYarnName(Application app) {
         String[] args = new String[2];
         args[0] = "--name";
-        args[1] = app.getConfigFile();
+        args[1] = app.getConfig();
         return ParameterCli.read(args);
     }
 
@@ -68,7 +70,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean create(Application app) {
+    public boolean create(Application app) throws IOException {
         if (app.getConfig() != null && app.getConfig().trim().length() > 0) {
             try {
                 String config = URLDecoder.decode(app.getConfig(), "UTF-8");
@@ -77,13 +79,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         }
+        String workspace = upload2Workspace(app);
+        app.setWorkspace(workspace);
         //配置文件中配置的yarnName..
         String yarnName = this.getYarnName(app);
         app.setYarnName(yarnName);
         app.setUserId(serverUtil.getUser().getUserId());
         app.setState(AppState.CREATED.getValue());
         app.setCreateTime(new Date());
+        app.setModule(app.getModule().replace(app.getAppBase().getAbsolutePath() + "/", ""));
+        app.setConfig(app.getConfig().replace(app.getAppBase().getAbsolutePath() + "/".concat(app.getModule()).concat("/"), ""));
         return save(app);
+    }
+
+    private String upload2Workspace(Application app) throws IOException {
+        //HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace().replaceFirst("hdfs:/+", "/"));
+        return properties.getWorkspace().concat("/").concat(app.getModule().replaceAll(".*/", ""));
     }
 
     @Override
@@ -92,25 +103,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        //deploying...
-        application.setState(AppState.DEPLOYING.getValue());
-        updateById(application);
-
-        JSONObject jsonConf = JSON.parseObject(application.getConfig());
-        StringBuilder builder = new StringBuilder();
-        for (Map.Entry<String, Object> objectEntry : jsonConf.entrySet()) {
-            String k = objectEntry.getKey();
-            Object v = objectEntry.getValue();
-            builder.append("--").append(k).append(" ");
-            if (!(v instanceof Boolean)) {
-                builder.append(v).append(" ");
-            }
-        }
-        String args = builder.toString().trim();
-        Deployment deployment = new Deployment(project, application);
-        deployment.setArgs(args);
-        deployment.startUp();
-        this.getAppId(application);
+        String appConf = String.format("%s/%s/%s", properties.getWorkspace(), application.getModule(), application.getConfig());
+        String flinkUserJar = String.format("%s/%s/lib/%s.jar", properties.getWorkspace(), application.getModule(), application.getModule());
+        String[] overrideOption = application.getShortOptions().split("\\s+");
+        ApplicationId appId = FlinkSubmit.submit(
+                properties.getWorkspace().replaceFirst("hdfs:/+", "/"),
+                flinkUserJar,
+                application.getYarnName(),
+                appConf,
+                overrideOption,
+                application.getArgs()
+        );
+        System.out.println(appId.toString());
         return true;
     }
 

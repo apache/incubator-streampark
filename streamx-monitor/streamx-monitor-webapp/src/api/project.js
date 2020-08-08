@@ -17,6 +17,14 @@ export function fileList (params) {
   return http.post(api.Project.FileList, params)
 }
 
+export function listApp (params) {
+  return http.post(api.Project.ListApp, params)
+}
+
+export function listConf (params) {
+  return http.post(api.Project.ListConf, params)
+}
+
 export function remove (params) {
   return http.post(api.Project.Delete, params)
 }

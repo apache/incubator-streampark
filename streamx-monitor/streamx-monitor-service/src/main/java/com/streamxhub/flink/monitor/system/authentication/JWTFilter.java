@@ -3,7 +3,7 @@ package com.streamxhub.flink.monitor.system.authentication;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.flink.monitor.base.properties.AdminXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
-import com.streamxhub.flink.monitor.base.utils.AdminXUtil;
+import com.streamxhub.flink.monitor.base.utils.WebUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -52,7 +52,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader(TOKEN);
-        JWTToken jwtToken = new JWTToken(AdminXUtil.decryptToken(token));
+        JWTToken jwtToken = new JWTToken(WebUtil.decryptToken(token));
         try {
             getSubject(request, response).login(jwtToken);
             return true;
