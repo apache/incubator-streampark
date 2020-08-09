@@ -48,7 +48,7 @@ object FlinkSubmit extends Logger {
       s"overrideOption ${overrideOption.mkString(" ")}," +
       s"args $args")
 
-    val map = if (appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.readFile(appConf)) else PropertiesUtils.fromYamlFile(appConf)
+    val map = if (appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(appConf)) else PropertiesUtils.fromYamlFile(appConf)
     val appName = if (yarnName == null) map(KEY_FLINK_APP_NAME) else yarnName
     val appMain = map(KEY_FLINK_APP_MAIN)
 
@@ -62,13 +62,13 @@ object FlinkSubmit extends Logger {
 
     val flinkVersion = new File(flinkHome).getName
 
-    val flinkHdfsDir = s"${workspace.replaceAll("[^/]*$","")}flink/$flinkVersion"
+    val flinkHdfsDir = s"${workspace.replaceFirst("[^/]*$","flink")}/$flinkVersion"
 
     logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsDir")
 
     if (!HdfsUtils.exists(flinkHdfsDir)) {
       logInfo(s"[StreamX] $flinkHdfsDir is not exists,upload beginning....")
-      HdfsUtils.uploadFile(flinkHome, flinkHdfsDir)
+      HdfsUtils.upload(flinkHome, flinkHdfsDir)
     }
 
     //存放flink集群相关的jar包目录

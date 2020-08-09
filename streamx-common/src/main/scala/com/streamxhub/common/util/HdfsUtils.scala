@@ -55,7 +55,7 @@ object HdfsUtils {
    * @param content
    * @throws
    */
-  @throws[IOException] def createFile(fileName: String, content: String): Unit = {
+  @throws[IOException] def create(fileName: String, content: String): Unit = {
     val path: Path = getPath(fileName)
     require(hdfs.exists(path), s"[StreamX] hdfs $fileName is exists!! ")
     val outputStream: FSDataOutputStream = hdfs.create(path)
@@ -66,7 +66,7 @@ object HdfsUtils {
 
   def exists(path: String) =  hdfs.exists(getPath(path))
 
-  @throws[IOException] def readFile(fileName: String): String = {
+  @throws[IOException] def read(fileName: String): String = {
     val path: Path = getPath(fileName)
     require(hdfs.exists(path) && !hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
     val in = hdfs.open(path)
@@ -84,13 +84,25 @@ object HdfsUtils {
     hdfs.delete(path, true)
   }
 
-  @throws[IOException] def uploadFile(fileName: String, hdfsPath: String): Unit = {
+  @throws[IOException] def upload(fileName: String, hdfsPath: String): Unit = {
     val src: Path = getPath(fileName)
     val dst: Path = getPath(hdfsPath)
     hdfs.copyFromLocalFile(src, dst)
   }
 
-  @throws[Exception] def downloadFile(fileName: String, localPath: String): Unit = {
+  @throws[IOException] def movie(fileName: String, hdfsPath: String): Unit = {
+    val src: Path = getPath(fileName)
+    val dst: Path = getPath(hdfsPath)
+    hdfs.moveFromLocalFile(src,dst)
+  }
+
+
+  @throws[IOException] def mkdirs(fileName: String): Unit = {
+    val path: Path = getPath(fileName)
+    hdfs.mkdirs(path);
+  }
+
+  @throws[Exception] def download(fileName: String, localPath: String): Unit = {
     val src: Path = getPath(fileName)
     val dst: Path = getPath(localPath)
     hdfs.copyToLocalFile(src, dst)
