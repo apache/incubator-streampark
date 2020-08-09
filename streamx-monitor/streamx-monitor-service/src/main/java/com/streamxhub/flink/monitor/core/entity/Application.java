@@ -61,6 +61,12 @@ public class Application implements Serializable {
     }
 
     public String backupPath() {
-        return ConfigConst.APP_HISTORY().concat("/").concat(id.toString()).concat("/").concat(System.currentTimeMillis()+"");
+        return ConfigConst.APP_HISTORY()
+                .concat("/")
+                .concat(id.toString())
+                .concat("/")
+                .concat(System.currentTimeMillis()+"")
+                .concat("/")
+                .concat(getModule().replaceFirst("^.*/", ""));
     }
 }

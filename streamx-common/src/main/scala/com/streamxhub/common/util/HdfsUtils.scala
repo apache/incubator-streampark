@@ -93,9 +93,8 @@ object HdfsUtils {
   @throws[IOException] def movie(fileName: String, hdfsPath: String): Unit = {
     val src: Path = getPath(fileName)
     val dst: Path = getPath(hdfsPath)
-    hdfs.moveFromLocalFile(src,dst)
+    hdfs.rename(src,dst)
   }
-
 
   @throws[IOException] def mkdirs(fileName: String): Unit = {
     val path: Path = getPath(fileName)
