@@ -62,7 +62,7 @@ object FlinkSubmit extends Logger {
 
     val flinkVersion = new File(flinkHome).getName
 
-    val flinkHdfsDir = s"${workspace.replaceFirst("[^/]*$","flink")}/$flinkVersion"
+    val flinkHdfsDir = s"$APP_FLINK/$flinkVersion"
 
     logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsDir")
 
