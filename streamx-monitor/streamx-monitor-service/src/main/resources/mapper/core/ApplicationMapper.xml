@@ -3,7 +3,7 @@
 <mapper namespace="com.streamxhub.flink.monitor.core.dao.ApplicationMapper">
     <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Application">
         <id column="ID" jdbcType="BIGINT" property="id"/>
-        <result column="PROJECT_ID" jdbcType="VARCHAR" property="projectId"/>
+        <result column="PROJECT_ID" jdbcType="BIGINT" property="projectId"/>
         <result column="MODULE" jdbcType="VARCHAR" property="module"/>
         <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
@@ -15,6 +15,7 @@
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
+        <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="TIMESTAMP" property="createTime"/>
     </resultMap>
@@ -45,6 +46,12 @@
                 And t.create_time between #{application.createTimeFrom} and #{application.createTimeTo}
             </if>
         </where>
-
     </select>
+
+    <update id="updateDeploy" parameterType="application">
+        update t_flink_app
+        set deploy=#{application.deploy}
+        where project_id=#{application.projectId}
+    </update>
+
 </mapper>

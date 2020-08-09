@@ -8,4 +8,7 @@ import org.apache.ibatis.annotations.Param;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
     IPage<Application> findApplication(Page<Application> page,@Param("application") Application application);
+
+    void updateDeploy(@Param("application") Application application);
+
 }

@@ -23,6 +23,7 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -69,6 +70,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return YarnUtils.isContains(app.getAppName());
     }
 
+
     @Override
     public boolean create(Application app) throws IOException {
         if (app.getConfig() != null && app.getConfig().trim().length() > 0) {
@@ -79,7 +81,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         }
-        String workspace = upload2Workspace(app);
+        String workspace = deploy(app);
         app.setWorkspace(workspace);
         //配置文件中配置的yarnName..
         String yarnName = this.getYarnName(app);
@@ -92,9 +94,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return save(app);
     }
 
-    private String upload2Workspace(Application app) throws IOException {
-        HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace().replaceFirst("hdfs:/+", "/"));
+    @Override
+    public String deploy(Application app) throws IOException {
+        if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
+            app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
+        }
+        HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace());
+        //更新发布状态...
+        app.setDeploy(0);
+        updateDeploy(app);
         return properties.getWorkspace().concat("/").concat(app.getModule().replaceAll(".*/", ""));
+    }
+
+    @Override
+    public void updateDeploy(Application application) {
+        this.baseMapper.updateDeploy(application);
     }
 
     @Override
@@ -117,6 +131,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         System.out.println(appId.toString());
         return true;
     }
+
 
     /**
      * 2秒钟从yarn里获取一次当前任务的appId,总共获取10次,如10次都未获取到则获取失败.

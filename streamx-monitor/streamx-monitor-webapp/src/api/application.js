@@ -9,6 +9,10 @@ export function update (params) {
   return http.post(api.Application.Update, params)
 }
 
+export function deploy (params) {
+  return http.post(api.Application.Deploy, params)
+}
+
 export function list (params) {
   return http.post(api.Application.List, params)
 }

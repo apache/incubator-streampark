@@ -21,7 +21,7 @@ public class Application implements Serializable {
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
-    private String projectId;
+    private Long projectId;
     /**
      * 创建人
      */
@@ -37,6 +37,10 @@ public class Application implements Serializable {
     private String yarnName;
     private String appId;
     private Integer state;
+    /**
+     * 是否需要重新发布(针对项目已更新,具体影响需要手动发布.)
+     */
+    private Integer deploy;
     private String args;
     private String module;//应用程序模块
     private String options;
@@ -52,6 +56,6 @@ public class Application implements Serializable {
 
     public File getAppBase() {
         String localWorkspace = SpringContextUtil.getBean(StreamXProperties.class).getAppHome();
-        return new File(localWorkspace.concat("/app/").concat(projectId));
+        return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
     }
 }
