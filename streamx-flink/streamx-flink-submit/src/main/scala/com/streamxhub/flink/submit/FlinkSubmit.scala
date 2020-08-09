@@ -62,7 +62,7 @@ object FlinkSubmit extends Logger {
 
     val flinkVersion = new File(flinkHome).getName
 
-    val flinkHdfsDir = s"$workspace/../flink/$flinkVersion"
+    val flinkHdfsDir = s"${workspace.replaceAll("[^/]*$","")}flink/$flinkVersion"
 
     logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsDir")
 
@@ -89,6 +89,8 @@ object FlinkSubmit extends Logger {
       Try(args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
       array += KEY_FLINK_APP_CONF("--")
       array += appConf
+      array += KEY_FLINK_HOME("--")
+      array += flinkHdfsDir
       array.toList.asJava
     }
 
