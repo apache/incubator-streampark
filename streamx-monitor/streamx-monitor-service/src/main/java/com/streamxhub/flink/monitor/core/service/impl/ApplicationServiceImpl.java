@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -99,7 +100,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
             app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
         }
-        HdfsUtils.uploadFile(app.getModule(), properties.getWorkspace());
+        if (!HdfsUtils.exists(app.getModule())) {
+            HdfsUtils.upload(app.getModule(), properties.getWorkspace());
+        } else {
+            File backUp = app.getBackup();
+            HdfsUtils.mkdirs(backUp.getAbsolutePath());
+            HdfsUtils.movie(app.getModule(), app.getBackup().getPath());
+        }
         //更新发布状态...
         app.setDeploy(0);
         updateDeploy(app);

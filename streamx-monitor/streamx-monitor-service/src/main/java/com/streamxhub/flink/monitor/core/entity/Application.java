@@ -58,4 +58,14 @@ public class Application implements Serializable {
         String localWorkspace = SpringContextUtil.getBean(StreamXProperties.class).getAppHome();
         return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
     }
+
+    public File getBackup() {
+        String workspace = SpringContextUtil.getBean(StreamXProperties.class).getWorkspace();
+        String backUp = String.format("%s/%s/%s",
+                workspace.replaceFirst("[^/]*$","history"),
+                projectId.toString(),
+                System.currentTimeMillis()+""
+        );
+        return new File(backUp);
+    }
 }
