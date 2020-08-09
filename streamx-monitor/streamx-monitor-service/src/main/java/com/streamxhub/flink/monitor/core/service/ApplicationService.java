@@ -18,4 +18,9 @@ public interface ApplicationService extends IService<Application> {
     String getYarnName(Application app);
 
     boolean checkExists(Application app);
+
+    String deploy(Application app)throws IOException;
+
+    void updateDeploy(Application app);
+
 }

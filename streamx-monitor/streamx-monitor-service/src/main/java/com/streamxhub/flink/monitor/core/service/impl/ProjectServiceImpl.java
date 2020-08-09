@@ -28,7 +28,9 @@ import com.streamxhub.flink.monitor.base.domain.RestResponse;
 import com.streamxhub.flink.monitor.base.utils.GZipUtil;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ProjectMapper;
+import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
+import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -60,6 +62,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
+
+    @Autowired
+    private ApplicationService applicationService;
 
     @Override
     public RestResponse create(Project project) {
@@ -111,6 +116,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     this.baseMapper.successBuild(project);
                     //发布到apps下
                     this.deploy(project);
+
+                    //更新application的发布状态.
+                    Application application = new Application();
+                    application.setProjectId(project.getId());
+                    application.setDeploy(1);
+                    applicationService.updateDeploy(application);
                 } else {
                     this.baseMapper.failureBuild(project);
                 }
@@ -193,6 +204,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         }
         return null;
     }
+
+
 
 
     private boolean cloneOrPull(Project project) {

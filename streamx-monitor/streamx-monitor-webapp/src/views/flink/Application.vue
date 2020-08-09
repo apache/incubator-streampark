@@ -103,6 +103,15 @@
       <template slot="operation" slot-scope="text, record">
         <a-icon
           v-permit="'role:update'"
+          v-show="record.deploy === 1"
+          type="thunderbolt"
+          theme="twoTone"
+          twoToneColor="#4a9ff5"
+          @click="handleDeploy(record)"
+          title="发布任务">
+        </a-icon>
+        <a-icon
+          v-permit="'role:update'"
           type="setting"
           theme="twoTone"
           twoToneColor="#4a9ff5"
@@ -124,7 +133,7 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { list, remove, exists, startUp } from '@/api/application'
+import { list, remove, exists, deploy, startUp } from '@/api/application'
 export default {
   components: { RangeDate },
   data () {
@@ -192,6 +201,14 @@ export default {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
+    },
+    handleDeploy (value) {
+      deploy({
+        id: value.projectId,
+        module: value.module
+      }).then((resp) => {
+        console.log(resp)
+      })
     },
     batchDelete () {
       this.$router.push({ 'path': 'addtest' })
