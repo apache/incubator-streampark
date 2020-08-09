@@ -226,6 +226,13 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
+  val APP_WORKSPACE = "/streamx/workspace"
+
+  val APP_FLINK = "/streamx/flink"
+
+  val APP_HISTORY = "/streamx/history"
+
+
   val LOGO =
     s"""
        |

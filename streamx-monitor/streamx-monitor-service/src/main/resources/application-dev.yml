@@ -73,5 +73,5 @@ adminx:
 
 streamx:
   app-home: /Users/benjobs/Workspace/deploy/workspace
-  workspace: hdfs:///streamx/workspace
+  name-service: nameservice1
 

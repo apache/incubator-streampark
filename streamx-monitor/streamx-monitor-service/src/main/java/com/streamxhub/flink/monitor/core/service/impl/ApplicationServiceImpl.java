@@ -1,6 +1,7 @@
 package com.streamxhub.flink.monitor.core.service.impl;
 
 
+import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.common.util.ThreadUtils;
@@ -23,13 +24,11 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
-import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -100,9 +99,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
             app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
         }
-        String hdfsModule = properties.getWorkspace().concat("/").concat(app.getModule().replaceFirst("^.*/", ""));
+        String hdfsModule = ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceFirst("^.*/", ""));
         if (!HdfsUtils.exists(hdfsModule)) {
-            HdfsUtils.upload(app.getModule(), properties.getWorkspace());
+            HdfsUtils.upload(app.getModule(), ConfigConst.APP_WORKSPACE());
         } else {
             String backUp = app.backupPath();
             HdfsUtils.mkdirs(backUp);
@@ -111,7 +110,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //更新发布状态...
         app.setDeploy(0);
         updateDeploy(app);
-        return properties.getWorkspace().concat("/").concat(app.getModule().replaceAll(".*/", ""));
+        return ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceAll(".*/", ""));
     }
 
     @Override
@@ -125,11 +124,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        String appConf = String.format("%s/%s/%s", properties.getWorkspace(), application.getModule(), application.getConfig());
-        String flinkUserJar = String.format("%s/%s/lib/%s.jar", properties.getWorkspace(), application.getModule(), application.getModule());
+
+        String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
+
+        String appConf = String.format("%s/%s/%s", workspaceWithSchemaAndNameService, application.getModule(), application.getConfig());
+        String flinkUserJar = String.format("%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
         ApplicationId appId = FlinkSubmit.submit(
-                properties.getWorkspace(),
+                workspaceWithSchemaAndNameService,
                 flinkUserJar,
                 application.getYarnName(),
                 appConf,
