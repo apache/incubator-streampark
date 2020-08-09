@@ -65,8 +65,6 @@ public class Application implements Serializable {
                 .concat("/")
                 .concat(id.toString())
                 .concat("/")
-                .concat(System.currentTimeMillis()+"")
-                .concat("/")
-                .concat(getModule().replaceFirst("^.*/", ""));
+                .concat(System.currentTimeMillis()+"");
     }
 }
