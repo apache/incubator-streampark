@@ -39,7 +39,7 @@ object AppSubmit {
     val app_conf = "hdfs://nameservice1/streamx/workspace/streamx-flink-test-1.0.0/conf/application.yml"
     //val app_conf = "/Users/benjobs/Github/StreamX/streamx-flink/streamx-flink-test/assembly/conf/application.yml"
 
-    val map = if (app_conf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.readFile(app_conf)) else PropertiesUtils.fromYamlFile(app_conf)
+    val map = if (app_conf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(app_conf)) else PropertiesUtils.fromYamlFile(app_conf)
     val appName = map(KEY_FLINK_APP_NAME)
     val appMain = map(KEY_FLINK_APP_MAIN)
 
