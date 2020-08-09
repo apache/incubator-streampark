@@ -75,4 +75,4 @@ adminx:
 
 streamx:
   app-home: /home/hst/workspace/deploy
-  workspace: hdfs://nameservice1/streamx/workspace
+  name-service: nameservice1
