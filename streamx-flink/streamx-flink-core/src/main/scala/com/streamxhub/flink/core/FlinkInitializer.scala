@@ -103,14 +103,9 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
 
-  private[this] def initParameter(): ParameterTool = {
-    val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_APP_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
-      case file => file
-    }
+  def readFlinkConf(config: String): Map[String,String] = {
     val extension = config.split("\\.").last.toLowerCase
-    val configArgs = if (config.startsWith("hdfs://")) {
+    if (config.startsWith("hdfs://")) {
       /**
        * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
        */
@@ -129,6 +124,15 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
         case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
       }
     }
+  }
+
+  private[this] def initParameter(): ParameterTool = {
+    val argsMap = ParameterTool.fromArgs(args)
+    val config = argsMap.get(KEY_FLINK_APP_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+      case file => file
+    }
+    val configArgs = readFlinkConf(config)
     ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
   }
 
@@ -286,12 +290,21 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
           //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
-            val flinkHome = System.getenv("FLINK_HOME")
-            require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-            val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-            val prop = PropertiesUtils.fromYamlFile(flinkConf)
+            val flinkConf = {
+              //从启动参数中读取配置文件...
+              val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
+                case null | "" =>
+                  logInfo("[StreamX] --flink.home is undefined,now try found from flink-conf.yaml on System env.")
+                  val flinkHome = System.getenv("FLINK_HOME")
+                  require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
+                  flinkHome
+                case file => file
+              }
+              val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+              readFlinkConf(flinkConf)
+            }
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
-            val dir = prop(KEY_FLINK_STATE_CHECKPOINTS_DIR)
+            val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
             logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
