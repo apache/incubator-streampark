@@ -107,7 +107,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String flinkUserJar = String.format("%s/%s/lib/%s.jar", properties.getWorkspace(), application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
         ApplicationId appId = FlinkSubmit.submit(
-                properties.getWorkspace().replaceFirst("hdfs:/+", "/"),
+                properties.getWorkspace(),
                 flinkUserJar,
                 application.getYarnName(),
                 appConf,
