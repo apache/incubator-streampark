@@ -13,6 +13,6 @@ public class StreamXProperties {
 
     private String appHome;
 
-    private String workspace;
+    private String nameService;
 
 }

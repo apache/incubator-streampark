@@ -3,6 +3,7 @@ package com.streamxhub.flink.monitor.core.entity;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.wuwenze.poi.annotation.Excel;
@@ -60,8 +61,6 @@ public class Application implements Serializable {
     }
 
     public String backupPath() {
-        String workspace = SpringContextUtil.getBean(StreamXProperties.class).getWorkspace();
-        String historyDir = workspace.replaceFirst("[^/]*$","history");
-        return historyDir.concat("/").concat(id.toString()).concat("/").concat(System.currentTimeMillis()+"");
+        return ConfigConst.APP_HISTORY().concat("/").concat(id.toString()).concat("/").concat(System.currentTimeMillis()+"");
     }
 }
