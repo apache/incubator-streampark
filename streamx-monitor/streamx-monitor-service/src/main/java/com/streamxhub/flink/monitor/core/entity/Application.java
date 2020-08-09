@@ -7,6 +7,7 @@ import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
+import lombok.Getter;
 
 import java.io.File;
 import java.io.Serializable;
@@ -59,7 +60,7 @@ public class Application implements Serializable {
         return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
     }
 
-    public String getBackup() {
+    public String backupPath() {
         String workspace = SpringContextUtil.getBean(StreamXProperties.class).getWorkspace();
         String historyDir = workspace.replaceFirst("[^/]*$","history");
         return historyDir.concat("/").concat(appId).concat("/").concat(System.currentTimeMillis()+"");
