@@ -204,6 +204,7 @@ export default {
     },
     handleDeploy (value) {
       deploy({
+        id: value.id,
         projectId: value.projectId,
         module: value.module
       }).then((resp) => {
