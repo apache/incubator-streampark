@@ -7,7 +7,6 @@ import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
-import lombok.Getter;
 
 import java.io.File;
 import java.io.Serializable;
