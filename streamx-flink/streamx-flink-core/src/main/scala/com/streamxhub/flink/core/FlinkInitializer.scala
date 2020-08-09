@@ -278,15 +278,14 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //默认:被cancel会保留Checkpoint数据
     //streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
-    val stateBackend = Try(XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND))).getOrElse(null)
-
+    val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND,null))
     //stateBackend
     if (stateBackend != null) {
       val cpDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * cpDir如果从配置文件中读取失败(key:state.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
-        Try(parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR)).getOrElse(null) match {
+        parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR,null) match {
           //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
