@@ -47,6 +47,12 @@ public class ApplicationController extends BaseController {
       return RestResponse.create().data(saved);
     }
 
+    @RequestMapping("deploy")
+    public RestResponse deploy(Application app) throws IOException {
+        applicationService.deploy(app);
+        return RestResponse.create();
+    }
+
     @RequestMapping("startUp")
     public RestResponse startUp(String id) {
         boolean started = applicationService.startUp(id);
