@@ -62,6 +62,6 @@ public class Application implements Serializable {
     public String backupPath() {
         String workspace = SpringContextUtil.getBean(StreamXProperties.class).getWorkspace();
         String historyDir = workspace.replaceFirst("[^/]*$","history");
-        return historyDir.concat("/").concat(appId).concat("/").concat(System.currentTimeMillis()+"");
+        return historyDir.concat("/").concat(id.toString()).concat("/").concat(System.currentTimeMillis()+"");
     }
 }
