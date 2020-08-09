@@ -65,16 +65,7 @@ public class Project implements Serializable {
 
     private transient String dateTo;
 
-    private transient String workspace;
-
     private transient String appSource;//项目源码路径
-
-    private String getWorkSpace() {
-        if (workspace == null) {
-            workspace = SpringContextUtil.getBean(StreamXProperties.class).getWorkspace();
-        }
-        return workspace;
-    }
 
     /**
      * 获取项目源码路径
