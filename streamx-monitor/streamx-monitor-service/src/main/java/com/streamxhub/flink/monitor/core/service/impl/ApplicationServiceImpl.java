@@ -100,12 +100,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
             app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
         }
-        if (!HdfsUtils.exists(app.getModule())) {
+        String hdfsModule = properties.getWorkspace().concat("/").concat(app.getModule().replaceFirst("^.*/",""));
+        if (!HdfsUtils.exists(hdfsModule)) {
             HdfsUtils.upload(app.getModule(), properties.getWorkspace());
         } else {
             File backUp = app.getBackup();
             HdfsUtils.mkdirs(backUp.getAbsolutePath());
-            HdfsUtils.movie(app.getModule(), app.getBackup().getPath());
+            HdfsUtils.movie(hdfsModule, app.getBackup().getPath());
         }
         //更新发布状态...
         app.setDeploy(0);
