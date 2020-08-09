@@ -104,7 +104,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!HdfsUtils.exists(hdfsModule)) {
             HdfsUtils.upload(app.getModule(), properties.getWorkspace());
         } else {
-            String backUp = app.getBackup();
+            String backUp = app.backupPath();
             HdfsUtils.mkdirs(backUp);
             HdfsUtils.movie(hdfsModule, backUp);
         }
