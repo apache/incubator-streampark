@@ -20,15 +20,12 @@
  */
 package com.streamxhub.flink.monitor.core.entity;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.ThreadUtils;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.yaml.snakeyaml.Yaml;
-import reactor.core.publisher.Flux;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -97,12 +94,12 @@ public class Deployment implements Serializable {
         String detached = readArgs("--detached");
         String name = readArgs("--name");
         String cmd = String.format("flink run %s %s --jar %s --flink.conf %s", resource, dynamic, jarFile, conf);
-        StringBuffer cmdBuffer = new StringBuffer(cmd);
+        StringBuffer buffer = new StringBuffer(cmd);
         if (detached.equals("Detached")) {
             String log = String.format("%s/%s-%s.log", logPath, name, System.currentTimeMillis());
-            cmdBuffer.append(" >> ").append(log).append(" 2>&1 &");
+            buffer.append(" >> ").append(log).append(" 2>&1 &");
         }
-        return cmdBuffer.toString().trim();
+        return buffer.toString().trim();
     }
 
     private String readArgs(String action) {
