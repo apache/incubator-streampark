@@ -92,7 +92,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
 
     @Override
-    public boolean create(Application app) throws IOException {
+    public boolean create(Application app) {
         if (app.getConfig() != null && app.getConfig().trim().length() > 0) {
             try {
                 String config = URLDecoder.decode(app.getConfig(), "UTF-8");
@@ -101,7 +101,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         }
-        String workspace = deploy(app);
+        String workspace = ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceAll(".*/", ""));
         app.setWorkspace(workspace);
         //配置文件中配置的yarnName..
         String yarnName = this.getYarnName(app);
@@ -111,7 +111,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         app.setCreateTime(new Date());
         app.setModule(app.getModule().replace(app.getAppBase().getAbsolutePath() + "/", ""));
         app.setConfig(app.getConfig().replace(app.getAppBase().getAbsolutePath() + "/".concat(app.getModule()).concat("/"), ""));
-        return save(app);
+        boolean saved = save(app);
+        if (saved) {
+            try {
+                deploy(app);
+                return true;
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+        return false;
     }
 
     @Override
