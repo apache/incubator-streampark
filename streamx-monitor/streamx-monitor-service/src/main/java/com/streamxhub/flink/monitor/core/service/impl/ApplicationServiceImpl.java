@@ -122,21 +122,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public String deploy(Application app) throws IOException {
+    public void deploy(Application app) throws IOException {
         if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
             app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
         }
-        String hdfsModule = ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceFirst("^.*/", ""));
-        if (HdfsUtils.exists(hdfsModule)) {
+        String workspaceWithModule = app.getWorkspace(true);
+        if (HdfsUtils.exists(workspaceWithModule)) {
             String backUp = app.backupPath();
             HdfsUtils.mkdirs(backUp);
-            HdfsUtils.movie(hdfsModule, backUp);
+            HdfsUtils.movie(workspaceWithModule, backUp);
         }
-        HdfsUtils.upload(app.getModule(), ConfigConst.APP_WORKSPACE());
+
+        String workspace = app.getWorkspace(false);
+        if (!HdfsUtils.exists(workspace)) {
+            HdfsUtils.mkdirs(workspace);
+        }
+        HdfsUtils.upload(app.getModule(), workspace);
         //更新发布状态...
         app.setDeploy(0);
         updateDeploy(app);
-        return ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceAll(".*/", ""));
     }
 
     @Override
@@ -152,8 +156,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert project != null;
 
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
-        String appConf = String.format("%s/%s/%s", workspaceWithSchemaAndNameService, application.getModule(), application.getConfig());
-        String flinkUserJar = String.format("%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, application.getModule(), application.getModule());
+        String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
+        String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
         ApplicationId appId = FlinkSubmit.submit(
                 properties.getNameService(),

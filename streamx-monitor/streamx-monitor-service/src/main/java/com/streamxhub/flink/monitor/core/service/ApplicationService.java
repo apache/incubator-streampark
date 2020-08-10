@@ -39,7 +39,7 @@ public interface ApplicationService extends IService<Application> {
 
     boolean checkExists(Application app);
 
-    String deploy(Application app)throws IOException;
+    void deploy(Application app)throws IOException;
 
     void updateDeploy(Application app);
 
