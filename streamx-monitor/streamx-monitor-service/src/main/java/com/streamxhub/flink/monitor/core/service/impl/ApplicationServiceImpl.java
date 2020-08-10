@@ -125,12 +125,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert project != null;
 
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
-
         String appConf = String.format("%s/%s/%s", workspaceWithSchemaAndNameService, application.getModule(), application.getConfig());
         String flinkUserJar = String.format("%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
         ApplicationId appId = FlinkSubmit.submit(
-                workspaceWithSchemaAndNameService,
+                properties.getNameService(),
                 flinkUserJar,
                 application.getYarnName(),
                 appConf,
