@@ -34,11 +34,10 @@ import scala.util.{Failure, Success, Try}
 
 object HdfsUtils {
 
-
-
   lazy val conf: Configuration = {
     val conf = new Configuration()
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
+    conf.set("fs.hdfs.impl.disable.cache","true")
     conf
   }
 
