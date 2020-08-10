@@ -69,7 +69,6 @@ public class Application implements Serializable {
 
     private String description;
     private Date createTime;
-    private String workspace;
     private transient String userName;
     private transient String projectName;
     private transient String createTimeFrom;
