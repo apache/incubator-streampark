@@ -313,7 +313,7 @@ export default {
     },
 
     handleView (params) {
-      window.open(this.yarn + "/cluster/app/" + params.appId)
+      window.open(this.yarn + "/proxy/" + params.appId)
     },
 
     addTask () {
