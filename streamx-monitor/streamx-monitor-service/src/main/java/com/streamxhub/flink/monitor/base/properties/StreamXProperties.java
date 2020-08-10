@@ -35,4 +35,6 @@ public class StreamXProperties {
 
     private String nameService;
 
+    private String yarn;
+
 }

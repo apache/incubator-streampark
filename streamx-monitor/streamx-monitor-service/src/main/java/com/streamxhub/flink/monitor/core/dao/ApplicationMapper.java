@@ -31,4 +31,5 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     void updateDeploy(@Param("application") Application application);
 
+
 }
