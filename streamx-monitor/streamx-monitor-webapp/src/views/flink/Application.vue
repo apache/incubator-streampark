@@ -126,14 +126,20 @@
           @click="handleStartUp(record)"
           title="提交任务">
         </a-icon>
-        <a-icon type="eye" theme="twoTone" twoToneColor="#42b983" @click="view(record)" title="查看"></a-icon>
+        <a-icon type="eye"
+                v-show="record.state === 6"
+                theme="twoTone"
+                twoToneColor="#42b983"
+                @click="handleView(record)" title="查看">
+        </a-icon>
+
       </template>
     </a-table>
   </a-card>
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { list, remove, exists, deploy, startUp } from '@/api/application'
+import { list, remove, exists, deploy, startUp, yarn } from '@/api/application'
 export default {
   components: { RangeDate },
   data () {
@@ -144,6 +150,7 @@ export default {
       selectedRowKeys: [],
       queryParams: {},
       sortedInfo: null,
+      yarn: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -190,6 +197,7 @@ export default {
   },
   mounted () {
     this.handleFetch()
+    this.handleYarn()
   },
   methods: {
     onSelectChange (selectedRowKeys) {
@@ -298,6 +306,16 @@ export default {
         this.loading = false
       })
     },
+    handleYarn (params = {}) {
+      yarn({}).then((resp) => {
+        this.yarn = resp.data
+      })
+    },
+
+    handleView (params) {
+      window.open(this.yarn + "/cluster/app/" + params.appId)
+    },
+
     addTask () {
       this.$router.push({ 'path': 'addapp' })
     },

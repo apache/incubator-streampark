@@ -28,6 +28,7 @@ export default {
     Add: '/flink/app/add',
     Update: '/flink/app/update',
     Deploy: '/flink/app/deploy',
+    Yarn: '/flink/app/yarn',
     List: '/flink/app/list',
     Name: '/flink/app/name',
     Exists: '/flink/app/exists',
