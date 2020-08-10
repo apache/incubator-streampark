@@ -84,6 +84,15 @@ public class Application implements Serializable {
                 .concat("/")
                 .concat(id.toString())
                 .concat("/")
-                .concat(System.currentTimeMillis()+"");
+                .concat(System.currentTimeMillis() + "");
+    }
+
+    public String getWorkspace(boolean withModule) {
+        String workspace = ConfigConst.APP_WORKSPACE().concat("/").concat(id.toString());
+        if (withModule) {
+            String module = getModule().replaceFirst("^.*/", "");
+            workspace = workspace.concat("/").concat(module);
+        }
+        return workspace;
     }
 }
