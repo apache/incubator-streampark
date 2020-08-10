@@ -75,14 +75,14 @@ object FlinkSubmit extends Logger {
     /**
      * 获取当前机器上的flink
      */
-    val flinkHome = System.getenv("FLINK_HOME")
-    require(flinkHome != null)
+    val flinkLocalHome = System.getenv("FLINK_HOME")
+    require(flinkLocalHome != null)
 
-    logInfo(s"[StreamX] flinkHome: $flinkHome")
+    logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
 
-    val flinkVersion = new File(flinkHome).getName
+    val flinkName = new File(flinkLocalHome).getName
 
-    val flinkHdfsHome = s"$APP_FLINK/$flinkVersion"
+    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
 
     val flinkHdfsHomeWithNameService = s"hdfs://$nameService$flinkHdfsHome"
 
@@ -90,7 +90,7 @@ object FlinkSubmit extends Logger {
 
     if (!HdfsUtils.exists(flinkHdfsHome)) {
       logInfo(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
-      HdfsUtils.upload(flinkHome, flinkHdfsHome)
+      HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
     }
 
     //存放flink集群相关的jar包目录
@@ -98,13 +98,13 @@ object FlinkSubmit extends Logger {
 
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
 
-    val flinkHdfsDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
+    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
       case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
     }
 
-    val flinkConfDir = flinkHome.concat("/conf")
+    val flinkLocalConfDir = flinkLocalHome.concat("/conf")
 
     val appArgs = {
       val array = new ArrayBuffer[String]
@@ -119,7 +119,7 @@ object FlinkSubmit extends Logger {
     //获取flink的配置
     val flinkConfiguration = GlobalConfiguration
       //从flink-conf.yaml中加载默认配置文件...
-      .loadConfiguration(flinkConfDir)
+      .loadConfiguration(flinkLocalConfDir)
 
       .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
@@ -139,7 +139,7 @@ object FlinkSubmit extends Logger {
       //设置启动参数
       .set(ApplicationConfiguration.APPLICATION_ARGS,appArgs)
 
-    val customCommandLines = loadCustomCommandLines(flinkConfiguration, flinkConfDir)
+    val customCommandLines = loadCustomCommandLines(flinkConfiguration, flinkLocalConfDir)
 
     val commandLine = {
       //merge options....
