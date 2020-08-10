@@ -152,9 +152,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean startUp(String id) {
         final Application application = getById(id);
         assert application != null;
+        application.setState(AppState.DEPLOYING.getValue());
+        this.baseMapper.updateById(application);
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
@@ -167,7 +168,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 overrideOption,
                 application.getArgs()
         );
-        System.out.println(appId.toString());
+        application.setAppId(appId.toString());
+        application.setState(AppState.RUNNING.getValue());
+        this.baseMapper.updateById(application);
         return true;
     }
 

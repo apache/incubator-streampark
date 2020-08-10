@@ -13,6 +13,11 @@ export function deploy (params) {
   return http.post(api.Application.Deploy, params)
 }
 
+
+export function yarn (params) {
+  return http.post(api.Application.Yarn, params)
+}
+
 export function list (params) {
   return http.post(api.Application.List, params)
 }

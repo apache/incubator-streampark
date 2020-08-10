@@ -23,6 +23,7 @@ package com.streamxhub.flink.monitor.core.controller;
 import com.streamxhub.flink.monitor.base.controller.BaseController;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.domain.RestResponse;
+import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -43,10 +44,18 @@ public class ApplicationController extends BaseController {
     @Autowired
     private ApplicationService applicationService;
 
+    @Autowired
+    private StreamXProperties properties;
+
     @RequestMapping("list")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.list(app, request);
         return RestResponse.create().data(applicationList);
+    }
+
+    @RequestMapping("yarn")
+    public RestResponse list() {
+        return RestResponse.create().data(properties.getYarn());
     }
 
     @RequestMapping("name")
@@ -63,8 +72,8 @@ public class ApplicationController extends BaseController {
 
     @RequestMapping("create")
     public RestResponse create(Application app) throws IOException {
-      boolean saved = applicationService.create(app);
-      return RestResponse.create().data(saved);
+        boolean saved = applicationService.create(app);
+        return RestResponse.create().data(saved);
     }
 
     @RequestMapping("deploy")
