@@ -91,11 +91,11 @@
         -->
         <a-tag color="#108ee9" v-if="state === 0">CREATED</a-tag>
         <a-tag color="#87d068" v-if="state === 1">DEPLOYING</a-tag>
-        <a-tag color="gray" v-if="state === 2">NEW</a-tag>
+        <a-tag color="cyan" v-if="state === 2">NEW</a-tag>
         <a-tag color="#f50" v-if="state === 3">NEW_SAVING</a-tag>
         <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
         <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
-        <a-tag color="#f50" v-if="state === 6">RUNNING</a-tag>
+        <a-tag color="#87d068" v-if="state === 6">RUNNING</a-tag>
         <a-tag color="#f50" v-if="state === 7">FINISHED</a-tag>
         <a-tag color="#f50" v-if="state === 8">FAILED</a-tag>
         <a-tag color="#" v-if="state === 9">KILLED</a-tag>
@@ -313,7 +313,7 @@ export default {
     },
 
     handleView (params) {
-      window.open(this.yarn + "/proxy/" + params.appId)
+      window.open(this.yarn + "/proxy/" + params.appId + "/")
     },
 
     addTask () {

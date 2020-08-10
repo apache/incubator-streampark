@@ -211,7 +211,9 @@ object FlinkSubmit extends Logger {
         println(clusterSpecification)
         println("------------------------------------")
         val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+
         applicationId = clusterClient.getClusterId
+
         println("------------------<<applicationId>>------------------")
         println()
         println("Flink Job Started: applicationId: " + applicationId)
