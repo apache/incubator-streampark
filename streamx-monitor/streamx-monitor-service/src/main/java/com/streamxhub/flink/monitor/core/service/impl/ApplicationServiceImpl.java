@@ -101,8 +101,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 e.printStackTrace();
             }
         }
-        String workspace = ConfigConst.APP_WORKSPACE().concat("/").concat(app.getModule().replaceAll(".*/", ""));
-        app.setWorkspace(workspace);
         //配置文件中配置的yarnName..
         String yarnName = this.getYarnName(app);
         app.setYarnName(yarnName);
