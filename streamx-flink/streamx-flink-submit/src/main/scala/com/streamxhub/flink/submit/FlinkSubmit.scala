@@ -34,14 +34,14 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def submit(workspace: String,
+  def submit(nameService:String,
              flinkUserJar: String,
              yarnName: String,
              appConf: String,
              overrideOption: Array[String],
              args: String): ApplicationId = {
 
-    logInfo(s"[StreamX] flink submit,workspace $workspace," +
+    logInfo(s"[StreamX] flink submit,nameService $nameService," +
       s"yarnName $yarnName," +
       s"appConf $appConf," +
       s"userJar $flinkUserJar," +
@@ -62,23 +62,25 @@ object FlinkSubmit extends Logger {
 
     val flinkVersion = new File(flinkHome).getName
 
-    val flinkHdfsDir = s"$APP_FLINK/$flinkVersion"
+    val flinkHdfsHome = s"$APP_FLINK/$flinkVersion"
 
-    logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsDir")
+    val flinkHdfsHomeWithNameService = s"hdfs://$nameService$flinkHdfsHome"
 
-    if (!HdfsUtils.exists(flinkHdfsDir)) {
-      logInfo(s"[StreamX] $flinkHdfsDir is not exists,upload beginning....")
-      HdfsUtils.upload(flinkHome, flinkHdfsDir)
+    logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsHome")
+
+    if (!HdfsUtils.exists(flinkHdfsHome)) {
+      logInfo(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
+      HdfsUtils.upload(flinkHome, flinkHdfsHome)
     }
 
     //存放flink集群相关的jar包目录
-    val flinkHdfsLibs = new Path(s"$flinkHdfsDir/lib")
+    val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
 
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsDir/plugins")
+    val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
 
     val flinkHdfsDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
       case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
-      case array if array.length == 1 => s"$flinkHdfsDir/lib/${array.head}"
+      case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
       case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
     }
 
@@ -90,7 +92,7 @@ object FlinkSubmit extends Logger {
       array += KEY_FLINK_APP_CONF("--")
       array += appConf
       array += KEY_FLINK_HOME("--")
-      array += flinkHdfsDir
+      array += flinkHdfsHomeWithNameService
       array.toList.asJava
     }
 
