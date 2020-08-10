@@ -177,7 +177,7 @@ object FlinkSubmit extends Logger {
           }
         })
 
-        //页面定义的参数优先级大于pe配合文件
+        //页面定义的参数优先级大于app配置文件
         overrideOption.foreach(x => array += x)
 
         array.toArray
