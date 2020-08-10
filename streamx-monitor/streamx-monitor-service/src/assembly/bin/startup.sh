@@ -24,16 +24,16 @@
 #
 # Environment Variable Prerequisites
 #
-#   APP_HOME   May point at your adminx "build" directory.
+#   APP_HOME   May point at your StreamX "build" directory.
 #
 #   APP_BASE   (Optional) Base directory for resolving dynamic portions
-#                   of a adminx installation.  If not present, resolves to
+#                   of a StreamX installation.  If not present, resolves to
 #                   the same directory that APP_HOME points to.
 #
 #   APP_CONF    (Optional) config path
 #
 #   APP_PID    (Optional) Path of the file which should contains the pid
-#                   of the adminx startup java process, when start (fork) is
+#                   of the StreamX startup java process, when start (fork) is
 #                   used
 # -----------------------------------------------------------------------------
 
@@ -49,28 +49,28 @@ echo_r () {
     # Color red: Error, Failed
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}adminx${RES}] ${RED_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}StreamX${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
 echo_g () {
     # Color green: Success
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}adminx${RES}] ${GREEN_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}StreamX${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
 echo_y () {
     # Color yellow: Warning
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}adminx${RES}] ${YELLOW_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}StreamX${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
 echo_w () {
     # Color yellow: White
     [[ $# -ne 1 ]] && return 1
     # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}adminx${RES}] ${WHITE_COLOR}$1${RES}\n"
+    printf "[${BLUE_COLOR}StreamX${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
 
@@ -114,7 +114,7 @@ APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_BIN="$APP_BASE"/bin
 APP_LIB="$APP_BASE"/lib
-APP_OUT="$APP_BASE"/logs/adminx.out
+APP_OUT="$APP_BASE"/logs/streamx.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
@@ -211,7 +211,7 @@ APP_PIDDIR="/var/run";
 if [[ ! -d "$APP_PIDDIR" ]] ; then
     mkdir ${APP_PIDDIR};
 fi
-APP_PID="$APP_BASE/adminx.pid";
+APP_PID="$APP_BASE/streamx.pid";
 
 # Add on extra jar files to CLASSPATH
 if [[ ! -z "$CLASSPATH" ]] ; then
