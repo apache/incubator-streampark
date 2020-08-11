@@ -87,7 +87,10 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (isRunning) {
-      resultFun(queryFun(database).iterator).foreach(ctx.collect)
+      val find = queryFun(database)
+      if (find != null) {
+        resultFun(find.iterator).foreach(ctx.collect)
+      }
     }
   }
 
