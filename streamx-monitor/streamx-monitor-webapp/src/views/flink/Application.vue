@@ -201,8 +201,8 @@ export default {
 
   mounted() {
     this.handleYarn()
-    this.handleFetch()
-    window.setInterval(() => this.handleFetch(), 1000)
+    this.handleFetch(true)
+    window.setInterval(() => this.handleFetch(false), 1000)
   },
 
   methods: {
@@ -296,7 +296,9 @@ export default {
       })
     },
 
-    handleFetch(params = {}) {
+    handleFetch(loading) {
+      if(loading) this.loading = true
+      const params = {}
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
@@ -311,7 +313,7 @@ export default {
       list({
         ...params
       }).then((resp) => {
-        console.log(resp)
+        this.loading = false
         const pagination = {...this.pagination}
         pagination.total = resp.data.total
         this.dataSource = resp.data.records

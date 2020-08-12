@@ -61,19 +61,20 @@ public enum AppState {
     RUNNING(6),
 
     /**
+     * Application which was terminated by a user or admin.
+     */
+    CANCELED(7),
+
+    /**
      * Application which finished successfully.
      */
-    FINISHED(7),
+    FINISHED(8),
 
     /**
      * Application which failed.
      */
-    FAILED(8),
-
-    /**
-     * Application which was terminated by a user or admin.
-     */
-    CANCELED(9),
+    FAILED(9),
+    
     /**
      * 失联
      */
