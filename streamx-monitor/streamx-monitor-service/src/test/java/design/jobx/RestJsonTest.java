@@ -1,19 +1,17 @@
 package design.jobx;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamxhub.flink.monitor.core.enums.AppState;
+import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.flink.monitor.core.metrics.yarn.AppInfo;
 import org.dom4j.*;
 import org.junit.Test;
-import org.dom4j.io.SAXReader;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.Iterator;
-import java.util.List;
 
 public class RestJsonTest {
 
@@ -92,6 +90,15 @@ public class RestJsonTest {
         }
         System.out.println(appInfo);
 
+
+    }
+
+    @Test
+    public void yarnAppInfo() throws Exception {
+        Application application = new Application();
+        application.setAppId("application_1587978117869_87565");
+        AppInfo appInfo =  application.getYarnAppInfo();
+        System.out.println(appInfo);
 
     }
 

@@ -97,9 +97,9 @@
         <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
         <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
         <a-tag color="#87d068" v-if="state === 6">RUNNING</a-tag>
-        <a-tag color="#f50" v-if="state === 7">FINISHED</a-tag>
-        <a-tag color="#f50" v-if="state === 8">FAILED</a-tag>
-        <a-tag color="#" v-if="state === 9">KILLED</a-tag>
+        <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELED</a-tag>
+        <a-tag color="#f50" v-if="state === 8">FINISHED</a-tag>
+        <a-tag color="#f50" v-if="state === 9">FAILED</a-tag>
         <a-tag color="#000" v-if="state === 10">LOST</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -198,12 +198,13 @@ export default {
       }]
     }
   },
+
   mounted() {
-    window.setInterval(() => {
-      this.handleFetch()
-    }, 2000)
     this.handleYarn()
+    this.handleFetch()
+    window.setInterval(() => this.handleFetch(), 1000)
   },
+
   methods: {
 
     onSelectChange(selectedRowKeys) {
