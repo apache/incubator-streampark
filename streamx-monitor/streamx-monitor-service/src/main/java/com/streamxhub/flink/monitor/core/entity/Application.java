@@ -21,16 +21,18 @@
 package com.streamxhub.flink.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.streamxhub.common.conf.ConfigConst;
+import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
+import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 
-import java.io.File;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Date;
 
 @Data
@@ -57,6 +59,7 @@ public class Application implements Serializable {
      */
     private String yarnName;
     private String appId;
+    private String jobId;
     private Integer state;
     /**
      * 是否需要重新发布(针对项目已更新,具体影响需要手动发布.)
@@ -95,4 +98,19 @@ public class Application implements Serializable {
         }
         return workspace;
     }
+
+    public String getYarnAppInfo() {
+        String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
+        String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
+        return HttpClientUtils.httpGetRequest(url);
+    }
+
+    public JobsOverview getJobsOverview() throws IOException {
+        String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
+        String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
+        String result = HttpClientUtils.httpGetRequest(url);
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.readValue(new StringReader(result), JobsOverview.class);
+    }
+
 }

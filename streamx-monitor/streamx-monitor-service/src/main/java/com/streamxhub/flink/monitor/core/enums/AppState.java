@@ -21,9 +21,6 @@
 package com.streamxhub.flink.monitor.core.enums;
 
 import lombok.Getter;
-import org.apache.hadoop.yarn.api.records.YarnApplicationState;
-
-import java.util.Arrays;
 
 @Getter
 public enum AppState {
