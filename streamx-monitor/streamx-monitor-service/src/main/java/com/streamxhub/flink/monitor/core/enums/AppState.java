@@ -73,8 +73,7 @@ public enum AppState {
     /**
      * Application which was terminated by a user or admin.
      */
-    KILLED(9),
-
+    CANCELED(9),
     /**
      * 失联
      */

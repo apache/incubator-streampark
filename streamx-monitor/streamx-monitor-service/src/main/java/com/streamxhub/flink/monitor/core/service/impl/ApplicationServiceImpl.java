@@ -20,7 +20,6 @@
  */
 package com.streamxhub.flink.monitor.core.service.impl;
 
-
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
