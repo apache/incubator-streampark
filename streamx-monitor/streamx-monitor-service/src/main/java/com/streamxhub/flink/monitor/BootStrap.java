@@ -22,6 +22,7 @@ package com.streamxhub.flink.monitor;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
 /**
@@ -29,6 +30,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  */
 @CrossOrigin
 @SpringBootApplication
+@EnableScheduling
 public class BootStrap {
 
     public static void main(String[] args) {
