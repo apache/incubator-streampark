@@ -32,7 +32,6 @@ public class FlinkMonitorTask {
         //以下状态的不再监控...
         queryWrapper.notIn("state",
                 AppState.CREATED.getValue(),
-                AppState.DEPLOYING.getValue(),
                 AppState.FINISHED.getValue(),
                 AppState.FAILED.getValue(),
                 AppState.KILLED.getValue(),

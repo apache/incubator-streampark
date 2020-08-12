@@ -151,8 +151,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean startUp(String id) {
         final Application application = getById(id);
         assert application != null;
-        application.setState(AppState.DEPLOYING.getValue());
-        this.baseMapper.updateById(application);
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
@@ -168,6 +166,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
         application.setAppId(appId.toString());
+        application.setState(AppState.DEPLOYING.getValue());
+        this.baseMapper.updateById(application);
         return true;
     }
 
