@@ -185,7 +185,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         );
         executorService.scheduleAtFixedRate(() -> {
             try {
-                JobsOverview jobsOverview = application.jobsOverview();
+                JobsOverview jobsOverview = application.getJobsOverview();
                 /**
                  * 注意:yarnName是唯一的,不能重复...
                  */
