@@ -24,7 +24,6 @@ package com.streamxhub.flink.monitor.core.service.impl;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
-import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.domain.Constant;
@@ -34,7 +33,6 @@ import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
-import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,7 +43,6 @@ import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -72,7 +69,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private StreamXProperties properties;
 
-    private final Map<Long, AppState> jobStateMap = new ConcurrentHashMap<>();
 
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
@@ -136,7 +132,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             HdfsUtils.mkdirs(backUp);
             HdfsUtils.movie(workspaceWithModule, backUp);
         }
-
         String workspace = app.getWorkspace(false);
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
@@ -173,41 +168,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
         application.setAppId(appId.toString());
-        Executors.newSingleThreadExecutor().submit(() -> getJobState(application));
         return true;
-    }
-
-    @SneakyThrows
-    private void getJobState(Application application) {
-        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(
-                1,
-                new BasicThreadFactory.Builder().namingPattern("Flink-GetJobState-%d").daemon(true).build()
-        );
-        executorService.scheduleAtFixedRate(() -> {
-            try {
-                JobsOverview jobsOverview = application.getJobsOverview();
-                /**
-                 * 注意:yarnName是唯一的,不能重复...
-                 */
-                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().equals(application.getYarnName())).findFirst();
-                assert optional.isPresent();
-                JobsOverview.Job job = optional.get();
-
-                if (application.getJobId() == null) {
-                    application.setJobId(job.getId());
-                    this.baseMapper.updateById(application);
-                }
-                AppState state = AppState.valueOf(job.getState());
-                AppState preState = jobStateMap.get(application.getId());
-                if (!state.equals(preState)) {
-                    application.setState(state.getValue());
-                    this.baseMapper.updateById(application);
-                    jobStateMap.put(application.getId(),state);
-                }
-            } catch (Exception e) {
-
-            }
-        }, 0, 2, TimeUnit.SECONDS);
     }
 
     /**

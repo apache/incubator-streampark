@@ -88,6 +88,7 @@
         FINISHED(7),
         FAILED(8),
         KILLED(9);
+        LOST(10);
         -->
         <a-tag color="#108ee9" v-if="state === 0">CREATED</a-tag>
         <a-tag color="#87d068" v-if="state === 1">DEPLOYING</a-tag>
@@ -99,6 +100,7 @@
         <a-tag color="#f50" v-if="state === 7">FINISHED</a-tag>
         <a-tag color="#f50" v-if="state === 8">FAILED</a-tag>
         <a-tag color="#" v-if="state === 9">KILLED</a-tag>
+        <a-tag color="#000" v-if="state === 10">LOST</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-icon
