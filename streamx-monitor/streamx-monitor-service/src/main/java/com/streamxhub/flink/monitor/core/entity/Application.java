@@ -66,7 +66,10 @@ public class Application implements Serializable {
      */
     private Integer deploy;
     private String args;
-    private String module;//应用程序模块
+    /**
+     * 应用程序模块
+     */
+    private String module;
     private String options;
     private String shortOptions;
 
@@ -105,7 +108,7 @@ public class Application implements Serializable {
         return HttpClientUtils.httpGetRequest(url);
     }
 
-    public JobsOverview getJobsOverview() throws IOException {
+    public JobsOverview jobsOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         String result = HttpClientUtils.httpGetRequest(url);
