@@ -61,6 +61,9 @@ public class FlinkMonitorTask {
                     applicationService.updateById(application);
                     jobStateMap.put(application.getId(), state);
                 }
+                if (state == AppState.FAILED || state == AppState.FINISHED || state == AppState.KILLED) {
+                    jobStateMap.remove(application.getId());
+                }
             } catch (Exception e) {
                 if (e instanceof ConnectException) {
                     try {
@@ -77,6 +80,7 @@ public class FlinkMonitorTask {
                          */
                         application.setState(AppState.LOST.getValue());
                         applicationService.updateById(application);
+                        jobStateMap.remove(application.getId());
                         //TODO send msg or emails
                         e1.printStackTrace();
                     }
