@@ -205,16 +205,19 @@ export default {
     this.handleYarn()
   },
   methods: {
+
     onSelectChange(selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
+
     handleDateChange(value) {
       if (value) {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
     },
+
     handleDeploy(value) {
       deploy({
         id: value.id,
@@ -224,6 +227,7 @@ export default {
         console.log(resp)
       })
     },
+
     batchDelete() {
       this.$router.push({'path': 'addtest'})
 
@@ -253,6 +257,7 @@ export default {
         }
       })
     },
+
     search() {
       const {sortedInfo} = this
       let sortField, sortOrder
@@ -267,6 +272,7 @@ export default {
         ...this.queryParams
       })
     },
+
     reset() {
       // 取消选中
       this.selectedRowKeys = []
@@ -278,6 +284,7 @@ export default {
       this.$refs.createTime.reset()
       this.fetch()
     },
+
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.fetch({
@@ -287,8 +294,8 @@ export default {
         ...filters
       })
     },
+
     handleFetch(params = {}) {
-      this.loading = true
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
@@ -308,9 +315,9 @@ export default {
         pagination.total = resp.data.total
         this.dataSource = resp.data.records
         this.pagination = pagination
-        this.loading = false
       })
     },
+
     handleYarn(params = {}) {
       yarn({}).then((resp) => {
         this.yarn = resp.data
@@ -324,6 +331,7 @@ export default {
     addTask() {
       this.$router.push({'path': 'addapp'})
     },
+
     handleStartUp(app) {
       exists({
         id: app.id
@@ -339,6 +347,7 @@ export default {
         }
       })
     }
+
   }
 }
 </script>
