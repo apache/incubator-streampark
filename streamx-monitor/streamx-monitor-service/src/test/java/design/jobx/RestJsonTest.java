@@ -3,11 +3,17 @@ package design.jobx;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.flink.monitor.core.enums.AppState;
 import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
+import com.streamxhub.flink.monitor.core.metrics.yarn.AppInfo;
+import org.dom4j.*;
 import org.junit.Test;
+import org.dom4j.io.SAXReader;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.util.Iterator;
+import java.util.List;
 
 public class RestJsonTest {
 
@@ -21,9 +27,71 @@ public class RestJsonTest {
     }
 
     @Test
-    public void em() {
+    public void em() throws Exception {
 
-        System.out.println(AppState.valueOf("RUNNING").getValue());
+        String xml = "<app>\n" +
+                "<id>application_1585401674210_281973</id>\n" +
+                "<user>hst</user>\n" +
+                "<name>HopsonFlink</name>\n" +
+                "<queue>root.users.hst</queue>\n" +
+                "<state>RUNNING</state>\n" +
+                "<finalStatus>UNDEFINED</finalStatus>\n" +
+                "<progress>100.0</progress>\n" +
+                "<trackingUI>ApplicationMaster</trackingUI>\n" +
+                "<trackingUrl>http://pro-hadoop-2:8088/proxy/application_1585401674210_281973/</trackingUrl>\n" +
+                "<diagnostics/>\n" +
+                "<clusterId>1585401674210</clusterId>\n" +
+                "<applicationType>Apache Flink</applicationType>\n" +
+                "<applicationTags/>\n" +
+                "<startedTime>1596298971576</startedTime>\n" +
+                "<finishedTime>0</finishedTime>\n" +
+                "<elapsedTime>911638708</elapsedTime>\n" +
+                "<amContainerLogs>http://pro-hadoop-7:8042/node/containerlogs/container_e06_1585401674210_281973_01_000001/hst</amContainerLogs>\n" +
+                "<amHostHttpAddress>pro-hadoop-7:8042</amHostHttpAddress>\n" +
+                "<allocatedMB>26624</allocatedMB>\n" +
+                "<allocatedVCores>13</allocatedVCores>\n" +
+                "<reservedMB>0</reservedMB>\n" +
+                "<reservedVCores>0</reservedVCores>\n" +
+                "<runningContainers>13</runningContainers>\n" +
+                "<memorySeconds>21856904069</memorySeconds>\n" +
+                "<vcoreSeconds>10672156</vcoreSeconds>\n" +
+                "<preemptedResourceMB>0</preemptedResourceMB>\n" +
+                "<preemptedResourceVCores>0</preemptedResourceVCores>\n" +
+                "<numNonAMContainerPreempted>0</numNonAMContainerPreempted>\n" +
+                "<numAMContainerPreempted>0</numAMContainerPreempted>\n" +
+                "<logAggregationStatus>NOT_START</logAggregationStatus>\n" +
+                "</app>";
+
+        Document document = DocumentHelper.parseText(xml);
+
+        //3.获取根节点
+        Element rootElement = document.getRootElement();
+        Iterator iterator = rootElement.elementIterator();
+
+        AppInfo appInfo = new AppInfo();
+        while (iterator.hasNext()) {
+            Element element = (Element) iterator.next();
+            Object value = element.getData();
+            String name = element.getName();
+            if (value != null && value.toString().trim().length() > 0) {
+                Field field = AppInfo.class.getDeclaredField(name);
+                field.setAccessible(true);
+                Object v = null;
+                Class<?> clazz = field.getType();
+                if (clazz.equals(Float.class)) {
+                    v = Float.parseFloat(value.toString());
+                } else if (clazz.equals(Long.class)) {
+                    v = Long.parseLong(value.toString());
+                } else if (clazz.equals(Integer.class)) {
+                    v = Integer.parseInt(value.toString());
+                } else {
+                    v = value.toString();
+                }
+                field.set(appInfo, v);
+            }
+        }
+        System.out.println(appInfo);
+
 
     }
 

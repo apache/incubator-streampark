@@ -22,7 +22,6 @@ package com.streamxhub.flink.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -31,11 +30,17 @@ import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
+import com.streamxhub.flink.monitor.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 
 import java.io.*;
+import java.lang.reflect.Field;
 import java.util.Date;
+import java.util.Iterator;
 
 @Data
 @TableName("t_flink_app")
@@ -105,10 +110,37 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public String getYarnAppInfo() {
+    public AppInfo getYarnAppInfo() throws Exception {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
-        return HttpClientUtils.httpGetRequest(url);
+        String result = HttpClientUtils.httpGetRequest(url);
+        Document document = DocumentHelper.parseText(result);
+        //3.获取根节点
+        Element rootElement = document.getRootElement();
+        Iterator iterator = rootElement.elementIterator();
+        AppInfo appInfo = new AppInfo();
+        while (iterator.hasNext()) {
+            Element element = (Element) iterator.next();
+            Object data = element.getData();
+            String name = element.getName();
+            if (data != null && data.toString().trim().length() > 0) {
+                Field field = AppInfo.class.getDeclaredField(name);
+                field.setAccessible(true);
+                Object value;
+                Class<?> clazz = field.getType();
+                if (clazz.equals(Float.class)) {
+                    value = Float.parseFloat(data.toString());
+                } else if (clazz.equals(Long.class)) {
+                    value = Long.parseLong(data.toString());
+                } else if (clazz.equals(Integer.class)) {
+                    value = Integer.parseInt(data.toString());
+                } else {
+                    value = data.toString();
+                }
+                field.set(appInfo, value);
+            }
+        }
+        return appInfo;
     }
 
     @JsonIgnore
