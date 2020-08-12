@@ -2,7 +2,6 @@ package com.streamxhub.common.util
 
 
 import org.apache.http.NameValuePair
-import org.apache.http.client.ClientProtocolException
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.HttpGet
 import org.apache.http.client.methods.HttpPost
@@ -13,7 +12,6 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
-import java.io.IOException
 import java.io.UnsupportedEncodingException
 import java.net.URISyntaxException
 import java.util
@@ -22,7 +20,6 @@ import scala.collection.JavaConversions._
 object HttpClientUtils {
 
   private var connectionManager: PoolingHttpClientConnectionManager = _
-  private val EMPTY_STR = ""
   private val UTF_8 = "UTF-8"
 
   private def init(): Unit = {
@@ -126,23 +123,15 @@ object HttpClientUtils {
     val httpClient = getHttpClient
     try {
       val response = httpClient.execute(request)
-      // response.getStatusLine().getExitCode();
       val entity = response.getEntity
       if (entity != null) { // long len = entity.getContentLength();// -1 表示长度未知
         val result = EntityUtils.toString(entity)
         response.close()
-        // httpClient.close();
-        return result
-      }
+        result
+      } else null
     } catch {
-      case e: ClientProtocolException =>
-        e.printStackTrace()
-      case e: IOException =>
-        e.printStackTrace()
-    } finally {
-
+      case e: Exception => throw e
     }
-    EMPTY_STR
   }
 
 }

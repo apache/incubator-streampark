@@ -148,8 +148,11 @@ public class Application implements Serializable {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         String result = HttpClientUtils.httpGetRequest(url);
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(new StringReader(result), JobsOverview.class);
+        if (result != null) {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(new StringReader(result), JobsOverview.class);
+        }
+        return null;
     }
 
 }
