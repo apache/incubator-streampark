@@ -24,6 +24,7 @@ package com.streamxhub.flink.monitor.core.service.impl;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.domain.Constant;
@@ -33,6 +34,7 @@ import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
+import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -71,7 +73,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private StreamXProperties properties;
 
-    private final Map<Long, YarnApplicationState> jobStateMap = new ConcurrentHashMap<>();
+    private final Map<Long, AppState> jobStateMap = new ConcurrentHashMap<>();
 
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
@@ -172,22 +174,38 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
         application.setAppId(appId.toString());
-        Executors.newSingleThreadExecutor().submit(() -> getJobState(application, appId.toString()));
+        Executors.newSingleThreadExecutor().submit(() -> getJobState(application));
         return true;
     }
 
     @SneakyThrows
-    private void getJobState(Application application, String appId) {
+    private void getJobState(Application application) {
         ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(
                 1,
                 new BasicThreadFactory.Builder().namingPattern("Flink-GetJobState-%d").daemon(true).build()
         );
         executorService.scheduleAtFixedRate(() -> {
-            YarnApplicationState yarnState = YarnUtils.getState(appId);
-            YarnApplicationState preState = jobStateMap.get(application.getId());
-            if (!yarnState.equals(preState)) {
-                application.setState(AppState.valueOf(yarnState.name()).getValue());
-                jobStateMap.put(application.getId(),yarnState);
+            try {
+                JobsOverview jobsOverview = application.getJobsOverview();
+                /**
+                 * 注意:yarnName是唯一的,不能重复...
+                 */
+                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().equals(application.getYarnName())).findFirst();
+                assert optional.isPresent();
+                JobsOverview.Job job = optional.get();
+
+                if (application.getJobId() == null) {
+                    application.setJobId(job.getId());
+                    this.baseMapper.updateById(application);
+                }
+                AppState state = AppState.valueOf(job.getState());
+                AppState preState = jobStateMap.get(application.getId());
+                if (!state.equals(preState)) {
+                    application.setState(state.getValue());
+                    this.baseMapper.updateById(application);
+                }
+            } catch (Exception e) {
+
             }
         }, 0, 2, TimeUnit.SECONDS);
     }
