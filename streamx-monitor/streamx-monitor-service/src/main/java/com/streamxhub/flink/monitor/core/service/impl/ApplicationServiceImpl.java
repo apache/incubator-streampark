@@ -202,6 +202,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (!state.equals(preState)) {
                     application.setState(state.getValue());
                     this.baseMapper.updateById(application);
+                    jobStateMap.put(application.getId(),state);
                 }
             } catch (Exception e) {
 
