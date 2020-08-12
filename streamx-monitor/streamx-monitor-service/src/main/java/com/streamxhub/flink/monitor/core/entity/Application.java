@@ -21,6 +21,8 @@
 package com.streamxhub.flink.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
@@ -102,13 +104,15 @@ public class Application implements Serializable {
         return workspace;
     }
 
+    @JsonIgnore
     public String getYarnAppInfo() {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
         return HttpClientUtils.httpGetRequest(url);
     }
 
-    public JobsOverview jobsOverview() throws IOException {
+    @JsonIgnore
+    public JobsOverview getJobsOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         String result = HttpClientUtils.httpGetRequest(url);
