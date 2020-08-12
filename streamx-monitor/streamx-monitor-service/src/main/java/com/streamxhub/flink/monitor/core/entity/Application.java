@@ -105,7 +105,7 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public AppInfo getYarnAppInfo() throws Exception {
-        String yarn = "http://test-hadoop-2:8088";//SpringContextUtil.getBean(StreamXProperties.class).getYarn();
+        String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
         String result = HttpClientUtils.httpGetRequest(url);
         if (result != null) {
