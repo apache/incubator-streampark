@@ -75,7 +75,7 @@
       :loading="loading"
       :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 900 }"
-      @change="handleTableChange" >
+      @change="handleTableChange">
       <template slot="state" slot-scope="state">
         <!--
         CREATED(0),
@@ -141,10 +141,11 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { list, remove, exists, deploy, startUp, yarn } from '@/api/application'
+import {list, remove, exists, deploy, startUp, yarn} from '@/api/application'
+
 export default {
-  components: { RangeDate },
-  data () {
+  components: {RangeDate},
+  data() {
     return {
       loading: false,
       advanced: false,
@@ -164,8 +165,8 @@ export default {
     }
   },
   computed: {
-    columns () {
-      let { sortedInfo } = this
+    columns() {
+      let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
       return [{
         title: '所属项目',
@@ -179,7 +180,7 @@ export default {
       }, {
         title: '状态',
         dataIndex: 'state',
-        scopedSlots: { customRender: 'state' }
+        scopedSlots: {customRender: 'state'}
       }, {
         title: '创建人',
         dataIndex: 'userName'
@@ -191,28 +192,30 @@ export default {
       }, {
         title: '操作',
         dataIndex: 'operation',
-        scopedSlots: { customRender: 'operation' },
+        scopedSlots: {customRender: 'operation'},
         fixed: 'right',
         width: 120
       }]
     }
   },
-  mounted () {
-    this.handleFetch()
+  mounted() {
+    window.setInterval(() => {
+      this.handleFetch()
+    }, 2000)
     this.handleYarn()
   },
   methods: {
-    onSelectChange (selectedRowKeys) {
+    onSelectChange(selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
-    handleDateChange (value) {
+    handleDateChange(value) {
       if (value) {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
     },
-    handleDeploy (value) {
+    handleDeploy(value) {
       deploy({
         id: value.id,
         projectId: value.projectId,
@@ -221,8 +224,8 @@ export default {
         console.log(resp)
       })
     },
-    batchDelete () {
-      this.$router.push({ 'path': 'addtest' })
+    batchDelete() {
+      this.$router.push({'path': 'addtest'})
 
       if (!this.selectedRowKeys.length) {
         this.$message.warning('请选择需要删除的记录')
@@ -235,7 +238,7 @@ export default {
         okText: '确定',
         okType: 'danger',
         cancelText: '取消',
-        onOk () {
+        onOk() {
           remove({
             name: that.selectedRowKeys.join(',')
           }).then(() => {
@@ -244,14 +247,14 @@ export default {
             that.fetch()
           })
         },
-        onCancel () {
+        onCancel() {
           that.selectedRowKeys = []
           that.$message.info('已取消删除')
         }
       })
     },
-    search () {
-      const { sortedInfo } = this
+    search() {
+      const {sortedInfo} = this
       let sortField, sortOrder
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
@@ -264,7 +267,7 @@ export default {
         ...this.queryParams
       })
     },
-    reset () {
+    reset() {
       // 取消选中
       this.selectedRowKeys = []
       // 重置列排序规则
@@ -275,7 +278,7 @@ export default {
       this.$refs.createTime.reset()
       this.fetch()
     },
-    handleTableChange (pagination, filters, sorter) {
+    handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.fetch({
         sortField: sorter.field,
@@ -284,7 +287,7 @@ export default {
         ...filters
       })
     },
-    handleFetch (params = {}) {
+    handleFetch(params = {}) {
       this.loading = true
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
@@ -301,27 +304,27 @@ export default {
         ...params
       }).then((resp) => {
         console.log(resp)
-        const pagination = { ...this.pagination }
+        const pagination = {...this.pagination}
         pagination.total = resp.data.total
         this.dataSource = resp.data.records
         this.pagination = pagination
         this.loading = false
       })
     },
-    handleYarn (params = {}) {
+    handleYarn(params = {}) {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
     },
 
-    handleView (params) {
+    handleView(params) {
       window.open(this.yarn + "/proxy/" + params.appId + "/")
     },
 
-    addTask () {
-      this.$router.push({ 'path': 'addapp' })
+    addTask() {
+      this.$router.push({'path': 'addapp'})
     },
-    handleStartUp (app) {
+    handleStartUp(app) {
       exists({
         id: app.id
       }).then((resp) => {
@@ -341,7 +344,7 @@ export default {
 </script>
 
 <style>
-  .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
-    font-size: 100px;
-  }
+.ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
+  font-size: 100px;
+}
 </style>
