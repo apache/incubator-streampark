@@ -12,6 +12,7 @@
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
         <result column="YARN_NAME" jdbcType="VARCHAR" property="yarnName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
