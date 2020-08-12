@@ -43,7 +43,9 @@ import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,8 +54,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -69,6 +70,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private StreamXProperties properties;
+
+    private final Map<Long, YarnApplicationState> jobStateMap = new ConcurrentHashMap<>();
 
     @Override
     public IPage<Application> list(Application app, RestRequest request) {
@@ -169,11 +172,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
         application.setAppId(appId.toString());
-        application.setState(AppState.RUNNING.getValue());
-        this.baseMapper.updateById(application);
+        Executors.newSingleThreadExecutor().submit(() -> getJobState(application, appId.toString()));
         return true;
     }
 
+    @SneakyThrows
+    private void getJobState(Application application, String appId) {
+        ScheduledExecutorService executorService = new ScheduledThreadPoolExecutor(
+                1,
+                new BasicThreadFactory.Builder().namingPattern("Flink-GetJobState-%d").daemon(true).build()
+        );
+        executorService.scheduleAtFixedRate(() -> {
+            YarnApplicationState yarnState = YarnUtils.getState(appId);
+            YarnApplicationState preState = jobStateMap.get(application.getId());
+            if (!yarnState.equals(preState)) {
+                application.setState(AppState.valueOf(yarnState.name()).getValue());
+                jobStateMap.put(application.getId(),yarnState);
+            }
+        }, 0, 2, TimeUnit.SECONDS);
+    }
 
     /**
      * 2秒钟从yarn里获取一次当前任务的appId,总共获取10次,如10次都未获取到则获取失败.
