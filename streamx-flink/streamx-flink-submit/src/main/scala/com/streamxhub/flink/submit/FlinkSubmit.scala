@@ -28,6 +28,7 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util.{HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
+import org.apache.flink.client.ClientUtils
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
@@ -44,7 +45,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
@@ -211,9 +211,7 @@ object FlinkSubmit extends Logger {
         println(clusterSpecification)
         println("------------------------------------")
         val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-
         applicationId = clusterClient.getClusterId
-
         println("------------------<<applicationId>>------------------")
         println()
         println("Flink Job Started: applicationId: " + applicationId)
