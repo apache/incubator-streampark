@@ -78,17 +78,13 @@
       @change="handleTableChange">
       <template slot="state" slot-scope="state">
         <!--
-        CREATED(0),
-        DEPLOYING(1),
-        NEW(2),
-        NEW_SAVING(3),
-        SUBMITTED(4),
         ACCEPTED(5),
         RUNNING(6),
-        FINISHED(7),
-        FAILED(8),
-        KILLED(9);
-        LOST(10);
+        CANCELLING(7),
+        CANCELED(8),
+        FINISHED(9),
+        FAILED(10),
+        LOST(11);
         -->
         <a-tag color="#108ee9" v-if="state === 0">CREATED</a-tag>
         <a-tag color="#87d068" v-if="state === 1">DEPLOYING</a-tag>
@@ -97,10 +93,11 @@
         <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
         <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
         <a-tag color="#87d068" v-if="state === 6">RUNNING</a-tag>
-        <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELED</a-tag>
-        <a-tag color="#f50" v-if="state === 8">FINISHED</a-tag>
-        <a-tag color="#f50" v-if="state === 9">FAILED</a-tag>
-        <a-tag color="#000" v-if="state === 10">LOST</a-tag>
+        <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELLING</a-tag>
+        <a-tag color="rgb(250, 140, 22)" v-if="state === 8">CANCELED</a-tag>
+        <a-tag color="#f50" v-if="state === 9">FINISHED</a-tag>
+        <a-tag color="#f50" v-if="state === 10">FAILED</a-tag>
+        <a-tag color="#000" v-if="state === 11">LOST</a-tag>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-icon

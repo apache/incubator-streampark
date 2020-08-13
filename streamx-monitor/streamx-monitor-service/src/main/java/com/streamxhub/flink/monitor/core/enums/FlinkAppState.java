@@ -60,6 +60,7 @@ public enum FlinkAppState {
      */
     RUNNING(6),
 
+
     CANCELLING(7),
     /**
      * Application which was terminated by a user or admin.
