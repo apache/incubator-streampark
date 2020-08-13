@@ -161,15 +161,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void cancel(Application app) {
+        Application application = getById(app.getId());
         String yarn = properties.getYarn();
-        String url = yarn.concat("/jobs/").concat(app.getJobId());
-        Map<String,Object> params = new HashMap<>(0);
-        params.put("mode","cancel");
-        try {
-            HttpClientUtils.httpPatchRequest(url,params);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String url = String.format("%s/proxy/%s/jobs/%s/yarn-cancel",yarn,application.getAppId(),application.getJobId());
+        HttpClientUtils.httpGetRequest(url);
     }
 
     @Override
