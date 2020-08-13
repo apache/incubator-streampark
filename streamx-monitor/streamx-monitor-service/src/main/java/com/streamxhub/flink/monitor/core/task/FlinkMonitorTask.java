@@ -21,8 +21,6 @@
 package com.streamxhub.flink.monitor.core.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.streamxhub.common.util.DateUtils;
-import com.streamxhub.flink.monitor.base.utils.DateUtil;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.enums.FlinkAppState;
 import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
@@ -48,6 +46,9 @@ public class FlinkMonitorTask {
     private ApplicationService applicationService;
 
     private final Map<Long, FlinkAppState> jobStateMap = new ConcurrentHashMap<>();
+
+    private final Map<Long, Long> cancelingMap = new ConcurrentHashMap<>();
+
 
     @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
@@ -80,6 +81,10 @@ public class FlinkMonitorTask {
                     }
                     FlinkAppState state = FlinkAppState.valueOf(job.getState());
                     FlinkAppState preState = jobStateMap.get(application.getId());
+
+                    if (state == FlinkAppState.CANCELLING) {
+                        cancelingMap.put(application.getId(), application.getId());
+                    }
 
                     if (!state.equals(preState)) {
                         application.setState(state.getValue());
@@ -116,30 +121,40 @@ public class FlinkMonitorTask {
             } catch (Exception e) {
                 e.printStackTrace();
                 if (e instanceof ConnectException) {
-                    try {
-                        /**
-                         * 2)到yarn的restApi中查询状态
-                         */
-                        AppInfo appInfo = application.getYarnAppInfo();
-                        String state = appInfo.getApp().getFinalStatus();
-                        FlinkAppState flinkAppState;
-                        if ("KILLED".equals(state)) {
-                            flinkAppState = FlinkAppState.CANCELED;
-                            application.setEndTime(new Date());
-                        } else {
-                            flinkAppState = FlinkAppState.valueOf(state);
-                        }
-                        application.setState(flinkAppState.getValue());
-                        applicationService.updateById(application);
-                    } catch (Exception e1) {
-                        /**s
-                         * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
-                         */
-                        application.setState(FlinkAppState.LOST.getValue());
+                    /**
+                     * 上一次的状态为canceling,如在获取上次信息的时候flink restServer还未关闭为canceling,且本次如获取不到(flink restServer已关闭),则认为任务已经CANCELED
+                     */
+                    if (cancelingMap.containsKey(application.getId())) {
+                        application.setState(FlinkAppState.CANCELED.getValue());
                         applicationService.updateById(application);
                         jobStateMap.remove(application.getId());
-                        //TODO send msg or emails
-                        e1.printStackTrace();
+                        cancelingMap.remove(application.getId());
+                    } else {
+                        try {
+                            /**
+                             * 2)到yarn的restApi中查询状态
+                             */
+                            AppInfo appInfo = application.getYarnAppInfo();
+                            String state = appInfo.getApp().getFinalStatus();
+                            FlinkAppState flinkAppState;
+                            if ("KILLED".equals(state)) {
+                                flinkAppState = FlinkAppState.CANCELED;
+                                application.setEndTime(new Date());
+                            } else {
+                                flinkAppState = FlinkAppState.valueOf(state);
+                            }
+                            application.setState(flinkAppState.getValue());
+                            applicationService.updateById(application);
+                        } catch (Exception e1) {
+                            /**s
+                             * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
+                             */
+                            application.setState(FlinkAppState.LOST.getValue());
+                            applicationService.updateById(application);
+                            jobStateMap.remove(application.getId());
+                            //TODO send msg or emails
+                            e1.printStackTrace();
+                        }
                     }
                 }
             }
