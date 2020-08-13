@@ -10,7 +10,6 @@
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
         <result column="SHORTOPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
-        <result column="YARN_NAME" jdbcType="VARCHAR" property="yarnName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
@@ -36,9 +35,6 @@
             <if test="application.appName != null and application.appName != ''">
                 AND t.app_name = #{application.appName}
             </if>
-            <if test="application.yarnName != null and application.yarnName != ''">
-                AND t.yarn_name = #{application.yarnName}
-            </if>
             <if test="application.state != null and application.state != ''">
                 AND t.state = #{application.state}
             </if>
@@ -52,6 +48,18 @@
         update t_flink_app
         set deploy=#{application.deploy}
         where project_id=#{application.projectId}
+    </update>
+
+    <update id="updateJobId" parameterType="application">
+        update t_flink_app
+        set job_id=#{application.jobId}
+        where id=#{application.id}
+    </update>
+
+    <update id="updateState" parameterType="application">
+        update t_flink_app
+        set `state`=#{application.state}
+        where id=#{application.id}
     </update>
 
 </mapper>

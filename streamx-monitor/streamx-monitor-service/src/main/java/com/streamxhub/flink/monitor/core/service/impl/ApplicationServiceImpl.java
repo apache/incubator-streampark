@@ -20,6 +20,7 @@
  */
 package com.streamxhub.flink.monitor.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
@@ -32,12 +33,13 @@ import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
+import com.streamxhub.flink.monitor.core.enums.AppExistsState;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.flink.monitor.core.enums.AppState;
+import com.streamxhub.flink.monitor.core.enums.FlinkAppState;
 import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.SneakyThrows;
@@ -84,11 +86,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return ParameterCli.read(args);
     }
 
+    /**
+     * 检查当前的appName在表和yarn中是否已经存在
+     * @param app
+     * @return
+     */
     @Override
-    public boolean checkExists(Application app) {
-        return YarnUtils.isContains(app.getAppName());
+    public AppExistsState checkExists(Application app) {
+        QueryWrapper<Application> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("app_name", app.getAppName());
+        int count = this.baseMapper.selectCount(queryWrapper);
+        boolean exists = YarnUtils.isContains(app.getAppName());
+        if (count == 0 && !exists) {
+            return AppExistsState.NO;
+        }
+        return exists ? AppExistsState.IN_YARN : AppExistsState.IN_DB;
     }
-
 
     @Override
     public boolean create(Application app) {
@@ -101,10 +114,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
         //配置文件中配置的yarnName..
-        String yarnName = this.getYarnName(app);
-        app.setYarnName(yarnName);
         app.setUserId(serverUtil.getUser().getUserId());
-        app.setState(AppState.CREATED.getValue());
+        app.setState(FlinkAppState.CREATED.getValue());
         app.setCreateTime(new Date());
         app.setModule(app.getModule().replace(app.getAppBase().getAbsolutePath() + "/", ""));
         app.setConfig(app.getConfig().replace(app.getAppBase().getAbsolutePath() + "/".concat(app.getModule()).concat("/"), ""));
@@ -147,6 +158,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public void updateState(Application application) {
+        this.baseMapper.updateState(application);
+    }
+
+    @Override
+    public void updateJobId(Application application) {
+        this.baseMapper.updateJobId(application);
+    }
+
+    @Override
     public boolean startUp(String id) {
         final Application application = getById(id);
         assert application != null;
@@ -159,13 +180,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ApplicationId appId = FlinkSubmit.submit(
                 properties.getNameService(),
                 flinkUserJar,
-                application.getYarnName(),
+                application.getAppName(),
                 appConf,
                 overrideOption,
                 application.getArgs()
         );
         application.setAppId(appId.toString());
-        application.setState(AppState.DEPLOYING.getValue());
+        application.setState(FlinkAppState.DEPLOYING.getValue());
         this.baseMapper.updateById(application);
         return true;
     }
@@ -185,7 +206,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (lastTime == 0 || (now - lastTime) >= 2000) {
                     lastTime = now;
                     index++;
-                    List<ApplicationId> idList = YarnUtils.getAppId(application.getYarnName());
+                    List<ApplicationId> idList = YarnUtils.getAppId(application.getAppName());
                     if (!idList.isEmpty()) {
                         if (idList.size() == 1) {
                             ApplicationId applicationId = idList.get(0);
