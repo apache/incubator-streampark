@@ -13,6 +13,8 @@
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime"/>
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
