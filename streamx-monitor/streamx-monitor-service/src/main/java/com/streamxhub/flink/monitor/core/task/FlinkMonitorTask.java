@@ -73,7 +73,6 @@ public class FlinkMonitorTask {
                 if (optional.isPresent()) {
                     JobsOverview.Job job = optional.get();
 
-
                     FlinkAppState state = FlinkAppState.valueOf(job.getState());
                     Long startTime = job.getStartTime();
                     Long endTime = job.getEndTime() == -1 ? null : job.getEndTime();
