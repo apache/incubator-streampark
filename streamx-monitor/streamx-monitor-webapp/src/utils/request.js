@@ -58,7 +58,7 @@ http.interceptors.response.use((response) => {
   return response.data
 }, error => {
   if (error.response) {
-    const errorMessage = error.response.data === null ? '系统内部异常，请联系网站管理员' : error.response.data.message
+    const errorMessage = error.response.data === null ? '系统内部异常，请联系管理员' : error.response.data.message
     switch (error.response.status) {
       case 404:
         notification.error({

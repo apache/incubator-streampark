@@ -23,7 +23,7 @@ package com.streamxhub.flink.monitor.core.enums;
 import lombok.Getter;
 
 @Getter
-public enum AppState {
+public enum FlinkAppState {
 
     /**
      * Application which is currently deploying.
@@ -81,7 +81,7 @@ public enum AppState {
 
     int value;
 
-    AppState(int value) {
+    FlinkAppState(int value) {
         this.value = value;
     }
 

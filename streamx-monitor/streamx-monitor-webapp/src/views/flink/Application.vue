@@ -74,7 +74,7 @@
       :pagination="pagination"
       :loading="loading"
       :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
-      :scroll="{ x: 900 }"
+      :scroll="{ x: 600 }"
       @change="handleTableChange">
       <template slot="state" slot-scope="state">
         <!--
@@ -169,26 +169,32 @@ export default {
       let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
       return [{
-        title: '所属项目',
-        dataIndex: 'projectName'
-      }, {
         title: '应用名称',
-        dataIndex: 'appName'
+        dataIndex: 'appName',
+        fixed: 'left'
       }, {
         title: '应用ID',
-        dataIndex: 'appId'
+        dataIndex: 'appId',
+        fixed: 'left'
       }, {
         title: '状态',
         dataIndex: 'state',
-        scopedSlots: {customRender: 'state'}
+        scopedSlots: {customRender: 'state'},
+        fixed: 'left'
+      },{
+        title: '所属项目',
+        dataIndex: 'projectName',
+        width: 150
       }, {
         title: '创建人',
-        dataIndex: 'userName'
+        dataIndex: 'userName',
+        width: 150
       }, {
         title: '创建时间',
         dataIndex: 'createTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order
+        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        width: 150
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -334,18 +340,10 @@ export default {
     },
 
     handleStartUp(app) {
-      exists({
+      startUp({
         id: app.id
       }).then((resp) => {
-        if (resp.data) {
-          this.$message.error('该任务正在运行中...')
-        } else {
-          startUp({
-            id: app.id
-          }).then((resp) => {
-            console.log(resp)
-          })
-        }
+        console.log(resp)
       })
     }
 

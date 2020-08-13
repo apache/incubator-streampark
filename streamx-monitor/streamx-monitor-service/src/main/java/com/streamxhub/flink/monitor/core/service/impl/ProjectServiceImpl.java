@@ -111,11 +111,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         boolean success = cloneOrPull(project);
         if (success) {
             new Thread(() -> {
-                boolean build = mavenBuild(project);
+                boolean build = ProjectServiceImpl.this.mavenBuild(project);
                 if (build) {
-                    this.baseMapper.successBuild(project);
+                    ProjectServiceImpl.this.baseMapper.successBuild(project);
                     //发布到apps下
-                    this.deploy(project);
+                    ProjectServiceImpl.this.deploy(project);
 
                     //更新application的发布状态.
                     Application application = new Application();
@@ -123,7 +123,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     application.setDeploy(1);
                     applicationService.updateDeploy(application);
                 } else {
-                    this.baseMapper.failureBuild(project);
+                    ProjectServiceImpl.this.baseMapper.failureBuild(project);
                 }
             }).start();
             return RestResponse.create().message("[StreamX] git clone and pull success. begin maven install");

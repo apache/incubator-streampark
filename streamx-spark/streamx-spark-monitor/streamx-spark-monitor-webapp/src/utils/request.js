@@ -49,7 +49,7 @@ STREAMX_REQUEST.interceptors.response.use((config) => {
     return config
 }, (error) => {
     if (error.response) {
-        let errorMessage = error.response.data === null ? '系统内部异常，请联系网站管理员' : error.response.data.message
+        let errorMessage = error.response.data === null ? '系统内部异常，请联系管理员' : error.response.data.message
         switch (error.response.status) {
             case 404:
                 notification.error({

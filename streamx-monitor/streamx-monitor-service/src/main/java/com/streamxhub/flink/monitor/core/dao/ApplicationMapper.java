@@ -27,9 +27,11 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
-    IPage<Application> findApplication(Page<Application> page,@Param("application") Application application);
+    IPage<Application> findApplication(Page<Application> page, @Param("application") Application application);
 
     void updateDeploy(@Param("application") Application application);
 
+    void updateState(@Param("application") Application application);
 
+    void updateJobId(Application application);
 }

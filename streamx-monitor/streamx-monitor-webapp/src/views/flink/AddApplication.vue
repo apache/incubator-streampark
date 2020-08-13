@@ -48,7 +48,8 @@
         label="作业名称"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input type="text" placeholder="请输入任务名称" v-decorator="['appName',{ rules: [{ required: true, message: '请输入任务名称' } ]}]"/>
+        <a-input type="text" placeholder="请输入任务名称"
+                 v-decorator="['appName',{ rules: [{ validator: handleCheckAppName,trigger:'submit' } ]}]"/>
       </a-form-item>
       <a-form-item
         label="部署模式"
@@ -77,7 +78,9 @@
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
-          <a-select-option v-for="(conf,index) in options" v-if="conf.group === mode" :key="index" :value="conf.name">{{ conf.key }} ( {{ conf.name }} )</a-select-option>
+          <a-select-option v-for="(conf,index) in options" v-if="conf.group === mode" :key="index" :value="conf.name">
+            {{ conf.key }} ( {{ conf.name }} )
+          </a-select-option>
         </a-select>
       </a-form-item>
 
@@ -89,14 +92,16 @@
         :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input v-if="conf.type === 'input'" type="text" :placeholder="conf.placeholder" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-input v-if="conf.type === 'input'" type="text" :placeholder="conf.placeholder"
+                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
           @change="(x) => handleSwitch(x,conf)"
           checkedChildren="开"
           unCheckedChildren="关"
           v-decorator="[`${conf.name}`]"/>
-        <a-input-number v-if="conf.type === 'number'" :min="conf.min" v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-input-number v-if="conf.type === 'number'" :min="conf.min"
+                        v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -109,8 +114,9 @@
           rows="4"
           name="dynamicProp"
           placeholder="$key=$value,多个参数换行 (-D <arg>)"
-          v-decorator="['dynamicProp']" />
+          v-decorator="['dynamicProp']"/>
       </a-form-item>
+
       <a-form-item
         label="运行参数"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -119,8 +125,9 @@
           rows="4"
           name="args"
           placeholder="<arguments>"
-          v-decorator="['args']" />
+          v-decorator="['args']"/>
       </a-form-item>
+
       <a-form-item
         label="应用描述"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -129,21 +136,24 @@
           rows="4"
           name="description"
           placeholder="请输入应用描述"
-          v-decorator="['description']" />
+          v-decorator="['description']"/>
       </a-form-item>
+
       <a-form-item
         :wrapperCol="{ span: 24 }"
         style="text-align: center">
         <a-button htmlType="submit" type="primary">提交</a-button>
         <a-button style="margin-left: 8px">保存</a-button>
       </a-form-item>
+
     </a-form>
+
   </a-card>
 </template>
 
 <script>
-import { select, listApp, listConf } from '@/api/project'
-import { create, name } from '@/api/application'
+import {select, listApp, listConf} from '@/api/project'
+import {create, exists, name} from '@/api/application'
 
 const configOptions = [
   {
@@ -273,18 +283,6 @@ const configOptions = [
     }
   },
   {
-    key: '-ynm',
-    name: 'yarnname',
-    placeholder: '-ynm,--yarnname <arg> ',
-    description: '自定义应用程序名称(on YARN)',
-    group: 'yarn',
-    type: 'input',
-    value: '',
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
     key: '-yat',
     name: 'yarnapplicationType',
     placeholder: '-yat,--yarnapplicationType <arg>',
@@ -376,7 +374,7 @@ const configOptions = [
 
 export default {
   name: 'BaseForm',
-  data () {
+  data() {
     return {
       maxTagCount: 1,
       value: 1,
@@ -390,32 +388,32 @@ export default {
       options: configOptions,
       mode: 'yarn',
       deploymentModes: [
-        { id: 'yarn', name: 'PreJob Cluster', default: true },
-        { id: 'session', name: 'Session Cluster', default: false }
+        {id: 'yarn', name: 'PreJob Cluster', default: true},
+        {id: 'session', name: 'Session Cluster', default: false}
       ]
     }
   },
-  mounted () {
+  mounted() {
     this.select()
   },
-  beforeMount () {
+  beforeMount() {
     this.form = this.$form.createForm(this)
     configOptions.forEach((item, index, array) => {
-      this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
+      this.form.getFieldDecorator(item.name, {initialValue: item.value, preserve: true})
     })
   },
   methods: {
-    filterOption (input, option) {
+    filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
-    select () {
+    select() {
       select().then((resp) => {
         this.project = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
     },
-    handleProject (value) {
+    handleProject(value) {
       listApp({
         id: value
       }).then((resp) => {
@@ -424,40 +422,60 @@ export default {
         this.$message.error(error.message)
       })
     },
-    handleConf (name) {
+    handleConf(name) {
       this.configItems = name
     },
 
-    handleSwitch (bool, conf) {
+    handleSwitch(bool, conf) {
       const v = {}
       v[conf.name] = bool
       this.form.setFieldsValue(v)
     },
-    handleMode (selectMode) {
+    handleMode(selectMode) {
       if (this.mode !== selectMode) {
         this.configItems = []
         this.form.resetFields(`options`, [])
       }
       this.mode = selectMode
     },
-    handleAppName (confFile) {
+    handleAppName(confFile) {
       name({
         config: confFile
       }).then((resp) => {
-        this.form.setFieldsValue({ 'appName': resp.data })
+        this.form.setFieldsValue({'appName': resp.data})
       }).catch((error) => {
         this.$message.error(error.message)
       })
     },
-    handleApp (app) {
+    handleApp(app) {
       listConf({
-        path:app
+        path: app
       }).then((resp) => {
         this.configSource = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
     },
+
+    handleCheckAppName(rule, value, callback) {
+      if (!value) {
+        callback(new Error('应用名称不能为空'))
+      } else {
+        exists({
+          appName: values.appName
+        }).then((resp) => {
+          const exists = parseInt(resp.data)
+          if (exists === 0) {
+            callback()
+          }else if(exists === 1) {
+            callback(new Error('应用名称必须唯一,该应用名称已经存在'))
+          }else {
+            callback(new Error('该应用名称已经在yarn中运行,不能重复请检查'))
+          }
+        })
+      }
+    },
+
     // handler
     handleSubmit: function (e) {
       e.preventDefault()
@@ -468,12 +486,12 @@ export default {
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
-              const option = configOptions.filter((elem) => k === elem.name )[0]
+              const option = configOptions.filter((elem) => k === elem.name)[0]
               const key = option.key
               if (v !== false && v !== '') {
                 options[k] = v
                 shortOptions += key + ' '
-                if ( option.type !== 'switch') {
+                if (option.type !== 'switch') {
                   shortOptions += v + ' '
                 }
               }
@@ -493,13 +511,14 @@ export default {
           }).then((resp) => {
             const created = resp.data
             if (created) {
-              this.$router.push({ path: '/flink/app' })
+              this.$router.push({path: '/flink/app'})
             } else {
               console.log(created)
             }
           }).catch((error) => {
             this.$message.error(error.message)
           })
+
         }
       })
     }
@@ -507,27 +526,33 @@ export default {
 }
 </script>
 <style>
-  .ant-list-item-meta-description{
-    margin-left: 20px;
-  }
-  .ant-list-item-content{
-    margin-right: 20px;
-  }
-  .conf_item {
-    margin-bottom: 0px;
-  }
-  .conf-desc {
-    color: darkgrey;
-    margin-bottom:0px
-  }
-  .conf-switch {
-    color: darkgrey;
-    margin-left: 5px;
-  }
-  .ant-input-number {
-    width: 100%;
-  }
-  .ant-form-explain {
-    margin-top: -5px;
-  }
+.ant-list-item-meta-description {
+  margin-left: 20px;
+}
+
+.ant-list-item-content {
+  margin-right: 20px;
+}
+
+.conf_item {
+  margin-bottom: 0px;
+}
+
+.conf-desc {
+  color: darkgrey;
+  margin-bottom: 0px
+}
+
+.conf-switch {
+  color: darkgrey;
+  margin-left: 5px;
+}
+
+.ant-input-number {
+  width: 100%;
+}
+
+.ant-form-explain {
+  margin-top: -5px;
+}
 </style>

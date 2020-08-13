@@ -25,6 +25,7 @@ import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.domain.RestResponse;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.core.entity.Application;
+import com.streamxhub.flink.monitor.core.enums.AppExistsState;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
@@ -66,7 +67,7 @@ public class ApplicationController extends BaseController {
 
     @RequestMapping("exists")
     public RestResponse exists(Application app) {
-        boolean exists = applicationService.checkExists(app);
+        AppExistsState exists = applicationService.checkExists(app);
         return RestResponse.create().data(exists);
     }
 
