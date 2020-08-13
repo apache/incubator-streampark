@@ -397,4 +397,11 @@ export default {
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
+.ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  text-align: center;
+  padding: 3px 5px;
+  cursor: default;
+}
 </style>
