@@ -70,6 +70,9 @@ public class Application implements Serializable {
     private String options;
     private String shortOptions;
 
+    private Date startTime;
+    private Date endTime;
+
     private String description;
     private Date createTime;
     private transient String userName;
@@ -77,12 +80,14 @@ public class Application implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
 
+    @JsonIgnore
     public File getAppBase() {
         String localWorkspace = SpringContextUtil.getBean(StreamXProperties.class).getAppHome();
         return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
     }
 
-    public String backupPath() {
+    @JsonIgnore
+    public String getBackupPath() {
         return ConfigConst.APP_HISTORY()
                 .concat("/")
                 .concat(id.toString())
@@ -90,6 +95,7 @@ public class Application implements Serializable {
                 .concat(System.currentTimeMillis() + "");
     }
 
+    @JsonIgnore
     public String getWorkspace(boolean withModule) {
         String workspace = ConfigConst.APP_WORKSPACE().concat("/").concat(id.toString());
         if (withModule) {
