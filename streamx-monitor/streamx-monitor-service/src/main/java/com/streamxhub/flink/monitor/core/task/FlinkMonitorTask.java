@@ -58,6 +58,7 @@ public class FlinkMonitorTask {
                 FlinkAppState.CREATED.getValue(),
                 FlinkAppState.FINISHED.getValue(),
                 FlinkAppState.FAILED.getValue(),
+                FlinkAppState.CANCELLING.getValue(),
                 FlinkAppState.CANCELED.getValue(),
                 FlinkAppState.LOST.getValue()
         );
@@ -81,10 +82,6 @@ public class FlinkMonitorTask {
                     }
                     FlinkAppState state = FlinkAppState.valueOf(job.getState());
                     FlinkAppState preState = jobStateMap.get(application.getId());
-
-                    if (state == FlinkAppState.CANCELLING) {
-                        cancelingMap.put(application.getId(), application.getId());
-                    }
 
                     if (!state.equals(preState)) {
                         application.setState(state.getValue());
@@ -116,6 +113,10 @@ public class FlinkMonitorTask {
 
                     if (state == FlinkAppState.FAILED || state == FlinkAppState.FINISHED || state == FlinkAppState.CANCELED) {
                         jobStateMap.remove(application.getId());
+                    }
+
+                    if (state == FlinkAppState.CANCELLING) {
+                        cancelingMap.put(application.getId(), application.getId());
                     }
                 }
             } catch (Exception e) {
