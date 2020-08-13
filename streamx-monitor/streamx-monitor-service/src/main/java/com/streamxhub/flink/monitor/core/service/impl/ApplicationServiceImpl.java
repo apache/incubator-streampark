@@ -173,6 +173,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
+        application.setState(FlinkAppState.DEPLOYING.getValue());
+        this.baseMapper.updateById(application);
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
@@ -186,8 +188,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
         application.setAppId(appId.toString());
-        application.setState(FlinkAppState.DEPLOYING.getValue());
-        this.baseMapper.updateById(application);
         return true;
     }
 
