@@ -28,7 +28,7 @@ spring:
           username: hopsonone
           password: hopsonone123
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://10.2.39.40:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC
+          url: jdbc:mysql://10.2.39.40:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
 
   aop.proxy-target-class: true
   messages.encoding: utf-8
