@@ -137,26 +137,27 @@
           </a-popconfirm>
         </template>
 
-        <template v-show="record.state === 6">
+        <template>
           <a-popconfirm
+            v-show="record.state === 6"
             title="确定要停止该项目吗?"
             ok-text="停止"
             cancel-text="取消"
             @confirm="handleCancel(record)">
-            <a-icon type="eye"
-                    v-show="record.state === 6"
-                    theme="twoTone"
-                    twoToneColor="#42b983"
+            <a-icon type="poweroff"
                     title="取消任务">
             </a-icon>
           </a-popconfirm>
+
+          <a-icon type="eye"
+                  v-show="record.state === 6"
+                  theme="twoTone"
+                  twoToneColor="#42b983"
+                  @click="handleView(record)" title="查看">
+          </a-icon>
+
         </template>
-        <a-icon type="eye"
-                v-show="record.state === 6"
-                theme="twoTone"
-                twoToneColor="#42b983"
-                @click="handleView(record)" title="查看">
-        </a-icon>
+
       </template>
     </a-table>
   </a-card>
@@ -226,7 +227,7 @@ export default {
         dataIndex: 'operation',
         scopedSlots: {customRender: 'operation'},
         fixed: 'right',
-        width: 120
+        width: 150
       }]
     }
   },
