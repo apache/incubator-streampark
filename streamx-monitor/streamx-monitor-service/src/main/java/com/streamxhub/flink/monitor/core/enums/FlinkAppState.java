@@ -60,25 +60,26 @@ public enum FlinkAppState {
      */
     RUNNING(6),
 
+    CANCELLING(7),
     /**
      * Application which was terminated by a user or admin.
      */
-    CANCELED(7),
+    CANCELED(8),
 
     /**
      * Application which finished successfully.
      */
-    FINISHED(8),
+    FINISHED(9),
 
     /**
      * Application which failed.
      */
-    FAILED(9),
+    FAILED(10),
     
     /**
      * 失联
      */
-    LOST(10);
+    LOST(11);
 
     int value;
 
