@@ -121,7 +121,7 @@
           title="修改角色">
         </a-icon>
 
-        <template>
+        <template v-show="record.state !== 6">
           <a-popconfirm
             title="确定要启动该项目吗?"
             ok-text="启动"
@@ -133,6 +133,21 @@
               theme="twoTone"
               twoToneColor="#4a9ff5"
               title="提交任务">
+            </a-icon>
+          </a-popconfirm>
+        </template>
+
+        <template v-show="record.state === 6">
+          <a-popconfirm
+            title="确定要停止该项目吗?"
+            ok-text="停止"
+            cancel-text="取消"
+            @confirm="handleCancel(record)">
+            <a-icon type="eye"
+                    v-show="record.state === 6"
+                    theme="twoTone"
+                    twoToneColor="#42b983"
+                    title="取消任务">
             </a-icon>
           </a-popconfirm>
         </template>
@@ -148,7 +163,7 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import {list, remove, exists, deploy, startUp, yarn} from '@/api/application'
+import {list, remove, cancel, deploy, startUp, yarn} from '@/api/application'
 
 export default {
   components: {RangeDate},
@@ -358,6 +373,14 @@ export default {
         icon: <a-icon type="smile" style="color: #108ee9" />
       })
       startUp({
+        id: app.id
+      }).then((resp) => {
+        console.log(resp)
+      })
+    },
+
+    handleCancel (app) {
+      cancel({
         id: app.id
       }).then((resp) => {
         console.log(resp)

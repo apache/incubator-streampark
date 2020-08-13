@@ -130,13 +130,13 @@ public class FlinkMonitorTask {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
                         application.setState(flinkAppState.getValue());
-                        applicationService.updateState(application);
+                        applicationService.updateById(application);
                     } catch (Exception e1) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
                         application.setState(FlinkAppState.LOST.getValue());
-                        applicationService.updateState(application);
+                        applicationService.updateById(application);
                         jobStateMap.remove(application.getId());
                         //TODO send msg or emails
                         e1.printStackTrace();

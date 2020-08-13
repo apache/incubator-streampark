@@ -44,7 +44,5 @@ public interface ApplicationService extends IService<Application> {
 
     void updateDeploy(Application app);
 
-    void updateState(Application application);
-
-    void updateJobId(Application application);
+    void cancel(Application app);
 }

@@ -71,6 +71,12 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(exists);
     }
 
+    @RequestMapping("cancel")
+    public RestResponse cancel(Application app) {
+        applicationService.cancel(app);
+        return RestResponse.create();
+    }
+
     @RequestMapping("create")
     public RestResponse create(Application app) throws IOException {
         boolean saved = applicationService.create(app);
