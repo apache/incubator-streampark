@@ -30,6 +30,10 @@ export function exists (params) {
   return http.post(api.Application.Exists, params)
 }
 
+export function cancel (params) {
+  return http.post(api.Application.Cancel, params)
+}
+
 export function create (params) {
   return http.post(api.Application.Create, params)
 }

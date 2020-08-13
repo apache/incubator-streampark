@@ -32,6 +32,7 @@ export default {
     List: '/flink/app/list',
     Name: '/flink/app/name',
     Exists: '/flink/app/exists',
+    Cancel: '/flink/app/cancel',
     Delete: '/flink/app/delete',
     Create: '/flink/app/create',
     StartUp: '/flink/app/startUp'
