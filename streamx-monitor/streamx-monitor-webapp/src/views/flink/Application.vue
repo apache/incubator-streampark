@@ -74,7 +74,7 @@
       :pagination="pagination"
       :loading="loading"
       :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
-      :scroll="{ x: 600 }"
+      :scroll="{ x: 700 }"
       @change="handleTableChange">
       <template slot="state" slot-scope="state">
         <!--
@@ -120,21 +120,28 @@
           @click="handleEdit(record)"
           title="修改角色">
         </a-icon>
-        <a-icon
-          v-permit="'role:update'"
-          type="play-circle"
-          theme="twoTone"
-          twoToneColor="#4a9ff5"
-          @click="handleStartUp(record)"
-          title="提交任务">
-        </a-icon>
+
+        <template>
+          <a-popconfirm
+            title="确定要启动该项目吗?"
+            ok-text="启动"
+            cancel-text="取消"
+            @confirm="handleStartUp(record)">
+            <a-icon
+              v-permit="'role:update'"
+              type="play-circle"
+              theme="twoTone"
+              twoToneColor="#4a9ff5"
+              title="提交任务">
+            </a-icon>
+          </a-popconfirm>
+        </template>
         <a-icon type="eye"
                 v-show="record.state === 6"
                 theme="twoTone"
                 twoToneColor="#42b983"
                 @click="handleView(record)" title="查看">
         </a-icon>
-
       </template>
     </a-table>
   </a-card>
@@ -171,30 +178,34 @@ export default {
       return [{
         title: '应用名称',
         dataIndex: 'appName',
-        fixed: 'left'
-      }, {
-        title: '应用ID',
-        dataIndex: 'appId',
-        fixed: 'left'
-      }, {
-        title: '状态',
-        dataIndex: 'state',
-        scopedSlots: {customRender: 'state'},
+        width: 150,
         fixed: 'left'
       },{
         title: '所属项目',
         dataIndex: 'projectName',
-        width: 150
-      }, {
-        title: '创建人',
-        dataIndex: 'userName',
-        width: 150
-      }, {
-        title: '创建时间',
-        dataIndex: 'createTime',
+        width: 200
+      },  {
+        title: '开始时间',
+        dataIndex: 'startTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
-        width: 150
+        width: 180
+      },  {
+        title: '结束时间',
+        dataIndex: 'endTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        width: 180
+      }, {
+        title: '应用ID',
+        dataIndex: 'appId',
+        width: 270
+      }, {
+        title: '状态',
+        dataIndex: 'state',
+        width: 100,
+        scopedSlots: {customRender: 'state'},
+        fixed: 'right'
       }, {
         title: '操作',
         dataIndex: 'operation',
@@ -342,11 +353,19 @@ export default {
     },
 
     handleStartUp(app) {
+      this.$notification.open({
+        message: '已发送任务启动请求',
+        icon: <a-icon type="smile" style="color: #108ee9" />
+      })
       startUp({
         id: app.id
       }).then((resp) => {
         console.log(resp)
       })
+    },
+
+    exportExcel() {
+
     }
 
   }
