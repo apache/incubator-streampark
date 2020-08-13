@@ -55,7 +55,6 @@ public class FlinkMonitorTask {
                 FlinkAppState.CREATED.getValue(),
                 FlinkAppState.FINISHED.getValue(),
                 FlinkAppState.FAILED.getValue(),
-                FlinkAppState.CANCELLING.getValue(),
                 FlinkAppState.CANCELED.getValue(),
                 FlinkAppState.LOST.getValue()
         );
