@@ -22,6 +22,9 @@ package com.streamxhub.flink.monitor.core.enums;
 
 import lombok.Getter;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 @Getter
 public enum FlinkAppState {
 
@@ -76,7 +79,7 @@ public enum FlinkAppState {
      * Application which failed.
      */
     FAILED(10),
-    
+
     /**
      * 失联
      */
@@ -88,5 +91,7 @@ public enum FlinkAppState {
         this.value = value;
     }
 
-
+    public static FlinkAppState of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    }
 }

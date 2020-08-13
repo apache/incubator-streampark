@@ -45,10 +45,7 @@ public class FlinkMonitorTask {
     @Autowired
     private ApplicationService applicationService;
 
-    private final Map<Long, FlinkAppState> jobStateMap = new ConcurrentHashMap<>();
-
     private final Map<Long, Long> cancelingMap = new ConcurrentHashMap<>();
-
 
     @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
@@ -75,44 +72,46 @@ public class FlinkMonitorTask {
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().trim().equals(application.getAppName().trim())).findFirst();
                 if (optional.isPresent()) {
                     JobsOverview.Job job = optional.get();
+
+
+                    FlinkAppState state = FlinkAppState.valueOf(job.getState());
+                    Long startTime = job.getStartTime();
+                    Long endTime = job.getEndTime() == -1 ? null : job.getEndTime();
+
                     boolean needUpdate = false;
+                    /**
+                     * update jobId
+                     */
                     if (application.getJobId() == null) {
                         application.setJobId(job.getId());
                         needUpdate = true;
                     }
-                    FlinkAppState state = FlinkAppState.valueOf(job.getState());
-                    FlinkAppState preState = jobStateMap.get(application.getId());
 
-                    if (!state.equals(preState)) {
+                    if (state.getValue() != application.getState()) {
                         application.setState(state.getValue());
-                        jobStateMap.put(application.getId(), state);
                         needUpdate = true;
                     }
 
                     if (application.getStartTime() == null) {
-                        application.setStartTime(new Date(job.getStartTime()));
+                        application.setStartTime(new Date(startTime));
                         needUpdate = true;
-                    } else if (!job.getStartTime().equals(application.getStartTime().getTime())) {
-                        application.setStartTime(new Date(job.getStartTime()));
+                    } else if (!startTime.equals(application.getStartTime().getTime())) {
+                        application.setStartTime(new Date(startTime));
                         needUpdate = true;
                     }
 
-                    if (job.getEndTime() != null) {
+                    if (endTime != null) {
                         if (application.getEndTime() == null) {
-                            application.setEndTime(new Date(job.getEndTime()));
+                            application.setEndTime(new Date(endTime));
                             needUpdate = true;
-                        } else if (!job.getEndTime().equals(application.getEndTime().getTime())) {
-                            application.setEndTime(new Date(job.getEndTime()));
+                        } else if (!endTime.equals(application.getEndTime().getTime())) {
+                            application.setEndTime(new Date(endTime));
                             needUpdate = true;
                         }
                     }
 
                     if (needUpdate) {
                         this.applicationService.updateById(application);
-                    }
-
-                    if (state == FlinkAppState.FAILED || state == FlinkAppState.FINISHED || state == FlinkAppState.CANCELED) {
-                        jobStateMap.remove(application.getId());
                     }
 
                     if (state == FlinkAppState.CANCELLING) {
@@ -128,7 +127,6 @@ public class FlinkMonitorTask {
                     if (cancelingMap.containsKey(application.getId())) {
                         application.setState(FlinkAppState.CANCELED.getValue());
                         applicationService.updateById(application);
-                        jobStateMap.remove(application.getId());
                         cancelingMap.remove(application.getId());
                     } else {
                         try {
@@ -152,7 +150,6 @@ public class FlinkMonitorTask {
                              */
                             application.setState(FlinkAppState.LOST.getValue());
                             applicationService.updateById(application);
-                            jobStateMap.remove(application.getId());
                             //TODO send msg or emails
                             e1.printStackTrace();
                         }
