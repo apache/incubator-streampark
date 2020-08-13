@@ -22,7 +22,7 @@ package com.streamxhub.flink.monitor.core.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
-import com.streamxhub.flink.monitor.core.enums.AppState;
+import com.streamxhub.flink.monitor.core.enums.FlinkAppState;
 import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.flink.monitor.core.metrics.yarn.AppInfo;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
@@ -44,18 +44,18 @@ public class FlinkMonitorTask {
     @Autowired
     private ApplicationService applicationService;
 
-    private final Map<Long, AppState> jobStateMap = new ConcurrentHashMap<>();
+    private final Map<Long, FlinkAppState> jobStateMap = new ConcurrentHashMap<>();
 
     @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         //以下状态的不再监控...
         queryWrapper.notIn("state",
-                AppState.CREATED.getValue(),
-                AppState.FINISHED.getValue(),
-                AppState.FAILED.getValue(),
-                AppState.CANCELED.getValue(),
-                AppState.LOST.getValue()
+                FlinkAppState.CREATED.getValue(),
+                FlinkAppState.FINISHED.getValue(),
+                FlinkAppState.FAILED.getValue(),
+                FlinkAppState.CANCELED.getValue(),
+                FlinkAppState.LOST.getValue()
         );
         List<Application> appList = applicationService.list(queryWrapper);
         appList.forEach((application) -> {
@@ -67,25 +67,27 @@ public class FlinkMonitorTask {
                 /**
                  * 注意:yarnName是唯一的,不能重复...
                  */
-                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().equals(application.getYarnName())).findFirst();
-                assert optional.isPresent();
-                JobsOverview.Job job = optional.get();
+                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().equals(application.getAppName())).findFirst();
+                if (optional.isPresent()) {
+                    JobsOverview.Job job = optional.get();
+                    if (application.getJobId() == null) {
+                        application.setJobId(job.getId());
+                        applicationService.updateJobId(application);
+                    }
+                    FlinkAppState state = FlinkAppState.valueOf(job.getState());
+                    FlinkAppState preState = jobStateMap.get(application.getId());
+                    if (!state.equals(preState)) {
+                        application.setState(state.getValue());
+                        applicationService.updateState(application);
+                        jobStateMap.put(application.getId(), state);
+                    }
+                    if (state == FlinkAppState.FAILED || state == FlinkAppState.FINISHED || state == FlinkAppState.CANCELED) {
+                        jobStateMap.remove(application.getId());
+                    }
+                }
 
-                if (application.getJobId() == null) {
-                    application.setJobId(job.getId());
-                    applicationService.updateById(application);
-                }
-                AppState state = AppState.valueOf(job.getState());
-                AppState preState = jobStateMap.get(application.getId());
-                if (!state.equals(preState)) {
-                    application.setState(state.getValue());
-                    applicationService.updateById(application);
-                    jobStateMap.put(application.getId(), state);
-                }
-                if (state == AppState.FAILED || state == AppState.FINISHED || state == AppState.CANCELED) {
-                    jobStateMap.remove(application.getId());
-                }
             } catch (Exception e) {
+                e.printStackTrace();
                 if (e instanceof ConnectException) {
                     try {
                         /**
@@ -93,19 +95,19 @@ public class FlinkMonitorTask {
                          */
                         AppInfo appInfo = application.getYarnAppInfo();
                         String state = appInfo.getApp().getFinalStatus();
-                        AppState appState = null;
-                        if("KILLED".equals(state)) {
-                            appState = AppState.CANCELED;
-                        }else {
-                            appState = AppState.valueOf(state);
+                        FlinkAppState flinkAppState = null;
+                        if ("KILLED".equals(state)) {
+                            flinkAppState = FlinkAppState.CANCELED;
+                        } else {
+                            flinkAppState = FlinkAppState.valueOf(state);
                         }
-                        application.setState(appState.getValue());
+                        application.setState(flinkAppState.getValue());
                         applicationService.updateById(application);
                     } catch (Exception e1) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
-                        application.setState(AppState.LOST.getValue());
+                        application.setState(FlinkAppState.LOST.getValue());
                         applicationService.updateById(application);
                         jobStateMap.remove(application.getId());
                         //TODO send msg or emails

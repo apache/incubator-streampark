@@ -52,13 +52,9 @@ public class Application implements Serializable {
     private Long userId;
     private String config;
     /**
-     * 仅前端页面显示的任务名称
+     * 前端和程序在yarn中显示的名称
      */
     private String appName;
-    /**
-     * 程序在yarn中的名称
-     */
-    private String yarnName;
     private String appId;
     private String jobId;
     private Integer state;

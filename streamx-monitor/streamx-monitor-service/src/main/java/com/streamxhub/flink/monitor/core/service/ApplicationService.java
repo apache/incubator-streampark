@@ -24,6 +24,7 @@ import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.flink.monitor.core.enums.AppExistsState;
 
 import java.io.IOException;
 
@@ -37,10 +38,13 @@ public interface ApplicationService extends IService<Application> {
 
     String getYarnName(Application app);
 
-    boolean checkExists(Application app);
+    AppExistsState checkExists(Application app);
 
     void deploy(Application app)throws IOException;
 
     void updateDeploy(Application app);
 
+    void updateState(Application application);
+
+    void updateJobId(Application application);
 }
