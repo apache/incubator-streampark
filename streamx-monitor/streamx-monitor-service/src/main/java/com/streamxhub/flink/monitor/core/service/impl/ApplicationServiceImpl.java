@@ -24,12 +24,14 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
+import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
@@ -138,7 +140,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         String workspaceWithModule = app.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
-            String backUp = app.backupPath();
+            String backUp = app.getBackupPath();
             HdfsUtils.mkdirs(backUp);
             HdfsUtils.movie(workspaceWithModule, backUp);
         }
@@ -158,13 +160,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void updateState(Application application) {
-        this.baseMapper.updateState(application);
-    }
-
-    @Override
-    public void updateJobId(Application application) {
-        this.baseMapper.updateJobId(application);
+    public void cancel(Application app) {
+        String yarn = properties.getYarn();
+        String url = yarn.concat("/jobs/").concat(app.getJobId());
+        Map<String,Object> params = new HashMap<>(0);
+        params.put("mode","cancel");
+        try {
+            HttpClientUtils.httpPatchRequest(url,params);
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
