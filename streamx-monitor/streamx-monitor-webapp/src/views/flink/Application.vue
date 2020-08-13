@@ -92,7 +92,7 @@
         <a-tag color="#f50" v-if="state === 3">NEW_SAVING</a-tag>
         <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
         <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
-        <a-tag color="#87d068" v-if="state === 6">RUNNING</a-tag>
+        <a-tag color="rgb(82, 196, 26)" v-if="state === 6">RUNNING</a-tag>
         <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELLING</a-tag>
         <a-tag color="rgb(250, 140, 22)" v-if="state === 8">CANCELED</a-tag>
         <a-tag color="#f50" v-if="state === 9">FINISHED</a-tag>
