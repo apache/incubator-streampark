@@ -118,12 +118,14 @@
           title="修改角色">
         </a-icon>
 
-        <template v-show="record.state !== 6">
+        <template>
           <a-popconfirm
+            v-show="record.state !== 6"
             title="确定要启动该项目吗?"
             ok-text="启动"
             cancel-text="取消"
             @confirm="handleStartUp(record)">
+            <a-icon slot="icon" type="question-circle-o" style="color: red" />
             <a-icon
               v-permit="'role:update'"
               type="play-circle"
@@ -141,19 +143,18 @@
             ok-text="停止"
             cancel-text="取消"
             @confirm="handleCancel(record)">
-            <a-icon type="poweroff"
-                    title="取消任务">
+            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+            <a-icon type="poweroff" title="取消任务">
             </a-icon>
           </a-popconfirm>
-
-          <a-icon type="eye"
-                  v-show="record.state === 6"
-                  theme="twoTone"
-                  twoToneColor="#42b983"
-                  @click="handleView(record)" title="查看">
-          </a-icon>
-
         </template>
+
+        <a-icon type="eye"
+                v-show="record.state === 6"
+                theme="twoTone"
+                twoToneColor="#42b983"
+                @click="handleView(record)" title="查看">
+        </a-icon>
 
       </template>
     </a-table>
