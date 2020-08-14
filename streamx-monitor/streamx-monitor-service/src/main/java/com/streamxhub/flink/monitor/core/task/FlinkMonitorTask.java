@@ -58,6 +58,7 @@ public class FlinkMonitorTask {
                 FlinkAppState.CANCELED.getValue(),
                 FlinkAppState.LOST.getValue()
         );
+
         List<Application> appList = applicationService.list(queryWrapper);
         appList.forEach((application) -> {
             try {

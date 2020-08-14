@@ -135,6 +135,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void deploy(Application app) throws IOException {
+        //先停止原有任务..
+        cancel(app);
         if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
             app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
         }
@@ -162,6 +164,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void cancel(Application app) {
         Application application = getById(app.getId());
+        application.setState(FlinkAppState.CANCELLING.getValue());
+        this.baseMapper.updateById(application);
         String yarn = properties.getYarn();
         String url = String.format("%s/proxy/%s/jobs/%s/yarn-cancel",yarn,application.getAppId(),application.getJobId());
         HttpClientUtils.httpGetRequest(url);
@@ -189,7 +193,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 一定要在flink job提交完毕才置状态...
          */
-        application.setState(FlinkAppState.DEPLOYING.getValue());
+        application.setState(FlinkAppState.STARTING.getValue());
         this.baseMapper.updateById(application);
         return true;
     }
