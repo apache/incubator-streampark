@@ -31,6 +31,7 @@
     <div class="operate">
       <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
     </div>
+
     <a-list size="large" :pagination="{showSizeChanger: true, showQuickJumper: true, pageSize: 5, total: 50}">
       <a-list-item  :key="index" v-for="(item, index) in dataSource">
         <a-list-item-meta>
