@@ -76,7 +76,7 @@
       :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 700 }"
       @change="handleTableChange">
-      <template slot="state" slot-scope="state">
+      <template slot="state" slot-scope="state" >
         <!--
         ACCEPTED(5),
         RUNNING(6),
@@ -86,18 +86,20 @@
         FAILED(10),
         LOST(11);
         -->
-        <a-tag color="#108ee9" v-if="state === 0">CREATED</a-tag>
-        <a-tag color="#87d068" v-if="state === 1">DEPLOYING</a-tag>
-        <a-tag color="cyan" v-if="state === 2">NEW</a-tag>
-        <a-tag color="#f50" v-if="state === 3">NEW_SAVING</a-tag>
-        <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
-        <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
-        <a-tag color="rgb(82, 196, 26)" v-if="state === 6">RUNNING</a-tag>
-        <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELLING</a-tag>
-        <a-tag color="rgb(250, 140, 22)" v-if="state === 8">CANCELED</a-tag>
-        <a-tag color="#f50" v-if="state === 9">FINISHED</a-tag>
-        <a-tag color="#f50" v-if="state === 10">FAILED</a-tag>
-        <a-tag color="#000" v-if="state === 11">LOST</a-tag>
+        <div class="app_state">
+          <a-tag color="#108ee9" v-if="state === 0">CREATED</a-tag>
+          <a-tag color="#87d068" v-if="state === 1">DEPLOYING</a-tag>
+          <a-tag color="cyan" v-if="state === 2">NEW</a-tag>
+          <a-tag color="#f50" v-if="state === 3">NEW_SAVING</a-tag>
+          <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
+          <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
+          <a-tag color="rgb(82, 196, 26)" v-if="state === 6">RUNNING</a-tag>
+          <a-tag color="rgb(250, 140, 22)" v-if="state === 7">CANCELLING</a-tag>
+          <a-tag color="rgb(250, 140, 22)" v-if="state === 8">CANCELED</a-tag>
+          <a-tag color="#f50" v-if="state === 9">FINISHED</a-tag>
+          <a-tag color="#f50" v-if="state === 10">FAILED</a-tag>
+          <a-tag color="#000" v-if="state === 11">LOST</a-tag>
+        </div>
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-icon
@@ -233,7 +235,10 @@ export default {
   mounted() {
     this.handleYarn()
     this.handleFetch(true)
-    window.setInterval(() => this.handleFetch(false), 1000)
+    const timer =  window.setInterval(() => this.handleFetch(false), 1000)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer);
+    })
   },
 
   methods: {
@@ -398,7 +403,7 @@ export default {
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
-.ant-tag {
+.app_state > .ant-tag {
   border-radius: 0;
   font-weight: 700;
   text-align: center;
