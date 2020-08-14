@@ -89,6 +89,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     /**
      * 检查当前的appName在表和yarn中是否已经存在
+     *
      * @param app
      * @return
      */
@@ -135,24 +136,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void deploy(Application app) throws IOException {
         //先停止原有任务..
-        cancel(app);
-        if (!app.getModule().startsWith(app.getAppBase().getAbsolutePath())) {
-            app.setModule(app.getAppBase().getAbsolutePath().concat("/").concat(app.getModule()));
+        Application application = getById(app.getId());
+        if (application.getState() == FlinkAppState.RUNNING.getValue()) {
+            cancel(application);
         }
-        String workspaceWithModule = app.getWorkspace(true);
+        if (!application.getModule().startsWith(application.getAppBase().getAbsolutePath())) {
+            application.setModule(application.getAppBase().getAbsolutePath().concat("/").concat(application.getModule()));
+        }
+        String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
-            String backUp = app.getBackupPath();
+            String backUp = application.getBackupPath();
             HdfsUtils.mkdirs(backUp);
             HdfsUtils.movie(workspaceWithModule, backUp);
         }
-        String workspace = app.getWorkspace(false);
+        String workspace = application.getWorkspace(false);
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
         }
-        HdfsUtils.upload(app.getModule(), workspace);
+        HdfsUtils.upload(application.getModule(), workspace);
         //更新发布状态...
-        app.setDeploy(0);
-        updateDeploy(app);
+        application.setDeploy(0);
+        updateDeploy(application);
     }
 
     @Override
@@ -166,7 +170,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         String yarn = properties.getYarn();
-        String url = String.format("%s/proxy/%s/jobs/%s/yarn-cancel",yarn,application.getAppId(),application.getJobId());
+        String url = String.format("%s/proxy/%s/jobs/%s/yarn-cancel", yarn, application.getAppId(), application.getJobId());
         HttpClientUtils.httpGetRequest(url);
     }
 
