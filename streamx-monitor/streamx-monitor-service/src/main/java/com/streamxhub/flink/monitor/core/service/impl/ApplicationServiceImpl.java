@@ -31,7 +31,6 @@ import com.streamxhub.flink.monitor.base.domain.Constant;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
-import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
