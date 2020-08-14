@@ -123,9 +123,8 @@
           <a-icon slot="icon" type="question-circle-o" style="color: red" />
           <a-icon
             v-permit="'role:update'"
-            type="thunderbolt"
-            theme="twoTone"
-            twoToneColor="purple"
+            type="upload"
+            style="color:#4a9ff5"
             title="发布任务">
           </a-icon>
         </a-popconfirm>
