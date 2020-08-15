@@ -35,7 +35,7 @@
     <a-list size="large" :pagination="{showSizeChanger: true, showQuickJumper: true, pageSize: 5, total: 50}">
       <a-list-item  :key="index" v-for="(item, index) in dataSource">
         <a-list-item-meta>
-          <a-avatar slot="avatar" size="large" src="~@/assets/icons/flink.svg"/>
+          <icon-font slot="avatar" class="icon-font" type="icon-flink"></icon-font>
           <a slot="title">{{ item.name }}</a>
           <a-popover arrow-point-at-center trigger="hover" slot="description">
             <template slot="content">
@@ -215,9 +215,14 @@ import Stomp from 'webstomp-client'
 import { Terminal } from "xterm"
 import "xterm/css/xterm.css"
 import "xterm/lib/xterm.js"
+import { Icon } from 'ant-design-vue'
+
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2006309_fxzli8dlyo9.js'
+})
 
 export default {
-  components: { RangeDate,Ellipsis,HeadInfo },
+  components: { IconFont,RangeDate,Ellipsis,HeadInfo },
   data () {
     return {
       loading: false,
@@ -488,5 +493,10 @@ export default {
     line-height: 22px;
   }
 }
+
+.icon-font {
+  font-size: 50px;
+}
+
 </style>
 
