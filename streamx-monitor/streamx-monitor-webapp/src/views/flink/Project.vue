@@ -496,11 +496,5 @@ export default {
 .icon-font {
   font-size: 50px;
 }
-
-.ant-message {
-  width: unset;
-  right: 16px;
-}
-
 </style>
 
