@@ -9,7 +9,7 @@
                 label="名称"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
-                <a-input v-model="queryParams.projectName"/>
+                <a-input v-model="queryParams['projectName']"/>
               </a-form-item>
             </a-col>
             <a-col :md="8" :sm="24">
@@ -44,20 +44,12 @@
                   icon="plus"
                   @click="addTask">
                 </a-button>
-                <a-button
-                  v-permit="'role:delete'"
-                  type="primary"
-                  shape="circle"
-                  icon="minus"
-                  @click="batchDelete">
-                </a-button>
               </span>
             </a-col>
           </div>
         </a-row>
       </a-form>
     </div>
-
     <!-- 表格区域 -->
     <a-table
       ref="TableInfo"
@@ -66,20 +58,19 @@
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
-      :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 700 }"
       @change="handleTableChange">
 
       <template slot="appName" slot-scope="text, record">
-        <a-badge dot title="项目已经更新,任务需重新发布" v-if="record.deploy === 1">
-          {{record.appName}}
+        <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
+          {{ record.appName }}
         </a-badge>
         <span v-else>
-          {{record.appName}}
+          {{ record.appName }}
         </span>
       </template>
 
-      <template slot="state" slot-scope="state" >
+      <template slot="state" slot-scope="state">
         <!--
           CREATED(0),
           DEPLOYING(1),
@@ -114,21 +105,13 @@
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
-        <a-popconfirm
+        <a-icon
           v-show="record.deploy === 1"
-          title="确定要重新发布任务吗?"
-          ok-text="确定"
-          cancel-text="取消"
-          @confirm="handleDeploy(record)">
-          <a-icon slot="icon" type="question-circle-o" style="color: red" />
-          <a-icon
-            v-permit="'role:update'"
-            type="upload"
-            style="color:#4a9ff5"
-            title="发布任务">
-          </a-icon>
-        </a-popconfirm>
-
+          v-permit="'role:update'"
+          type="upload"
+          style="color:#4a9ff5"
+          @click="handleDeploy(record)">
+        </a-icon>
         <a-icon
           v-permit="'role:update'"
           type="setting"
@@ -137,48 +120,69 @@
           @click="handleEdit(record)"
           title="修改角色">
         </a-icon>
-
         <template>
           <a-popconfirm
             v-show="record.state ===0 || record.state >= 10 "
-            title="确定要启动该项目吗?"
+            v-permit="'role:update'"
+            title="确定要启动该应用吗?"
             ok-text="确定"
             cancel-text="取消"
             @confirm="handleStartUp(record)">
-            <a-icon slot="icon" type="question-circle-o" style="color: red" />
+            <a-icon slot="icon" type="question-circle-o" style="color: red"/>
             <a-icon
-              v-permit="'role:update'"
               type="play-circle"
               theme="twoTone"
               twoToneColor="#4a9ff5"
-              title="提交任务">
+              title="启动应用">
             </a-icon>
           </a-popconfirm>
         </template>
-
         <template>
           <a-popconfirm
             v-show="record.state === 8"
-            title="确定要停止该项目吗?"
+            title="确定要停止该应用吗?"
             ok-text="确定"
             cancel-text="取消"
             style="color: #4a9ff5"
             @confirm="handleCancel(record)">
-            <a-icon slot="icon" type="question-circle-o" style="color: red" />
-            <a-icon type="poweroff" title="取消任务">
+            <a-icon slot="icon" type="question-circle-o" style="color: red"/>
+            <a-icon type="poweroff" title="停止应用">
             </a-icon>
           </a-popconfirm>
         </template>
-
         <a-icon type="eye"
                 v-show="record.state === 8"
                 theme="twoTone"
                 twoToneColor="#4a9ff5"
                 @click="handleView(record)" title="查看">
         </a-icon>
-
       </template>
+
     </a-table>
+
+    <a-modal v-model="deployVisible" on-ok="handleDeployOk" class="backup-modal">
+      <template slot="title">
+        <a-icon slot="icon" type="question-circle-o" style="color: red"/>
+        确定要重新发布应用吗?
+      </template>
+      <template slot="footer">
+        <a-button key="back" @click="handleDeployCancel">
+          Return
+        </a-button>
+        <a-button key="submit" type="primary" :loading="loading" @click="handleDeployOk">
+          Submit
+        </a-button>
+      </template>
+      <a-form @submit="handleDeployOk" :form="form">
+        <a-form-item>
+          <a-textarea
+            rows="3"
+            placeholder="应用重新发布前会先备份当前的应用,请输入当前应用的备份描述信息,以便回滚版本时找回"
+            v-decorator="['description',{ rules: [{ required: true, message: '请输入备份描述' } ]}]">
+          </a-textarea>
+        </a-form-item>
+      </a-form>
+    </a-modal>
   </a-card>
 </template>
 <script>
@@ -196,6 +200,9 @@ export default {
       queryParams: {},
       sortedInfo: null,
       yarn: null,
+      deployVisible: false,
+      form: null,
+      application: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -216,17 +223,17 @@ export default {
         width: 150,
         fixed: 'left',
         scopedSlots: {customRender: 'appName'},
-      },{
+      }, {
         title: '所属项目',
         dataIndex: 'projectName',
         width: 200
-      },  {
+      }, {
         title: '开始时间',
         dataIndex: 'startTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
         width: 180
-      },  {
+      }, {
         title: '结束时间',
         dataIndex: 'endTime',
         sorter: true,
@@ -255,10 +262,14 @@ export default {
   mounted() {
     this.handleYarn()
     this.handleFetch(true)
-    const timer =  window.setInterval(() => this.handleFetch(false), 1000)
+    const timer = window.setInterval(() => this.handleFetch(false), 1000)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer);
     })
+  },
+
+  beforeMount() {
+    this.form = this.$form.createForm(this)
   },
 
   methods: {
@@ -276,12 +287,25 @@ export default {
     },
 
     handleDeploy(value) {
-      deploy({
-        id: value.id,
-        projectId: value.projectId,
-        module: value.module
-      }).then((resp) => {
-        console.log(resp)
+      this.deployVisible = true
+      this.application = value
+    },
+
+    handleDeployCancel () {
+      this.deployVisible = false
+      this.form.resetFields(`description`,'')
+    },
+
+    handleDeployOk() {
+      this.form.validateFields((err, values) => {
+        if (!err) {
+          deploy({
+            id: this.application.id,
+            backUpDescription: values.description
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
       })
     },
 
@@ -353,7 +377,7 @@ export default {
     },
 
     handleFetch(loading) {
-      if(loading) this.loading = true
+      if (loading) this.loading = true
       const params = {}
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
@@ -384,7 +408,7 @@ export default {
     },
 
     handleView(params) {
-      window.open(this.yarn + "/proxy/" + params.appId + "/")
+      window.open(this.yarn + "/proxy/" + params['appId'] + "/")
     },
 
     addTask() {
@@ -392,10 +416,6 @@ export default {
     },
 
     handleStartUp(app) {
-      this.$notification.open({
-        message: '已发送任务启动请求',
-        icon: <a-icon type="smile" style="color: #108ee9" />
-      })
       startUp({
         id: app.id
       }).then((resp) => {
@@ -403,7 +423,7 @@ export default {
       })
     },
 
-    handleCancel (app) {
+    handleCancel() {
       cancel({
         id: app.id
       }).then((resp) => {
@@ -423,11 +443,24 @@ export default {
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
+
 .app_state > .ant-tag {
   border-radius: 0;
   font-weight: 700;
   text-align: center;
   padding: 3px 5px;
   cursor: default;
+}
+
+.backup-modal  .ant-modal-header {
+  border-bottom: unset;
+}
+.backup-modal .ant-modal-footer {
+  border-top: unset;
+}
+
+.backup-modal .ant-modal-body {
+  padding-bottom: 5px;
+  padding-top: 5px;
 }
 </style>
