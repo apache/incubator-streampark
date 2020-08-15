@@ -87,7 +87,7 @@
           FAILED(12),
           LOST(13);
         -->
-        <div class="app_state">
+        <div>
           <a-tag color="#1890ff" v-if="state === 0">CREATED</a-tag>
           <a-tag color="#13c2c2" v-if="state === 1">DEPLOYING</a-tag>
           <a-tag color="cyan" v-if="state === 2">NEW</a-tag>
@@ -160,7 +160,7 @@
 
     </a-table>
 
-    <a-modal v-model="deployVisible" on-ok="handleDeployOk" class="backup-modal">
+    <a-modal v-model="deployVisible" on-ok="handleDeployOk">
       <template slot="title">
         <a-icon slot="icon" type="question-circle-o" style="color: red"/>
         确定要重新发布应用吗?
@@ -299,6 +299,11 @@ export default {
     handleDeployOk() {
       this.form.validateFields((err, values) => {
         if (!err) {
+          this.handleDeployCancel()
+          this.$message.info(
+            '已发送部署请求,后台正在执行部署,请耐心等待',
+            3,
+          )
           deploy({
             id: this.application.id,
             backUpDescription: values.description
@@ -439,12 +444,12 @@ export default {
 }
 </script>
 
-<style>
+<style scoped>
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
 
-.app_state > .ant-tag {
+.ant-tag {
   border-radius: 0;
   font-weight: 700;
   text-align: center;
@@ -452,15 +457,22 @@ export default {
   cursor: default;
 }
 
-.backup-modal  .ant-modal-header {
+.ant-modal-header {
   border-bottom: unset;
 }
-.backup-modal .ant-modal-footer {
+
+.ant-modal-footer {
   border-top: unset;
 }
 
-.backup-modal .ant-modal-body {
+.ant-modal-body {
   padding-bottom: 5px;
   padding-top: 5px;
 }
+
+.ant-message {
+  width: unset;
+  right: 16px;
+}
+
 </style>

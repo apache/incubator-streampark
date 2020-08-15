@@ -343,11 +343,10 @@ export default {
       }
     },
     handleBuild (record) {
-      this.$notification.open({
-        message: '编译通知',
-        description: '已发送编译请求,后台正在执行编译,该操作可能花几分钟甚至更多时间来完成编译,请耐心等待',
-        icon: <a-icon type="smile" style="color: #108ee9" />
-      })
+      this.$message.info(
+        '已发送编译请求,后台正在执行编译,该操作需要花一些时间,您可以查询编译日志来查看进度',
+        3,
+      )
       build({
         id: record.id
       }).then(() => {
@@ -496,6 +495,11 @@ export default {
 
 .icon-font {
   font-size: 50px;
+}
+
+.ant-message {
+  width: unset;
+  right: 16px;
 }
 
 </style>
