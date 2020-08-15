@@ -116,7 +116,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     ProjectServiceImpl.this.baseMapper.successBuild(project);
                     //发布到apps下
                     ProjectServiceImpl.this.deploy(project);
-
                     //更新application的发布状态.
                     Application application = new Application();
                     application.setProjectId(project.getId());
@@ -204,9 +203,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         }
         return null;
     }
-
-
-
 
     private boolean cloneOrPull(Project project) {
         boolean isCloned = project.isCloned();

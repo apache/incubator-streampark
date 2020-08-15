@@ -74,34 +74,36 @@
         <!--
           CREATED(0),
           DEPLOYING(1),
-          NEW(2),
-          NEW_SAVING(3),
-          SUBMITTED(4),
-          ACCEPTED(5),
-          STARTING(6),
-          RESTARTING(7),
-          RUNNING(8),
-          CANCELLING(9),
-          CANCELED(10),
-          FINISHED(11),
-          FAILED(12),
-          LOST(13);
+          DEPLOYED(2),
+          NEW(3),
+          NEW_SAVING(4),
+          SUBMITTED(5),
+          ACCEPTED(6),
+          STARTING(7),
+          RESTARTING(8),
+          RUNNING(9),
+          CANCELLING(10),
+          CANCELED(11),
+          FINISHED(12),
+          FAILED(13),
+          LOST(14);
         -->
         <div>
           <a-tag color="#1890ff" v-if="state === 0">CREATED</a-tag>
           <a-tag color="#13c2c2" v-if="state === 1">DEPLOYING</a-tag>
-          <a-tag color="cyan" v-if="state === 2">NEW</a-tag>
-          <a-tag color="#f50" v-if="state === 3">NEW_SAVING</a-tag>
-          <a-tag color="#f50" v-if="state === 4">SUBMITTED</a-tag>
-          <a-tag color="#f50" v-if="state === 5">ACCEPTED</a-tag>
-          <a-tag color="#2db7f5" v-if="state === 6">STARTING</a-tag>
-          <a-tag color="#108ee9" v-if="state === 7">RESTARTING</a-tag>
-          <a-tag color="#52c41a" v-if="state === 8">RUNNING</a-tag>
-          <a-tag color="#faad14" v-if="state === 9">CANCELLING</a-tag>
-          <a-tag color="#fa8c16" v-if="state === 10">CANCELED</a-tag>
-          <a-tag color="#a0d911" v-if="state === 11">FINISHED</a-tag>
-          <a-tag color="#f5222d" v-if="state === 12">FAILED</a-tag>
-          <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
+          <a-tag color="cyan" v-if="state === 2">DEPLOYED</a-tag>
+          <a-tag color="cyan" v-if="state === 3">NEW</a-tag>
+          <a-tag color="#f50" v-if="state === 4">NEW_SAVING</a-tag>
+          <a-tag color="#f50" v-if="state === 5">SUBMITTED</a-tag>
+          <a-tag color="#f50" v-if="state === 6">ACCEPTED</a-tag>
+          <a-tag color="#2db7f5" v-if="state === 7">STARTING</a-tag>
+          <a-tag color="#108ee9" v-if="state === 8">RESTARTING</a-tag>
+          <a-tag color="#52c41a" v-if="state === 9">RUNNING</a-tag>
+          <a-tag color="#faad14" v-if="state === 10">CANCELLING</a-tag>
+          <a-tag color="#fa8c16" v-if="state === 11">CANCELED</a-tag>
+          <a-tag color="#a0d911" v-if="state === 12">FINISHED</a-tag>
+          <a-tag color="#f5222d" v-if="state === 13">FAILED</a-tag>
+          <a-tag color="#000000" v-if="state === 14">LOST</a-tag>
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -122,7 +124,7 @@
         </a-icon>
         <template>
           <a-popconfirm
-            v-show="record.state ===0 || record.state >= 10 "
+            v-show="record.state === 0 || record.state === 2 || record.state > 10 "
             v-permit="'role:update'"
             title="确定要启动该应用吗?"
             ok-text="确定"
@@ -139,7 +141,7 @@
         </template>
         <template>
           <a-popconfirm
-            v-show="record.state === 8"
+            v-show="record.state === 9"
             title="确定要停止该应用吗?"
             ok-text="确定"
             cancel-text="取消"
@@ -151,7 +153,7 @@
           </a-popconfirm>
         </template>
         <a-icon type="eye"
-                v-show="record.state === 8"
+                v-show="record.state === 9"
                 theme="twoTone"
                 twoToneColor="#4a9ff5"
                 @click="handleView(record)" title="查看">
@@ -291,9 +293,9 @@ export default {
       this.application = value
     },
 
-    handleDeployCancel () {
+    handleDeployCancel() {
       this.deployVisible = false
-      this.form.resetFields(`description`,'')
+      this.form.resetFields(`description`, '')
     },
 
     handleDeployOk() {

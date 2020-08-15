@@ -52,4 +52,10 @@
         where project_id=#{application.projectId}
     </update>
 
+    <update id="updateState" parameterType="application">
+        update t_flink_app
+        set state=#{application.state}
+        where id=#{application.id}
+    </update>
+
 </mapper>
