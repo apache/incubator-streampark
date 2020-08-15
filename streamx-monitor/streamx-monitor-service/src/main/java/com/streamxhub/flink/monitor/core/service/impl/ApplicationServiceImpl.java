@@ -33,8 +33,10 @@ import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.flink.monitor.core.entity.Application;
+import com.streamxhub.flink.monitor.core.entity.ApplicationBackUp;
 import com.streamxhub.flink.monitor.core.entity.Project;
 import com.streamxhub.flink.monitor.core.enums.AppExistsState;
+import com.streamxhub.flink.monitor.core.service.ApplicationBackUpService;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -64,6 +66,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ProjectService projectService;
+
+    @Autowired
+    private ApplicationBackUpService backUpService;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -137,6 +142,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application app) throws IOException {
         //先停止原有任务..
         Application application = getById(app.getId());
+        application.setBackUpDescription(app.getBackUpDescription());
         if (application.getState() == FlinkAppState.RUNNING.getValue()) {
             cancel(application);
         }
@@ -145,9 +151,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
-            String backUp = application.getBackupPath();
-            HdfsUtils.mkdirs(backUp);
-            HdfsUtils.movie(workspaceWithModule, backUp);
+            ApplicationBackUp backUp = new ApplicationBackUp(application);
+            backUpService.save(backUp);
+            HdfsUtils.mkdirs(backUp.getPath());
+            HdfsUtils.movie(workspaceWithModule, backUp.getPath());
         }
         String workspace = application.getWorkspace(false);
         if (!HdfsUtils.exists(workspace)) {

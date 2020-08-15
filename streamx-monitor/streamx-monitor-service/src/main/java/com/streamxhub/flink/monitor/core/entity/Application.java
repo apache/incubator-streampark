@@ -85,20 +85,12 @@ public class Application implements Serializable {
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;
+    private transient String backUpDescription;
 
     @JsonIgnore
     public File getAppBase() {
         String localWorkspace = SpringContextUtil.getBean(StreamXProperties.class).getAppHome();
         return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
-    }
-
-    @JsonIgnore
-    public String getBackupPath() {
-        return ConfigConst.APP_HISTORY()
-                .concat("/")
-                .concat(id.toString())
-                .concat("/")
-                .concat(System.currentTimeMillis() + "");
     }
 
     @JsonIgnore
