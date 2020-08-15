@@ -430,7 +430,7 @@ export default {
       })
     },
 
-    handleCancel() {
+    handleCancel(app) {
       cancel({
         id: app.id
       }).then((resp) => {
