@@ -470,9 +470,4 @@ export default {
   padding-top: 5px;
 }
 
-.ant-message {
-  width: unset;
-  right: 16px;
-}
-
 </style>
