@@ -75,35 +75,48 @@
           CREATED(0),
           DEPLOYING(1),
           DEPLOYED(2),
-          NEW(3),
-          NEW_SAVING(4),
-          SUBMITTED(5),
-          ACCEPTED(6),
-          STARTING(7),
-          RESTARTING(8),
-          RUNNING(9),
-          CANCELLING(10),
-          CANCELED(11),
-          FINISHED(12),
-          FAILED(13),
-          LOST(14);
+          STARTING(3),
+          RESTARTING(4),
+          RUNNING(5),
+          FAILING(6),
+          FAILED(7),
+          CANCELLING(8),
+          CANCELED(9),
+          FINISHED(10),
+          SUSPENDED(11),
+          RECONCILING(12),
+          LOST(13);
+
+         TOTAL: '#112641',
+          RUNNING: '#52c41a',
+          FAILED: '#f5222d',
+          FINISHED: '#1890ff',
+          CANCELED: '#fa8c16',
+          CANCELING: '#faad14',
+          CREATED: '#2f54eb',
+          DEPLOYING: '#13c2c2',
+          RECONCILING: '#eb2f96',
+          IN_PROGRESS: '#faad14',
+          SCHEDULED: '#722ed1',
+          COMPLETED: '#1890ff',
+          RESTARTING: '#13c2c2'
         -->
         <div>
-          <a-tag color="#1890ff" v-if="state === 0">CREATED</a-tag>
+          <span style="color: #fa8c16"></span>
+          <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
           <a-tag color="#108ee9" v-if="state === 1">DEPLOYING</a-tag>
           <a-tag color="#13c2c2" v-if="state === 2">DEPLOYED</a-tag>
-          <a-tag color="cyan" v-if="state === 3">NEW</a-tag>
-          <a-tag color="#f50" v-if="state === 4">NEW_SAVING</a-tag>
-          <a-tag color="#f50" v-if="state === 5">SUBMITTED</a-tag>
-          <a-tag color="#f50" v-if="state === 6">ACCEPTED</a-tag>
-          <a-tag color="#2db7f5" v-if="state === 7">STARTING</a-tag>
-          <a-tag color="#108ee9" v-if="state === 8">RESTARTING</a-tag>
-          <a-tag color="#52c41a" v-if="state === 9">RUNNING</a-tag>
-          <a-tag color="#faad14" v-if="state === 10">CANCELLING</a-tag>
-          <a-tag color="#fa8c16" v-if="state === 11">CANCELED</a-tag>
-          <a-tag color="#a0d911" v-if="state === 12">FINISHED</a-tag>
-          <a-tag color="#f5222d" v-if="state === 13">FAILED</a-tag>
-          <a-tag color="#000000" v-if="state === 14">LOST</a-tag>
+          <a-tag color="#2db7f5" v-if="state === 3">STARTING</a-tag>
+          <a-tag color="#13c2c2" v-if="state === 4">RESTARTING</a-tag>
+          <a-tag color="#52c41a" v-if="state === 5">RUNNING</a-tag>
+          <a-tag color="#faad14" v-if="state === 6">FAILING</a-tag>
+          <a-tag color="#f5222d" v-if="state === 7">FAILED</a-tag>
+          <a-tag color="#fadb14" v-if="state === 8">CANCELLING</a-tag>
+          <a-tag color="#fa8c16" v-if="state === 9">CANCELED</a-tag>
+          <a-tag color="#1890ff" v-if="state === 10">FINISHED</a-tag>
+          <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
+          <a-tag color="#eb2f96" v-if="state === 12">RECONCILING</a-tag>
+          <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
         </div>
       </template>
       <template slot="operation" slot-scope="text, record">
@@ -124,7 +137,14 @@
         </a-icon>
         <template>
           <a-popconfirm
-            v-show="record.state === 0 || record.state === 2 || record.state > 10 "
+            v-show="
+            record.state === 0
+            || record.state === 2
+            || record.state === 7
+            || record.state === 9
+            || record.state === 10
+            || record.state === 11
+            || record.state === 13"
             v-permit="'role:update'"
             title="确定要启动该应用吗?"
             ok-text="确定"
@@ -141,7 +161,7 @@
         </template>
         <template>
           <a-popconfirm
-            v-show="record.state === 9"
+            v-show="record.state === 5"
             title="确定要停止该应用吗?"
             ok-text="确定"
             cancel-text="取消"
@@ -153,7 +173,7 @@
           </a-popconfirm>
         </template>
         <a-icon type="eye"
-                v-show="record.state === 9"
+                v-show="record.state === 5"
                 theme="twoTone"
                 twoToneColor="#4a9ff5"
                 @click="handleView(record)" title="查看">
