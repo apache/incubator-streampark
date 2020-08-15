@@ -52,6 +52,8 @@ public class FlinkMonitorTask {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         //以下状态的不再监控...
         queryWrapper.notIn("state",
+                FlinkAppState.DEPLOYING.getValue(),
+                FlinkAppState.DEPLOYED.getValue(),
                 FlinkAppState.CREATED.getValue(),
                 FlinkAppState.FINISHED.getValue(),
                 FlinkAppState.FAILED.getValue(),

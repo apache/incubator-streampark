@@ -20,9 +20,6 @@
  */
 package com.streamxhub.flink.monitor.core.controller;
 
-import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import com.streamxhub.common.util.ThreadUtils;
-import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.flink.monitor.base.controller.BaseController;
 import com.streamxhub.flink.monitor.base.domain.RestRequest;
 import com.streamxhub.flink.monitor.base.domain.RestResponse;
@@ -31,16 +28,13 @@ import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.enums.AppExistsState;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.*;
 
 @Slf4j
@@ -94,7 +88,7 @@ public class ApplicationController extends BaseController {
     public RestResponse deploy(Application app) {
         Executors.newSingleThreadExecutor().submit(() -> {
             try {
-                applicationService.deploy(app);
+                applicationService.deploy(app,true);
             } catch (IOException e) {
                 e.printStackTrace();
             }

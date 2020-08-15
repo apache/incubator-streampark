@@ -30,6 +30,7 @@ import java.io.IOException;
 
 
 public interface ApplicationService extends IService<Application> {
+
     IPage<Application> list(Application app, RestRequest request);
 
     boolean create(Application app) throws IOException;
@@ -40,9 +41,11 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void deploy(Application app)throws IOException;
+    void deploy(Application app,boolean backUp)throws IOException;
 
     void updateDeploy(Application app);
+
+    void updateState(Application app);
 
     void cancel(Application app);
 }

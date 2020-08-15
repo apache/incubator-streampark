@@ -38,61 +38,66 @@ public enum FlinkAppState {
     DEPLOYING(1),
 
     /**
+     * Application which is currently deploying.
+     */
+    DEPLOYED(2),
+
+    /**
      * Application which was just created.
      */
-    NEW(2),
+    NEW(3),
 
     /**
      * Application which is being saved.
      */
-    NEW_SAVING(3),
+    NEW_SAVING(4),
 
     /**
      * Application which has been submitted.
      */
-    SUBMITTED(4),
+    SUBMITTED(5),
 
     /**
      * Application has been accepted by the scheduler
      */
-    ACCEPTED(5),
+    ACCEPTED(6),
 
     /**
      * Application which is currently running.
      */
-    STARTING(6),
+    STARTING(7),
 
     /**
      * Application which is currently running.
      */
-    RESTARTING(7),
+    RESTARTING(8),
 
     /**
      * Application which is currently running.
      */
-    RUNNING(8),
+    RUNNING(9),
 
 
-    CANCELLING(9),
+    CANCELLING(10),
     /**
      * Application which was terminated by a user or admin.
      */
-    CANCELED(10),
+    CANCELED(11),
 
     /**
      * Application which finished successfully.
      */
-    FINISHED(11),
+    FINISHED(12),
 
     /**
      * Application which failed.
      */
-    FAILED(12),
+    FAILED(13),
 
     /**
      * 失联
      */
-    LOST(13);
+    LOST(14);
 
     int value;
 
