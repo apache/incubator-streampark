@@ -443,6 +443,10 @@ export default {
     },
 
     handleStartUp(app) {
+      this.$message.info(
+        '已发送启动请求,该应用正在启动中',
+        3,
+      )
       startUp({
         id: app.id
       }).then((resp) => {
