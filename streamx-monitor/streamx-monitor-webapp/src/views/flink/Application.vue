@@ -90,8 +90,8 @@
         -->
         <div>
           <a-tag color="#1890ff" v-if="state === 0">CREATED</a-tag>
-          <a-tag color="#13c2c2" v-if="state === 1">DEPLOYING</a-tag>
-          <a-tag color="cyan" v-if="state === 2">DEPLOYED</a-tag>
+          <a-tag color="#108ee9" v-if="state === 1">DEPLOYING</a-tag>
+          <a-tag color="#13c2c2" v-if="state === 2">DEPLOYED</a-tag>
           <a-tag color="cyan" v-if="state === 3">NEW</a-tag>
           <a-tag color="#f50" v-if="state === 4">NEW_SAVING</a-tag>
           <a-tag color="#f50" v-if="state === 5">SUBMITTED</a-tag>
@@ -108,7 +108,7 @@
       </template>
       <template slot="operation" slot-scope="text, record">
         <a-icon
-          v-show="record.deploy === 1"
+          v-show="record.deploy === 1 && record.state !== 1 "
           v-permit="'role:update'"
           type="upload"
           style="color:#4a9ff5"
