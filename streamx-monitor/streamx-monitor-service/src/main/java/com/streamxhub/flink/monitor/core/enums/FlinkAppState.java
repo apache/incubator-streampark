@@ -27,77 +27,56 @@ import java.util.Arrays;
 @Getter
 public enum FlinkAppState {
 
-    /**
-     * Application which is currently deploying.
-     */
+    /** Job is newly created, no task has started to run. */
     CREATED(0),
-
     /**
      * Application which is currently deploying.
      */
     DEPLOYING(1),
-
     /**
      * Application which is currently deploying.
      */
     DEPLOYED(2),
 
     /**
-     * Application which was just created.
+     * Application which is currently running.
      */
-    NEW(3),
-
-    /**
-     * Application which is being saved.
-     */
-    NEW_SAVING(4),
-
-    /**
-     * Application which has been submitted.
-     */
-    SUBMITTED(5),
-
-    /**
-     * Application has been accepted by the scheduler
-     */
-    ACCEPTED(6),
+    STARTING(3),
 
     /**
      * Application which is currently running.
      */
-    STARTING(7),
+    RESTARTING(4),
 
+    /** Some tasks are scheduled or running, some may be pending, some may be finished. */
+    RUNNING(5),
+
+    /** The job has failed and is currently waiting for the cleanup to complete. */
+    FAILING(6),
+
+    /** The job has failed with a non-recoverable task failure. */
+    FAILED(7),
+
+    /** Job is being cancelled. */
+    CANCELLING(8),
+
+    /** Job has been cancelled. */
+    CANCELED(9),
+
+    /** All of the job's tasks have successfully finished. */
+    FINISHED(10),
     /**
-     * Application which is currently running.
+     * The job has been suspended which means that it has been stopped but not been removed from a
+     * potential HA job store.
      */
-    RESTARTING(8),
+    SUSPENDED(11),
 
-    /**
-     * Application which is currently running.
-     */
-    RUNNING(9),
-
-
-    CANCELLING(10),
-    /**
-     * Application which was terminated by a user or admin.
-     */
-    CANCELED(11),
-
-    /**
-     * Application which finished successfully.
-     */
-    FINISHED(12),
-
-    /**
-     * Application which failed.
-     */
-    FAILED(13),
-
+    /** The job is currently reconciling and waits for task execution report to recover state. */
+    RECONCILING(12),
     /**
      * 失联
      */
-    LOST(14);
+    LOST(13);
 
     int value;
 
