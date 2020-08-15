@@ -455,6 +455,10 @@ export default {
     },
 
     handleCancel(app) {
+      this.$message.info(
+        '已发送停止请求,该应用正在停止中',
+        3,
+      )
       cancel({
         id: app.id
       }).then((resp) => {
