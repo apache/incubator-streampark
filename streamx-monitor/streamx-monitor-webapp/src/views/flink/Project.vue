@@ -25,79 +25,86 @@
           <a-radio-button>已构建</a-radio-button>
           <a-radio-button>构建失败</a-radio-button>
         </a-radio-group>
-        <a-input-search style="margin-left: 16px; width: 272px;" />
+        <a-input-search style="margin-left: 16px; width: 272px;"/>
       </div>
 
-    <div class="operate">
-      <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
-    </div>
+      <div class="operate">
+        <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
+      </div>
 
-    <a-list size="large" :pagination="{showSizeChanger: true, showQuickJumper: true, pageSize: 5, total: 50}">
-      <a-list-item  :key="index" v-for="(item, index) in dataSource">
-        <a-list-item-meta>
-          <icon-font slot="avatar" class="icon-font" type="icon-flink"></icon-font>
-          <a slot="title">{{ item.name }}</a>
-          <a-popover arrow-point-at-center trigger="hover" slot="description">
-            <template slot="content">
-              {{item.url}}
-            </template>
-            <a-button style="border:unset;height:20px;background:unset;margin-left:0;padding-left:0px;">
-              <ellipsis :length="controller.ellipsis">
-                {{item.description}}
-              </ellipsis>
-            </a-button>
-          </a-popover>
-        </a-list-item-meta>
+      <a-list size="large" :pagination="{showSizeChanger: true, showQuickJumper: true, pageSize: 5, total: 50}">
+        <a-list-item :key="index" v-for="(item, index) in dataSource">
+          <a-list-item-meta>
+            <icon-font slot="avatar" class="icon-font" type="icon-flink"></icon-font>
+            <a slot="title">{{ item.name }}</a>
+            <a-popover arrow-point-at-center trigger="hover" slot="description">
+              <template slot="content">
+                {{ item.url }}
+              </template>
+              <a-button style="border:unset;height:20px;background:unset;margin-left:0;padding-left:0px;">
+                <ellipsis :length="controller.ellipsis">
+                  {{ item.description }}
+                </ellipsis>
+              </a-button>
+            </a-popover>
+          </a-list-item-meta>
 
-        <div class="list-content">
-          <div class="list-content-item">
-            <span>托管平台</span>
-            <p><a-icon type="github" two-tone-color></a-icon></p>
+          <div class="list-content">
+            <div class="list-content-item">
+              <span>托管平台</span>
+              <p>
+                <a-icon type="github" two-tone-color></a-icon>
+              </p>
+            </div>
+            <div class="list-content-item">
+              <span>分支</span>
+              <p>
+                <a-tag color="blue">{{ item.branches }}</a-tag>
+              </p>
+            </div>
+            <div class="list-content-item">
+              <span>构建次数</span>
+              <p>21</p>
+            </div>
+            <div class="list-content-item">
+              <span>最后构建时间</span>
+              <p>{{ item.lastBuild }}</p>
+            </div>
           </div>
-          <div class="list-content-item">
-            <span>分支</span>
-            <p><a-tag color="blue">{{ item.branches }}</a-tag></p>
-          </div>
-          <div class="list-content-item">
-            <span>构建次数</span>
-            <p>21</p>
-          </div>
-          <div class="list-content-item">
-            <span>最后构建时间</span>
-            <p>{{ item.lastBuild }}</p>
-          </div>
-        </div>
 
-        <div slot="actions" v-show="controller.building || item.buildState == 0">
-          <a-icon type="sync" spin @click="handleSeeLog(item)"/>
-        </div>
+          <div slot="actions" v-show="controller.building || item.buildState == 0">
+            <a-icon type="sync" spin @click="handleSeeLog(item)"/>
+          </div>
 
-        <div slot="actions">
-          <a-dropdown>
-            <a-menu slot="overlay">
-              <a-menu-item><a>编辑项目</a></a-menu-item>
-              <a-menu-item>
-                <a-popconfirm
-                  title="确定要pull最新代码并重新编译该项目吗?"
-                  cancel-text="No"
-                  ok-text="Yes"
-                  @confirm="handleBuild(item)"
-                >
-                 <span>更新 & 编译</span>
-                </a-popconfirm>
-              </a-menu-item>
-              <a-menu-item><a>删除项目</a></a-menu-item>
-            </a-menu>
-            <a>更多<a-icon type="down"/></a>
-          </a-dropdown>
-        </div>
-      </a-list-item>
-    </a-list>
+          <div slot="actions">
+            <a-dropdown>
+              <a-menu slot="overlay">
+                <a-menu-item><a>编辑项目</a></a-menu-item>
+                <a-menu-item>
+                  <a-popconfirm
+                    title="确定要pull最新代码并重新编译该项目吗?"
+                    cancel-text="No"
+                    ok-text="Yes"
+                    @confirm="handleBuild(item)"
+                  >
+                    <span>更新 & 编译</span>
+                  </a-popconfirm>
+                </a-menu-item>
+                <a-menu-item><a>删除项目</a></a-menu-item>
+              </a-menu>
+              <a>更多
+                <a-icon type="down"/>
+              </a>
+            </a-dropdown>
+          </div>
+        </a-list-item>
+      </a-list>
     </a-card>
 
-    <a-modal v-model="controller.visible" width="65%" :bodyStyle="controller.modalStyle" :destroyOnClose='controller.modalDestroyOnClose' @ok="handleClose">
+    <a-modal v-model="controller.visible" width="65%" :bodyStyle="controller.modalStyle"
+             :destroyOnClose='controller.modalDestroyOnClose' @ok="handleClose">
       <template slot="title">
-        <a-icon type="code" />&nbsp; {{controller.consoleName}}
+        <a-icon type="code"/>&nbsp; {{ controller.consoleName }}
       </template>
       <template slot="footer">
         <a-button key="submit" type="primary" @click="handleClose">
@@ -169,7 +176,7 @@
             </a-row>
           </a-form>
         </div>-->
-      <!-- 表格区域 -->
+    <!-- 表格区域 -->
     <!--
       <a-table
         ref="TableInfo"
@@ -207,23 +214,23 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
-import { build, list, remove } from '@/api/project'
+import {build, list, remove} from '@/api/project'
 import Ellipsis from '@/components/Ellipsis'
 import HeadInfo from "@comp/tools/HeadInfo"
 import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
-import { Terminal } from "xterm"
+import {Terminal} from "xterm"
 import "xterm/css/xterm.css"
 import "xterm/lib/xterm.js"
-import { Icon } from 'ant-design-vue'
+import {Icon} from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_fxzli8dlyo9.js'
 })
 
 export default {
-  components: { IconFont,RangeDate,Ellipsis,HeadInfo },
-  data () {
+  components: {IconFont, RangeDate, Ellipsis, HeadInfo},
+  data() {
     return {
       loading: false,
       advanced: false,
@@ -236,7 +243,7 @@ export default {
       controller: {
         ellipsis: 100,
         building: false,
-        modalStyle : {
+        modalStyle: {
           height: '600px',
           padding: '5px'
         },
@@ -255,21 +262,23 @@ export default {
     }
   },
   computed: {
-    columns () {
-      let { sortedInfo } = this
+    columns() {
+      let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
-      return [{
+      return [
+      {
         title: '项目名称',
         dataIndex: 'name'
-      }, {
+      },
+      {
         title: 'Repository',
         dataIndex: 'repository',
         customRender: (text, row, index) => {
           switch (text) {
             case 1:
-              return <a-icon type="github"></a-icon>
+              return <a-icon type = "github"></a-icon>
             case 2:
-              return <a-icon type="medium"></a-icon>
+              return <a-icon type = "medium">< /a-icon>
             default:
               return text
           }
@@ -279,54 +288,60 @@ export default {
         title: 'Repository URL',
         dataIndex: 'url',
         customRender: (text, row, index) => {
-         return <div>
-           <a-popover arrow-point-at-center trigger="hover">
-             <template slot="content">
-               {{text}}
-             </template>
-             <a-button style="border:unset;height:20px;background:unset;">
-               <ellipsis length="50">
-                 {{text}}
-               </ellipsis>
-             </a-button>
-           </a-popover>
-         </div>
+          return <div>
+            <a-popover arrow-point-at-center trigger = "hover" >
+              <template slot = "content">
+                {{ text }}
+              </template>
+            <a-button style = "border:unset;height:20px;background:unset;" >
+              <ellipsis length = "50" >
+                {{ text }}
+              </ellipsis>
+            </a-button>
+            </a-popover>
+          </div>
         },
       },
-        {
-          title: 'Branches',
-          dataIndex: 'branches',
-          customRender: (text, row, index) => {
-            switch (text) {
-              case 'master':
-                return <a-tag color="red">{{text}}</a-tag>
-              default:
-                return <a-tag color="green">{{text}}</a-tag>
-            }
+      {
+        title: 'Branches',
+        dataIndex: 'branches',
+        customRender: (text, row, index) => {
+          switch (text) {
+            case 'master':
+              return <a-tag color = "red"> {{text}} </a-tag>
+            default:
+              return <a-tag color = "green"> {{text}} </a-tag>
           }
-        },
-        {
+        }
+      },
+      {
         title: 'Last Build',
         dataIndex: 'lastBuild'
       },
-        {
+      {
         title: '操作',
         dataIndex: 'operation',
-        scopedSlots: { customRender: 'operation' },
+        scopedSlots: {customRender: 'operation'},
         fixed: 'right',
         width: 120
       }]
     }
   },
-  mounted () {
-    this.fetch()
+
+  mounted() {
+    this.fetch({}, true)
+    const timer = window.setInterval(() => this.fetch({}, false), 1000)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer);
+    })
   },
+
   methods: {
-    onSelectChange (selectedRowKeys) {
+    onSelectChange(selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
-    handleChange (info) {
+    handleChange(info) {
       const status = info.file.status
       if (status === 'done') {
         this.loading = false
@@ -336,13 +351,13 @@ export default {
         this.$message.error(`${info.file.name} file upload failed.`)
       }
     },
-    handleDateChange (value) {
+    handleDateChange(value) {
       if (value) {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
     },
-    handleBuild (record) {
+    handleBuild(record) {
       this.$message.info(
         '已发送编译请求,后台正在执行编译,该操作需要花一些时间,您可以查询编译日志来查看进度',
         3,
@@ -354,8 +369,8 @@ export default {
       this.controller.building = true
     },
 
-    search () {
-      const { sortedInfo } = this
+    search() {
+      const {sortedInfo} = this
       let sortField, sortOrder
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
@@ -366,23 +381,23 @@ export default {
         sortField: sortField,
         sortOrder: sortOrder,
         ...this.queryParams
-      })
+      }, true)
     },
 
-    handleAdd () {
-      this.$router.push({ 'path': 'addproject' })
+    handleAdd() {
+      this.$router.push({'path': 'addproject'})
     },
 
-    handleSeeLog (project) {
+    handleSeeLog(project) {
       this.controller.consoleName = project.name + '构建日志'
       this.controller.visible = true
-      this.$nextTick(function (){
+      this.$nextTick(function () {
         this.handleOpenWS(project)
       })
     },
 
     handleOpenWS(project) {
-      const rows = parseInt(this.controller.modalStyle.height.replace("px",'')) / 16
+      const rows = parseInt(this.controller.modalStyle.height.replace("px", '')) / 16
       const cols = (document.querySelector(".terminal").offsetWidth - 10) / 8
       this.terminal = new Terminal({
         cursorBlink: true,
@@ -409,8 +424,8 @@ export default {
       const socket = new SockJS('http://test2:10001/websocket')
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe('/resp/tail', (msg) => this.terminal.writeln(msg.body) )
-        this.stompClient.send("/req/tail/"+project.id)
+        this.stompClient.subscribe('/resp/tail', (msg) => this.terminal.writeln(msg.body))
+        this.stompClient.send("/req/tail/" + project.id)
       })
     },
 
@@ -422,7 +437,7 @@ export default {
       this.terminal = null
     },
 
-    reset () {
+    reset() {
       // 取消选中
       this.selectedRowKeys = []
       // 重置列排序规则
@@ -431,19 +446,21 @@ export default {
       this.queryParams = {}
       // 清空时间选择
       this.$refs.createTime.reset()
-      this.fetch()
+      this.fetch({}, true)
     },
-    handleTableChange (pagination, filters, sorter) {
+    handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,
         ...this.queryParams,
         ...filters
-      })
+      }, true)
     },
-    fetch (params = {}) {
-      this.loading = true
+    fetch(params, loading) {
+      if (loading) {
+        this.loading = true
+      }
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
@@ -458,7 +475,7 @@ export default {
       list({
         ...params
       }).then((resp) => {
-        const pagination = { ...this.pagination }
+        const pagination = {...this.pagination}
         pagination.total = resp.data.total
         this.dataSource = resp.data.records
         console.log(this.dataSource)
@@ -483,9 +500,11 @@ export default {
   vertical-align: middle;
   font-size: 14px;
   margin-left: 40px;
+
   span {
     line-height: 20px;
   }
+
   p {
     margin-top: 4px;
     margin-bottom: 0;
