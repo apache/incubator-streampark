@@ -129,7 +129,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean saved = save(app);
         if (saved) {
             try {
-                deploy(app);
+                deploy(app, false);
                 return true;
             } catch (Exception e) {
                 throw new RuntimeException(e);
@@ -139,23 +139,31 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void deploy(Application app) throws IOException {
+    public void deploy(Application app, boolean backUp) throws IOException {
         //先停止原有任务..
         Application application = getById(app.getId());
         application.setBackUpDescription(app.getBackUpDescription());
         if (application.getState() == FlinkAppState.RUNNING.getValue()) {
             cancel(application);
         }
+
+        //更改状态为发布中....
+        application.setState(FlinkAppState.DEPLOYING.getValue());
+        updateState(application);
+
         if (!application.getModule().startsWith(application.getAppBase().getAbsolutePath())) {
             application.setModule(application.getAppBase().getAbsolutePath().concat("/").concat(application.getModule()));
+
         }
+
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
-            ApplicationBackUp backUp = new ApplicationBackUp(application);
-            backUpService.save(backUp);
-            HdfsUtils.mkdirs(backUp.getPath());
-            HdfsUtils.movie(workspaceWithModule, backUp.getPath());
+            ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
+            backUpService.save(applicationBackUp);
+            HdfsUtils.mkdirs(applicationBackUp.getPath());
+            HdfsUtils.movie(workspaceWithModule, applicationBackUp.getPath());
         }
+
         String workspace = application.getWorkspace(false);
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
@@ -164,11 +172,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //更新发布状态...
         application.setDeploy(0);
         updateDeploy(application);
+
+        //更改状态为发布完成....
+        application.setState(FlinkAppState.DEPLOYED.getValue());
+        updateState(application);
     }
 
     @Override
     public void updateDeploy(Application application) {
         this.baseMapper.updateDeploy(application);
+    }
+
+    @Override
+    public void updateState(Application application) {
+        this.baseMapper.updateState(application);
     }
 
     @Override
