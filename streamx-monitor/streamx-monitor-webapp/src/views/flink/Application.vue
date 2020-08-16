@@ -101,7 +101,7 @@
           COMPLETED: '#1890ff',
           RESTARTING: '#13c2c2'
         -->
-        <div>
+        <div class="app_state">
           <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
           <a-tag color="#108ee9" v-if="state === 1">DEPLOYING</a-tag>
           <a-tag color="#108ee9" v-if="state === 2">DEPLOYED</a-tag>
@@ -478,11 +478,16 @@ export default {
   font-size: 100px;
 }
 
-.ant-tag {
+.app_state {
+  width: 100px;
+}
+
+.app_state > .ant-tag {
   border-radius: 0;
   font-weight: 700;
+  font-size: 13px;
   text-align: center;
-  padding: 3px 5px;
+  padding: 1px 5px;
   cursor: default;
 }
 
@@ -498,5 +503,7 @@ export default {
   padding-bottom: 5px;
   padding-top: 5px;
 }
+
+
 
 </style>
