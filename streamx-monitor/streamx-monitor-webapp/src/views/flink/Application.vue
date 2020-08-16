@@ -263,11 +263,11 @@ export default {
       }, {
         title: '应用ID',
         dataIndex: 'appId',
-        width: 270
+        width: 280
       }, {
         title: '状态',
         dataIndex: 'state',
-        width: 100,
+        width: 80,
         scopedSlots: {customRender: 'state'},
         fixed: 'right'
       }, {
@@ -479,7 +479,7 @@ export default {
 }
 
 .app_state {
-  width: 100px;
+  width: 80px;
 }
 
 .app_state > .ant-tag {
