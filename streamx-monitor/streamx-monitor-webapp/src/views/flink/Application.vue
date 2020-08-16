@@ -102,16 +102,15 @@
           RESTARTING: '#13c2c2'
         -->
         <div>
-          <span style="color: #fa8c16"></span>
           <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
           <a-tag color="#108ee9" v-if="state === 1">DEPLOYING</a-tag>
-          <a-tag color="#13c2c2" v-if="state === 2">DEPLOYED</a-tag>
-          <a-tag color="#2db7f5" v-if="state === 3">STARTING</a-tag>
+          <a-tag color="#108ee9" v-if="state === 2">DEPLOYED</a-tag>
+          <a-tag color="#13c2c2" v-if="state === 3">STARTING</a-tag>
           <a-tag color="#13c2c2" v-if="state === 4">RESTARTING</a-tag>
           <a-tag color="#52c41a" v-if="state === 5">RUNNING</a-tag>
-          <a-tag color="#faad14" v-if="state === 6">FAILING</a-tag>
+          <a-tag color="#fa541c" v-if="state === 6">FAILING</a-tag>
           <a-tag color="#f5222d" v-if="state === 7">FAILED</a-tag>
-          <a-tag color="#fadb14" v-if="state === 8">CANCELLING</a-tag>
+          <a-tag color="#faad14" v-if="state === 8">CANCELLING</a-tag>
           <a-tag color="#fa8c16" v-if="state === 9">CANCELED</a-tag>
           <a-tag color="#1890ff" v-if="state === 10">FINISHED</a-tag>
           <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
