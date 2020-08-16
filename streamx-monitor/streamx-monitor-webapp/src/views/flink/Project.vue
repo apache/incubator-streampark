@@ -359,7 +359,7 @@ export default {
     },
     handleBuild(record) {
       this.$message.info(
-        '已发送编译请求,后台正在执行编译,该操作需要花一些时间,您可以查询编译日志来查看进度',
+        '已发送编译请求,后台正在执行编译,您可以查询编译日志来查看进度',
         3,
       )
       build({
