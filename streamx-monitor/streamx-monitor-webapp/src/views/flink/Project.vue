@@ -66,9 +66,10 @@
               <span>构建次数</span>
               <p>21</p>
             </div>
-            <div class="list-content-item">
+            <div class="list-content-item" style="width: 180px">
               <span>最后构建时间</span>
-              <p>{{ item.lastBuild }}</p>
+              <p v-if="item.lastBuild">{{ item.lastBuild }}</p>
+              <p v-else>--</p>
             </div>
           </div>
 
