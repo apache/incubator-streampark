@@ -93,19 +93,13 @@ public class FlinkMonitorTask {
                         needUpdate = true;
                     }
 
-                    if (application.getStartTime() == null) {
-                        application.setStartTime(new Date(startTime));
-                        needUpdate = true;
-                    } else if (!startTime.equals(application.getStartTime().getTime())) {
+                    if (application.getStartTime() == null || !startTime.equals(application.getStartTime().getTime())) {
                         application.setStartTime(new Date(startTime));
                         needUpdate = true;
                     }
 
                     if (endTime != null) {
-                        if (application.getEndTime() == null) {
-                            application.setEndTime(new Date(endTime));
-                            needUpdate = true;
-                        } else if (!endTime.equals(application.getEndTime().getTime())) {
+                        if (application.getEndTime() == null || !endTime.equals(application.getEndTime().getTime())) {
                             application.setEndTime(new Date(endTime));
                             needUpdate = true;
                         }
