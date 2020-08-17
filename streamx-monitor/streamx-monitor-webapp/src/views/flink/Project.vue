@@ -355,6 +355,7 @@ export default {
       this.$refs.createTime.reset()
       this.fetch({}, true)
     },
+
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.fetch({
@@ -364,6 +365,7 @@ export default {
         ...filters
       }, true)
     },
+
     fetch(params, loading) {
       if (loading) {
         this.loading = true
