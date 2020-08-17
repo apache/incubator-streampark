@@ -73,7 +73,7 @@
             </div>
           </div>
 
-          <div slot="actions" v-show="controller.building || item.buildState == 0">
+          <div slot="actions" v-show="controller.building || item.buildState === 0">
             <a-icon type="sync" spin @click="handleSeeLog(item)"/>
           </div>
 
@@ -86,8 +86,7 @@
                     title="确定要pull最新代码并重新编译该项目吗?"
                     cancel-text="No"
                     ok-text="Yes"
-                    @confirm="handleBuild(item)"
-                  >
+                    @confirm="handleBuild(item)">
                     <span>更新 & 编译</span>
                   </a-popconfirm>
                 </a-menu-item>
@@ -102,8 +101,11 @@
       </a-list>
     </a-card>
 
-    <a-modal v-model="controller.visible" width="65%" :bodyStyle="controller.modalStyle"
-             :destroyOnClose='controller.modalDestroyOnClose' @ok="handleClose">
+    <a-modal v-model="controller.visible"
+             width="65%"
+             :bodyStyle="controller.modalStyle"
+             :destroyOnClose='controller.modalDestroyOnClose'
+             @ok="handleClose">
       <template slot="title">
         <a-icon type="code"/>&nbsp; {{ controller.consoleName }}
       </template>
@@ -114,102 +116,6 @@
       </template>
       <div id="terminal" ref="terminal" class="terminal"></div>
     </a-modal>
-
-    <!--  <a-card :bordered="false" style="margin-top: 20px;">
-        <div class="table-page-search-wrapper">
-          <a-form layout="inline">
-            <a-row :gutter="48">
-              <div class="fold">
-                <a-col :md="8" :sm="24">
-                  <a-form-item
-                    label="名称"
-                    :labelCol="{span: 4}"
-                    :wrapperCol="{span: 18, offset: 2}">
-                    <a-input v-model="queryParams.name"/>
-                  </a-form-item>
-                </a-col>
-                <a-col :md="8" :sm="24">
-                  <a-form-item
-                    label="创建时间"
-                    :labelCol="{span: 4}"
-                    :wrapperCol="{span: 18, offset: 2}">
-                    <range-date @change="handleDateChange" ref="createTime"></range-date>
-                  </a-form-item>
-                </a-col>
-                <a-col :md="8" :sm="24">
-                  <span class="table-page-search-bar">
-                    <a-button
-                      type="primary"
-                      shape="circle"
-                      icon="search"
-                      @click="search">
-                    </a-button>
-                    <a-button
-                      type="primary"
-                      shape="circle"
-                      icon="rest"
-                      @click="reset">
-                    </a-button>
-                    <a-button
-                      type="primary"
-                      shape="circle"
-                      icon="export"
-                      v-permit="'role:export'"
-                      @click="exportExcel">
-                    </a-button>
-                    <a-button
-                      v-permit="'role:delete'"
-                      type="primary"
-                      shape="circle"
-                      icon="plus"
-                      @click="addProject">
-                    </a-button>
-                    <a-button
-                      v-permit="'role:delete'"
-                      type="primary"
-                      shape="circle"
-                      icon="minus"
-                      @click="batchDelete">
-                    </a-button>
-                  </span>
-                </a-col>
-              </div>
-            </a-row>
-          </a-form>
-        </div>-->
-    <!-- 表格区域 -->
-    <!--
-      <a-table
-        ref="TableInfo"
-        :columns="columns"
-        rowKey="id"
-        :dataSource="dataSource"
-        :pagination="pagination"
-        :loading="loading"
-        :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
-        :scroll="{ x: 900 }"
-        @change="handleTableChange" >
-        <template slot="operation" slot-scope="text, record">
-          <a-popconfirm
-            title="确定要pull最新代码并重新编译该项目吗?"
-            cancel-text="No"
-            ok-text="Yes"
-            @confirm="handleBuild(record)"
-          >
-            <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#4a9ff5" title="编译"></a-icon>
-          </a-popconfirm>
-          <a-icon
-            v-permit="'role:update'"
-            type="setting"
-            theme="twoTone"
-            twoToneColor="#4a9ff5"
-            @click="edit(record)"
-            title="修改角色">
-          </a-icon>
-          <a-icon type="eye" theme="twoTone" twoToneColor="#4a9ff5" @click="handleView(record)" title="查看"></a-icon>
-        </template>
-      </a-table>-->
-
   </div>
 
 </template>
@@ -279,7 +185,7 @@ export default {
             case 1:
               return <a-icon type = "github"></a-icon>
             case 2:
-              return <a-icon type = "medium">< /a-icon>
+              return <a-icon type = "medium"></a-icon>
             default:
               return text
           }
