@@ -76,12 +76,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             project.setDate(new Date());
             boolean status = save(project);
             if (status) {
-                return response.message("添加任务成功");
+                return response.message("添加项目成功").data(true);
             } else {
-                return response.message("添加任务失败");
+                return response.message("添加项目失败").data(false);
             }
         } else {
-            return response.message("该名称的项目已存在,添加任务失败");
+            return response.message("该名称的项目已存在,添加任务失败").data(false);
         }
     }
 

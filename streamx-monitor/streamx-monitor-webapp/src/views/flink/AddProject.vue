@@ -146,7 +146,10 @@ export default {
             if (created) {
               this.$router.push({path: '/flink/project'})
             } else {
-              console.log(created)
+              this.$notification.error({
+                message: '项目保存失败',
+                description: resp['message'] ,
+              });
             }
           }).catch((error) => {
             this.$message.error(error.message)
