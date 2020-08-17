@@ -22,11 +22,8 @@
             <if test="project.name != null and project.name != ''">
                 AND t.name like '%${project.name}%'
             </if>
-            <if test="project.repository != null and project.repository != ''">
-                AND t.repository = #{project.repository}
-            </if>
-            <if test="project.dateFrom != null and project.dateFrom !=''">
-                And t.date between #{project.dateFrom} and #{project.dateTo}
+            <if test="project.buildState != null">
+                AND t.buildState = #{project.buildState}
             </if>
         </where>
     </select>
