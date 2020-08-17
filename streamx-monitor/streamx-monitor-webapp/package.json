@@ -50,7 +50,7 @@
     "@vue/cli-service": "^3.7.0",
     "@vue/eslint-config-standard": "^4.0.0",
     "@vue/test-utils": "^1.0.0-beta.20",
-    "apexcharts": "^3.8.4",
+    "apexcharts": "^3.20.0",
     "babel-core": "7.0.0-bridge.0",
     "babel-eslint": "^7.2.3",
     "babel-jest": "^25.0.0",

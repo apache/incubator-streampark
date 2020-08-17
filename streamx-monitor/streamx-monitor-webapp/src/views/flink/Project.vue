@@ -1,18 +1,19 @@
 <template>
   <div>
-    <a-card :bordered="false">
-      <a-row>
-        <a-col :sm="8" :xs="24">
-          <head-info title="我的待办" content="8个任务" :bordered="true"/>
-        </a-col>
-        <a-col :sm="8" :xs="24">
-          <head-info title="本周任务平均处理时间" content="32分钟" :bordered="true"/>
-        </a-col>
-        <a-col :sm="8" :xs="24">
-          <head-info title="本周完成任务数" content="24个"/>
-        </a-col>
-      </a-row>
-    </a-card>
+    <a-row :gutter="24">
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }" class="chart">
+          <apexchart type="pie" width="260" :options="chart.state.chartOptions" :series="chart.state.series"></apexchart>
+      </a-col>
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }" class="chart">
+            <apexchart type="pie" width="260" :options="chart.state.chartOptions" :series="chart.state.series"></apexchart>
+      </a-col>
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }" class="chart">
+          <apexchart type="pie" width="260" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+      </a-col>
+      <a-col :sm="24" :md="12" :xl="6" :style="{ marginBottom: '24px' }" class="chart">
+          <apexchart type="pie" width="260" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+      </a-col>
+    </a-row>
 
     <a-card
       style="margin-top: 24px"
@@ -121,7 +122,9 @@
 </template>
 <script>
 import RangeDate from '@/components/DateTime/RangeDate'
+import { ChartCard, MiniArea, MiniBar, MiniProgress, RankList, Bar, Trend, NumberInfo, MiniSmoothArea } from '@/components'
 import {build, list, remove} from '@/api/project'
+import VueApexCharts from "vue-apexcharts"
 import Ellipsis from '@/components/Ellipsis'
 import HeadInfo from "@comp/tools/HeadInfo"
 import SockJS from 'sockjs-client'
@@ -136,7 +139,17 @@ const IconFont = Icon.createFromIconfontCN({
 })
 
 export default {
-  components: {IconFont, RangeDate, Ellipsis, HeadInfo},
+  components: {IconFont, RangeDate, Ellipsis, HeadInfo, VueApexCharts,
+    ChartCard,
+    MiniArea,
+    MiniBar,
+    MiniProgress,
+    RankList,
+    Bar,
+    Trend,
+    NumberInfo,
+    MiniSmoothArea
+  },
   data() {
     return {
       loading: false,
@@ -165,6 +178,51 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+      },
+      chart: {
+        state: {
+          series: [44, 55, 13, 43, 22],
+          chartOptions: {
+            chart: {
+              width: 250,
+              type: 'pie',
+            },
+            labels: ['Team A', 'Team B', 'Team C', 'Team D', 'Team E'],
+            responsive: [{
+              breakpoint: 200,
+              options: {
+                chart: {
+                  width: 200
+                },
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }]
+          }
+        },
+        type: {
+          series: [44, 55],
+          chartOptions: {
+            chart: {
+              width: 260,
+              type: 'pie',
+            },
+            labels: ['Team A', 'Team B'],
+            responsive: [{
+              breakpoint: 10,
+              options: {
+                chart: {
+                  width: 200
+                },
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }]
+          }
+        }
+
       }
     }
   },
@@ -391,6 +449,20 @@ export default {
 
 .icon-font {
   font-size: 50px;
+}
+.chart {
+  padding: 20px 24px 8px;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  -webkit-font-feature-settings: 'tnum';
+  font-feature-settings: 'tnum';
+  position: relative;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.3s;
 }
 </style>
 
