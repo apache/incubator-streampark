@@ -103,9 +103,9 @@
         -->
         <div class="app_state">
           <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
-          <a-tag color="#108ee9" v-if="state === 1">DEPLOYING</a-tag>
+          <a-tag color="#1ABBDC" v-if="state === 1">DEPLOYING</a-tag>
           <a-tag color="#108ee9" v-if="state === 2">DEPLOYED</a-tag>
-          <a-tag color="#13c2c2" v-if="state === 3">STARTING</a-tag>
+          <a-tag color="#1AB58E" v-if="state === 3">STARTING</a-tag>
           <a-tag color="#13c2c2" v-if="state === 4">RESTARTING</a-tag>
           <a-tag color="#52c41a" v-if="state === 5">RUNNING</a-tag>
           <a-tag color="#fa541c" v-if="state === 6">FAILING</a-tag>
