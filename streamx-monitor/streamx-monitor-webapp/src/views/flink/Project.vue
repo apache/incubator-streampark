@@ -18,21 +18,21 @@
       style="margin-top: 24px"
       :bordered="false">
       <div slot="extra">
-        <a-radio-group>
-          <a-radio-button>全部</a-radio-button>
-          <a-radio-button>构建中</a-radio-button>
-          <a-radio-button>未构建</a-radio-button>
-          <a-radio-button>已构建</a-radio-button>
-          <a-radio-button>构建失败</a-radio-button>
+        <a-radio-group button-style="solid" default-value=''>
+          <a-radio-button @click="handleQuery()" value=''>全部</a-radio-button>
+          <a-radio-button @click="handleQuery(0)" value="0" >构建中</a-radio-button>
+          <a-radio-button @click="handleQuery(-1)" value="-1">未构建</a-radio-button>
+          <a-radio-button @click="handleQuery(1)" value="1">已构建</a-radio-button>
+          <a-radio-button @click="handleQuery(2)" value="2">构建失败</a-radio-button>
         </a-radio-group>
-        <a-input-search style="margin-left: 16px; width: 272px;"/>
+        <a-input-search @search="handleSearch" style="margin-left: 16px; width: 272px;"/>
       </div>
 
       <div class="operate">
         <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
       </div>
 
-      <a-list size="large" :pagination="{showSizeChanger: true, showQuickJumper: true, pageSize: 5, total: 50}">
+      <a-list size="large" :pagination="pagination">
         <a-list-item :key="index" v-for="(item, index) in dataSource">
           <a-list-item-meta>
             <icon-font slot="avatar" class="icon-font" type="icon-flink"></icon-font>
@@ -236,8 +236,8 @@ export default {
   },
 
   mounted() {
-    this.fetch({}, true)
-    const timer = window.setInterval(() => this.fetch({}, false), 1000)
+    this.fetch(this.queryParams, true)
+    const timer = window.setInterval(() => this.fetch(this.queryParams, false), 1000)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer);
     })
@@ -248,22 +248,15 @@ export default {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
-    handleChange(info) {
-      const status = info.file.status
-      if (status === 'done') {
-        this.loading = false
-        this.$message.success(`${info.file.name} file uploaded successfully.`)
-      } else if (status === 'error') {
-        this.loading = false
-        this.$message.error(`${info.file.name} file upload failed.`)
-      }
+
+    handleSearch(value) {
+      this.paginationInfo = null
+      this.fetch({
+        name: value,
+        ...this.queryParams
+      }, true)
     },
-    handleDateChange(value) {
-      if (value) {
-        this.queryParams.dateFrom = value[0]
-        this.queryParams.dateTo = value[1]
-      }
-    },
+
     handleBuild(record) {
       this.$message.info(
         '已发送编译请求,后台正在执行编译,您可以查询编译日志来查看进度',
@@ -274,21 +267,6 @@ export default {
       }).then(() => {
       })
       this.controller.building = true
-    },
-
-    search() {
-      const {sortedInfo} = this
-      let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
-      }
-      this.fetch({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams
-      }, true)
     },
 
     handleAdd() {
@@ -345,25 +323,16 @@ export default {
     },
 
     reset() {
-      // 取消选中
-      this.selectedRowKeys = []
-      // 重置列排序规则
-      this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
-      // 清空时间选择
-      this.$refs.createTime.reset()
       this.fetch({}, true)
     },
 
-    handleTableChange(pagination, filters, sorter) {
-      this.sortedInfo = sorter
+    handleQuery(state) {
+      this.queryParams.buildState = state
       this.fetch({
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-        ...this.queryParams,
-        ...filters
-      }, true)
+        ...this.queryParams
+      },true)
     },
 
     fetch(params, loading) {
@@ -387,7 +356,6 @@ export default {
         const pagination = {...this.pagination}
         pagination.total = resp.data.total
         this.dataSource = resp.data.records
-        console.log(this.dataSource)
         this.pagination = pagination
         this.loading = false
       })
