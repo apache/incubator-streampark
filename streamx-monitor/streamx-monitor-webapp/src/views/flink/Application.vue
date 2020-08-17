@@ -188,10 +188,10 @@
       </template>
       <template slot="footer">
         <a-button key="back" @click="handleDeployCancel">
-          Return
+          取消
         </a-button>
         <a-button key="submit" type="primary" :loading="loading" @click="handleDeployOk">
-          Submit
+          确定
         </a-button>
       </template>
       <a-form @submit="handleDeployOk" :form="form">
