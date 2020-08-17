@@ -21,6 +21,7 @@
 package com.streamxhub.flink.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.flink.monitor.base.properties.StreamXProperties;
 import com.streamxhub.flink.monitor.base.utils.CommonUtil;
 import com.streamxhub.flink.monitor.base.utils.SpringContextUtil;
@@ -58,7 +59,6 @@ public class Project implements Serializable {
     private String username;
 
     private String password;
-
     /**
      * 1:git
      * 2:svn
@@ -70,7 +70,6 @@ public class Project implements Serializable {
     private Date date;
 
     private String description;
-
     /**
      * 构建状态:
      * -1:未构建
@@ -92,6 +91,7 @@ public class Project implements Serializable {
      *
      * @return
      */
+    @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
             appSource = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/project");
@@ -109,25 +109,30 @@ public class Project implements Serializable {
         return new File(sourcePath.getAbsolutePath().concat("/").concat(fullName));
     }
 
+    @JsonIgnore
     public File getAppBase() {
         String appBase = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 
+    @JsonIgnore
     public CredentialsProvider getCredentialsProvider() {
         return new UsernamePasswordCredentialsProvider(this.username, this.password);
     }
 
+    @JsonIgnore
     public File getGitRepository() {
         File home = getAppSource();
         return new File(home, ".git");
     }
 
+    @JsonIgnore
     public boolean isCloned() {
         File repository = getGitRepository();
         return repository.exists();
     }
 
+    @JsonIgnore
     public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtil.notEmpty(this.getPom())) {
@@ -136,6 +141,7 @@ public class Project implements Serializable {
         return Arrays.asList("cd ".concat(buildHome), "mvn clean install -Dmaven.test.skip=true","exit");
     }
 
+    @JsonIgnore
     public String getLog4BuildStart() {
         return String.format("%s[StreamX] project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
                 getLogHeader("maven"),
@@ -145,6 +151,7 @@ public class Project implements Serializable {
         );
     }
 
+    @JsonIgnore
     public String getLog4PullStart() {
         return String.format("%s[StreamX] project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
                 getLogHeader("git pull"),
@@ -153,7 +160,7 @@ public class Project implements Serializable {
         );
     }
 
-
+    @JsonIgnore
     public String getLog4CloneStart() {
         return String.format("%s[StreamX] project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
                 getLogHeader("git clone"),
@@ -163,6 +170,7 @@ public class Project implements Serializable {
         );
     }
 
+    @JsonIgnore
     public String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
     }

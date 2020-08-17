@@ -56,7 +56,7 @@ public class ApplicationController extends BaseController {
     }
 
     @RequestMapping("yarn")
-    public RestResponse list() {
+    public RestResponse yarn() {
         return RestResponse.create().data(properties.getYarn());
     }
 
