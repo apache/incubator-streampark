@@ -26,7 +26,7 @@ export default {
   production: process.env.NODE_ENV === 'production' && process.env.VUE_APP_PREVIEW !== 'true',
   // storage options
   storageOptions: {
-    namespace: 'WEBX_', // key prefix
+    namespace: 'STREAMX_', // key prefix
     name: 'ls', // name variable Vue.[ls] or this.[$ls],
     storage: 'local' // storage name session, local, memory
   }
