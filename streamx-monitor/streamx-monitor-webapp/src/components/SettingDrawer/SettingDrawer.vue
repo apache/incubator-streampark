@@ -239,7 +239,7 @@ export default {
         multiTab: ${this.baseConfig.multiTab},
         // vue-ls options
         storageOptions: {
-          namespace: 'WEBX_',
+          namespace: 'STREAMX_',
           name: 'ls',
           storage: 'local',
         }
