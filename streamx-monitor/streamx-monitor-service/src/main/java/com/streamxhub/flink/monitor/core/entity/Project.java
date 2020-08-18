@@ -106,7 +106,8 @@ public class Project implements Serializable {
         String branches = this.getBranches() == null ? "master" : this.getBranches();
         String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
         String fullName = rootName.concat("-").concat(branches);
-        return new File(sourcePath.getAbsolutePath().concat("/").concat(getName()).concat("/").concat(fullName));
+        String path = String.format("%s/%s/%s", sourcePath.getAbsolutePath(), getName(), fullName);
+        return new File(path);
     }
 
     @JsonIgnore
@@ -138,7 +139,7 @@ public class Project implements Serializable {
         if (CommonUtil.notEmpty(this.getPom())) {
             buildHome = new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
         }
-        return Arrays.asList("cd ".concat(buildHome), "mvn clean install -Dmaven.test.skip=true","exit");
+        return Arrays.asList("cd ".concat(buildHome), "mvn clean install -Dmaven.test.skip=true", "exit");
     }
 
     @JsonIgnore
