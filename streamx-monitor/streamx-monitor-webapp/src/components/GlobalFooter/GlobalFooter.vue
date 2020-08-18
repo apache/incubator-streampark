@@ -10,7 +10,7 @@
     </div>
     <div class="copyright">
       Copyright
-      <a-icon type="copyright" /> 2015~2019 <span>WebX</span>
+      <a-icon type="copyright" /> 2019~2020 <span>StreamX</span>
     </div>
   </div>
 </template>

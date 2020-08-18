@@ -95,7 +95,7 @@ data.push({
   }
 })
 data.push({
-  title: 'WebX',
+  title: 'StreamX',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/dURIMkkrRFpPgTuzkwnB.png',
   description: '生命就像一盒巧克力，结果往往出人意料',
   owner: '林东东',
@@ -105,7 +105,7 @@ data.push({
   }
 })
 data.push({
-  title: 'WebX',
+  title: 'StreamX',
   avatar: 'https://gw.alipayobjects.com/zos/rmsportal/sfjbOqnsXXJgNCjCzDBL.png',
   description: '城镇中有那么多的酒馆，她却偏偏走进了我的酒馆',
   owner: '周星星',
