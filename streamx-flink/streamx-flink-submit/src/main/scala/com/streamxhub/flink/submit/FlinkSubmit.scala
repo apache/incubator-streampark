@@ -28,7 +28,6 @@ import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util.{HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
-import org.apache.flink.client.ClientUtils
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
@@ -54,7 +53,7 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def submit(nameService:String,
+  def submit(nameService: String,
              flinkUserJar: String,
              yarnName: String,
              appConf: String,
@@ -123,7 +122,7 @@ object FlinkSubmit extends Logger {
 
       .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, List(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
@@ -137,7 +136,7 @@ object FlinkSubmit extends Logger {
       //设置启动主类
       .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
       //设置启动参数
-      .set(ApplicationConfiguration.APPLICATION_ARGS,appArgs)
+      .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs)
 
     val customCommandLines = loadCustomCommandLines(flinkConfiguration, flinkLocalConfDir)
 
@@ -236,7 +235,7 @@ object FlinkSubmit extends Logger {
    */
   @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: List[String]) = {
     val configuration = new Configuration
-    val classpath = new ArrayList[URL]
+    val classpath = new ArrayBuffer[URL]
     if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
       try classpath.add(new URL(path)) catch {
         case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:${path},err:$e")
@@ -259,7 +258,7 @@ object FlinkSubmit extends Logger {
     val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
     configuration.setBoolean(DeploymentOptions.ATTACHED, !detachedMode)
     configuration.setBoolean(DeploymentOptions.SHUTDOWN_IF_ATTACHED, shutdownOnAttachedExit)
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath.toList, new function.Function[URL, String] {
       override def apply(url: URL): String = url.toString
     })
     SavepointRestoreSettings.toConfiguration(savepointSettings, configuration)
