@@ -58,7 +58,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     private final Map<Long, StringBuilder> tailBuffer = new HashMap<>();
 
-    private final Map<Long, Boolean> tailBegining = new HashMap<>();
+    private final Map<Long, Boolean> tailBeginning = new HashMap<>();
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -332,8 +332,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if (tailOutMap.containsKey(project.getId())) {
-                    if (tailBegining.containsKey(project.getId())) {
-                        tailBegining.remove(project.getId());
+                    if (tailBeginning.containsKey(project.getId())) {
+                        tailBeginning.remove(project.getId());
                         Arrays.stream(builder.toString().split("\n")).forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/tail", x));
                     } else {
                         simpMessageSendingOperations.convertAndSend("/resp/tail", line);
@@ -360,12 +360,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     public void tailBuildLog(Long id) {
         this.tailOutMap.put(id, id);
         //首次会从buffer里从头读取数据.只有一次.
-        this.tailBegining.put(id, true);
+        this.tailBeginning.put(id, true);
     }
 
     private void tailCleanUp(Long id) {
         tailOutMap.remove(id);
-        tailBegining.remove(id);
+        tailBeginning.remove(id);
         tailBuffer.remove(id);
     }
 

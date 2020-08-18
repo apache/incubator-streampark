@@ -106,7 +106,7 @@ public class Project implements Serializable {
         String branches = this.getBranches() == null ? "master" : this.getBranches();
         String rootName = url.replaceAll(".*/|\\.git|\\.svn", "");
         String fullName = rootName.concat("-").concat(branches);
-        return new File(sourcePath.getAbsolutePath().concat("/").concat(fullName));
+        return new File(sourcePath.getAbsolutePath().concat("/").concat(getName()).concat("/").concat(fullName));
     }
 
     @JsonIgnore
