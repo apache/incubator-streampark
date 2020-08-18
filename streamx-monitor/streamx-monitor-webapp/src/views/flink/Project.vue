@@ -150,23 +150,22 @@
             </div>
           </div>
 
-          <div slot="actions" v-show="controller.building || item.buildState === 0">
-            <a-icon type="sync" spin @click="handleSeeLog(item)"/>
+          <div slot="actions">
+            <a-icon v-if="item.buildState === 0" type="sync" spin @click="handleSeeLog(item)"/>
+            <a-popconfirm
+              v-else
+              title="确定要编译该项目吗?"
+              cancel-text="No"
+              ok-text="Yes"
+              @confirm="handleBuild(item)">
+              <a-icon type="play-circle"></a-icon>
+            </a-popconfirm>
           </div>
 
           <div slot="actions">
             <a-dropdown>
               <a-menu slot="overlay">
                 <a-menu-item><a>编辑项目</a></a-menu-item>
-                <a-menu-item>
-                  <a-popconfirm
-                    title="确定要pull最新代码并重新编译该项目吗?"
-                    cancel-text="No"
-                    ok-text="Yes"
-                    @confirm="handleBuild(item)">
-                    <span>更新 & 编译</span>
-                  </a-popconfirm>
-                </a-menu-item>
                 <a-menu-item><a>删除项目</a></a-menu-item>
               </a-menu>
               <a>更多
@@ -210,7 +209,7 @@ import "xterm/lib/xterm.js"
 import {Icon} from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2006309_fxzli8dlyo9.js'
+  scriptUrl: '//at.alicdn.com/t/font_2006309_d0bamxgl4wt.js'
 })
 
 export default {
@@ -227,7 +226,6 @@ export default {
       terminal: null,
       controller: {
         ellipsis: 100,
-        building: false,
         modalStyle: {
           height: '600px',
           padding: '5px'
@@ -336,12 +334,8 @@ export default {
               }
             }]
           },
-
         }
-
-
       }
-
     }
   },
   computed: {
@@ -435,14 +429,13 @@ export default {
 
     handleBuild(record) {
       this.$message.info(
-        '已发送编译请求,后台正在执行编译,您可以查询编译日志来查看进度',
+        '已发送编译请求,后台正在更新代码并编译,您可以查询编译日志来查看进度',
         3,
       )
       build({
         id: record.id
       }).then(() => {
       })
-      this.controller.building = true
     },
 
     handleAdd() {
