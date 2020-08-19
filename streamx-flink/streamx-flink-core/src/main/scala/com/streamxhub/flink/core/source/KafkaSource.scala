@@ -234,7 +234,7 @@ object StartFrom {
               })
             ) match {
               case Success(v) => new StartFrom(x, v)
-              case Failure(_) => throw new IllegalArgumentException(s"[Streamx] topic:$x start.form offset error, e.g: 1:10000,2:10000,3:10002")
+              case Failure(_) => throw new IllegalArgumentException(s"[StreamX] topic:$x start.form offset error, e.g: 1:10000,2:10000,3:10002")
             }
           case _ => null
         }
@@ -244,7 +244,4 @@ object StartFrom {
 
 }
 
-class StartFrom(val topic: String, val partitionOffset: Array[(Int, Long)]) {
-
-}
-
+class StartFrom(val topic: String, val partitionOffset: Array[(Int, Long)])
