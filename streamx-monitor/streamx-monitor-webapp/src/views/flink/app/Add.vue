@@ -152,8 +152,8 @@
 </template>
 
 <script>
-import {select, listApp, listConf} from '@/api/project'
-import {create, exists, name} from '@/api/application'
+import {select, listApp, listConf} from '@api/project'
+import {create, exists, name} from '@api/application'
 
 const configOptions = [
   {
