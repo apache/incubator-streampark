@@ -158,7 +158,7 @@
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleBuild(item)">
-              <a-icon type="play-circle"></a-icon>
+              <a-icon type="thunderbolt"></a-icon>
             </a-popconfirm>
           </div>
 
@@ -196,10 +196,10 @@
 
 </template>
 <script>
-import RangeDate from '@/components/DateTime/RangeDate'
-import {build, list, remove} from '@/api/project'
+import RangeDate from '@comp/DateTime/RangeDate'
+import {build, list, remove} from '@api/project'
 import VueApexCharts from "vue-apexcharts"
-import Ellipsis from '@/components/Ellipsis'
+import Ellipsis from '@comp/Ellipsis'
 import HeadInfo from "@comp/tools/HeadInfo"
 import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
@@ -439,7 +439,7 @@ export default {
     },
 
     handleAdd() {
-      this.$router.push({'path': 'addproject'})
+      this.$router.push({'path': '/flink/project/add'})
     },
 
     handleSeeLog(project) {

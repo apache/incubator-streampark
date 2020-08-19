@@ -94,40 +94,53 @@ export default {
 
     // render
     renderItem (menu) {
-      if (!menu.hidden) {
+      if (!menu.meta.hidden) {
         return menu.children && !menu.hideChildrenInMenu ? this.renderSubMenu(menu) : this.renderMenuItem(menu)
       }
       return null
     },
+
     renderMenuItem (menu) {
-      const target = menu.meta.target || null
-      const tag = target && 'a' || 'router-link'
-      const props = { to: { name: menu.name } }
-      const attrs = { href: menu.path, target: menu.meta.target }
-      return (
-        <Item {...{ key: menu.path }}>
-          <tag {...{ props, attrs }}>
-            {this.renderIcon(menu.meta.icon)}
-            <span>{menu.name}</span>
-          </tag>
-        </Item>
-      )
-    },
-    renderSubMenu (menu) {
-      const itemArr = []
-      if (!menu.hideChildrenInMenu) {
-        menu.children.forEach(item => itemArr.push(this.renderItem(item)))
+      if(!menu.meta.hidden) {
+        const target = menu.meta.target || null
+        const tag = target && 'a' || 'router-link'
+        const props = { to: { name: menu.name } }
+        const attrs = { href: menu.path, target: menu.meta.target }
+        return (
+          <Item {...{ key: menu.path }}>
+            <tag {...{ props, attrs }}>
+              {this.renderIcon(menu.meta.icon)}
+              <span>{menu.name}</span>
+            </tag>
+          </Item>
+        )
       }
-      return (
-        <SubMenu {...{ key: menu.path }}>
-          <span slot="title">
-            {this.renderIcon(menu.meta.icon)}
-            <span>{menu.name}</span>
-          </span>
-          {itemArr}
-        </SubMenu>
-      )
+      return null
     },
+
+    renderSubMenu (menu) {
+      if(!menu.meta.hidden) {
+        const itemArr = []
+        if (!menu.hideChildrenInMenu) {
+          menu.children.forEach(item => {
+            if(!menu.meta.hidden) {
+              itemArr.push(this.renderItem(item))
+            }
+          })
+        }
+        return (
+          <SubMenu {...{ key: menu.path }}>
+            <span slot="title">
+              {this.renderIcon(menu.meta.icon)}
+              <span>{menu.name}</span>
+            </span>
+            {itemArr}
+          </SubMenu>
+        )
+      }
+      return null
+    },
+
     renderIcon (icon) {
       if (icon === 'none' || icon === undefined) {
         return null

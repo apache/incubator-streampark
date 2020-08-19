@@ -171,12 +171,16 @@
             </a-icon>
           </a-popconfirm>
         </template>
+
         <a-icon type="eye"
                 v-show="record.state === 5"
                 theme="twoTone"
                 twoToneColor="#4a9ff5"
                 @click="handleView(record)" title="查看">
         </a-icon>
+
+      <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)" />
+
       </template>
 
     </a-table>
@@ -207,8 +211,8 @@
   </a-card>
 </template>
 <script>
-import RangeDate from '@/components/DateTime/RangeDate'
-import {list, remove, cancel, deploy, startUp, yarn} from '@/api/application'
+import RangeDate from '@comp/DateTime/RangeDate'
+import {list, remove, cancel, deploy, startUp, yarn} from '@api/application'
 
 export default {
   components: {RangeDate},
@@ -335,6 +339,10 @@ export default {
       })
     },
 
+    handleDetail () {
+      this.$router.push({'path': 'appdetail'})
+    },
+
     batchDelete() {
       this.$router.push({'path': 'addtest'})
 
@@ -438,7 +446,7 @@ export default {
     },
 
     addTask() {
-      this.$router.push({'path': 'addapp'})
+      this.$router.push({'path': '/flink/app/add'})
     },
 
     handleStartUp(app) {
