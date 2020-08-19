@@ -29,13 +29,13 @@
                   type="primary"
                   shape="circle"
                   icon="search"
-                  @click="search">
+                  @click="handleSearch">
                 </a-button>
                 <a-button
                   type="primary"
                   shape="circle"
                   icon="rest"
-                  @click="reset">
+                  @click="handleReset">
                 </a-button>
                 <a-button
                   v-permit="'role:delete'"
@@ -340,40 +340,10 @@ export default {
     },
 
     handleDetail () {
-      this.$router.push({'path': 'appdetail'})
+      this.$router.push({'path': '/flink/app/detail'})
     },
 
-    batchDelete() {
-      this.$router.push({'path': 'addtest'})
-
-      if (!this.selectedRowKeys.length) {
-        this.$message.warning('请选择需要删除的记录')
-        return
-      }
-      const that = this
-      that.$confirm({
-        title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        onOk() {
-          remove({
-            name: that.selectedRowKeys.join(',')
-          }).then(() => {
-            that.$message.success('删除成功')
-            that.selectedRowKeys = []
-            that.fetch()
-          })
-        },
-        onCancel() {
-          that.selectedRowKeys = []
-          that.$message.info('已取消删除')
-        }
-      })
-    },
-
-    search() {
+    handleSearch() {
       const {sortedInfo} = this
       let sortField, sortOrder
       // 获取当前列的排序和列的过滤规则
@@ -388,7 +358,7 @@ export default {
       })
     },
 
-    reset() {
+    handleReset() {
       // 取消选中
       this.selectedRowKeys = []
       // 重置列排序规则
@@ -397,7 +367,7 @@ export default {
       this.queryParams = {}
       // 清空时间选择
       this.$refs.createTime.reset()
-      this.fetch()
+      this.handleFetch()
     },
 
     handleTableChange(pagination, filters, sorter) {
