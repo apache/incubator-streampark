@@ -85,6 +85,7 @@ public class UserManager {
     public ArrayList<VueRouter<Menu>> getUserRouters() {
 
         List<VueRouter<Menu>> routes = new ArrayList<>();
+        //只差type为菜单类型
         List<Menu> menus = this.menuService.findUserMenus(serverUtil.getUser().getUsername());
         menus.forEach(menu -> {
             VueRouter<Menu> route = new VueRouter<>();
@@ -93,12 +94,8 @@ public class UserManager {
             route.setPath(menu.getPath());
             route.setComponent(menu.getComponent());
             route.setName(menu.getMenuName());
-
-            Boolean show = null;
-            if (menu.getType().equals(Menu.TYPE_MENU)) {
-                show = !menu.getDisplay().equals(Menu.DISPLAY_SHOW);
-            }
-            route.setMeta(new RouterMeta(true, show, true, menu.getIcon()));
+            boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
+            route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
             routes.add(route);
         });
         return TreeUtil.buildVueRouter(routes);
