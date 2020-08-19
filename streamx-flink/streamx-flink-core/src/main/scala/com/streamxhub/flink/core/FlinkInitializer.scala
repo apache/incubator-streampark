@@ -270,13 +270,13 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //默认:模式为exactly_one，精准一次语义
     streamEnv.getCheckpointConfig.setCheckpointingMode(cpMode)
     //默认: 检查点之间的时间间隔为0s【checkpoint最小间隔】
-    //streamEnv.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
+    streamEnv.getCheckpointConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
     //默认:检查点必须在10分钟之内完成，或者被丢弃【checkpoint超时时间】
-    //streamEnv.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
+    streamEnv.getCheckpointConfig.setCheckpointTimeout(cpTimeout)
     //默认:同一时间只允许进行一次检查点
-    //streamEnv.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
+    streamEnv.getCheckpointConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
     //默认:被cancel会保留Checkpoint数据
-    //streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
+    streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
     val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND,null))
     //stateBackend

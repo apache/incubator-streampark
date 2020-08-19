@@ -47,10 +47,16 @@ public class JdbcQuery implements Serializable {
      * 采用fetch模式拉取,每次拉取的大小
      */
     private Integer fetchSize = 2000;
+
     private Integer size = 0;
+
     private String lastOffset;
 
     public JdbcQuery() {
+    }
+
+    public JdbcQuery(String sql) {
+
     }
 
     public JdbcQuery(String table, String field, String offset, String option) {
