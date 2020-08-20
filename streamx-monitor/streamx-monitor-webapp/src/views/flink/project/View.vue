@@ -150,7 +150,7 @@
             </div>
           </div>
 
-          <div slot="actions">
+          <div class="operation">
             <a-icon v-if="item.buildState === 0"
                     type="sync"
                     color="#4a9ff5"
@@ -164,25 +164,12 @@
               @confirm="handleBuild(item)">
               <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
             </a-popconfirm>
-          </div>
 
-          <div slot="actions">
-            <a-dropdown>
-              <a-menu slot="overlay">
-                <a-menu-item>
-                  <a-icon type="edit" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
-                </a-menu-item>
-
-                <a-menu-item>
-                  <a-icon type="delete" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
-                </a-menu-item>
-              </a-menu>
-              <a>更多
-                <a-icon type="down"/>
-              </a>
-            </a-dropdown>
+            <a-icon type="edit" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
+            <a-icon type="delete" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
           </div>
         </a-list-item>
+
       </a-list>
     </a-card>
 
@@ -347,75 +334,12 @@ export default {
     }
   },
   computed: {
-    columns() {
-      let {sortedInfo} = this
-      sortedInfo = sortedInfo || {}
-      return [
-      {
-        title: '项目名称',
-        dataIndex: 'name'
-      },
-      {
-        title: 'Repository',
-        dataIndex: 'repository',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case 1:
-              return <a-icon type = "github"></a-icon>
-            case 2:
-              return <a-icon type = "medium"></a-icon>
-            default:
-              return text
-          }
-        },
-      },
-      {
-        title: 'Repository URL',
-        dataIndex: 'url',
-        customRender: (text, row, index) => {
-          return <div>
-            <a-popover arrow-point-at-center trigger = "hover" >
-              <template slot = "content">
-                {{ text }}
-              </template>
-            <a-button style = "border:unset;height:20px;background:unset;" >
-              <ellipsis length = "50" >
-                {{ text }}
-              </ellipsis>
-            </a-button>
-            </a-popover>
-          </div>
-        },
-      },
-      {
-        title: 'Branches',
-        dataIndex: 'branches',
-        customRender: (text, row, index) => {
-          switch (text) {
-            case 'master':
-              return <a-tag color = "red"> {{text}} </a-tag>
-            default:
-              return <a-tag color = "green"> {{text}} </a-tag>
-          }
-        }
-      },
-      {
-        title: 'Last Build',
-        dataIndex: 'lastBuild'
-      },
-      {
-        title: '操作',
-        dataIndex: 'operation',
-        scopedSlots: {customRender: 'operation'},
-        fixed: 'right',
-        width: 120
-      }]
-    }
+
   },
 
   mounted() {
-    this.fetch(this.queryParams, true)
-    const timer = window.setInterval(() => this.fetch(this.queryParams, false), 1000)
+    this.handleFetch(this.queryParams, true)
+    const timer = window.setInterval(() => this.handleFetch(this.queryParams, false), 1000)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer);
     })
@@ -429,7 +353,7 @@ export default {
 
     handleSearch(value) {
       this.paginationInfo = null
-      this.fetch({
+      this.handleFetch({
         name: value,
         ...this.queryParams
       }, true)
@@ -502,17 +426,17 @@ export default {
     reset() {
       // 重置查询参数
       this.queryParams = {}
-      this.fetch({}, true)
+      this.handleFetch({}, true)
     },
 
     handleQuery(state) {
       this.queryParams.buildState = state
-      this.fetch({
+      this.handleFetch({
         ...this.queryParams
       },true)
     },
 
-    fetch(params, loading) {
+    handleFetch(params, loading) {
       if (loading) {
         this.loading = true
       }
@@ -583,6 +507,11 @@ export default {
   border-radius: 2px;
   transition: all 0.3s;
 }
+
+.operation {
+  width: 80px;
+}
+
 
 </style>
 
