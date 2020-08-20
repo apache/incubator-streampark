@@ -193,7 +193,6 @@
       <div id="terminal" ref="terminal" class="terminal"></div>
     </a-modal>
   </div>
-
 </template>
 <script>
 import RangeDate from '@comp/DateTime/RangeDate'
