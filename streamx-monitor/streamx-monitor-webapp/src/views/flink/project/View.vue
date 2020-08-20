@@ -113,7 +113,10 @@
         <a-list-item :key="index" v-for="(item, index) in dataSource">
           <a-list-item-meta>
             <icon-font slot="avatar" class="icon-font" type="icon-flink"></icon-font>
-            <a slot="title">{{ item.name }}</a>
+            <a slot="title">
+              {{ item.name }}
+              <a-badge status="processing" title="installing" v-if="item.buildState === 0"/>
+            </a>
             <a-popover arrow-point-at-center trigger="hover" slot="description">
               <template slot="content">
                 {{ item.url }}
@@ -153,7 +156,7 @@
           <div class="operation">
             <a-icon v-if="item.buildState === 0"
                     type="sync"
-                    color="#4a9ff5"
+                    style="color:#4a9ff5"
                     spin
                     @click="handleSeeLog(item)"/>
             <a-popconfirm
