@@ -497,7 +497,6 @@ export default {
               }
             }
           }
-
           create({
             projectId: values.projectId,
             module: values.module,
@@ -525,7 +524,8 @@ export default {
   }
 }
 </script>
-<style>
+
+<style scoped>
 .ant-list-item-meta-description {
   margin-left: 20px;
 }
