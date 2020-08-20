@@ -30,7 +30,7 @@ import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
+  private[streamxhub] def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.foreach { case (k, v) => prop.put(addfix + k, v) }
