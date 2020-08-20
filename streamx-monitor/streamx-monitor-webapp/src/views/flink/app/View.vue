@@ -179,7 +179,7 @@
                 @click="handleView(record)" title="查看">
         </a-icon>
 
-      <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)" />
+        <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)" />
 
       </template>
 
