@@ -151,7 +151,11 @@
           </div>
 
           <div slot="actions">
-            <a-icon v-if="item.buildState === 0" type="sync" spin @click="handleSeeLog(item)"/>
+            <a-icon v-if="item.buildState === 0"
+                    type="sync"
+                    color="#4a9ff5"
+                    spin
+                    @click="handleSeeLog(item)"/>
             <a-popconfirm
               v-else
               title="确定要编译该项目吗?"
