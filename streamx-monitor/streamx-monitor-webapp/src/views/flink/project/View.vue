@@ -158,15 +158,20 @@
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleBuild(item)">
-              <a-icon type="thunderbolt"></a-icon>
+              <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
             </a-popconfirm>
           </div>
 
           <div slot="actions">
             <a-dropdown>
               <a-menu slot="overlay">
-                <a-menu-item><a>编辑项目</a></a-menu-item>
-                <a-menu-item><a>删除项目</a></a-menu-item>
+                <a-menu-item>
+                  <a-icon type="edit" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
+                </a-menu-item>
+
+                <a-menu-item>
+                  <a-icon type="delete" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
+                </a-menu-item>
               </a-menu>
               <a>更多
                 <a-icon type="down"/>
