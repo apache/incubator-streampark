@@ -29,7 +29,7 @@ object JdbcSinkApp extends FlinkStreaming {
      * 1)正确情况: 当从kafka中读取的内容全部是数字时会插入成功,kafka的消费的offset也会更新.
      * 2)异常情况: 当从kafka中读取的内容非数字会导致插入失败,kafka的消费的offset会回滚
      */
-    JdbcSink(context, parallelism = 3).towPCSink[String](source)(x => {
+    JdbcSink(context, parallelism = 5).towPCSink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
 
