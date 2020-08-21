@@ -84,7 +84,10 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
     val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
     val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
-    afterSink(sink, parallelism, name, uid)
+    if (parallelism > 1) {
+      logWarn(s"[StreamX] parallelism:$parallelism, MySQL towPCSink parallelism bust be 1.")
+    }
+    afterSink(sink, 1, name, uid)
   }
 
 }
