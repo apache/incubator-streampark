@@ -257,7 +257,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
       logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
-      buffer += (transaction.transactionId -> transaction)
+      buffer += transaction.transactionId -> transaction
     }
   }
 
@@ -289,9 +289,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
           statement.clearBatch()
         } else {
           //单条记录插入...
-          transaction.sql.foreach(sql => {
-            statement.executeUpdate(sql)
-          })
+          transaction.sql.foreach(statement.executeUpdate)
         }
         connection.commit()
         //成功,清除state...
@@ -301,7 +299,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
           logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
           throw e
         case t: Throwable =>
-          logError(s"[StreamX] Jdbc2PCSink commit Exception:${t.getMessage}")
+          logError(s"[StreamX] Jdbc2PCSink commit Throwable:${t.getMessage}")
           throw t
       } finally {
         JdbcUtils.close(statement, connection)
