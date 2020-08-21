@@ -296,7 +296,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.Scala, jdbc: Properties)
         }
         connection.commit()
         //成功,清除state...
-        abort(transaction)
+        buffer -= transaction.transactionId
       } catch {
         case e: SQLException =>
           logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
