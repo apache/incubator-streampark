@@ -20,18 +20,20 @@
  */
 package com.streamxhub.flink.core.sink
 
+import java.util.Optional
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.{ConfigUtils, Logger}
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer
+import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaProducer011 => FlinkKafkaProducer}
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
 
 import scala.annotation.meta.param
@@ -103,8 +105,15 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
         case Some("NONE") => Semantic.NONE
         case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,muse be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
       }
-      new FlinkKafkaProducer[T](topicId, serializationSchema, prop, partitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
+      val serialization = new KeyedSerializationSchemaWrapper[T](serializationSchema)
+
+      val optPartitioner = partitioner match {
+        case null => Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]]
+        case part => Optional.of(part)
+      }
+      new FlinkKafkaProducer[T](topicId, serialization, prop, optPartitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
     }
+
 
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;

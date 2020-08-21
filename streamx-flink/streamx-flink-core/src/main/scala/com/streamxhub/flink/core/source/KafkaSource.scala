@@ -27,7 +27,7 @@ import java.util.regex.Pattern
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
 import org.apache.flink.streaming.api.scala.{DataStream, _}
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer011 => FlinkKafkaConsumer, KafkaDeserializationSchema}
 import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.TypeInformation
