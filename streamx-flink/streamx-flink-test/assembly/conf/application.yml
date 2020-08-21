@@ -19,7 +19,7 @@ flink:
   parallelism: 1
   checkpoints:
     enable: true
-    interval: 20
+    interval: 5000
     mode: EXACTLY_ONCE
 
 # 重启策略
@@ -48,8 +48,7 @@ mysql:
   driverClassName: com.mysql.jdbc.Driver
   jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true
   username: root
-  password: 123456
-
+  password: 123322242
 
 influx:
   mydb:
@@ -125,9 +124,9 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_06
+  group.id: flink_01
   auto.offset.reset: earliest
-  enable.auto.commit: true
+  #enable.auto.commit: true
   #start.from:
     #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
     #offset: # 给每个topic的partition指定offset

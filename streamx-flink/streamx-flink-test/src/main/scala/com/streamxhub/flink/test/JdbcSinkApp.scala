@@ -15,12 +15,13 @@ object JdbcSinkApp extends FlinkStreaming {
     /**
      * 从kafka里读数据.这里的数据是数字或者字母,每次读取1条
      */
-    val source = new KafkaSource(context).getDataStream[String]()
+    val source = KafkaSource(context).getDataStream[String]()
       .uid("kfkSource1")
       .name("kfkSource1")
       .map(x => {
         x.value
       })
+
 
     /**
      * 假设这里有一个orders表.有两个字段,一个是id,一个是timestamp,id的类型可以是int
