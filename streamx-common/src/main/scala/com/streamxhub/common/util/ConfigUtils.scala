@@ -30,7 +30,7 @@ import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  private[streamxhub] def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
+  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.foreach { case (k, v) => prop.put(addfix + k, v) }
@@ -50,12 +50,12 @@ object ConfigUtils {
       val _topic = topic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
-          if (top == null || top.split("\\,|\\s+").length > 1) {
+          if (top == null || top.split(",|\\s+").length > 1) {
             throw new IllegalArgumentException(s"Can't find a unique topic!!!,you must be input a topic")
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split("\\,|\\s+").toSet.contains(_topic))
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic))
       if (hasTopic) {
         throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
@@ -90,7 +90,7 @@ object ConfigUtils {
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must be not null")
-      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException(s"Jdbc instance:${prefix} error, [user|password] must be all null,or all not null ")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: SMap[String, String] = filterParam(parameter, fix)
