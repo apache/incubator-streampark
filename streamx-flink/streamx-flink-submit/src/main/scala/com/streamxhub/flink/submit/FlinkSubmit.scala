@@ -53,22 +53,21 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def submit(nameService: String,
-             flinkUserJar: String,
-             yarnName: String,
-             appConf: String,
-             overrideOption: Array[String],
-             args: String): ApplicationId = {
+  def submit(submitInfo: SubmitInfo): ApplicationId = {
+    logInfo(
+     s"""
+        |"[StreamX] flink submit," +
+        |       "deployMode: ${submitInfo.deployMode},"
+        |      "nameService: ${submitInfo.nameService},"
+        |      "yarnName: ${submitInfo.yarnName},"
+        |      "appConf: ${submitInfo.appConf},"
+        |      "userJar: ${submitInfo.flinkUserJar},"
+        |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+        |      "args: ${submitInfo.args}"
+        |""".stripMargin)
 
-    logInfo(s"[StreamX] flink submit,nameService $nameService," +
-      s"yarnName $yarnName," +
-      s"appConf $appConf," +
-      s"userJar $flinkUserJar," +
-      s"overrideOption ${overrideOption.mkString(" ")}," +
-      s"args $args")
-
-    val map = if (appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(appConf)) else PropertiesUtils.fromYamlFile(appConf)
-    val appName = if (yarnName == null) map(KEY_FLINK_APP_NAME) else yarnName
+    val map = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
+    val appName = if (submitInfo.yarnName == null) map(KEY_FLINK_APP_NAME) else submitInfo.yarnName
     val appMain = map(KEY_FLINK_APP_MAIN)
 
     /**
@@ -83,7 +82,7 @@ object FlinkSubmit extends Logger {
 
     val flinkHdfsHome = s"$APP_FLINK/$flinkName"
 
-    val flinkHdfsHomeWithNameService = s"hdfs://$nameService$flinkHdfsHome"
+    val flinkHdfsHomeWithNameService = s"hdfs://${submitInfo.nameService}$flinkHdfsHome"
 
     logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsHome")
 
@@ -107,14 +106,14 @@ object FlinkSubmit extends Logger {
 
     val appArgs = {
       val array = new ArrayBuffer[String]
-      Try(args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
+      Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
       array += KEY_FLINK_APP_CONF("--")
-      array += appConf
+      array += submitInfo.appConf
       array += KEY_FLINK_HOME("--")
       array += flinkHdfsHomeWithNameService
       array.toList.asJava
     }
-    
+
     //获取flink的配置
     val flinkConfiguration = GlobalConfiguration
       //从flink-conf.yaml中加载默认配置文件...
@@ -126,9 +125,9 @@ object FlinkSubmit extends Logger {
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
-      .set(PipelineOptions.JARS, Collections.singletonList(flinkUserJar))
-      //设置为application模式
-      .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+      .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
+      //设置为部署模式
+      .set(DeploymentOptions.TARGET, submitInfo.deployMode.getName)
       //yarn application name
       .set(YarnConfigOptions.APPLICATION_NAME, appName)
       //yarn application Type
@@ -177,7 +176,7 @@ object FlinkSubmit extends Logger {
         })
 
         //页面定义的参数优先级大于app配置文件
-        overrideOption.foreach(x => array += x)
+        submitInfo.overrideOption.foreach(x => array += x)
 
         array.toArray
       }
@@ -195,7 +194,7 @@ object FlinkSubmit extends Logger {
     }
 
     val activeCommandLine = validateAndGetActiveCommandLine()
-    val uri = PackagedProgramUtils.resolveURI(flinkUserJar)
+    val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
