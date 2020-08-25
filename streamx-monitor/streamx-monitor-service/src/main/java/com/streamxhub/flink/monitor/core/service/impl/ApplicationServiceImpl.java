@@ -212,7 +212,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String[] overrideOption = application.getShortOptions().split("\\s+");
 
         SubmitInfo submitInfo = new SubmitInfo(
-                YarnDeploymentTarget.valueOf(application.getDeployMode()),
+                YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
                 properties.getNameService(),
                 flinkUserJar,
                 application.getAppName(),
