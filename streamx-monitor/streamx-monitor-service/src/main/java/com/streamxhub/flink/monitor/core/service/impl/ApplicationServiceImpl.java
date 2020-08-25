@@ -45,8 +45,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.flink.monitor.core.enums.FlinkAppState;
 import com.streamxhub.flink.monitor.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
+import com.streamxhub.flink.submit.SubmitInfo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -208,7 +210,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
-        ApplicationId appId = FlinkSubmit.submit(
+
+        SubmitInfo submitInfo = new SubmitInfo(
+                YarnDeploymentTarget.APPLICATION,
                 properties.getNameService(),
                 flinkUserJar,
                 application.getAppName(),
@@ -216,6 +220,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 overrideOption,
                 application.getArgs()
         );
+        ApplicationId appId = FlinkSubmit.submit(submitInfo);
         application.setAppId(appId.toString());
         /**
          * 一定要在flink job提交完毕才置状态...
