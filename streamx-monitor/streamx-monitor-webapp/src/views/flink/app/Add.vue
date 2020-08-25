@@ -388,8 +388,9 @@ export default {
       options: configOptions,
       mode: 'yarn',
       deploymentModes: [
-        {id: 'yarn', name: 'PreJob Cluster', default: true},
-        {id: 'session', name: 'Session Cluster', default: false}
+        {id: 'yarn-application', name: 'Application Mode', default: true},
+        {id: 'yarn-per-job', name: 'Pre-Job', default: false},
+        {id: 'yarn-session', name: 'Session', default: false}
       ]
     }
   },
@@ -500,6 +501,7 @@ export default {
           create({
             projectId: values.projectId,
             module: values.module,
+            deployMode: values.mode,
             config: values.config,
             appName: values.appName,
             args: values.args,
