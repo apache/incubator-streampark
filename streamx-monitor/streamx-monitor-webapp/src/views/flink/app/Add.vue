@@ -389,7 +389,7 @@ export default {
       mode: 'yarn',
       deploymentModes: [
         {id: 'APPLICATION', name: 'Application Mode', default: true},
-        {id: 'PER-JOB', name: 'Per-Job', default: false},
+        {id: 'PER_JOB', name: 'Per-Job', default: false},
         {id: 'SESSION', name: 'Session', default: false}
       ]
     }
