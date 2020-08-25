@@ -5,6 +5,7 @@
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="PROJECT_ID" jdbcType="BIGINT" property="projectId"/>
         <result column="MODULE" jdbcType="VARCHAR" property="module"/>
+        <result column="DEPLOY_MODE" jdbcType="INTEGER" property="deployMode"/>
         <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
