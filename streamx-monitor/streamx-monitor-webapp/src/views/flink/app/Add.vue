@@ -388,9 +388,9 @@ export default {
       options: configOptions,
       mode: 'yarn',
       deploymentModes: [
-        {id: 'yarn-application', name: 'Application Mode', default: true},
-        {id: 'yarn-per-job', name: 'Pre-Job', default: false},
-        {id: 'yarn-session', name: 'Session', default: false}
+        {id: 'APPLICATION', name: 'Application Mode', default: true},
+        {id: 'PER-JOB', name: 'Pre-Job', default: false},
+        {id: 'SESSION', name: 'Session', default: false}
       ]
     }
   },
