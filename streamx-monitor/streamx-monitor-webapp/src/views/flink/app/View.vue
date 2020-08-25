@@ -70,6 +70,12 @@
         </span>
       </template>
 
+      <template slot="deployMode" slot-scope="mode">
+        <a-tag color="blue" v-if="mode === 'yarn-per-job'">Per-Job</a-tag>
+        <a-tag color="cyan" v-if="mode === 'yarn-session'">Session</a-tag>
+        <a-tag color="green" v-if="mode === 'yarn-application'">Application</a-tag>
+      </template>
+
       <template slot="state" slot-scope="state">
         <!--
           CREATED(0),
@@ -253,6 +259,11 @@ export default {
         dataIndex: 'projectName',
         width: 200
       }, {
+        title: '部署方式',
+        dataIndex: 'deployMode',
+        width: 100,
+        scopedSlots: {customRender: 'deployMode'},
+      }, {
         title: '开始时间',
         dataIndex: 'startTime',
         sorter: true,
@@ -264,10 +275,6 @@ export default {
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
         width: 180
-      }, {
-        title: '应用ID',
-        dataIndex: 'appId',
-        width: 280
       }, {
         title: '状态',
         dataIndex: 'state',
