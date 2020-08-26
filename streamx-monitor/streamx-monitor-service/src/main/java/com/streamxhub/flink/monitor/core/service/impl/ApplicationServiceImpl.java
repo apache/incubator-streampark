@@ -130,12 +130,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         app.setConfig(app.getConfig().replace(app.getAppBase().getAbsolutePath() + "/".concat(app.getModule()).concat("/"), ""));
         boolean saved = save(app);
         if (saved) {
-            try {
-                deploy(app, false);
-                return true;
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    deploy(app, false);
+                    return true;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         return false;
     }
