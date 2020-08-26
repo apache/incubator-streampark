@@ -26,7 +26,7 @@
           showSearch
           optionFilterProp="children"
           :filterOption="filterOption"
-          placeholder="请选择部署模式"
+          placeholder="请选择应用"
           @change="handleApp"
           v-decorator="[ 'module', {rules: [{ required: true, message: '请选择应用'}]} ]">
           <a-select-option v-for="p in appList" :key="p.name" :value="p.path">{{ p.name }}</a-select-option>
@@ -52,7 +52,8 @@
         label="作业名称"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input type="text" placeholder="请输入任务名称"
+        <a-input type="text"
+                 placeholder="请输入任务名称"
                  v-decorator="['appName',{ rules: [{ validator: handleCheckAppName,trigger:'submit' } ]}]"/>
       </a-form-item>
 
@@ -156,7 +157,7 @@
       <a-form-item
         :wrapperCol="{ span: 24 }"
         style="text-align: center">
-        <a-button html-type="submit" type="primary">提交</a-button>
+        <a-button htmlType="submit" type="primary">提交</a-button>
         <a-button style="margin-left: 8px">保存</a-button>
       </a-form-item>
 
@@ -401,9 +402,9 @@ export default {
       options: configOptions,
       mode: 'yarn',
       deploymentModes: [
-        {id: 'APPLICATION', name: 'Application Mode', default: true},
-        {id: 'PER_JOB', name: 'Per-Job', default: false},
-        {id: 'SESSION', name: 'Session', default: false}
+        {id: 'APPLICATION', name: 'Application Mode', group: 'yarn', default: true},
+        {id: 'PER_JOB', name: 'Per-Job', group: 'yarn',default: false},
+        {id: 'SESSION', name: 'Session', group: 'session',default: false}
       ]
     }
   },
@@ -517,7 +518,7 @@ export default {
           create({
             projectId: values.projectId,
             module: values.module,
-            //deployMode: values.mode,
+            deployMode: values.mode,
             config: values.config,
             appName: values.appName,
             args: values.args,
