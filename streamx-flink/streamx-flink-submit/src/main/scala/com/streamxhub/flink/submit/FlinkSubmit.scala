@@ -127,7 +127,7 @@ object FlinkSubmit extends Logger {
       //设置用户的jar
       .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
       //设置为部署模式
-      .set(DeploymentOptions.TARGET, submitInfo.deployMode.getName)
+      .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
       //yarn application name
       .set(YarnConfigOptions.APPLICATION_NAME, appName)
       //yarn application Type
