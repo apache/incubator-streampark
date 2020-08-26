@@ -175,7 +175,7 @@ const configOptions = [
     name: 'container',
     placeholder: '-n,--container <arg>',
     description: 'TaskManager分配个数',
-    group: 'session',
+    group: 'SESSION',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -191,7 +191,7 @@ const configOptions = [
     name: 'detached',
     placeholder: '-d,--detached',
     description: '以独立模式运行',
-    group: 'session',
+    group: 'SESSION',
     type: 'switch',
     value: false,
     validator: (rule, value, callback) => {
@@ -203,7 +203,7 @@ const configOptions = [
     name: 'jobManagerMemory',
     placeholder: '-jm,--jobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
-    group: 'session',
+    group: 'SESSION',
     type: 'number',
     min: 512,
     value: '',
@@ -222,7 +222,7 @@ const configOptions = [
     name: 'jobmanager',
     placeholder: '-m,--jobmanager <arg>',
     description: 'JobManager 地址(yarn-cluster)',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -238,7 +238,7 @@ const configOptions = [
     name: 'detached',
     placeholder: '-d,--detached',
     description: '以独立模式运行',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'switch',
     value: false,
     validator: (rule, value, callback) => {
@@ -250,7 +250,7 @@ const configOptions = [
     name: 'yarnjobManagerMemory',
     placeholder: '-yjm,--yarnjobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'number',
     min: 512,
     value: '',
@@ -267,7 +267,7 @@ const configOptions = [
     name: 'yarntaskManagerMemory',
     placeholder: '-ytm,--yarntaskManagerMemory <arg>',
     description: 'TaskManager内存大小 (单位: MB)',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'number',
     min: 512,
     value: '',
@@ -284,7 +284,7 @@ const configOptions = [
     name: 'yarnslots',
     placeholder: '-ys,--yarnslots <arg> ',
     description: '每个TaskManager可分配的slot数量',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'number',
     min: 1,
     value: '',
@@ -300,7 +300,7 @@ const configOptions = [
     key: '-yat',
     name: 'yarnapplicationType',
     placeholder: '-yat,--yarnapplicationType <arg>',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -311,7 +311,7 @@ const configOptions = [
     key: '-yqu',
     name: 'yarnqueue',
     placeholder: '-yqu,--yarnqueue <arg> ',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'input',
     description: '指定应用的运行队列(on YARN)',
     value: '',
@@ -328,7 +328,7 @@ const configOptions = [
     name: 'yarnzookeeperNamespace',
     placeholder: '-yz,--yarnzookeeperNamespace <arg>',
     description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -340,7 +340,7 @@ const configOptions = [
     name: 'yarnnodeLabel',
     placeholder: '-ynl,--yarnnodeLabel <arg>',
     description: 'Specify YARN node label for the YARN application',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
@@ -352,7 +352,7 @@ const configOptions = [
     name: 'shutdownOnAttachedExit',
     placeholder: '-sae,--shutdownOnAttachedExit',
     description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'switch',
     value: '',
     validator: (rule, value, callback) => {
@@ -365,7 +365,7 @@ const configOptions = [
     name: 'yarnquery',
     placeholder: '-yq,--yarnquery',
     description: '显示YARN上可用的资源(memory, cores)',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'switch',
     value: '',
     validator: (rule, value, callback) => {
@@ -377,7 +377,7 @@ const configOptions = [
     name: 'yarnhelp',
     placeholder: '-yh,--yarnhelp',
     description: 'YRAN Session帮助信息',
-    group: 'yarn',
+    group: 'PER_JOB',
     type: 'switch',
     value: '',
     validator: (rule, value, callback) => {
@@ -400,11 +400,11 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
-      mode: 'yarn',
+      mode: 'PER_JOB',
       deploymentModes: [
-        {id: 'APPLICATION', name: 'Application Mode', group: 'yarn', default: true},
-        {id: 'PER_JOB', name: 'Per-Job', group: 'yarn',default: false},
-        {id: 'SESSION', name: 'Session', group: 'session',default: false}
+        {id: 'APPLICATION', name: 'Application Mode', default: true},
+        {id: 'PER_JOB', name: 'Per-Job', default: false},
+        {id: 'SESSION', name: 'Session', default: false}
       ]
     }
   },
