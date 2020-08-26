@@ -69,7 +69,7 @@ public class ApplicationController extends BaseController {
     @RequestMapping("exists")
     public RestResponse exists(Application app) {
         AppExistsState exists = applicationService.checkExists(app);
-        return RestResponse.create().data(exists);
+        return RestResponse.create().data(exists.get());
     }
 
     @RequestMapping("cancel")

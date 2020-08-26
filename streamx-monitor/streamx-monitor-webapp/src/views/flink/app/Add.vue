@@ -1,7 +1,6 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
     <a-form @submit="handleSubmit" :form="form">
-
       <a-form-item
         label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -479,9 +478,7 @@ export default {
       if (!value) {
         callback(new Error('应用名称不能为空'))
       } else {
-        exists({
-          appName: values.appName
-        }).then((resp) => {
+        exists({ appName: value.appName }).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
@@ -540,6 +537,7 @@ export default {
         }
       })
     }
+
   }
 }
 </script>
