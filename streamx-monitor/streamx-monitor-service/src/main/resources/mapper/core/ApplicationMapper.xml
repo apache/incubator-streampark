@@ -50,7 +50,7 @@
     <update id="updateDeploy" parameterType="application">
         update t_flink_app
         set deploy=#{application.deploy}
-        where project_id=#{application.projectId}
+        where id=#{application.id}
     </update>
 
     <update id="updateState" parameterType="application">
