@@ -496,7 +496,7 @@ export default {
 
     // handler
     handleSubmit: function (e) {
-      //e.preventDefault()
+      e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
