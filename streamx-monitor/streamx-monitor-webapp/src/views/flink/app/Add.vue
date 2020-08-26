@@ -448,6 +448,7 @@ export default {
         this.$message.error(error.message)
       })
     },
+
     handleApp(app) {
       listConf({
         path: app
