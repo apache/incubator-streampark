@@ -23,4 +23,7 @@ public enum AppExistsState {
         this.value = value;
     }
 
+    public int get() {
+        return this.value;
+    }
 }
