@@ -34,4 +34,7 @@ public interface ProjectMapper extends BaseMapper<Project> {
     void successBuild(@Param("project") Project project);
 
     void startBuild(@Param("project") Project project);
+
+    void deploy(@Param("id") Long id);
+
 }
