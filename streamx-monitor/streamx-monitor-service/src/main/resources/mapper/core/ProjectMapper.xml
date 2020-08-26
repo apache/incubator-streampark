@@ -28,6 +28,12 @@
         </where>
     </select>
 
+    <update id="deploy" parameterType="java.lang.Long">
+        update t_flink_app
+        set deploy=1
+        where project_id=#{id}
+    </update>
+
     <update id="successBuild" parameterType="project">
         update t_flink_project
         set lastBuild = now(),BUILDSTATE=1

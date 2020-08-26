@@ -117,10 +117,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //发布到apps下
                     ProjectServiceImpl.this.deploy(project);
                     //更新application的发布状态.
-                    Application application = new Application();
-                    application.setProjectId(project.getId());
-                    application.setDeploy(1);
-                    applicationService.updateDeploy(application);
+                    this.baseMapper.deploy(project.getId());
                 } else {
                     ProjectServiceImpl.this.baseMapper.failureBuild(project);
                 }

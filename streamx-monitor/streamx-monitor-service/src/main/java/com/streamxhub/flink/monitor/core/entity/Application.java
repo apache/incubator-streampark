@@ -34,6 +34,7 @@ import com.streamxhub.flink.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.flink.monitor.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
+
 import java.io.*;
 import java.util.Date;
 
@@ -72,15 +73,15 @@ public class Application implements Serializable {
     private String shortOptions;
     private String deployMode;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date startTime;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date endTime;
 
     private String description;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss",timezone="GMT+8")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     private transient String userName;
     private transient String projectName;
