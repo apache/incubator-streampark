@@ -1,6 +1,7 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
     <a-form @submit="handleSubmit" :form="form">
+
       <a-form-item
         label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -15,6 +16,7 @@
           <a-select-option v-for="p in project" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
         </a-select>
       </a-form-item>
+
       <a-form-item
         label="Application"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -30,6 +32,7 @@
           <a-select-option v-for="p in appList" :key="p.name" :value="p.path">{{ p.name }}</a-select-option>
         </a-select>
       </a-form-item>
+
       <a-form-item
         label="配置文件"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -44,6 +47,7 @@
           >
         </a-tree-select>
       </a-form-item>
+
       <a-form-item
         label="作业名称"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -51,6 +55,7 @@
         <a-input type="text" placeholder="请输入任务名称"
                  v-decorator="['appName',{ rules: [{ validator: handleCheckAppName,trigger:'submit' } ]}]"/>
       </a-form-item>
+
       <a-form-item
         label="部署模式"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -151,12 +156,11 @@
       <a-form-item
         :wrapperCol="{ span: 24 }"
         style="text-align: center">
-        <a-button htmlType="submit" type="primary">提交</a-button>
+        <a-button html-type="submit" type="primary">提交</a-button>
         <a-button style="margin-left: 8px">保存</a-button>
       </a-form-item>
 
     </a-form>
-
   </a-card>
 </template>
 
