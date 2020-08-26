@@ -78,7 +78,11 @@
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
-          <a-select-option v-for="(conf,index) in options" v-if="conf.group === mode" :key="index" :value="conf.name">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === mode"
+            :key="index"
+            :value="conf.name">
             {{ conf.key }} ( {{ conf.name }} )
           </a-select-option>
         </a-select>
@@ -92,16 +96,21 @@
         :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input v-if="conf.type === 'input'" type="text" :placeholder="conf.placeholder"
-                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-input v-if="conf.type === 'input'"
+                 type="text"
+                 :placeholder="conf.placeholder"
+                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"
+        />
         <a-switch
           v-if="conf.type === 'switch'"
           @change="(x) => handleSwitch(x,conf)"
           checkedChildren="开"
           unCheckedChildren="关"
           v-decorator="[`${conf.name}`]"/>
-        <a-input-number v-if="conf.type === 'number'" :min="conf.min"
-                        v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-input-number v-if="conf.type === 'number'"
+                        :min="conf.min"
+                        v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"
+        />
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -432,6 +441,7 @@ export default {
       v[conf.name] = bool
       this.form.setFieldsValue(v)
     },
+
     handleMode(selectMode) {
       if (this.mode !== selectMode) {
         this.configItems = []
@@ -439,6 +449,7 @@ export default {
       }
       this.mode = selectMode
     },
+
     handleAppName(confFile) {
       name({
         config: confFile
@@ -502,7 +513,7 @@ export default {
           create({
             projectId: values.projectId,
             module: values.module,
-            deployMode: values.mode,
+            //deployMode: values.mode,
             config: values.config,
             appName: values.appName,
             args: values.args,
