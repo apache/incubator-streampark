@@ -28,7 +28,6 @@ import com.streamxhub.flink.monitor.base.domain.RestResponse;
 import com.streamxhub.flink.monitor.base.utils.GZipUtil;
 import com.streamxhub.flink.monitor.base.utils.SortUtil;
 import com.streamxhub.flink.monitor.core.dao.ProjectMapper;
-import com.streamxhub.flink.monitor.core.entity.Application;
 import com.streamxhub.flink.monitor.core.entity.Project;
 import com.streamxhub.flink.monitor.core.service.ApplicationService;
 import com.streamxhub.flink.monitor.core.service.ProjectService;
