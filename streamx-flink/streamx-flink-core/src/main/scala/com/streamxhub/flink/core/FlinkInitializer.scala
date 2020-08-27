@@ -21,11 +21,10 @@
 package com.streamxhub.flink.core
 
 import java.io.File
-import java.util.Base64
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{DeflaterUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{HdfsUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
@@ -41,7 +40,6 @@ import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
 import org.apache.flink.api.scala.ExecutionEnvironment
 import com.streamxhub.flink.core.enums.RestartStrategy
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 
@@ -105,32 +103,33 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
 
-  def readFlinkConf(config: String): Map[String, String] = {
-    /**
-     * 避免在这里直接使用hdfs Api读取文件,防止引入的hdfs jar和用户程序里的jar冲突,应尽量减少对外部的依赖...
-     **/
-    lazy val encodeConf: String = DeflaterUtils.unzipString(config.drop(7))
-    config match {
-      case x: String if x.startsWith("prop://") =>
-        PropertiesUtils.fromPropertiesText(encodeConf)
-      case x: String if x.startsWith("yaml://") =>
-        PropertiesUtils.fromYamlText(encodeConf)
-      case _ =>
-        val configFile = new File(config)
-        require(configFile.exists(), s"[StreamX] Usage:flink.conf file $config is not found!!!")
-        val extension = config.split("\\.").last.toLowerCase
-        extension match {
-          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-          case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
-        }
+  def readFlinkConf(config: String): Map[String,String] = {
+    val extension = config.split("\\.").last.toLowerCase
+    if (config.startsWith("hdfs://")) {
+      /**
+       * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+       */
+      val text = HdfsUtils.read(config)
+      extension match {
+        case "properties" => PropertiesUtils.fromPropertiesText(text)
+        case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+      }
+    } else {
+      val configFile = new File(config)
+      require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
+      extension match {
+        case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+        case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+      }
     }
   }
 
   private[this] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_APP_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
+    val config = argsMap.get(KEY_FLINK_APP_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)
@@ -279,30 +278,29 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //默认:被cancel会保留Checkpoint数据
     streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
-    val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND, null))
+    val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND,null))
     //stateBackend
     if (stateBackend != null) {
       val cpDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * cpDir如果从配置文件中读取失败(key:state.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
-        parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR, null) match {
+        parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR,null) match {
           //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
             val flinkConf = {
-              parameter.get(KEY_FLINK_CONF(), null) match {
-                case text: String =>  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(text))
+              //从启动参数中读取配置文件...
+              val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
                 case null | "" =>
-                  //直接读取本地FLINK_HOME下的的配置文件.
-                  val flinkHome = {
-                    val flinkHome = System.getenv("FLINK_HOME")
-                    require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-                    flinkHome
-                  }
-                  val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-                  readFlinkConf(flinkConf)
+                  logInfo("[StreamX] --flink.home is undefined,now try found from flink-conf.yaml on System env.")
+                  val flinkHome = System.getenv("FLINK_HOME")
+                  require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
+                  flinkHome
+                case file => file
               }
+              val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+              readFlinkConf(flinkConf)
             }
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
             val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)
