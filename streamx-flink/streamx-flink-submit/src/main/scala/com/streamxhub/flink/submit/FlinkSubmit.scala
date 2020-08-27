@@ -108,7 +108,7 @@ object FlinkSubmit extends Logger {
 
     /**
      * 相关参数在这里从hdfs中读取出来,然后传入到FlinkStreaming中来启动,主要是避免@see{com.streamxhub.flink.core.FlinkInitializer}程序中解析参数而引入额外的hdfs相关的jar
-     * 可能会和用户导入的jar冲突,这里将对外部的依赖降到最低,避免带来不必须的麻烦...
+     * 可能会和用户导入的jar冲突,这里将对外部的依赖降到最低,避免带来不必要的麻烦,给用户使用框架的时候造成困扰...
      */
     val encodeConf = DeflaterUtils.zipString(HdfsUtils.read(submitInfo.appConf))
 
