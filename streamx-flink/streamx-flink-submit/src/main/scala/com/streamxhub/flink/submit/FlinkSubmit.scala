@@ -225,7 +225,6 @@ object FlinkSubmit extends Logger {
 
 
   /**
-   * just create from flink v1.11.1 source
    *
    * @param activeCustomCommandLine
    * @param commandLine
