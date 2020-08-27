@@ -22,7 +22,6 @@ package com.streamxhub.flink.submit
 
 import java.io.File
 import java.net.{MalformedURLException, URL}
-import java.util.Base64.getEncoder
 import java.util._
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -42,7 +41,6 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import com.streamxhub.common.util.DeflaterUtils
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -57,16 +55,16 @@ object FlinkSubmit extends Logger {
 
   def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
-      s"""
-         |"[StreamX] flink submit," +
-         |       "deployMode: ${submitInfo.deployMode},"
-         |      "nameService: ${submitInfo.nameService},"
-         |      "yarnName: ${submitInfo.yarnName},"
-         |      "appConf: ${submitInfo.appConf},"
-         |      "userJar: ${submitInfo.flinkUserJar},"
-         |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
-         |      "args: ${submitInfo.args}"
-         |""".stripMargin)
+     s"""
+        |"[StreamX] flink submit," +
+        |       "deployMode: ${submitInfo.deployMode},"
+        |      "nameService: ${submitInfo.nameService},"
+        |      "yarnName: ${submitInfo.yarnName},"
+        |      "appConf: ${submitInfo.appConf},"
+        |      "userJar: ${submitInfo.flinkUserJar},"
+        |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+        |      "args: ${submitInfo.args}"
+        |""".stripMargin)
 
     val map = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
     val appName = if (submitInfo.yarnName == null) map(KEY_FLINK_APP_NAME) else submitInfo.yarnName
@@ -106,32 +104,13 @@ object FlinkSubmit extends Logger {
 
     val flinkLocalConfDir = flinkLocalHome.concat("/conf")
 
-    /**
-     * 相关参数在这里从hdfs中读取出来,然后传入到FlinkStreaming中来启动,主要是避免@see{com.streamxhub.flink.core.FlinkInitializer}程序中解析参数而引入额外的hdfs相关的jar
-     * 可能会和用户导入的jar冲突,这里将对外部的依赖降到最低,避免带来不必要的麻烦,给用户使用框架的时候造成困扰...
-     */
-    val encodeConf = DeflaterUtils.zipString(HdfsUtils.read(submitInfo.appConf))
-
-    val userAppConf = submitInfo.appConf.split("\\.").last.toLowerCase match {
-      case "yaml" | "yml" => s"yaml://$encodeConf"
-      case "properties" => s"prop://$encodeConf"
-      case _ => null
-    }
-
-    val flinkConf = {
-      val yaml = s"$flinkHdfsHomeWithNameService/conf/flink-conf.yaml"
-      DeflaterUtils.zipString(HdfsUtils.read(yaml))
-    }
-
     val appArgs = {
       val array = new ArrayBuffer[String]
       Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
+      array += KEY_FLINK_APP_CONF("--")
+      array += submitInfo.appConf
       array += KEY_FLINK_HOME("--")
       array += flinkHdfsHomeWithNameService
-      array += KEY_APP_CONF("--")
-      array += userAppConf
-      array += KEY_FLINK_CONF("--")
-      array += flinkConf
       array.toList.asJava
     }
 
