@@ -114,9 +114,7 @@ object FlinkSubmit extends Logger {
       array.toList.asJava
     }
 
-    val classPath = HdfsUtils.list(submitInfo.classPath).map(x => {
-        s"${submitInfo.classPath}/${x}"
-      }).asJava.toList
+    val classPath = HdfsUtils.list(submitInfo.classPath).map(x => s"${submitInfo.classPath}/$x")
 
     logInfo(s"[StreamX] flinkSubmit, classpath:${classPath}")
 
@@ -129,7 +127,7 @@ object FlinkSubmit extends Logger {
       //设置yarn.provided.lib.dirs
       .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置classPath
-      .set(PipelineOptions.CLASSPATHS, classPath)
+      .set(PipelineOptions.CLASSPATHS, Arrays.asList(classPath: _*))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
