@@ -22,19 +22,17 @@ package com.streamxhub.common.util
 
 import java.io.ByteArrayOutputStream
 import java.util.Base64
+import java.util.zip.DataFormatException
+import java.util.zip.Deflater
+import java.util.zip.Inflater
 
 object DeflaterUtils {
-
-  import java.util.zip.DataFormatException
-  import java.util.zip.Deflater
-  import java.util.zip.Inflater
 
   /**
    * 压缩
    */
   def zipString(text: String): String = {
     /**
-     * https://www.yiibai.com/javazip/javazip_deflater.html#article-start
      * 0 ~ 9 压缩等级 低到高
      * public static final int BEST_COMPRESSION = 9;            最佳压缩的压缩级别。
      * public static final int BEST_SPEED = 1;                  压缩级别最快的压缩。
