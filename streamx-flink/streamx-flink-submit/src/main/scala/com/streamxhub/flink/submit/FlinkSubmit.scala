@@ -123,7 +123,7 @@ object FlinkSubmit extends Logger {
       //设置yarn.provided.lib.dirs
       .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置classPath
-      .set(PipelineOptions.CLASSPATHS,submitInfo.classPath)
+      .set(PipelineOptions.CLASSPATHS,Arrays.asList(submitInfo.classPath))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
