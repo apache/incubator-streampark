@@ -195,13 +195,8 @@ object FlinkSubmit extends Logger {
     }
 
     val activeCommandLine = validateAndGetActiveCommandLine()
-
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
-    val jars = HdfsUtils.list(submitInfo.classPath).map(x => {
-      s"${submitInfo.classPath}/$x"
-    })
-    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, util.Arrays.asList(jars: _*))
-
+    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
