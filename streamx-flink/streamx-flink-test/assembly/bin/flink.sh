@@ -207,7 +207,7 @@ doStart() {
         flink run \
         $runOption \
         $jarfile \
-        --flink.conf $app_proper
+        --app.conf $app_proper
         echo "${app_name}" > "${APP_TEMP}/.running"
     else
         # shellcheck disable=SC2006
@@ -218,7 +218,7 @@ doStart() {
         flink run \
         $runOption \
         $jarfile \
-        --flink.conf $app_proper >> $app_out 2>&1 &
+        --app.conf $app_proper >> $app_out 2>&1 &
 
         echo "${app_name}" > "${APP_TEMP}/.running"
         echo_g "${app_name} starting,more detail please log:${app_out}"
