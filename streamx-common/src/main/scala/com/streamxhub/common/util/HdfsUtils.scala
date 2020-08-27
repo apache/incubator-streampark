@@ -20,6 +20,11 @@
  */
 package com.streamxhub.common.util
 
+import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.hdfs.HAUtil
+import java.io.IOException
+import java.net.InetSocketAddress
+
 import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 
 import org.apache.hadoop.conf.Configuration
@@ -37,7 +42,7 @@ object HdfsUtils {
   lazy val conf: Configuration = {
     val conf = new Configuration()
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
-    conf.set("fs.hdfs.impl.disable.cache","true")
+    conf.set("fs.hdfs.impl.disable.cache", "true")
     conf
   }
 
@@ -45,6 +50,15 @@ object HdfsUtils {
     case Success(fs) => fs
     case Failure(e) => new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
       null
+  }
+
+  @throws[Exception] def getNameNode: String = {
+    Try {
+      HAUtil.getAddressOfActive(hdfs).getHostString
+    } match {
+      case Success(value) => value
+      case Failure(exception) => throw exception
+    }
   }
 
   /**
@@ -63,7 +77,7 @@ object HdfsUtils {
     outputStream.close()
   }
 
-  def exists(path: String) =  hdfs.exists(getPath(path))
+  def exists(path: String) = hdfs.exists(getPath(path))
 
   @throws[IOException] def read(fileName: String): String = {
     val path: Path = getPath(fileName)
@@ -92,7 +106,7 @@ object HdfsUtils {
   @throws[IOException] def movie(fileName: String, hdfsPath: String): Unit = {
     val src: Path = getPath(fileName)
     val dst: Path = getPath(hdfsPath)
-    hdfs.rename(src,dst)
+    hdfs.rename(src, dst)
   }
 
   @throws[IOException] def mkdirs(fileName: String): Unit = {
