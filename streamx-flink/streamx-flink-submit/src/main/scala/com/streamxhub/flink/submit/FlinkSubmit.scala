@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import java.io.File
 import java.net.{MalformedURLException, URL}
+import java.util.Base64.getEncoder
 import java.util._
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -104,11 +105,19 @@ object FlinkSubmit extends Logger {
 
     val flinkLocalConfDir = flinkLocalHome.concat("/conf")
 
+    val encodeConf =  getEncoder.encodeToString(HdfsUtils.read(submitInfo.appConf).getBytes)
+
+    val userAppConf = submitInfo.appConf.split("\\.").last.toLowerCase match {
+      case "yaml"|"yml" => s"yaml://$encodeConf"
+      case "properties" => s"prop://$encodeConf"
+      case _ => null
+    }
+
     val appArgs = {
       val array = new ArrayBuffer[String]
       Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
       array += KEY_FLINK_APP_CONF("--")
-      array += submitInfo.appConf
+      array += userAppConf
       array += KEY_FLINK_HOME("--")
       array += flinkHdfsHomeWithNameService
       array.toList.asJava
