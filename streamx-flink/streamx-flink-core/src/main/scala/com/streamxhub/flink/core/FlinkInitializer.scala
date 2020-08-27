@@ -108,6 +108,11 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
 
+    /**
+     * 避免在这里直接使用hdfs Api读取文件,防止引入的hdfs jar和用户程序里的jar冲突,应尽量减少对外部的依赖...
+     * @param x
+     * @return
+     */
     def decode(x: String): String = {
       val text = x.drop(7)
       val byte = Base64.getDecoder decode text
