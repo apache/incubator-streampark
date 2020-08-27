@@ -41,6 +41,7 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.apache.hadoop.fs.FsUrlStreamHandlerFactory
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -195,6 +196,8 @@ object FlinkSubmit extends Logger {
 
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
+
+    URL.setURLStreamHandlerFactory(new FsUrlStreamHandlerFactory())
     val classPath = HdfsUtils.list(submitInfo.classPath).map(x => new URL(s"${submitInfo.classPath}/$x"))
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, classPath, Collections.singletonList(uri.toString))
 
