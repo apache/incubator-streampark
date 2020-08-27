@@ -20,11 +20,7 @@
  */
 package com.streamxhub.common.util
 
-import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.hdfs.HAUtil
-import java.io.IOException
-import java.net.InetSocketAddress
-
 import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 
 import org.apache.hadoop.conf.Configuration
