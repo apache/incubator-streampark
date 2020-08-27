@@ -293,7 +293,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
             val flinkConf = {
               parameter.get(KEY_FLINK_CONF(), null) match {
                 case text: String =>  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(text))
-                case null || "" =>
+                case null | "" =>
                   //直接读取本地FLINK_HOME下的的配置文件.
                   val flinkHome = {
                     val flinkHome = System.getenv("FLINK_HOME")
