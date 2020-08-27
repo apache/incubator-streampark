@@ -121,7 +121,7 @@ object FlinkSubmit extends Logger {
 
       .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, submitInfo.classPath))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
@@ -196,8 +196,9 @@ object FlinkSubmit extends Logger {
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
 
-    val classPath = HdfsUtils.list(submitInfo.classPath).map(x => s"${submitInfo.classPath}/$x")
-    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, classPath, Collections.singletonList(uri.toString))
+    //val classPath = HdfsUtils.list(submitInfo.classPath).map(x => s"${submitInfo.classPath}/$x")
+
+    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
@@ -233,17 +234,15 @@ object FlinkSubmit extends Logger {
    * @throws
    * @return
    */
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, classpath: List[String], jobJars: List[String]) = {
+  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: List[String]) = {
     val configuration = new Configuration
 
-    val userClasspath = new ArrayBuffer[String]
+    val classpath = new ArrayBuffer[URL]
     if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
-      try userClasspath.add(new URL(path).toString) catch {
+      try classpath.add(new URL(path)) catch {
         case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:${path},err:$e")
       }
     }
-    classpath.addAll(userClasspath)
-
     val stringFunc = new function.Function[String, String] {
       override def apply(t: String): String = t
     }
