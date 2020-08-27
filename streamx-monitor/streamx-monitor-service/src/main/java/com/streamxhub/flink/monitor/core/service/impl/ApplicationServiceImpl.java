@@ -203,19 +203,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean startUp(String id) {
+    public boolean startUp(String id) throws Exception {
         final Application application = getById(id);
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
+        String nameNode = HdfsUtils.getNameNode();
+        log.info("[StreamX] getNameNode: {}",nameNode);
+        String workspaceWithSchemaAndNameService = "hdfs://".concat(nameNode).concat(ConfigConst.APP_WORKSPACE());
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
-                properties.getNameService(),
+                nameNode,
                 flinkUserJar,
                 application.getAppName(),
                 appConf,
