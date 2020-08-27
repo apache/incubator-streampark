@@ -25,6 +25,7 @@ import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 
 case class SubmitInfo(deployMode: YarnDeploymentTarget,
                       nameService: String,
+                      classPath:String,
                       flinkUserJar: String,
                       yarnName: String,
                       appConf: String,

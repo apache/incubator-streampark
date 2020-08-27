@@ -210,12 +210,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert project != null;
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
-        String flinkUserJar = String.format("%s/%s/%s/lib/%s.jar", workspaceWithSchemaAndNameService, id, application.getModule(), application.getModule());
+        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
+        String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
                 properties.getNameService(),
+                classPath,
                 flinkUserJar,
                 application.getAppName(),
                 appConf,
