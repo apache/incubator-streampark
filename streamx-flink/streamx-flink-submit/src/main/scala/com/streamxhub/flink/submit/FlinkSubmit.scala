@@ -58,7 +58,7 @@ object FlinkSubmit extends Logger {
     logInfo(
       s"""
          |"[StreamX] flink submit," +
-         |       "deployMode: ${submitInfo.deployMode},"
+         |      "deployMode: ${submitInfo.deployMode},"
          |      "nameService: ${submitInfo.nameService},"
          |      "yarnName: ${submitInfo.yarnName},"
          |      "appConf: ${submitInfo.appConf},"
@@ -198,7 +198,7 @@ object FlinkSubmit extends Logger {
 
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val jars = HdfsUtils.list(submitInfo.classPath).map(x => {
-      "${submitInfo.classPath}/$x"
+      s"${submitInfo.classPath}/$x"
     })
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, util.Arrays.asList(jars: _*))
 
