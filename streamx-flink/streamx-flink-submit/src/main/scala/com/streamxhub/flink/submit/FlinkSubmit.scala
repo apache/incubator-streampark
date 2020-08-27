@@ -42,6 +42,7 @@ import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
+import com.streamxhub.common.util.DeflaterUtils
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -56,16 +57,16 @@ object FlinkSubmit extends Logger {
 
   def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
-     s"""
-        |"[StreamX] flink submit," +
-        |       "deployMode: ${submitInfo.deployMode},"
-        |      "nameService: ${submitInfo.nameService},"
-        |      "yarnName: ${submitInfo.yarnName},"
-        |      "appConf: ${submitInfo.appConf},"
-        |      "userJar: ${submitInfo.flinkUserJar},"
-        |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
-        |      "args: ${submitInfo.args}"
-        |""".stripMargin)
+      s"""
+         |"[StreamX] flink submit," +
+         |       "deployMode: ${submitInfo.deployMode},"
+         |      "nameService: ${submitInfo.nameService},"
+         |      "yarnName: ${submitInfo.yarnName},"
+         |      "appConf: ${submitInfo.appConf},"
+         |      "userJar: ${submitInfo.flinkUserJar},"
+         |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+         |      "args: ${submitInfo.args}"
+         |""".stripMargin)
 
     val map = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
     val appName = if (submitInfo.yarnName == null) map(KEY_FLINK_APP_NAME) else submitInfo.yarnName
@@ -105,21 +106,28 @@ object FlinkSubmit extends Logger {
 
     val flinkLocalConfDir = flinkLocalHome.concat("/conf")
 
-    val encodeConf =  getEncoder.encodeToString(HdfsUtils.read(submitInfo.appConf).getBytes)
+    val encodeConf = DeflaterUtils.zipString(HdfsUtils.read(submitInfo.appConf))
 
     val userAppConf = submitInfo.appConf.split("\\.").last.toLowerCase match {
-      case "yaml"|"yml" => s"yaml://$encodeConf"
+      case "yaml" | "yml" => s"yaml://$encodeConf"
       case "properties" => s"prop://$encodeConf"
       case _ => null
+    }
+
+    val flinkConf = {
+      val yaml = s"$flinkHdfsHomeWithNameService/conf/flink-conf.yaml"
+      DeflaterUtils.zipString(HdfsUtils.read(yaml))
     }
 
     val appArgs = {
       val array = new ArrayBuffer[String]
       Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
-      array += KEY_FLINK_APP_CONF("--")
-      array += userAppConf
       array += KEY_FLINK_HOME("--")
       array += flinkHdfsHomeWithNameService
+      array += KEY_APP_CONF("--")
+      array += userAppConf
+      array += KEY_FLINK_CONF("--")
+      array += flinkConf
       array.toList.asJava
     }
 

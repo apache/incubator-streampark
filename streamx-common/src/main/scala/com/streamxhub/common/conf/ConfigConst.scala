@@ -54,7 +54,9 @@ object ConfigConst {
   val SIGN_EMPTY = ""
 
   //
-  def KEY_FLINK_APP_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
+  def KEY_APP_CONF(prefix: String = null): String = if (prefix == null) "app.conf" else s"${prefix}app.conf"
+
+  def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
   def KEY_FLINK_HOME(prefix: String = null): String = if (prefix == null) "flink.home" else s"${prefix}flink.home"
 

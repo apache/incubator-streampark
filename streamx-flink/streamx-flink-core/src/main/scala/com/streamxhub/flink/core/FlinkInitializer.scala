@@ -25,7 +25,7 @@ import java.util.Base64
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DeflaterUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
@@ -106,27 +106,19 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   private[this] var streamEnv: StreamExecutionEnvironment = _
 
   def readFlinkConf(config: String): Map[String, String] = {
-    val extension = config.split("\\.").last.toLowerCase
-
     /**
      * 避免在这里直接使用hdfs Api读取文件,防止引入的hdfs jar和用户程序里的jar冲突,应尽量减少对外部的依赖...
-     * @param x
-     * @return
-     */
-    def decode(x: String): String = {
-      val text = x.drop(7)
-      val byte = Base64.getDecoder decode text
-      new String(byte, "UTF-8")
-    }
-
+     **/
+    lazy val encodeConf: String = DeflaterUtils.unzipString(config.drop(7))
     config match {
       case x: String if x.startsWith("prop://") =>
-        PropertiesUtils.fromPropertiesText(decode(x))
+        PropertiesUtils.fromPropertiesText(encodeConf)
       case x: String if x.startsWith("yaml://") =>
-        PropertiesUtils.fromYamlText(decode(x))
+        PropertiesUtils.fromYamlText(encodeConf)
       case _ =>
         val configFile = new File(config)
-        require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
+        require(configFile.exists(), s"[StreamX] Usage:flink.conf file $config is not found!!!")
+        val extension = config.split("\\.").last.toLowerCase
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
           case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
@@ -137,8 +129,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_APP_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+    val config = argsMap.get(KEY_APP_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)
@@ -299,17 +291,18 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
             val flinkConf = {
-              //从启动参数中读取配置文件...
-              val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
-                case null | "" =>
-                  logInfo("[StreamX] --flink.home is undefined,now try found from flink-conf.yaml on System env.")
-                  val flinkHome = System.getenv("FLINK_HOME")
-                  require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-                  flinkHome
-                case file => file
+              parameter.get(KEY_FLINK_CONF(), null) match {
+                case text: String =>  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(text))
+                case null || "" =>
+                  //从启动参数中读取配置文件...
+                  val flinkHome = {
+                    val flinkHome = System.getenv("FLINK_HOME")
+                    require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
+                    flinkHome
+                  }
+                  val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+                  readFlinkConf(flinkConf)
               }
-              val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-              readFlinkConf(flinkConf)
             }
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
             val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)
