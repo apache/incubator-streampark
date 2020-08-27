@@ -75,5 +75,4 @@ adminx:
 
 streamx:
   app-home: /home/hst/workspace/deploy
-  name-service: nameservice1
   yarn: http://test-hadoop-2:8088
