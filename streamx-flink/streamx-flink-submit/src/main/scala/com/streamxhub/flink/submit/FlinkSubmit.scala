@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import java.io.File
 import java.net.{MalformedURLException, URL}
+import java.util
 import java.util._
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -121,7 +122,7 @@ object FlinkSubmit extends Logger {
 
       .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, submitInfo.classPath))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
@@ -194,11 +195,12 @@ object FlinkSubmit extends Logger {
     }
 
     val activeCommandLine = validateAndGetActiveCommandLine()
+
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
-
-    //val classPath = HdfsUtils.list(submitInfo.classPath).map(x => s"${submitInfo.classPath}/$x")
-
-    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
+    val jars = HdfsUtils.list(submitInfo.classPath).map(x => {
+      "${submitInfo.classPath}/$x"
+    })
+    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, util.Arrays.asList(jars: _*))
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
@@ -243,10 +245,9 @@ object FlinkSubmit extends Logger {
         case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:${path},err:$e")
       }
     }
-    val stringFunc = new function.Function[String, String] {
-      override def apply(t: String): String = t
-    }
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, stringFunc)
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
+      override def apply(t: URL): String = t.toString
+    })
 
     if (commandLine.hasOption(FlinkRunOption.PARALLELISM_OPTION.getOpt)) {
       val parString = commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt)
@@ -267,7 +268,10 @@ object FlinkSubmit extends Logger {
     configuration.setBoolean(DeploymentOptions.SHUTDOWN_IF_ATTACHED, shutdownOnAttachedExit)
 
     SavepointRestoreSettings.toConfiguration(savepointSettings, configuration)
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, stringFunc)
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, new function.Function[String, String] {
+      override def apply(t: String): String = t
+    })
+
     val executorConfig = checkNotNull(activeCustomCommandLine).applyCommandLineOptionsToConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
     effectiveConfiguration.addAll(configuration)
