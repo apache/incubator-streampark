@@ -93,6 +93,11 @@ object HdfsUtils {
     hdfs.delete(path, true)
   }
 
+  @throws[IOException] def list(hdfsPath: String): List[String] = {
+    val path: Path = getPath(hdfsPath)
+    hdfs.listStatus(path).map(_.getPath.getName).toList
+  }
+
   @throws[IOException] def upload(fileName: String, hdfsPath: String): Unit = {
     val src: Path = getPath(fileName)
     val dst: Path = getPath(hdfsPath)

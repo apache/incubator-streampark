@@ -55,16 +55,16 @@ object FlinkSubmit extends Logger {
 
   def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
-     s"""
-        |"[StreamX] flink submit," +
-        |       "deployMode: ${submitInfo.deployMode},"
-        |      "nameService: ${submitInfo.nameService},"
-        |      "yarnName: ${submitInfo.yarnName},"
-        |      "appConf: ${submitInfo.appConf},"
-        |      "userJar: ${submitInfo.flinkUserJar},"
-        |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
-        |      "args: ${submitInfo.args}"
-        |""".stripMargin)
+      s"""
+         |"[StreamX] flink submit," +
+         |       "deployMode: ${submitInfo.deployMode},"
+         |      "nameService: ${submitInfo.nameService},"
+         |      "yarnName: ${submitInfo.yarnName},"
+         |      "appConf: ${submitInfo.appConf},"
+         |      "userJar: ${submitInfo.flinkUserJar},"
+         |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+         |      "args: ${submitInfo.args}"
+         |""".stripMargin)
 
     val map = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
     val appName = if (submitInfo.yarnName == null) map(KEY_FLINK_APP_NAME) else submitInfo.yarnName
@@ -114,6 +114,12 @@ object FlinkSubmit extends Logger {
       array.toList.asJava
     }
 
+    val classPath = HdfsUtils.list(submitInfo.classPath).map(x => {
+        s"${submitInfo.classPath}/${x}"
+      }).asJava.toList
+
+    logInfo(s"[StreamX] flinkSubmit, classpath:${classPath}")
+
     //获取flink的配置
     val flinkConfiguration = GlobalConfiguration
       //从flink-conf.yaml中加载默认配置文件...
@@ -123,7 +129,7 @@ object FlinkSubmit extends Logger {
       //设置yarn.provided.lib.dirs
       .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置classPath
-      .set(PipelineOptions.CLASSPATHS,Arrays.asList(submitInfo.classPath))
+      .set(PipelineOptions.CLASSPATHS, classPath)
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
