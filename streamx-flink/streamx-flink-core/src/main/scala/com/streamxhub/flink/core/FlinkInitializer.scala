@@ -294,7 +294,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
               parameter.get(KEY_FLINK_CONF(), null) match {
                 case text: String =>  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(text))
                 case null || "" =>
-                  //从启动参数中读取配置文件...
+                  //直接读取本地FLINK_HOME下的的配置文件.
                   val flinkHome = {
                     val flinkHome = System.getenv("FLINK_HOME")
                     require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
