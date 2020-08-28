@@ -63,12 +63,13 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+         |      "dynamicProperties": s"${submitInfo.dynamicProperties}"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
-    val map = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
-    val appName = if (submitInfo.yarnName == null) map(KEY_FLINK_APP_NAME) else submitInfo.yarnName
-    val appMain = map(KEY_FLINK_APP_MAIN)
+    val appConfigMap = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
+    val appName = if (submitInfo.yarnName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.yarnName
+    val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
     /**
      * 获取当前机器上的flink
@@ -148,9 +149,9 @@ object FlinkSubmit extends Logger {
       val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions)
 
       //read and verify user config...
-      val userArgs = {
+      val appArgs = {
         val optionMap = new mutable.HashMap[String, Any]()
-        map.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
+        appConfigMap.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
           val key = x._1.drop(optionPrefix.length)
           //验证参数是否合法...
           val verify = commandLineOptions.hasOption(key)
@@ -165,6 +166,7 @@ object FlinkSubmit extends Logger {
             case v => optionMap += s"-$opt" -> v
           }
         })
+
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
           array += x._1
@@ -178,8 +180,9 @@ object FlinkSubmit extends Logger {
 
         array.toArray
       }
-      CliFrontendParser.parse(commandLineOptions, userArgs, true)
+      CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
+
 
     def validateAndGetActiveCommandLine(): CustomCommandLine = {
       val line = checkNotNull(commandLine)
@@ -193,7 +196,10 @@ object FlinkSubmit extends Logger {
 
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
+
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
+
+
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
@@ -253,6 +259,7 @@ object FlinkSubmit extends Logger {
         case e: NumberFormatException => throw new CliArgsException(s"The parallelism must be a positive number: $parString,err:$e ")
       }
     }
+
     val detachedMode = commandLine.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || commandLine.hasOption(FlinkRunOption.YARN_DETACHED_OPTION.getOpt)
     val shutdownOnAttachedExit = commandLine.hasOption(SHUTDOWN_IF_ATTACHED_OPTION.getOpt)
     val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
@@ -266,7 +273,26 @@ object FlinkSubmit extends Logger {
 
     val executorConfig = checkNotNull(activeCustomCommandLine).applyCommandLineOptionsToConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
+
     effectiveConfiguration.addAll(configuration)
+    /**
+     * dynamicOption....
+     */
+    val dynamicOption: Option = Option.builder("D")
+      .argName("property=value")
+      .numberOfArgs(2)
+      .valueSeparator('=')
+      .build
+    val properties = commandLine.getOptionProperties(dynamicOption.getOpt)
+    properties.stringPropertyNames.foreach((key: String) => {
+      val value = properties.getProperty(key)
+      if (value != null) {
+        effectiveConfiguration.setString(key, value)
+      } else {
+        effectiveConfiguration.setString(key, "true")
+      }
+    })
+
     println("-----------------------")
     println("Effective executor configuration: {}", effectiveConfiguration)
     println("-----------------------")
