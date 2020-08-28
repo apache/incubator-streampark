@@ -63,7 +63,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
-         |      "dynamicProperties": s"${submitInfo.dynamicProperties}"
+         |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
@@ -177,6 +177,9 @@ object FlinkSubmit extends Logger {
 
         //页面定义的参数优先级大于app配置文件
         submitInfo.overrideOption.foreach(x => array += x)
+
+        //-D
+        submitInfo.dynamicOption.foreach(x => array += x)
 
         array.toArray
       }

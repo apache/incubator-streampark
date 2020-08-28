@@ -20,8 +20,6 @@
  */
 package com.streamxhub.flink.submit
 
-import java.util.Properties
-
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 
 
@@ -32,6 +30,6 @@ case class SubmitInfo(deployMode: YarnDeploymentTarget,
                       yarnName: String,
                       appConf: String,
                       overrideOption: Array[String],
-                      dynamicProperties: Properties,
+                      dynamicOption: Array[String],
                       args: String
                      )
