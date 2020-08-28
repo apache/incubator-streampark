@@ -22,7 +22,6 @@ package com.streamxhub.flink.submit
 
 import java.io.File
 import java.net.{MalformedURLException, URL}
-import java.util
 import java.util._
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -237,7 +236,7 @@ object FlinkSubmit extends Logger {
     val classpath = new ArrayBuffer[URL]
     if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
       try classpath.add(new URL(path)) catch {
-        case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:${path},err:$e")
+        case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:$path,err:$e")
       }
     }
     ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
