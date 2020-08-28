@@ -9,7 +9,8 @@
         <result column="CONFIG" jdbcType="VARCHAR" property="config"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
-        <result column="SHORTOPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
+        <result column="SHORT_OPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
+        <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
         <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
