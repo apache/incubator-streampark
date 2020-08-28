@@ -213,6 +213,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
         String[] overrideOption = application.getShortOptions().split("\\s+");
+        String[] dynamicOption = application.getDynamicOptions().split("\\s+");
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
@@ -222,8 +223,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getAppName(),
                 appConf,
                 overrideOption,
+                dynamicOption,
                 application.getArgs()
         );
+
         ApplicationId appId = FlinkSubmit.submit(submitInfo);
         application.setAppId(appId.toString());
         /**

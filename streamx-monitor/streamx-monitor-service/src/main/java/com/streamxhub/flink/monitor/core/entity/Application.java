@@ -71,6 +71,7 @@ public class Application implements Serializable {
     private String module;
     private String options;
     private String shortOptions;
+    private String dynamicOptions;
     private String deployMode;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
