@@ -179,9 +179,10 @@ object FlinkSubmit extends Logger {
         submitInfo.overrideOption.foreach(x => array += x)
 
         //-D
-        submitInfo.dynamicOption.foreach(x => array += x)
+        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
         array.toArray
+
       }
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
