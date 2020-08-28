@@ -118,8 +118,6 @@ object FlinkSubmit extends Logger {
     val flinkConfiguration = GlobalConfiguration
       //从flink-conf.yaml中加载默认配置文件...
       .loadConfiguration(flinkLocalConfDir)
-
-      .set(CoreOptions.CLASSLOADER_RESOLVE_ORDER, "parent-first")
       //设置yarn.provided.lib.dirs
       .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
