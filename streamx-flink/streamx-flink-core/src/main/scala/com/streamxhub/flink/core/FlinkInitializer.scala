@@ -103,7 +103,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
 
-  def readFlinkConf(config: String): Map[String,String] = {
+  def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
     if (config.startsWith("hdfs://")) {
       /**
@@ -278,19 +278,22 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     //默认:被cancel会保留Checkpoint数据
     streamEnv.getCheckpointConfig.enableExternalizedCheckpoints(cpCleanUp)
 
-    val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND,null))
+    val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND, null))
     //stateBackend
     if (stateBackend != null) {
       val cpDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
          * cpDir如果从配置文件中读取失败(key:state.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
-        parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR,null) match {
+        parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR, null) match {
           //从flink-conf.yaml中读取.
           case null =>
             logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
             val flinkConf = {
-              //从启动参数中读取配置文件...
+              /**
+               * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
+               * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
+               */
               val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
                 case null | "" =>
                   logInfo("[StreamX] --flink.home is undefined,now try found from flink-conf.yaml on System env.")
