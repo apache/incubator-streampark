@@ -126,9 +126,9 @@
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-textarea
           rows="4"
-          name="dynamicProp"
+          name="dynamicOptions"
           placeholder="$key=$value,多个参数换行 (-D <arg>)"
-          v-decorator="['dynamicProp']"/>
+          v-decorator="['dynamicOptions']"/>
       </a-form-item>
 
       <a-form-item
@@ -521,7 +521,7 @@ export default {
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
-            dynamicProp: values.dynamicProp,
+            dynamicOptions: values.dynamicOptions,
             description: values.description
           }).then((resp) => {
             const created = resp.data
