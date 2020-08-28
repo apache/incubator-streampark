@@ -20,15 +20,18 @@
  */
 package com.streamxhub.flink.submit
 
+import java.util.Properties
+
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 
 
 case class SubmitInfo(deployMode: YarnDeploymentTarget,
                       nameService: String,
-                      classPath:String,
+                      classPath: String,
                       flinkUserJar: String,
                       yarnName: String,
                       appConf: String,
                       overrideOption: Array[String],
+                      dynamicProperties: Properties,
                       args: String
                      )
