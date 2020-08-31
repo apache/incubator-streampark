@@ -4,14 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.monitor.system.dao.MenuMapper;
 import com.streamxhub.monitor.system.entity.Menu;
-import com.streamxhub.monitor.system.manager.UserManager;
 import com.streamxhub.monitor.system.service.MenuService;
 import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.Tree;
 import com.streamxhub.monitor.base.utils.TreeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,9 +20,6 @@ import java.util.*;
 @Service("menuService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
-
-    @Autowired
-    private UserManager userManager;
 
     @Override
     public List<Menu> findUserPermissions(String username) {
@@ -87,11 +82,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         menu.setModifyTime(new Date());
         setMenu(menu);
         baseMapper.updateById(menu);
-
-        // 查找与这些菜单/按钮关联的用户
-        List<String> userIds = this.baseMapper.findUserIdsByMenuId(String.valueOf(menu.getMenuId()));
-        // 重新将这些用户的角色和权限缓存到 Redis中
-        this.userManager.loadUserPermissionRoleRedisCache(userIds);
     }
 
     @Override
@@ -102,8 +92,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             List<String> userIds = this.baseMapper.findUserIdsByMenuId(String.valueOf(menuId));
             // 递归删除这些菜单/按钮
             this.baseMapper.deleteMenus(menuId);
-            // 重新将这些用户的角色和权限缓存到 Redis中
-            this.userManager.loadUserPermissionRoleRedisCache(userIds);
         }
     }
 

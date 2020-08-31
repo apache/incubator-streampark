@@ -83,37 +83,21 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public void deleteRoles(String[] roleIds) throws Exception {
-        // 查找这些角色关联了那些用户
-        List<String> userIds = this.userRoleService.findUserIdsByRoleId(roleIds);
-
         List<String> list = Arrays.asList(roleIds);
-
         baseMapper.deleteBatchIds(list);
-
         this.roleMenuService.deleteRoleMenusByRoleId(roleIds);
         this.userRoleService.deleteUserRolesByRoleId(roleIds);
-
-        // 重新将这些用户的角色和权限缓存到 Redis中
-        this.userManager.loadUserPermissionRoleRedisCache(userIds);
-
     }
 
     @Override
     public void updateRole(Role role) throws Exception {
         // 查找这些角色关联了那些用户
         String[] roleId = {String.valueOf(role.getRoleId())};
-        List<String> userIds = this.userRoleService.findUserIdsByRoleId(roleId);
-
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
-
         roleMenuMapper.delete(new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
-
         String[] menuIds = role.getMenuId().split(StringPool.COMMA);
         setRoleMenus(role, menuIds);
-
-        // 重新将这些用户的角色和权限缓存到 Redis中
-        this.userManager.loadUserPermissionRoleRedisCache(userIds);
     }
 
     private void setRoleMenus(Role role, String[] menuIds) {
