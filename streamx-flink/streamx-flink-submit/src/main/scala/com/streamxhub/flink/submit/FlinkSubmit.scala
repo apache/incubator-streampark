@@ -297,29 +297,29 @@ object FlinkSubmit extends Logger {
 
     if (commandLine.hasOption("-yjm") || commandLine.hasOption("-jm")) {
       val jobManagerMemory = Try{
-        commandLine.getOptionValue("-yjm").replaceFirst("(mb|MB)$|$", "mb")
+        commandLine.getOptionValue("yjm").replaceFirst("(mb|MB)$|$", "mb")
       }.getOrElse{
-        commandLine.getOptionValue("-jm").replaceFirst("(mb|MB)$|$", "mb")
+        commandLine.getOptionValue("jm").replaceFirst("(mb|MB)$|$", "mb")
       }
       effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jobManagerMemory)
     }
 
     if (commandLine.hasOption("-ytm") || commandLine.hasOption("-tm")) {
       val taskManagerMemory = Try{
-        commandLine.getOptionValue("-ytm").replaceFirst("(mb|MB)$|$", "mb")
+        commandLine.getOptionValue("ytm").replaceFirst("(mb|MB)$|$", "mb")
       }.getOrElse{
-        commandLine.getOptionValue("-tm").replaceFirst("(mb|MB)$|$", "mb")
+        commandLine.getOptionValue("tm").replaceFirst("(mb|MB)$|$", "mb")
       }
       effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
     }
 
     if (commandLine.hasOption("-p")) {
-      val parallelism = commandLine.getOptionValue("-p")
+      val parallelism = commandLine.getOptionValue("p")
       effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
     }
 
     if (commandLine.hasOption("-ys")) {
-      val slot = commandLine.getOptionValue("-ys")
+      val slot = commandLine.getOptionValue("ys")
       effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
     }
 
