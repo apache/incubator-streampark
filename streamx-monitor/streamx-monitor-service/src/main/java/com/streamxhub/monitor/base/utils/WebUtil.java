@@ -1,17 +1,9 @@
 package com.streamxhub.monitor.base.utils;
 
-import com.streamxhub.monitor.base.function.CacheSelector;
 import com.streamxhub.monitor.base.domain.Constant;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.monitor.system.authentication.JWTUtil;
-import com.streamxhub.monitor.system.entity.User;
-import com.streamxhub.monitor.system.service.CacheService;
-import com.streamxhub.monitor.system.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
-
-import java.util.function.Supplier;
 import java.util.stream.IntStream;
 
 /**
@@ -19,36 +11,6 @@ import java.util.stream.IntStream;
  */
 @Slf4j
 public class WebUtil {
-
-    public static User getCurrentUser() {
-        String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        UserService userService = SpringContextUtil.getBean(UserService.class);
-        CacheService cacheService = SpringContextUtil.getBean(CacheService.class);
-        return selectCacheByTemplate(() -> cacheService.getUser(username), () -> userService.findByName(username));
-    }
-
-    /**
-     * 缓存查询摸板，先查缓存，如果缓存查询失败再从数据库查询
-     *
-     * @param cacheSelector    查询缓存的方法
-     * @param databaseSelector 数据库查询方法
-     * @return T
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> T selectCacheByTemplate(CacheSelector<?> cacheSelector, Supplier<?> databaseSelector) {
-        try {
-            // 先查 Redis缓存
-            log.debug("query data from redis ······");
-            return (T) cacheSelector.select();
-        } catch (Exception e) {
-            // 数据库查询
-            log.info("redis error：", e);
-            log.debug("query data from database ······");
-            return (T) databaseSelector.get();
-        }
-    }
-
 
     /**
      * token 加密

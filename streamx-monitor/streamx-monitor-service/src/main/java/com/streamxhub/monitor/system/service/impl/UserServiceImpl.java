@@ -14,7 +14,6 @@ import com.streamxhub.monitor.system.dao.UserRoleMapper;
 import com.streamxhub.monitor.system.entity.User;
 import com.streamxhub.monitor.system.entity.UserRole;
 import com.streamxhub.monitor.system.manager.UserManager;
-import com.streamxhub.monitor.system.service.CacheService;
 import com.streamxhub.monitor.system.service.UserConfigService;
 import com.streamxhub.monitor.system.service.UserRoleService;
 import com.streamxhub.monitor.system.service.UserService;
@@ -35,21 +34,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserRoleMapper userRoleMapper;
+
     @Autowired
     private UserConfigService userConfigService;
-    @Autowired
-    private CacheService cacheService;
+
     @Autowired
     private UserRoleService userRoleService;
+
     @Autowired
     private UserManager userManager;
-
 
     @Override
     public User findByName(String username) {
         return baseMapper.selectOne(new LambdaQueryWrapper<User>().eq(User::getUsername, username));
     }
-
 
     @Override
     public IPage<User> findUserDetail(User user, RestRequest request) {
@@ -69,11 +67,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateLoginTime(String username) throws Exception {
         User user = new User();
         user.setLastLoginTime(new Date());
-
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-
-        // 重新将用户信息加载到 redis中
-        cacheService.saveUser(username);
     }
 
     @Override
@@ -94,9 +88,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 创建用户默认的个性化配置
         userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
-
-        // 将用户相关信息保存到 Redis中
-        userManager.loadUserRedisCache(user);
     }
 
     @Override
@@ -111,23 +102,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
-
-        // 重新将用户信息，用户角色信息，用户权限信息 加载到 redis中
-        cacheService.saveUser(user.getUsername());
-        cacheService.saveRoles(user.getUsername());
-        cacheService.savePermissions(user.getUsername());
     }
 
     @Override
     @Transactional
     public void deleteUsers(String[] userIds) throws Exception {
-        // 先删除相应的缓存
-        this.userManager.deleteUserRedisCache(userIds);
-
         List<String> list = Arrays.asList(userIds);
-
         removeByIds(list);
-
         // 删除用户角色
         this.userRoleService.deleteUserRolesByUserId(userIds);
         // 删除用户个性化配置
@@ -138,8 +119,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional
     public void updateProfile(User user) throws Exception {
         updateById(user);
-        // 重新缓存用户信息
-        cacheService.saveUser(user.getUsername());
     }
 
     @Override
@@ -147,10 +126,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateAvatar(String username, String avatar) throws Exception {
         User user = new User();
         user.setAvatar(avatar);
-
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-        // 重新缓存用户信息
-        cacheService.saveUser(username);
     }
 
     @Override
@@ -162,8 +138,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSalt(salt);
         user.setPassword(password);
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-        // 重新缓存用户信息
-        cacheService.saveUser(username);
     }
 
     @Override
@@ -189,8 +163,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         // 创建用户默认的个性化配置
         userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
-        // 将用户相关信息保存到 Redis中
-        userManager.loadUserRedisCache(user);
 
     }
 
@@ -204,8 +176,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setSalt(salt);
             user.setPassword(password);
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
-            // 重新将用户信息加载到 redis中
-            cacheService.saveUser(username);
         }
 
     }
