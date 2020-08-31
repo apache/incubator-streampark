@@ -71,7 +71,7 @@
       </template>
 
       <template slot="deployMode" slot-scope="mode">
-        <a-tag color="blue" v-if="mode === 'PER-JOB'">Per-Job</a-tag>
+        <a-tag color="blue" v-if="mode === 'PER_JOB'">Per-Job</a-tag>
         <a-tag color="cyan" v-if="mode === 'SESSION'">Session</a-tag>
         <a-tag color="green" v-if="mode === 'APPLICATION'">Application</a-tag>
       </template>
