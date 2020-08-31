@@ -7,7 +7,7 @@ import com.streamxhub.monitor.system.entity.Role;
 import com.streamxhub.monitor.system.entity.User;
 import com.streamxhub.monitor.system.entity.UserConfig;
 import com.streamxhub.monitor.base.domain.Constant;
-import com.streamxhub.flink.monitor.system.service.*;
+import com.streamxhub.monitor.system.service.*;
 import com.streamxhub.monitor.system.service.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;

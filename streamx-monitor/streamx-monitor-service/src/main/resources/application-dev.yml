@@ -52,7 +52,7 @@ management.endpoints.web.exposure.include: ['httptrace', 'metrics']
 
 #mybatis plus 设置
 mybatis-plus:
-  type-aliases-package: com.streamxhub.flink.monitor.*.entity
+  type-aliases-package: com.streamxhub.monitor.*.entity
   mapper-locations: classpath:mapper/*/*.xml
   configuration:
     jdbc-type-for-null: null

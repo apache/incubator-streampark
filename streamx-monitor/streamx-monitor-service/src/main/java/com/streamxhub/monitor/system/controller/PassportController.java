@@ -8,7 +8,7 @@ import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.RestResponse;
 import com.streamxhub.monitor.base.exception.AdminXException;
 import com.streamxhub.monitor.base.properties.AdminXProperties;
-import com.streamxhub.flink.monitor.base.utils.*;
+import com.streamxhub.monitor.base.utils.*;
 import com.streamxhub.monitor.system.authentication.JWTToken;
 import com.streamxhub.monitor.system.authentication.JWTUtil;
 import com.streamxhub.monitor.system.entity.LoginLog;
