@@ -296,20 +296,12 @@ object FlinkSubmit extends Logger {
     })
 
     if (commandLine.hasOption("-yjm") || commandLine.hasOption("-jm")) {
-      val jobManagerMemory = Try{
-        commandLine.getOptionValue("yjm").replaceFirst("(mb|MB)$|$", "")
-      }.getOrElse{
-        commandLine.getOptionValue("jm").replaceFirst("(mb|MB)$|$", "")
-      }
+      val jobManagerMemory = Try(commandLine.getOptionValue("yjm").toString).getOrElse(commandLine.getOptionValue("jm"))
       effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jobManagerMemory)
     }
 
     if (commandLine.hasOption("-ytm") || commandLine.hasOption("-tm")) {
-      val taskManagerMemory = Try{
-        commandLine.getOptionValue("ytm").replaceFirst("(mb|MB)$|$", "")
-      }.getOrElse{
-        commandLine.getOptionValue("tm").replaceFirst("(mb|MB)$|$", "")
-      }
+      val taskManagerMemory = Try(commandLine.getOptionValue("ytm").toString).getOrElse(commandLine.getOptionValue("tm"))
       effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
     }
 
