@@ -54,6 +54,7 @@
     <a-table
       ref="TableInfo"
       :columns="columns"
+      size="middle"
       rowKey="name"
       :dataSource="dataSource"
       :pagination="pagination"
@@ -118,6 +119,7 @@
           <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
         </div>
       </template>
+
       <template slot="operation" slot-scope="text, record">
         <a-icon
           v-show="record.deploy === 1 && record.state !== 1 "
@@ -243,35 +245,37 @@ export default {
       let {sortedInfo} = this
       sortedInfo = sortedInfo || {}
       return [{
-        title: '应用名称',
+        title: 'Job Name',
         dataIndex: 'appName',
-        width: 220,
+        width: 200,
         fixed: 'left',
+        ellipsis: true,
         scopedSlots: {customRender: 'appName'},
       }, {
-        title: '所属项目',
+        title: 'Project',
         dataIndex: 'projectName',
+        ellipsis: true,
         width: 200
       }, {
-        title: '开始时间',
+        title: 'Start Time',
         dataIndex: 'startTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
         width: 180
       }, {
-        title: '结束时间',
+        title: 'End Time',
         dataIndex: 'endTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
         width: 180
       }, {
-        title: '状态',
+        title: 'Status',
         dataIndex: 'state',
         width: 80,
         scopedSlots: {customRender: 'state'},
         fixed: 'right'
       }, {
-        title: '操作',
+        title: 'Operation',
         dataIndex: 'operation',
         scopedSlots: {customRender: 'operation'},
         fixed: 'right',
