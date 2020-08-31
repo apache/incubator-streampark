@@ -33,7 +33,7 @@
       </a-form-item>
 
       <a-form-item
-        label="配置文件"
+        label="Config File"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-tree-select
@@ -47,8 +47,9 @@
         </a-tree-select>
       </a-form-item>
 
+
       <a-form-item
-        label="作业名称"
+        label="App name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input type="text"
@@ -57,22 +58,29 @@
       </a-form-item>
 
       <a-form-item
-        label="部署模式"
+        label="Parallelism"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          showSearch
-          optionFilterProp="children"
-          :filterOption="filterOption"
-          placeholder="请选择部署模式"
-          @change="handleMode"
-          v-decorator="[ 'mode', {rules: [{ required: true, message: '请选择部署模式'}]} ]">
-          <a-select-option v-for="p in deploymentModes" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
-        </a-select>
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="The parallelism with which to run the program"
+          v-decorator="['parallelism']" />
       </a-form-item>
 
       <a-form-item
-        label="资源参数"
+        label="Slots"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="Number of slots per TaskManager"
+          v-decorator="['slot']" />
+      </a-form-item>
+
+      <a-form-item
+        label="Run Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -83,20 +91,32 @@
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
-          <a-select-option
-            v-for="(conf,index) in options"
-            v-if="conf.group === mode"
-            :key="index"
-            :value="conf.name">
-            {{ conf.key }} ( {{ conf.name }} )
-          </a-select-option>
+          <a-select-opt-group label="run options">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'run'"
+              :key="index"
+              :value="conf.name">
+              {{ conf.key }} ( {{ conf.name }} )
+            </a-select-option>
+          </a-select-opt-group>
+
+          <a-select-opt-group label="yarn-cluster options">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'yarn-cluster'"
+              :key="index"
+              :value="conf.name">
+              {{ conf.key }} ( {{ conf.name }} )
+            </a-select-option>
+          </a-select-opt-group>
         </a-select>
       </a-form-item>
 
       <a-form-item
         class="conf_item"
         v-for="(conf,index) in options"
-        v-if="configItems.includes(conf.name) && mode === conf.group"
+        v-if="configItems.includes(conf.name)"
         :key="index"
         :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -121,7 +141,7 @@
       </a-form-item>
 
       <a-form-item
-        label="动态参数"
+        label="Dynamic Option"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-textarea
@@ -132,7 +152,7 @@
       </a-form-item>
 
       <a-form-item
-        label="运行参数"
+        label="Program Args"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-textarea
@@ -143,7 +163,7 @@
       </a-form-item>
 
       <a-form-item
-        label="应用描述"
+        label="Description"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-textarea
@@ -170,63 +190,16 @@ import {create, exists, name} from '@api/application'
 
 const configOptions = [
   {
-    key: '-n',
-    name: 'container',
-    placeholder: '-n,--container <arg>',
-    description: 'TaskManager分配个数',
-    group: 'SESSION',
-    type: 'input',
-    value: '',
-    validator: (rule, value, callback) => {
-      if (!value || value.length === 0) {
-        callback(new Error('TaskManager数量不能为空'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: '-d',
-    name: 'detached',
-    placeholder: '-d,--detached',
-    description: '以独立模式运行',
-    group: 'SESSION',
-    type: 'switch',
-    value: false,
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
-    key: '-jm',
-    name: 'jobManagerMemory',
-    placeholder: '-jm,--jobManagerMemory <arg>',
-    description: 'JobManager内存大小 (单位: MB)',
-    group: 'SESSION',
-    type: 'number',
-    min: 512,
-    value: '',
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('JobManager内存不能为空'))
-      } else {
-        callback()
-      }
-    }
-  },
-
-  // ------------------------------------------------------- YARN -------------------------------------------------------
-  {
     key: '-m',
     name: 'jobmanager',
     placeholder: '-m,--jobmanager <arg>',
     description: 'JobManager 地址(yarn-cluster)',
-    group: 'PER_JOB',
+    group: 'run',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
       if (!value || value.length === 0) {
-        callback(new Error('JobManager不能为空'))
+        callback(new Error('JobManager is require or you can delete this option'))
       } else {
         callback()
       }
@@ -236,26 +209,51 @@ const configOptions = [
     key: '-d',
     name: 'detached',
     placeholder: '-d,--detached',
-    description: '以独立模式运行',
-    group: 'PER_JOB',
+    description: 'If present, runs the job in detached mode',
+    group: 'no-support',
     type: 'switch',
     value: false,
     validator: (rule, value, callback) => {
       callback()
     }
   },
+  {
+    key: '-n',
+    name: 'allowNonRestoredState',
+    placeholder: '-n,--allowNonRestoredState <arg>',
+    description: 'Allow to skip savepoint state that cannot be restored',
+    group: 'run',
+    type: 'switch',
+    value: false,
+    validator: (rule, value, callback) => {
+      callback()
+    }
+  },
+  {
+    key: '-sae',
+    name: 'shutdownOnAttachedExit',
+    placeholder: '-sae,--shutdownOnAttachedExit',
+    description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
+    group: 'no-support',
+    type: 'switch',
+    value: false,
+    validator: (rule, value, callback) => {
+      callback()
+    }
+  },
+  // ------------------------------------------------------- yarn-cluster -------------------------------------------------------
   {
     key: '-yjm',
     name: 'yarnjobManagerMemory',
     placeholder: '-yjm,--yarnjobManagerMemory <arg>',
     description: 'JobManager内存大小 (单位: MB)',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'number',
     min: 512,
     value: '',
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('JobManager内存不能为空'))
+        callback(new Error('JobManager is require or you can delete this option'))
       } else {
         callback()
       }
@@ -266,57 +264,61 @@ const configOptions = [
     name: 'yarntaskManagerMemory',
     placeholder: '-ytm,--yarntaskManagerMemory <arg>',
     description: 'TaskManager内存大小 (单位: MB)',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'number',
     min: 512,
     value: '',
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('TaskManager内存不能为空'))
+        callback(new Error('TaskManager is require or you can delete this option'))
       } else {
         callback()
       }
     }
   },
-  {
-    key: '-ys',
-    name: 'yarnslots',
-    placeholder: '-ys,--yarnslots <arg> ',
-    description: '每个TaskManager可分配的slot数量',
-    group: 'PER_JOB',
-    type: 'number',
-    min: 1,
-    value: '',
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('slots数量不能为空'))
-      } else {
-        callback()
-      }
-    }
-  },
+
   {
     key: '-yat',
     name: 'yarnapplicationType',
     placeholder: '-yat,--yarnapplicationType <arg>',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
-      callback()
+      if (!value) {
+        callback(new Error('yarnapplicationType is require or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: '-ynl',
+    name: 'yarnnodeLabel',
+    placeholder: '-ynl,--yarnnodeLabel <arg>',
+    description: 'Specify YARN node label for the YARN application',
+    group: 'yarn-cluster',
+    type: 'input',
+    value: '',
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('yarnnodeLabel is require or you can delete this option.'))
+      } else {
+        callback()
+      }
     }
   },
   {
     key: '-yqu',
     name: 'yarnqueue',
     placeholder: '-yqu,--yarnqueue <arg> ',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'input',
     description: '指定应用的运行队列(on YARN)',
     value: '',
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('运行队列不能为空'))
+        callback(new Error('yarnqueue is required or you can delete this option'))
       } else {
         callback()
       }
@@ -327,62 +329,34 @@ const configOptions = [
     name: 'yarnzookeeperNamespace',
     placeholder: '-yz,--yarnzookeeperNamespace <arg>',
     description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'input',
     value: '',
     validator: (rule, value, callback) => {
-      callback()
+      if (!value) {
+        callback(new Error('yarnzookeeperNamespace is required or you can delete this option'))
+      } else {
+        callback()
+      }
     }
   },
-  {
-    key: '-ynl',
-    name: 'yarnnodeLabel',
-    placeholder: '-ynl,--yarnnodeLabel <arg>',
-    description: 'Specify YARN node label for the YARN application',
-    group: 'PER_JOB',
-    type: 'input',
-    value: '',
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
-    key: '-sae',
-    name: 'shutdownOnAttachedExit',
-    placeholder: '-sae,--shutdownOnAttachedExit',
-    description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
-    group: 'PER_JOB',
-    type: 'switch',
-    value: '',
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-
   {
     key: '-yq',
     name: 'yarnquery',
     placeholder: '-yq,--yarnquery',
     description: '显示YARN上可用的资源(memory, cores)',
-    group: 'PER_JOB',
+    group: 'yarn-cluster',
     type: 'switch',
     value: '',
     validator: (rule, value, callback) => {
-      callback()
+      if (!value) {
+        callback(new Error('yarnquery is required or you can delete this option'))
+      } else {
+        callback()
+      }
     }
   },
-  {
-    key: '-yh',
-    name: 'yarnhelp',
-    placeholder: '-yh,--yarnhelp',
-    description: 'YRAN Session帮助信息',
-    group: 'PER_JOB',
-    type: 'switch',
-    value: '',
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  }
+
 ]
 
 export default {
@@ -399,12 +373,6 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
-      mode: 'PER_JOB',
-      deploymentModes: [
-        {id: 'APPLICATION', name: 'Application Mode', default: true},
-        {id: 'PER_JOB', name: 'Per-Job', default: false},
-        {id: 'SESSION', name: 'Session', default: false}
-      ]
     }
   },
   mounted() {
@@ -436,6 +404,7 @@ export default {
         this.$message.error(error.message)
       })
     },
+
     handleConf(name) {
       this.configItems = name
     },
@@ -444,14 +413,6 @@ export default {
       const v = {}
       v[conf.name] = bool
       this.form.setFieldsValue(v)
-    },
-
-    handleMode(selectMode) {
-      if (this.mode !== selectMode) {
-        this.configItems = []
-        this.form.resetFields(`options`, [])
-      }
-      this.mode = selectMode
     },
 
     handleAppName(confFile) {
@@ -512,10 +473,20 @@ export default {
               }
             }
           }
+
+          if(values.parallelism) {
+            options["parallelism"] = values.parallelism
+            shortOptions += ' -p ' + values.parallelism
+          }
+
+          if(values.slot) {
+            options["yarnslots"] = values.slot
+            shortOptions += ' -yd '
+          }
+
           create({
             projectId: values.projectId,
             module: values.module,
-            deployMode: values.mode,
             config: values.config,
             appName: values.appName,
             args: values.args,
