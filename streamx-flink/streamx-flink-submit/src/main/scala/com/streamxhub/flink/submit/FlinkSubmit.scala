@@ -299,7 +299,7 @@ object FlinkSubmit extends Logger {
     }
 
     /**
-     * dynamicOption(优先级最高...)
+     * dynamicOption(Highest priority...)
      */
     val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
     properties.stringPropertyNames.foreach((key: String) => {
