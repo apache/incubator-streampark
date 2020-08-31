@@ -1,10 +1,7 @@
 package com.streamxhub.monitor.system.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamxhub.monitor.base.annotation.Limit;
 import com.streamxhub.monitor.base.domain.ActiveUser;
-import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.RestResponse;
 import com.streamxhub.monitor.base.exception.AdminXException;
 import com.streamxhub.monitor.base.properties.AdminXProperties;
@@ -16,9 +13,7 @@ import com.streamxhub.monitor.system.entity.User;
 import com.streamxhub.monitor.system.entity.UserConfig;
 import com.streamxhub.monitor.system.manager.UserManager;
 import com.streamxhub.monitor.system.service.LoginLogService;
-import com.streamxhub.monitor.system.service.RedisService;
 import com.streamxhub.monitor.system.service.UserService;
-import com.streamxhub.monitor.base.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.lionsoul.ip2region.DbSearcher;
@@ -44,8 +39,6 @@ import java.util.Set;
 @RequestMapping("passport")
 public class PassportController {
 
-    @Autowired
-    private RedisService redisService;
     @Autowired
     private UserManager userManager;
     @Autowired
@@ -111,22 +104,6 @@ public class PassportController {
     @RequiresPermissions("user:kickout")
     public void kickout(@NotBlank(message = "{required}") String id) throws Exception {
         String now = DateUtil.formatFullTime(LocalDateTime.now());
-        Set<String> userOnlineStringSet = redisService.zrangeByScore(Constant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
-        ActiveUser kickoutUser = null;
-        String kickoutUserString = "";
-        for (String userOnlineString : userOnlineStringSet) {
-            ActiveUser activeUser = mapper.readValue(userOnlineString, ActiveUser.class);
-            if (StringUtils.equals(activeUser.getId(), id)) {
-                kickoutUser = activeUser;
-                kickoutUserString = userOnlineString;
-            }
-        }
-        if (kickoutUser != null && StringUtils.isNotBlank(kickoutUserString)) {
-            // 删除 zset中的记录
-            redisService.zrem(Constant.ACTIVE_USERS_ZSET_PREFIX, kickoutUserString);
-            // 删除对应的 token缓存
-            redisService.del(Constant.TOKEN_CACHE_PREFIX + kickoutUser.getToken() + "." + kickoutUser.getIp());
-        }
     }
 
 
@@ -139,12 +116,6 @@ public class PassportController {
         activeUser.setIp(ip);
         activeUser.setToken(token.getToken());
         activeUser.setLoginAddress(AddressUtil.getCityInfo(DbSearcher.BTREE_ALGORITHM, ip));
-
-        // zset 存储登录用户，score 为过期时间戳
-        this.redisService.zadd(Constant.ACTIVE_USERS_ZSET_PREFIX, Double.valueOf(token.getExpireAt()), mapper.writeValueAsString(activeUser));
-        // redis 中存储这个加密 token，key = 前缀 + 加密 token + .ip
-        this.redisService.set(Constant.TOKEN_CACHE_PREFIX + token.getToken() + StringPool.DOT + ip, token.getToken(), properties.getShiro().getJwtTimeOut() * 1000);
-
         return activeUser.getId();
     }
 

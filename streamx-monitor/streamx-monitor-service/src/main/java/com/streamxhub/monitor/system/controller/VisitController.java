@@ -4,11 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.monitor.base.utils.DateUtil;
 import com.streamxhub.monitor.system.dao.LoginLogMapper;
 import com.streamxhub.monitor.system.entity.User;
-import com.streamxhub.monitor.system.service.RedisService;
 import com.streamxhub.monitor.base.domain.ActiveUser;
-import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.RestResponse;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -24,9 +21,6 @@ import java.util.*;
 @Validated
 @RestController
 public class VisitController {
-
-    @Autowired
-    private RedisService redisService;
 
     @Autowired
     private LoginLogMapper loginLogMapper;
@@ -58,19 +52,7 @@ public class VisitController {
     @GetMapping("online")
     public RestResponse userOnline(String username) throws Exception {
         String now = DateUtil.formatFullTime(LocalDateTime.now());
-        Set<String> userOnlineStringSet = redisService.zrangeByScore(Constant.ACTIVE_USERS_ZSET_PREFIX, now, "+inf");
         List<ActiveUser> activeUsers = new ArrayList<>();
-        for (String userOnlineString : userOnlineStringSet) {
-            ActiveUser activeUser = mapper.readValue(userOnlineString, ActiveUser.class);
-            activeUser.setToken(null);
-            if (StringUtils.isNotBlank(username)) {
-                if (StringUtils.equalsIgnoreCase(username, activeUser.getUsername())) {
-                    activeUsers.add(activeUser);
-                }
-            } else {
-                activeUsers.add(activeUser);
-            }
-        }
         return new RestResponse().data(activeUsers);
     }
 
