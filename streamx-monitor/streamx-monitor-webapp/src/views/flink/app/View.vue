@@ -70,12 +70,6 @@
         </span>
       </template>
 
-      <template slot="deployMode" slot-scope="mode">
-        <a-tag color="blue" v-if="mode === 'PER_JOB'">Per-Job</a-tag>
-        <a-tag color="cyan" v-if="mode === 'SESSION'">Session</a-tag>
-        <a-tag color="green" v-if="mode === 'APPLICATION'">Application</a-tag>
-      </template>
-
       <template slot="state" slot-scope="state">
         <!--
           CREATED(0),
@@ -258,11 +252,6 @@ export default {
         title: '所属项目',
         dataIndex: 'projectName',
         width: 200
-      }, {
-        title: '部署方式',
-        dataIndex: 'deployMode',
-        width: 100,
-        scopedSlots: {customRender: 'deployMode'},
       }, {
         title: '开始时间',
         dataIndex: 'startTime',
