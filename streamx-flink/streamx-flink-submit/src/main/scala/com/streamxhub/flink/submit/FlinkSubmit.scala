@@ -277,18 +277,6 @@ object FlinkSubmit extends Logger {
     val effectiveConfiguration = new Configuration(executorConfig)
 
     effectiveConfiguration.addAll(configuration)
-    /**
-     * dynamicOption....
-     */
-    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
-    properties.stringPropertyNames.foreach((key: String) => {
-      val value = properties.getProperty(key)
-      if (value != null) {
-        effectiveConfiguration.setString(key, value)
-      } else {
-        effectiveConfiguration.setString(key, "true")
-      }
-    })
 
     if (commandLine.hasOption(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)) {
       val jobManagerMemory = commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)
@@ -309,6 +297,19 @@ object FlinkSubmit extends Logger {
       val slot = commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt)
       effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
     }
+
+    /**
+     * dynamicOption(优先级最高...)
+     */
+    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
+    properties.stringPropertyNames.foreach((key: String) => {
+      val value = properties.getProperty(key)
+      if (value != null) {
+        effectiveConfiguration.setString(key, value)
+      } else {
+        effectiveConfiguration.setString(key, "true")
+      }
+    })
 
     println("-----------------------")
     println("Effective executor configuration: ", effectiveConfiguration)
