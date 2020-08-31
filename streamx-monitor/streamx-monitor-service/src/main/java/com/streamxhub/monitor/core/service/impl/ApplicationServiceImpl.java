@@ -54,6 +54,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import scala.util.Try;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -212,8 +213,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
-        String[] overrideOption = application.getShortOptions().split("\\s+");
-        String[] dynamicOption = application.getDynamicOptions().split("\\s+");
+        String[] overrideOption = Optional.of(application.getShortOptions().split("\\s+")).orElse(new String[0]);
+        String[] dynamicOption = Optional.of(application.getDynamicOptions().split("\\s+")).orElse(new String[0]);
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
