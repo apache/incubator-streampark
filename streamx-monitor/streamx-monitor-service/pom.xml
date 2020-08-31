@@ -24,7 +24,6 @@
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
-        <redis.version>2.9.0</redis.version>
         <es.version>6.2.3</es.version>
         <influxdb.version>2.17</influxdb.version>
         <protobuf.version>2.5.0</protobuf.version>
@@ -193,29 +192,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-cache</artifactId>
-        </dependency>
-
-        <!-- redis -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
-        </dependency>
-
-        <!-- shiro-redis -->
-        <dependency>
-            <groupId>org.crazycake</groupId>
-            <artifactId>shiro-redis</artifactId>
-            <version>3.1.0</version>
-            <exclusions>
-                <exclusion>
-                    <artifactId>commons-cli</artifactId>
-                    <groupId>commons-cli</groupId>
-                </exclusion>
-                <exclusion>
-                    <artifactId>shiro-core</artifactId>
-                    <groupId>org.apache.shiro</groupId>
-                </exclusion>
-            </exclusions>
         </dependency>
 
         <!-- ip2region -->
