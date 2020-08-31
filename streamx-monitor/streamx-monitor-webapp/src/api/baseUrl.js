@@ -4,7 +4,7 @@ switch (process.env.NODE_ENV) {
     baseUrl = '/api'
     break
   case 'production':
-    baseUrl = 'http://10.2.39.89:10001'
+    baseUrl = 'http://pro-hadoop-2:10001'
     break
 }
 export default baseUrl
