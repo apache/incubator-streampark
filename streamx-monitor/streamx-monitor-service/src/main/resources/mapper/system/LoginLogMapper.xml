@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.flink.monitor.system.dao.LoginLogMapper">
+<mapper namespace="com.streamxhub.monitor.system.dao.LoginLogMapper">
     <select id="findTotalVisitCount" resultType="long">
         select count(1) from t_login_log
     </select>

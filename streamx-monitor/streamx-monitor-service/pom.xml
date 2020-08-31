@@ -306,7 +306,7 @@
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>../lib</classpathPrefix>
-                            <mainClass>com.streamxhub.flink.monitor.BootStrap</mainClass>
+                            <mainClass>com.streamxhub.monitor.BootStrap</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
