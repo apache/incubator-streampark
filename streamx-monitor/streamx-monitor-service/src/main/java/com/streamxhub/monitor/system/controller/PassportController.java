@@ -60,7 +60,6 @@ public class PassportController {
     private ObjectMapper mapper;
 
     @PostMapping("login")
-    @Limit(key = "login", period = 60, count = 20, name = "登录接口", prefix = "limit")
     public RestResponse login(
             @NotBlank(message = "{required}") String username,
             @NotBlank(message = "{required}") String password,
