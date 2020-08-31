@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.flink.monitor.core.dao.ApplicationMapper">
-    <resultMap id="BaseResultMap" type="com.streamxhub.flink.monitor.core.entity.Application">
+<mapper namespace="com.streamxhub.monitor.core.dao.ApplicationMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.monitor.core.entity.Application">
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="PROJECT_ID" jdbcType="BIGINT" property="projectId"/>
         <result column="MODULE" jdbcType="VARCHAR" property="module"/>
