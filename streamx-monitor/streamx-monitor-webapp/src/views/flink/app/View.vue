@@ -251,7 +251,7 @@ export default {
       return [{
         title: '应用名称',
         dataIndex: 'appName',
-        width: 150,
+        width: 220,
         fixed: 'left',
         scopedSlots: {customRender: 'appName'},
       }, {
