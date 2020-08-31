@@ -481,7 +481,7 @@ export default {
 
           if(values.slot) {
             options["yarnslots"] = values.slot
-            shortOptions += ' -yd '
+            shortOptions += ' -ys ' + values.slot
           }
 
           create({

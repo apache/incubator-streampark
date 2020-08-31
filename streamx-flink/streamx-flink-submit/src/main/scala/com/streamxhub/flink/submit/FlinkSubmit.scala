@@ -187,7 +187,6 @@ object FlinkSubmit extends Logger {
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
-
     def validateAndGetActiveCommandLine(): CustomCommandLine = {
       val line = checkNotNull(commandLine)
       println("Custom commandlines: {}", customCommandLines)
@@ -227,7 +226,6 @@ object FlinkSubmit extends Logger {
     }
 
   }
-
 
   /**
    *
@@ -297,8 +295,30 @@ object FlinkSubmit extends Logger {
       }
     })
 
+
+    def getMemoryWithMB(memorySize: String): String = {
+      memorySize.replaceFirst("(mb|MB)$|$", "mb")
+    }
+
+    if (commandLine.hasOption("-yjm") || commandLine.hasOption("-jm")) {
+      val jobManagerMemory = Try(getMemoryWithMB(commandLine.getOptionValue("-yjm")))
+        .getOrElse(getMemoryWithMB(commandLine.getOptionValue("-jm")))
+      effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jobManagerMemory)
+    }
+
+    if (commandLine.hasOption("-ytm") || commandLine.hasOption("-tm")) {
+      val taskManagerMemory = Try(getMemoryWithMB(commandLine.getOptionValue("-ytm")))
+        .getOrElse(getMemoryWithMB(commandLine.getOptionValue("-tm")))
+      effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
+    }
+
+    if (commandLine.hasOption("-p")) {
+      val parallelism = commandLine.getOptionValue("-p")
+      effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
+    }
+
     println("-----------------------")
-    println("Effective executor configuration: {}", effectiveConfiguration)
+    println("Effective executor configuration: ", effectiveConfiguration)
     println("-----------------------")
     effectiveConfiguration
   }
