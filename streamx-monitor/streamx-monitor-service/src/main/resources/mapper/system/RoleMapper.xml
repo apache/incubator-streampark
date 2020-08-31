@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.flink.monitor.system.dao.RoleMapper">
-    <resultMap id="roleMap" type="com.streamxhub.flink.monitor.system.entity.Role">
+<mapper namespace="com.streamxhub.monitor.system.dao.RoleMapper">
+    <resultMap id="roleMap" type="com.streamxhub.monitor.system.entity.Role">
         <!--
           WARNING - @mbg.generated
         -->
