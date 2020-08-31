@@ -278,24 +278,25 @@ object FlinkSubmit extends Logger {
 
     effectiveConfiguration.addAll(configuration)
 
-    if (commandLine.hasOption(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)) {
-      val jobManagerMemory = commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)
-      effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jobManagerMemory)
+    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
+      case null =>
+      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm)
     }
 
-    if (commandLine.hasOption(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt)) {
-      val taskManagerMemory = commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt)
-      effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
+    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
+      case null =>
+      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm)
     }
 
-    if (commandLine.hasOption(FlinkRunOption.PARALLELISM_OPTION.getOpt)) {
-      val parallelism = commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt)
-      effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
+
+    commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
+      case null =>
+      case parallelism => effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
     }
 
-    if (commandLine.hasOption(FlinkRunOption.YARN_SLOTS_OPTION.getOpt)) {
-      val slot = commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt)
-      effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
+    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
+      case null =>
+      case slot => effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
     }
 
     /**
