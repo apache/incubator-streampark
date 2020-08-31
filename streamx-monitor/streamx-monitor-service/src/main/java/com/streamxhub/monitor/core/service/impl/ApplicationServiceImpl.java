@@ -213,8 +213,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
-        String[] overrideOption = Optional.of(application.getShortOptions().split("\\s+")).orElse(new String[0]);
-        String[] dynamicOption = Optional.of(application.getDynamicOptions().split("\\s+")).orElse(new String[0]);
+
+        String[] overrideOption = application.getShortOptions() != null
+                ? application.getShortOptions().split("\\s+")
+                : new String[0];
+
+        String[] dynamicOption = application.getDynamicOptions() != null
+                ? application.getDynamicOptions().split("\\s+")
+                : new String[0];
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
