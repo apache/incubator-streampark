@@ -34,6 +34,7 @@ import com.streamxhub.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.monitor.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.*;
 import java.util.Date;
@@ -41,6 +42,7 @@ import java.util.Date;
 @Data
 @TableName("t_flink_app")
 @Excel("flink应用实体")
+@Slf4j
 public class Application implements Serializable {
     /**
      * what fuck。。。
@@ -124,6 +126,7 @@ public class Application implements Serializable {
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         String result = HttpClientUtils.httpGetRequest(url);
         if (result != null) {
+            log.info("[StreamX] getJobsOverview: {}", result);
             ObjectMapper mapper = new ObjectMapper();
             return mapper.readValue(new StringReader(result), JobsOverview.class);
         }
