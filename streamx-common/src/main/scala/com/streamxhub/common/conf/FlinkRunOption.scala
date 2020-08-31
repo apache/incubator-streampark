@@ -107,6 +107,34 @@ object FlinkRunOption {
 
   val PYEXEC_OPTION: Option = new Option("pyexec", "pyExecutable", true, "Specify the path of the python interpreter used to execute the python UDF worker " + "(e.g.: --pyExecutable /usr/local/bin/python3). " + "The python UDF worker depends on Python 3.5+, Apache Beam (version == 2.15.0), " + "Pip (version >= 7.1.0) and SetupTools (version >= 37.0.0). " + "Please ensure that the specified environment meets the above requirements.")
 
+
+  /**
+   * yarn
+   */
+  private[this] val shortPrefix = "y"
+  private[this] val longPrefix = "yarn"
+  //yarn
+  // Create the command line options
+  val YARN_QUERY_OPTION = new Option(shortPrefix + "q", longPrefix + "query", false, "Display available YARN resources (memory, cores)")
+  val YARN_APPLICATIONID_OPTION = new Option(shortPrefix + "id", longPrefix + "applicationId", true, "Attach to running YARN session")
+  val YARN_QUEUE_OPTION = new Option(shortPrefix + "qu", longPrefix + "queue", true, "Specify YARN queue.")
+  val YARN_SHIPPATH_OPTION = new Option(shortPrefix + "t", longPrefix + "ship", true, "Ship files in the specified directory (t for transfer)")
+  val YARN_FLINKJAR_OPTION = new Option(shortPrefix + "j", longPrefix + "jar", true, "Path to Flink jar file")
+  val YARN_JMMEMORY_OPTION = new Option(shortPrefix + "jm", longPrefix + "jobManagerMemory", true, "Memory for JobManager Container with optional unit (default: MB)")
+  val YARN_TMMEMORY_OPTION = new Option(shortPrefix + "tm", longPrefix + "taskManagerMemory", true, "Memory per TaskManager Container with optional unit (default: MB)")
+  val YARN_SLOTS_OPTION = new Option(shortPrefix + "s", longPrefix + "slots", true, "Number of slots per TaskManager")
+  val YARN_NAME_OPTION = new Option(shortPrefix + "nm", longPrefix + "name", true, "Set a custom name for the application on YARN")
+  val YARN_APPLICATIONTYPE_OPTION = new Option(shortPrefix + "at", longPrefix + "applicationType", true, "Set a custom application type for the application on YARN")
+  val YARN_ZOOKEEPERNAMESPACE_OPTION = new Option(shortPrefix + "z", longPrefix + "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
+  val YARN_NODELABEL_OPTION = new Option(shortPrefix + "nl", longPrefix + "nodeLabel", true, "Specify YARN node label for the YARN application")
+  val YARN_HELP_OPTION = new Option(shortPrefix + "h", longPrefix + "help", false, "Help for the Yarn session CLI.")
+  /**
+   * Dynamic properties allow the user to specify additional configuration values with -D, such as
+   * <tt> -Dfs.overwrite-files=true  -Dtaskmanager.memory.network.min=536346624</tt>.
+   */
+  val YARN_DYNAMIC_OPTION: Option = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Generic configuration options for execution/deployment and for the configured " + "executor. The available options can be found at " + "https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
+
+
   HELP_OPTION.setRequired(false)
 
   JAR_OPTION.setRequired(false)
@@ -192,31 +220,7 @@ object FlinkRunOption {
   }
 
   def getYARNOptions: Options = {
-    val shortPrefix = "y"
-    val longPrefix = "yarn"
-    //yarn
-    // Create the command line options
-    val query = new Option(shortPrefix + "q", longPrefix + "query", false, "Display available YARN resources (memory, cores)")
-    val applicationId = new Option(shortPrefix + "id", longPrefix + "applicationId", true, "Attach to running YARN session")
-    val queue = new Option(shortPrefix + "qu", longPrefix + "queue", true, "Specify YARN queue.")
-    val shipPath = new Option(shortPrefix + "t", longPrefix + "ship", true, "Ship files in the specified directory (t for transfer)")
-    val flinkJar = new Option(shortPrefix + "j", longPrefix + "jar", true, "Path to Flink jar file")
-    val jmMemory = new Option(shortPrefix + "jm", longPrefix + "jobManagerMemory", true, "Memory for JobManager Container with optional unit (default: MB)")
-    val tmMemory = new Option(shortPrefix + "tm", longPrefix + "taskManagerMemory", true, "Memory per TaskManager Container with optional unit (default: MB)")
-    val slots = new Option(shortPrefix + "s", longPrefix + "slots", true, "Number of slots per TaskManager")
-    val name = new Option(shortPrefix + "nm", longPrefix + "name", true, "Set a custom name for the application on YARN")
-    val applicationType = new Option(shortPrefix + "at", longPrefix + "applicationType", true, "Set a custom application type for the application on YARN")
-    val zookeeperNamespace = new Option(shortPrefix + "z", longPrefix + "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
-    val nodeLabel = new Option(shortPrefix + "nl", longPrefix + "nodeLabel", true, "Specify YARN node label for the YARN application")
-    val help = new Option(shortPrefix + "h", longPrefix + "help", false, "Help for the Yarn session CLI.")
-    /**
-     * Dynamic properties allow the user to specify additional configuration values with -D, such as
-     * <tt> -Dfs.overwrite-files=true  -Dtaskmanager.memory.network.min=536346624</tt>.
-     */
-    val dynamicProperties: Option = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Generic configuration options for execution/deployment and for the configured " + "executor. The available options can be found at " + "https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
-
     val allOptions = new Options
-
     /**
      *
      * val TARGET = ConfigOptions.key("execution.target")
@@ -240,22 +244,22 @@ object FlinkRunOption {
     }
 
     allOptions.addOption(ADDRESS_OPTION)
-    allOptions.addOption(flinkJar)
-    allOptions.addOption(jmMemory)
-    allOptions.addOption(tmMemory)
-    allOptions.addOption(queue)
-    allOptions.addOption(query)
-    allOptions.addOption(shipPath)
-    allOptions.addOption(slots)
-    allOptions.addOption(dynamicProperties)
+    allOptions.addOption(YARN_FLINKJAR_OPTION)
+    allOptions.addOption(YARN_JMMEMORY_OPTION)
+    allOptions.addOption(YARN_TMMEMORY_OPTION)
+    allOptions.addOption(YARN_QUEUE_OPTION)
+    allOptions.addOption(YARN_QUERY_OPTION)
+    allOptions.addOption(YARN_SHIPPATH_OPTION)
+    allOptions.addOption(YARN_SLOTS_OPTION)
+    allOptions.addOption(YARN_DYNAMIC_OPTION)
     allOptions.addOption(DETACHED_OPTION)
     allOptions.addOption(YARN_DETACHED_OPTION)
-    allOptions.addOption(name)
-    allOptions.addOption(applicationId)
-    allOptions.addOption(applicationType)
-    allOptions.addOption(zookeeperNamespace)
-    allOptions.addOption(nodeLabel)
-    allOptions.addOption(help)
+    allOptions.addOption(YARN_NAME_OPTION)
+    allOptions.addOption(YARN_APPLICATIONID_OPTION)
+    allOptions.addOption(YARN_APPLICATIONTYPE_OPTION)
+    allOptions.addOption(YARN_ZOOKEEPERNAMESPACE_OPTION)
+    allOptions.addOption(YARN_NODELABEL_OPTION)
+    allOptions.addOption(YARN_HELP_OPTION)
     allOptions
   }
 

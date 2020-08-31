@@ -280,12 +280,7 @@ object FlinkSubmit extends Logger {
     /**
      * dynamicOption....
      */
-    val dynamicOption: Option = Option.builder("D")
-      .argName("property=value")
-      .numberOfArgs(2)
-      .valueSeparator('=')
-      .build
-    val properties = commandLine.getOptionProperties(dynamicOption.getOpt)
+    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
     properties.stringPropertyNames.foreach((key: String) => {
       val value = properties.getProperty(key)
       if (value != null) {
@@ -295,23 +290,23 @@ object FlinkSubmit extends Logger {
       }
     })
 
-    if (commandLine.hasOption("-yjm") || commandLine.hasOption("-jm")) {
-      val jobManagerMemory = Try(commandLine.getOptionValue("yjm").toString).getOrElse(commandLine.getOptionValue("jm"))
+    if (commandLine.hasOption(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)) {
+      val jobManagerMemory = commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt)
       effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jobManagerMemory)
     }
 
-    if (commandLine.hasOption("-ytm") || commandLine.hasOption("-tm")) {
-      val taskManagerMemory = Try(commandLine.getOptionValue("ytm").toString).getOrElse(commandLine.getOptionValue("tm"))
+    if (commandLine.hasOption(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt)) {
+      val taskManagerMemory = commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt)
       effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
     }
 
-    if (commandLine.hasOption("-p")) {
-      val parallelism = commandLine.getOptionValue("p")
+    if (commandLine.hasOption(FlinkRunOption.PARALLELISM_OPTION.getOpt)) {
+      val parallelism = commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt)
       effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
     }
 
-    if (commandLine.hasOption("-ys")) {
-      val slot = commandLine.getOptionValue("ys")
+    if (commandLine.hasOption(FlinkRunOption.YARN_SLOTS_OPTION.getOpt)) {
+      val slot = commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt)
       effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
     }
 
