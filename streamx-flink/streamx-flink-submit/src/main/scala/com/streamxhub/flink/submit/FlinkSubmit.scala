@@ -309,12 +309,17 @@ object FlinkSubmit extends Logger {
     if (commandLine.hasOption("-ytm") || commandLine.hasOption("-tm")) {
       val taskManagerMemory = Try(getMemoryWithMB(commandLine.getOptionValue("-ytm")))
         .getOrElse(getMemoryWithMB(commandLine.getOptionValue("-tm")))
-      effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
+      effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), taskManagerMemory)
     }
 
     if (commandLine.hasOption("-p")) {
       val parallelism = commandLine.getOptionValue("-p")
       effectiveConfiguration.setString(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism)
+    }
+
+    if (commandLine.hasOption("-ys")) {
+      val slot = commandLine.getOptionValue("-ys")
+      effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
     }
 
     println("-----------------------")
