@@ -140,7 +140,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             });
         }
-        return false;
+        return saved;
     }
 
     @Override
