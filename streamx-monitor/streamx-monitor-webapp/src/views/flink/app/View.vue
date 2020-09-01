@@ -160,19 +160,14 @@
             </a-icon>
           </a-popconfirm>
         </template>
-        <template>
-          <a-popconfirm
-            v-show="record.state === 5"
-            title="确定要停止该应用吗?"
-            ok-text="确定"
-            cancel-text="取消"
-            style="color: #4a9ff5"
-            @confirm="handleCancel(record)">
-            <a-icon slot="icon" type="question-circle-o" style="color: red"/>
-            <a-icon type="poweroff" title="停止应用">
-            </a-icon>
-          </a-popconfirm>
-        </template>
+
+        <a-icon type="poweroff"
+                title="停止应用"
+                style="color: #4a9ff5"
+                v-show="record.state === 5"
+                @click="handleCancel(record)">
+        </a-icon>
+
 
         <a-icon type="eye"
                 v-show="record.state === 5"
@@ -218,26 +213,28 @@
       </template>
 
       <a-form @submit="handleCancelOk" :form="formSavePoint">
-        <a-form-item
-          label="Savepoint"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-input type="text"
-                   placeholder="Path to the savepoint (with schema hdfs://)"
-                   v-decorator="['savepoint',{ rules: [{ message: 'Path to the savepoint (for example hdfs:///flink/savepoint-1537)' } ]}]">
-          </a-input>
-        </a-form-item>
 
         <a-form-item
           label="Drain"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+          :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
           <a-input-number
             :min="1"
             :step="1000"
             placeholder="Send before max watermark stoping"
-            v-decorator="['drain',{ rules: [{  message: ' Send MAX_WATERMARK before taking the savepoint and stopping the pipelne' } ]}]">
+            v-decorator="['drain',{ rules: [{ trigger:'submit', message: ' Send MAX_WATERMARK before taking the savepoint and stopping the pipelne' } ]}]">
           </a-input-number>
+        </a-form-item>
+
+        <a-form-item
+          label="Savepoint"
+          :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+          :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+          <a-textarea
+            rows="3"
+            placeholder="Path to the savepoint (with schema hdfs://)"
+            v-decorator="['savePoint',{ rules: [{ trigger:'submit', message: 'Path to the savepoint (for example hdfs:///flink/savepoint-1537)' } ]}]">
+          </a-textarea>
         </a-form-item>
 
       </a-form>
@@ -405,7 +402,7 @@ export default {
           )
           cancel({
             id: this.application.id,
-            savepoint: values.savepoint,
+            savePoint: values.savePoint,
             drain: values.drain
           }).then((resp) => {
             console.log(resp)
@@ -545,4 +542,8 @@ export default {
   padding-bottom: 5px;
   padding-top: 5px;
 }
+.ant-input-number {
+  width: 100%;
+}
+
 </style>
