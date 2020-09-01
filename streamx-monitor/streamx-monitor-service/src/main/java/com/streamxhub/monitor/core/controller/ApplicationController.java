@@ -73,8 +73,8 @@ public class ApplicationController extends BaseController {
     }
 
     @RequestMapping("cancel")
-    public RestResponse cancel(Application app,String savePoint,Long drain) {
-        applicationService.cancel(app,savePoint,drain);
+    public RestResponse cancel(Application app) {
+        applicationService.cancel(app);
         return RestResponse.create();
     }
 
