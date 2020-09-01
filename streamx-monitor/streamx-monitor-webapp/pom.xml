@@ -7,6 +7,7 @@
 
   <name>streamx-monitor-webapp</name>
   <description>streamx-monitor-webapp</description>
+
   <build>
     <plugins>
       <plugin>
@@ -44,4 +45,5 @@
       </plugin>
     </plugins>
   </build>
+
 </project>
