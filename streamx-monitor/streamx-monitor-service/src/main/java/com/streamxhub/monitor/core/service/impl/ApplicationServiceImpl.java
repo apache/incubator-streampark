@@ -240,6 +240,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
          * 一定要在flink job提交完毕才置状态...
          */
         application.setState(FlinkAppState.STARTING.getValue());
+        application.setEndTime(null);
         this.baseMapper.updateById(application);
         return true;
     }
