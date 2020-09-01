@@ -55,7 +55,7 @@
       ref="TableInfo"
       :columns="columns"
       size="middle"
-      rowKey="name"
+      rowKey="id"
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
@@ -353,30 +353,6 @@ export default {
     })
   },
 
-  filters: {
-    duration(ms) {
-      let ss = 1000
-      let mi = ss * 60
-      let hh = mi * 60
-      let dd = hh * 24
-
-      let day = parseInt(ms / dd)
-      let hour = parseInt((ms - day * dd) / hh)
-      let minute = parseInt((ms - day * dd - hour * hh)/ mi)
-      let seconds = parseInt((ms - day * dd - hour * hh - minute * mi) / ss)
-
-      if (day > 0) {
-        return day + "D " + hour + "h " + minute + "m " + seconds + "s"
-      } else if (hour > 0) {
-        return hour + "h " + minute + "m " + seconds + "s"
-      } else if (minute > 0) {
-        return minute + "m " + seconds + "s"
-      } else {
-        return 0 + "m " + seconds + "s"
-      }
-    }
-  },
-
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
     this.formSavePoint = this.$form.createForm(this)
@@ -554,7 +530,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style lang="less">
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
@@ -586,6 +562,10 @@ export default {
 }
 .ant-input-number {
   width: 100%;
+}
+
+.ant-table-thead > tr > th, .ant-table-tbody > tr > td {
+  padding: 8px 8px !important;
 }
 
 </style>
