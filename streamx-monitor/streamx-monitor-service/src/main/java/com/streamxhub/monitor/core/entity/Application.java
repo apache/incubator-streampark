@@ -87,6 +87,8 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     private transient String userName;
+    private transient String savePoint;
+    private transient Long drain;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;
