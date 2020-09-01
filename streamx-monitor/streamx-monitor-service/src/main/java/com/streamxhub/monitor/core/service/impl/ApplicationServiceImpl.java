@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.HdfsUtils;
-import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.monitor.base.domain.Constant;
