@@ -36,22 +36,49 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
-import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
+import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.hadoop.fs.Path
-import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.apache.flink.api.common.JobID
 
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
-
+import scala.util.{Failure, Success, Try}
+import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.apache.flink.client.cli.CliArgsException
+import org.apache.flink.util.FlinkException
 
 object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
+
+  def cancel(appId: String, jobId: String, savePoint: String): Unit = {
+    val flinkConfiguration = new Configuration
+    flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
+    val clusterClientFactory = new YarnClusterClientFactory
+
+    val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
+
+    if (applicationId == null) {
+      throw new FlinkException("[StreamX] flink cancel error: No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    }
+    val jobID = Try(JobID.fromHexString(jobId)) match {
+      case Success(id) => id
+      case Failure(e) => throw new CliArgsException(e.getMessage)
+    }
+
+    val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
+    val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.retrieve(applicationId).getClusterClient
+    savePoint match {
+      case null | "" => clusterClient.cancel(jobID)
+      case sp => clusterClient.cancelWithSavepoint(jobID, sp)
+      case _ =>
+    }
+  }
 
   def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(

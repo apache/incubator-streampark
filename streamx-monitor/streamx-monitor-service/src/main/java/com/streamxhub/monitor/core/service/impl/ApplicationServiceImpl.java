@@ -148,7 +148,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(app.getId());
         application.setBackUpDescription(app.getBackUpDescription());
         if (application.getState() == FlinkAppState.RUNNING.getValue()) {
-            cancel(application);
+            cancel(application,null);
         }
 
         //更改状态为发布中....
@@ -193,13 +193,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void cancel(Application app) {
+    public void cancel(Application app, String savePoint) {
         Application application = getById(app.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
-        String yarn = properties.getYarn();
-        String url = String.format("%s/proxy/%s/jobs/%s/yarn-cancel", yarn, application.getAppId(), application.getJobId());
-        HttpClientUtils.httpGetRequest(url);
+        FlinkSubmit.cancel(application.getAppId(), app.getJobId(), savePoint);
     }
 
     @Override
