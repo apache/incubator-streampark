@@ -77,7 +77,7 @@
                 end_time=#{application.endTime}
             </if>
             <if test="application.duration != null">
-                duration=#{application.getDuration}
+                duration=#{application.duration}
             </if>
         </set>
         where id=#{application.id}
