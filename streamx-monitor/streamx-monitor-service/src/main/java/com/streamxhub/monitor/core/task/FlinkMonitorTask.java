@@ -21,8 +21,6 @@
 package com.streamxhub.monitor.core.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.streamxhub.monitor.core.entity.Application;
 import com.streamxhub.monitor.core.enums.FlinkAppState;
 import com.streamxhub.monitor.core.metrics.flink.JobsOverview;

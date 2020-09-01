@@ -375,19 +375,24 @@ export default {
       options: configOptions,
     }
   },
+
   mounted() {
     this.select()
   },
+
   beforeMount() {
     this.form = this.$form.createForm(this)
     configOptions.forEach((item, index, array) => {
       this.form.getFieldDecorator(item.name, {initialValue: item.value, preserve: true})
     })
   },
+
   methods: {
+
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
+
     select() {
       select().then((resp) => {
         this.project = resp.data
@@ -395,6 +400,7 @@ export default {
         this.$message.error(error.message)
       })
     },
+
     handleProject(value) {
       listApp({
         id: value
