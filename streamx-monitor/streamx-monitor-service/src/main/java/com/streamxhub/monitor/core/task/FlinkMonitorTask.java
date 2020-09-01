@@ -69,47 +69,34 @@ public class FlinkMonitorTask {
                  * 1)到flink的restApi中查询状态
                  */
                 JobsOverview jobsOverview = application.getJobsOverview();
-                /**
-                 * 注意:yarnName是唯一的,不能重复...
-                 */
-                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().filter((x) -> x.getName().trim().equals(application.getAppName().trim())).findFirst();
+                Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
                     JobsOverview.Job job = optional.get();
 
                     FlinkAppState state = FlinkAppState.valueOf(job.getState());
-                    Long startTime = job.getStartTime();
-                    Long endTime = job.getEndTime() == -1 ? null : job.getEndTime();
+                    long startTime = job.getStartTime();
+                    long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
 
                     boolean needUpdate = false;
-                    /**
-                     * update jobId
-                     */
-                    if (application.getJobId() == null) {
+                    if (!application.getJobId().equals(job.getId())) {
                         application.setJobId(job.getId());
                         needUpdate = true;
                     }
-
-                    if (state.getValue() != application.getState()) {
+                    if (!application.getState().equals(state.getValue())) {
                         application.setState(state.getValue());
                         needUpdate = true;
                     }
-
-                    if (application.getStartTime() == null || !startTime.equals(application.getStartTime().getTime())) {
+                    if (startTime != application.getStartTime().getTime()) {
                         application.setStartTime(new Date(startTime));
                         needUpdate = true;
                     }
-
-                    if (endTime != null) {
-                        if (application.getEndTime() == null || !endTime.equals(application.getEndTime().getTime())) {
-                            application.setEndTime(new Date(endTime));
-                            needUpdate = true;
-                        }
+                    if (endTime != -1 && startTime != application.getEndTime().getTime()) {
+                        application.setEndTime(new Date(endTime));
+                        needUpdate = true;
                     }
-
                     if (needUpdate) {
                         this.applicationService.updateById(application);
                     }
-
                     if (state == FlinkAppState.CANCELLING) {
                         cancelingMap.put(application.getId(), application.getId());
                     }
