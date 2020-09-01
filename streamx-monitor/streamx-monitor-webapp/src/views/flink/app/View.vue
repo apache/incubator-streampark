@@ -71,6 +71,10 @@
         </span>
       </template>
 
+      <template slot="duration" slot-scope="text, record">
+          {{ record.duration | duration }}
+      </template>
+
       <template slot="state" slot-scope="state">
         <!--
           CREATED(0),
@@ -301,13 +305,20 @@ export default {
         title: 'Start Time',
         dataIndex: 'startTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
         width: 180
       }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: {customRender: 'duration'},
+        width: 100
+      },{
         title: 'End Time',
         dataIndex: 'endTime',
         sorter: true,
-        sortOrder: sortedInfo.columnKey === 'date' && sortedInfo.order,
+        sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
         width: 180
       }, {
         title: 'Status',
@@ -334,10 +345,33 @@ export default {
     })
   },
 
+  filters: {
+    duration(ms) {
+      let ss = 1000
+      let mi = ss * 60
+      let hh = mi * 60
+      let dd = hh * 24
+
+      let day = ms / dd
+      let hour = (ms - day * dd) / hh
+      let minute = (ms - day * dd - hour * hh)/ mi
+      let seconds = (ms - day * dd - hour * hh - minute * mi) / ss;
+
+      if (day > 0) {
+        return day + "D " + hour + "h " + minute + "m " + seconds + "s"
+      } else if (hour > 0) {
+        return hour + "h " + minute + "m" + seconds + "s"
+      } else if (minute > 0) {
+        return minute + "m" + seconds + "s"
+      } else {
+        return 0 + "m" + seconds + "s"
+      }
+    }
+  },
+
   beforeMount() {
     this.formDeploy = this.$form.createForm(this)
     this.formSavePoint = this.$form.createForm(this)
-
   },
 
   methods: {

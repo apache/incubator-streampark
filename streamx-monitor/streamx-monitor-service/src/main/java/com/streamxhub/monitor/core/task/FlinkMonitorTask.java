@@ -77,26 +77,26 @@ public class FlinkMonitorTask {
                     long startTime = job.getStartTime();
                     long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
 
-                    boolean needUpdate = false;
                     if (!application.getJobId().equals(job.getId())) {
                         application.setJobId(job.getId());
-                        needUpdate = true;
                     }
+
                     if (!application.getState().equals(state.getValue())) {
                         application.setState(state.getValue());
-                        needUpdate = true;
                     }
+
                     if (startTime != application.getStartTime().getTime()) {
                         application.setStartTime(new Date(startTime));
-                        needUpdate = true;
                     }
+
                     if (endTime != -1 && startTime != application.getEndTime().getTime()) {
                         application.setEndTime(new Date(endTime));
-                        needUpdate = true;
                     }
-                    if (needUpdate) {
-                        this.applicationService.updateById(application);
-                    }
+
+                    application.setDuration(job.getDuration());
+
+                    this.applicationService.updateMonitor(application);
+
                     if (state == FlinkAppState.CANCELLING) {
                         cancelingMap.put(application.getId(), application.getId());
                     }
@@ -107,7 +107,7 @@ public class FlinkMonitorTask {
                  */
                 if (cancelingMap.containsKey(application.getId())) {
                     application.setState(FlinkAppState.CANCELED.getValue());
-                    applicationService.updateById(application);
+                    applicationService.updateMonitor(application);
                     cancelingMap.remove(application.getId());
                 } else {
                     try {
@@ -124,13 +124,13 @@ public class FlinkMonitorTask {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
                         application.setState(flinkAppState.getValue());
-                        applicationService.updateById(application);
+                        applicationService.updateMonitor(application);
                     } catch (Exception e1) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
                         application.setState(FlinkAppState.LOST.getValue());
-                        applicationService.updateById(application);
+                        applicationService.updateMonitor(application);
                         //TODO send msg or emails
                         e1.printStackTrace();
                     }
@@ -138,7 +138,7 @@ public class FlinkMonitorTask {
             } catch (IOException exception) {
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
-                applicationService.updateById(application);
+                applicationService.updateMonitor(application);
             }
         });
 

@@ -17,6 +17,7 @@
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="START_TIME" jdbcType="DATE" property="startTime"/>
         <result column="END_TIME" jdbcType="DATE" property="endTime"/>
+        <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
@@ -57,6 +58,28 @@
     <update id="updateState" parameterType="application">
         update t_flink_app
         set state=#{application.state}
+        where id=#{application.id}
+    </update>
+
+    <update id="updateMonitor" parameterType="application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null and application.jobId != ''">
+                job_id=#{application.jobId}
+            </if>
+            <if test="application.state != null">
+                state=#{application.state}
+            </if>
+            <if test="application.startTime != null">
+                start_time=#{application.startTime}
+            </if>
+            <if test="application.endTime != null">
+                end_time=#{application.endTime}
+            </if>
+            <if test="application.duration != null">
+                duration=#{application.getDuration}
+            </if>
+        </set>
         where id=#{application.id}
     </update>
 
