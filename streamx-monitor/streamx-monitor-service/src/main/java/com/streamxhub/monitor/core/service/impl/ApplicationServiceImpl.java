@@ -196,7 +196,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(app.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
-        FlinkSubmit.cancel(application.getAppId(), application.getJobId(), app.getSavePoint(), app.getDrain());
+        FlinkSubmit.cancel(
+                application.getAppId(),
+                application.getJobId(),
+                app.getSavePoint(),
+                app.getDrain()
+        );
     }
 
     @Override
