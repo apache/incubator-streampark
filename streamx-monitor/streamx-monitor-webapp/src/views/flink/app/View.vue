@@ -56,6 +56,7 @@
       :columns="columns"
       size="middle"
       rowKey="id"
+      class="app_list"
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
@@ -539,11 +540,10 @@ export default {
 }
 </script>
 
-<style lang="less">
+<style scoped>
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
 }
-
 .app_state {
   width: 80px;
 }
@@ -573,15 +573,15 @@ export default {
   width: 100%;
 }
 
-.ant-table-thead > tr > th, .ant-table-tbody > tr > td {
-  padding: 9px 9px !important;
-}
-
 .close-deploy {
   left: 12px;
   font-size: 8px;
   font-weight: bold;
   top: -8px;
+}
+
+.app_list >>> .ant-table-thead > tr > td, .app_list >>> .ant-table-tbody > tr > td {
+  padding: 9px 9px !important;
 }
 
 </style>
