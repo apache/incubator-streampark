@@ -75,6 +75,13 @@
           {{ record.duration | duration }}
       </template>
 
+      <template slot="endTime" slot-scope="text, record">
+        <span v-if="record.endTime">
+          {{ record.endTime}}
+        </span>
+        <span v-else> - </span>
+      </template>
+
       <template slot="state" slot-scope="state">
         <!--
           CREATED(0),
@@ -313,12 +320,13 @@ export default {
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
         scopedSlots: {customRender: 'duration'},
-        width: 100
+        width: 150
       },{
         title: 'End Time',
         dataIndex: 'endTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
+        scopedSlots: {customRender: 'endTime'},
         width: 180
       }, {
         title: 'Status',
