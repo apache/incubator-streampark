@@ -124,11 +124,14 @@ public class Application implements Serializable {
     public JobsOverview getJobsOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
-        String result = HttpClientUtils.httpGetRequest(url);
-        if (result != null) {
-            log.info("[StreamX] getJobsOverview: {}", result);
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(new StringReader(result), JobsOverview.class);
+        try {
+            String result = HttpClientUtils.httpGetRequest(url);
+            if (result != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(new StringReader(result), JobsOverview.class);
+            }
+        } catch (IOException e) {
+            throw e;
         }
         return null;
     }
