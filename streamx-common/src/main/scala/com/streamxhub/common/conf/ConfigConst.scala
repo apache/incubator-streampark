@@ -58,6 +58,8 @@ object ConfigConst {
 
   def KEY_FLINK_HOME(prefix: String = null): String = if (prefix == null) "flink.home" else s"${prefix}flink.home"
 
+  def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
+
   val KEY_FLINK_PARALLELISM = "flink.parallelism"
 
   val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
