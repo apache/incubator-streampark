@@ -193,14 +193,14 @@
         确定要重新发布应用吗?
       </template>
       <template slot="footer">
-        <a-button key="back" @click="handleDeployCancel">
+        <a-button key="back" @click="handleDeployNo">
           取消
         </a-button>
         <a-button key="submit" type="primary" :loading="loading" @click="handleDeployOk">
           确定
         </a-button>
       </template>
-      <a-form @submit="handleDeployOk" :form="form">
+      <a-form @submit="handleDeployOk" :form="formDeploy">
         <a-form-item>
           <a-textarea
             rows="3"
@@ -210,6 +210,48 @@
         </a-form-item>
       </a-form>
     </a-modal>
+
+    <a-modal v-model="cancelVisible" on-ok="handleCancelOk">
+      <template slot="title">
+        <a-icon slot="icon" type="poweroff" style="color: red"/>
+        Cancel application
+      </template>
+
+      <a-form @submit="handleCancelOk" :form="formSavePoint">
+        <a-form-item
+          label="Savepoint"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-input type="text"
+                   placeholder="Path to the savepoint (with schema hdfs://)"
+                   v-decorator="['savepoint',{ rules: [{ message: 'Path to the savepoint (for example hdfs:///flink/savepoint-1537)' } ]}]">
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          label="Drain"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-input-number
+            :min="1"
+            :step="1000"
+            placeholder="Send before max watermark stoping"
+            v-decorator="['drain',{ rules: [{  message: ' Send MAX_WATERMARK before taking the savepoint and stopping the pipelne' } ]}]">
+          </a-input-number>
+        </a-form-item>
+
+      </a-form>
+
+      <template slot="footer">
+        <a-button key="back" @click="handleCancelNo">
+          取消
+        </a-button>
+        <a-button key="submit" type="primary" :loading="loading" @click="handleCancelOk">
+          确定
+        </a-button>
+      </template>
+    </a-modal>
+
   </a-card>
 </template>
 <script>
@@ -228,7 +270,9 @@ export default {
       sortedInfo: null,
       yarn: null,
       deployVisible: false,
-      form: null,
+      cancelVisible: false,
+      formDeploy: null,
+      formSavePoint: null,
       application: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -294,7 +338,9 @@ export default {
   },
 
   beforeMount() {
-    this.form = this.$form.createForm(this)
+    this.formDeploy = this.$form.createForm(this)
+    this.formSavePoint = this.$form.createForm(this)
+
   },
 
   methods: {
@@ -316,15 +362,15 @@ export default {
       this.application = value
     },
 
-    handleDeployCancel() {
+    handleDeployNo() {
       this.deployVisible = false
-      this.form.resetFields(`description`, '')
+      this.formDeploy.resetFields()
     },
 
     handleDeployOk() {
-      this.form.validateFields((err, values) => {
+      this.formDeploy.validateFields((err, values) => {
         if (!err) {
-          this.handleDeployCancel()
+          this.handleDeployNo()
           this.$message.info(
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3,
@@ -332,6 +378,35 @@ export default {
           deploy({
             id: this.application.id,
             backUpDescription: values.description
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
+      })
+    },
+
+    handleCancel(value) {
+      this.cancelVisible = true
+      this.application = value
+    },
+
+    handleCancelNo() {
+      this.cancelVisible = false
+      this.formSavePoint.resetFields()
+    },
+
+    handleCancelOk() {
+      this.formSavePoint.validateFields((err, values) => {
+        if (!err) {
+          this.handleCancelNo()
+          this.$message.info(
+            '已发送停止请求,该应用正在停止',
+            3,
+          )
+          cancel({
+            id: this.application.id,
+            savepoint: values.savepoint,
+            drain: values.drain
           }).then((resp) => {
             console.log(resp)
           })
@@ -431,17 +506,6 @@ export default {
       })
     },
 
-    handleCancel(app) {
-      this.$message.info(
-        '已发送停止请求,该应用正在停止中',
-        3,
-      )
-      cancel({
-        id: app.id
-      }).then((resp) => {
-        console.log(resp)
-      })
-    },
 
     exportExcel() {
 
