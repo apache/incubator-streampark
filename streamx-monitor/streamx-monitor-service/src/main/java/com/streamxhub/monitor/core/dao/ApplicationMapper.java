@@ -33,5 +33,5 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     void updateState(@Param("application") Application application);
 
-    void updateJobId(Application application);
+    void updateMonitor(@Param("application")Application application);
 }

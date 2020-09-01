@@ -200,6 +200,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public void updateMonitor(Application application) {
+        this.baseMapper.updateMonitor(application);
+    }
+
+    @Override
     public boolean startUp(String id) throws Exception {
         final Application application = getById(id);
         assert application != null;
