@@ -50,4 +50,6 @@ public interface ApplicationService extends IService<Application> {
     void cancel(Application app);
 
     void updateMonitor(Application application);
+
+    void closeDeploy(Application app);
 }

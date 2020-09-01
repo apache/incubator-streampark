@@ -45,3 +45,7 @@ export function remove (params) {
 export function startUp (params) {
   return http.post(api.Application.StartUp, params)
 }
+
+export function closeDeploy (params) {
+  return http.post(api.Application.CloseDeploy, params)
+}
