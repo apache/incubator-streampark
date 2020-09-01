@@ -352,19 +352,19 @@ export default {
       let hh = mi * 60
       let dd = hh * 24
 
-      let day = ms / dd
-      let hour = (ms - day * dd) / hh
-      let minute = (ms - day * dd - hour * hh)/ mi
-      let seconds = (ms - day * dd - hour * hh - minute * mi) / ss;
+      let day = parseInt(ms / dd)
+      let hour = parseInt((ms - day * dd) / hh)
+      let minute = parseInt((ms - day * dd - hour * hh)/ mi)
+      let seconds = parseInt((ms - day * dd - hour * hh - minute * mi) / ss)
 
       if (day > 0) {
         return day + "D " + hour + "h " + minute + "m " + seconds + "s"
       } else if (hour > 0) {
-        return hour + "h " + minute + "m" + seconds + "s"
+        return hour + "h " + minute + "m " + seconds + "s"
       } else if (minute > 0) {
-        return minute + "m" + seconds + "s"
+        return minute + "m " + seconds + "s"
       } else {
-        return 0 + "m" + seconds + "s"
+        return 0 + "m " + seconds + "s"
       }
     }
   },
