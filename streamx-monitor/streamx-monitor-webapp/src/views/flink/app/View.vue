@@ -565,7 +565,7 @@ export default {
 }
 
 .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
-  padding: 8px 8px !important;
+  padding: 9px 9px !important;
 }
 
 </style>
