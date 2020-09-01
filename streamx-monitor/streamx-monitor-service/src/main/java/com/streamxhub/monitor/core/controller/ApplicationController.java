@@ -102,4 +102,9 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(started);
     }
 
+    @RequestMapping("closeDeploy")
+    public RestResponse closeDeploy(Application app) {
+        applicationService.closeDeploy(app);
+        return RestResponse.create().data(true);
+    }
 }

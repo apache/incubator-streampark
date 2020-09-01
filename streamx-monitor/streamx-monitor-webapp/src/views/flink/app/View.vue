@@ -69,6 +69,9 @@
         <span v-else>
           {{ record.appName }}
         </span>
+        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy === 1">
+          <a-icon slot="count" type="close" style="color: #333" />
+        </a-badge>
       </template>
 
       <template slot="duration" slot-scope="text, record">
@@ -264,7 +267,7 @@
 </template>
 <script>
 import RangeDate from '@comp/DateTime/RangeDate'
-import {list, remove, cancel, deploy, startUp, yarn} from '@api/application'
+import {list, remove, cancel, deploy, startUp, closeDeploy, yarn} from '@api/application'
 
 export default {
   components: {RangeDate},
@@ -521,6 +524,12 @@ export default {
       })
     },
 
+    handleCloseDeploy(app) {
+      closeDeploy({
+        id: app.id
+      }).then((resp) => {
+      })
+    },
 
     exportExcel() {
 
@@ -566,6 +575,13 @@ export default {
 
 .ant-table-thead > tr > th, .ant-table-tbody > tr > td {
   padding: 9px 9px !important;
+}
+
+.close-deploy {
+  left: 12px;
+  font-size: 8px;
+  font-weight: bold;
+  top: -8px;
 }
 
 </style>

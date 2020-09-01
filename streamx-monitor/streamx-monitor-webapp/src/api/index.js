@@ -35,7 +35,8 @@ export default {
     Cancel: '/flink/app/cancel',
     Delete: '/flink/app/delete',
     Create: '/flink/app/create',
-    StartUp: '/flink/app/startUp'
+    StartUp: '/flink/app/startUp',
+    CloseDeploy: '/flink/app/closeDeploy'
   },
   User: {
     ExecUser: '/user/execUser',
@@ -45,7 +46,6 @@ export default {
     POST: '/user/post',
     DELETE: '/user/delete',
     EXPORT: '/user/export',
-
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
   },
