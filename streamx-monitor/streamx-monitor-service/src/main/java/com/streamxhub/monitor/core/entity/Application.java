@@ -20,6 +20,8 @@
  */
 package com.streamxhub.monitor.core.entity;
 
+import com.baomidou.mybatisplus.annotation.FieldStrategy;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -80,6 +82,7 @@ public class Application implements Serializable {
     private Date startTime;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    @TableField(strategy = FieldStrategy.IGNORED)
     private Date endTime;
 
     private Long duration;
