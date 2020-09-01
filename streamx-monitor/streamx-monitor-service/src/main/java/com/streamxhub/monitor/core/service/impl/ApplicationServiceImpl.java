@@ -187,6 +187,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public void closeDeploy(Application app) {
+        app.setDeploy(0);
+        this.baseMapper.updateDeploy(app);
+    }
+
+    @Override
     public void updateState(Application application) {
         this.baseMapper.updateState(application);
     }
