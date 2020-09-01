@@ -59,7 +59,7 @@ object FlinkSubmit extends Logger {
          |"[StreamX] flink submit," +
          |      "deployMode: ${submitInfo.deployMode},"
          |      "nameService: ${submitInfo.nameService},"
-         |      "yarnName: ${submitInfo.yarnName},"
+         |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
@@ -68,7 +68,7 @@ object FlinkSubmit extends Logger {
          |""".stripMargin)
 
     val appConfigMap = if (submitInfo.appConf.startsWith("hdfs:")) PropertiesUtils.fromYamlText(HdfsUtils.read(submitInfo.appConf)) else PropertiesUtils.fromYamlFile(submitInfo.appConf)
-    val appName = if (submitInfo.yarnName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.yarnName
+    val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
     /**
@@ -112,6 +112,8 @@ object FlinkSubmit extends Logger {
       array += submitInfo.appConf
       array += KEY_FLINK_HOME("--")
       array += flinkHdfsHomeWithNameService
+      array += KEY_APP_NAME("--")
+      array += appName
       array.toList.asJava
     }
 
@@ -287,7 +289,6 @@ object FlinkSubmit extends Logger {
       case null =>
       case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm)
     }
-
 
     commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
       case null =>
