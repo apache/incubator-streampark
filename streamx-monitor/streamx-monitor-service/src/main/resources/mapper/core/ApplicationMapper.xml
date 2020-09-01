@@ -65,19 +65,19 @@
         update t_flink_app
         <set>
             <if test="application.jobId != null and application.jobId != ''">
-                job_id=#{application.jobId}
+                job_id=#{application.jobId},
             </if>
             <if test="application.state != null">
-                state=#{application.state}
+                state=#{application.state},
             </if>
             <if test="application.startTime != null">
-                start_time=#{application.startTime}
+                start_time=#{application.startTime},
             </if>
             <if test="application.endTime != null">
-                end_time=#{application.endTime}
+                end_time=#{application.endTime},
             </if>
             <if test="application.duration != null">
-                duration=#{application.duration}
+                duration=#{application.duration},
             </if>
         </set>
         where id=#{application.id}
