@@ -584,13 +584,13 @@ export default {
   padding: 9px 9px !important;
 }
 
-.status-processing-deploying{ animation: deploying 1000ms ease-out infinite alternate; }
-.status-processing-starting{ animation: starting 1000ms ease-out infinite alternate; }
-.status-processing-restarting{ animation: restarting 1000ms ease-out infinite alternate; }
-.status-processing-running { animation: running 1000ms ease-out infinite alternate; }
-.status-processing-failing { animation: failing 1000ms ease-out infinite alternate; }
-.status-processing-cancelling { animation: cancelling 1000ms ease-out infinite alternate; }
-.status-processing-reconciling { animation: reconciling 1000ms ease-out infinite alternate; }
+.status-processing-deploying{ animation: deploying 800ms ease-out infinite alternate; }
+.status-processing-starting{ animation: starting 800ms ease-out infinite alternate; }
+.status-processing-restarting{ animation: restarting 800ms ease-out infinite alternate; }
+.status-processing-running { animation: running 800ms ease-out infinite alternate; }
+.status-processing-failing { animation: failing 800ms ease-out infinite alternate; }
+.status-processing-cancelling { animation: cancelling 800ms ease-out infinite alternate; }
+.status-processing-reconciling { animation: reconciling 800ms ease-out infinite alternate; }
 
 @keyframes deploying {
   0% {
