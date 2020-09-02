@@ -65,14 +65,24 @@
 
       <template slot="appName" slot-scope="text, record">
         <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
-          {{ record.appName }}
+          <ellipsis :length="40" tooltip>
+            {{ record.appName }}
+          </ellipsis>
         </a-badge>
         <span v-else>
-          {{ record.appName }}
+          <ellipsis :length="40" tooltip>
+            {{ record.appName }}
+          </ellipsis>
         </span>
         <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy === 1">
           <a-icon slot="count" type="close" style="color: #333" />
         </a-badge>
+      </template>
+
+      <template slot="projectName" slot-scope="text, record">
+        <ellipsis :length="35" tooltip>
+          {{ record.projectName}}
+        </ellipsis>
       </template>
 
       <template slot="duration" slot-scope="text, record">
@@ -267,11 +277,12 @@
   </a-card>
 </template>
 <script>
+import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import {list, remove, cancel, deploy, startUp, closeDeploy, yarn} from '@api/application'
 
 export default {
-  components: {RangeDate},
+  components: { RangeDate, Ellipsis},
   data() {
     return {
       loading: false,
@@ -303,14 +314,13 @@ export default {
       return [{
         title: 'Job Name',
         dataIndex: 'appName',
-        width: 200,
+        width: 250,
         fixed: 'left',
-        ellipsis: true,
         scopedSlots: {customRender: 'appName'},
       }, {
         title: 'Project',
         dataIndex: 'projectName',
-        ellipsis: true,
+        scopedSlots: {customRender: 'projectName'},
         width: 200
       }, {
         title: 'Start Time',
