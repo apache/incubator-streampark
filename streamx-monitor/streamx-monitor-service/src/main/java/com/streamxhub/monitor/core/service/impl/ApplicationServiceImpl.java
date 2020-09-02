@@ -95,7 +95,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     /**
-     * 检查当前的appName在表和yarn中是否已经存在
+     * 检查当前的jobName在表和yarn中是否已经存在
      *
      * @param app
      * @return
@@ -103,9 +103,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public AppExistsState checkExists(Application app) {
         QueryWrapper<Application> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("app_name", app.getAppName());
+        queryWrapper.eq("job_name", app.getJobName());
         int count = this.baseMapper.selectCount(queryWrapper);
-        boolean exists = YarnUtils.isContains(app.getAppName());
+        boolean exists = YarnUtils.isContains(app.getJobName());
         if (count == 0 && !exists) {
             return AppExistsState.NO;
         }
@@ -234,7 +234,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
                 properties.getNameService(),
                 flinkUserJar,
-                application.getAppName(),
+                application.getJobName(),
                 appConf,
                 overrideOption,
                 dynamicOption,
@@ -267,7 +267,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (lastTime == 0 || (now - lastTime) >= 2000) {
                     lastTime = now;
                     index++;
-                    List<ApplicationId> idList = YarnUtils.getAppId(application.getAppName());
+                    List<ApplicationId> idList = YarnUtils.getAppId(application.getJobName());
                     if (!idList.isEmpty()) {
                         if (idList.size() == 1) {
                             ApplicationId applicationId = idList.get(0);

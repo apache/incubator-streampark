@@ -60,7 +60,7 @@ public class Application implements Serializable {
     /**
      * 前端和程序在yarn中显示的名称
      */
-    private String appName;
+    private String jobName;
     private String appId;
     private String jobId;
     private Integer state;
