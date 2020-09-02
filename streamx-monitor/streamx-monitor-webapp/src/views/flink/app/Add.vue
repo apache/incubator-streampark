@@ -41,7 +41,7 @@
           :treeData="configSource"
           placeholder="请选择配置文件"
           treeDefaultExpandAll
-          @change="handleAppName"
+          @change="handleJobName"
           v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
           >
         </a-tree-select>
@@ -54,7 +54,7 @@
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input type="text"
                  placeholder="请输入任务名称"
-                 v-decorator="['appName',{ rules: [{ validator: handleCheckAppName,trigger:'submit' } ]}]"/>
+                 v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
       </a-form-item>
 
       <a-form-item
@@ -421,11 +421,11 @@ export default {
       this.form.setFieldsValue(v)
     },
 
-    handleAppName(confFile) {
+    handleJobName(confFile) {
       name({
         config: confFile
       }).then((resp) => {
-        this.form.setFieldsValue({'appName': resp.data})
+        this.form.setFieldsValue({'jobName': resp.data})
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -441,11 +441,11 @@ export default {
       })
     },
 
-    handleCheckAppName(rule, value, callback) {
+    handleCheckJobName(rule, value, callback) {
       if (!value) {
         callback(new Error('应用名称不能为空'))
       } else {
-        exists({ appName: value.appName }).then((resp) => {
+        exists({ jobName: value.jobName }).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
@@ -494,7 +494,7 @@ export default {
             projectId: values.projectId,
             module: values.module,
             config: values.config,
-            appName: values.appName,
+            jobName: values.jobName,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
