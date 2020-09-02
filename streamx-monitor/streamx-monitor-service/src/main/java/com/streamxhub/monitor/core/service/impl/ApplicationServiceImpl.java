@@ -29,6 +29,7 @@ import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.RestRequest;
 import com.streamxhub.monitor.base.properties.StreamXProperties;
+import com.streamxhub.monitor.base.utils.CommonUtil;
 import com.streamxhub.monitor.base.utils.SortUtil;
 import com.streamxhub.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.monitor.core.entity.Application;
@@ -221,18 +222,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
-        String[] overrideOption = application.getShortOptions() != null
+        String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
                 ? application.getShortOptions().split("\\s+")
                 : new String[0];
 
-        String[] dynamicOption = application.getDynamicOptions() != null
+        String[] dynamicOption = CommonUtil.notEmpty(application.getDynamicOptions())
                 ? application.getDynamicOptions().split("\\s+")
                 : new String[0];
 
         SubmitInfo submitInfo = new SubmitInfo(
                 YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
                 properties.getNameService(),
-                classPath,
                 flinkUserJar,
                 application.getAppName(),
                 appConf,
