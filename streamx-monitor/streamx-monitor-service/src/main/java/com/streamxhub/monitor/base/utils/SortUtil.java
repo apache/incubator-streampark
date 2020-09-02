@@ -23,7 +23,7 @@ public class SortUtil {
     public static void handlePageSort(RestRequest request, Page page, String defaultSort, String defaultOrder, boolean camelToUnderscore) {
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
-        String sortField = request.getSortField();
+        String sortField = WebUtil.camelToUnderscore(request.getSortField());
         if (camelToUnderscore) {
             sortField = WebUtil.camelToUnderscore(sortField);
             defaultSort = WebUtil.camelToUnderscore(defaultSort);

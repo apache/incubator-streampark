@@ -63,7 +63,7 @@
       :scroll="{ x: 700 }"
       @change="handleTableChange">
 
-      <template slot="appName" slot-scope="text, record">
+   <!--   <template slot="appName" slot-scope="text, record">
         <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
           <ellipsis :length="40" tooltip>
             {{ record.appName }}
@@ -77,6 +77,64 @@
         <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy === 1">
           <a-icon slot="count" type="close" style="color: #333" />
         </a-badge>
+      </template>
+-->
+
+      <div
+        slot="filterDropdown"
+        slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
+        style="padding: 8px">
+        <a-input v-ant-ref="c => (searchInput = c)"
+          :placeholder="`Search ${column.dataIndex}`"
+          :value="selectedKeys[0]"
+          style="width: 188px; margin-bottom: 8px; display: block;"
+          @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
+          @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
+
+        <a-button
+          type="primary"
+          icon="search"
+          size="small"
+          style="width: 90px; margin-right: 8px"
+          @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)">
+          Search
+        </a-button>
+
+        <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
+          Reset
+        </a-button>
+      </div>
+
+      <a-icon slot="filterIcon"
+        slot-scope="filtered"
+        type="search"
+        :style="{ color: filtered ? '#108ee9' : undefined }"/>
+
+      <template slot="customRender" slot-scope="text, record, index, column">
+        <span v-if="searchText && searchedColumn === column.dataIndex">
+          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+            <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+              {{ fragment }}
+            </mark>
+            <template v-else>
+               <ellipsis :length="40" tooltip>
+                {{ fragment }}
+              </ellipsis>
+            </template>
+          </template>
+        </span>
+        <template v-else>
+          <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
+            <ellipsis :length="40" tooltip>
+              {{ text }}
+            </ellipsis>
+          </a-badge>
+          <span v-else>
+            <ellipsis :length="40" tooltip>
+              {{ text }}
+            </ellipsis>
+          </span>
+        </template>
       </template>
 
       <template slot="projectName" slot-scope="text, record">
@@ -297,6 +355,9 @@ export default {
       formDeploy: null,
       formSavePoint: null,
       application: null,
+      searchText: '',
+      searchInput: null,
+      searchedColumn: '',
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -316,7 +377,23 @@ export default {
         dataIndex: 'appName',
         width: 250,
         fixed: 'left',
-        scopedSlots: {customRender: 'appName'},
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'customRender',
+        },
+        onFilter: (value, record) =>
+          record.appName
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus()
+            })
+          }
+        }
       }, {
         title: 'Project',
         dataIndex: 'projectName',
@@ -345,8 +422,21 @@ export default {
       }, {
         title: 'Status',
         dataIndex: 'state',
-        width: 80,
+        width: 100,
         scopedSlots: {customRender: 'state'},
+        filters: [
+          { text: 'CREATED', value: 0 },
+          { text: 'DEPLOYING', value: 1 },
+          { text: 'DEPLOYED', value: 2 },
+          { text: 'STARTING', value: 3 },
+          { text: 'RESTARTING', value: 4 },
+          { text: 'RUNNING', value: 5 },
+          { text: 'FAILING', value: 6 },
+          { text: 'FAILED', value: 7 },
+          { text: 'CANCELED', value: 9 },
+          { text: 'FINISHED', value: 10 },
+          { text: 'LOST', value: 13 }
+        ],
         fixed: 'right'
       }, {
         title: 'Operation',
@@ -361,9 +451,9 @@ export default {
   mounted() {
     this.handleYarn()
     this.handleFetch(true)
-    const timer = window.setInterval(() => this.handleFetch(false), 1000)
+    //const timer = window.setInterval(() => this.handleFetch(false), 1000)
     this.$once('hook:beforeDestroy', () => {
-      clearInterval(timer);
+    //  clearInterval(timer);
     })
   },
 
@@ -447,46 +537,39 @@ export default {
       this.$router.push({'path': '/flink/app/detail'})
     },
 
-    handleSearch() {
+    handleSearch(selectedKeys, confirm, dataIndex) {
+      confirm()
+      this.searchText = selectedKeys[0]
+      this.searchedColumn = dataIndex
+      this.queryParams[this.searchedColumn] = this.searchText
       const {sortedInfo} = this
-      let sortField, sortOrder
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
+        this.queryParams['sortField'] = sortedInfo.field
+        this.queryParams['sortOrder'] = sortedInfo.order
       }
-      this.fetch({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams
-      })
+      console.log(this.queryParams)
     },
 
-    handleReset() {
-      // 取消选中
-      this.selectedRowKeys = []
+    handleReset(clearFilters) {
+      clearFilters()
+      this.searchText = ''
       // 重置列排序规则
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
-      // 清空时间选择
-      this.$refs.createTime.reset()
-      this.handleFetch()
     },
 
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
-      this.fetch({
-        sortField: sorter.field,
-        sortOrder: sorter.order,
-        ...this.queryParams,
-        ...filters
-      })
+      this.queryParams['sortField'] = sorter.field
+      this.queryParams['sortOrder'] = sorter.order
+      this.handleFetch(true)
     },
 
     handleFetch(loading) {
       if (loading) this.loading = true
-      const params = {}
+      const params = Object.assign(this.queryParams,{})
       if (this.paginationInfo) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
         this.$refs.TableInfo.pagination.current = this.paginationInfo.current
@@ -498,9 +581,7 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      list({
-        ...params
-      }).then((resp) => {
+      list({ ...params }).then((resp) => {
         this.loading = false
         const pagination = {...this.pagination}
         pagination.total = resp.data.total
