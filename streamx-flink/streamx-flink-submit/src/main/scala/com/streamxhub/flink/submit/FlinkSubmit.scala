@@ -190,7 +190,7 @@ object FlinkSubmit extends Logger {
           }
           verify
         }).foreach(x => {
-          val opt = commandLineOptions.getOption(s"--${x._1.drop(optionPrefix.length).trim}").getOpt
+          val opt = commandLineOptions.getOption(x._1.drop(optionPrefix.length).trim).getOpt
           Try(x._2.toBoolean).getOrElse(x._2) match {
             case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
             case v => optionMap += s"-$opt" -> v
@@ -270,11 +270,14 @@ object FlinkSubmit extends Logger {
     val configuration = new Configuration
 
     val classpath = new ArrayBuffer[URL]
-    if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
-      try classpath.add(new URL(path)) catch {
-        case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:$path,err:$e")
+    if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
+      for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
+        try classpath.add(new URL(path)) catch {
+          case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:$path,err:$e")
+        }
       }
     }
+
     ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
       override def apply(t: URL): String = t.toString
     })
