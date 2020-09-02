@@ -563,7 +563,7 @@ export default {
   font-weight: 700;
   font-size: 13px;
   text-align: center;
-  padding: 1px 5px;
+  padding: 0 4px;
   cursor: default;
 }
 
