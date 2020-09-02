@@ -11,7 +11,7 @@
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
         <result column="SHORT_OPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
         <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
-        <result column="APP_NAME" jdbcType="VARCHAR" property="appName"/>
+        <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
@@ -31,8 +31,8 @@
         inner join t_user u
         on t.user_id = u.user_id
         <where>
-            <if test="application.appName != null and application.appName != ''">
-                AND t.app_name like '%${application.appName}%'
+            <if test="application.jobName != null and application.jobName != ''">
+                AND t.job_name like '%${application.jobName}%'
             </if>
             <if test="application.projectName != null and application.projectName != ''">
                 AND p.name like '%${application.projectName}%'
