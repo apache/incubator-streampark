@@ -205,6 +205,7 @@ import {Terminal} from "xterm"
 import "xterm/css/xterm.css"
 import "xterm/lib/xterm.js"
 import {Icon} from 'ant-design-vue'
+import baseUrl from '@/api/baseUrl'
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_d0bamxgl4wt.js'
@@ -410,7 +411,7 @@ export default {
       })
       const container = document.getElementById("terminal")
       this.terminal.open(container, true)
-      const socket = new SockJS('http://pro-hadoop-2:10001/websocket')
+      const socket = new SockJS(baseUrl.concat('/websocket'))
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/tail', (msg) => this.terminal.writeln(msg.body))
@@ -496,6 +497,7 @@ export default {
 .icon-font {
   font-size: 50px;
 }
+
 .gutter-box {
   padding: 10px 20px;
   background: #fff;
