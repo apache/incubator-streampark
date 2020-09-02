@@ -31,20 +31,17 @@
         inner join t_user u
         on t.user_id = u.user_id
         <where>
+            <if test="application.appName != null and application.appName != ''">
+                AND t.app_name like '%${application.appName}%'
+            </if>
             <if test="application.projectName != null and application.projectName != ''">
                 AND p.name like '%${application.projectName}%'
             </if>
             <if test="application.appId != null and application.appId != ''">
                 AND t.app_id = #{application.appId}
             </if>
-            <if test="application.appName != null and application.appName != ''">
-                AND t.app_name = #{application.appName}
-            </if>
             <if test="application.state != null and application.state != ''">
                 AND t.state = #{application.state}
-            </if>
-            <if test="application.createTimeFrom != null and application.createTimeFrom !=''">
-                And t.create_time between #{application.createTimeFrom} and #{application.createTimeTo}
             </if>
         </where>
     </select>
