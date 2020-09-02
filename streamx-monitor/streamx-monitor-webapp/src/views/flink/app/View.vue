@@ -111,26 +111,55 @@
         :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
       <template slot="customRender" slot-scope="text, record, index, column">
-        <span v-if="searchText && searchedColumn === column.dataIndex">
-          <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-            <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
-              {{ fragment }}
-            </mark>
+        <template v-if="searchText && searchedColumn === column.dataIndex">
+          <a-badge v-if="record.deploy === 1" dot title="应用已更新,需重新发布">
+            <template v-if="text.length>25">
+              <a-tooltip placement="top">
+                <template slot="title">
+                  {{ text }}
+                </template>
+                <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                    {{ fragment }}
+                  </mark>
+                  <template v-else>
+                    {{ fragment }}
+                  </template>
+                </template>
+                ...
+              </a-tooltip>
+            </template>
             <template v-else>
-               <ellipsis :length="40" tooltip>
+              <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                  {{ fragment }}
+                </mark>
+                <template v-else>
+                  {{ fragment }}
+                </template>
+              </template>
+            </template>
+          </a-badge>
+          <template v-else>
+             <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                 {{ fragment }}
-              </ellipsis>
+              </mark>
+              <template v-else>
+                {{ fragment }}
+              </template>
             </template>
           </template>
-        </span>
+        </template>
+
         <template v-else>
           <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
-            <ellipsis :length="40" tooltip>
+            <ellipsis :length="45" tooltip>
               {{ text }}
             </ellipsis>
           </a-badge>
           <span v-else>
-            <ellipsis :length="40" tooltip>
+            <ellipsis :length="45" tooltip>
               {{ text }}
             </ellipsis>
           </span>
