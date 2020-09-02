@@ -63,15 +63,15 @@
       :scroll="{ x: 700 }"
       @change="handleTableChange">
 
-   <!--   <template slot="appName" slot-scope="text, record">
+   <!--   <template slot="jobName" slot-scope="text, record">
         <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
           <ellipsis :length="40" tooltip>
-            {{ record.appName }}
+            {{ record.jobName }}
           </ellipsis>
         </a-badge>
         <span v-else>
           <ellipsis :length="40" tooltip>
-            {{ record.appName }}
+            {{ record.jobName }}
           </ellipsis>
         </span>
         <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy === 1">
@@ -87,7 +87,7 @@
         <a-input v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
           :value="selectedKeys[0]"
-          style="width: 188px; margin-bottom: 8px; display: block;"
+          style="width: 200px; margin-bottom: 8px; display: block;"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
 
@@ -374,7 +374,7 @@ export default {
       sortedInfo = sortedInfo || {}
       return [{
         title: 'Job Name',
-        dataIndex: 'appName',
+        dataIndex: 'jobName',
         width: 250,
         fixed: 'left',
         scopedSlots: {
@@ -383,7 +383,7 @@ export default {
           customRender: 'customRender',
         },
         onFilter: (value, record) =>
-          record.appName
+          record.jobName
             .toString()
             .toLowerCase()
             .includes(value.toLowerCase()),
