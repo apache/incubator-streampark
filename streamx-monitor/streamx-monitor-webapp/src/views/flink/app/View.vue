@@ -1,5 +1,5 @@
 <template>
-  <a-card :bordered="false" style="margin-top: 20px;">
+  <a-card :bordered="false">
     <!-- 表格区域 -->
     <a-table
       ref="TableInfo"
@@ -7,6 +7,7 @@
       size="middle"
       rowKey="id"
       class="app_list"
+      style="margin-top: -10px"
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
@@ -84,16 +85,19 @@
         </template>
         <template v-else>
           <a-badge dot title="应用已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
-            <ellipsis :length="45" tooltip>
+            <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
           </a-badge>
           <span v-else>
-            <ellipsis :length="45" tooltip>
+            <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
           </span>
         </template>
+        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
+          <a-icon slot="count" type="close" style="color: #333" />
+        </a-badge>
       </template>
 
       <template slot="duration" slot-scope="text, record">
