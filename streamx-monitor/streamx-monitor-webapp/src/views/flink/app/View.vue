@@ -7,7 +7,7 @@
       size="middle"
       rowKey="id"
       class="app_list"
-      style="margin-top: -10px"
+      style="margin-top: -20px"
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
