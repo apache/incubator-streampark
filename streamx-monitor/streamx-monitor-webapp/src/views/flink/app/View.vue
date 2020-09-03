@@ -1,5 +1,99 @@
 <template>
-  <a-card :bordered="false">
+  <div>
+
+    <a-row :gutter="24">
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+          <a-divider style="margin-bottom: 10px"/>
+          <div>
+            <span>
+              Total
+              <strong>100</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Flink
+              <strong>67</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Spark
+              <strong>33</strong>
+            </span>
+          </div>
+        </div>
+      </a-col>
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+          <a-divider style="margin-bottom: 10px"/>
+          <div>
+            <span>
+              Total
+              <strong>100</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Flink
+              <strong>67</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Spark
+              <strong>33</strong>
+            </span>
+          </div>
+        </div>
+      </a-col>
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-divider style="margin-bottom: 10px"/>
+          <div>
+            <span>
+              Total
+              <strong>100</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Flink
+              <strong>67</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Spark
+              <strong>33</strong>
+            </span>
+          </div>
+        </div>
+      </a-col>
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-divider style="margin-bottom: 10px"/>
+          <div>
+            <span>
+              Total
+              <strong>100</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Flink
+              <strong>67</strong>
+            </span>
+            <a-divider type="vertical" />
+            <span>
+              Spark
+              <strong>33</strong>
+            </span>
+          </div>
+        </div>
+      </a-col>
+    </a-row>
+
+    <a-card :bordered="false" style="margin-top: 20px">
+
     <!-- 表格区域 -->
     <a-table
       ref="TableInfo"
@@ -302,10 +396,13 @@
     </a-modal>
 
   </a-card>
+  </div>
 </template>
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
+import VueApexCharts from "vue-apexcharts"
+import {Icon} from 'ant-design-vue'
 import {list, remove, cancel, deploy, startUp, closeDeploy, yarn} from '@api/application'
 
 export default {
@@ -335,6 +432,99 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+      },
+      seriesSpark3: [{
+        data: [400, 12, 400, 243, 404,433,145,210,321,100,213,89,254]
+      }],
+
+      chartOptionsSpark3: {
+        chart: {
+          type: 'area',
+          height: 140,
+          sparkline: {
+            enabled: true
+          },
+        },
+        stroke: {
+          curve: 'straight'
+        },
+        fill: {
+          opacity: 0.3
+        },
+        xaxis: {
+          crosshairs: {
+            width: 1
+          },
+        },
+        yaxis: {
+          min: 0
+        },
+        title: {
+          text: '13,965',
+          offsetX: 0,
+          style: {
+            fontSize: '24px',
+          }
+        },
+        subtitle: {
+          text: 'Total Project',
+          offsetX: 0,
+          style: {
+            fontSize: '14px',
+          }
+        }
+      },
+
+      chart: {
+        state: {
+          series: [{
+            data: [400, 430, 448, 470, 540]
+          }],
+          chartOptions: {
+            chart: {
+              type: 'bar',
+              height: 350
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true,
+              }
+            },
+            dataLabels: {
+              enabled: false
+            },
+            xaxis: {
+              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy'],
+            }
+          },
+        },
+        type: {
+          series: [44, 55],
+          chartOptions: {
+            chart: {
+              width: 240,
+              type: 'donut',
+            },
+            dataLabels: {
+              enabled: false
+            },
+            fill: {
+              type: 'gradient',
+            },
+            labels: ['Flink', 'Spark'],
+            responsive: [{
+              breakpoint: 240,
+              options: {
+                chart: {
+                  width: 240
+                },
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }]
+          },
+        }
       }
     }
   },
@@ -756,5 +946,30 @@ export default {
     box-shadow: 0 0 10px #eb2f96, inset 0 0 5px #eb2f96;
   }
 }
+
+
+.icon-font {
+  font-size: 50px;
+}
+
+.gutter-box {
+  padding: 10px 20px;
+  background: #fff;
+  color: rgba(0, 0, 0, 0.65);
+  font-size: 14px;
+  font-variant: tabular-nums;
+  line-height: 1.5;
+  list-style: none;
+  -webkit-font-feature-settings: 'tnum';
+  font-feature-settings: 'tnum';
+  position: relative;
+  border-radius: 2px;
+  transition: all 0.3s;
+}
+
+.operation {
+  width: 80px;
+}
+
 
 </style>
