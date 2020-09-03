@@ -101,7 +101,7 @@
       size="middle"
       rowKey="id"
       class="app_list"
-      style="margin-top: -20px"
+      style="margin-top: -24px"
       :dataSource="dataSource"
       :pagination="pagination"
       :loading="loading"
@@ -113,7 +113,7 @@
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
         style="padding: 8px">
         <a-input v-ant-ref="c => (searchInput = c)"
-          :placeholder="`Search ${column.dataIndex}`"
+          :placeholder="`Search ${column.title}`"
           :value="selectedKeys[0]"
           style="width: 220px; margin-bottom: 8px; display: block;"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
@@ -945,11 +945,6 @@ export default {
     border-color: #eb2f96;
     box-shadow: 0 0 10px #eb2f96, inset 0 0 5px #eb2f96;
   }
-}
-
-
-.icon-font {
-  font-size: 50px;
 }
 
 .gutter-box {
