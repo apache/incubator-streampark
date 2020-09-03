@@ -1,55 +1,5 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
-    <div class="table-page-search-wrapper">
-      <a-form layout="inline">
-        <a-row :gutter="48">
-          <div class="fold">
-            <a-col :md="8" :sm="24">
-              <a-form-item
-                label="名称"
-                :labelCol="{span: 4}"
-                :wrapperCol="{span: 18, offset: 2}">
-                <a-input v-model="queryParams['projectName']"/>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item
-                label="创建时间"
-                :labelCol="{span: 4}"
-                :wrapperCol="{span: 18, offset: 2}">
-                <range-date
-                  @change="handleDateChange"
-                  ref="createTime">
-                </range-date>
-              </a-form-item>
-            </a-col>
-            <a-col :md="8" :sm="24">
-              <span class="table-page-search-bar">
-                <a-button
-                  type="primary"
-                  shape="circle"
-                  icon="search"
-                  @click="handleSearch">
-                </a-button>
-                <a-button
-                  type="primary"
-                  shape="circle"
-                  icon="rest"
-                  @click="handleReset">
-                </a-button>
-                <a-button
-                  v-permit="'role:delete'"
-                  type="primary"
-                  shape="circle"
-                  icon="plus"
-                  @click="addTask">
-                </a-button>
-              </span>
-            </a-col>
-          </div>
-        </a-row>
-      </a-form>
-    </div>
     <!-- 表格区域 -->
     <a-table
       ref="TableInfo"
@@ -63,23 +13,6 @@
       :scroll="{ x: 700 }"
       @change="handleTableChange">
 
-   <!--   <template slot="jobName" slot-scope="text, record">
-        <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
-          <ellipsis :length="40" tooltip>
-            {{ record.jobName }}
-          </ellipsis>
-        </a-badge>
-        <span v-else>
-          <ellipsis :length="40" tooltip>
-            {{ record.jobName }}
-          </ellipsis>
-        </span>
-        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy === 1">
-          <a-icon slot="count" type="close" style="color: #333" />
-        </a-badge>
-      </template>
--->
-
       <div
         slot="filterDropdown"
         slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -87,10 +20,9 @@
         <a-input v-ant-ref="c => (searchInput = c)"
           :placeholder="`Search ${column.dataIndex}`"
           :value="selectedKeys[0]"
-          style="width: 200px; margin-bottom: 8px; display: block;"
+          style="width: 220px; margin-bottom: 8px; display: block;"
           @change="e => setSelectedKeys(e.target.value ? [e.target.value] : [])"
           @pressEnter="() => handleSearch(selectedKeys, confirm, column.dataIndex)"/>
-
         <a-button
           type="primary"
           icon="search"
@@ -99,7 +31,6 @@
           @click="() => handleSearch(selectedKeys, confirm, column.dataIndex)">
           Search
         </a-button>
-
         <a-button size="small" style="width: 90px" @click="() => handleReset(clearFilters)">
           Reset
         </a-button>
@@ -110,9 +41,9 @@
         type="search"
         :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
-      <template slot="customRender" slot-scope="text, record, index, column">
+      <template slot="filterRender" slot-scope="text, record, index, column">
         <template v-if="searchText && searchedColumn === column.dataIndex">
-          <a-badge v-if="record.deploy === 1" dot title="应用已更新,需重新发布">
+          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用已更新,需重新发布">
             <template v-if="text.length>25">
               <a-tooltip placement="top">
                 <template slot="title">
@@ -151,9 +82,8 @@
             </template>
           </template>
         </template>
-
         <template v-else>
-          <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
+          <a-badge dot title="应用已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
             <ellipsis :length="45" tooltip>
               {{ text }}
             </ellipsis>
@@ -164,12 +94,6 @@
             </ellipsis>
           </span>
         </template>
-      </template>
-
-      <template slot="projectName" slot-scope="text, record">
-        <ellipsis :length="35" tooltip>
-          {{ record.projectName}}
-        </ellipsis>
       </template>
 
       <template slot="duration" slot-scope="text, record">
@@ -230,6 +154,18 @@
           <a-tag color="#eb2f96" v-if="state === 12" class="status-processing-reconciling">RECONCILING</a-tag>
           <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
         </div>
+      </template>
+
+      <template slot="customOperation">
+        Operation
+        <a-button
+          v-permit="'role:delete'"
+          type="primary"
+          shape="circle"
+          icon="plus"
+          style="margin-left: 20px; width: 25px;height: 25px;min-width: 25px"
+          @click="handleAdd">
+        </a-button>
       </template>
 
       <template slot="operation" slot-scope="text, record">
@@ -378,6 +314,7 @@ export default {
       selectedRowKeys: [],
       queryParams: {},
       sortedInfo: null,
+      filteredInfo: null,
       yarn: null,
       deployVisible: false,
       cancelVisible: false,
@@ -399,8 +336,9 @@ export default {
   },
   computed: {
     columns() {
-      let {sortedInfo} = this
+      let { sortedInfo, filteredInfo } = this
       sortedInfo = sortedInfo || {}
+      filteredInfo = filteredInfo || {}
       return [{
         title: 'Job Name',
         dataIndex: 'jobName',
@@ -409,7 +347,7 @@ export default {
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'customRender',
+          customRender: 'filterRender',
         },
         onFilter: (value, record) =>
           record.jobName
@@ -426,8 +364,24 @@ export default {
       }, {
         title: 'Project',
         dataIndex: 'projectName',
-        scopedSlots: {customRender: 'projectName'},
-        width: 200
+        width: 200,
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'filterRender',
+        },
+        onFilter: (value, record) =>
+          record['projectName']
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus()
+            })
+          }
+        }
       }, {
         title: 'Start Time',
         dataIndex: 'startTime',
@@ -451,7 +405,7 @@ export default {
       }, {
         title: 'Status',
         dataIndex: 'state',
-        width: 100,
+        width: 120,
         scopedSlots: {customRender: 'state'},
         filters: [
           { text: 'CREATED', value: 0 },
@@ -466,11 +420,20 @@ export default {
           { text: 'FINISHED', value: 10 },
           { text: 'LOST', value: 13 }
         ],
-        fixed: 'right'
+        fixed: 'right',
+        filteredValue: filteredInfo.state || null,
+        onFilter: (value, record) => {
+          console.log(record.state === value)
+          console.log(value + "------")
+          return record.state === value
+        },
+        sorter: (a, b) => a.state - b.state,
+        sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
       }, {
-        title: 'Operation',
         dataIndex: 'operation',
+        key: 'operation',
         scopedSlots: {customRender: 'operation'},
+        slots: { title: 'customOperation' },
         fixed: 'right',
         width: 150
       }]
@@ -629,7 +592,7 @@ export default {
       window.open(this.yarn + "/proxy/" + params['appId'] + "/")
     },
 
-    addTask() {
+    handleAdd() {
       this.$router.push({'path': '/flink/app/add'})
     },
 
