@@ -447,9 +447,9 @@ export default {
   mounted() {
     this.handleYarn()
     this.handleFetch(true)
-    //const timer = window.setInterval(() => this.handleFetch(false), 1000)
+    const timer = window.setInterval(() => this.handleFetch(false), 1000)
     this.$once('hook:beforeDestroy', () => {
-    //  clearInterval(timer);
+      clearInterval(timer);
     })
   },
 
