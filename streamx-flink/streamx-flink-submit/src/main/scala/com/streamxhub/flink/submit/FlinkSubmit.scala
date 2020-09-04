@@ -228,10 +228,10 @@ object FlinkSubmit extends Logger {
     }
 
     val activeCommandLine = validateAndGetActiveCommandLine()
+
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
 
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
