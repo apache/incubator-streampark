@@ -6,9 +6,9 @@
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>streamx-monitor-shell</artifactId>
-    <name>streamx-monitor-shell</name>
-    <description>streamx-monitor-shell</description>
+    <artifactId>streamx-monitor-repl</artifactId>
+    <name>streamx-monitor-repl</name>
+    <description>streamx-monitor-repl</description>
 
     <!-- 定义统一版本号-->
     <properties>
