@@ -106,8 +106,12 @@ object ParameterCli {
           }
         })
     }
+    optionToArg(optionMap)
+  }
+
+  def optionToArg(option: mutable.Map[String, Any]): Array[String] = {
     val array = new ArrayBuffer[String]
-    optionMap.foreach(x => {
+    option.foreach(x => {
       array += x._1
       if (x._2.isInstanceOf[String]) {
         array += x._2.toString
@@ -115,6 +119,5 @@ object ParameterCli {
     })
     array.toArray
   }
-
 
 }
