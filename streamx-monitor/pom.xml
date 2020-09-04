@@ -11,6 +11,7 @@
 
     <modules>
         <module>streamx-monitor-service</module>
+        <module>streamx-monitor-shell</module>
         <module>streamx-monitor-webapp</module>
     </modules>
 
