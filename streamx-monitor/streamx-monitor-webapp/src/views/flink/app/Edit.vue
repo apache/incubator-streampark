@@ -42,8 +42,11 @@
           placeholder="请选择配置文件"
           treeDefaultExpandAll
           @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]"/>
+          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
+          >
+        </a-tree-select>
       </a-form-item>
+
 
       <a-form-item
         label="App name"

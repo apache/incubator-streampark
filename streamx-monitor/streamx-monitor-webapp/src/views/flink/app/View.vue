@@ -1,6 +1,5 @@
 <template>
   <div>
-
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
