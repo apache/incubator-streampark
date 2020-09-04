@@ -2,9 +2,10 @@ package com.streamxhub.flink.test
 
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.KafkaSink
+import com.streamxhub.flink.core.sink.{KafkaSink, RedisMapper, RedisSink}
 import com.streamxhub.flink.core.source.KafkaSource
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 
 object FlinkSinkApp extends FlinkStreaming {
@@ -26,9 +27,15 @@ object FlinkSinkApp extends FlinkStreaming {
 
     //Kafka sink..................
     //2)下沉到目标
-    KafkaSink(context).sink(source)
+    //KafkaSink(context).sink(source)
 
-    /**
+    val ds = source.flatMap(x => {
+      x.split(",") match {
+        case Array(d, a, b, c) => Some(Person(d.toInt, a, b.toInt, c.toInt))
+        case _ => None
+      }
+    })
+
     val ds2 = source.flatMap(x => {
       x.split(",") match {
         case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
@@ -40,12 +47,13 @@ object FlinkSinkApp extends FlinkStreaming {
     //1)定义 RedisSink
     val sink = RedisSink(context)
     //2)写Mapper映射
-    val personMapper: Mapper[Person] = Mapper[Person](RedisCommand.HSET, "flink_person", _.id.toString, _.name)
-    val userMapper: Mapper[User] = Mapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)
+    val personMapper: RedisMapper[Person] = RedisMapper[Person](RedisCommand.HSET, "flink_person", _.id.toString, _.name)
+    val userMapper: RedisMapper[User] = RedisMapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)
 
     //3)下沉数据.done
-    sink.sink[User](ds2,userMapper)
-    sink.sink[Person](ds,personMapper)*/
+    sink.towPCSink[User](ds2, userMapper,201800)
+    sink.towPCSink[Person](ds, personMapper,204800)
+
 
   }
 

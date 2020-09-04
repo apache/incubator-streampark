@@ -33,7 +33,7 @@ object ConfigUtils {
   def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
-    map.foreach { case (k, v) => prop.put(addfix + k, v) }
+    map.filter(_._2.nonEmpty).foreach { case (k, v) => prop.put(addfix + k, v) }
     prop
   }
 
