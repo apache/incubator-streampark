@@ -111,7 +111,7 @@
       </a-form-item>
 
       <a-form-item
-        class="conf_item"
+        class="conf-item"
         v-for="(conf,index) in options"
         v-if="configItems.includes(conf.name)"
         :key="index"
@@ -525,7 +525,7 @@ export default {
   margin-right: 20px;
 }
 
-.conf_item {
+.conf-item {
   margin-bottom: 0px;
 }
 
