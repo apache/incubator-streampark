@@ -255,7 +255,7 @@ class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
         case Some(t) => t.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
         case _ => this.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
       }
-      case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
+      case other => throw new IllegalArgumentException("[StreamX] RedisSink:Cannot process such data type: " + other)
     }
   }
 
