@@ -113,7 +113,7 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
     redisContainer = RedisContainer.getContainer(jedisConfig)
   }
 
-  override def invoke(input: R): Unit = {
+  override def invoke(input: R, context: SinkFunction.Context[_]): Unit = {
     val key = mapper.getKeyFromData(input)
     val value = mapper.getValueFromData(input)
     mapper.getCommandDescription.getCommand match {
@@ -222,39 +222,41 @@ class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: Mapper[
   }
 
   override def commit(transaction: Transaction[R]): Unit = {
-    try {
-      val redisContainer = RedisContainer.getContainer(jedisConfig)
-      val jedisTransaction = redisContainer.jedis.multi()
-      transaction.mapper.foreach(x => {
-        val mapper = x._1
-        val ttl = x._2
-        val r = x._3
-        val key = mapper.getKeyFromData(r)
-        val value = mapper.getValueFromData(r)
-        mapper.getCommandDescription.getCommand match {
-          case RPUSH => redisContainer.rpush(key, value)
-          case LPUSH => redisContainer.lpush(key, value)
-          case SADD => redisContainer.sadd(key, value)
-          case SET => redisContainer.set(key, value)
-          case PFADD => redisContainer.pfadd(key, value)
-          case PUBLISH => redisContainer.publish(key, value)
-          case ZADD => redisContainer.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
-          case ZREM => redisContainer.zrem(mapper.getCommandDescription.getAdditionalKey, key)
-          case HSET => redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
-          case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
-        }
-        redisContainer.expireAndClose(key, ttl)
-        jedisTransaction.exec()
-        //成功,清除state...
-        buffer -= transaction.transactionId
-      })
-    } catch {
-      case e: JedisException =>
-        logError(s"[StreamX] Redis2PCSink commit JedisException:${e.getMessage}")
-        throw e
-      case t: Throwable =>
-        logError(s"[StreamX] Redis2PCSink commit Throwable:${t.getMessage}")
-        throw t
+    if (transaction.invoked && transaction.mapper.nonEmpty) {
+      try {
+        val redisContainer = RedisContainer.getContainer(jedisConfig)
+        val jedisTransaction = redisContainer.jedis.multi()
+        transaction.mapper.foreach(x => {
+          val mapper = x._1
+          val ttl = x._2
+          val r = x._3
+          val key = mapper.getKeyFromData(r)
+          val value = mapper.getValueFromData(r)
+          mapper.getCommandDescription.getCommand match {
+            case RPUSH => redisContainer.rpush(key, value)
+            case LPUSH => redisContainer.lpush(key, value)
+            case SADD => redisContainer.sadd(key, value)
+            case SET => redisContainer.set(key, value)
+            case PFADD => redisContainer.pfadd(key, value)
+            case PUBLISH => redisContainer.publish(key, value)
+            case ZADD => redisContainer.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
+            case ZREM => redisContainer.zrem(mapper.getCommandDescription.getAdditionalKey, key)
+            case HSET => redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
+            case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
+          }
+          redisContainer.expireAndClose(key, ttl)
+          jedisTransaction.exec()
+          //成功,清除state...
+          buffer -= transaction.transactionId
+        })
+      } catch {
+        case e: JedisException =>
+          logError(s"[StreamX] Redis2PCSink commit JedisException:${e.getMessage}")
+          throw e
+        case t: Throwable =>
+          logError(s"[StreamX] Redis2PCSink commit Throwable:${t.getMessage}")
+          throw t
+      }
     }
   }
 
