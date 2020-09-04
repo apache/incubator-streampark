@@ -21,6 +21,7 @@
 package com.streamxhub.flink.core.sink
 
 import java.io.IOException
+
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig}
@@ -45,6 +46,7 @@ import redis.clients.jedis.{Jedis, JedisPool}
 
 import scala.annotation.meta.param
 import scala.collection.mutable.ListBuffer
+import scala.sys.SystemProperties.headless.key
 
 object RedisSink {
 
@@ -94,51 +96,89 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
 
 }
 
-class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => String) extends RedisMapper[T] with Serializable {
-
-  override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, key)
-
-  override def getKeyFromData(r: T): String = k(r)
-
-  override def getValueFromData(r: T): String = v(r)
-
-}
 
 class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[R], ttl: Int) extends RSink[R](jedisConfig, mapper) with Logger {
 
-  private[this] var redisContainer: RedisContainer = _
+  private[this] var redisContainer: RedisContainer[R] = _
 
-  @throws[Exception]
-  override def open(parameters: Configuration): Unit = {
-    redisContainer = RedisContainer.getContainer(jedisConfig)
+  @throws[Exception] override def open(parameters: Configuration): Unit = {
+    redisContainer = RedisContainer.getContainer[R](jedisConfig)
   }
 
   override def invoke(input: R, context: SinkFunction.Context[_]): Unit = {
-    val key = mapper.getKeyFromData(input)
-    val value = mapper.getValueFromData(input)
-    mapper.getCommandDescription.getCommand match {
-      case RPUSH => this.redisContainer.rpush(key, value)
-      case LPUSH => this.redisContainer.lpush(key, value)
-      case SADD => this.redisContainer.sadd(key, value)
-      case SET => this.redisContainer.set(key, value)
-      case PFADD => this.redisContainer.pfadd(key, value)
-      case PUBLISH => this.redisContainer.publish(key, value)
-      case ZADD => this.redisContainer.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
-      case ZREM => this.redisContainer.zrem(mapper.getCommandDescription.getAdditionalKey, key)
-      case HSET => this.redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
-      case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
-    }
+    redisContainer.invoke(mapper, input)
     redisContainer.expire(key, ttl)
   }
 
-  @throws[IOException]
-  override def close(): Unit = if (redisContainer != null) redisContainer.close()
+  @throws[IOException] override def close(): Unit = if (redisContainer != null) redisContainer.close()
+
+}
+//-----------------------
+
+class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
+  extends TwoPhaseCommitSinkFunction[T, Transaction[T], Void](new KryoSerializer[Transaction[T]](classOf[Transaction[T]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
+
+  private[this] val buffer: collection.mutable.Map[String, Transaction[T]] = collection.mutable.Map.empty[String, Transaction[T]]
+
+  override def beginTransaction(): Transaction[T] = {
+    logInfo("[StreamX] Redis2PCSink beginTransaction.")
+    Transaction[T]()
+  }
+
+  override def invoke(transaction: Transaction[T], value: T, context: SinkFunction.Context[_]): Unit = {
+    transaction.invoked = true
+    transaction + (mapper, value, ttl)
+  }
+
+  override def preCommit(transaction: Transaction[T]): Unit = {
+    //防止未调用invoke方法直接调用preCommit
+    if (transaction.invoked) {
+      logInfo(s"[StreamX] Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
+      buffer += transaction.transactionId -> transaction
+    }
+  }
+
+  override def commit(transaction: Transaction[T]): Unit = {
+    if (transaction.invoked && transaction.mapper.nonEmpty) {
+      try {
+        val redisContainer = RedisContainer.getContainer[T](jedisConfig)
+        val jedisTransaction = redisContainer.jedis.multi()
+        transaction.mapper.foreach(x => {
+          redisContainer.invoke(x._1, x._2)
+          redisContainer.expire(mapper.getKeyFromData(x._2), x._3)
+        })
+        jedisTransaction.exec()
+        jedisTransaction.close()
+        redisContainer.close()
+        //成功,清除state...
+        buffer -= transaction.transactionId
+      } catch {
+        case e: JedisException =>
+          logError(s"[StreamX] Redis2PCSink commit JedisException:${e.getMessage}")
+          throw e
+        case t: Throwable =>
+          logError(s"[StreamX] Redis2PCSink commit Throwable:${t.getMessage}")
+          throw t
+      }
+    }
+  }
+
+  override def abort(transaction: Transaction[T]): Unit = {
+    logInfo(s"[StreamX] Redis2PCSink abort,TransactionId:${transaction.transactionId}")
+    buffer -= transaction.transactionId
+  }
 
 }
 
+
+case class Transaction[T](transactionId: String = Utils.uuid(), mapper: ListBuffer[(RedisMapper[T], T, Int)] = ListBuffer.empty, var invoked: Boolean = false) extends Serializable {
+  def +(redisMapper: RedisMapper[T], r: T, ttl: Int): Unit = mapper.add((redisMapper, r, ttl))
+}
+
+
 object RedisContainer extends Logger {
 
-  def getContainer(jedisConfig: FlinkJedisConfigBase): RedisContainer = {
+  def getContainer[T](jedisConfig: FlinkJedisConfigBase): RedisContainer[T] = {
     val jedisPoolConfig = jedisConfig.asInstanceOf[FlinkJedisPoolConfig]
     val genericObjectPoolConfig = new GenericObjectPoolConfig
     genericObjectPoolConfig.setMaxIdle(jedisPoolConfig.getMaxIdle)
@@ -153,7 +193,7 @@ object RedisContainer extends Logger {
       jedisPoolConfig.getDatabase
     )
     try {
-      val redisContainer = new RedisContainer(jedisPool)
+      val redisContainer = new RedisContainer[T](jedisPool)
       redisContainer.open()
       redisContainer
     } catch {
@@ -165,8 +205,30 @@ object RedisContainer extends Logger {
 
 }
 
-class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
-  lazy val jedis: Jedis = classOf[RContainer].getDeclaredMethod("getInstance", classOf[Void]).invoke(this, null).asInstanceOf[Jedis]
+class RedisContainer[R](jedisPool: JedisPool) extends RContainer[R](jedisPool) {
+
+  lazy val jedis: Jedis = {
+    val method = classOf[RContainer].getDeclaredMethod("getInstance", classOf[Void])
+    method.setAccessible(true)
+    method.invoke(this, null).asInstanceOf[Jedis]
+  }
+
+  def invoke(mapper: RedisMapper[R], input: R): Unit = {
+    val key = mapper.getKeyFromData(input)
+    val value = mapper.getValueFromData(input)
+    mapper.getCommandDescription.getCommand match {
+      case RPUSH => this.rpush(key, value)
+      case LPUSH => this.lpush(key, value)
+      case SADD => this.sadd(key, value)
+      case SET => this.set(key, value)
+      case PFADD => this.pfadd(key, value)
+      case PUBLISH => this.publish(key, value)
+      case ZADD => this.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
+      case ZREM => this.zrem(mapper.getCommandDescription.getAdditionalKey, key)
+      case HSET => this.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
+      case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
+    }
+  }
 
   def expire(key: String, ttl: Int): Unit = {
     ttl match {
@@ -177,83 +239,13 @@ class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
 
 }
 
+class Mapper[T](cmd: RedisCommand, key: String, k: T => String, v: T => String) extends RedisMapper[T] with Serializable {
 
-//-----------------------
+  override def getCommandDescription: RedisCommandDescription = new RedisCommandDescription(cmd, key)
 
-class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[R], ttl: Int)
-  extends TwoPhaseCommitSinkFunction[R, Transaction[R], Void](new KryoSerializer[Transaction[R]](classOf[Transaction[R]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
+  override def getKeyFromData(r: T): String = k(r)
 
-  private[this] val buffer: collection.mutable.Map[String, Transaction[R]] = collection.mutable.Map.empty[String, Transaction[R]]
-
-  override def beginTransaction(): Transaction[R] = {
-    logInfo("[StreamX] Redis2PCSink beginTransaction.")
-    Transaction[R]()
-  }
-
-  override def invoke(transaction: Transaction[R], value: R, context: SinkFunction.Context[_]): Unit = {
-    transaction.invoked = true
-    transaction + (mapper, ttl, value)
-  }
-
-  override def preCommit(transaction: Transaction[R]): Unit = {
-    //防止未调用invoke方法直接调用preCommit
-    if (transaction.invoked) {
-      logInfo(s"[StreamX] Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
-      buffer += transaction.transactionId -> transaction
-    }
-  }
-
-  override def commit(transaction: Transaction[R]): Unit = {
-    if (transaction.invoked && transaction.mapper.nonEmpty) {
-      try {
-        val redisContainer = RedisContainer.getContainer(jedisConfig)
-        val jedisTransaction = redisContainer.jedis.multi()
-        transaction.mapper.foreach(x => {
-          val mapper = x._1
-          val ttl = x._2
-          val r = x._3
-          val key = mapper.getKeyFromData(r)
-          val value = mapper.getValueFromData(r)
-          mapper.getCommandDescription.getCommand match {
-            case RPUSH => redisContainer.rpush(key, value)
-            case LPUSH => redisContainer.lpush(key, value)
-            case SADD => redisContainer.sadd(key, value)
-            case SET => redisContainer.set(key, value)
-            case PFADD => redisContainer.pfadd(key, value)
-            case PUBLISH => redisContainer.publish(key, value)
-            case ZADD => redisContainer.zadd(mapper.getCommandDescription.getAdditionalKey, value, key)
-            case ZREM => redisContainer.zrem(mapper.getCommandDescription.getAdditionalKey, key)
-            case HSET => redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
-            case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
-          }
-          redisContainer.expire(key, ttl)
-          jedisTransaction.exec()
-          jedisTransaction.close()
-          redisContainer.close()
-          //成功,清除state...
-          buffer -= transaction.transactionId
-        })
-      } catch {
-        case e: JedisException =>
-          logError(s"[StreamX] Redis2PCSink commit JedisException:${e.getMessage}")
-          throw e
-        case t: Throwable =>
-          logError(s"[StreamX] Redis2PCSink commit Throwable:${t.getMessage}")
-          throw t
-      }
-    }
-  }
-
-  override def abort(transaction: Transaction[R]): Unit = {
-    logInfo(s"[StreamX] Redis2PCSink abort,TransactionId:${transaction.transactionId}")
-    buffer -= transaction.transactionId
-  }
+  override def getValueFromData(r: T): String = v(r)
 
 }
-
-
-case class Transaction[R](transactionId: String = Utils.uuid(), mapper: ListBuffer[(RedisMapper[R], Int, R)] = ListBuffer.empty, var invoked: Boolean = false) extends Serializable {
-  def +(redisMapper: RedisMapper[R], ttl: Int, r: R): Unit = mapper.add((redisMapper, ttl, r))
-}
-
 
