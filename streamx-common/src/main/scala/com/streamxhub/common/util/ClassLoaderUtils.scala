@@ -77,7 +77,7 @@ object ClassLoaderUtils {
 
   private def loopFiles(file: File): Unit = {
     if (file.isDirectory) {
-      file.listFiles.foreach(x => loopFiles(x))
+      file.listFiles.foreach(loopFiles)
     } else if (file.getAbsolutePath.endsWith(".jar") || file.getAbsolutePath.endsWith(".zip")) {
       addURL(file)
     }
