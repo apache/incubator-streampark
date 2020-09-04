@@ -114,7 +114,7 @@ class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
 
 }
 
-//-----------------------
+//-------------Redis2PCSinkFunction,端到端精准一次语义实现---------------------------------------------------------------------------------------
 
 class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[T], ttl: Int)
   extends TwoPhaseCommitSinkFunction[T, RedisTransaction[T], Void](new KryoSerializer[RedisTransaction[T]](classOf[RedisTransaction[T]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
