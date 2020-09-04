@@ -124,7 +124,7 @@ http.sink:
 kafka.source:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
   topic: hello
-  group.id: flink_01
+  group.id: flink_02
   auto.offset.reset: earliest
   #enable.auto.commit: true
   #start.from:
