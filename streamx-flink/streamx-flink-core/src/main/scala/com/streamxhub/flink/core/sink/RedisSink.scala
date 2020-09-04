@@ -128,7 +128,7 @@ class RedisSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
       case HSET => this.redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
       case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
     }
-    redisContainer.expireAndClose(key, ttl)
+    redisContainer.expire(key, ttl)
   }
 
   @throws[IOException]
@@ -162,43 +162,25 @@ object RedisContainer extends Logger {
         throw e
     }
   }
+
 }
 
 class RedisContainer(jedisPool: JedisPool) extends RContainer(jedisPool) {
+  lazy val jedis: Jedis = classOf[RContainer].getDeclaredMethod("getInstance", classOf[Void]).invoke(this, null).asInstanceOf[Jedis]
 
-  lazy val jedis: Jedis = jedisPool.getResource
-
-  override def hset(key: String, hashField: String, value: String): Unit = jedis.hset(key, hashField, value)
-
-  override def rpush(key: String, value: String): Unit = jedis.rpush(key, value)
-
-  override def lpush(key: String, value: String): Unit = jedis.lpush(key, value)
-
-  override def sadd(key: String, value: String): Unit = jedis.sadd(key, value)
-
-  override def publish(key: String, message: String): Unit = jedis.publish(key, message)
-
-  override def set(key: String, value: String): Unit = jedis.set(key, value)
-
-  override def pfadd(key: String, element: String): Unit = jedis.pfadd(key, element)
-
-  override def zadd(key: String, score: String, element: String): Unit = jedis.zadd(key, score.toDouble, element)
-
-  override def zrem(key: String, element: String): Unit = jedis.zrem(key, element)
-
-  def expireAndClose(key: String, ttl: Int): Unit = {
+  def expire(key: String, ttl: Int): Unit = {
     ttl match {
       case Int.MaxValue =>
       case _ => jedis.expire(key, ttl)
     }
-    jedis.close()
   }
+
 }
 
 
 //-----------------------
 
-class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: Mapper[R], ttl: Int)
+class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: RedisMapper[R], ttl: Int)
   extends TwoPhaseCommitSinkFunction[R, Transaction[R], Void](new KryoSerializer[Transaction[R]](classOf[Transaction[R]], new ExecutionConfig), VoidSerializer.INSTANCE) with Logger {
 
   private[this] val buffer: collection.mutable.Map[String, Transaction[R]] = collection.mutable.Map.empty[String, Transaction[R]]
@@ -216,7 +198,7 @@ class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: Mapper[
   override def preCommit(transaction: Transaction[R]): Unit = {
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
-      logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
+      logInfo(s"[StreamX] Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
       buffer += transaction.transactionId -> transaction
     }
   }
@@ -244,8 +226,10 @@ class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: Mapper[
             case HSET => redisContainer.hset(mapper.getCommandDescription.getAdditionalKey, key, value)
             case other => throw new IllegalArgumentException("[Streamx] RedisSink:Cannot process such data type: " + other)
           }
-          redisContainer.expireAndClose(key, ttl)
+          redisContainer.expire(key, ttl)
           jedisTransaction.exec()
+          jedisTransaction.close()
+          redisContainer.close()
           //成功,清除state...
           buffer -= transaction.transactionId
         })
@@ -268,8 +252,8 @@ class Redis2PCSinkFunction[R](jedisConfig: FlinkJedisConfigBase, mapper: Mapper[
 }
 
 
-case class Transaction[R](transactionId: String = Utils.uuid(), mapper: ListBuffer[(Mapper[R], Int, R)] = ListBuffer.empty, var invoked: Boolean = false) extends Serializable {
-  def +(_mapper: Mapper[R], ttl: Int, r: R): Unit = mapper.add((_mapper, ttl, r))
+case class Transaction[R](transactionId: String = Utils.uuid(), mapper: ListBuffer[(RedisMapper[R], Int, R)] = ListBuffer.empty, var invoked: Boolean = false) extends Serializable {
+  def +(redisMapper: RedisMapper[R], ttl: Int, r: R): Unit = mapper.add((redisMapper, ttl, r))
 }
 
 
