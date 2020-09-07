@@ -219,6 +219,33 @@ public class FlinkInterpreterTest {
     assertEquals("name_2", select.getOptions()[1].getDisplayName());
   }
 
+
+  @Test
+  public void testStreamWordCount() throws InterpreterException, IOException {
+    InterpreterContext context = getInterpreterContext();
+    InterpreterResult result = interpreter.interpret(
+            "val data = senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")",
+            context);
+    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+    context = getInterpreterContext();
+    result = interpreter.interpret(
+            "data.flatMap(line => line.split(\"\\\\s\"))\n" +
+                    "  .map(w => (w, 1))\n" +
+                    "  .keyBy(0)\n" +
+                    "  .sum(1)\n" +
+                    "  .print()\n" +
+                    "senv.execute()", context);
+
+    System.out.println(context.out.toString());
+    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+
+    String[] expectedCounts = {"(hello,3)", "(world,1)", "(flink,1)", "(hadoop,1)"};
+    String output = context.out.toInterpreterResultMessage().get(0).getData();
+    for (String expectedCount : expectedCounts) {
+      assertTrue(output, output.contains(expectedCount));
+    }
+  }
+
   @Test
   public void testZShow() throws InterpreterException, IOException {
     // show dataset
@@ -277,31 +304,6 @@ public class FlinkInterpreterTest {
     assertArrayEquals(expectedCounts, counts);
   }
 
-  @Test
-  public void testStreamWordCount() throws InterpreterException, IOException {
-    InterpreterContext context = getInterpreterContext();
-    InterpreterResult result = interpreter.interpret(
-            "val data = senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")",
-            context);
-    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
-    context = getInterpreterContext();
-    result = interpreter.interpret(
-            "data.flatMap(line => line.split(\"\\\\s\"))\n" +
-                    "  .map(w => (w, 1))\n" +
-                    "  .keyBy(0)\n" +
-                    "  .sum(1)\n" +
-                    "  .print()\n" +
-                    "senv.execute()", context);
-
-    System.out.println(context.out.toString());
-    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
-
-    String[] expectedCounts = {"(hello,3)", "(world,1)", "(flink,1)", "(hadoop,1)"};
-    String output = context.out.toInterpreterResultMessage().get(0).getData();
-    for (String expectedCount : expectedCounts) {
-      assertTrue(output, output.contains(expectedCount));
-    }
-  }
 
   @Test
   public void testCancelStreamSql() throws IOException, InterpreterException, InterruptedException, TimeoutException {
