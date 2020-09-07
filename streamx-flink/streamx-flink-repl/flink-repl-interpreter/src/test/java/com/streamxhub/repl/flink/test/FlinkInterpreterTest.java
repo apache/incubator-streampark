@@ -224,12 +224,8 @@ public class FlinkInterpreterTest {
   public void testStreamWordCount() throws InterpreterException, IOException {
     InterpreterContext context = getInterpreterContext();
     InterpreterResult result = interpreter.interpret(
-            "val data = senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")",
-            context);
-    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
-    context = getInterpreterContext();
-    result = interpreter.interpret(
-            "data.flatMap(line => line.split(\"\\\\s\"))\n" +
+            "senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")" +
+                    "  .flatMap(line => line.split(\"\\\\s\"))\n" +
                     "  .map(w => (w, 1))\n" +
                     "  .keyBy(0)\n" +
                     "  .sum(1)\n" +
