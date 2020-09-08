@@ -187,6 +187,7 @@
 <script>
 import {select, listApp, listConf} from '@api/project'
 import {create, exists, name} from '@api/application'
+import { mapActions,mapGetters } from 'vuex'
 
 const configOptions = [
   {
@@ -377,6 +378,8 @@ export default {
   },
 
   mounted() {
+    alert(this.applicationId())
+    this.CleanAppId()
     this.select()
   },
 
@@ -388,7 +391,8 @@ export default {
   },
 
   methods: {
-
+    ...mapActions(['CleanAppId']),
+    ...mapGetters(['applicationId']),
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
