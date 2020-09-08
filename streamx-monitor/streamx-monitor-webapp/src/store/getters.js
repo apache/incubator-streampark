@@ -15,8 +15,7 @@ const getters = {
 
   routers: state => state.user.routers,
   multiTab: state => state.app.multiTab,
-  jobType: state => state.job.jobType,
-  stepIndex: state => state.job.stepIndex
+  applicationId: state => state.application.appId,
 }
 
 export default getters

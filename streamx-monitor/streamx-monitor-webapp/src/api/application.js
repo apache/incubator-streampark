@@ -5,6 +5,10 @@ export function add (params) {
   return http.post(api.Application.Add, params)
 }
 
+export  function readConf(params) {
+  return http.post(api.Application.ReadConf, params)
+}
+
 export function update (params) {
   return http.post(api.Application.Update, params)
 }

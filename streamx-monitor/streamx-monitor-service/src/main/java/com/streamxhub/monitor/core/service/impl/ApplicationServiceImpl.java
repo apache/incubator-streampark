@@ -48,6 +48,7 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import com.streamxhub.flink.submit.SubmitInfo;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,12 +56,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.*;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("applicationService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -157,7 +162,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (!application.getModule().startsWith(application.getAppBase().getAbsolutePath())) {
             application.setModule(application.getAppBase().getAbsolutePath().concat("/").concat(application.getModule()));
-
         }
 
         String workspaceWithModule = application.getWorkspace(true);
@@ -191,6 +195,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void closeDeploy(Application app) {
         app.setDeploy(0);
         this.baseMapper.updateDeploy(app);
+    }
+
+    @Override
+    public String readConf(Application app) throws IOException {
+        File file = new File(app.getConfig());
+        return FileUtils.readFileToString(file,"utf-8");
     }
 
     @Override

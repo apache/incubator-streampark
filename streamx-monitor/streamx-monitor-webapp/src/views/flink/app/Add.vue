@@ -43,6 +43,21 @@
           treeDefaultExpandAll
           @change="handleJobName"
           v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]"/>
+        <a-icon
+          type="edit"
+          theme="twoTone"
+          twoToneColor="#4a9ff5"
+          @click="handleEditConfig(record)"
+          style="width:20px;margin-left:5px;float:right;margin-top: 5px"
+          title="修改角色">
+        </a-icon>
+
+        <a-icon
+          type="undo"
+          @click="handleEdit(record)"
+          style="width:20px;margin-left:5px;margin-top: 5px;float:right;color: #4a9ff5"
+          title="修改角色">
+        </a-icon>
       </a-form-item>
 
       <a-form-item
@@ -183,7 +198,7 @@
 
 <script>
 import {select, listApp, listConf} from '@api/project'
-import {create, exists, name} from '@api/application'
+import {create, exists, name, readConf} from '@api/application'
 
 const configOptions = [
   {
@@ -455,8 +470,25 @@ export default {
       }
     },
 
+    handleEditConfig() {
+      let projectId = this.form.getFieldValue('projectId')
+      let module = this.form.getFieldValue('module')
+      let config = this.form.getFieldValue('config')
+      readConf({
+        projectId:projectId,
+        module:module,
+        config:config
+      }).then((resp) => {
+         let conf = resp.data
+        console.log(conf)
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+
+    },
+
     // handler
-    handleSubmit: function (e) {
+    handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {

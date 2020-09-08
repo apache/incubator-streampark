@@ -52,4 +52,6 @@ public interface ApplicationService extends IService<Application> {
     void updateMonitor(Application application);
 
     void closeDeploy(Application app);
+
+    String readConf(Application app) throws IOException;
 }
