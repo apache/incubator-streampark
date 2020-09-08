@@ -199,7 +199,7 @@
 <script>
 import {select, listApp, listConf} from '@api/project'
 import {create, exists, name, readConf} from '@api/application'
-
+let Base64 = require('js-base64').Base64
 const configOptions = [
   {
     key: '-m',
@@ -471,15 +471,11 @@ export default {
     },
 
     handleEditConfig() {
-      let projectId = this.form.getFieldValue('projectId')
-      let module = this.form.getFieldValue('module')
       let config = this.form.getFieldValue('config')
       readConf({
-        projectId:projectId,
-        module:module,
         config:config
       }).then((resp) => {
-         let conf = resp.data
+         let conf = Base64.decode(resp.data)
         console.log(conf)
       }).catch((error) => {
         this.$message.error(error.message)
