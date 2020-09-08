@@ -26,6 +26,7 @@ export default {
   },
   Application: {
     Add: '/flink/app/add',
+    ReadConf: '/flink/app/readConf',
     Update: '/flink/app/update',
     Deploy: '/flink/app/deploy',
     Yarn: '/flink/app/yarn',

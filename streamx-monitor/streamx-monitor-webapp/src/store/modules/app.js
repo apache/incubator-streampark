@@ -24,8 +24,9 @@ const app = {
     autoHideHeader: false,
     color: null,
     weak: false,
-    multiTab: true
+    multiTab: true,
   },
+
   mutations: {
     SET_SIDEBAR_TYPE: (state, type) => {
       state.sidebar = type

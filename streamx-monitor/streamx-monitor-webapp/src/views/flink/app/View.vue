@@ -400,8 +400,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
-import VueApexCharts from "vue-apexcharts"
-import {Icon} from 'ant-design-vue'
+import { mapActions } from 'vuex'
 import {list, remove, cancel, deploy, startUp, closeDeploy, yarn} from '@api/application'
 
 export default {
@@ -616,8 +615,6 @@ export default {
         fixed: 'right',
         filteredValue: filteredInfo.state || null,
         onFilter: (value, record) => {
-          console.log(record.state === value)
-          console.log(value + "------")
           return record.state === value
         },
         sorter: (a, b) => a.state - b.state,
@@ -648,7 +645,7 @@ export default {
   },
 
   methods: {
-
+    ...mapActions(['SetAppId']),
     onSelectChange(selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
@@ -787,6 +784,11 @@ export default {
 
     handleAdd() {
       this.$router.push({'path': '/flink/app/add'})
+    },
+
+    handleEdit(app) {
+      this.SetAppId(app.id)
+      this.$router.push({'path': '/flink/app/edit'})
     },
 
     handleStartUp(app) {

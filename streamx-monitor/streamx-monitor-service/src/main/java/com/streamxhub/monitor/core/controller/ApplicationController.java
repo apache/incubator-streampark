@@ -88,7 +88,7 @@ public class ApplicationController extends BaseController {
     public RestResponse deploy(Application app) {
         Executors.newSingleThreadExecutor().submit(() -> {
             try {
-                applicationService.deploy(app,true);
+                applicationService.deploy(app, true);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -107,4 +107,11 @@ public class ApplicationController extends BaseController {
         applicationService.closeDeploy(app);
         return RestResponse.create().data(true);
     }
+
+    @RequestMapping("readConf")
+    public RestResponse readConf(Application app) throws IOException {
+        String config = applicationService.readConf(app);
+        return RestResponse.create().data(config);
+    }
+
 }

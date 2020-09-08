@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service("projectService")
@@ -109,7 +110,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         tailBuffer.put(id, new StringBuilder());
         boolean success = cloneOrPull(project);
         if (success) {
-            new Thread(() -> {
+            Executors.newSingleThreadExecutor().submit(() -> {
                 boolean build = ProjectServiceImpl.this.mavenBuild(project);
                 if (build) {
                     ProjectServiceImpl.this.baseMapper.successBuild(project);
@@ -121,7 +122,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 } else {
                     ProjectServiceImpl.this.baseMapper.failureBuild(project);
                 }
-            }).start();
+            });
             return RestResponse.create().message("[StreamX] git clone and pull success. begin maven install");
         } else {
             return RestResponse.create().message("[StreamX] clone or pull error.");
@@ -149,10 +150,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         Project project = getById(id);
         File appHome = project.getAppBase();
         List<Map<String, String>> list = new ArrayList<>();
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x)->{
-            Map<String,String> map = new HashMap<>();
-            map.put("name",x.getName());
-            map.put("path",x.getAbsolutePath());
+        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("name", x.getName());
+            map.put("path", x.getAbsolutePath());
             list.add(map);
         });
         return list;
@@ -189,7 +190,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             }
             List<Map<String, Object>> list = new ArrayList<>();
             //只过滤conf这个目录
-            File[] files = unzipFile.listFiles(item -> item.getName().equals("conf"));
+            File[] files = unzipFile.listFiles(x -> x.getName().equals("conf"));
             assert files != null;
             for (File item : files) {
                 eachFile(item, list, true);
@@ -282,12 +283,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     private void eachFile(File file, List<Map<String, Object>> list, Boolean isRoot) {
         if (file != null && file.exists() && file.listFiles() != null) {
             if (isRoot) {
-                String title = file.getName();
-                String value = file.getAbsolutePath();
                 Map<String, Object> map = new HashMap<>(0);
-                map.put("key", title);
-                map.put("title", title);
-                map.put("value", value);
+                map.put("key", file.getName());
+                map.put("title", file.getName());
+                map.put("value", file.getAbsolutePath());
                 List<Map<String, Object>> children = new ArrayList<>();
                 eachFile(file, children, false);
                 if (!children.isEmpty()) {
