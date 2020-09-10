@@ -85,11 +85,11 @@ public class FlinkMonitorTask {
                         application.setState(state.getValue());
                     }
 
-                    if (startTime != application.getStartTime().getTime()) {
+                    if (application.getStartTime() != null || startTime != application.getStartTime().getTime()) {
                         application.setStartTime(new Date(startTime));
                     }
 
-                    if (endTime != -1 && startTime != application.getEndTime().getTime()) {
+                    if ( endTime != -1 && application.getEndTime() != null &&  startTime != application.getEndTime().getTime()) {
                         application.setEndTime(new Date(endTime));
                     }
 
