@@ -159,6 +159,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         return list;
     }
 
+    @Override
+    public String getAppConfPath(Long id, String module) {
+        Project project = getById(id);
+        File appHome = project.getAppBase();
+        Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles())).filter((x) -> x.getName().equals(module)).findFirst();
+        if (fileOptional.isPresent()) {
+            return fileOptional.get().getAbsolutePath();
+        }
+        return null;
+    }
+
     private List<String> scanApp(Project project) {
         File path = project.getAppSource();
         List<String> list = new ArrayList<>();

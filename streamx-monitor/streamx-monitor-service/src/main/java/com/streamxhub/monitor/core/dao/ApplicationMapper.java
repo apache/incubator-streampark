@@ -36,4 +36,6 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     void updateMonitor(@Param("application")Application application);
 
     void closeDeploy(@Param("application")Application application);
+
+    Application getApp(@Param("application") Application application);
 }
