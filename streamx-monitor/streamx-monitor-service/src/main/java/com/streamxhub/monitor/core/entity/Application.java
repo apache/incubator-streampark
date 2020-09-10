@@ -56,7 +56,6 @@ public class Application implements Serializable {
      * 创建人
      */
     private Long userId;
-    private String config;
     /**
      * 前端和程序在yarn中显示的名称
      */
@@ -92,6 +91,9 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     private transient String userName;
+
+    private transient String config;
+    private transient Integer format;
     private transient String savePoint;
     private transient Long drain;
     private transient String projectName;

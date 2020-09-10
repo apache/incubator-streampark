@@ -69,7 +69,7 @@ export default {
 }
 </script>
 
-<style>
+<style scoped lang="less">
 .code {
   height: 500px;
   font-size: 11pt;

@@ -24,7 +24,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
@@ -105,24 +105,29 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    if (config.startsWith("hdfs://")) {
-      /**
-       * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
-       */
-      val text = HdfsUtils.read(config)
-      extension match {
-        case "properties" => PropertiesUtils.fromPropertiesText(text)
-        case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
-      }
-    } else {
-      val configFile = new File(config)
-      require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
-      extension match {
-        case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
-        case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-        case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
-      }
+    config match {
+      case x if x.startsWith("yaml://") =>
+        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
+      case x if x.startsWith("prop://") =>
+        PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
+      case x if x.startsWith("hdfs://") =>
+        /**
+         * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+         */
+        val text = HdfsUtils.read(config)
+        extension match {
+          case "properties" => PropertiesUtils.fromPropertiesText(text)
+          case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+        }
+      case _ =>
+        val configFile = new File(config)
+        require(configFile.exists(), s"[StreamX] Usage:flink.conf file $configFile is not found!!!")
+        extension match {
+          case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
+          case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+        }
     }
   }
 
