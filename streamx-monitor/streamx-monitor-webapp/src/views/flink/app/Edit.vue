@@ -412,8 +412,13 @@ export default {
   },
 
   mounted() {
-    this.handleGet(this.applicationId())
-    this.CleanAppId()
+    let appId = this.applicationId()
+    if(appId) {
+      this.handleGet()
+      this.CleanAppId()
+    }else {
+      this.$router.back(-1)
+    }
   },
 
   beforeMount() {
@@ -587,6 +592,10 @@ export default {
 <style scoped>
 .ant-list-item-meta-description {
   margin-left: 20px;
+}
+
+.ant-alert.ant-alert-no-icon {
+  padding: 6px 15px;
 }
 
 .ant-list-item-content {
