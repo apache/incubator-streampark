@@ -85,12 +85,16 @@ public class FlinkMonitorTask {
                         application.setState(state.getValue());
                     }
 
-                    if (application.getStartTime() != null && startTime != application.getStartTime().getTime()) {
+                    if (application.getStartTime() == null) {
+                        application.setStartTime(new Date(startTime));
+                    } else if (startTime != application.getStartTime().getTime()) {
                         application.setStartTime(new Date(startTime));
                     }
 
-                    if ( endTime != -1 && (application.getEndTime() == null ||  endTime != application.getEndTime().getTime())) {
-                        application.setEndTime(new Date(endTime));
+                    if (endTime != -1) {
+                        if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
+                            application.setEndTime(new Date(endTime));
+                        }
                     }
 
                     application.setDuration(job.getDuration());
