@@ -147,6 +147,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
+        //update config...
+        configService.update(paramOfApp);
+
+        //update other...
         Application application = getById(paramOfApp.getId());
         application.setJobName(paramOfApp.getJobName());
         application.setArgs(paramOfApp.getArgs());
@@ -154,7 +158,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setShortOptions(paramOfApp.getShortOptions());
         application.setDynamicOptions(paramOfApp.getDynamicOptions());
         application.setDescription(paramOfApp.getDescription());
-        configService.update(paramOfApp);
         this.baseMapper.updateById(application);
         return true;
     }
