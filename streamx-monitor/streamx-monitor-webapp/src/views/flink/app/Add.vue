@@ -33,7 +33,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Config"
+        label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-tree-select
@@ -42,7 +42,8 @@
           placeholder="请选择配置文件"
           treeDefaultExpandAll
           @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig, message: '请选择配置文件'}]} ]"/>
+          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig, message: '请选择配置文件'}]} ]">
+        </a-tree-select>
         <a-icon
           v-if="form.getFieldValue('config')"
           type="edit"
@@ -55,7 +56,7 @@
       </a-form-item>
 
       <a-form-item
-        label="App name"
+        label="Application name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input type="text"
@@ -483,6 +484,8 @@ export default {
         let isYaml = value.endsWith(".yaml") || value.endsWith(".yml")
         if(!isProp && !isYaml) {
           callback(new Error('配置文件必须为.properties 或者.yaml,.yml)'))
+        }else {
+          callback()
         }
       }
     },
@@ -539,8 +542,8 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
-          let config = this.form.getFieldValue('config')
-          let format = config.endsWith(".properties") ? 2:1
+          let configVal = this.form.getFieldValue('config')
+          let format = configVal.endsWith(".properties") ? 2:1
           const params = {
             projectId: values.projectId,
             module: values.module,
@@ -555,15 +558,15 @@ export default {
 
           if (this.configOverride == null) {
             readConf({
-              config: config
+              config: configVal
             }).then((resp) => {
-              params.config = resp.data
-              this.handleCreate(resp.data)
+              params['config'] = resp.data
+              this.handleCreate(params)
             }).catch((error) => {
               this.$message.error(error.message)
             })
           } else {
-            params.config = Base64.enable(this.configOverride)
+            params['config'] = Base64.enable(this.configOverride)
             this.handleCreate(params)
           }
 
