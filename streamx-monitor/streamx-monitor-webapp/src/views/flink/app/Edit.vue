@@ -5,35 +5,60 @@
         label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          showSearch
-          optionFilterProp="children"
-          :filterOption="filterOption"
-          placeholder="请选择项目"
-          @change="handleProject"
-          v-decorator="[ 'projectId', {rules: [{ required: true, message: '请选择项目'}]} ]">
-          <a-select-option v-for="p in project" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
-        </a-select>
+        <a-alert :message="app.project" type="info"/>
       </a-form-item>
 
       <a-form-item
-        label="Application"
+          label="Application"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-alert message="Success Tips" type="info"/>
+      </a-form-item>
+
+      <a-form-item
+        label="Config strategy"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          label="应用"
-          showSearch
-          optionFilterProp="children"
-          :filterOption="filterOption"
-          placeholder="请选择应用"
-          @change="handleApp"
-          v-decorator="[ 'module', {rules: [{ required: true, message: '请选择应用'}]} ]">
-          <a-select-option v-for="p in appList" :key="p.name" :value="p.path">{{ p.name }}</a-select-option>
-        </a-select>
+        <a-radio-group default-value="1" button-style="solid" v-modle="strategy" @change="handleStrategy">
+          <a-radio-button value="1">
+            原有配置
+          </a-radio-button>
+          <a-radio-button value="2">
+            新配置
+          </a-radio-button>
+        </a-radio-group>
       </a-form-item>
 
       <a-form-item
-        label="Config File"
+        v-if="strategy == 1"
+        label="Application conf"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-alert type="info">
+          <template slot="message">
+            eas job yaml conf
+            <div style="float: right">
+              <a-icon type="eye"
+                      theme="twoTone"
+                      twoToneColor="#4a9ff5"
+                      @click="handleView()" title="查看">
+              </a-icon>
+              <a-icon
+                type="edit"
+                theme="twoTone"
+                twoToneColor="#4a9ff5"
+                @click="handleEditConfig()"
+                style="width:20px;margin-left:5px;float:right;margin-top: 5px"
+                title="修改角色">
+              </a-icon>
+            </div>
+          </template>
+        </a-alert>
+      </a-form-item>
+
+      <a-form-item
+        v-if="strategy == 2"
+        label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-tree-select
@@ -47,9 +72,8 @@
         </a-tree-select>
       </a-form-item>
 
-
       <a-form-item
-        label="App name"
+        label="Application name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input type="text"
@@ -185,8 +209,8 @@
 </template>
 
 <script>
-import {select, listApp, listConf} from '@api/project'
-import {create, exists, name} from '@api/application'
+import {listConf} from '@api/project'
+import {get, create, exists, name} from '@api/application'
 import { mapActions,mapGetters } from 'vuex'
 
 const configOptions = [
@@ -365,9 +389,8 @@ export default {
   data() {
     return {
       maxTagCount: 1,
+      strategy:1,
       value: 1,
-      project: [],
-      appList: [],
       app: null,
       config: null,
       configSource: [],
@@ -378,9 +401,8 @@ export default {
   },
 
   mounted() {
-    alert(this.applicationId())
+    this.handleGet(this.applicationId())
     this.CleanAppId()
-    this.select()
   },
 
   beforeMount() {
@@ -397,19 +419,16 @@ export default {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
 
-    select() {
-      select().then((resp) => {
-        this.project = resp.data
-      }).catch((error) => {
-        this.$message.error(error.message)
-      })
-    },
-
-    handleProject(value) {
-      listApp({
-        id: value
-      }).then((resp) => {
-        this.appList = resp.data
+    handleGet(appId) {
+      get({id: appId }).then((resp) => {
+        this.app = resp.data
+        listConf({
+          path: this.app["confPath"]
+        }).then((resp) => {
+          this.configSource = resp.data
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -435,16 +454,6 @@ export default {
       })
     },
 
-    handleApp(app) {
-      listConf({
-        path: app
-      }).then((resp) => {
-        this.configSource = resp.data
-      }).catch((error) => {
-        this.$message.error(error.message)
-      })
-    },
-
     handleCheckJobName(rule, value, callback) {
       if (!value) {
         callback(new Error('应用名称不能为空'))
@@ -460,6 +469,10 @@ export default {
           }
         })
       }
+    },
+
+    handleStrategy (e) {
+      this.strategy = e.target.value
     },
 
     // handler

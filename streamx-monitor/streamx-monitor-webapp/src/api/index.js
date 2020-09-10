@@ -31,6 +31,7 @@ export default {
     Deploy: '/flink/app/deploy',
     Yarn: '/flink/app/yarn',
     List: '/flink/app/list',
+    Get: '/flink/app/get',
     Name: '/flink/app/name',
     Exists: '/flink/app/exists',
     Cancel: '/flink/app/cancel',

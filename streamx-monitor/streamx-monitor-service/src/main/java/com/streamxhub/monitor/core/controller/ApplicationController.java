@@ -72,6 +72,12 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(exists.get());
     }
 
+    @RequestMapping("get")
+    public RestResponse get(Application app) {
+        Application application = applicationService.getApp(app);
+        return RestResponse.create().data(application);
+    }
+
     @RequestMapping("cancel")
     public RestResponse cancel(Application app) {
         applicationService.cancel(app);
