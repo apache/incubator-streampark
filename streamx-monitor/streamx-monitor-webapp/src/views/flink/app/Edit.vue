@@ -1,25 +1,25 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
-    <a-form @submit="handleSubmit" :form="form">
+    <a-form @submit="handleSubmit" :form="form" v-if="app!=null">
       <a-form-item
         label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-alert :message="app.project" type="info"/>
+        <a-alert :message="app['projectName']" type="info"/>
       </a-form-item>
 
       <a-form-item
           label="Application"
           :labelCol="{lg: {span: 7}, sm: {span: 7}}"
           :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-alert :message="app.module" type="info"/>
+          <a-alert :message="app['module']" type="info"/>
       </a-form-item>
 
       <a-form-item
         label="Config strategy"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-radio-group default-value="1" button-style="solid" v-modle="strategy" @change="handleStrategy">
+        <a-radio-group default-value="1" button-style="solid" @change="handleStrategy">
           <a-radio-button value="1">
             原有配置
           </a-radio-button>
@@ -205,13 +205,19 @@
       </a-form-item>
 
     </a-form>
+
+    <conf ref="confEdit" :readOnly="confEdit.readOnly" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+
   </a-card>
+
 </template>
 
 <script>
 import {listConf} from '@api/project'
-import {get, create, exists, name} from '@api/application'
+import {get, create, exists, name, readConf} from '@api/application'
 import { mapActions,mapGetters } from 'vuex'
+import Conf from './Conf'
+let Base64 = require('js-base64').Base64
 
 const configOptions = [
   {
@@ -385,7 +391,8 @@ const configOptions = [
 ]
 
 export default {
-  name: 'BaseForm',
+  name: 'AppEdit',
+  components: {Conf},
   data() {
     return {
       maxTagCount: 1,
@@ -397,6 +404,10 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
+      confEdit:  {
+        visiable: false,
+        readOnly: true,
+      }
     }
   },
 
@@ -473,6 +484,37 @@ export default {
 
     handleStrategy (e) {
       this.strategy = e.target.value
+    },
+
+    handleView () {
+
+    },
+
+    handleEditNewConfig() {
+      let config = this.form.getFieldValue('config')
+      readConf({
+        config:config
+      }).then((resp) => {
+        let conf = Base64.decode(resp.data)
+        this.confEdit.visiable = true
+        this.$refs.confEdit.set(conf)
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    handleEditConfig() {
+      this.confEdit.visiable = true
+      console.log(this.app.config)
+      this.$refs.confEdit.set(this.app.config)
+    },
+
+    handleEditConfClose() {
+      this.confEdit.visiable = false
+    },
+
+    handleEditConfOk(value) {
+      this.configOverride = value
     },
 
     // handler

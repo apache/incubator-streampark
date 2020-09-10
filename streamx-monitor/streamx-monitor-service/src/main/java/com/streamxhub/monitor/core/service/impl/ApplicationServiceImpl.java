@@ -209,7 +209,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
             application.setConfig(encode);
         }
-        String path = this.projectService.getAppConfPath(application.getProjectId(),application.getModule());
+        String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
         application.setConfPath(path);
         return application;
     }
