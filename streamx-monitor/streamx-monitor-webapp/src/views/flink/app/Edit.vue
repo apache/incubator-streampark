@@ -12,7 +12,7 @@
           label="Application"
           :labelCol="{lg: {span: 7}, sm: {span: 7}}"
           :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-alert message="Success Tips" type="info"/>
+          <a-alert :message="app.module" type="info"/>
       </a-form-item>
 
       <a-form-item
