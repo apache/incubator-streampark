@@ -9,5 +9,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     void create(Application application);
 
+    void update(Application application);
+
     ApplicationConfig getActived(Long id);
 }

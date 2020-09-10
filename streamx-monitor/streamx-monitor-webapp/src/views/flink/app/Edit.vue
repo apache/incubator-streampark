@@ -206,7 +206,7 @@
 
     </a-form>
 
-    <conf ref="confEdit" :readOnly="confEdit.readOnly" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
 
   </a-card>
 
@@ -214,7 +214,7 @@
 
 <script>
 import {listConf} from '@api/project'
-import {get, create, exists, name, readConf} from '@api/application'
+import {get, update, exists, name, readConf} from '@api/application'
 import { mapActions,mapGetters } from 'vuex'
 import Conf from './Conf'
 let Base64 = require('js-base64').Base64
@@ -400,13 +400,13 @@ export default {
       value: 1,
       app: null,
       config: null,
+      configOverride: null,
       configSource: [],
       configItems: [],
       form: null,
       options: configOptions,
       confEdit:  {
-        visiable: false,
-        readOnly: true,
+        visiable: false
       }
     }
   },
@@ -487,7 +487,10 @@ export default {
     },
 
     handleView () {
-
+      this.$refs.confEdit.setReadOnly(true)
+      this.confEdit.visiable = true
+      let conf = Base64.decode(this.app.config)
+      this.$refs.confEdit.set(conf)
     },
 
     handleEditNewConfig() {
@@ -504,9 +507,10 @@ export default {
     },
 
     handleEditConfig() {
+      this.$refs.confEdit.setReadOnly(false)
       this.confEdit.visiable = true
-      console.log(this.app.config)
-      this.$refs.confEdit.set(this.app.config)
+      let conf = Base64.decode(this.app.config)
+      this.$refs.confEdit.set(conf)
     },
 
     handleEditConfClose() {
@@ -549,10 +553,10 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
-          create({
-            projectId: values.projectId,
-            module: values.module,
-            config: values.config,
+          let config = this.configOverride || this.app.config
+          update({
+            id: this.app.id,
+            config: Base64.encode(config),
             jobName: values.jobName,
             args: values.args,
             options: JSON.stringify(options),
@@ -560,11 +564,11 @@ export default {
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }).then((resp) => {
-            const created = resp.data
-            if (created) {
+            const updated = resp.data
+            if (updated) {
               this.$router.push({path: '/flink/app'})
             } else {
-              console.log(created)
+              console.log(updated)
             }
           }).catch((error) => {
             this.$message.error(error.message)
