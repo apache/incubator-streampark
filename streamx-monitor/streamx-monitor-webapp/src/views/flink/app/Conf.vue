@@ -48,13 +48,11 @@ import "codemirror/addon/selection/active-line"
 import "codemirror/mode/clike/clike"
 import "codemirror/mode/sql/sql"
 
-import vueCodeDiff from 'vue-code-diff'
 import 'mergely/lib/mergely.css'
 import 'mergely/lib/mergely'
 
 export default {
   name: 'Conf',
-  components: {vueCodeDiff},
   props: {
     visiable: {
       default: false
