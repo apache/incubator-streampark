@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("applicationConfigService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
