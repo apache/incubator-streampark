@@ -147,7 +147,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
-        Application application = getApp(paramOfApp);
+        Application application = getById(paramOfApp.getId());
         application.setJobName(paramOfApp.getJobName());
         application.setArgs(paramOfApp.getArgs());
         application.setOptions(paramOfApp.getOptions());
