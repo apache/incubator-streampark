@@ -72,18 +72,6 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(exists.get());
     }
 
-    @RequestMapping("get")
-    public RestResponse get(Application app) {
-        Application application = applicationService.getApp(app);
-        return RestResponse.create().data(application);
-    }
-
-    @RequestMapping("cancel")
-    public RestResponse cancel(Application app) {
-        applicationService.cancel(app);
-        return RestResponse.create();
-    }
-
     @RequestMapping("create")
     public RestResponse create(Application app) throws IOException {
         boolean saved = applicationService.create(app);
@@ -114,10 +102,28 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(true);
     }
 
+    @RequestMapping("get")
+    public RestResponse get(Application app) {
+        Application application = applicationService.getApp(app);
+        return RestResponse.create().data(application);
+    }
+
+    @RequestMapping("cancel")
+    public RestResponse cancel(Application app) {
+        applicationService.cancel(app);
+        return RestResponse.create();
+    }
+
     @RequestMapping("readConf")
     public RestResponse readConf(Application app) throws IOException {
         String config = applicationService.readConf(app);
         return RestResponse.create().data(config);
+    }
+
+    @RequestMapping("update")
+    public RestResponse update(Application app) {
+        Boolean updated = applicationService.update(app);
+        return RestResponse.create().data(updated);
     }
 
 }
