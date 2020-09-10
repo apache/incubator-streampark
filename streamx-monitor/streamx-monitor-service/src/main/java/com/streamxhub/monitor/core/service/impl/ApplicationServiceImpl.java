@@ -89,17 +89,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
 
     @Override
-    public IPage<Application> list(Application app, RestRequest request) {
+    public IPage<Application> list(Application paramOfApp, RestRequest request) {
         Page<Application> page = new Page<>();
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.findApplication(page, app);
+        return this.baseMapper.findApplication(page, paramOfApp);
     }
 
     @Override
-    public String getYarnName(Application app) {
+    public String getYarnName(Application paramOfApp) {
         String[] args = new String[2];
         args[0] = "--name";
-        args[1] = app.getConfig();
+        args[1] = paramOfApp.getConfig();
         return ParameterCli.read(args);
     }
 
@@ -110,11 +110,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @return
      */
     @Override
-    public AppExistsState checkExists(Application app) {
+    public AppExistsState checkExists(Application paramOfApp) {
         QueryWrapper<Application> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("job_name", app.getJobName());
+        queryWrapper.eq("job_name", paramOfApp.getJobName());
         int count = this.baseMapper.selectCount(queryWrapper);
-        boolean exists = YarnUtils.isContains(app.getJobName());
+        boolean exists = YarnUtils.isContains(paramOfApp.getJobName());
         if (count == 0 && !exists) {
             return AppExistsState.NO;
         }
@@ -123,18 +123,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public boolean create(Application app) {
+    public boolean create(Application paramOfApp) {
         //配置文件中配置的yarnName..
-        app.setUserId(serverUtil.getUser().getUserId());
-        app.setState(FlinkAppState.CREATED.getValue());
-        app.setCreateTime(new Date());
-        app.setModule(app.getModule().replace(app.getAppBase().getAbsolutePath() + "/", ""));
-        boolean saved = save(app);
-        configService.create(app);
+        paramOfApp.setUserId(serverUtil.getUser().getUserId());
+        paramOfApp.setState(FlinkAppState.CREATED.getValue());
+        paramOfApp.setCreateTime(new Date());
+        paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
+        boolean saved = save(paramOfApp);
+        configService.create(paramOfApp);
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
-                    deploy(app, false);
+                    deploy(paramOfApp, false);
                     return true;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -145,10 +145,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void deploy(Application app, boolean backUp) throws IOException {
+    public void deploy(Application paramOfApp, boolean backUp) throws IOException {
         //先停止原有任务..
-        Application application = getById(app.getId());
-        application.setBackUpDescription(app.getBackUpDescription());
+        Application application = getById(paramOfApp.getId());
+        application.setBackUpDescription(paramOfApp.getBackUpDescription());
         if (application.getState() == FlinkAppState.RUNNING.getValue()) {
             cancel(application);
         }
@@ -189,27 +189,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void closeDeploy(Application app) {
-        app.setDeploy(0);
-        this.baseMapper.updateDeploy(app);
+    public void closeDeploy(Application paramOfApp) {
+        paramOfApp.setDeploy(0);
+        this.baseMapper.updateDeploy(paramOfApp);
     }
 
     @Override
-    public String readConf(Application app) throws IOException {
-        File file = new File(app.getConfig());
+    public String readConf(Application paramOfApp) throws IOException {
+        File file = new File(paramOfApp.getConfig());
         String conf = FileUtils.readFileToString(file, "utf-8");
         return Base64.getEncoder().encodeToString(conf.getBytes());
     }
 
     @Override
-    public Application getApp(Application app) {
-        Application application = this.baseMapper.getApp(app);
+    public Application getApp(Application paramOfApp) {
+        Application application = this.baseMapper.getApp(paramOfApp);
         if (application.getConfig() != null) {
             String unzipString = DeflaterUtils.unzipString(application.getConfig());
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
             application.setConfig(encode);
         }
-        String path = this.projectService.getAppConfPath(app.getProjectId(),app.getModule());
+        String path = this.projectService.getAppConfPath(application.getProjectId(),application.getModule());
         application.setConfPath(path);
         return application;
     }
@@ -220,16 +220,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void cancel(Application app) {
-        Application application = getById(app.getId());
+    public void cancel(Application paramOfApp) {
+        Application application = getById(paramOfApp.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
-        FlinkSubmit.cancel(application.getAppId(), application.getJobId(), app.getSavePoint(), app.getDrain());
+        FlinkSubmit.cancel(application.getAppId(), application.getJobId(), paramOfApp.getSavePoint(), paramOfApp.getDrain());
     }
 
     @Override
-    public void updateMonitor(Application application) {
-        this.baseMapper.updateMonitor(application);
+    public void updateMonitor(Application paramOfApp) {
+        this.baseMapper.updateMonitor(paramOfApp);
     }
 
     @Override
