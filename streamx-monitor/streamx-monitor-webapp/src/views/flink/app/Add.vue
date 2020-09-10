@@ -189,7 +189,7 @@
 
     </a-form>
 
-    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+    <conf ref="confEdit" :readOnly="confEdit.readOnly" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
 
   </a-card>
 </template>
@@ -373,7 +373,7 @@ const configOptions = [
 ]
 
 export default {
-  name: 'BaseForm',
+  name: 'AppAdd',
   components: {Conf},
   data() {
     return {
@@ -389,7 +389,8 @@ export default {
       form: null,
       options: configOptions,
       confEdit:  {
-        visiable: false
+        visiable: false,
+        readOnly: false,
       }
     }
   },

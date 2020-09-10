@@ -55,7 +55,8 @@ export default {
   name: 'Conf',
   props: {
     visiable: {
-      default: false
+      default: false,
+      readOnly: false
     }
   },
   data() {
