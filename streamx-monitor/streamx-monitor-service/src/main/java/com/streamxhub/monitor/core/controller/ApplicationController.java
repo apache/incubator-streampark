@@ -122,8 +122,12 @@ public class ApplicationController extends BaseController {
 
     @RequestMapping("update")
     public RestResponse update(Application app) {
-        Boolean updated = applicationService.update(app);
-        return RestResponse.create().data(updated);
+        try {
+            applicationService.update(app);
+            return RestResponse.create().data(true);
+        } catch (Exception e) {
+            return RestResponse.create().data(false);
+        }
     }
 
 }
