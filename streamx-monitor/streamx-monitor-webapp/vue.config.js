@@ -7,6 +7,8 @@ function resolve(dir) {
 
 // vue.config.js
 module.exports = {
+  publicPath: '/',
+  productionSourceMap: false,
   /*
     Vue-cli3:
     Crashed when using Webpack `import()` #2463
@@ -22,9 +24,20 @@ module.exports = {
   },
   */
   configureWebpack: {
+    resolve: {
+      alias: {
+        'mergely':		path.join(__dirname, 'node_modules', 'mergely'),
+        'CodeMirror':	path.join(__dirname, 'node_modules', 'codemirror'),
+        'jQuery':		path.join(__dirname, 'node_modules', 'jquery'),
+      }
+    },
     plugins: [
       // Ignore all locale files of moment.js
-      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/)
+      new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
+      new webpack.ProvidePlugin({
+        jQuery: 'jquery',
+        CodeMirror: 'codemirror'
+      })
     ]
   },
 

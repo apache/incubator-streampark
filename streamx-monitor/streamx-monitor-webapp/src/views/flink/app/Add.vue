@@ -33,7 +33,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Config File"
+        label="Config"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-tree-select
@@ -42,20 +42,14 @@
           placeholder="请选择配置文件"
           treeDefaultExpandAll
           @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]"/>
+          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig, message: '请选择配置文件'}]} ]"/>
         <a-icon
+          v-if="form.getFieldValue('config')"
           type="edit"
           theme="twoTone"
           twoToneColor="#4a9ff5"
-          @click="handleEditConfig(record)"
+          @click="handleEditConfig()"
           style="width:20px;margin-left:5px;float:right;margin-top: 5px"
-          title="修改角色">
-        </a-icon>
-
-        <a-icon
-          type="undo"
-          @click="handleEdit(record)"
-          style="width:20px;margin-left:5px;margin-top: 5px;float:right;color: #4a9ff5"
           title="修改角色">
         </a-icon>
       </a-form-item>
@@ -193,13 +187,19 @@
       </a-form-item>
 
     </a-form>
+
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+
   </a-card>
 </template>
 
 <script>
 import {select, listApp, listConf} from '@api/project'
 import {create, exists, name, readConf} from '@api/application'
+import Conf from './Conf'
+
 let Base64 = require('js-base64').Base64
+
 const configOptions = [
   {
     key: '-m',
@@ -373,6 +373,7 @@ const configOptions = [
 
 export default {
   name: 'BaseForm',
+  components: {Conf},
   data() {
     return {
       maxTagCount: 1,
@@ -381,10 +382,14 @@ export default {
       appList: [],
       app: null,
       config: null,
+      configOverride: null,
       configSource: [],
       configItems: [],
       form: null,
       options: configOptions,
+      confEdit:  {
+        visiable: false
+      }
     }
   },
 
@@ -444,6 +449,8 @@ export default {
     },
 
     handleApp(app) {
+      this.form.resetFields(['config','jobName'])
+      this.configOverride = null
       listConf({
         path: app
       }).then((resp) => {
@@ -470,20 +477,37 @@ export default {
       }
     },
 
+    handleCheckConfig(rule, value, callback) {
+      if (value) {
+        let isProp = value.endsWith(".properties")
+        let isYaml = value.endsWith(".yaml") || value.endsWith(".yml")
+        if(!isProp && !isYaml) {
+          callback(new Error('配置文件必须为.properties 或者.yaml,.yml)'))
+        }
+      }
+    },
+
     handleEditConfig() {
       let config = this.form.getFieldValue('config')
       readConf({
         config:config
       }).then((resp) => {
-         let conf = Base64.decode(resp.data)
-        console.log(conf)
+        let conf = Base64.decode(resp.data)
+        this.confEdit.visiable = true
+        this.$refs.confEdit.set(conf)
       }).catch((error) => {
         this.$message.error(error.message)
       })
-
     },
 
-    // handler
+    handleEditConfClose() {
+      this.confEdit.visiable = false
+    },
+
+    handleEditConfOk(value) {
+      this.configOverride = value
+    },
+
     handleSubmit(e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
@@ -515,28 +539,48 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
-          create({
+          let config = this.form.getFieldValue('config')
+          let format = config.endsWith(".properties") ? 2:1
+          const params = {
             projectId: values.projectId,
             module: values.module,
-            config: values.config,
             jobName: values.jobName,
+            format: format,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
             dynamicOptions: values.dynamicOptions,
             description: values.description
-          }).then((resp) => {
-            const created = resp.data
-            if (created) {
-              this.$router.push({path: '/flink/app'})
-            } else {
-              console.log(created)
-            }
-          }).catch((error) => {
-            this.$message.error(error.message)
-          })
+          }
+
+          if (this.configOverride == null) {
+            readConf({
+              config: config
+            }).then((resp) => {
+              params.config = resp.data
+              this.handleCreate(resp.data)
+            }).catch((error) => {
+              this.$message.error(error.message)
+            })
+          } else {
+            params.config = Base64.enable(this.configOverride)
+            this.handleCreate(params)
+          }
 
         }
+      })
+    },
+
+    handleCreate(params) {
+      create(params).then((resp) => {
+        const created = resp.data
+        if (created) {
+          this.$router.push({path: '/flink/app'})
+        } else {
+          console.log(created)
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
       })
     }
 

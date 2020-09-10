@@ -23,6 +23,7 @@ package com.streamxhub.monitor.core.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
+import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
@@ -34,9 +35,11 @@ import com.streamxhub.monitor.base.utils.SortUtil;
 import com.streamxhub.monitor.core.dao.ApplicationMapper;
 import com.streamxhub.monitor.core.entity.Application;
 import com.streamxhub.monitor.core.entity.ApplicationBackUp;
+import com.streamxhub.monitor.core.entity.ApplicationConfig;
 import com.streamxhub.monitor.core.entity.Project;
 import com.streamxhub.monitor.core.enums.AppExistsState;
 import com.streamxhub.monitor.core.service.ApplicationBackUpService;
+import com.streamxhub.monitor.core.service.ApplicationConfigService;
 import com.streamxhub.monitor.core.service.ApplicationService;
 import com.streamxhub.monitor.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -76,6 +79,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ApplicationBackUpService backUpService;
+
+    @Autowired
+    private ApplicationConfigService configService;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -119,21 +125,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean create(Application app) {
-        if (app.getConfig() != null && app.getConfig().trim().length() > 0) {
-            try {
-                String config = URLDecoder.decode(app.getConfig(), "UTF-8");
-                app.setConfig(config);
-            } catch (UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-        }
         //配置文件中配置的yarnName..
         app.setUserId(serverUtil.getUser().getUserId());
         app.setState(FlinkAppState.CREATED.getValue());
         app.setCreateTime(new Date());
         app.setModule(app.getModule().replace(app.getAppBase().getAbsolutePath() + "/", ""));
-        app.setConfig(app.getConfig().replace(app.getAppBase().getAbsolutePath() + "/".concat(app.getModule()).concat("/"), ""));
         boolean saved = save(app);
+        configService.create(app);
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
@@ -230,7 +228,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
-        String appConf = String.format("%s/%s/%s/%s", workspaceWithSchemaAndNameService, id, application.getModule(), application.getConfig());
+
+        ApplicationConfig applicationConfig =  configService.getActived(application.getId());
+        String confContent = applicationConfig.getContent();
+        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+        String appConf = String.format("%s://%s",format,confContent);
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
