@@ -414,7 +414,7 @@ export default {
   mounted() {
     let appId = this.applicationId()
     if(appId) {
-      this.handleGet()
+      this.handleGet(appId)
       this.CleanAppId()
     }else {
       this.$router.back(-1)
