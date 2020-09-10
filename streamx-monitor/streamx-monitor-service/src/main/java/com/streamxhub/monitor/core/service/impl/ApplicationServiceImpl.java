@@ -61,8 +61,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.*;
 import java.util.concurrent.*;
 
@@ -124,6 +122,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application app) {
         //配置文件中配置的yarnName..
         app.setUserId(serverUtil.getUser().getUserId());
@@ -229,10 +228,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert project != null;
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
 
-        ApplicationConfig applicationConfig =  configService.getActived(application.getId());
+        ApplicationConfig applicationConfig = configService.getActived(application.getId());
         String confContent = applicationConfig.getContent();
         String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-        String appConf = String.format("%s://%s",format,confContent);
+        String appConf = String.format("%s://%s", format, confContent);
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
