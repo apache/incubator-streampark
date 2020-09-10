@@ -77,7 +77,7 @@ public class FlinkMonitorTask {
                     long startTime = job.getStartTime();
                     long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
 
-                    if (!application.getJobId().equals(job.getId())) {
+                    if (!job.getId().equals(application.getJobId())) {
                         application.setJobId(job.getId());
                     }
 
