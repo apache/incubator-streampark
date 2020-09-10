@@ -553,11 +553,13 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
+          let format = this.strategy == 1 ? this.app.format :  this.form.getFieldValue('config').endsWith(".properties") ? 2:1
           let config = this.configOverride || this.app.config
           update({
             id: this.app.id,
             config: Base64.encode(config),
             jobName: values.jobName,
+            format: format,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
