@@ -8,16 +8,29 @@
             class="drawer-conf">
 
     <template slot="title">
-      <a-icon v-if="!visibleDiff" type="setting" />
-      <a-icon v-else type="deployment-unit" />
-      {{ title }}
+      <template v-if="readOnly">
+        <a-icon type="eye" />
+        配置详情
+      </template>
+      <template v-else>
+        <a-icon v-if="!visibleDiff" type="setting" />
+        <a-icon v-else type="deployment-unit" />
+        {{ title }}
+      </template>
     </template>
 
     <div v-show="!visibleDiff">
       <a-textarea ref="confEdit" class="confEdit"/>
       <div class="drawer-bootom-button">
         <div style="float: right">
-          <a-button class="drwaer-button-item" @click="handleCancel">取消</a-button>
+          <a-button class="drwaer-button-item" @click="handleCancel">
+            <span v-if="readOnly">
+              关闭
+            </span>
+            <span v-else>
+              取消
+            </span>
+          </a-button>
           <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleNext()"><a-icon type="right" />下一步</a-button>
         </div>
       </div>
@@ -54,19 +67,17 @@ import 'mergely/lib/mergely'
 export default {
   name: 'Conf',
   props: {
-    visiable: {
-      default: false,
-      readOnly: false
-    }
+    visiable: false
   },
   data() {
     return {
-      title: '配置详情',
+      title: '配置编辑',
       codeMirror: null,
       confCode: null,
       changed:false,
       value: null,
       visibleDiff:false,
+      readOnly: false,
       loading: false
     }
   },
@@ -85,9 +96,9 @@ export default {
           showCursorWhenSelecting: true,
           extraKeys: {'Ctrl': 'autocomplete'},
           lint: true,
+          readOnly:this.readOnly,
           autoMatchParens: true,
           mode: 'text/x-yaml',
-          readOnly: false,
           theme: 'default',	// 设置主题
           lineWrapping: true, // 代码折叠
           gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
@@ -144,6 +155,13 @@ export default {
       })
     },
 
+    setReadOnly(val) {
+      this.readOnly = val
+      if (this.codeMirror != null) {
+        this.codeMirror.setOption("readOnly",val)
+      }
+    },
+
     handleCancel() {
       this.changed = false
       this.confCode = null
@@ -159,10 +177,10 @@ export default {
     },
 
     handleCloseDiff() {
-      this.title = '配置详情'
+      this.title = '配置编辑'
       this.visibleDiff = false
     }
-  }
+  },
 
 }
 

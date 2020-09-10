@@ -8,7 +8,6 @@ import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.monitor.core.dao.ApplicationConfigMapper;
 import com.streamxhub.monitor.core.entity.Application;
 import com.streamxhub.monitor.core.entity.ApplicationConfig;
-import com.streamxhub.monitor.core.entity.Project;
 import com.streamxhub.monitor.core.service.ApplicationConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -36,6 +35,17 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
         //先前的激活的配置设置为备胎....
         this.baseMapper.standby(application.getId());
         save(applicationConfig);
+    }
+
+    @Override
+    public synchronized void update(Application application) {
+        ApplicationConfig config = this.getActived(application.getId());
+        String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+        String encode = DeflaterUtils.zipString(decode);
+        //create...
+        if(!config.getContent().equals(encode)) {
+            this.create(application);
+        }
     }
 
     @Override
