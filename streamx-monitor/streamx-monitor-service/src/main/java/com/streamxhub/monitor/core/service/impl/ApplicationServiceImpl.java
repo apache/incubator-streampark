@@ -198,8 +198,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public String readConf(Application app) throws IOException {
         File file = new File(app.getConfig());
         String conf = FileUtils.readFileToString(file, "utf-8");
-        String encode = Base64.getEncoder().encodeToString(conf.getBytes());
-        return encode;
+        return Base64.getEncoder().encodeToString(conf.getBytes());
+    }
+
+    @Override
+    public Application getApp(Application app) {
+        Application application = this.baseMapper.getApp(app);
+        if (application.getConfig() != null) {
+            String unzipString = DeflaterUtils.unzipString(application.getConfig());
+            String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+            application.setConfig(encode);
+        }
+        String path = this.projectService.getAppConfPath(app.getProjectId(),app.getModule());
+        application.setConfPath(path);
+        return application;
     }
 
     @Override

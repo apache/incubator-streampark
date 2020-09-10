@@ -9,6 +9,10 @@ export  function readConf(params) {
   return http.post(api.Application.ReadConf, params)
 }
 
+export function get (params) {
+  return http.post(api.Application.Get, params)
+}
+
 export function update (params) {
   return http.post(api.Application.Update, params)
 }
