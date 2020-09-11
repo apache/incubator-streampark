@@ -86,7 +86,10 @@ public class Project implements Serializable {
 
     private transient String dateTo;
 
-    private transient String appSource;//项目源码路径
+    /**
+     * 项目源码路径
+     */
+    private transient String appSource;
 
     /**
      * 获取项目源码路径
