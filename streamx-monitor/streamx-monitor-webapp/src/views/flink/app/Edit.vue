@@ -33,7 +33,7 @@
             v-if="strategy == 1"
             style="width: 75%"
             @change="handleChangeConfig"
-            v-model="configId">
+            v-model="defaultConfigId">
             <a-select-option v-for="(ver,i) in configVersions" :value="ver.id">
               <div style="padding-left: 5px">
                 <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
@@ -233,10 +233,10 @@ export default {
       maxTagCount: 1,
       strategy:1,
       app: null,
-      configId: null,
+      defaultConfigId: null,
       defaultOptions: {},
       configOverride: null,
-      configVersion: null,
+      configId: null,
       configVersions: [],
       configSource: [],
       configItems: [],
@@ -277,7 +277,7 @@ export default {
         this.app = resp.data
         this.configOverride = Base64.decode(this.app.config)
         this.defaultOptions = JSON.parse(this.app.options)
-        this.configVersion = this.app.configVersion
+        this.configId = this.app.configId
         this.handleSetForm()
         this.handleSetOptions()
         this.handleListConfVersion()
@@ -347,7 +347,7 @@ export default {
         id: v
       }).then((resp) => {
         this.configOverride = Base64.decode(resp.data.content)
-        this.configVersion = resp.data.id
+        this.configId = resp.data.id
       })
     },
 
@@ -398,13 +398,13 @@ export default {
 
           let format = this.strategy == 1 ? this.app.format : (this.form.getFieldValue('config').endsWith(".properties") ? 2:1)
           let config = this.configOverride || this.app.config
-          let configVersion = this.strategy == 1 ? this.configVersion : null
+          let configId = this.strategy == 1 ? this.configId : null
           update({
             id: this.app.id,
             config: Base64.encode(config),
             jobName: values.jobName,
             format: format,
-            configVersion: configVersion,
+            configId: configId,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
@@ -458,7 +458,7 @@ export default {
       }).then((resp) => {
         resp.data.forEach(((value, index) => {
           if(value.actived) {
-            this.configId = value.id
+            this.defaultConfigId = value.id
           }
         }))
         this.configVersions = resp.data
