@@ -158,6 +158,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setShortOptions(paramOfApp.getShortOptions());
         application.setDynamicOptions(paramOfApp.getDynamicOptions());
         application.setDescription(paramOfApp.getDescription());
+        application.setDeploy(1);
         this.baseMapper.updateById(application);
         return true;
     }
