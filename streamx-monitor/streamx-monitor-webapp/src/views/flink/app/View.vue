@@ -137,7 +137,35 @@
 
       <template slot="filterRender" slot-scope="text, record, index, column">
         <template v-if="searchText && searchedColumn === column.dataIndex">
-          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用或配置已更新,需重新发布">
+          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用已更新,需重新发布">
+            <template v-if="text.length>25">
+              <a-tooltip placement="top">
+                <template slot="title">
+                  {{ text }}
+                </template>
+                <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                    {{ fragment }}
+                  </mark>
+                  <template v-else>
+                    {{ fragment }}
+                  </template>
+                </template>
+                ...
+              </a-tooltip>
+            </template>
+            <template v-else>
+              <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                  {{ fragment }}
+                </mark>
+                <template v-else>
+                  {{ fragment }}
+                </template>
+              </template>
+            </template>
+          </a-badge>
+          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 2" dot title="配置已更新,需重启应用">
             <template v-if="text.length>25">
               <a-tooltip placement="top">
                 <template slot="title">
@@ -177,7 +205,12 @@
           </template>
         </template>
         <template v-else>
-          <a-badge dot title="应用或配置已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
+          <a-badge dot title="应用已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
+            <ellipsis :length="40" tooltip>
+              {{ text }}
+            </ellipsis>
+          </a-badge>
+          <a-badge dot title="配置已更新,需重启项目" v-if="column.dataIndex === 'jobName' && record.deploy === 2">
             <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
@@ -188,7 +221,7 @@
             </ellipsis>
           </span>
         </template>
-        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
+        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy !== 1">
           <a-icon slot="count" type="close" style="color: #333" />
         </a-badge>
       </template>
