@@ -15,48 +15,99 @@
           <a-alert :message="app['module']" type="info"/>
       </a-form-item>
 
-      <a-form-item
-        label="Config strategy"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-radio-group default-value="1" button-style="solid" @change="handleStrategy">
-          <a-radio-button value="1">
-            原有配置
-          </a-radio-button>
-          <a-radio-button value="2">
-            新配置
-          </a-radio-button>
-        </a-radio-group>
-      </a-form-item>
 
       <a-form-item
+        label="Application conf"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+
+        <a-input-group compact>
+          <a-select style="width: 30%" default-value="1" @change="handleStrategy">
+            <a-select-option value="1">
+              old config
+            </a-select-option>
+            <a-select-option value="2">
+              new config
+            </a-select-option>
+          </a-select>
+
+          <a-select
+            v-if="strategy == 1"
+            v-model="value"
+            style="width: 70%"
+            placeholder="select one country"
+            option-label-prop="label">
+            <a-select-option v-for="(ver,i) in configVersions" :value="ver.version" :label="'version:'.concat(ver.version)">
+              <span role="img" v-if="ver.actived == 1">
+                🇨🇳
+              </span>
+              version: {{ver.version}}
+            </a-select-option>
+
+            <template slot="suffixIcon">
+              <a-icon
+                type="setting"
+                theme="twoTone"
+                twoToneColor="#4a9ff5"
+                @click.stop="handleEditConfig()"
+                title="编辑配置">
+              </a-icon>
+            </template>
+
+          </a-select>
+
+          <a-tree-select
+            style="width: 70%"
+            v-if="strategy == 2"
+            :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
+            :treeData="configSource"
+            placeholder="请选择配置文件"
+            treeDefaultExpandAll
+            @change="handleJobName"
+            v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
+            >
+            <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
+              <a-icon
+                type="setting"
+                theme="twoTone"
+                twoToneColor="#4a9ff5"
+                @click.stop="handleEditNewConfig()"
+                title="编辑配置">
+              </a-icon>
+            </template>
+          </a-tree-select>
+        </a-input-group>
+
+      </a-form-item>
+
+     <!-- <a-form-item
         v-if="strategy == 1"
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-alert type="info">
-          <template slot="message">
-            eas job yaml conf
-            <div style="float: right">
-              <a-icon type="eye"
-                      theme="twoTone"
-                      twoToneColor="#4a9ff5"
-                      @click="handleView()" title="查看">
-              </a-icon>
-              <a-icon
-                type="edit"
-                theme="twoTone"
-                twoToneColor="#4a9ff5"
-                @click="handleEditConfig()"
-                style="width:20px;margin-left:5px;float:right;margin-top: 5px"
-                title="修改角色">
-              </a-icon>
-            </div>
-          </template>
-        </a-alert>
-      </a-form-item>
 
-      <a-form-item
+        <template slot="message" style="width: 70%">
+              eas job yaml conf
+              <div style="float: right">
+                <a-icon type="eye"
+                        theme="twoTone"
+                        twoToneColor="#4a9ff5"
+                        @click="handleView()" title="查看">
+                </a-icon>
+                <a-icon
+                  type="edit"
+                  theme="twoTone"
+                  twoToneColor="#4a9ff5"
+                  @click="handleEditConfig()"
+                  style="width:20px;margin-left:5px;float:right;margin-top: 5px"
+                  title="修改角色">
+                </a-icon>
+              </div>
+            </template>
+
+      </a-form-item>-->
+
+    <!--  <a-form-item
         v-if="strategy == 2"
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -70,7 +121,7 @@
           v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
           >
         </a-tree-select>
-      </a-form-item>
+      </a-form-item>-->
 
       <a-form-item
         label="Application name"
@@ -215,6 +266,7 @@
 <script>
 import {listConf} from '@api/project'
 import {get, update, exists, name, readConf} from '@api/application'
+import {version,get as getVer} from '@api/config'
 import { mapActions,mapGetters } from 'vuex'
 import Conf from './Conf'
 import configOptions from './option'
@@ -230,7 +282,9 @@ export default {
       value: 1,
       app: null,
       config: null,
+      configId: null,
       configOverride: null,
+      configVersions: [],
       configSource: [],
       configItems: [],
       form: null,
@@ -318,8 +372,8 @@ export default {
       }
     },
 
-    handleStrategy (e) {
-      this.strategy = e.target.value
+    handleStrategy (v) {
+      this.strategy = v
     },
 
     handleView () {
@@ -329,7 +383,7 @@ export default {
       this.$refs.confEdit.set(conf)
     },
 
-    handleEditNewConfig() {
+    handleEditNewConfig(e) {
       let config = this.form.getFieldValue('config')
       readConf({
         config:config
@@ -419,6 +473,23 @@ export default {
     handleSetForm() {
       this.$nextTick(()=>{
         this.form.setFieldsValue({'jobName': this.app.jobName})
+      })
+      this.handleListConfVersion()
+    },
+
+    handleListConfVersion() {
+      version({
+        id:this.appId
+      }).then((resp) => {
+        this.configVersions = resp.data
+      })
+    },
+
+    handleGetConfVersion() {
+      getVer({
+        id: this.configId
+      }).then((resp) => {
+        this.configVersions = resp.data
       })
     }
 
