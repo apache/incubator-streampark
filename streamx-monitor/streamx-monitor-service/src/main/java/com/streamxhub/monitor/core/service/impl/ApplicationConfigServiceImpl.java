@@ -62,13 +62,36 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
 
     @Override
     public synchronized void update(Application application) {
-        ApplicationConfig config = this.getActived(application.getId());
-        String decode = new String(Base64.getDecoder().decode(application.getConfig()));
-        String encode = DeflaterUtils.zipString(decode);
-        //create...
-        if (!config.getContent().equals(encode)) {
-            this.create(application);
+        if (application.getConfigVersion() != null) {
+            ApplicationConfig config = this.getVersion(application.getId(), application.getConfigVersion());
+            String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+            String encode = DeflaterUtils.zipString(decode);
+            //create...
+            if (!config.getContent().equals(encode)) {
+                this.create(application);
+            } else {
+                //先前的激活的配置设置为备胎....
+                this.baseMapper.standby(application.getId());
+                //将指定版本设置为激活
+                this.baseMapper.active(application.getId(), application.getConfigVersion());
+            }
+        } else {
+            ApplicationConfig config = this.getActived(application.getId());
+            String decode = new String(Base64.getDecoder().decode(application.getConfig()));
+            String encode = DeflaterUtils.zipString(decode);
+            //create...
+            if (!config.getContent().equals(encode)) {
+                this.create(application);
+            }
         }
+    }
+
+    private ApplicationConfig getVersion(Long id, Integer configVersion) {
+        QueryWrapper<ApplicationConfig> queryWrapper = new QueryWrapper();
+        queryWrapper.lambda()
+                .eq(ApplicationConfig::getAppId, id)
+                .eq(ApplicationConfig::getVersion, configVersion);
+        return this.getOne(queryWrapper);
     }
 
     @Override

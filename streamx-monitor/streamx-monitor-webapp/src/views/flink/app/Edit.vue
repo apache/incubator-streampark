@@ -67,7 +67,7 @@
                 type="setting"
                 theme="twoTone"
                 twoToneColor="#4a9ff5"
-                @click.stop="handleEditNewConfig()"
+                @click.stop="handleEditConfig()"
                 title="编辑配置">
               </a-icon>
             </template>
@@ -236,6 +236,7 @@ export default {
       configId: null,
       defaultOptions: {},
       configOverride: null,
+      configVersion: null,
       configVersions: [],
       configSource: [],
       configItems: [],
@@ -276,6 +277,7 @@ export default {
         this.app = resp.data
         this.configOverride = Base64.decode(this.app.config)
         this.defaultOptions = JSON.parse(this.app.options)
+        this.configVersion = this.app.configVersion
         this.handleSetForm()
         this.handleSetOptions()
         this.handleListConfVersion()
@@ -344,13 +346,9 @@ export default {
       getVer({
         id: v
       }).then((resp) => {
-        this.configOverride = Base64.decode(resp.data)
+        this.configOverride = Base64.decode(resp.data.content)
+        this.configVersion = resp.data.id
       })
-    },
-
-    handleEditNewConfig() {
-      this.confEdit.visiable = true
-      this.$refs.confEdit.set(this.configOverride)
     },
 
     handleEditConfig() {
@@ -398,13 +396,15 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
-          let format = this.strategy == 1 ? this.app.format :  this.form.getFieldValue('config').endsWith(".properties") ? 2:1
+          let format = this.strategy == 1 ? this.app.format : (this.form.getFieldValue('config').endsWith(".properties") ? 2:1)
           let config = this.configOverride || this.app.config
+          let configVersion = this.strategy == 1 ? this.configVersion : null
           update({
             id: this.app.id,
             config: Base64.encode(config),
             jobName: values.jobName,
             format: format,
+            configVersion: configVersion,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
