@@ -62,8 +62,9 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
 
     @Override
     public synchronized void update(Application application) {
-        if (application.getConfigVersion() != null) {
-            ApplicationConfig config = this.getById(application.getConfigVersion());
+        Long configVersionId = application.getConfigVersion();
+        if (configVersionId != null) {
+            ApplicationConfig config = this.getById(configVersionId);
             String decode = new String(Base64.getDecoder().decode(application.getConfig()));
             String encode = DeflaterUtils.zipString(decode);
             //create...
@@ -73,7 +74,7 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
                 //先前的激活的配置设置为备胎....
                 this.baseMapper.standby(application.getId());
                 //将指定版本设置为激活
-                this.baseMapper.active(application.getId(), application.getConfigVersion());
+                this.baseMapper.active(configVersionId);
             }
         } else {
             ApplicationConfig config = this.getActived(application.getId());
