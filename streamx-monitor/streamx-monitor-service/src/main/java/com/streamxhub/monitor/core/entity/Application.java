@@ -93,6 +93,7 @@ public class Application implements Serializable {
     private transient String userName;
 
     private transient String config;
+    private transient Integer configVersion;
     private transient String confPath;
     private transient Integer format;
     private transient String savePoint;

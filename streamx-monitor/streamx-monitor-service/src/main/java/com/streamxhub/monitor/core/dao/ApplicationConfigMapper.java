@@ -16,4 +16,7 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
     @Select("select * from t_flink_config where app_id=#{appId} and actived = 1")
     ApplicationConfig getActived(@Param("appId")Long id);
+
+    @Update("update t_flink_config set actived = 1 where app_id=#{appId} and version = #{version}")
+    void active(@Param("appId")Long appId,@Param("version") Integer version);
 }
