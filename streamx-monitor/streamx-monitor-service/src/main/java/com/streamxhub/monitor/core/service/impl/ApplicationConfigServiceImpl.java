@@ -87,7 +87,13 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
 
     @Override
     public ApplicationConfig get(Long id) {
-        return getById(id);
+        ApplicationConfig config = getById(id);
+        if (config.getContent() != null) {
+            String unzipString = DeflaterUtils.unzipString(config.getContent());
+            String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+            config.setContent(encode);
+        }
+        return config;
     }
 
 }
