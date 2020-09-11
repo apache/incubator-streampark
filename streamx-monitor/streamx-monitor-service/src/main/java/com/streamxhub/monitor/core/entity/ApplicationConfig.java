@@ -43,6 +43,7 @@ public class ApplicationConfig {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long appId;
 
     private Boolean actived;
