@@ -210,7 +210,7 @@
               {{ text }}
             </ellipsis>
           </a-badge>
-          <a-badge dot title="配置已更新,需重启项目" v-else-if ="column.dataIndex === 'jobName' && record.deploy === 2">
+          <a-badge dot title="配置已更新,需重启项目" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
             <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>

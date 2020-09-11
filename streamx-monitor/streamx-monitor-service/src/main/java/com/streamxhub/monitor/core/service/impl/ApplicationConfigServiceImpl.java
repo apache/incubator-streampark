@@ -63,7 +63,7 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
     @Override
     public synchronized void update(Application application) {
         if (application.getConfigVersion() != null) {
-            ApplicationConfig config = this.getVersion(application.getId(), application.getConfigVersion());
+            ApplicationConfig config = this.getById(application.getConfigVersion());
             String decode = new String(Base64.getDecoder().decode(application.getConfig()));
             String encode = DeflaterUtils.zipString(decode);
             //create...
