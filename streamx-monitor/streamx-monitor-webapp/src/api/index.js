@@ -40,6 +40,12 @@ export default {
     StartUp: '/flink/app/startUp',
     CloseDeploy: '/flink/app/closeDeploy'
   },
+
+  Config: {
+    Get : '/flink/conf/get',
+    Version: '/flink/conf/version',
+  },
+
   User: {
     ExecUser: '/user/execUser',
     LIST: '/user/list',
