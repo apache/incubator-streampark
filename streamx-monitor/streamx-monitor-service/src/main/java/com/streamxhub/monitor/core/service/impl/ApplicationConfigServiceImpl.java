@@ -86,7 +86,7 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
         }
     }
 
-    private ApplicationConfig getVersion(Long id, Integer configVersion) {
+    private ApplicationConfig getVersion(Long id, Long configVersion) {
         QueryWrapper<ApplicationConfig> queryWrapper = new QueryWrapper();
         queryWrapper.lambda()
                 .eq(ApplicationConfig::getAppId, id)
