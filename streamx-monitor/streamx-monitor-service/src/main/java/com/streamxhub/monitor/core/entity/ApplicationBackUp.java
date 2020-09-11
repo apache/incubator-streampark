@@ -35,6 +35,8 @@ import lombok.Data;
 public class ApplicationBackUp {
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long appId;
     private String path;
     private String description;
