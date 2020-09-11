@@ -46,7 +46,7 @@
     </select>
 
     <select id="getApp" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName,c.content as config,c.format,c.version as configVersion
+        SELECT t.*,p.name as projectName,c.content as config,c.format,c.id as configId
         FROM t_flink_app t
         inner join t_flink_project p
         on t.project_id = p.id
