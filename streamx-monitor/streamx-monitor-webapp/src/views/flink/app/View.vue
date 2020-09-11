@@ -210,7 +210,7 @@
               {{ text }}
             </ellipsis>
           </a-badge>
-          <a-badge dot title="配置已更新,需重启项目" v-if="column.dataIndex === 'jobName' && record.deploy === 2">
+          <a-badge dot title="配置已更新,需重启项目" v-else-if ="column.dataIndex === 'jobName' && record.deploy === 2">
             <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
@@ -221,7 +221,7 @@
             </ellipsis>
           </span>
         </template>
-        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy !== 1">
+        <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy !== 0">
           <a-icon slot="count" type="close" style="color: #333" />
         </a-badge>
       </template>
