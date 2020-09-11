@@ -51,6 +51,8 @@ public class Application implements Serializable {
      */
     @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long projectId;
     /**
      * 创建人
@@ -93,6 +95,8 @@ public class Application implements Serializable {
     private transient String userName;
 
     private transient String config;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private transient Long configId;
     private transient String confPath;
     private transient Integer format;
