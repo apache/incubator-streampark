@@ -137,7 +137,7 @@
 
       <template slot="filterRender" slot-scope="text, record, index, column">
         <template v-if="searchText && searchedColumn === column.dataIndex">
-          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用已更新,需重新发布">
+          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用或配置已更新,需重新发布">
             <template v-if="text.length>25">
               <a-tooltip placement="top">
                 <template slot="title">
@@ -177,7 +177,7 @@
           </template>
         </template>
         <template v-else>
-          <a-badge dot title="应用已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
+          <a-badge dot title="应用或配置已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
             <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
