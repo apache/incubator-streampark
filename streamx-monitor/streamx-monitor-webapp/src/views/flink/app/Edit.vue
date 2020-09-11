@@ -15,7 +15,6 @@
           <a-alert :message="app['module']" type="info"/>
       </a-form-item>
 
-
       <a-form-item
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -266,7 +265,7 @@
 <script>
 import {listConf} from '@api/project'
 import {get, update, exists, name, readConf} from '@api/application'
-import {version,get as getVer} from '@api/config'
+import {list as listVer,get as getVer} from '@api/config'
 import { mapActions,mapGetters } from 'vuex'
 import Conf from './Conf'
 import configOptions from './option'
@@ -478,7 +477,7 @@ export default {
     },
 
     handleListConfVersion() {
-      version({
+      listVer({
         id:this.appId
       }).then((resp) => {
         this.configVersions = resp.data

@@ -48,8 +48,8 @@ public class ConfigController extends BaseController {
         return RestResponse.create().data(config);
     }
 
-    @RequestMapping("confVer")
-    public RestResponse confVer(Application app) {
+    @RequestMapping("list")
+    public RestResponse list(Application app) {
         List<ApplicationConfig> list =  applicationConfigService.listConf(app.getId());
         return RestResponse.create().data(list);
     }

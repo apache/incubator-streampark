@@ -43,7 +43,7 @@ export default {
 
   Config: {
     Get : '/flink/conf/get',
-    Version: '/flink/conf/version',
+    List: '/flink/conf/list',
   },
 
   User: {
