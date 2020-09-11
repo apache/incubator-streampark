@@ -189,7 +189,7 @@
 
     </a-form>
 
-    <conf ref="confEdit" :readOnly="confEdit.readOnly" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
 
   </a-card>
 </template>
@@ -218,8 +218,7 @@ export default {
       form: null,
       options: configOptions,
       confEdit:  {
-        visiable: false,
-        readOnly: false,
+        visiable: false
       }
     }
   },
@@ -230,7 +229,7 @@ export default {
 
   beforeMount() {
     this.form = this.$form.createForm(this)
-    configOptions.forEach((item, index, array) => {
+    this.options.forEach((item, index, array) => {
       this.form.getFieldDecorator(item.name, {initialValue: item.value, preserve: true})
     })
   },
@@ -350,7 +349,7 @@ export default {
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
-              const option = configOptions.filter((elem) => k === elem.name)[0]
+              const option = this.options.filter((elem) => k === elem.name)[0]
               const key = option.key
               if (v !== false && v !== '') {
                 options[k] = v

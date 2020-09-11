@@ -19,30 +19,29 @@
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-
         <a-input-group compact>
-          <a-select style="width: 30%" default-value="1" @change="handleStrategy">
+          <a-select style="width: 25%" default-value="1" @change="handleStrategy">
             <a-select-option value="1">
-              old config
+              use existing
             </a-select-option>
             <a-select-option value="2">
-              new config
+              reselect
             </a-select-option>
           </a-select>
 
           <a-select
             v-if="strategy == 1"
-            v-model="value"
-            style="width: 70%"
-            placeholder="select one country"
-            option-label-prop="label">
-            <a-select-option v-for="(ver,i) in configVersions" :value="ver.version" :label="'version:'.concat(ver.version)">
-              <span role="img" v-if="ver.actived == 1">
-                🇨🇳
-              </span>
-              version: {{ver.version}}
+            style="width: 75%"
+            @change="handleChangeConfig"
+            v-model="configId">
+            <a-select-option v-for="(ver,i) in configVersions" :value="ver.id">
+              <div style="padding-left: 5px">
+                <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
+                  {{ver.version}}
+                </a-button>
+                <a-tag color="green" style=";margin-left: 10px;" size="small" v-if="ver.actived">current</a-tag>
+              </div>
             </a-select-option>
-
             <template slot="suffixIcon">
               <a-icon
                 type="setting"
@@ -52,19 +51,17 @@
                 title="编辑配置">
               </a-icon>
             </template>
-
           </a-select>
 
           <a-tree-select
-            style="width: 70%"
+            style="width: 75%"
             v-if="strategy == 2"
             :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
             :treeData="configSource"
             placeholder="请选择配置文件"
             treeDefaultExpandAll
-            @change="handleJobName"
+            @change="handleChangeNewConfig"
             v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
-            >
             <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
               <a-icon
                 type="setting"
@@ -78,49 +75,6 @@
         </a-input-group>
 
       </a-form-item>
-
-     <!-- <a-form-item
-        v-if="strategy == 1"
-        label="Application conf"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-
-        <template slot="message" style="width: 70%">
-              eas job yaml conf
-              <div style="float: right">
-                <a-icon type="eye"
-                        theme="twoTone"
-                        twoToneColor="#4a9ff5"
-                        @click="handleView()" title="查看">
-                </a-icon>
-                <a-icon
-                  type="edit"
-                  theme="twoTone"
-                  twoToneColor="#4a9ff5"
-                  @click="handleEditConfig()"
-                  style="width:20px;margin-left:5px;float:right;margin-top: 5px"
-                  title="修改角色">
-                </a-icon>
-              </div>
-            </template>
-
-      </a-form-item>-->
-
-    <!--  <a-form-item
-        v-if="strategy == 2"
-        label="Application conf"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-tree-select
-          :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
-          :treeData="configSource"
-          placeholder="请选择配置文件"
-          treeDefaultExpandAll
-          @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, message: '请选择配置文件'}]} ]">
-          >
-        </a-tree-select>
-      </a-form-item>-->
 
       <a-form-item
         label="Application name"
@@ -278,10 +232,9 @@ export default {
     return {
       maxTagCount: 1,
       strategy:1,
-      value: 1,
       app: null,
-      config: null,
       configId: null,
+      defaultOptions: {},
       configOverride: null,
       configVersions: [],
       configSource: [],
@@ -306,7 +259,7 @@ export default {
 
   beforeMount() {
     this.form = this.$form.createForm(this)
-    configOptions.forEach((item, index, array) => {
+    this.options.forEach((item, index, array) => {
       this.form.getFieldDecorator(item.name, {initialValue: item.value, preserve: true})
     })
   },
@@ -321,7 +274,11 @@ export default {
     handleGet(appId) {
       get({id: appId }).then((resp) => {
         this.app = resp.data
+        this.configOverride = Base64.decode(this.app.config)
+        this.defaultOptions = JSON.parse(this.app.options)
         this.handleSetForm()
+        this.handleSetOptions()
+        this.handleListConfVersion()
         listConf({
           path: this.app["confPath"]
         }).then((resp) => {
@@ -344,11 +301,19 @@ export default {
       this.form.setFieldsValue(v)
     },
 
-    handleJobName(confFile) {
+    handleChangeNewConfig(confFile) {
       name({
         config: confFile
       }).then((resp) => {
         this.form.setFieldsValue({'jobName': resp.data})
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+      readConf({
+        config: confFile
+      }).then((resp) => {
+        let conf = Base64.decode(resp.data)
+        this.configOverride = conf
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -375,31 +340,22 @@ export default {
       this.strategy = v
     },
 
-    handleView () {
-      this.$refs.confEdit.setReadOnly(true)
-      this.confEdit.visiable = true
-      let conf = Base64.decode(this.app.config)
-      this.$refs.confEdit.set(conf)
-    },
-
-    handleEditNewConfig(e) {
-      let config = this.form.getFieldValue('config')
-      readConf({
-        config:config
+    handleChangeConfig (v) {
+      getVer({
+        id: v
       }).then((resp) => {
-        let conf = Base64.decode(resp.data)
-        this.confEdit.visiable = true
-        this.$refs.confEdit.set(conf)
-      }).catch((error) => {
-        this.$message.error(error.message)
+        this.configOverride = Base64.decode(resp.data)
       })
     },
 
-    handleEditConfig() {
-      this.$refs.confEdit.setReadOnly(false)
+    handleEditNewConfig() {
       this.confEdit.visiable = true
-      let conf = Base64.decode(this.app.config)
-      this.$refs.confEdit.set(conf)
+      this.$refs.confEdit.set(this.configOverride)
+    },
+
+    handleEditConfig() {
+      this.confEdit.visiable = true
+      this.$refs.confEdit.set(this.configOverride )
     },
 
     handleEditConfClose() {
@@ -420,7 +376,7 @@ export default {
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
-              const option = configOptions.filter((elem) => k === elem.name)[0]
+              const option = this.options.filter((elem) => k === elem.name)[0]
               const key = option.key
               if (v !== false && v !== '') {
                 options[k] = v
@@ -471,23 +427,40 @@ export default {
 
     handleSetForm() {
       this.$nextTick(()=>{
-        this.form.setFieldsValue({'jobName': this.app.jobName})
+        this.form.setFieldsValue({
+            'jobName': this.app.jobName,
+            'args': this.app.args,
+            'description': this.app.description,
+            'dynamicOptions': this.app.dynamicOptions,
+            'slot': this.defaultOptions.yarnslots,
+            'parallelism': this.defaultOptions.parallelism
+          })
       })
-      this.handleListConfVersion()
+    },
+
+    handleSetOptions() {
+      let array = []
+      for(let k in this.defaultOptions) {
+        if( k!="parallelism" && k != "slot") {
+          array.push(k)
+        }
+      }
+      this.configItems = array
+      this.form.setFieldsValue(this.defaultOptions)
+      this.$nextTick(()=>{
+        this.form.setFieldsValue({'options': array})
+      })
     },
 
     handleListConfVersion() {
       listVer({
-        id:this.appId
+        id: this.app.id
       }).then((resp) => {
-        this.configVersions = resp.data
-      })
-    },
-
-    handleGetConfVersion() {
-      getVer({
-        id: this.configId
-      }).then((resp) => {
+        resp.data.forEach(((value, index) => {
+          if(value.actived) {
+            this.configId = value.id
+          }
+        }))
         this.configVersions = resp.data
       })
     }
@@ -531,4 +504,12 @@ export default {
 .ant-form-explain {
   margin-top: -5px;
 }
+
+.ant-tag {
+  font-size: 12px;
+  line-height: 1.5;
+  margin-right: 5px;
+  line-height: 20px;
+}
+
 </style>
