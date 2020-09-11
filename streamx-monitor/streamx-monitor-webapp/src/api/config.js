@@ -5,7 +5,7 @@ export function get(params) {
   return http.post(api.Config.Get, params)
 }
 
-export function version(queryParam) {
-  return http.post(api.Config.Version, queryParam)
+export function list(queryParam) {
+  return http.post(api.Config.List, queryParam)
 }
 
