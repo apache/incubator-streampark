@@ -50,7 +50,9 @@ public class Project implements Serializable {
 
     private String url;
 
-    //分支.
+    /**
+     * 分支
+     */
     private String branches;
 
     @TableField("LASTBUILD")
