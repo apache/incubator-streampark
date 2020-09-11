@@ -21,6 +21,7 @@
 package com.streamxhub.monitor.core.service.impl;
 
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.monitor.core.dao.ApplicationConfigMapper;
@@ -33,6 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
+import java.util.List;
 
 /**
  * @author benjobs
@@ -64,7 +66,7 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
         String decode = new String(Base64.getDecoder().decode(application.getConfig()));
         String encode = DeflaterUtils.zipString(decode);
         //create...
-        if(!config.getContent().equals(encode)) {
+        if (!config.getContent().equals(encode)) {
             this.create(application);
         }
     }
@@ -72,6 +74,20 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
     @Override
     public ApplicationConfig getActived(Long id) {
         return this.baseMapper.getActived(id);
+    }
+
+    @Override
+    public List<ApplicationConfig> listConf(Long appId) {
+        QueryWrapper<ApplicationConfig> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda()
+                .eq(ApplicationConfig::getAppId, appId)
+                .orderByDesc(ApplicationConfig::getVersion);
+        return this.list(queryWrapper);
+    }
+
+    @Override
+    public ApplicationConfig get(Long id) {
+        return getById(id);
     }
 
 }

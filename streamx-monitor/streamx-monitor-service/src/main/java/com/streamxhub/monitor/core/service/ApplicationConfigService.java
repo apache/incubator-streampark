@@ -25,6 +25,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.monitor.core.entity.Application;
 import com.streamxhub.monitor.core.entity.ApplicationConfig;
 
+import java.util.List;
+
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     void create(Application application);
@@ -32,4 +34,8 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
     void update(Application application);
 
     ApplicationConfig getActived(Long id);
+
+    List<ApplicationConfig> listConf(Long appId);
+
+    ApplicationConfig get(Long id);
 }
