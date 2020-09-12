@@ -1,11 +1,12 @@
 <template>
-  <a-drawer :maskClosable="false"
-            width="calc(100% - 25%)"
-            placement="right"
-            :closable="true"
-            @close="handleCancel"
-            :visible="visiable"
-            class="drawer-conf">
+  <a-drawer
+    :maskClosable="false"
+    width="calc(100% - 25%)"
+    placement="right"
+    :closable="true"
+    @close="handleCancel"
+    :visible="visiable"
+    class="drawer-conf">
 
     <template slot="title">
       <template>
@@ -20,7 +21,7 @@
       <div class="drawer-bootom-button">
         <div style="float: right">
           <a-button class="drwaer-button-item" @click="handleCancel">
-              取消
+            取消
           </a-button>
           <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleNext()"><a-icon type="right" />下一步</a-button>
         </div>
@@ -47,35 +48,38 @@
 <script>
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/mode/yaml/yaml'
-import "codemirror/addon/edit/matchbrackets"
-import "codemirror/addon/selection/active-line"
-import "codemirror/mode/clike/clike"
-import "codemirror/mode/sql/sql"
-
+import 'codemirror/addon/edit/matchbrackets'
+import 'codemirror/addon/selection/active-line'
+import 'codemirror/mode/clike/clike'
+import 'codemirror/mode/sql/sql'
 import 'mergely/lib/mergely.css'
 import 'mergely/lib/mergely'
 
 export default {
   name: 'Conf',
   props: {
-    visiable: false
+    visiable: {
+      type: Boolean,
+      default: false
+    }
   },
-  data() {
+  data () {
     return {
       title: '配置编辑',
       codeMirror: null,
       confCode: null,
-      changed:false,
+      changed: false,
       value: null,
-      visibleDiff:false,
+      visibleDiff: false,
       loading: false
     }
   },
 
   methods: {
-    handleCodeMirror() {
+
+    handleCodeMirror () {
       if (this.codeMirror == null) {
-        this.codeMirror = CodeMirror.fromTextArea(document.querySelector(".confEdit"), {
+        this.codeMirror = CodeMirror.fromTextArea(document.querySelector('.confEdit'), {
           tabSize: 2,
           styleActiveLine: true,
           lineNumbers: true,
@@ -84,7 +88,7 @@ export default {
           styleSelectedText: true,
           matchBrackets: true,
           showCursorWhenSelecting: true,
-          extraKeys: {'Ctrl': 'autocomplete'},
+          extraKeys: { 'Ctrl': 'autocomplete' },
           lint: true,
           readOnly: false,
           autoMatchParens: true,
@@ -94,38 +98,36 @@ export default {
           gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
         })
 
-        this.codeMirror.on("change", (editor,change) => {
-          //第一次
-          if(!this.confCode) {
+        this.codeMirror.on('change', (editor, change) => {
+          // 第一次
+          if (!this.confCode) {
             this.confCode = change.text
-          }else {
+          } else {
             this.changed = true
             this.confCode = this.codeMirror.getValue()
           }
         })
-
         this.$nextTick(() => {
           this.handleSetValue()
         })
-
       } else {
         this.handleSetValue()
       }
     },
 
-    handleSetValue() {
+    handleSetValue () {
       this.codeMirror.setValue(this.value)
       setTimeout(() => {
         this.codeMirror.refresh()
       }, 1)
     },
 
-    handleNext() {
+    handleNext () {
       this.visibleDiff = true
       this.title = '配置对比'
-      this.$nextTick(()=>{
+      this.$nextTick(() => {
         jQuery('#mergely').mergely({
-          cmsettings: {mode: 'text/plain', readOnly: true},
+          cmsettings: { mode: 'text/plain', readOnly: true },
           lhs: (setValue) => {
             setValue(this.value)
           },
@@ -136,7 +138,7 @@ export default {
       })
     },
 
-    set(value) {
+    set (value) {
       this.changed = false
       this.confCode = null
       this.value = value
@@ -145,7 +147,7 @@ export default {
       })
     },
 
-    handleCancel() {
+    handleCancel () {
       this.changed = false
       this.confCode = null
       this.value = null
@@ -154,16 +156,16 @@ export default {
       this.$emit('close')
     },
 
-    handleOk() {
-      this.$emit('ok',this.confCode)
+    handleOk () {
+      this.$emit('ok', this.confCode)
       this.handleCancel()
     },
 
-    handleCloseDiff() {
+    handleCloseDiff () {
       this.title = '配置编辑'
       this.visibleDiff = false
     }
-  },
+  }
 
 }
 
@@ -207,4 +209,3 @@ export default {
 }
 
 </style>
-
