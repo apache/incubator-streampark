@@ -26,8 +26,6 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.monitor.base.properties.StreamXProperties;
@@ -46,13 +44,9 @@ import java.util.Date;
 @Excel("flink应用实体")
 @Slf4j
 public class Application implements Serializable {
-    /**
-     * what fuck。。。
-     */
-    @JsonSerialize(using = ToStringSerializer.class)
+
     private Long id;
 
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long projectId;
     /**
      * 创建人
@@ -96,7 +90,6 @@ public class Application implements Serializable {
 
     private transient String config;
 
-    @JsonSerialize(using = ToStringSerializer.class)
     private transient Long configId;
     private transient String confPath;
     private transient Integer format;
