@@ -1,68 +1,70 @@
 <template>
   <div class="card-list" ref="content" style="padding: 10px;background-color: #fff;">
     <div class="icon-list" style="height: 30px;width: 100px;z-index: 5">
-      <a-icon type="fullscreen-exit"
-              twoToneColor="#4a9ff5"
-              style="float: right; padding-left: 10px;"/>
-      <a-icon type="play-circle"
-              twoToneColor="#4a9ff5"
-              @click="handleReplSubmit"
-              style="float: right;padding-left: 10px;"/>
-      <a-icon type="project"
-              twoToneColor="#4a9ff5"
-              style="float: right;padding-left: 10px;"/>
+      <a-icon
+        type="fullscreen-exit"
+        twoToneColor="#4a9ff5"
+        style="float: right; padding-left: 10px;"/>
+      <a-icon
+        type="play-circle"
+        twoToneColor="#4a9ff5"
+        @click="handleReplSubmit"
+        style="float: right;padding-left: 10px;"/>
+      <a-icon
+        type="project"
+        twoToneColor="#4a9ff5"
+        style="float: right;padding-left: 10px;"/>
     </div>
     <textarea ref="code" class="code" v-model="code"></textarea>
   </div>
 </template>
 <script>
-import "codemirror/theme/idea.css"
+import 'codemirror/theme/idea.css'
 import 'codemirror/theme/cobalt.css'
 import 'codemirror/theme/eclipse.css'
-import "codemirror/lib/codemirror.css"
-import "codemirror/addon/hint/show-hint.css"
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/addon/hint/show-hint.css'
 
-import "codemirror/addon/edit/matchbrackets"
-import "codemirror/addon/selection/active-line"
-import "codemirror/addon/hint/anyword-hint"
-import "codemirror/mode/clike/clike"
-import "codemirror/mode/sql/sql"
+import 'codemirror/addon/edit/matchbrackets'
+import 'codemirror/addon/selection/active-line'
+import 'codemirror/addon/hint/anyword-hint'
+import 'codemirror/mode/clike/clike'
+import 'codemirror/mode/sql/sql'
 
-let CodeMirror = require("codemirror/lib/codemirror")
+const CodeMirror = require('codemirror/lib/codemirror')
 
 export default {
-  name: "codeMirror",
-  data() {
+  name: 'CodeMirror',
+  data () {
     return {
       editor: null,
       code: ''
     }
   },
 
-  mounted() {
+  mounted () {
     this.editor = CodeMirror.fromTextArea(this.$refs.code, {
       theme: 'eclipse',
-      mode: "text/x-scala",
-      lineWrapping: true,	//代码折叠
+      mode: 'text/x-scala',
+      lineWrapping: true,	// 代码折叠
       foldGutter: true,
       indentWithTabs: true,
       smartIndent: true,
       lineNumbers: false,
       matchBrackets: true,
       autofocus: true,
-      extraKeys: {'Ctrl': 'autocomplete'},//自定义快捷键
-      hintOptions: {//自定义提示选项
+      extraKeys: { 'Ctrl': 'autocomplete' }, // 自定义快捷键
+      hintOptions: {// 自定义提示选项
         tables: {
           users: ['name', 'score', 'birthDate'],
           countries: ['name', 'population', 'size']
         }
       }
     })
-
   },
 
   methods: {
-    handleReplSubmit() {
+    handleReplSubmit () {
       console.log(this.code)
     }
   }
