@@ -53,7 +53,7 @@
           placeholder="请选择配置文件"
           treeDefaultExpandAll
           @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig, message: '请选择配置文件'}]} ]">
+          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig }]} ]">
           <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
             <a-icon
               type="setting"
@@ -325,6 +325,8 @@ export default {
         }else {
           callback()
         }
+      } else {
+        callback(new Error('请选择配置文件'))
       }
     },
 
