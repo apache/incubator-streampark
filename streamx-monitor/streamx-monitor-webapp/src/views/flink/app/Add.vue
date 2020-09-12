@@ -70,9 +70,10 @@
         label="Application name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input type="text"
-                 placeholder="请输入任务名称"
-                 v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
+        <a-input
+          type="text"
+          placeholder="请输入任务名称"
+          v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
       </a-form-item>
 
       <a-form-item
@@ -138,10 +139,11 @@
         :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input v-if="conf.type === 'input'"
-                 type="text"
-                 :placeholder="conf.placeholder"
-                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-input
+          v-if="conf.type === 'input'"
+          type="text"
+          :placeholder="conf.placeholder"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
           @change="(x) => handleSwitch(x,conf)"
@@ -205,16 +207,16 @@
 
 <script>
 
-import {select, listApp, listConf} from '@api/project'
-import {create, exists, name, readConf} from '@api/application'
+import { select, listApp, listConf } from '@api/project'
+import { create, exists, name, readConf } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
-let Base64 = require('js-base64').Base64
+const Base64 = require('js-base64').Base64
 
 export default {
   name: 'AppAdd',
-  components: {Conf},
-  data() {
+  components: { Conf },
+  data () {
     return {
       maxTagCount: 1,
       projectList: [],
@@ -226,30 +228,31 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
-      confEdit:  {
-        visiable: false
+      confEdit: {
+        type: Boolean,
+        default: false
       }
     }
   },
 
-  mounted() {
+  mounted () {
     this.select()
   },
 
-  beforeMount() {
+  beforeMount () {
     this.form = this.$form.createForm(this)
     this.options.forEach((item, index, array) => {
-      this.form.getFieldDecorator(item.name, {initialValue: item.value, preserve: true})
+      this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
     })
   },
 
   methods: {
 
-    filterOption(input, option) {
+    filterOption (input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
 
-    select() {
+    select () {
       select().then((resp) => {
         this.projectList = resp.data
       }).catch((error) => {
@@ -257,7 +260,7 @@ export default {
       })
     },
 
-    handleProject(value) {
+    handleProject (value) {
       listApp({
         id: value
       }).then((resp) => {
@@ -267,28 +270,28 @@ export default {
       })
     },
 
-    handleConf(name) {
+    handleConf (name) {
       this.configItems = name
     },
 
-    handleSwitch(bool, conf) {
+    handleSwitch (bool, conf) {
       const v = {}
       v[conf.name] = bool
       this.form.setFieldsValue(v)
     },
 
-    handleJobName(confFile) {
+    handleJobName (confFile) {
       name({
         config: confFile
       }).then((resp) => {
-        this.form.setFieldsValue({'jobName': resp.data})
+        this.form.setFieldsValue({ 'jobName': resp.data })
       }).catch((error) => {
         this.$message.error(error.message)
       })
     },
 
-    handleApp(app) {
-      this.form.resetFields(['config','jobName'])
+    handleApp (app) {
+      this.form.resetFields(['config', 'jobName'])
       this.configOverride = null
       listConf({
         path: app
@@ -299,7 +302,7 @@ export default {
       })
     },
 
-    handleCheckJobName(rule, value, callback) {
+    handleCheckJobName (rule, value, callback) {
       if (!value) {
         callback(new Error('应用名称不能为空'))
       } else {
@@ -307,22 +310,22 @@ export default {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
-          }else if(exists === 1) {
+          } else if (exists === 1) {
             callback(new Error('应用名称必须唯一,该应用名称已经存在'))
-          }else {
+          } else {
             callback(new Error('该应用名称已经在yarn中运行,不能重复请检查'))
           }
         })
       }
     },
 
-    handleCheckConfig(rule, value, callback) {
+    handleCheckConfig (rule, value, callback) {
       if (value) {
-        let isProp = value.endsWith(".properties")
-        let isYaml = value.endsWith(".yaml") || value.endsWith(".yml")
-        if(!isProp && !isYaml) {
+        const isProp = value.endsWith('.properties')
+        const isYaml = value.endsWith('.yaml') || value.endsWith('.yml')
+        if (!isProp && !isYaml) {
           callback(new Error('配置文件必须为.properties 或者.yaml,.yml)'))
-        }else {
+        } else {
           callback()
         }
       } else {
@@ -330,12 +333,12 @@ export default {
       }
     },
 
-    handleEditConfig() {
-      let config = this.form.getFieldValue('config')
+    handleEditConfig () {
+      const config = this.form.getFieldValue('config')
       readConf({
-        config:config
+        config: config
       }).then((resp) => {
-        let conf = Base64.decode(resp.data)
+        const conf = Base64.decode(resp.data)
         this.confEdit.visiable = true
         this.$refs.confEdit.set(conf)
       }).catch((error) => {
@@ -343,20 +346,20 @@ export default {
       })
     },
 
-    handleEditConfClose() {
+    handleEditConfClose () {
       this.confEdit.visiable = false
     },
 
-    handleEditConfOk(value) {
+    handleEditConfOk (value) {
       this.configOverride = value
     },
 
-    handleSubmit(e) {
+    handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          let shortOptions = ""
+          let shortOptions = ''
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
@@ -372,18 +375,18 @@ export default {
             }
           }
 
-          if(values.parallelism) {
-            options["parallelism"] = values.parallelism
+          if (values.parallelism) {
+            options['parallelism'] = values.parallelism
             shortOptions += ' -p ' + values.parallelism
           }
 
-          if(values.slot) {
-            options["yarnslots"] = values.slot
+          if (values.slot) {
+            options['yarnslots'] = values.slot
             shortOptions += ' -ys ' + values.slot
           }
 
-          let configVal = this.form.getFieldValue('config')
-          let format = configVal.endsWith(".properties") ? 2:1
+          const configVal = this.form.getFieldValue('config')
+          const format = configVal.endsWith('.properties') ? 2 : 1
           const params = {
             projectId: values.projectId,
             module: values.module,
@@ -409,16 +412,15 @@ export default {
             params['config'] = Base64.enable(this.configOverride)
             this.handleCreate(params)
           }
-
         }
       })
     },
 
-    handleCreate(params) {
+    handleCreate (params) {
       create(params).then((resp) => {
         const created = resp.data
         if (created) {
-          this.$router.push({path: '/flink/app'})
+          this.$router.push({ path: '/flink/app' })
         } else {
           console.log(created)
         }
