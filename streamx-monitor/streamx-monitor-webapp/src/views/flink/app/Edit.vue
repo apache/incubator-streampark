@@ -77,6 +77,43 @@
       </a-form-item>
 
       <a-form-item
+        v-show="strategy == 1 && configVersions.length>1"
+        label="Compare conf"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17}}">
+
+        <a-input-group compact>
+          <a-select
+            :class="compareVisible ? 'compare_select': 'compare_select_no'"
+            v-decorator="[ 'compare_conf' ]"
+            placeholder="请选择要对比的配置版本"
+            mode="multiple"
+            @change="handleChangeCompact"
+            :maxTagCount="maxTagCount">
+            <a-select-option v-for="(ver,i) in configVersions" :value="ver.id">
+              <div style="padding-left: 5px">
+                <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
+                  {{ ver.version }}
+                </a-button>
+                <a-tag color="green" style=";margin-left: 10px;" size="small" v-if="ver.actived">current</a-tag>
+              </div>
+            </a-select-option>
+          </a-select>
+          <a-button
+            v-if="compareVisible"
+            style="width: 80px"
+            @click="handleCompactConf"
+            type="primary">
+            <a-icon
+              type="swap"
+              style="color:#fff">
+            </a-icon>
+            对比
+          </a-button>
+        </a-input-group>
+      </a-form-item>
+
+      <a-form-item
         label="Application name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -116,7 +153,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount"
+          :maxTagCount="maxTagCount - 1"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -231,9 +268,11 @@ export default {
   components: { Conf },
   data () {
     return {
-      maxTagCount: 1,
+      maxTagCount: 2,
       strategy: 1,
       app: null,
+      compareVisible: false,
+      compareConf: [],
       defaultConfigId: null,
       defaultOptions: {},
       configOverride: null,
@@ -463,6 +502,35 @@ export default {
         })
         this.configVersions = resp.data
       })
+    },
+
+    handleChangeCompact () {
+      this.$nextTick(() => {
+        const conf = this.form.getFieldValue('compare_conf')
+        if (conf.length > 2) {
+          while (conf.length > 2) {
+            conf.shift()
+          }
+          this.form.setFieldsValue({ 'compare_conf': conf })
+        }
+        this.compareConf = conf
+        this.compareVisible = conf.length === 2
+      })
+    },
+
+    handleCompactConf () {
+      getVer({
+        id: this.compareConf[0]
+      }).then((resp) => {
+        const conf1 = Base64.decode(resp.data.content)
+        getVer({
+          id: this.compareConf[1]
+        }).then((resp) => {
+          const conf2 = Base64.decode(resp.data.content)
+          this.confEdit.visiable = true
+          this.$refs.confEdit.compact(conf1, conf2)
+        })
+      })
     }
 
   }
@@ -512,4 +580,15 @@ export default {
   line-height: 20px;
 }
 
+>>> .ant-select-selection__choice {
+  border: none !important;
+}
+
+.compare_select {
+  width: calc(100% - 80px) !important;
+}
+
+.compare_select_no {
+  width: 100% !important;
+}
 </style>
