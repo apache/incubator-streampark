@@ -25,6 +25,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * @author benjobs
+ */
 @Data
 public class JobsOverview {
 

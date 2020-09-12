@@ -21,8 +21,6 @@
 package com.streamxhub.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.streamxhub.common.conf.ConfigConst;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
@@ -33,10 +31,7 @@ import lombok.Data;
 @TableName("t_app_backup")
 @Excel("app备份实体")
 public class ApplicationBackUp {
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
-
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long appId;
     private String path;
     private String description;
