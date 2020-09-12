@@ -193,7 +193,6 @@ export default {
   z-index: 9;
 }
 
-
 .drawer-conf >>> .drwaer-button-item {
   margin-right: 20px;
 }
@@ -206,7 +205,6 @@ export default {
   right: 20px;
   overflow: hidden;
 }
-
 
 </style>
 
