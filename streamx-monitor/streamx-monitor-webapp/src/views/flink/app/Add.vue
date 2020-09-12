@@ -1,6 +1,7 @@
 <template>
   <a-card :body-style="{padding: '24px 32px'}" :bordered="false">
     <a-form @submit="handleSubmit" :form="form">
+
       <a-form-item
         label="Project"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -12,7 +13,12 @@
           placeholder="请选择项目"
           @change="handleProject"
           v-decorator="[ 'projectId', {rules: [{ required: true, message: '请选择项目'}]} ]">
-          <a-select-option v-for="p in project" :key="p.id" :value="p.id">{{ p.name }}</a-select-option>
+          <a-select-option
+            v-for="p in projectList"
+            :key="p.id"
+            :value="p.id">
+            {{ p.name }}
+          </a-select-option>
         </a-select>
       </a-form-item>
 
@@ -28,7 +34,12 @@
           placeholder="请选择应用"
           @change="handleApp"
           v-decorator="[ 'module', {rules: [{ required: true, message: '请选择应用'}]} ]">
-          <a-select-option v-for="p in appList" :key="p.name" :value="p.path">{{ p.name }}</a-select-option>
+          <a-select-option
+            v-for="p in appList"
+            :key="p.name"
+            :value="p.path">
+            {{ p.name }}
+          </a-select-option>
         </a-select>
       </a-form-item>
 
@@ -43,16 +54,16 @@
           treeDefaultExpandAll
           @change="handleJobName"
           v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig, message: '请选择配置文件'}]} ]">
+          <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
+            <a-icon
+              type="setting"
+              theme="twoTone"
+              twoToneColor="#4a9ff5"
+              @click.stop="handleEditConfig()"
+              title="编辑配置">
+            </a-icon>
+          </template>
         </a-tree-select>
-        <a-icon
-          v-if="form.getFieldValue('config')"
-          type="edit"
-          theme="twoTone"
-          twoToneColor="#4a9ff5"
-          @click="handleEditConfig()"
-          style="width:20px;margin-left:5px;float:right;margin-top: 5px"
-          title="修改角色">
-        </a-icon>
       </a-form-item>
 
       <a-form-item
@@ -107,7 +118,6 @@
               {{ conf.key }} ( {{ conf.name }} )
             </a-select-option>
           </a-select-opt-group>
-
           <a-select-opt-group label="yarn-cluster options">
             <a-select-option
               v-for="(conf,index) in options"
@@ -131,18 +141,17 @@
         <a-input v-if="conf.type === 'input'"
                  type="text"
                  :placeholder="conf.placeholder"
-                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"
-        />
+                 v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
           @change="(x) => handleSwitch(x,conf)"
           checkedChildren="开"
           unCheckedChildren="关"
           v-decorator="[`${conf.name}`]"/>
-        <a-input-number v-if="conf.type === 'number'"
-                        :min="conf.min"
-                        v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"
-        />
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -195,6 +204,7 @@
 </template>
 
 <script>
+
 import {select, listApp, listConf} from '@api/project'
 import {create, exists, name, readConf} from '@api/application'
 import Conf from './Conf'
@@ -207,8 +217,7 @@ export default {
   data() {
     return {
       maxTagCount: 1,
-      value: 1,
-      project: [],
+      projectList: [],
       appList: [],
       app: null,
       config: null,
@@ -242,7 +251,7 @@ export default {
 
     select() {
       select().then((resp) => {
-        this.project = resp.data
+        this.projectList = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
