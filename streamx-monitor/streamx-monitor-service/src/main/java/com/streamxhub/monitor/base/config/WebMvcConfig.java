@@ -50,7 +50,6 @@ public class WebMvcConfig implements WebMvcConfigurer {
         converters.add(new StringHttpMessageConverter());
         converters.add(new ResourceHttpMessageConverter());
         converters.add(new AllEncompassingFormHttpMessageConverter());
-        converters.add(new StringHttpMessageConverter());
         converters.add(jackson2HttpMessageConverter());
     }
 
