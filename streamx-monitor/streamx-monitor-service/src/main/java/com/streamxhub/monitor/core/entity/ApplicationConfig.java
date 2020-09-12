@@ -21,14 +21,9 @@
 package com.streamxhub.monitor.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import com.streamxhub.common.util.DeflaterUtils;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-
-import java.util.Base64;
 
 /**
  * @author benjobs
@@ -40,10 +35,8 @@ import java.util.Base64;
 @Slf4j
 public class ApplicationConfig {
 
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
-    @JsonSerialize(using = ToStringSerializer.class)
     private Long appId;
 
     private Boolean actived;
