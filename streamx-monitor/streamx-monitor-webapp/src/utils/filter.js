@@ -20,7 +20,7 @@ Vue.filter('moment', function (dataStr, pattern = 'YYYY-MM-DD HH:mm:ss') {
 })
 
 Vue.filter('duration', function duration (ms) {
-  if (ms == 0 || ms === undefined || ms === null) {
+  if (ms === 0 || ms === undefined || ms === null) {
     return ''
   }
   const ss = 1000
