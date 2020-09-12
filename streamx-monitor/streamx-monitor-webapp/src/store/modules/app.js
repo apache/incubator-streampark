@@ -24,7 +24,7 @@ const app = {
     autoHideHeader: false,
     color: null,
     weak: false,
-    multiTab: true,
+    multiTab: true
   },
 
   mutations: {

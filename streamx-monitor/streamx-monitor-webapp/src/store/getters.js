@@ -15,7 +15,7 @@ const getters = {
 
   routers: state => state.user.routers,
   multiTab: state => state.app.multiTab,
-  applicationId: state => state.application.appId,
+  applicationId: state => state.application.appId
 }
 
 export default getters
