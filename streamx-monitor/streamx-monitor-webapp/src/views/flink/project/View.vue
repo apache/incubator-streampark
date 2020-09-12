@@ -95,8 +95,8 @@
       style="margin-top: 24px"
       :bordered="false">
       <div slot="extra">
-        <a-radio-group button-style="solid" default-value=''>
-          <a-radio-button @click="handleQuery()" value=''>全部</a-radio-button>
+        <a-radio-group button-style="solid" default-value="">
+          <a-radio-button @click="handleQuery()" value="">全部</a-radio-button>
           <a-radio-button @click="handleQuery(0)" value="0" >构建中</a-radio-button>
           <a-radio-button @click="handleQuery(-1)" value="-1">未构建</a-radio-button>
           <a-radio-button @click="handleQuery(1)" value="1">已构建</a-radio-button>
@@ -154,11 +154,12 @@
           </div>
 
           <div class="operation">
-            <a-icon v-if="item.buildState === 0"
-                    type="sync"
-                    style="color:#4a9ff5"
-                    spin
-                    @click="handleSeeLog(item)"/>
+            <a-icon
+              v-if="item.buildState === 0"
+              type="sync"
+              style="color:#4a9ff5"
+              spin
+              @click="handleSeeLog(item)"/>
             <a-popconfirm
               v-else
               title="确定要编译该项目吗?"
@@ -176,11 +177,12 @@
       </a-list>
     </a-card>
 
-    <a-modal v-model="controller.visible"
-             width="65%"
-             :bodyStyle="controller.modalStyle"
-             :destroyOnClose='controller.modalDestroyOnClose'
-             @ok="handleClose">
+    <a-modal
+      v-model="controller.visible"
+      width="65%"
+      :bodyStyle="controller.modalStyle"
+      :destroyOnClose="controller.modalDestroyOnClose"
+      @ok="handleClose">
       <template slot="title">
         <a-icon type="code"/>&nbsp; {{ controller.consoleName }}
       </template>
@@ -195,16 +197,16 @@
 </template>
 <script>
 import RangeDate from '@comp/DateTime/RangeDate'
-import {build, list, remove} from '@api/project'
-import VueApexCharts from "vue-apexcharts"
+import { build, list, remove } from '@api/project'
+import VueApexCharts from 'vue-apexcharts'
 import Ellipsis from '@comp/Ellipsis'
-import HeadInfo from "@comp/tools/HeadInfo"
+import HeadInfo from '@comp/tools/HeadInfo'
 import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
-import {Terminal} from "xterm"
-import "xterm/css/xterm.css"
-import "xterm/lib/xterm.js"
-import {Icon} from 'ant-design-vue'
+import { Terminal } from 'xterm'
+import 'xterm/css/xterm.css'
+
+import { Icon } from 'ant-design-vue'
 import baseUrl from '@/api/baseUrl'
 
 const IconFont = Icon.createFromIconfontCN({
@@ -212,8 +214,8 @@ const IconFont = Icon.createFromIconfontCN({
 })
 
 export default {
-  components: {IconFont, RangeDate, Ellipsis, HeadInfo, VueApexCharts},
-  data() {
+  components: { IconFont, RangeDate, Ellipsis, HeadInfo, VueApexCharts },
+  data () {
     return {
       loading: false,
       advanced: false,
@@ -243,7 +245,7 @@ export default {
       },
 
       seriesSpark3: [{
-        data: [400, 12, 400, 243, 404,433,145,210,321,100,213,89,254]
+        data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
       }],
 
       chartOptionsSpark3: {
@@ -252,7 +254,7 @@ export default {
           height: 140,
           sparkline: {
             enabled: true
-          },
+          }
         },
         stroke: {
           curve: 'straight'
@@ -263,7 +265,7 @@ export default {
         xaxis: {
           crosshairs: {
             width: 1
-          },
+          }
         },
         yaxis: {
           min: 0
@@ -272,14 +274,14 @@ export default {
           text: '13,965',
           offsetX: 0,
           style: {
-            fontSize: '24px',
+            fontSize: '24px'
           }
         },
         subtitle: {
           text: 'Total Project',
           offsetX: 0,
           style: {
-            fontSize: '14px',
+            fontSize: '14px'
           }
         }
       },
@@ -296,29 +298,29 @@ export default {
             },
             plotOptions: {
               bar: {
-                horizontal: true,
+                horizontal: true
               }
             },
             dataLabels: {
               enabled: false
             },
             xaxis: {
-              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy'],
+              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
             }
-          },
+          }
         },
         type: {
           series: [44, 55],
           chartOptions: {
             chart: {
               width: 240,
-              type: 'donut',
+              type: 'donut'
             },
             dataLabels: {
               enabled: false
             },
             fill: {
-              type: 'gradient',
+              type: 'gradient'
             },
             labels: ['Flink', 'Spark'],
             responsive: [{
@@ -332,7 +334,7 @@ export default {
                 }
               }
             }]
-          },
+          }
         }
       }
     }
@@ -341,21 +343,21 @@ export default {
 
   },
 
-  mounted() {
+  mounted () {
     this.handleFetch(this.queryParams, true)
     const timer = window.setInterval(() => this.handleFetch(this.queryParams, false), 1000)
     this.$once('hook:beforeDestroy', () => {
-      clearInterval(timer);
+      clearInterval(timer)
     })
   },
 
   methods: {
-    onSelectChange(selectedRowKeys) {
+    onSelectChange (selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
 
-    handleSearch(value) {
+    handleSearch (value) {
       this.paginationInfo = null
       this.handleFetch({
         name: value,
@@ -363,10 +365,10 @@ export default {
       }, true)
     },
 
-    handleBuild(record) {
+    handleBuild (record) {
       this.$message.info(
         '已发送编译请求,后台正在更新代码并编译,您可以查询编译日志来查看进度',
-        3,
+        3
       )
       build({
         id: record.id
@@ -374,11 +376,11 @@ export default {
       })
     },
 
-    handleAdd() {
-      this.$router.push({'path': '/flink/project/add'})
+    handleAdd () {
+      this.$router.push({ 'path': '/flink/project/add' })
     },
 
-    handleSeeLog(project) {
+    handleSeeLog (project) {
       this.controller.consoleName = project.name + '构建日志'
       this.controller.visible = true
       this.$nextTick(function () {
@@ -386,40 +388,40 @@ export default {
       })
     },
 
-    handleOpenWS(project) {
-      const rows = parseInt(this.controller.modalStyle.height.replace("px", '')) / 16
-      const cols = (document.querySelector(".terminal").offsetWidth - 10) / 8
+    handleOpenWS (project) {
+      const rows = parseInt(this.controller.modalStyle.height.replace('px', '')) / 16
+      const cols = (document.querySelector('.terminal').offsetWidth - 10) / 8
       this.terminal = new Terminal({
         cursorBlink: true,
         rendererType: 'canvas',
-        termName: "xterm",
+        termName: 'xterm',
         useStyle: true,
         screenKeys: true,
         convertEol: true,
         scrollback: 1000,
         tabstopwidth: 4,
         disableStdin: true,
-        rows: parseInt(rows), //行数
+        rows: parseInt(rows), // 行数
         cols: parseInt(cols),
         fontSize: 14,
-        cursorStyle: "underline", //光标样式
+        cursorStyle: 'underline', // 光标样式
         theme: {
-          foreground: "#AAAAAA", //字体
-          background: "#131D32", //背景色
+          foreground: '#AAAAAA', // 字体
+          background: '#131D32', // 背景色
           lineHeight: 16
         }
       })
-      const container = document.getElementById("terminal")
+      const container = document.getElementById('terminal')
       this.terminal.open(container, true)
       const socket = new SockJS(baseUrl.concat('/websocket'))
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/tail', (msg) => this.terminal.writeln(msg.body))
-        this.stompClient.send("/req/tail/" + project.id)
+        this.stompClient.send('/req/tail/' + project.id)
       })
     },
 
-    handleClose() {
+    handleClose () {
       this.stompClient.disconnect()
       this.controller.visible = false
       this.terminal.clear()
@@ -427,20 +429,20 @@ export default {
       this.terminal = null
     },
 
-    reset() {
+    reset () {
       // 重置查询参数
       this.queryParams = {}
       this.handleFetch({}, true)
     },
 
-    handleQuery(state) {
+    handleQuery (state) {
       this.queryParams.buildState = state
       this.handleFetch({
         ...this.queryParams
-      },true)
+      }, true)
     },
 
-    handleFetch(params, loading) {
+    handleFetch (params, loading) {
       if (loading) {
         this.loading = true
       }
@@ -458,7 +460,7 @@ export default {
       list({
         ...params
       }).then((resp) => {
-        const pagination = {...this.pagination}
+        const pagination = { ...this.pagination }
         pagination.total = resp.data.total
         this.dataSource = resp.data.records
         this.pagination = pagination
@@ -517,6 +519,4 @@ export default {
   width: 80px;
 }
 
-
 </style>
-
