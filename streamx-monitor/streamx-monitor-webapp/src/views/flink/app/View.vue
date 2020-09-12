@@ -799,7 +799,7 @@ export default {
       list({ ...params }).then((resp) => {
         this.loading = false
         const pagination = {...this.pagination}
-        pagination.total = resp.data.total
+        pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         this.pagination = pagination
       })
