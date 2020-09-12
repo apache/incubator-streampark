@@ -37,7 +37,7 @@
       <div class="drawer-bootom-button">
         <div style="float: right">
           <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleCloseDiff"><a-icon type="left" />上一步</a-button>
-          <a-button class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定</a-button>
+          <a-button v-if="!compactMode" class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定</a-button>
         </div>
       </div>
     </div>
@@ -65,6 +65,7 @@ export default {
   },
   data () {
     return {
+      compactMode: false,
       title: '配置编辑',
       codeMirror: null,
       confCode: null,
@@ -125,25 +126,42 @@ export default {
     handleNext () {
       this.visibleDiff = true
       this.title = '配置对比'
-      this.$nextTick(() => {
-        jQuery('#mergely').mergely({
-          cmsettings: { mode: 'text/plain', readOnly: true },
-          lhs: (setValue) => {
-            setValue(this.value)
-          },
-          rhs: (setValue) => {
-            setValue(this.confCode)
-          }
-        })
-      })
+      this.handleMergely(this.value, this.confCode)
     },
 
     set (value) {
+      this.compactMode = false
       this.changed = false
       this.confCode = null
       this.value = value
       this.$nextTick(() => {
         this.handleCodeMirror()
+      })
+    },
+
+    compact (val1, val2) {
+      this.compactMode = true
+      this.visibleDiff = true
+      this.title = '配置对比'
+      setTimeout(() => {
+        this.handleMergely(val1, val2)
+      }, 100)
+    },
+
+    handleMergely (val1, val2) {
+      this.$nextTick(() => {
+        jQuery('#mergely').mergely({
+          cmsettings: { mode: 'text/plain', readOnly: true },
+          lhs: (setValue) => {
+            setValue(val1)
+          },
+          rhs: (setValue) => {
+            setValue(val2)
+          }
+        })
+        this.$nextTick(() => {
+          jQuery("#mergely-splash").remove()
+        })
       })
     },
 
