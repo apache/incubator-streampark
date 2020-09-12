@@ -5,7 +5,7 @@ export function add (params) {
   return http.post(api.Application.Add, params)
 }
 
-export  function readConf(params) {
+export function readConf (params) {
   return http.post(api.Application.ReadConf, params)
 }
 
@@ -20,7 +20,6 @@ export function update (params) {
 export function deploy (params) {
   return http.post(api.Application.Deploy, params)
 }
-
 
 export function yarn (params) {
   return http.post(api.Application.Yarn, params)

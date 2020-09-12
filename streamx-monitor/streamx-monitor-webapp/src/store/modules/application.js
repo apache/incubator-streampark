@@ -1,6 +1,6 @@
 const application = {
   state: {
-    appId: null,
+    appId: null
   },
 
   mutations: {
@@ -9,7 +9,7 @@ const application = {
     },
     CLEAN_APP_ID: (state, empty) => {
       state.appId = null
-    },
+    }
   },
 
   actions: {

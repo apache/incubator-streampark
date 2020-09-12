@@ -23,7 +23,7 @@ export default {
     size: String
   },
   components: {
-    flink : flinkSvg,
+    flink: flinkSvg,
     spark: sparkSvg
   }
 }
