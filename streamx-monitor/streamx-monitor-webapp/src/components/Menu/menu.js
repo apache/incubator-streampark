@@ -101,7 +101,7 @@ export default {
     },
 
     renderMenuItem (menu) {
-      if(!menu.meta.hidden) {
+      if (!menu.meta.hidden) {
         const target = menu.meta.target || null
         const tag = target && 'a' || 'router-link'
         const props = { to: { name: menu.name } }
@@ -119,11 +119,11 @@ export default {
     },
 
     renderSubMenu (menu) {
-      if(!menu.meta.hidden) {
+      if (!menu.meta.hidden) {
         const itemArr = []
         if (!menu.hideChildrenInMenu) {
           menu.children.forEach(item => {
-            if(!menu.meta.hidden) {
+            if (!menu.meta.hidden) {
               itemArr.push(this.renderItem(item))
             }
           })
