@@ -165,7 +165,7 @@
               </template>
             </template>
           </a-badge>
-          <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 2" dot title="配置已更新,需重启应用">
+          <a-badge dot color="blue" v-if="column.dataIndex === 'jobName' && record.deploy === 2" title="配置已更新,需重启应用">
             <template v-if="text.length>25">
               <a-tooltip placement="top">
                 <template slot="title">
@@ -210,7 +210,7 @@
               {{ text }}
             </ellipsis>
           </a-badge>
-          <a-badge dot title="配置已更新,需重启项目" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
+          <a-badge dot color="blue" title="配置已更新,需重启项目" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
             <ellipsis :length="40" tooltip>
               {{ text }}
             </ellipsis>
