@@ -34,7 +34,7 @@ export default {
     Get: '/flink/app/get',
     Name: '/flink/app/name',
     Exists: '/flink/app/exists',
-    Cancel: '/flink/app/cancel',
+    Stop: '/flink/app/stop',
     Delete: '/flink/app/delete',
     Create: '/flink/app/create',
     StartUp: '/flink/app/startUp',

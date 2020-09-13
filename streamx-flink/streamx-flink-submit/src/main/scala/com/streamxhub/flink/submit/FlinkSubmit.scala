@@ -56,7 +56,7 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def cancel(appId: String, jobId: String, savePoint: String, drain: Boolean): Unit = {
+  def stop(appId: String, jobId: String, savePoint: String, drain: Boolean): Unit = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory

@@ -37,8 +37,8 @@ export function exists (params) {
   return http.post(api.Application.Exists, params)
 }
 
-export function cancel (params) {
-  return http.post(api.Application.Cancel, params)
+export function stop (params) {
+  return http.post(api.Application.Stop, params)
 }
 
 export function create (params) {

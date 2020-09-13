@@ -346,7 +346,7 @@
             title="停止应用"
             style="color: #4a9ff5"
             v-show="record.state === 5"
-            @click="handleCancel(record)">
+            @click="handleStop(record)">
           </a-icon>
 
           <a-icon
@@ -388,13 +388,13 @@
         </a-form>
       </a-modal>
 
-      <a-modal v-model="cancelVisible" on-ok="handleCancelOk">
+      <a-modal v-model="stopVisible" on-ok="handleStopOk">
         <template slot="title">
           <a-icon slot="icon" type="poweroff" style="color: red"/>
           Cancel application
         </template>
 
-        <a-form @submit="handleCancelOk" :form="formSavePoint">
+        <a-form @submit="handleStopOk" :form="formSavePoint">
 
           <a-form-item
             label="Drain"
@@ -425,10 +425,10 @@
         </a-form>
 
         <template slot="footer">
-          <a-button key="back" @click="handleCancelNo">
+          <a-button key="back" @click="handleStopCancel">
             取消
           </a-button>
-          <a-button key="submit" type="primary" :loading="loading" @click="handleCancelOk">
+          <a-button key="submit" type="primary" :loading="loading" @click="handleStopOk">
             确定
           </a-button>
         </template>
@@ -441,7 +441,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import { mapActions } from 'vuex'
-import { list, cancel, deploy, startUp, closeDeploy, yarn } from '@api/application'
+import { list, stop, deploy, startUp, closeDeploy, yarn } from '@api/application'
 
 export default {
   components: { RangeDate, Ellipsis },
@@ -456,7 +456,7 @@ export default {
       filteredInfo: null,
       yarn: null,
       deployVisible: false,
-      cancelVisible: false,
+      stopVisible: false,
       formDeploy: null,
       formSavePoint: null,
       drain: false,
@@ -728,18 +728,18 @@ export default {
       })
     },
 
-    handleCancel (value) {
-      this.cancelVisible = true
+    handleStop (value) {
+      this.stopVisible = true
       this.application = value
     },
 
-    handleCancelNo () {
-      this.cancelVisible = false
+    handleStopCancel () {
+      this.stopVisible = false
       this.formSavePoint.resetFields()
       this.drain = false
     },
 
-    handleCancelOk () {
+    handleStopOk () {
       this.formSavePoint.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
@@ -748,8 +748,8 @@ export default {
           )
           const savePoint = values.savePoint
           const drain = values.drain || false
-          this.handleCancelNo()
-          cancel({
+          this.handleStopCancel()
+          stop({
             id: this.application.id,
             savePoint: savePoint,
             drain: drain
