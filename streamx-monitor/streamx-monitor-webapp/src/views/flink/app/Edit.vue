@@ -244,8 +244,8 @@
       <a-form-item
         :wrapperCol="{ span: 24 }"
         style="text-align: center">
-        <a-button htmlType="submit" type="primary">提交</a-button>
-        <a-button style="margin-left: 8px">保存</a-button>
+        <a-button @click="handleReset">重置</a-button>
+        <a-button htmlType="submit" type="primary" style="margin-left: 15px">提交</a-button>
       </a-form-item>
 
     </a-form>
@@ -321,8 +321,7 @@ export default {
         this.configOverride = Base64.decode(this.app.config)
         this.defaultOptions = JSON.parse(this.app.options)
         this.configId = this.app.configId
-        this.handleSetForm()
-        this.handleSetOptions()
+        this.handleReset()
         this.handleListConfVersion()
         listConf({
           path: this.app['confPath']
@@ -467,33 +466,6 @@ export default {
       })
     },
 
-    handleSetForm () {
-      this.$nextTick(() => {
-        this.form.setFieldsValue({
-          'jobName': this.app.jobName,
-          'args': this.app.args,
-          'description': this.app.description,
-          'dynamicOptions': this.app.dynamicOptions,
-          'yarnslots': this.defaultOptions.yarnslots,
-          'parallelism': this.defaultOptions.parallelism
-        })
-      })
-    },
-
-    handleSetOptions () {
-      const array = []
-      for (const k in this.defaultOptions) {
-        if (k !== 'parallelism' && k !== 'yarnslots') {
-          array.push(k)
-        }
-      }
-      this.configItems = array
-      this.form.setFieldsValue(this.defaultOptions)
-      this.$nextTick(() => {
-        this.form.setFieldsValue({ 'options': array })
-      })
-    },
-
     handleListConfVersion () {
       listVer({
         id: this.app.id
@@ -533,6 +505,30 @@ export default {
           this.confEdit.visiable = true
           this.$refs.confEdit.compact(conf1, conf2)
         })
+      })
+    },
+
+    handleReset () {
+      this.$nextTick(() => {
+        this.form.setFieldsValue({
+          'jobName': this.app.jobName,
+          'args': this.app.args,
+          'description': this.app.description,
+          'dynamicOptions': this.app.dynamicOptions,
+          'yarnslots': this.defaultOptions.yarnslots,
+          'parallelism': this.defaultOptions.parallelism
+        })
+      })
+      const array = []
+      for (const k in this.defaultOptions) {
+        if (k !== 'parallelism' && k !== 'yarnslots') {
+          array.push(k)
+        }
+      }
+      this.configItems = array
+      this.form.setFieldsValue(this.defaultOptions)
+      this.$nextTick(() => {
+        this.form.setFieldsValue({ 'options': array })
       })
     }
 
@@ -585,10 +581,6 @@ export default {
 
 >>> .ant-select-selection__choice {
   border: none !important;
-}
-
->>> .ant-select-dropdown {
-  z-index: unset !important;
 }
 
 </style>

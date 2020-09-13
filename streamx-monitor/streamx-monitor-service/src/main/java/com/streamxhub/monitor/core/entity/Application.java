@@ -94,7 +94,7 @@ public class Application implements Serializable {
     private transient String confPath;
     private transient Integer format;
     private transient String savePoint;
-    private transient Long drain;
+    private transient Boolean drain;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;
