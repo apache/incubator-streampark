@@ -49,7 +49,7 @@ public interface ApplicationService extends IService<Application> {
 
     void updateState(Application app);
 
-    void cancel(Application app);
+    void stop(Application app);
 
     void updateMonitor(Application application);
 

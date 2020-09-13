@@ -108,9 +108,9 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(application);
     }
 
-    @RequestMapping("cancel")
-    public RestResponse cancel(Application app) {
-        applicationService.cancel(app);
+    @RequestMapping("stop")
+    public RestResponse stop(Application app) {
+        applicationService.stop(app);
         return RestResponse.create();
     }
 
