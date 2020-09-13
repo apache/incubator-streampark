@@ -30,11 +30,14 @@
           </a-select>
 
           <a-select
-            v-if="strategy == 1"
+            v-if="strategy === 1"
             style="width: 75%"
             @change="handleChangeConfig"
             v-model="defaultConfigId">
-            <a-select-option v-for="(ver,i) in configVersions" :value="ver.id">
+            <a-select-option
+              v-for="(ver,index) in configVersions"
+              :value="ver.id"
+              :key="index">
               <div style="padding-left: 5px">
                 <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
                   {{ ver.version }}
@@ -55,7 +58,7 @@
 
           <a-tree-select
             style="width: 75%"
-            v-if="strategy == 2"
+            v-if="strategy === 2"
             :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
             :treeData="configSource"
             placeholder="请选择配置文件"
@@ -77,7 +80,7 @@
       </a-form-item>
 
       <a-form-item
-        v-show="strategy == 1 && configVersions.length>1"
+        v-show="strategy === 1 && configVersions.length>1"
         label="Compare conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17}}">
@@ -89,8 +92,11 @@
             placeholder="请选择要对比的配置版本"
             mode="multiple"
             @change="handleChangeCompact"
-            :maxTagCount="maxTagCount">
-            <a-select-option v-for="(ver,i) in configVersions" :value="ver.id">
+            :maxTagCount="count2">
+            <a-select-option
+              v-for="(ver,index) in configVersions"
+              :value="ver.id"
+              :key="index">
               <div style="padding-left: 5px">
                 <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
                   {{ ver.version }}
@@ -138,7 +144,7 @@
           :min="1"
           :step="1"
           placeholder="Number of slots per TaskManager"
-          v-decorator="['slot']" />
+          v-decorator="['yarnslots']" />
       </a-form-item>
 
       <a-form-item
@@ -149,7 +155,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount - 1"
+          :maxTagCount="count1"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -264,10 +270,11 @@ export default {
   components: { Conf },
   data () {
     return {
-      maxTagCount: 2,
       strategy: 1,
       app: null,
       compareDisabled: true,
+      count1: 1,
+      count2: 2,
       compareConf: [],
       defaultConfigId: null,
       defaultOptions: {},
@@ -375,7 +382,7 @@ export default {
     },
 
     handleStrategy (v) {
-      this.strategy = v
+      this.strategy = parseInt(v)
     },
 
     handleChangeConfig (v) {
@@ -427,14 +434,14 @@ export default {
             shortOptions += ' -p ' + values.parallelism
           }
 
-          if (values.slot) {
-            options['yarnslots'] = values.slot
-            shortOptions += ' -ys ' + values.slot
+          if (values.yarnslots) {
+            options['yarnslots'] = values.yarnslots
+            shortOptions += ' -ys ' + values.yarnslots
           }
 
-          const format = this.strategy == 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
+          const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
           const config = this.configOverride || this.app.config
-          const configId = this.strategy == 1 ? this.configId : null
+          const configId = this.strategy === 1 ? this.configId : null
           update({
             id: this.app.id,
             config: Base64.encode(config),
@@ -467,7 +474,7 @@ export default {
           'args': this.app.args,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
-          'slot': this.defaultOptions.yarnslots,
+          'yarnslots': this.defaultOptions.yarnslots,
           'parallelism': this.defaultOptions.parallelism
         })
       })
