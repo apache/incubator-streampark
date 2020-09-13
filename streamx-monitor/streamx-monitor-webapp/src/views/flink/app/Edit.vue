@@ -476,7 +476,7 @@ export default {
     handleSetOptions () {
       const array = []
       for (const k in this.defaultOptions) {
-        if (k != 'parallelism' && k != 'slot') {
+        if (k !== 'parallelism' && k !== 'yarnslots') {
           array.push(k)
         }
       }
