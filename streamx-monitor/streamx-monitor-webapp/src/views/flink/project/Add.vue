@@ -89,11 +89,12 @@
           placeholder="请输入应用描述"
           v-decorator="['description']"/>
       </a-form-item>
+
       <a-form-item
         :wrapperCol="{ span: 24 }"
         style="text-align: center">
-        <a-button htmlType="submit" type="primary">提交</a-button>
-        <a-button style="margin-left: 8px">保存</a-button>
+        <a-button @click="handleGoBack">取消</a-button>
+        <a-button htmlType="submit" type="primary" style="margin-left: 15px">提交</a-button>
       </a-form-item>
     </a-form>
   </a-card>
@@ -162,6 +163,10 @@ export default {
           })
         }
       })
+    },
+
+    handleGoBack () {
+      this.$router.go(-1)
     }
   }
 }
