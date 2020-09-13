@@ -84,7 +84,7 @@
 
         <a-input-group compact>
           <a-select
-            :class="compareVisible ? 'compare_select': 'compare_select_no'"
+            style="width: calc(100% - 60px)"
             v-decorator="[ 'compare_conf' ]"
             placeholder="请选择要对比的配置版本"
             mode="multiple"
@@ -100,14 +100,10 @@
             </a-select-option>
           </a-select>
           <a-button
-            v-if="compareVisible"
-            style="width: 80px"
+            :disabled="compareDisabled"
+            style="width: 60px"
             @click="handleCompactConf"
             type="primary">
-            <a-icon
-              type="swap"
-              style="color:#fff">
-            </a-icon>
             对比
           </a-button>
         </a-input-group>
@@ -271,7 +267,7 @@ export default {
       maxTagCount: 2,
       strategy: 1,
       app: null,
-      compareVisible: false,
+      compareDisabled: true,
       compareConf: [],
       defaultConfigId: null,
       defaultOptions: {},
@@ -514,7 +510,7 @@ export default {
           this.form.setFieldsValue({ 'compare_conf': conf })
         }
         this.compareConf = conf
-        this.compareVisible = conf.length === 2
+        this.compareDisabled = conf.length !== 2
       })
     },
 
@@ -584,11 +580,8 @@ export default {
   border: none !important;
 }
 
-.compare_select {
-  width: calc(100% - 80px) !important;
+.ant-select-dropdown {
+  z-index: unset !important;
 }
 
-.compare_select_no {
-  width: 100% !important;
-}
 </style>
