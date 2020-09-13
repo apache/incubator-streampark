@@ -400,12 +400,15 @@
             label="Drain"
             :labelCol="{lg: {span: 5}, sm: {span: 5}}"
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
-            <a-input-number
-              :min="1"
-              :step="1000"
-              placeholder="Send before max watermark stoping"
-              v-decorator="['drain',{ rules: [{ trigger:'submit', message: ' Send MAX_WATERMARK before taking the savepoint and stopping the pipelne' } ]}]">
-            </a-input-number>
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              placeholder="Send max watermark before taking stoping"
+              v-model="drain"
+              v-decorator="['drain']"/>
+            <span class="conf-switch" style="color:darkgrey"> Send max watermark before stoping</span>
           </a-form-item>
 
           <a-form-item
@@ -456,6 +459,7 @@ export default {
       cancelVisible: false,
       formDeploy: null,
       formSavePoint: null,
+      drain: false,
       application: null,
       searchText: '',
       searchInput: null,
@@ -732,20 +736,23 @@ export default {
     handleCancelNo () {
       this.cancelVisible = false
       this.formSavePoint.resetFields()
+      this.drain = false
     },
 
     handleCancelOk () {
       this.formSavePoint.validateFields((err, values) => {
         if (!err) {
-          this.handleCancelNo()
           this.$message.info(
             '已发送停止请求,该应用正在停止',
             3
           )
+          const savePoint = values.savePoint
+          const drain = values.drain || false
+          this.handleCancelNo()
           cancel({
             id: this.application.id,
-            savePoint: values.savePoint,
-            drain: values.drain
+            savePoint: savePoint,
+            drain: drain
           }).then((resp) => {
             console.log(resp)
           })

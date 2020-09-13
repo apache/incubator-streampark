@@ -191,6 +191,10 @@ export default {
 
 <style scoped>
 
+.drawer-conf {
+  z-index: 1055;
+}
+
 .drawer-conf >>> .CodeMirror {
   border: 1px solid #eee;
   height: calc(100% - 50px);
