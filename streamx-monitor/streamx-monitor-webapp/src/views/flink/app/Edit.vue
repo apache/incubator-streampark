@@ -587,7 +587,7 @@ export default {
   border: none !important;
 }
 
-.ant-select-dropdown {
+>>> .ant-select-dropdown {
   z-index: unset !important;
 }
 
