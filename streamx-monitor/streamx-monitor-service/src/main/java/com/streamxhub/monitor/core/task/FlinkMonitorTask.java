@@ -21,6 +21,7 @@
 package com.streamxhub.monitor.core.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.streamxhub.monitor.base.utils.CommonUtil;
 import com.streamxhub.monitor.core.entity.Application;
 import com.streamxhub.monitor.core.enums.FlinkAppState;
 import com.streamxhub.monitor.core.metrics.flink.JobsOverview;
@@ -32,6 +33,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.Date;
 import java.util.List;
@@ -130,13 +132,24 @@ public class FlinkMonitorTask {
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
-                        /**s
-                         * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
-                         */
-                        application.setState(FlinkAppState.LOST.getValue());
+                        Serializable timeMillis = CommonUtil.localCache.get(application.getId());
+                        boolean flag = false;
+                        if (timeMillis != null) {
+                            long timeOut = 1 * 60 * 1000;
+                            flag = System.currentTimeMillis() - (Long) timeMillis <= timeOut;
+                            CommonUtil.localCache.remove(application.getId());
+                        }
+                        if (flag) {
+                            application.setState(FlinkAppState.CANCELED.getValue());
+                        } else {
+                            /**s
+                             * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
+                             */
+                            application.setState(FlinkAppState.LOST.getValue());
+                            //TODO send msg or emails
+                            e1.printStackTrace();
+                        }
                         applicationService.updateMonitor(application);
-                        //TODO send msg or emails
-                        e1.printStackTrace();
                     }
                 }
             } catch (IOException exception) {
