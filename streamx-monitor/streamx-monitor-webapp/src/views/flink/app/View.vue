@@ -391,8 +391,8 @@
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
             <a-textarea
               rows="3"
-              placeholder="Path to the savepoint (with schema hdfs://)"
-              v-decorator="['checkPoint',{ rules: [{ trigger:'submit', message: 'Path to a savepoint to restore the job from (for example  hdfs:///flink/savepoint-1537)' } ]}]">
+              placeholder="Path to a savepoint to restore the job from (with schema hdfs://) e.g: hdfs:///flink/savepoint-1537 "
+              v-decorator="['checkPoint']">
             </a-textarea>
           </a-form-item>
 
@@ -436,8 +436,8 @@
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
             <a-textarea
               rows="3"
-              placeholder="Path to the savepoint (with schema hdfs://)"
-              v-decorator="['savePoint',{ rules: [{ trigger:'submit', message: 'Path to the savepoint (for example hdfs:///flink/savepoint-1537)' } ]}]">
+              placeholder="Path to the savepoint (with schema hdfs://), e.g: hdfs:///flink/savepoint-1537 "
+              v-decorator="['savePoint']">
             </a-textarea>
           </a-form-item>
 
