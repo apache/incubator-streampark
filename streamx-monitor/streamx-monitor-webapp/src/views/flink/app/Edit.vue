@@ -92,7 +92,7 @@
             placeholder="请选择要对比的配置版本"
             mode="multiple"
             @change="handleChangeCompact"
-            :maxTagCount="count2">
+            :maxTagCount="selectTagCount.count2">
             <a-select-option
               v-for="(ver,index) in configVersions"
               :value="ver.id"
@@ -155,7 +155,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="count1"
+          :maxTagCount="selectTagCount.count1"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -196,9 +196,12 @@
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
-          @change="(x) => handleSwitch(x,conf)"
+          disabled
           checkedChildren="开"
           unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="switchDefaultValue"
           v-decorator="[`${conf.name}`]"/>
         <a-input-number
           v-if="conf.type === 'number'"
@@ -273,8 +276,11 @@ export default {
       strategy: 1,
       app: null,
       compareDisabled: true,
-      count1: 1,
-      count2: 2,
+      selectTagCount: {
+        count1: 1,
+        count2: 2
+      },
+      switchDefaultValue: true,
       compareConf: [],
       defaultConfigId: null,
       defaultOptions: {},
@@ -337,12 +343,6 @@ export default {
 
     handleConf (name) {
       this.configItems = name
-    },
-
-    handleSwitch (bool, conf) {
-      const v = {}
-      v[conf.name] = bool
-      this.form.setFieldsValue(v)
     },
 
     handleChangeNewConfig (confFile) {
@@ -418,12 +418,9 @@ export default {
               const v = values[k]
               const option = this.options.filter((elem) => k === elem.name)[0]
               const key = option.key
-              if (v !== false && v !== '') {
+              if (v !== '') {
                 options[k] = v
                 shortOptions += key + ' '
-                if (option.type !== 'switch') {
-                  shortOptions += v + ' '
-                }
               }
             }
           }
@@ -436,6 +433,16 @@ export default {
           if (values.yarnslots) {
             options['yarnslots'] = values.yarnslots
             shortOptions += ' -ys ' + values.yarnslots
+          }
+
+          if (this.configItems.includes('allowNonRestoredState')) {
+            options['allowNonRestoredState'] = true
+            shortOptions += ' -n '
+          }
+
+          if (this.configItems.includes('yarnquery')) {
+            options['yarnquery'] = true
+            shortOptions += ' -yq '
           }
 
           const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
@@ -519,6 +526,7 @@ export default {
           'parallelism': this.defaultOptions.parallelism
         })
       })
+
       const array = []
       for (const k in this.defaultOptions) {
         if (k !== 'parallelism' && k !== 'yarnslots') {
@@ -581,6 +589,11 @@ export default {
 
 >>> .ant-select-selection__choice {
   border: none !important;
+}
+
+>>> .ant-switch-loading, .ant-switch-disabled {
+  cursor: not-allowed;
+  opacity: unset !important;
 }
 
 </style>
