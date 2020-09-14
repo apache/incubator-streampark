@@ -1,5 +1,9 @@
 package com.streamxhub.monitor.core.enums;
 
+/**
+ * @author benjobs
+ */
+
 public enum DeployState {
 
     /**
