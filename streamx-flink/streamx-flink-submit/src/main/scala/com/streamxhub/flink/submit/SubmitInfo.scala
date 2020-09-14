@@ -28,6 +28,7 @@ case class SubmitInfo(deployMode: YarnDeploymentTarget,
                       flinkUserJar: String,
                       appName: String,
                       appConf: String,
+                      savePoint:String,
                       overrideOption: Array[String],
                       dynamicOption: Array[String],
                       args: String

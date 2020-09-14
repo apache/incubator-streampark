@@ -83,6 +83,7 @@ object FlinkSubmit extends Logger {
          |      "nameService: ${submitInfo.nameService},"
          |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"
+         |      "savePint: ${submitInfo.savePoint}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
@@ -210,6 +211,11 @@ object FlinkSubmit extends Logger {
           }
         })
 
+        //fromSavePoint
+        if (submitInfo.savePoint != null) {
+          optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+        }
+
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
           array += x._1
@@ -223,6 +229,7 @@ object FlinkSubmit extends Logger {
 
         //-D
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+
 
         array.toArray
 

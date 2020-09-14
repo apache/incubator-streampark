@@ -316,9 +316,9 @@
             @click="handleEdit(record)"
             title="修改角色">
           </a-icon>
-          <template>
-            <a-popconfirm
-              v-show="
+          <a-icon
+            type="play-circle"
+            v-if="
                 record.state === 0
                   || record.state === 2
                   || record.state === 7
@@ -326,21 +326,11 @@
                   || record.state === 10
                   || record.state === 11
                   || record.state === 13"
-              v-permit="'role:update'"
-              title="确定要启动该应用吗?"
-              ok-text="确定"
-              cancel-text="取消"
-              @confirm="handleStartUp(record)">
-              <a-icon slot="icon" type="question-circle-o" style="color: red"/>
-              <a-icon
-                type="play-circle"
-                theme="twoTone"
-                twoToneColor="#4a9ff5"
-                title="启动应用">
-              </a-icon>
-            </a-popconfirm>
-          </template>
-
+            v-permit="'role:update'"
+            theme="twoTone"
+            twoToneColor="#4a9ff5"
+            @click="handleStart(record)">
+          </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
@@ -388,6 +378,36 @@
         </a-form>
       </a-modal>
 
+      <a-modal v-model="startVisible" on-ok="handleStartOk">
+        <template slot="title">
+          <a-icon slot="icon" type="play-circle" style="color: green"/>
+          Start application
+        </template>
+
+        <a-form @submit="handleStartOk" :form="formCheckPoint">
+
+          <a-form-item
+            label="Savepoint"
+            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-textarea
+              rows="3"
+              placeholder="Path to the savepoint (with schema hdfs://)"
+              v-decorator="['checkPoint',{ rules: [{ trigger:'submit', message: 'Path to a savepoint to restore the job from (for example  hdfs:///flink/savepoint-1537)' } ]}]">
+            </a-textarea>
+          </a-form-item>
+
+        </a-form>
+
+        <template slot="footer">
+          <a-button key="back" @click="handleStartCancel">
+            取消
+          </a-button>
+          <a-button key="submit" type="primary" :loading="loading" @click="handleStartOk">
+            确定
+          </a-button>
+        </template>
+      </a-modal>
       <a-modal v-model="stopVisible" on-ok="handleStopOk">
         <template slot="title">
           <a-icon slot="icon" type="poweroff" style="color: red"/>
@@ -433,7 +453,6 @@
           </a-button>
         </template>
       </a-modal>
-
     </a-card>
   </div>
 </template>
@@ -441,7 +460,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import { mapActions } from 'vuex'
-import { list, stop, deploy, startUp, closeDeploy, yarn } from '@api/application'
+import { list, stop, deploy, start, closeDeploy, yarn } from '@api/application'
 
 export default {
   components: { RangeDate, Ellipsis },
@@ -457,8 +476,10 @@ export default {
       yarn: null,
       deployVisible: false,
       stopVisible: false,
+      startVisible: false,
       formDeploy: null,
       formSavePoint: null,
+      formCheckPoint: null,
       drain: false,
       application: null,
       searchText: '',
@@ -684,6 +705,7 @@ export default {
   beforeMount () {
     this.formDeploy = this.$form.createForm(this)
     this.formSavePoint = this.$form.createForm(this)
+    this.formCheckPoint = this.$form.createForm(this)
   },
 
   methods: {
@@ -721,6 +743,35 @@ export default {
           deploy({
             id: this.application.id,
             backUpDescription: values.description
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
+      })
+    },
+
+    handleStart (app) {
+      this.startVisible = true
+      this.application = app
+    },
+
+    handleStartCancel () {
+      this.startVisible = false
+      this.formCheckPoint.resetFields()
+    },
+
+    handleStartOk () {
+      this.formCheckPoint.validateFields((err, values) => {
+        if (!err) {
+          this.$message.info(
+            '已发送启动请求,该应用正在启动中',
+            3
+          )
+          const savePoint = values.savePoint
+          this.handleStartCancel()
+          start({
+            id: this.application.id,
+            savePoint: savePoint
           }).then((resp) => {
             console.log(resp)
           })
@@ -835,18 +886,6 @@ export default {
     handleEdit (app) {
       this.SetAppId(app.id)
       this.$router.push({ 'path': '/flink/app/edit' })
-    },
-
-    handleStartUp (app) {
-      this.$message.info(
-        '已发送启动请求,该应用正在启动中',
-        3
-      )
-      startUp({
-        id: app.id
-      }).then((resp) => {
-        console.log(resp)
-      })
     },
 
     handleCloseDeploy (app) {
