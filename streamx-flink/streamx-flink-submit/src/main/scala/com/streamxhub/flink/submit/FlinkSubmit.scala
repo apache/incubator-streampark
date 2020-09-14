@@ -56,7 +56,7 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def stop(appId: String, jobId: String, savePoint: String, drain: Boolean): Unit = {
+  def stop(appId: String, jobId: String, savePoint: String, drain: java.lang.Boolean): Unit = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
@@ -72,7 +72,11 @@ object FlinkSubmit extends Logger {
     }
     val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.retrieve(applicationId).getClusterClient
-    clusterClient.stopWithSavepoint(jobID, drain, savePoint)
+    (savePoint, drain) match {
+      case (null, null) => clusterClient.cancel(jobID)
+      case (sp, null) => clusterClient.cancelWithSavepoint(jobID, sp)
+      case (sp, d) => clusterClient.stopWithSavepoint(jobID, d, sp)
+    }
   }
 
   def submit(submitInfo: SubmitInfo): ApplicationId = {
