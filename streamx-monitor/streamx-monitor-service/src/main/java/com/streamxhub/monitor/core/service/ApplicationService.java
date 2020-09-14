@@ -37,7 +37,7 @@ public interface ApplicationService extends IService<Application> {
 
     boolean update(Application app);
 
-    boolean startUp(String id) throws Exception;
+    boolean start(Application app) throws Exception;
 
     String getYarnName(Application app);
 
