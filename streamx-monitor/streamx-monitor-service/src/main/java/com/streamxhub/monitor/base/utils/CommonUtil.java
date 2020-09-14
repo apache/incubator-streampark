@@ -46,6 +46,8 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 /**
@@ -129,6 +131,9 @@ public abstract class CommonUtil implements Serializable {
 
 
     private static String OS = System.getProperty("os.name").toLowerCase();
+
+    public static final Map<Serializable,Serializable> localCache = new ConcurrentHashMap<>();
+
 
     private static Properties properties;
 
