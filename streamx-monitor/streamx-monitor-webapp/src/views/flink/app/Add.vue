@@ -146,9 +146,12 @@
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
-          @change="(x) => handleSwitch(x,conf)"
+          disabled
           checkedChildren="开"
           unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="switchDefaultValue"
           v-decorator="[`${conf.name}`]"/>
         <a-input-number
           v-if="conf.type === 'number'"
@@ -222,6 +225,7 @@ export default {
       projectList: [],
       appList: [],
       app: null,
+      switchDefaultValue: true,
       config: null,
       configOverride: null,
       configSource: [],
@@ -272,12 +276,6 @@ export default {
 
     handleConf (name) {
       this.configItems = name
-    },
-
-    handleSwitch (bool, conf) {
-      const v = {}
-      v[conf.name] = bool
-      this.form.setFieldsValue(v)
     },
 
     handleJobName (confFile) {
@@ -365,12 +363,9 @@ export default {
               const v = values[k]
               const option = this.options.filter((elem) => k === elem.name)[0]
               const key = option.key
-              if (v !== false && v !== '') {
+              if (v !== '') {
                 options[k] = v
                 shortOptions += key + ' '
-                if (option.type !== 'switch') {
-                  shortOptions += v + ' '
-                }
               }
             }
           }
@@ -383,6 +378,16 @@ export default {
           if (values.slot) {
             options['yarnslots'] = values.slot
             shortOptions += ' -ys ' + values.slot
+          }
+
+          if (this.configItems.includes('allowNonRestoredState')) {
+            options['allowNonRestoredState'] = true
+            shortOptions += ' -n '
+          }
+
+          if (this.configItems.includes('yarnquery')) {
+            options['yarnquery'] = true
+            shortOptions += ' -yq '
           }
 
           const configVal = this.form.getFieldValue('config')
@@ -466,5 +471,10 @@ export default {
 
 .ant-form-explain {
   margin-top: -5px;
+}
+
+>>> .ant-switch-loading, .ant-switch-disabled {
+  cursor: not-allowed;
+  opacity: unset !important;
 }
 </style>
