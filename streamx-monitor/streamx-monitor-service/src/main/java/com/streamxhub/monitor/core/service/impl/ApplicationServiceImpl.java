@@ -38,6 +38,7 @@ import com.streamxhub.monitor.core.entity.ApplicationBackUp;
 import com.streamxhub.monitor.core.entity.ApplicationConfig;
 import com.streamxhub.monitor.core.entity.Project;
 import com.streamxhub.monitor.core.enums.AppExistsState;
+import com.streamxhub.monitor.core.enums.DeployState;
 import com.streamxhub.monitor.core.service.ApplicationBackUpService;
 import com.streamxhub.monitor.core.service.ApplicationConfigService;
 import com.streamxhub.monitor.core.service.ApplicationService;
@@ -134,7 +135,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
-                    deploy(paramOfApp, false);
+                    deploy(paramOfApp, false, false);
                     return true;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -161,24 +162,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 配置文件已更新
          */
-        application.setDeploy(2);
+        application.setDeploy(DeployState.CONF_UPDATED.get());
         this.baseMapper.updateById(application);
         return true;
     }
 
     @Override
-    public void deploy(Application paramOfApp, boolean backUp) throws IOException {
-        //先停止原有任务..
+    public void deploy(Application paramOfApp, boolean backUp, boolean restart) throws Exception {
         Application application = getById(paramOfApp.getId());
-        application.setBackUpDescription(paramOfApp.getBackUpDescription());
-        if (application.getState() == FlinkAppState.RUNNING.getValue()) {
+        Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
+
+        //1) 需要重启的先通知服务,
+        if (restart) {
             stop(application);
+        } else if (!isRunning) {
+            //不需要重启的并且未正在运行的,则更改状态为发布中....
+            application.setState(FlinkAppState.DEPLOYING.getValue());
+            updateState(application);
         }
 
-        //更改状态为发布中....
-        application.setState(FlinkAppState.DEPLOYING.getValue());
-        updateState(application);
-
+        //2) deploying...
+        application.setBackUpDescription(paramOfApp.getBackUpDescription());
         if (!application.getModule().startsWith(application.getAppBase().getAbsolutePath())) {
             application.setModule(application.getAppBase().getAbsolutePath().concat("/").concat(application.getModule()));
         }
@@ -186,23 +190,35 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
-            backUpService.save(applicationBackUp);
-            HdfsUtils.mkdirs(applicationBackUp.getPath());
-            HdfsUtils.movie(workspaceWithModule, applicationBackUp.getPath());
+            //3) 需要背负的做背负...
+            if (backUp) {
+                backUpService.save(applicationBackUp);
+                HdfsUtils.mkdirs(applicationBackUp.getPath());
+                HdfsUtils.movie(workspaceWithModule, applicationBackUp.getPath());
+            }
         }
-
         String workspace = application.getWorkspace(false);
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
         }
         HdfsUtils.upload(application.getModule(), workspace);
-        //更新发布状态...
-        application.setDeploy(0);
-        updateDeploy(application);
 
-        //更改状态为发布完成....
-        application.setState(FlinkAppState.DEPLOYED.getValue());
-        updateState(application);
+        //4) 更新发布状态,需要重启的应用则重新启动...
+        if (restart) {
+            //重新启动.
+            start(application);
+            //将"需要重新发布"状态清空...
+            application.setDeploy(DeployState.NONE.get());
+            updateDeploy(application);
+        } else {
+            if (isRunning) {
+                application.setDeploy(DeployState.NEED_START.get());
+                updateDeploy(application);
+            } else {
+                application.setState(FlinkAppState.DEPLOYED.getValue());
+                updateState(application);
+            }
+        }
     }
 
     @Override
@@ -212,7 +228,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void closeDeploy(Application paramOfApp) {
-        paramOfApp.setDeploy(0);
+        paramOfApp.setDeploy(DeployState.NONE.get());
         this.baseMapper.updateDeploy(paramOfApp);
     }
 
@@ -256,7 +272,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean start(Application paramOfApp) throws Exception {
+    public boolean start(Application paramOfApp) {
         final Application application = getById(paramOfApp.getId());
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
