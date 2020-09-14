@@ -318,8 +318,7 @@
           </a-icon>
           <a-icon
             type="play-circle"
-            v-if="
-                record.state === 0
+            v-if="record.state === 0
                   || record.state === 2
                   || record.state === 7
                   || record.state === 9
@@ -411,7 +410,7 @@
       <a-modal v-model="stopVisible" on-ok="handleStopOk">
         <template slot="title">
           <a-icon slot="icon" type="poweroff" style="color: red"/>
-          Cancel application
+          Stop application
         </template>
 
         <a-form @submit="handleStopOk" :form="formSavePoint">
