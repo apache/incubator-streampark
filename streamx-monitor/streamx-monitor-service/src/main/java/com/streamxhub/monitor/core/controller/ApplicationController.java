@@ -79,11 +79,11 @@ public class ApplicationController extends BaseController {
     }
 
     @RequestMapping("deploy")
-    public RestResponse deploy(Application app) {
+    public RestResponse deploy(Application app, boolean restart) {
         Executors.newSingleThreadExecutor().submit(() -> {
             try {
-                applicationService.deploy(app, true);
-            } catch (IOException e) {
+                applicationService.deploy(app, true, restart);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         });
