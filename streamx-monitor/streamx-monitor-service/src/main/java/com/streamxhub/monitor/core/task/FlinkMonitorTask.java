@@ -132,12 +132,11 @@ public class FlinkMonitorTask {
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
-                        Serializable timeMillis = CommonUtil.localCache.get(application.getId());
+                        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
                         boolean flag = false;
                         if (timeMillis != null) {
                             long timeOut = 1 * 60 * 1000;
                             flag = System.currentTimeMillis() - (Long) timeMillis <= timeOut;
-                            CommonUtil.localCache.remove(application.getId());
                         }
                         if (flag) {
                             application.setState(FlinkAppState.CANCELED.getValue());
