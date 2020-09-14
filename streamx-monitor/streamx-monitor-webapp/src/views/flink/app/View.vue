@@ -140,7 +140,7 @@
         <template slot="filterRender" slot-scope="text, record, index, column">
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用已更新,需重新发布">
-              <template v-if="text.length>25">
+              <template v-if="text.length>30">
                 <a-tooltip placement="top">
                   <template slot="title">
                     {{ text }}
@@ -168,7 +168,35 @@
               </template>
             </a-badge>
             <a-badge dot color="blue" v-if="column.dataIndex === 'jobName' && record.deploy === 2" title="配置已更新,需重启应用">
-              <template v-if="text.length>25">
+              <template v-if="text.length>30">
+                <a-tooltip placement="top">
+                  <template slot="title">
+                    {{ text }}
+                  </template>
+                  <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                      {{ fragment }}
+                    </mark>
+                    <template v-else>
+                      {{ fragment }}
+                    </template>
+                  </template>
+                  ...
+                </a-tooltip>
+              </template>
+              <template v-else>
+                <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                    {{ fragment }}
+                  </mark>
+                  <template v-else>
+                    {{ fragment }}
+                  </template>
+                </template>
+              </template>
+            </a-badge>
+            <a-badge dot color="blue" v-if="column.dataIndex === 'jobName' && record.deploy === 3" title="程序已发布完成,需重启应用">
+              <template v-if="text.length>30">
                 <a-tooltip placement="top">
                   <template slot="title">
                     {{ text }}
@@ -212,7 +240,12 @@
                 {{ text }}
               </ellipsis>
             </a-badge>
-            <a-badge dot color="blue" title="配置已更新,需重启项目" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
+            <a-badge dot color="blue" title="配置已更新,需重启应用" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
+              <ellipsis :length="40" tooltip>
+                {{ text }}
+              </ellipsis>
+            </a-badge>
+            <a-badge dot color="blue" title="程序已发布完成,需重启应用" v-else-if="column.dataIndex === 'jobName' && record.deploy === 3">
               <ellipsis :length="40" tooltip>
                 {{ text }}
               </ellipsis>
@@ -356,7 +389,7 @@
       <a-modal v-model="deployVisible" on-ok="handleDeployOk">
         <template slot="title">
           <a-icon slot="icon" type="question-circle-o" style="color: red"/>
-          确定要重新发布应用吗?
+          Deploy Application
         </template>
         <template slot="footer">
           <a-button key="back" @click="handleDeployNo">
@@ -367,7 +400,36 @@
           </a-button>
         </template>
         <a-form @submit="handleDeployOk" :form="formDeploy">
-          <a-form-item>
+          <a-form-item
+            v-if="application && application.state === 5 "
+            label="restart"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              placeholder="重启应用"
+              v-model="restart"
+              v-decorator="['restart']"/>
+            <span class="conf-switch" style="color:darkgrey"> restart application after deploy</span>
+          </a-form-item>
+          <a-form-item
+            v-if="restart"
+            label="Savepoint"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-textarea
+              rows="3"
+              placeholder="Path to a savepoint to stop and restore the job from (with schema hdfs://) e.g: hdfs:///flink/savepoint-1537 "
+              v-decorator="['savePoint',{ rules: [{ required: true, message: 'savePoint is required' } ]}]">
+            </a-textarea>
+          </a-form-item>
+          <a-form-item
+            label="Backup desc"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
             <a-textarea
               rows="3"
               placeholder="应用重新发布前会先备份当前的应用,请输入当前应用的备份描述信息,以便回滚版本时找回"
@@ -392,7 +454,7 @@
             <a-textarea
               rows="3"
               placeholder="Path to a savepoint to restore the job from (with schema hdfs://) e.g: hdfs:///flink/savepoint-1537 "
-              v-decorator="['checkPoint']">
+              v-decorator="['savePoint']">
             </a-textarea>
           </a-form-item>
 
@@ -480,6 +542,7 @@ export default {
       formSavePoint: null,
       formCheckPoint: null,
       drain: false,
+      restart: false,
       application: null,
       searchText: '',
       searchInput: null,
@@ -728,12 +791,15 @@ export default {
 
     handleDeployNo () {
       this.deployVisible = false
+      this.restart = false
       this.formDeploy.resetFields()
     },
 
     handleDeployOk () {
       this.formDeploy.validateFields((err, values) => {
         if (!err) {
+          const savePoint = values.savePoint
+          const description = values.description
           this.handleDeployNo()
           this.$message.info(
             '已发送部署请求,后台正在执行部署,请耐心等待',
@@ -741,7 +807,9 @@ export default {
           )
           deploy({
             id: this.application.id,
-            backUpDescription: values.description
+            restart: this.restart,
+            savePoint: savePoint,
+            backUpDescription: description
           }).then((resp) => {
             console.log(resp)
           })
