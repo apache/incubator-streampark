@@ -255,8 +255,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean startUp(String id) throws Exception {
-        final Application application = getById(id);
+    public boolean start(Application paramOfApp) throws Exception {
+        final Application application = getById(paramOfApp.getId());
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
@@ -266,7 +266,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String confContent = applicationConfig.getContent();
         String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
         String appConf = String.format("%s://%s", format, confContent);
-        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, id, application.getModule());
+        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, paramOfApp.getId(), application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
         String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
@@ -283,6 +283,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
+                paramOfApp.getSavePoint(),
                 overrideOption,
                 dynamicOption,
                 application.getArgs()

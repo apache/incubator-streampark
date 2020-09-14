@@ -90,9 +90,9 @@ public class ApplicationController extends BaseController {
         return RestResponse.create();
     }
 
-    @RequestMapping("startUp")
-    public RestResponse startUp(String id) throws Exception {
-        boolean started = applicationService.startUp(id);
+    @RequestMapping("start")
+    public RestResponse start(Application app) throws Exception {
+        boolean started = applicationService.start(app);
         return RestResponse.create().data(started);
     }
 
