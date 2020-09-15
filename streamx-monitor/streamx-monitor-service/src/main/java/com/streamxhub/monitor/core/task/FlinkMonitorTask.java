@@ -93,7 +93,7 @@ public class FlinkMonitorTask {
                     /**
                      * 发布完重新启动后将"需重启"状态清空
                      */
-                    if (application.getState() == FlinkAppState.RESTARTING.getValue() && DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
+                    if (application.getState() == FlinkAppState.STARTING.getValue() && DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
                         application.setDeploy(DeployState.NONE.get());
                     }
 
