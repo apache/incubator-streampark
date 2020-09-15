@@ -1,96 +1,5 @@
 <template>
   <div>
-    <a-row :gutter="24">
-      <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Spark
-              <strong>33</strong>
-            </span>
-          </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Spark
-              <strong>33</strong>
-            </span>
-          </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Spark
-              <strong>33</strong>
-            </span>
-          </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Spark
-              <strong>33</strong>
-            </span>
-          </div>
-        </div>
-      </a-col>
-    </a-row>
-
     <a-card
       style="margin-top: 24px"
       :bordered="false">
@@ -197,8 +106,7 @@
 </template>
 <script>
 import RangeDate from '@comp/DateTime/RangeDate'
-import { build, list, remove } from '@api/project'
-import VueApexCharts from 'vue-apexcharts'
+import { build, list } from '@api/project'
 import Ellipsis from '@comp/Ellipsis'
 import HeadInfo from '@comp/tools/HeadInfo'
 import SockJS from 'sockjs-client'
@@ -214,7 +122,7 @@ const IconFont = Icon.createFromIconfontCN({
 })
 
 export default {
-  components: { IconFont, RangeDate, Ellipsis, HeadInfo, VueApexCharts },
+  components: { IconFont, RangeDate, Ellipsis, HeadInfo },
   data () {
     return {
       loading: false,
@@ -242,100 +150,6 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
-      },
-
-      seriesSpark3: [{
-        data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
-      }],
-
-      chartOptionsSpark3: {
-        chart: {
-          type: 'area',
-          height: 140,
-          sparkline: {
-            enabled: true
-          }
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        fill: {
-          opacity: 0.3
-        },
-        xaxis: {
-          crosshairs: {
-            width: 1
-          }
-        },
-        yaxis: {
-          min: 0
-        },
-        title: {
-          text: '13,965',
-          offsetX: 0,
-          style: {
-            fontSize: '24px'
-          }
-        },
-        subtitle: {
-          text: 'Total Project',
-          offsetX: 0,
-          style: {
-            fontSize: '14px'
-          }
-        }
-      },
-
-      chart: {
-        state: {
-          series: [{
-            data: [400, 430, 448, 470, 540]
-          }],
-          chartOptions: {
-            chart: {
-              type: 'bar',
-              height: 350
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true
-              }
-            },
-            dataLabels: {
-              enabled: false
-            },
-            xaxis: {
-              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
-            }
-          }
-        },
-        type: {
-          series: [44, 55],
-          chartOptions: {
-            chart: {
-              width: 240,
-              type: 'donut'
-            },
-            dataLabels: {
-              enabled: false
-            },
-            fill: {
-              type: 'gradient'
-            },
-            labels: ['Flink', 'Spark'],
-            responsive: [{
-              breakpoint: 240,
-              options: {
-                chart: {
-                  width: 240
-                },
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }]
-          }
-        }
       }
     }
   },
