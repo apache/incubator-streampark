@@ -1037,7 +1037,7 @@ export default {
 }
 
 .close-deploy {
-  left: 12px;
+  left: 15px;
   font-size: 8px;
   font-weight: bold;
   top: -8px;
@@ -1149,6 +1149,10 @@ export default {
 
 .operation {
   width: 80px;
+}
+
+>>> .ant-badge-dot, .ant-badge {
+  right: unset !important;
 }
 
 </style>
