@@ -138,14 +138,39 @@
           :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
         <template slot="filterRender" slot-scope="text, record, index, column">
+          <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
-            <a-badge v-if="column.dataIndex === 'jobName' && record.deploy === 1" dot title="应用已更新,需重新发布">
-              <template v-if="text.length>30">
-                <a-tooltip placement="top">
-                  <template slot="title">
-                    {{ text }}
-                  </template>
-                  <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+            <template v-if="column.dataIndex === 'jobName'">
+              <!--start: record.deploy === 0-->
+              <template v-if="record.deploy === 0" v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                  {{ fragment }}
+                </mark>
+                <template v-else>
+                  {{ fragment }}
+                </template>
+              </template>
+              <!--end: record.deploy === 0-->
+              <!--start: record.deploy === 1-->
+              <a-badge v-if="record.deploy === 1" dot title="应用已更新,需重新发布">
+                <template v-if="text.length>25">
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      {{ text }}
+                    </template>
+                    <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                        {{ fragment }}
+                      </mark>
+                      <template v-else>
+                        {{ fragment }}
+                      </template>
+                    </template>
+                    ...
+                  </a-tooltip>
+                </template>
+                <template v-else>
+                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -153,27 +178,29 @@
                       {{ fragment }}
                     </template>
                   </template>
-                  ...
-                </a-tooltip>
-              </template>
-              <template v-else>
-                <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
-                    {{ fragment }}
-                  </mark>
-                  <template v-else>
-                    {{ fragment }}
-                  </template>
                 </template>
-              </template>
-            </a-badge>
-            <a-badge dot color="blue" v-if="column.dataIndex === 'jobName' && record.deploy === 2" title="配置已更新,需重启应用">
-              <template v-if="text.length>30">
-                <a-tooltip placement="top">
-                  <template slot="title">
-                    {{ text }}
-                  </template>
-                  <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              </a-badge>
+              <!-- end: record.deploy === 1-->
+              <!--start: record.deploy === 2-->
+              <a-badge dot color="blue" v-if="record.deploy === 2" title="配置已更新,需重启应用">
+                <template v-if="text.length>25">
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      {{ text }}
+                    </template>
+                    <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                        {{ fragment }}
+                      </mark>
+                      <template v-else>
+                        {{ fragment }}
+                      </template>
+                    </template>
+                    ...
+                  </a-tooltip>
+                </template>
+                <template v-else>
+                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -181,27 +208,29 @@
                       {{ fragment }}
                     </template>
                   </template>
-                  ...
-                </a-tooltip>
-              </template>
-              <template v-else>
-                <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
-                    {{ fragment }}
-                  </mark>
-                  <template v-else>
-                    {{ fragment }}
-                  </template>
                 </template>
-              </template>
-            </a-badge>
-            <a-badge dot color="blue" v-if="column.dataIndex === 'jobName' && record.deploy === 3" title="程序已发布完成,需重启应用">
-              <template v-if="text.length>30">
-                <a-tooltip placement="top">
-                  <template slot="title">
-                    {{ text }}
-                  </template>
-                  <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              </a-badge>
+              <!-- end: record.deploy === 2-->
+              <!-- start: record.deploy === 3-->
+              <a-badge dot color="blue" v-if="record.deploy === 3" title="程序已发布完成,需重启应用">
+                <template v-if="text.length>25">
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      {{ text }}
+                    </template>
+                    <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
+                        {{ fragment }}
+                      </mark>
+                      <template v-else>
+                        {{ fragment }}
+                      </template>
+                    </template>
+                    ...
+                  </a-tooltip>
+                </template>
+                <template v-else>
+                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -209,22 +238,16 @@
                       {{ fragment }}
                     </template>
                   </template>
-                  ...
-                </a-tooltip>
-              </template>
-              <template v-else>
-                <template v-for="(fragment, i) in text.toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                  <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
-                    {{ fragment }}
-                  </mark>
-                  <template v-else>
-                    {{ fragment }}
-                  </template>
                 </template>
-              </template>
-            </a-badge>
+              </a-badge>
+              <!-- end: record.deploy === 3-->
+              <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
+                <a-icon slot="count" type="close" style="color: #333" />
+              </a-badge>
+            </template>
+            <!--其他字段-->
             <template v-else>
-              <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                   {{ fragment }}
                 </mark>
@@ -234,31 +257,39 @@
               </template>
             </template>
           </template>
+          <!--无条件搜索-->
           <template v-else>
-            <a-badge dot title="应用已更新,需重新发布" v-if="column.dataIndex === 'jobName' && record.deploy === 1">
-              <ellipsis :length="40" tooltip>
+            <template v-if="column.dataIndex === 'jobName'">
+              <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
+                <ellipsis :length="45" tooltip>
+                  {{ text }}
+                </ellipsis>
+              </a-badge>
+              <a-badge dot color="blue" title="配置已更新,需重启应用" v-else-if="record.deploy === 2">
+                <ellipsis :length="45" tooltip>
+                  {{ text }}
+                </ellipsis>
+              </a-badge>
+              <a-badge dot color="blue" title="程序已发布完成,需重启应用" v-else-if="record.deploy === 3">
+                <ellipsis :length="45" tooltip>
+                  {{ text }}
+                </ellipsis>
+              </a-badge>
+              <span v-else>
+                <ellipsis :length="45" tooltip>
+                  {{ text }}
+                </ellipsis>
+              </span>
+              <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
+                <a-icon slot="count" type="close" style="color: #333" />
+              </a-badge>
+            </template>
+            <template v-else>
+              <ellipsis :length="45" tooltip>
                 {{ text }}
               </ellipsis>
-            </a-badge>
-            <a-badge dot color="blue" title="配置已更新,需重启应用" v-else-if="column.dataIndex === 'jobName' && record.deploy === 2">
-              <ellipsis :length="40" tooltip>
-                {{ text }}
-              </ellipsis>
-            </a-badge>
-            <a-badge dot color="blue" title="程序已发布完成,需重启应用" v-else-if="column.dataIndex === 'jobName' && record.deploy === 3">
-              <ellipsis :length="40" tooltip>
-                {{ text }}
-              </ellipsis>
-            </a-badge>
-            <span v-else>
-              <ellipsis :length="40" tooltip>
-                {{ text }}
-              </ellipsis>
-            </span>
+            </template>
           </template>
-          <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="column.dataIndex === 'jobName' && record.deploy !== 0">
-            <a-icon slot="count" type="close" style="color: #333" />
-          </a-badge>
         </template>
 
         <template slot="duration" slot-scope="text, record">
@@ -352,12 +383,12 @@
           <a-icon
             type="play-circle"
             v-if="record.state === 0
-                  || record.state === 2
-                  || record.state === 7
-                  || record.state === 9
-                  || record.state === 10
-                  || record.state === 11
-                  || record.state === 13"
+              || record.state === 2
+              || record.state === 7
+              || record.state === 9
+              || record.state === 10
+              || record.state === 11
+              || record.state === 13"
             v-permit="'role:update'"
             theme="twoTone"
             twoToneColor="#4a9ff5"
