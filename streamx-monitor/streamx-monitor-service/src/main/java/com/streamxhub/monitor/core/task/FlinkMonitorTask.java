@@ -90,6 +90,13 @@ public class FlinkMonitorTask {
                         application.setJobId(job.getId());
                     }
 
+                    /**
+                     * 发布完重新启动后将"需重启"状态清空
+                     */
+                    if (application.getState() == FlinkAppState.RESTARTING.getValue() && DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
+                        application.setDeploy(DeployState.NONE.get());
+                    }
+
                     if (!application.getState().equals(state.getValue())) {
                         application.setState(state.getValue());
                     }
@@ -104,13 +111,6 @@ public class FlinkMonitorTask {
                         if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
                             application.setEndTime(new Date(endTime));
                         }
-                    }
-
-                    /**
-                     * 发布完重新启动后将"需重启"状态清空
-                     */
-                    if (DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
-                        application.setDeploy(DeployState.NONE.get());
                     }
 
                     application.setDuration(job.getDuration());
