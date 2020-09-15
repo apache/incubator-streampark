@@ -211,10 +211,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setDeploy(DeployState.NONE.get());
             updateDeploy(application);
         } else {
-            if (isRunning) {
-                application.setDeploy(DeployState.NEED_START.get());
-                updateDeploy(application);
-            } else {
+            application.setDeploy(DeployState.NEED_START.get());
+            updateDeploy(application);
+            if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
                 updateState(application);
             }
