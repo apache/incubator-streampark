@@ -23,6 +23,7 @@ package com.streamxhub.monitor.core.task;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.monitor.base.utils.CommonUtil;
 import com.streamxhub.monitor.core.entity.Application;
+import com.streamxhub.monitor.core.enums.DeployState;
 import com.streamxhub.monitor.core.enums.FlinkAppState;
 import com.streamxhub.monitor.core.metrics.flink.JobsOverview;
 import com.streamxhub.monitor.core.metrics.yarn.AppInfo;
@@ -74,6 +75,9 @@ public class FlinkMonitorTask {
                  * 1)到flink的restApi中查询状态
                  */
                 JobsOverview jobsOverview = application.getJobsOverview();
+                Integer deploy = application.getDeploy();
+                application.setDeploy(null);
+
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
                     JobsOverview.Job job = optional.get();
@@ -100,6 +104,13 @@ public class FlinkMonitorTask {
                         if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
                             application.setEndTime(new Date(endTime));
                         }
+                    }
+
+                    /**
+                     * 发布完重新启动后将"需重启"状态清空
+                     */
+                    if (DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
+                        application.setDeploy(DeployState.NONE.get());
                     }
 
                     application.setDuration(job.getDuration());
