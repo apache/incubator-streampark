@@ -345,7 +345,7 @@ export default {
 
   mounted () {
     this.handleFetch(this.queryParams, true)
-    const timer = window.setInterval(() => this.handleFetch(this.queryParams, false), 1000)
+    const timer = window.setInterval(() => this.handleFetch(this.queryParams, false), 2000)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
