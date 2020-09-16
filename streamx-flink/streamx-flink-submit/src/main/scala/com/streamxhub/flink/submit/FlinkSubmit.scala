@@ -52,6 +52,7 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.flink.client.cli.CliArgsException
 import org.apache.flink.configuration.ConfigOptions
+import java.lang.{Boolean => JBool}
 
 import org.apache.flink.util.{ExceptionUtils, FlinkException}
 
@@ -98,12 +99,12 @@ object FlinkSubmit extends Logger {
       .defaultValue(s"hdfs://$nameService$APP_SAVEPOINTS")
   )
 
-  def stop(nameService: String, appId: String, jobStringId: String, savePoint: Boolean, drain: Boolean): String = {
+  def stop(nameService: String, appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
     val savePointDir = getSavePointDir(nameService)
 
-    val savepointPathFuture: CompletableFuture[String] = (savePoint, drain) match {
+    val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(null)) match {
       case (false, false) =>
         clusterClient.cancel(jobID)
         null
