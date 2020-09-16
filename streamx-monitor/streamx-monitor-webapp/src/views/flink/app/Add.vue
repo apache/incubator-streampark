@@ -99,6 +99,20 @@
       </a-form-item>
 
       <a-form-item
+        label="allow NonRestored State"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-switch
+          checkedChildren="开"
+          unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="allowNonRestoredState"
+          v-decorator="['allowNonRestoredState']"/>
+        <span class="conf-switch"> Allow to skip savepoint state that cannot be restored </span>
+      </a-form-item>
+
+      <a-form-item
         label="Run Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -226,6 +240,7 @@ export default {
       appList: [],
       app: null,
       switchDefaultValue: true,
+      allowNonRestoredState: false,
       config: null,
       configOverride: null,
       configSource: [],
@@ -380,7 +395,7 @@ export default {
             shortOptions += ' -ys ' + values.slot
           }
 
-          if (this.configItems.includes('allowNonRestoredState')) {
+          if (this.allowNonRestoredState) {
             options['allowNonRestoredState'] = true
             shortOptions += ' -n '
           }
