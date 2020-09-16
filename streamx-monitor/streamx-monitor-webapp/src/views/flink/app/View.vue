@@ -493,7 +493,7 @@
           Start application
         </template>
 
-        <a-form @submit="handleStartOk" :form="formCheckPoint">
+        <a-form @submit="handleStartOk" :form="formStartCheckPoint">
           <a-form-item
             label="from savepoint"
             :labelCol="{lg: {span: 6}, sm: {span: 6}}"
@@ -514,8 +514,9 @@
             label="savepoint"
             :labelCol="{lg: {span: 6}, sm: {span: 6}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
-            <a-select>
-              <a-select-option value="1" v-for="(k ,i) in historySavePoint " :key="i" v-decorator="['savePointPath']">
+            <a-select
+              v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
+              <a-select-option value="1" v-for="(k ,i) in historySavePoint " :key="i">
                 {{ k.savePoint }}
               </a-select-option>
             </a-select>
@@ -538,7 +539,7 @@
           Stop application
         </template>
 
-        <a-form @submit="handleStopOk" :form="formSavePoint">
+        <a-form @submit="handleStopOk" :form="formStopSavePoint">
 
           <a-form-item
             label="Drain"
@@ -605,8 +606,8 @@ export default {
       stopVisible: false,
       startVisible: false,
       formDeploy: null,
-      formSavePoint: null,
-      formCheckPoint: null,
+      formStopSavePoint: null,
+      formStartCheckPoint: null,
       drain: false,
       savePoint: true,
       restart: false,
@@ -835,8 +836,8 @@ export default {
 
   beforeMount () {
     this.formDeploy = this.$form.createForm(this)
-    this.formSavePoint = this.$form.createForm(this)
-    this.formCheckPoint = this.$form.createForm(this)
+    this.formStopSavePoint = this.$form.createForm(this)
+    this.formStartCheckPoint = this.$form.createForm(this)
   },
 
   methods: {
@@ -894,19 +895,19 @@ export default {
 
     handleStartCancel () {
       this.startVisible = false
-      this.formCheckPoint.resetFields()
+      this.formStartCheckPoint.resetFields()
       this.savePoint = true
     },
 
     handleStartOk () {
-      this.formCheckPoint.validateFields((err, values) => {
+      this.formStartCheckPoint.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
             '已发送启动请求,该应用正在启动中',
             3
           )
           const savePoint = this.savePoint
-          const savePointPath = values.savePointPath
+          const savePointPath = savePoint ? (values.savePointPath || this.lastestSavePoint) : null
           this.handleStartCancel()
           start({
             id: this.application.id,
@@ -938,7 +939,7 @@ export default {
 
     handleStopCancel () {
       this.stopVisible = false
-      this.formSavePoint.resetFields()
+      this.formStopSavePoint.resetFields()
       this.drain = false
       this.savePoint = true
     },
