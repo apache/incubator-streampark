@@ -3,19 +3,23 @@
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+          <apexchart
+            type="donut"
+            width="200"
+            :options="chart.type.chartOptions"
+            :series="chart.type.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
               Total
               <strong>100</strong>
             </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <span>
               Flink
               <strong>67</strong>
             </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <span>
               Spark
               <strong>33</strong>
@@ -25,41 +29,23 @@
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="donut" width="200" :options="chart.type.chartOptions" :series="chart.type.series"></apexchart>
+          <apexchart
+            type="donut"
+            width="200"
+            :options="chart.type.chartOptions"
+            :series="chart.type.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
               Total
               <strong>100</strong>
             </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <span>
               Flink
               <strong>67</strong>
             </span>
-            <a-divider type="vertical" />
-            <span>
-              Spark
-              <strong>33</strong>
-            </span>
-          </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical" />
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <span>
               Spark
               <strong>33</strong>
@@ -76,12 +62,34 @@
               Total
               <strong>100</strong>
             </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
             <span>
               Flink
               <strong>67</strong>
             </span>
-            <a-divider type="vertical" />
+            <a-divider type="vertical"/>
+            <span>
+              Spark
+              <strong>33</strong>
+            </span>
+          </div>
+        </div>
+      </a-col>
+      <a-col class="gutter-row" :span="6">
+        <div class="gutter-box">
+          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-divider style="margin-bottom: 10px"/>
+          <div>
+            <span>
+              Total
+              <strong>100</strong>
+            </span>
+            <a-divider type="vertical"/>
+            <span>
+              Flink
+              <strong>67</strong>
+            </span>
+            <a-divider type="vertical"/>
             <span>
               Spark
               <strong>33</strong>
@@ -142,7 +150,9 @@
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <template v-if="column.dataIndex === 'jobName'">
               <!--start: record.deploy === 0-->
-              <template v-if="record.deploy === 0" v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              <template
+                v-if="record.deploy === 0"
+                v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                   {{ fragment }}
                 </mark>
@@ -158,7 +168,8 @@
                     <template slot="title">
                       {{ text }}
                     </template>
-                    <template v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <template
+                      v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                       <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                         {{ fragment }}
                       </mark>
@@ -170,7 +181,8 @@
                   </a-tooltip>
                 </template>
                 <template v-else>
-                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <template
+                    v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -188,7 +200,8 @@
                     <template slot="title">
                       {{ text }}
                     </template>
-                    <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <template
+                      v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                       <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                         {{ fragment }}
                       </mark>
@@ -200,7 +213,8 @@
                   </a-tooltip>
                 </template>
                 <template v-else>
-                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <template
+                    v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -218,7 +232,8 @@
                     <template slot="title">
                       {{ text }}
                     </template>
-                    <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <template
+                      v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                       <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                         {{ fragment }}
                       </mark>
@@ -230,7 +245,8 @@
                   </a-tooltip>
                 </template>
                 <template v-else>
-                  <template v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <template
+                    v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                       {{ fragment }}
                     </mark>
@@ -242,12 +258,13 @@
               </a-badge>
               <!-- end: record.deploy === 3-->
               <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
-                <a-icon slot="count" type="close" style="color: #333" />
+                <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </template>
             <!--其他字段-->
             <template v-else>
-              <template v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+              <template
+                v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
                   {{ fragment }}
                 </mark>
@@ -281,7 +298,7 @@
                 </ellipsis>
               </span>
               <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
-                <a-icon slot="count" type="close" style="color: #333" />
+                <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </template>
             <template v-else>
@@ -344,7 +361,7 @@
             <a-tag color="#fa541c" v-if="state === 6" class="status-processing-failing">FAILING</a-tag>
             <a-tag color="#f5222d" v-if="state === 7">FAILED</a-tag>
             <a-tag color="#faad14" v-if="state === 8" class="status-processing-cancelling">CANCELLING</a-tag>
-            <a-tag color="#fa8c16" v-if="state === 9" >CANCELED</a-tag>
+            <a-tag color="#fa8c16" v-if="state === 9">CANCELED</a-tag>
             <a-tag color="#1890ff" v-if="state === 10">FINISHED</a-tag>
             <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
             <a-tag color="#eb2f96" v-if="state === 12" class="status-processing-reconciling">RECONCILING</a-tag>
@@ -411,7 +428,7 @@
             title="查看">
           </a-icon>
 
-          <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)" />
+          <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)"/>
 
         </template>
 
@@ -492,17 +509,14 @@
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint"
+            v-if="savePoint && !lastestSavePoint "
             mode="combobox"
             label="savepoint"
             :labelCol="{lg: {span: 6}, sm: {span: 6}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
-            <a-select default-value="1">
-              <a-select-option value="1">
-                use existing
-              </a-select-option>
-              <a-select-option value="2">
-                reselect
+            <a-select>
+              <a-select-option value="1" v-for="(k ,i) in historySavePoint " :key="i" v-decorator="['savePointPath']">
+                {{ k.savePoint }}
               </a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
@@ -573,6 +587,7 @@ import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import { mapActions } from 'vuex'
 import { list, stop, deploy, start, closeDeploy, yarn } from '@api/application'
+import { lastest, history } from '@api/savepoint'
 
 export default {
   components: { RangeDate, Ellipsis },
@@ -596,6 +611,8 @@ export default {
       savePoint: true,
       restart: false,
       application: null,
+      lastestSavePoint: null,
+      historySavePoint: null,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
@@ -878,6 +895,7 @@ export default {
     handleStartCancel () {
       this.startVisible = false
       this.formCheckPoint.resetFields()
+      this.savePoint = true
     },
 
     handleStartOk () {
@@ -887,11 +905,13 @@ export default {
             '已发送启动请求,该应用正在启动中',
             3
           )
-          const savePoint = values.savePoint
+          const savePoint = this.savePoint
+          const savePointPath = values.savePointPath
           this.handleStartCancel()
           start({
             id: this.application.id,
-            savePoint: savePoint
+            savePoint: savePoint,
+            savePointPath: savePointPath
           }).then((resp) => {
             console.log(resp)
           })
@@ -902,6 +922,18 @@ export default {
     handleStop (value) {
       this.stopVisible = true
       this.application = value
+      lastest({
+        appId: this.application.id
+      }).then((resp) => {
+        this.lastestSavePoint = resp.data || null
+        if (!this.lastestSavePoint) {
+          history({
+            appId: this.application.id
+          }).then((resp) => {
+            this.historySavePoint = resp.data || []
+          })
+        }
+      })
     },
 
     handleStopCancel () {
@@ -1051,6 +1083,7 @@ export default {
   padding-bottom: 5px;
   padding-top: 5px;
 }
+
 .ant-input-number {
   width: 100%;
 }
@@ -1066,13 +1099,33 @@ export default {
   padding: 9px 9px !important;
 }
 
-.status-processing-deploying{ animation: deploying 800ms ease-out infinite alternate; }
-.status-processing-starting{ animation: starting 800ms ease-out infinite alternate; }
-.status-processing-restarting{ animation: restarting 800ms ease-out infinite alternate; }
-.status-processing-running { animation: running 800ms ease-out infinite alternate; }
-.status-processing-failing { animation: failing 800ms ease-out infinite alternate; }
-.status-processing-cancelling { animation: cancelling 800ms ease-out infinite alternate; }
-.status-processing-reconciling { animation: reconciling 800ms ease-out infinite alternate; }
+.status-processing-deploying {
+  animation: deploying 800ms ease-out infinite alternate;
+}
+
+.status-processing-starting {
+  animation: starting 800ms ease-out infinite alternate;
+}
+
+.status-processing-restarting {
+  animation: restarting 800ms ease-out infinite alternate;
+}
+
+.status-processing-running {
+  animation: running 800ms ease-out infinite alternate;
+}
+
+.status-processing-failing {
+  animation: failing 800ms ease-out infinite alternate;
+}
+
+.status-processing-cancelling {
+  animation: cancelling 800ms ease-out infinite alternate;
+}
+
+.status-processing-reconciling {
+  animation: reconciling 800ms ease-out infinite alternate;
+}
 
 @keyframes deploying {
   0% {
