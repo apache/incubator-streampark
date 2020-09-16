@@ -169,7 +169,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
-        //1) 需要重启的先通知服务,
+        //1) 需要重启的先停止服务
         if (restart) {
             stop(application);
         } else if (!isRunning) {
