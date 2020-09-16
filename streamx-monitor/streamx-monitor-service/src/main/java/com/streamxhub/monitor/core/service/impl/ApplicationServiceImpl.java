@@ -258,12 +258,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         CommonUtil.localCache.put(paramOfApp.getId(), Long.valueOf(System.currentTimeMillis()));
-        String savePointDir = FlinkSubmit.stop(properties.getNameService(), application.getAppId(), application.getJobId(), paramOfApp.getSavePoint(), paramOfApp.getDrain());
-        if (paramOfApp.getSavePoint()) {
+        String savePointDir = FlinkSubmit.stop(properties.getNameService(), application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
+        if (paramOfApp.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
             savePoint.setAppId(application.getId());
             savePoint.setLastest(true);
             savePoint.setSavePoint(savePointDir);
+            savePoint.setCreateTime(new Date());
             //之前的配置设置为已过期
             this.savePointService.obsolete(application.getId());
             this.savePointService.save(savePoint);
@@ -290,7 +291,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, paramOfApp.getId(), application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
-        SavePoint savePoint = savePointService.getLastest(application.getId());
+        String savePoint = paramOfApp.getSavePointed() ? paramOfApp.getSavePoint() : null;
 
         String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
                 ? application.getShortOptions().split("\\s+")
@@ -306,7 +307,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
-                savePoint == null ? null : savePoint.getSavePoint(),
+                savePoint,
                 overrideOption,
                 dynamicOption,
                 application.getArgs()

@@ -92,7 +92,8 @@ public class Application implements Serializable {
     private transient Long configId;
     private transient String confPath;
     private transient Integer format;
-    private transient Boolean savePoint;
+    private transient String savePoint;
+    private transient Boolean savePointed;
     private transient Boolean drain;
     private transient String projectName;
     private transient String createTimeFrom;
