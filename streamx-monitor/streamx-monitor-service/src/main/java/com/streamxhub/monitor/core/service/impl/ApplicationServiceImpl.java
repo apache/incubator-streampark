@@ -167,13 +167,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void deploy(Application paramOfApp) throws Exception {
         Application application = getById(paramOfApp.getId());
-        application.setSavePointed(paramOfApp.getSavePointed());
-
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
         //1) 需要重启的先停止服务
         if (paramOfApp.getRestart()) {
-            stop(application);
+            stop(paramOfApp);
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
@@ -189,7 +187,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
-            //3) 需要背负的做背负...
+            //3) 需要备份的做备份...
             if (paramOfApp.getBackUp()) {
                 backUpService.save(applicationBackUp);
                 HdfsUtils.mkdirs(applicationBackUp.getPath());
@@ -205,7 +203,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //4) 更新发布状态,需要重启的应用则重新启动...
         if (paramOfApp.getRestart()) {
             //重新启动.
-            start(application);
+            start(paramOfApp);
             //将"需要重新发布"状态清空...
             application.setDeploy(DeployState.NONE.get());
             updateDeploy(application);
