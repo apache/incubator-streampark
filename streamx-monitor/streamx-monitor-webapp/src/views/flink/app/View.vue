@@ -499,7 +499,7 @@
         <a-form @submit="handleStartOk" :form="formStartCheckPoint">
           <a-form-item
             label="from savepoint"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checkedChildren="开"
@@ -515,7 +515,7 @@
             v-if="savePoint && !lastestSavePoint "
             mode="combobox"
             label="savepoint"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
               v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
@@ -527,6 +527,20 @@
               </a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
+          </a-form-item>
+
+          <a-form-item
+            label="allow NonRestored"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="allowNonRestoredState"
+              v-decorator="['allowNonRestoredState']"/>
+            <span class="conf-switch"> skip savepoint that cannot be restored </span>
           </a-form-item>
         </a-form>
 
@@ -620,6 +634,7 @@ export default {
       application: null,
       lastestSavePoint: null,
       historySavePoint: null,
+      allowNonRestoredState: false,
       searchText: '',
       searchInput: null,
       searchedColumn: '',
@@ -914,6 +929,7 @@ export default {
 
     handleStartCancel () {
       this.startVisible = false
+      this.allowNonRestoredState = false
       this.formStartCheckPoint.resetFields()
       this.savePoint = true
     },
@@ -927,11 +943,13 @@ export default {
           )
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint.savePoint) : null
+          const allowNonRestoredState = this.allowNonRestoredState
           this.handleStartCancel()
           start({
             id: this.application.id,
             savePointed: savePointed,
-            savePoint: savePoint
+            savePoint: savePoint,
+            allowNonRestored: allowNonRestoredState
           }).then((resp) => {
             console.log(resp)
           })
