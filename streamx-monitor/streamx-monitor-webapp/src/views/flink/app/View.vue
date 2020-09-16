@@ -906,13 +906,13 @@ export default {
             '已发送启动请求,该应用正在启动中',
             3
           )
-          const savePoint = this.savePoint
-          const savePointPath = savePoint ? (values.savePointPath || this.lastestSavePoint) : null
+          const savePointed = this.savePoint
+          const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint) : null
           this.handleStartCancel()
           start({
             id: this.application.id,
-            savePoint: savePoint,
-            savePointPath: savePointPath
+            savePointed: savePointed,
+            savePoint: savePoint
           }).then((resp) => {
             console.log(resp)
           })

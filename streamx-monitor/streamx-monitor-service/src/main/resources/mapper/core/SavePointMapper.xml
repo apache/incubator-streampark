@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.monitor.core.dao.SavePointMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.monitor.core.entity.SavePoint">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="LASTEST" jdbcType="BOOLEAN" property="lastest"/>
+        <result column="SAVE_POINT" jdbcType="VARCHAR" property="savePoint"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+    </resultMap>
+</mapper>
