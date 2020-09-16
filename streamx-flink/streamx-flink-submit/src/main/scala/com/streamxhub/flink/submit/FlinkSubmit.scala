@@ -92,16 +92,16 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
+  def getSavePointDir(nameService: String): String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
       .stringType()
-      .defaultValue("hdfs:///streamx/savepoints/")
+      .defaultValue(s"hdfs://$nameService$APP_SAVEPOINTS")
   )
 
-  def stop(appId: String, jobStringId: String, savePoint: Boolean, drain: Boolean): String = {
+  def stop(nameService: String, appId: String, jobStringId: String, savePoint: Boolean, drain: Boolean): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
-    val savePointDir = getSavePointDir()
+    val savePointDir = getSavePointDir(nameService)
 
     val savepointPathFuture: CompletableFuture[String] = (savePoint, drain) match {
       case (false, false) =>
@@ -207,7 +207,9 @@ object FlinkSubmit extends Logger {
       }
 
       //获取flink的配置
-      val runConfiguration = new Configuration()
+      val runConfiguration = GlobalConfiguration
+        //从flink-conf.yaml中加载默认配置文件...
+        .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
         .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
         //设置flinkDistJar
