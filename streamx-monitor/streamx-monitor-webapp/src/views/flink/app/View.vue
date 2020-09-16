@@ -531,7 +531,7 @@
 
           <a-form-item
             label="allow NonRestored"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checkedChildren="开"
