@@ -26,6 +26,8 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
+import java.util.List;
+
 /**
  * @author benjobs
  */
@@ -35,5 +37,8 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     void obsolete(@Param("appId") Long appId);
 
     @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest = 1")
-    SavePoint getLastest(Long id);
+    SavePoint getLastest(@Param("appId") Long appId);
+
+    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest = 0")
+    List<SavePoint> getHistory(@Param("appId") Long appId);
 }

@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Slf4j
 @Service("savePointService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -23,5 +25,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public SavePoint getLastest(Long id) {
        return this.baseMapper.getLastest(id);
+    }
+
+    @Override
+    public List<SavePoint> getHistory(Long appId) {
+        return this.baseMapper.getHistory(appId);
     }
 }
