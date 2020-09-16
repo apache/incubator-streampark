@@ -477,18 +477,36 @@
         </template>
 
         <a-form @submit="handleStartOk" :form="formCheckPoint">
-
           <a-form-item
-            label="Savepoint"
-            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
-            <a-textarea
-              rows="3"
-              placeholder="Path to a savepoint to restore the job from (with schema hdfs://) e.g: hdfs:///flink/savepoint-1537 "
-              v-decorator="['savePoint']">
-            </a-textarea>
+            label="from savepoint"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="savePoint"
+              v-decorator="['savePoint']"/>
+            <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
           </a-form-item>
 
+          <a-form-item
+            v-if="savePoint"
+            mode="combobox"
+            label="savepoint"
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-select default-value="1">
+              <a-select-option value="1">
+                use existing
+              </a-select-option>
+              <a-select-option value="2">
+                reselect
+              </a-select-option>
+            </a-select>
+            <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
+          </a-form-item>
         </a-form>
 
         <template slot="footer">
