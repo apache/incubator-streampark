@@ -58,4 +58,6 @@ public interface ApplicationService extends IService<Application> {
     String readConf(Application app) throws IOException;
 
     Application getApp(Application app);
+
+    void updateSavePoint(Application app);
 }
