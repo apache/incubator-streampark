@@ -436,7 +436,7 @@
 
       <a-modal v-model="deployVisible" on-ok="handleDeployOk">
         <template slot="title">
-          <a-icon slot="icon" type="question-circle-o" style="color: red"/>
+          <a-icon slot="icon" type="upload" style="color: green"/>
           Deploy Application
         </template>
         <template slot="footer">
@@ -468,11 +468,14 @@
             label="Savepoint"
             :labelCol="{lg: {span: 6}, sm: {span: 6}}"
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
-            <a-textarea
-              rows="3"
-              placeholder="Path to a savepoint to stop and restore the job from (with schema hdfs://) e.g: hdfs:///flink/savepoint-1537 "
-              v-decorator="['savePoint',{ rules: [{ required: true, message: 'savePoint is required' } ]}]">
-            </a-textarea>
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="savePoint"
+              v-decorator="['savePoint']"/>
+            <span class="conf-switch" style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
           <a-form-item
             label="Backup desc"
@@ -865,13 +868,14 @@ export default {
     handleDeployNo () {
       this.deployVisible = false
       this.restart = false
+      this.savePoint = true
       this.formDeploy.resetFields()
     },
 
     handleDeployOk () {
       this.formDeploy.validateFields((err, values) => {
         if (!err) {
-          const savePoint = values.savePoint
+          const savePoint = this.savePoint
           const description = values.description
           const restart = this.restart
           this.handleDeployNo()
@@ -882,7 +886,7 @@ export default {
           deploy({
             id: this.application.id,
             restart: restart,
-            savePoint: savePoint,
+            savePointed: savePoint,
             backUpDescription: description
           }).then((resp) => {
             console.log(resp)

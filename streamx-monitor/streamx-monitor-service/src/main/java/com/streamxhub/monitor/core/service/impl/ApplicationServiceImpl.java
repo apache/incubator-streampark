@@ -165,6 +165,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void deploy(Application paramOfApp, boolean backUp, boolean restart) throws Exception {
         Application application = getById(paramOfApp.getId());
+        paramOfApp.setSavePointed(paramOfApp.getSavePointed());
+
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
         //1) 需要重启的先通知服务,
@@ -291,7 +293,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, paramOfApp.getId(), application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
-        String savePoint = paramOfApp.getSavePointed() ? paramOfApp.getSavePoint() : null;
+        String savePointDir = null;
+        if (paramOfApp.getSavePointed()) {
+            if (paramOfApp.getSavePoint() == null) {
+                SavePoint savePoint = savePointService.getLastest(paramOfApp.getId());
+                if (savePoint != null) {
+                    savePointDir = savePoint.getSavePoint();
+                }
+            } else {
+                savePointDir = paramOfApp.getSavePoint();
+            }
+        }
 
         String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
                 ? application.getShortOptions().split("\\s+")
@@ -307,7 +319,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
-                savePoint,
+                savePointDir,
                 overrideOption,
                 dynamicOption,
                 application.getArgs()
