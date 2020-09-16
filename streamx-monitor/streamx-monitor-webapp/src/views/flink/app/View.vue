@@ -516,7 +516,10 @@
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
               v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
-              <a-select-option value="1" v-for="(k ,i) in historySavePoint " :key="i">
+              <a-select-option
+                v-for="(k ,i) in historySavePoint"
+                :key="i"
+                :value="k.savePoint">
                 {{ k.savePoint }}
               </a-select-option>
             </a-select>
@@ -891,6 +894,18 @@ export default {
     handleStart (app) {
       this.startVisible = true
       this.application = app
+      lastest({
+        appId: this.application.id
+      }).then((resp) => {
+        this.lastestSavePoint = resp.data || null
+        if (!this.lastestSavePoint) {
+          history({
+            appId: this.application.id
+          }).then((resp) => {
+            this.historySavePoint = resp.data || []
+          })
+        }
+      })
     },
 
     handleStartCancel () {
@@ -907,7 +922,7 @@ export default {
             3
           )
           const savePointed = this.savePoint
-          const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint) : null
+          const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint.savePoint) : null
           this.handleStartCancel()
           start({
             id: this.application.id,
@@ -923,18 +938,6 @@ export default {
     handleStop (value) {
       this.stopVisible = true
       this.application = value
-      lastest({
-        appId: this.application.id
-      }).then((resp) => {
-        this.lastestSavePoint = resp.data || null
-        if (!this.lastestSavePoint) {
-          history({
-            appId: this.application.id
-          }).then((resp) => {
-            this.historySavePoint = resp.data || []
-          })
-        }
-      })
     },
 
     handleStopCancel () {
