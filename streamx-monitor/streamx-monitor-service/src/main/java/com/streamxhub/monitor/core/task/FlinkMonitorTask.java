@@ -90,11 +90,19 @@ public class FlinkMonitorTask {
                         application.setJobId(job.getId());
                     }
 
-                    /**
-                     * 发布完重新启动后将"需重启"状态清空
-                     */
-                    if (application.getState() == FlinkAppState.STARTING.getValue() && DeployState.NEED_START.get() == deploy && state == FlinkAppState.RUNNING) {
-                        application.setDeploy(DeployState.NONE.get());
+                    if (application.getState() == FlinkAppState.STARTING.getValue() && state == FlinkAppState.RUNNING) {
+                        /**
+                         * 发布完重新启动后将"需重启"状态清空
+                         */
+                        if (DeployState.NEED_START.get() == deploy) {
+                            application.setDeploy(DeployState.NONE.get());
+                        }
+
+                        if( application.getSavePoint()!=null ) {
+                            application.setSavePoint(null);
+                            applicationService.updateSavePoint(application);
+                        }
+
                     }
 
                     if (!application.getState().equals(state.getValue())) {
