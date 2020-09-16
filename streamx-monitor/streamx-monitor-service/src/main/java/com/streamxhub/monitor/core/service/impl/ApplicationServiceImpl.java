@@ -305,9 +305,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
-                ? application.getShortOptions().split("\\s+")
-                : new String[0];
+        String[] overrideOption = new String[0];
+        if (CommonUtil.notEmpty(application.getShortOptions())) {
+            String options = application.getShortOptions().replaceAll("(|\\s+)-n(\\s+|)", " ");
+            if (paramOfApp.getAllowNonRestored()) {
+                options = options.concat(" -n ");
+            }
+            overrideOption = options.trim().split("\\s+");
+        } else {
+            if (paramOfApp.getAllowNonRestored()) {
+                overrideOption = new String[1];
+                overrideOption[0] = "-n";
+            }
+        }
 
         String[] dynamicOption = CommonUtil.notEmpty(application.getDynamicOptions())
                 ? application.getDynamicOptions().split("\\s+")
