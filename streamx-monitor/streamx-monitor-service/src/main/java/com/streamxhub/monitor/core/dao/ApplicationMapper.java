@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 public interface ApplicationMapper extends BaseMapper<Application> {
     IPage<Application> findApplication(Page<Application> page, @Param("application") Application application);
@@ -33,9 +34,10 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     void updateState(@Param("application") Application application);
 
-    void updateMonitor(@Param("application")Application application);
-
-    void closeDeploy(@Param("application")Application application);
+    void updateMonitor(@Param("application") Application application);
 
     Application getApp(@Param("application") Application application);
+
+    @Update("update t_flink_app set savePoint = #{savePoint} where id=#{id}")
+    void updateSavepath(@Param("id") Long id, @Param("savePoint") String savePoint);
 }

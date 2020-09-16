@@ -28,18 +28,6 @@ export default [
     }
   },
   {
-    key: '-n',
-    name: 'allowNonRestoredState',
-    placeholder: '-n,--allowNonRestoredState <arg>',
-    description: 'Allow to skip savepoint state that cannot be restored',
-    group: 'run',
-    type: 'switch',
-    value: false,
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
     key: '-sae',
     name: 'shutdownOnAttachedExit',
     placeholder: '-sae,--shutdownOnAttachedExit',
