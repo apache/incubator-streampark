@@ -148,20 +148,6 @@
       </a-form-item>
 
       <a-form-item
-        label="allow NonRestored State"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-switch
-          checkedChildren="开"
-          unCheckedChildren="关"
-          checked-children="true"
-          un-checked-children="false"
-          v-model="allowNonRestoredState"
-          v-decorator="['allowNonRestoredState']"/>
-        <span class="conf-switch"> Allow to skip savepoint state that cannot be restored </span>
-      </a-form-item>
-
-      <a-form-item
         label="Run Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -295,7 +281,6 @@ export default {
         count2: 2
       },
       switchDefaultValue: true,
-      allowNonRestoredState: false,
       compareConf: [],
       defaultConfigId: null,
       defaultOptions: {},
@@ -450,11 +435,6 @@ export default {
             shortOptions += ' -ys ' + values.yarnslots
           }
 
-          if (this.allowNonRestoredState) {
-            options['allowNonRestoredState'] = true
-            shortOptions += ' -n '
-          }
-
           if (this.configItems.includes('yarnquery')) {
             options['yarnquery'] = true
             shortOptions += ' -yq '
@@ -541,10 +521,9 @@ export default {
           'parallelism': this.defaultOptions.parallelism
         })
       })
-      this.allowNonRestoredState = this.defaultOptions['allowNonRestoredState'] || false
       const array = []
       for (const k in this.defaultOptions) {
-        if (k !== 'parallelism' && k !== 'yarnslots' && k !== 'allowNonRestoredState') {
+        if (k !== 'parallelism' && k !== 'yarnslots') {
           array.push(k)
         }
       }
