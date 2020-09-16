@@ -130,7 +130,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
-                    deploy(paramOfApp, false, false);
+                    paramOfApp.setBackUp(false);
+                    paramOfApp.setRestart(false);
+                    deploy(paramOfApp);
                     return true;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -163,14 +165,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void deploy(Application paramOfApp, boolean backUp, boolean restart) throws Exception {
+    public void deploy(Application paramOfApp) throws Exception {
         Application application = getById(paramOfApp.getId());
         application.setSavePointed(paramOfApp.getSavePointed());
 
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
         //1) 需要重启的先停止服务
-        if (restart) {
+        if (paramOfApp.getRestart()) {
             stop(application);
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
@@ -188,7 +190,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (HdfsUtils.exists(workspaceWithModule)) {
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
             //3) 需要背负的做背负...
-            if (backUp) {
+            if (paramOfApp.getBackUp()) {
                 backUpService.save(applicationBackUp);
                 HdfsUtils.mkdirs(applicationBackUp.getPath());
                 HdfsUtils.movie(workspaceWithModule, applicationBackUp.getPath());
@@ -201,7 +203,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         HdfsUtils.upload(application.getModule(), workspace);
 
         //4) 更新发布状态,需要重启的应用则重新启动...
-        if (restart) {
+        if (paramOfApp.getRestart()) {
             //重新启动.
             start(application);
             //将"需要重新发布"状态清空...
