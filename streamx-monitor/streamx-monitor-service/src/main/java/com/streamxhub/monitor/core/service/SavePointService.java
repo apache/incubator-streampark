@@ -23,6 +23,8 @@ package com.streamxhub.monitor.core.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.monitor.core.entity.SavePoint;
 
+import java.util.List;
+
 /**
  * @author benjobs
  */
@@ -34,4 +36,6 @@ public interface SavePointService extends IService<SavePoint> {
     void obsolete(Long appId);
 
     SavePoint getLastest(Long id);
+
+    List<SavePoint> getHistory(Long appId);
 }

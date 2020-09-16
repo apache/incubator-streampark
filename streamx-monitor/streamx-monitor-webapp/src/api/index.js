@@ -24,6 +24,10 @@ export default {
     Delete: '/flink/project/delete',
     Select: '/flink/project/select'
   },
+  SavePoint: {
+    Lastest: '/flink/savepoint/lastest',
+    History: '/flink/savepoint/history'
+  },
   Application: {
     Add: '/flink/app/add',
     ReadConf: '/flink/app/readConf',
