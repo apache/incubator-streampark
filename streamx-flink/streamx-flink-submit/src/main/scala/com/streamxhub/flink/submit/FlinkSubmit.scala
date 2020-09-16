@@ -304,24 +304,21 @@ object FlinkSubmit extends Logger {
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
     var applicationId: ApplicationId = null
+    val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
-      val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
-      try {
-        val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-        println("------------------<<specification>>------------------")
-        println(clusterSpecification)
-        println("------------------------------------")
-        val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
-        applicationId = clusterClient.getClusterId
-        println("------------------<<applicationId>>------------------")
-        println()
-        println("Flink Job Started: applicationId: " + applicationId)
-        println()
-        println("------------------------------------")
-      } finally if (clusterDescriptor != null) clusterDescriptor.close()
-      applicationId
-    }
-
+      val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
+      println("------------------<<specification>>------------------")
+      println(clusterSpecification)
+      println("------------------------------------")
+      val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+      applicationId = clusterClient.getClusterId
+      println("------------------<<applicationId>>------------------")
+      println()
+      println("Flink Job Started: applicationId: " + applicationId)
+      println()
+      println("------------------------------------")
+    } finally if (clusterDescriptor != null) clusterDescriptor.close()
+    applicationId
   }
 
   /**
