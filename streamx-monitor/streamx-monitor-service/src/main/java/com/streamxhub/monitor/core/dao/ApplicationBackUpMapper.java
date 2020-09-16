@@ -23,6 +23,9 @@ package com.streamxhub.monitor.core.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.monitor.core.entity.ApplicationBackUp;
 
+/**
+ * @author benjobs
+ */
 public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
 }
