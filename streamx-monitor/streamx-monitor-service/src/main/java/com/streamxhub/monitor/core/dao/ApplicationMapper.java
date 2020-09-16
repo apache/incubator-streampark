@@ -38,6 +38,6 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     Application getApp(@Param("application") Application application);
 
-    @Update("update t_flink_app set savePoint = #{savePoint} where id=#{id}")
+    @Update("update t_flink_app set save_point = #{savePoint} where id=#{id}")
     void updateSavePoint(@Param("id") Long id, @Param("savePoint") String savePoint);
 }
