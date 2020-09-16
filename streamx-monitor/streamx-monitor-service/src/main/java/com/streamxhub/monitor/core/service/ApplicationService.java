@@ -43,7 +43,7 @@ public interface ApplicationService extends IService<Application> {
 
     AppExistsState checkExists(Application app);
 
-    void deploy(Application app,boolean backUp,boolean restart) throws Exception;
+    void deploy(Application app) throws Exception;
 
     void updateDeploy(Application app);
 
