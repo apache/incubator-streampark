@@ -308,7 +308,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
-                paramOfApp.getSavePoint(),
+                application.getSavePoint(),
                 overrideOption,
                 dynamicOption,
                 application.getArgs()
