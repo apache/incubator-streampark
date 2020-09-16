@@ -165,7 +165,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void deploy(Application paramOfApp, boolean backUp, boolean restart) throws Exception {
         Application application = getById(paramOfApp.getId());
-        paramOfApp.setSavePointed(paramOfApp.getSavePointed());
+        application.setSavePointed(paramOfApp.getSavePointed());
 
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
