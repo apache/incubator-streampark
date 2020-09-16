@@ -8,6 +8,7 @@
         <result column="DEPLOY_MODE" jdbcType="INTEGER" property="deployMode"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
+        <result column="SAVE_POINT" jdbcType="VARCHAR" property="savePoint"/>
         <result column="SHORT_OPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
         <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>

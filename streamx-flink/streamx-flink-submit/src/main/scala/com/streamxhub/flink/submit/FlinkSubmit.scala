@@ -23,6 +23,7 @@ package com.streamxhub.flink.submit
 import java.io.File
 import java.net.{MalformedURLException, URL}
 import java.util._
+import java.util.concurrent.{CompletableFuture, TimeUnit}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
@@ -50,32 +51,75 @@ import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.flink.client.cli.CliArgsException
-import org.apache.flink.util.FlinkException
+import org.apache.flink.configuration.ConfigOptions
+
+import org.apache.flink.util.{ExceptionUtils, FlinkException}
 
 object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  def stop(appId: String, jobId: String, savePoint: String, drain: java.lang.Boolean): Unit = {
+  private[this] var flinkDefaultConfiguration: Configuration = null
+
+  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
-
     val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
-
     if (applicationId == null) {
-      throw new FlinkException("[StreamX] flink cancel error: No cluster id was specified. Please specify a cluster to which you would like to connect.")
-    }
-    val jobID = Try(JobID.fromHexString(jobId)) match {
-      case Success(id) => id
-      case Failure(e) => throw new CliArgsException(e.getMessage)
+      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
     }
     val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.retrieve(applicationId).getClusterClient
-    (savePoint, drain) match {
-      case (null, null) => clusterClient.cancel(jobID)
-      case (sp, null) => clusterClient.cancelWithSavepoint(jobID, sp)
-      case (sp, d) => clusterClient.stopWithSavepoint(jobID, d, sp)
+    clusterClient
+  }
+
+  private[this] def getJobID(jobId: String): JobID = {
+    Try(JobID.fromHexString(jobId)) match {
+      case Success(id) => id
+      case Failure(e) => throw new CliArgsException(e.getMessage)
+    }
+  }
+
+  def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
+    if (flinkDefaultConfiguration == null) {
+      val flinkLocalHome = System.getenv("FLINK_HOME")
+      require(flinkLocalHome != null)
+      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+      //获取flink的配置
+      this.flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkLocalConfDir)
+    }
+    flinkDefaultConfiguration.get(option)
+  }
+
+  def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
+    ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+      .stringType()
+      .defaultValue("hdfs:///streamx/savepoints/")
+  )
+
+  def stop(appId: String, jobStringId: String, savePoint: Boolean, drain: Boolean): String = {
+    val jobID = getJobID(jobStringId)
+    val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
+    val savePointDir = getSavePointDir()
+
+    val savepointPathFuture: CompletableFuture[String] = (savePoint, drain) match {
+      case (false, false) =>
+        clusterClient.cancel(jobID)
+        null
+      case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir)
+      case (_, _) => clusterClient.stopWithSavepoint(jobID, drain, savePointDir)
+    }
+
+    if (savepointPathFuture == null) null else {
+      try {
+        val clientTimeout = getOptionFromDefaultFlinkConfig(ClientOptions.CLIENT_TIMEOUT)
+        savepointPathFuture.get(clientTimeout.toMillis(), TimeUnit.MILLISECONDS)
+      } catch {
+        case e: Exception =>
+          val cause = ExceptionUtils.stripExecutionException(e)
+          throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
+      }
     }
   }
 
@@ -117,8 +161,9 @@ object FlinkSubmit extends Logger {
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
+
     /**
-     * 获取当前机器上的flink
+     * init config....
      */
     val flinkLocalHome = System.getenv("FLINK_HOME")
     require(flinkLocalHome != null)
@@ -126,65 +171,62 @@ object FlinkSubmit extends Logger {
     logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
 
     val flinkName = new File(flinkLocalHome).getName
-
     val flinkHdfsHome = s"$APP_FLINK/$flinkName"
-
-    val flinkHdfsHomeWithNameService = s"hdfs://${submitInfo.nameService}$flinkHdfsHome"
-
-    logInfo(s"[StreamX] flinkHdfsDir: $flinkHdfsHome")
-
     if (!HdfsUtils.exists(flinkHdfsHome)) {
       logInfo(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
       HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
     }
 
-    //存放flink集群相关的jar包目录
-    val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
+    val customCommandLines = {
 
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
+      val flinkHdfsHomeWithNameService = s"hdfs://${submitInfo.nameService}$flinkHdfsHome"
 
-    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-      case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+
+      //存放flink集群相关的jar包目录
+      val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
+
+      val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
+
+      val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+        case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+      }
+
+      val appArgs = {
+        val array = new ArrayBuffer[String]
+        Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
+        array += KEY_FLINK_APP_CONF("--")
+        array += submitInfo.appConf
+        array += KEY_FLINK_HOME("--")
+        array += flinkHdfsHomeWithNameService
+        array += KEY_APP_NAME("--")
+        array += appName
+        array.toList.asJava
+      }
+
+      //获取flink的配置
+      val runConfiguration = new Configuration()
+        //设置yarn.provided.lib.dirs
+        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+        //设置flinkDistJar
+        .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
+        //设置用户的jar
+        .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
+        //设置部署模式为"application"
+        .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+        //yarn application name
+        .set(YarnConfigOptions.APPLICATION_NAME, appName)
+        //yarn application Type
+        .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
+        //设置启动主类
+        .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
+        //设置启动参数
+        .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs)
+
+      loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
     }
-
-    val flinkLocalConfDir = flinkLocalHome.concat("/conf")
-
-    val appArgs = {
-      val array = new ArrayBuffer[String]
-      Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
-      array += KEY_FLINK_APP_CONF("--")
-      array += submitInfo.appConf
-      array += KEY_FLINK_HOME("--")
-      array += flinkHdfsHomeWithNameService
-      array += KEY_APP_NAME("--")
-      array += appName
-      array.toList.asJava
-    }
-
-    //获取flink的配置
-    val flinkConfiguration = GlobalConfiguration
-      //从flink-conf.yaml中加载默认配置文件...
-      .loadConfiguration(flinkLocalConfDir)
-      //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
-      //设置flinkDistJar
-      .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
-      //设置用户的jar
-      .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
-      //设置为部署模式
-      .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
-      //yarn application name
-      .set(YarnConfigOptions.APPLICATION_NAME, appName)
-      //yarn application Type
-      .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
-      //设置启动主类
-      .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
-      //设置启动参数
-      .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs)
-
-    val customCommandLines = loadCustomCommandLines(flinkConfiguration, flinkLocalConfDir)
 
     val commandLine = {
       //merge options....
@@ -233,7 +275,6 @@ object FlinkSubmit extends Logger {
 
         //-D
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-
 
         array.toArray
 

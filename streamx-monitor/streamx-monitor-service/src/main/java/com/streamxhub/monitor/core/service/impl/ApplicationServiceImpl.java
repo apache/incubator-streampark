@@ -262,7 +262,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         CommonUtil.localCache.put(paramOfApp.getId(), Long.valueOf(System.currentTimeMillis()));
-        FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePoint(), paramOfApp.getDrain());
+        String savePoint = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
+        if(paramOfApp.getSavePointed()) {
+            this.baseMapper.updateSavepath(application.getId(),savePoint);
+        }
     }
 
     @Override

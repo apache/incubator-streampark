@@ -84,16 +84,16 @@ public class Application implements Serializable {
 
     private String description;
 
+    private String savePoint;
+
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
     private transient String userName;
-
     private transient String config;
-
     private transient Long configId;
     private transient String confPath;
     private transient Integer format;
-    private transient String savePoint;
+    private transient Boolean savePointed;
     private transient Boolean drain;
     private transient String projectName;
     private transient String createTimeFrom;

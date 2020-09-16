@@ -527,13 +527,15 @@
             label="Savepoint"
             :labelCol="{lg: {span: 5}, sm: {span: 5}}"
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
-            <a-textarea
-              rows="3"
-              placeholder="Path to the savepoint (with schema hdfs://), e.g: hdfs:///flink/savepoint-1537 "
-              v-decorator="['savePoint']">
-            </a-textarea>
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="savePoint"
+              v-decorator="['savePoint']"/>
+            <span class="conf-switch" style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
-
         </a-form>
 
         <template slot="footer">
@@ -573,6 +575,7 @@ export default {
       formSavePoint: null,
       formCheckPoint: null,
       drain: false,
+      savePoint: true,
       restart: false,
       application: null,
       searchText: '',
@@ -831,6 +834,7 @@ export default {
         if (!err) {
           const savePoint = values.savePoint
           const description = values.description
+          const restart = this.restart
           this.handleDeployNo()
           this.$message.info(
             '已发送部署请求,后台正在执行部署,请耐心等待',
@@ -838,7 +842,7 @@ export default {
           )
           deploy({
             id: this.application.id,
-            restart: this.restart,
+            restart: restart,
             savePoint: savePoint,
             backUpDescription: description
           }).then((resp) => {
@@ -886,26 +890,23 @@ export default {
       this.stopVisible = false
       this.formSavePoint.resetFields()
       this.drain = false
+      this.savePoint = true
     },
 
     handleStopOk () {
-      this.formSavePoint.validateFields((err, values) => {
-        if (!err) {
-          this.$message.info(
-            '已发送停止请求,该应用正在停止',
-            3
-          )
-          const savePoint = values.savePoint
-          const drain = values.drain || false
-          this.handleStopCancel()
-          stop({
-            id: this.application.id,
-            savePoint: savePoint,
-            drain: drain
-          }).then((resp) => {
-            console.log(resp)
-          })
-        }
+      this.$message.info(
+        '已发送停止请求,该应用正在停止',
+        3
+      )
+      const savePoint = this.savePoint
+      const drain = this.drain
+      this.handleStopCancel()
+      stop({
+        id: this.application.id,
+        savePointed: savePoint,
+        drain: drain
+      }).then((resp) => {
+        console.log(resp)
       })
     },
 
