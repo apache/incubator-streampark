@@ -104,7 +104,7 @@ object FlinkSubmit extends Logger {
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
     val savePointDir = getSavePointDir(nameService)
 
-    val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(null)) match {
+    val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
       case (false, false) =>
         clusterClient.cancel(jobID)
         null
