@@ -97,12 +97,6 @@ public class FlinkMonitorTask {
                         if (DeployState.NEED_START.get() == deploy) {
                             application.setDeploy(DeployState.NONE.get());
                         }
-
-                        if( application.getSavePoint()!=null ) {
-                            application.setSavePoint(null);
-                            applicationService.updateSavePoint(application);
-                        }
-
                     }
 
                     if (!application.getState().equals(state.getValue())) {

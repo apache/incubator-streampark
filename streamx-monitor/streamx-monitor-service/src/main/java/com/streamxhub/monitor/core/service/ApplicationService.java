@@ -59,5 +59,4 @@ public interface ApplicationService extends IService<Application> {
 
     Application getApp(Application app);
 
-    void updateSavePoint(Application app);
 }

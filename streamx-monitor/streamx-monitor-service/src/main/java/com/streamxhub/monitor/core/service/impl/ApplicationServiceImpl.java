@@ -25,7 +25,6 @@ import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.common.util.HdfsUtils;
-import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.monitor.base.domain.Constant;
 import com.streamxhub.monitor.base.domain.RestRequest;
@@ -33,16 +32,10 @@ import com.streamxhub.monitor.base.properties.StreamXProperties;
 import com.streamxhub.monitor.base.utils.CommonUtil;
 import com.streamxhub.monitor.base.utils.SortUtil;
 import com.streamxhub.monitor.core.dao.ApplicationMapper;
-import com.streamxhub.monitor.core.entity.Application;
-import com.streamxhub.monitor.core.entity.ApplicationBackUp;
-import com.streamxhub.monitor.core.entity.ApplicationConfig;
-import com.streamxhub.monitor.core.entity.Project;
+import com.streamxhub.monitor.core.entity.*;
 import com.streamxhub.monitor.core.enums.AppExistsState;
 import com.streamxhub.monitor.core.enums.DeployState;
-import com.streamxhub.monitor.core.service.ApplicationBackUpService;
-import com.streamxhub.monitor.core.service.ApplicationConfigService;
-import com.streamxhub.monitor.core.service.ApplicationService;
-import com.streamxhub.monitor.core.service.ProjectService;
+import com.streamxhub.monitor.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -50,7 +43,6 @@ import com.streamxhub.monitor.core.enums.FlinkAppState;
 import com.streamxhub.monitor.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import com.streamxhub.flink.submit.SubmitInfo;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
@@ -81,6 +73,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ApplicationConfigService configService;
+
+    @Autowired
+    private SavePointService savePointService;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -252,25 +247,26 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void updateSavePoint(Application app) {
-        this.baseMapper.updateSavePoint(app.getId(), app.getSavePoint());
-    }
-
-    @Override
     public void updateState(Application application) {
         this.baseMapper.updateState(application);
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public void stop(Application paramOfApp) {
         Application application = getById(paramOfApp.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         CommonUtil.localCache.put(paramOfApp.getId(), Long.valueOf(System.currentTimeMillis()));
-        String savePoint = FlinkSubmit.stop(properties.getNameService(), application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
-        if (paramOfApp.getSavePointed()) {
-            application.setSavePoint(savePoint);
-            this.updateSavePoint(application);
+        String savePointDir = FlinkSubmit.stop(properties.getNameService(), application.getAppId(), application.getJobId(), paramOfApp.getSavePoint(), paramOfApp.getDrain());
+        if (paramOfApp.getSavePoint()) {
+            SavePoint savePoint = new SavePoint();
+            savePoint.setAppId(application.getId());
+            savePoint.setLastest(true);
+            savePoint.setSavePoint(savePointDir);
+            //之前的配置设置为已过期
+            this.savePointService.obsolete(application.getId());
+            this.savePointService.save(savePoint);
         }
     }
 
@@ -294,6 +290,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, paramOfApp.getId(), application.getModule());
         String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
 
+        SavePoint savePoint = savePointService.getLastest(application.getId());
+
         String[] overrideOption = CommonUtil.notEmpty(application.getShortOptions())
                 ? application.getShortOptions().split("\\s+")
                 : new String[0];
@@ -308,7 +306,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
-                application.getSavePoint(),
+                savePoint == null ? null : savePoint.getSavePoint(),
                 overrideOption,
                 dynamicOption,
                 application.getArgs()
@@ -324,39 +322,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         this.baseMapper.updateById(application);
 
         return true;
-    }
-
-    /**
-     * 2秒钟从yarn里获取一次当前任务的appId,总共获取10次,如10次都未获取到则获取失败.
-     */
-    @SneakyThrows
-    private void getAppId(Application application) {
-        ThreadFactory namedThreadFactory = ThreadUtils.threadFactory("Flink-StartUp");
-        ExecutorService executorService = Executors.newSingleThreadExecutor(namedThreadFactory);
-        executorService.submit(() -> {
-            int index = 0;
-            Long lastTime = 0L;
-            while (index <= 10) {
-                Long now = System.currentTimeMillis();
-                if (lastTime == 0 || (now - lastTime) >= 2000) {
-                    lastTime = now;
-                    index++;
-                    List<ApplicationId> idList = YarnUtils.getAppId(application.getJobName());
-                    if (!idList.isEmpty()) {
-                        if (idList.size() == 1) {
-                            ApplicationId applicationId = idList.get(0);
-                            application.setAppId(applicationId.toString());
-                        } else {
-                            //表示有多个重复的任务.
-                            application.setState(5);
-                        }
-                        updateById(application);
-                        break;
-                    }
-                }
-            }
-        });
-        ThreadUtils.shutdownExecutorService(executorService);
     }
 
 

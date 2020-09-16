@@ -20,25 +20,20 @@
  */
 package com.streamxhub.monitor.core.dao;
 
-import com.streamxhub.monitor.core.entity.Project;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.streamxhub.monitor.core.entity.SavePoint;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
  */
-public interface ProjectMapper extends BaseMapper<Project> {
+public interface SavePointMapper extends BaseMapper<SavePoint> {
 
-    IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
+    @Update("update t_flink_savepoint set lastest = 0 where app_id=#{appId}")
+    void obsolete(@Param("appId") Long appId);
 
-    void failureBuild(@Param("project") Project project);
-
-    void successBuild(@Param("project") Project project);
-
-    void startBuild(@Param("project") Project project);
-
-    void deploy(@Param("id") Long id);
-
+    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest = 1")
+    SavePoint getLastest(Long id);
 }

@@ -18,27 +18,20 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.monitor.core.dao;
+package com.streamxhub.monitor.core.service;
 
-import com.streamxhub.monitor.core.entity.Project;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.monitor.core.entity.SavePoint;
 
 /**
  * @author benjobs
  */
-public interface ProjectMapper extends BaseMapper<Project> {
+public interface SavePointService extends IService<SavePoint> {
+    /**
+     *
+     * @param appId
+     */
+    void obsolete(Long appId);
 
-    IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
-
-    void failureBuild(@Param("project") Project project);
-
-    void successBuild(@Param("project") Project project);
-
-    void startBuild(@Param("project") Project project);
-
-    void deploy(@Param("id") Long id);
-
+    SavePoint getLastest(Long id);
 }

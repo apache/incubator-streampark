@@ -18,27 +18,29 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.monitor.core.dao;
+package com.streamxhub.monitor.core.entity;
 
-import com.streamxhub.monitor.core.entity.Project;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.wuwenze.poi.annotation.Excel;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author benjobs
  */
-public interface ProjectMapper extends BaseMapper<Project> {
 
-    IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
+@Data
+@TableName("t_flink_savepoint")
+@Excel("flink savepoint信息")
+@Slf4j
+public class SavePoint {
 
-    void failureBuild(@Param("project") Project project);
+    private Long id;
 
-    void successBuild(@Param("project") Project project);
+    private Long appId;
 
-    void startBuild(@Param("project") Project project);
+    private Boolean lastest;
 
-    void deploy(@Param("id") Long id);
+    private String savePoint;
 
 }
