@@ -519,6 +519,7 @@
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
               mode="combobox"
+              allowClear
               v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
