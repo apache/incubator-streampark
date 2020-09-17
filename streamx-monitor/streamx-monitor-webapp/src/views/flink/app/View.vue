@@ -921,7 +921,6 @@ export default {
           history({
             appId: this.application.id
           }).then((resp) => {
-            this.startVisible = true
             this.historySavePoint = resp.data || []
           })
         }
