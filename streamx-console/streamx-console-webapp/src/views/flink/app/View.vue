@@ -513,12 +513,12 @@
 
           <a-form-item
             v-if="savePoint && !lastestSavePoint "
-            mode="combobox"
             label="savepoint"
             style="margin-bottom: 10px"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
+              mode="combobox"
               v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
