@@ -523,7 +523,7 @@
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
                 :value="k.savePoint">
-                {{ k.savePoint }}
+                {{ k.savePoint.substr(k.savePoint.lastIndexOf('/')+1) }}
               </a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
