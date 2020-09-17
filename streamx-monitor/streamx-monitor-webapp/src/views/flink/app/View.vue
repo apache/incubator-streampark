@@ -911,16 +911,17 @@ export default {
     },
 
     handleStart (app) {
-      this.startVisible = true
       this.application = app
       lastest({
         appId: this.application.id
       }).then((resp) => {
         this.lastestSavePoint = resp.data || null
+        this.startVisible = true
         if (!this.lastestSavePoint) {
           history({
             appId: this.application.id
           }).then((resp) => {
+            this.startVisible = true
             this.historySavePoint = resp.data || []
           })
         }
