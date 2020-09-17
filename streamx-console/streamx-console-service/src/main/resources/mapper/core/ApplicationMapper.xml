@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.streamxhub.console.core.dao.ApplicationMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.console.core.entity.Application">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="PROJECT_ID" jdbcType="BIGINT" property="projectId"/>
+        <result column="MODULE" jdbcType="VARCHAR" property="module"/>
+        <result column="DEPLOY_MODE" jdbcType="INTEGER" property="deployMode"/>
+        <result column="ARGS" jdbcType="VARCHAR" property="args"/>
+        <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
+        <result column="SHORT_OPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
+        <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
+        <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
+        <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
+        <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
+        <result column="START_TIME" jdbcType="DATE" property="startTime"/>
+        <result column="END_TIME" jdbcType="DATE" property="endTime"/>
+        <result column="DURATION" jdbcType="BIGINT" property="duration"/>
+        <result column="STATE" jdbcType="INTEGER" property="state"/>
+        <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+    </resultMap>
+
+    <select id="findApplication" resultType="application" parameterType="application">
+        SELECT t.*,p.name as projectName,u.username FROM t_flink_app t
+        inner join t_flink_project p
+        on t.project_id = p.id
+        inner join t_user u
+        on t.user_id = u.user_id
+        <where>
+            <if test="application.jobName != null and application.jobName != ''">
+                AND t.job_name like '%${application.jobName}%'
+            </if>
+            <if test="application.projectName != null and application.projectName != ''">
+                AND p.name like '%${application.projectName}%'
+            </if>
+            <if test="application.appId != null and application.appId != ''">
+                AND t.app_id = #{application.appId}
+            </if>
+            <if test="application.state != null and application.state != ''">
+                AND t.state = #{application.state}
+            </if>
+        </where>
+    </select>
+
+    <select id="getApp" resultType="application" parameterType="application">
+        SELECT t.*,p.name as projectName,c.content as config,c.format,c.id as configId
+        FROM t_flink_app t
+        inner join t_flink_project p
+        on t.project_id = p.id
+        inner join t_flink_config c
+        on c.app_id = t.id
+        and c.actived = 1
+        where t.id = #{application.id}
+    </select>
+
+    <update id="updateDeploy" parameterType="application">
+        update t_flink_app
+        set deploy=#{application.deploy}
+        where id=#{application.id}
+    </update>
+
+    <update id="updateState" parameterType="application">
+        update t_flink_app
+        set state=#{application.state}
+        where id=#{application.id}
+    </update>
+
+    <update id="updateMonitor" parameterType="application">
+        update t_flink_app
+        <set>
+            <if test="application.jobId != null and application.jobId != ''">
+                job_id=#{application.jobId},
+            </if>
+            <if test="application.state != null">
+                state=#{application.state},
+            </if>
+            <if test="application.deploy != null">
+                deploy=#{application.deploy},
+            </if>
+            <if test="application.startTime != null">
+                start_time=#{application.startTime},
+            </if>
+            <if test="application.endTime != null">
+                end_time=#{application.endTime},
+            </if>
+            <if test="application.duration != null">
+                duration=#{application.duration},
+            </if>
+        </set>
+        where id=#{application.id}
+    </update>
+
+</mapper>
