@@ -168,6 +168,7 @@ public class FlinkMonitorTask {
                     }
                 }
             } catch (IOException exception) {
+                exception.printStackTrace();
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
