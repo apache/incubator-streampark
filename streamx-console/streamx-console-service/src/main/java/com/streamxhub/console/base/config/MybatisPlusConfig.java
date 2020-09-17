@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Configuration;
  * @author benjobs
  */
 @Configuration
-@MapperScan(value = {"com.streamxhub.monitor.*.dao"})
+@MapperScan(value = {"com.streamxhub.console.*.dao"})
 public class MybatisPlusConfig {
 
     /**
