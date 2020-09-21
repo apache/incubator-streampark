@@ -284,21 +284,24 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
 
-        String appConf;
+        String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
+        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
+
+        String appConf, flinkUserJar;
         if (application.getAppType() == 1) {
             ApplicationConfig applicationConfig = configService.getActived(application.getId());
             String confContent = applicationConfig.getContent();
             String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
             appConf = String.format("%s://%s", format, confContent);
+            flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
         } else {
             appConf = String.format(
                     "json://{\"%s\":\"%s\"}",
                     ConfigConst.KEY_FLINK_APP_MAIN(),
                     application.getMainClass()
             );
+            flinkUserJar = String.format("%s/%s", classPath, application.getJar());
         }
-
-        String flinkUserJar = application.getProgramJar(properties.getNameService());
 
         String savePointDir = null;
         if (paramOfApp.getSavePointed()) {
