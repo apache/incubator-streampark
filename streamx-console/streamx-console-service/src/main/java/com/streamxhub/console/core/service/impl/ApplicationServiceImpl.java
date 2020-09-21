@@ -334,7 +334,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 : new String[0];
 
         SubmitInfo submitInfo = new SubmitInfo(
-                YarnDeploymentTarget.valueOf(application.getDeployMode().toUpperCase()),
                 properties.getNameService(),
                 flinkUserJar,
                 application.getJobName(),

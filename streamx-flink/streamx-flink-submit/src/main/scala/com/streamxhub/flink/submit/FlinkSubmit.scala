@@ -128,7 +128,6 @@ object FlinkSubmit extends Logger {
     logInfo(
       s"""
          |"[StreamX] flink submit," +
-         |      "deployMode: ${submitInfo.deployMode},"
          |      "nameService: ${submitInfo.nameService},"
          |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"

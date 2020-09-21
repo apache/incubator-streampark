@@ -74,7 +74,6 @@ public class Application implements Serializable {
     private String options;
     private String shortOptions;
     private String dynamicOptions;
-    private String deployMode;
     private Integer appType;
     private String jar;
     private String mainClass;
