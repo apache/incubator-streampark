@@ -147,8 +147,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
         //update config...
-        configService.update(paramOfApp);
-
+        if (paramOfApp.getAppType() == 1) {
+            configService.update(paramOfApp);
+        }
         //update other...
         Application application = getById(paramOfApp.getId());
         application.setJobName(paramOfApp.getJobName());
