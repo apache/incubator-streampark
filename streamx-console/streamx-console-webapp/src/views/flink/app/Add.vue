@@ -468,11 +468,13 @@ export default {
             shortOptions += ' -yq '
           }
 
-          const configVal = this.form.getFieldValue('config')
           const jar = this.form.getFieldValue('jar') || null
           const mainClass = this.form.getFieldValue('mainClass') || null
-
-          const format = configVal.endsWith('.properties') ? 2 : 1
+          const configVal = this.form.getFieldValue('config') || null
+          let format = 0
+          if (this.appType == 1 && configVal) {
+            format = configVal.endsWith('.properties') ? 2 : 1
+          }
           const params = {
             projectId: values.project,
             module: values.module,
@@ -488,7 +490,7 @@ export default {
             description: values.description
           }
 
-          if (this.configOverride == null) {
+          if (this.appType == 1 && this.configOverride == null) {
             readConf({
               config: configVal
             }).then((resp) => {
