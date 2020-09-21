@@ -143,14 +143,14 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
     if (redisTransaction.invoked && redisTransaction.mapper.nonEmpty) {
       try {
         val redisContainer = RedisContainer.getContainer(jedisConfig)
-        val realTransaction = redisContainer.jedis.multi()
+        val transaction = redisContainer.jedis.multi()
         redisTransaction.mapper.foreach(x => {
-          redisContainer.invoke[T](x._1, x._2, Some(realTransaction))
+          redisContainer.invoke[T](x._1, x._2, Some(transaction))
           val key = mapper.getKeyFromData(x._2)
-          realTransaction.expire(key, x._3)
+          transaction.expire(key, x._3)
         })
-        realTransaction.exec()
-        realTransaction.close()
+        transaction.exec()
+        transaction.close()
         redisContainer.close()
         //成功,清除state...
         buffer -= redisTransaction.transactionId
