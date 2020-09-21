@@ -28,5 +28,4 @@ case class SubmitInfo(nameService: String,
                       savePoint: String,
                       overrideOption: Array[String],
                       dynamicOption: Array[String],
-                      args: String
-                     )
+                      args: String)
