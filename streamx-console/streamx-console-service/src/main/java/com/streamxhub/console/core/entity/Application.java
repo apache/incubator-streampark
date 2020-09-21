@@ -154,4 +154,10 @@ public class Application implements Serializable {
         return null;
     }
 
+    @JsonIgnore
+    public String getProgramJar(String nameService) {
+        String workspaceWithSchemaAndNameService = "hdfs://".concat(nameService).concat(ConfigConst.APP_WORKSPACE());
+        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, getId(), getModule());
+        return String.format("%s/%s.jar", classPath, getModule());
+    }
 }

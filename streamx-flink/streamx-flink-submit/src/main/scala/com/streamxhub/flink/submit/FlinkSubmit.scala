@@ -27,7 +27,7 @@ import java.util.concurrent.{CompletableFuture, TimeUnit}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
-import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, JsonUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
@@ -156,12 +156,12 @@ object FlinkSubmit extends Logger {
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
           case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
         }
+      case x if x.startsWith("json://") => JsonUtils.read[Map[String, String]](x.drop(7))(Manifest[Map[String, String]]).toMap
       case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
     }
 
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
-
 
     /**
      * init config....

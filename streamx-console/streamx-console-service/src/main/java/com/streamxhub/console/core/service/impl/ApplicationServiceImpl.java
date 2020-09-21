@@ -283,14 +283,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
 
-        ApplicationConfig applicationConfig = configService.getActived(application.getId());
-        String confContent = applicationConfig.getContent();
-        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-        String appConf = String.format("%s://%s", format, confContent);
-        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, paramOfApp.getId(), application.getModule());
-        String flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
+        String appConf;
+        if (application.getAppType() == 1) {
+            ApplicationConfig applicationConfig = configService.getActived(application.getId());
+            String confContent = applicationConfig.getContent();
+            String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+            appConf = String.format("%s://%s", format, confContent);
+        } else {
+            appConf = String.format(
+                    "json://{\"%s\":\"%s\"}",
+                    ConfigConst.KEY_FLINK_APP_MAIN(),
+                    application.getMainClass()
+            );
+        }
+
+        String flinkUserJar = application.getProgramJar(properties.getNameService());
 
         String savePointDir = null;
         if (paramOfApp.getSavePointed()) {
@@ -342,9 +350,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.STARTING.getValue());
         application.setEndTime(null);
         this.baseMapper.updateById(application);
-
         return true;
     }
-
 
 }
