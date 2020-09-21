@@ -20,6 +20,7 @@
  */
 package com.streamxhub.console.core.controller;
 
+import com.streamxhub.common.util.Utils;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
@@ -34,9 +35,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.*;
+import java.util.jar.Manifest;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Validated
 @RestController
@@ -107,6 +114,13 @@ public class ApplicationController extends BaseController {
     public RestResponse get(Application app) {
         Application application = applicationService.getApp(app);
         return RestResponse.create().data(application);
+    }
+
+    @RequestMapping("main")
+    public RestResponse getMain(String jar) {
+        Manifest manifest = Utils.getJarManifest(new File(jar));
+        String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+        return RestResponse.create().data(mainClass);
     }
 
     @RequestMapping("stop")

@@ -12,7 +12,7 @@
           :filterOption="filterOption"
           placeholder="请选择项目"
           @change="handleProject"
-          v-decorator="[ 'projectId', {rules: [{ required: true, message: '请选择项目'}]} ]">
+          v-decorator="[ 'project', {rules: [{ required: true }]} ]">
           <a-select-option
             v-for="p in projectList"
             :key="p.id"
@@ -23,7 +23,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Application"
+        label="Module"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -31,11 +31,11 @@
           showSearch
           optionFilterProp="children"
           :filterOption="filterOption"
-          placeholder="请选择应用"
-          @change="handleApp"
-          v-decorator="[ 'module', {rules: [{ required: true, message: '请选择应用'}]} ]">
+          placeholder="请选择模块"
+          @change="handleModule"
+          v-decorator="[ 'module', {rules: [{ required: true }]} ]">
           <a-select-option
-            v-for="p in appList"
+            v-for="p in moduleList"
             :key="p.name"
             :value="p.path">
             {{ p.name }}
@@ -44,6 +44,53 @@
       </a-form-item>
 
       <a-form-item
+        label="Application Type"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          placeholder="请选择Application type"
+          @change="handleAppType"
+          v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
+          <a-select-option value=1>
+            StreamX Flink
+          </a-select-option>
+          <a-select-option value=2>
+            Apache Flink
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        v-if="appType == 2"
+        label="Program Jar"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          placeholder="请选择jar"
+          @change="handleJars"
+          v-decorator="[ 'jar', {rules: [{ required: true }] }]">
+          <a-select-option
+            v-for="(jar,index) in jars"
+            :key="index"
+            :value="jar">
+            {{ jar.replace(/^\/.*\//g,'') }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        v-if="appType == 2"
+        label="Program Main"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="请输入Main class"
+          v-decorator="[ 'mainClass', {rules: [{ required: true, message: '请输入Main class'}]} ]"/>
+      </a-form-item>
+
+      <a-form-item
+        v-if="appType == 1"
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -67,7 +114,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Application name"
+        label="Application Name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -210,8 +257,8 @@
 
 <script>
 
-import { select, listApp, listConf } from '@api/project'
-import { create, exists, name, readConf } from '@api/application'
+import { select, modules, listConf, jars } from '@api/project'
+import { create, exists, name, readConf, main } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
 const Base64 = require('js-base64').Base64
@@ -223,8 +270,11 @@ export default {
     return {
       maxTagCount: 1,
       projectList: [],
-      appList: [],
+      module: null,
+      moduleList: [],
+      jars: [],
       app: null,
+      appType: 0,
       switchDefaultValue: true,
       config: null,
       configOverride: null,
@@ -265,10 +315,10 @@ export default {
     },
 
     handleProject (value) {
-      listApp({
+      modules({
         id: value
       }).then((resp) => {
-        this.appList = resp.data
+        this.moduleList = resp.data
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -288,13 +338,46 @@ export default {
       })
     },
 
-    handleApp (app) {
-      this.form.resetFields(['config', 'jobName'])
-      this.configOverride = null
-      listConf({
-        path: app
+    handleModule (module) {
+      this.module = module
+      this.form.resetFields(['appType', 'config', 'jobName'])
+      this.appType = 0
+    },
+
+    handleAppType (val) {
+      this.appType = val
+      this.handleConfOrJar()
+    },
+
+    handleConfOrJar () {
+      if (this.module && this.appType) {
+        this.form.resetFields(['config', 'jobName'])
+        this.configOverride = null
+        if (this.appType == 1) {
+          listConf({
+            module: this.module
+          }).then((resp) => {
+            this.configSource = resp.data
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        } else {
+          jars({
+            module: this.module
+          }).then((resp) => {
+            this.jars = resp.data
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        }
+      }
+    },
+
+    handleJars (jar) {
+      main({
+        jar: jar
       }).then((resp) => {
-        this.configSource = resp.data
+        this.form.setFieldsValue({ 'mainClass': resp.data })
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -386,10 +469,16 @@ export default {
           }
 
           const configVal = this.form.getFieldValue('config')
+          const jar = this.form.getFieldValue('jar') || null
+          const mainClass = this.form.getFieldValue('mainClass') || null
+
           const format = configVal.endsWith('.properties') ? 2 : 1
           const params = {
-            projectId: values.projectId,
+            projectId: values.project,
             module: values.module,
+            appType: this.appType,
+            jar: jar,
+            mainClass: mainClass,
             jobName: values.jobName,
             format: format,
             args: values.args,
@@ -434,6 +523,7 @@ export default {
     }
 
   }
+
 }
 </script>
 

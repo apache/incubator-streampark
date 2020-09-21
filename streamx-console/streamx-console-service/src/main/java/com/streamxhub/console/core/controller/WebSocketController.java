@@ -26,6 +26,9 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
 
+/**
+ * @author benjobs
+ */
 @Controller
 public class WebSocketController {
 
@@ -33,7 +36,7 @@ public class WebSocketController {
     private ProjectService projectService;
 
     @MessageMapping("/tail/{id}")
-    public void tailBuild(@DestinationVariable("id") Long id) {
+    public void tail(@DestinationVariable("id") Long id) {
         projectService.tailBuildLog(id);
     }
 

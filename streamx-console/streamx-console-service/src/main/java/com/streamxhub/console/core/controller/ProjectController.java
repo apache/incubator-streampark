@@ -64,15 +64,21 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(page);
     }
 
-    @RequestMapping("listapp")
-    public RestResponse listApp(Long id) {
-        List<Map<String, String>> result = projectService.listApp(id);
+    @RequestMapping("modules")
+    public RestResponse modules(Long id) {
+        List<Map<String, String>> result = projectService.modules(id);
+        return RestResponse.create().data(result);
+    }
+
+    @RequestMapping("jars")
+    public RestResponse jars(Project project) {
+        List<String> result = projectService.jars(project);
         return RestResponse.create().data(result);
     }
 
     @RequestMapping("listconf")
-    public RestResponse listConf(String path) {
-        List<Map<String,Object>> list = projectService.listConf(path);
+    public RestResponse listConf(String module) {
+        List<Map<String, Object>> list = projectService.listConf(module);
         return RestResponse.create().data(list);
     }
 

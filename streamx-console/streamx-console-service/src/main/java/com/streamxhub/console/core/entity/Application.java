@@ -39,6 +39,9 @@ import lombok.extern.slf4j.Slf4j;
 import java.io.*;
 import java.util.Date;
 
+/**
+ * @author benjobs
+ */
 @Data
 @TableName("t_flink_app")
 @Excel("flink应用实体")
@@ -72,6 +75,9 @@ public class Application implements Serializable {
     private String shortOptions;
     private String dynamicOptions;
     private String deployMode;
+    private Integer appType;
+    private String jar;
+    private String mainClass;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date startTime;

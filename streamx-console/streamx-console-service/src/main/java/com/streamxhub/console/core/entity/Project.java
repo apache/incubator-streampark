@@ -82,6 +82,8 @@ public class Project implements Serializable {
     @TableField("BUILDSTATE")
     private Integer buildState;
 
+    private transient String module;
+
     private transient String dateFrom;
 
     private transient String dateTo;

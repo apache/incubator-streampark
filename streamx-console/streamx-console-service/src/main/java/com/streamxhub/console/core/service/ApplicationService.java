@@ -28,7 +28,9 @@ import com.streamxhub.console.core.enums.AppExistsState;
 
 import java.io.IOException;
 
-
+/**
+ * @author benjobs
+ */
 public interface ApplicationService extends IService<Application> {
 
     IPage<Application> list(Application app, RestRequest request);

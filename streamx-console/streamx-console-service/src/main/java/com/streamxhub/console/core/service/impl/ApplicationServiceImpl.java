@@ -83,7 +83,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private StreamXProperties properties;
 
-
     @Override
     public IPage<Application> list(Application paramOfApp, RestRequest request) {
         Page<Application> page = new Page<>();

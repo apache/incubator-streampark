@@ -13,6 +13,10 @@ export function get (params) {
   return http.post(api.Application.Get, params)
 }
 
+export function main (params) {
+  return http.post(api.Application.Main, params)
+}
+
 export function update (params) {
   return http.post(api.Application.Update, params)
 }

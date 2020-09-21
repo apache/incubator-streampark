@@ -17,12 +17,16 @@ export function fileList (params) {
   return http.post(api.Project.FileList, params)
 }
 
-export function listApp (params) {
-  return http.post(api.Project.ListApp, params)
+export function modules (params) {
+  return http.post(api.Project.Modules, params)
 }
 
 export function listConf (params) {
   return http.post(api.Project.ListConf, params)
+}
+
+export function jars (params) {
+  return http.post(api.Project.Jars, params)
 }
 
 export function remove (params) {

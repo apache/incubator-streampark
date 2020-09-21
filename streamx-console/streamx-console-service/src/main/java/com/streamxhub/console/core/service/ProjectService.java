@@ -29,6 +29,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);
@@ -41,9 +44,11 @@ public interface ProjectService extends IService<Project> {
 
     void tailBuildLog(Long id);
 
-    List<Map<String, String>> listApp(Long id);
+    List<Map<String, String>> modules(Long id);
 
-    List<Map<String,Object>> listConf(String path);
+    List<String> jars(Project project);
+
+    List<Map<String,Object>> listConf(String module);
 
     String getAppConfPath(Long id,String module);
 }

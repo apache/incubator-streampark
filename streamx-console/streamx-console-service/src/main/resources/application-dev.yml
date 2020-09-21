@@ -27,7 +27,7 @@ spring:
           username: root
           password: 123322242
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://127.0.0.1:3306/adminx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+          url: jdbc:mysql://127.0.0.1:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
   aop.proxy-target-class: true
   messages.encoding: utf-8
 

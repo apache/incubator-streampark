@@ -25,6 +25,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
 import org.springframework.web.socket.config.annotation.*;
 
+/**
+ * @author benjobs
+ */
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
@@ -38,9 +41,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-
         registry.setApplicationDestinationPrefixes("/req");
-
         registry.enableSimpleBroker("/resp");
     }
 }

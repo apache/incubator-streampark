@@ -12,6 +12,9 @@
         <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
+        <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>
+        <result column="JAR" jdbcType="VARCHAR" property="jar"/>
+        <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>
         <result column="START_TIME" jdbcType="DATE" property="startTime"/>

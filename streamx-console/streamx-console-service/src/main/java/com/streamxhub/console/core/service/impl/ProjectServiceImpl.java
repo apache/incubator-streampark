@@ -22,6 +22,7 @@ package com.streamxhub.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.util.CommandUtils;
+import com.streamxhub.common.util.Utils;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
@@ -29,7 +30,6 @@ import com.streamxhub.console.base.utils.GZipUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ProjectMapper;
 import com.streamxhub.console.core.entity.Project;
-import com.streamxhub.console.core.service.ApplicationService;
 import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -49,6 +49,9 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.Executors;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("projectService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -62,9 +65,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
-
-    @Autowired
-    private ApplicationService applicationService;
 
     @Override
     public RestResponse create(Project project) {
@@ -116,7 +116,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     ProjectServiceImpl.this.baseMapper.successBuild(project);
                     //发布到apps下
                     ProjectServiceImpl.this.deploy(project);
-
                     //更新application的发布状态.
                     this.baseMapper.deploy(project.getId());
                 } else {
@@ -130,23 +129,83 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     private void deploy(Project project) {
-        List<String> apps = this.scanApp(project);
-        apps.forEach((y) -> {
-            File unzipFile = new File(y);
-            File deployPath = project.getAppBase();
-            if (!deployPath.exists()) {
-                deployPath.mkdirs();
-            }
-            //将项目解包到app下.
-            if (unzipFile.exists()) {
-                String cmd = String.format("tar -xzvf %s -C %s", unzipFile.getAbsolutePath(), deployPath.getAbsolutePath());
-                CommandUtils.execute(cmd);
+        File path = project.getAppSource();
+        List<File> apps = new ArrayList<>();
+        // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
+        findTarAndJar(apps, path);
+        apps.forEach((app) -> {
+            String appPath = app.getAbsolutePath();
+            // 1). tar.gz文件....
+            if (appPath.endsWith("tar.gz")) {
+                File deployPath = project.getAppBase();
+                if (!deployPath.exists()) {
+                    deployPath.mkdirs();
+                }
+                //将项目解包到app下.
+                if (app.exists()) {
+                    String cmd = String.format("tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
+                    CommandUtils.execute(cmd);
+                }
+            } else {
+                try {
+                    //2) .jar文件(普通,官方标准的flink工程)
+                    Utils.checkJarFile(app.toURI().toURL());
+                    String moduleName = app.getName().replace(".jar", "");
+                    File appBase = project.getAppBase();
+                    File targetDir = new File(appBase, moduleName);
+                    if (!targetDir.exists()) {
+                        targetDir.mkdirs();
+                    }
+                    File targetJar = new File(targetDir, app.getName());
+                    app.renameTo(targetJar);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
             }
         });
     }
 
+    private void findTarAndJar(List<File> list, File path) {
+        for (File file : Objects.requireNonNull(path.listFiles())) {
+            //定位到target目录下:
+            if (file.isDirectory() && file.getName().equals("target")) {
+                //在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
+                File tar = null, jar = null;
+                for (File targetFile : Objects.requireNonNull(file.listFiles())) {
+                    //1) 一旦找到tar.gz文件则退出.
+                    if (targetFile.getName().endsWith("tar.gz")) {
+                        tar = targetFile;
+                        break;
+                    }
+                    //2) 尝试寻找jar文件...可能存在发现多个jar.
+                    if (!targetFile.getName().startsWith("original-") &&
+                            !targetFile.getName().endsWith("-sources.jar") &&
+                            targetFile.getName().endsWith(".jar")) {
+                        if (jar == null) {
+                            jar = targetFile;
+                        } else {
+                            //可能存在会找到多个jar,这种情况下,选择体积最大的那个jar返回...(不要问我为什么.)
+                            if (targetFile.getTotalSpace() > jar.getTotalSpace()) {
+                                jar = targetFile;
+                            }
+                        }
+                    }
+                }
+                File target = tar == null ? jar : tar;
+                if (target == null) {
+                    throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + file.getAbsolutePath());
+                }
+                list.add(target);
+            }
+
+            if (file.isDirectory()) {
+                findTarAndJar(list, file);
+            }
+        }
+    }
+
     @Override
-    public List<Map<String, String>> listApp(Long id) {
+    public List<Map<String, String>> modules(Long id) {
         Project project = getById(id);
         File appHome = project.getAppBase();
         List<Map<String, String>> list = new ArrayList<>();
@@ -156,6 +215,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             map.put("path", x.getAbsolutePath());
             list.add(map);
         });
+        return list;
+    }
+
+    @Override
+    public List<String> jars(Project project) {
+        List<String> list = new ArrayList<>(0);
+        File apps = new File(project.getModule());
+        for (File file : apps.listFiles()) {
+            if (file.getName().endsWith(".jar")) {
+                list.add(file.getAbsolutePath());
+            }
+        }
         return list;
     }
 
@@ -170,31 +241,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         return null;
     }
 
-    private List<String> scanApp(Project project) {
-        File path = project.getAppSource();
-        List<String> list = new ArrayList<>();
-        findApp(list, path);
-        return list;
-    }
-
-    private void findApp(List<String> list, File path) {
-        for (File file : Objects.requireNonNull(path.listFiles())) {
-            if (file.isFile() &&
-                    file.getParentFile().isDirectory() &&
-                    file.getParentFile().getName().equals("target") &&
-                    file.getName().endsWith("tar.gz")) {
-                list.add(file.getAbsolutePath());
-            }
-            if (file.isDirectory()) {
-                findApp(list, file);
-            }
-        }
-    }
-
     @Override
-    public List<Map<String, Object>> listConf(String path) {
+    public List<Map<String, Object>> listConf(String module) {
         try {
-            File file = new File(path);
+            File file = new File(module);
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
                 GZipUtil.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
@@ -366,7 +416,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Override
     public void tailBuildLog(Long id) {
         this.tailOutMap.put(id, id);
-        //首次会从buffer里从头读取数据.只有一次.
+        //首次会从buffer里从头读取数据.有且仅有一次.
         this.tailBeginning.put(id, true);
     }
 

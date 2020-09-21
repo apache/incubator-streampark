@@ -19,8 +19,9 @@ export default {
     Build: '/flink/project/build',
     List: '/flink/project/list',
     FileList: '/flink/project/filelist',
-    ListApp: '/flink/project/listapp',
+    Modules: '/flink/project/modules',
     ListConf: '/flink/project/listconf',
+    Jars: '/flink/project/jars',
     Delete: '/flink/project/delete',
     Select: '/flink/project/select'
   },
@@ -36,6 +37,7 @@ export default {
     Yarn: '/flink/app/yarn',
     List: '/flink/app/list',
     Get: '/flink/app/get',
+    Main: '/flink/app/main',
     Name: '/flink/app/name',
     Exists: '/flink/app/exists',
     Stop: '/flink/app/stop',
