@@ -155,7 +155,7 @@ object FlinkSubmit extends Logger {
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
           case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
         }
-      case x if x.startsWith("json://") => JsonUtils.read[Map[String, String]](x.drop(7))(Manifest[Map[String, String]]).toMap
+      case x if x.startsWith("json://") => JsonUtils.read[Map[String, String]](x.drop(7)).toMap
       case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
     }
 
