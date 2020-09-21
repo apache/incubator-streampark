@@ -125,7 +125,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setCreateTime(new Date());
         paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
         boolean saved = save(paramOfApp);
-        configService.create(paramOfApp);
+        if (paramOfApp.getAppType() == 1) {
+            configService.create(paramOfApp);
+        }
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {

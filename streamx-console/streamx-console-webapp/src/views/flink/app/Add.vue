@@ -467,40 +467,38 @@ export default {
             options['yarnquery'] = true
             shortOptions += ' -yq '
           }
-
-          const jar = this.form.getFieldValue('jar') || null
-          const mainClass = this.form.getFieldValue('mainClass') || null
-          const configVal = this.form.getFieldValue('config') || null
-          let format = 0
-          if (this.appType == 1 && configVal) {
-            format = configVal.endsWith('.properties') ? 2 : 1
-          }
+          // common params...
           const params = {
             projectId: values.project,
             module: values.module,
             appType: this.appType,
-            jar: jar,
-            mainClass: mainClass,
             jobName: values.jobName,
-            format: format,
             args: values.args,
             options: JSON.stringify(options),
             shortOptions: shortOptions,
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }
-
-          if (this.appType == 1 && this.configOverride == null) {
-            readConf({
-              config: configVal
-            }).then((resp) => {
-              params['config'] = resp.data
+          if (this.appType == 1) {
+            const configVal = this.form.getFieldValue('config')
+            const format = configVal.endsWith('.properties') ? 2 : 1
+            params['format'] = format
+            if (this.configOverride == null) {
+              readConf({
+                config: configVal
+              }).then((resp) => {
+                params['config'] = resp.data
+                this.handleCreate(params)
+              }).catch((error) => {
+                this.$message.error(error.message)
+              })
+            } else {
+              params['config'] = Base64.enable(this.configOverride)
               this.handleCreate(params)
-            }).catch((error) => {
-              this.$message.error(error.message)
-            })
+            }
           } else {
-            params['config'] = Base64.enable(this.configOverride)
+            params['jar'] = this.form.getFieldValue('jar') || null
+            params['mainClass'] = this.form.getFieldValue('mainClass') || null
             this.handleCreate(params)
           }
         }
