@@ -24,7 +24,6 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
-import org.json4s.jackson.Serialization
 import java.text.SimpleDateFormat
 
 object JsonUtils extends Serializable {
@@ -53,6 +52,6 @@ object JsonUtils extends Serializable {
     }
   }
 
-  def write(obj: AnyRef): String = mapper.wri Serialization.write(obj)(org.json4s.DefaultFormats)
+  def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 
 }
