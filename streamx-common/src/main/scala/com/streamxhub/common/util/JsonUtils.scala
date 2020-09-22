@@ -21,17 +21,30 @@
 package com.streamxhub.common.util
 
 import com.fasterxml.jackson.annotation.JsonInclude
-import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper}
+import com.fasterxml.jackson.databind.{DeserializationFeature, ObjectMapper, SerializationFeature}
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import com.fasterxml.jackson.module.scala.experimental.ScalaObjectMapper
 import org.json4s.jackson.Serialization
+import java.text.SimpleDateFormat
 
 object JsonUtils extends Serializable {
 
   private val mapper = new ObjectMapper() with ScalaObjectMapper
+
   mapper.registerModule(DefaultScalaModule)
+
+  //忽略在json字符串中存在，在java类中不存在字段，防止错误。
   mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+
+  //该属性设置主要是将忽略空bean转json错误
+  mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
+  //该属性设置主要是取消将对象的时间默认转换timesstamps(时间戳)形式
+  mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
+
   mapper.setSerializationInclusion(JsonInclude.Include.NON_NULL)
+
+  //所有日期都统一为以下样式：yyyy-MM-dd HH:mm:ss，这里可以不用我的DateTimeUtil.DATE_FORMAT，手动添加
+  mapper.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat))
 
   def read[T](obj: AnyRef)(implicit manifest: Manifest[T]): T = {
     obj match {
@@ -40,6 +53,6 @@ object JsonUtils extends Serializable {
     }
   }
 
-  def write(obj: AnyRef): String = Serialization.write(obj)(org.json4s.DefaultFormats)
+  def write(obj: AnyRef): String = mapper.wri Serialization.write(obj)(org.json4s.DefaultFormats)
 
 }
