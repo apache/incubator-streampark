@@ -125,7 +125,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setCreateTime(new Date());
         paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
         boolean saved = save(paramOfApp);
-        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.get()) {
+        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
             configService.create(paramOfApp);
         }
         if (saved) {
@@ -147,7 +147,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
         //update config...
-        if (paramOfApp.getAppType() == ApplicationType.APACHE_FLINK.get()) {
+        if (paramOfApp.getAppType() == ApplicationType.APACHE_FLINK.getType()) {
             configService.update(paramOfApp);
         }
         //update other...
@@ -346,6 +346,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
+                application.getApplicationType().getName(),
                 savePointDir,
                 overrideOption,
                 dynamicOption,
