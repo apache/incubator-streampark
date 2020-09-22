@@ -286,7 +286,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
-        String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
 
         String appConf, flinkUserJar;
         switch (application.getApplicationType()) {
@@ -295,6 +294,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String confContent = applicationConfig.getContent();
                 String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
                 appConf = String.format("%s://%s", format, confContent);
+                String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
                 flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
                 break;
             case APACHE_FLINK:
@@ -303,6 +303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         ConfigConst.KEY_FLINK_APP_MAIN(),
                         application.getMainClass()
                 );
+                classPath = String.format("%s/%s/%s", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
                 flinkUserJar = String.format("%s/%s", classPath, application.getJar());
                 break;
             default:
