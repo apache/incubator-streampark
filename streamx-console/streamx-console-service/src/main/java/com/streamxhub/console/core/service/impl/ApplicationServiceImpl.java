@@ -124,10 +124,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setState(FlinkAppState.CREATED.getValue());
         paramOfApp.setCreateTime(new Date());
         paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
-        boolean saved = save(paramOfApp);
         if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
             configService.create(paramOfApp);
+        } else {
+            paramOfApp.setJar(new File(paramOfApp.getJar()).getName());
         }
+
+        boolean saved = save(paramOfApp);
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
