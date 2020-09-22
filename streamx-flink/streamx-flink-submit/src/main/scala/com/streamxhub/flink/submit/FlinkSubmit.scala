@@ -83,7 +83,7 @@ object FlinkSubmit extends Logger {
     }
   }
 
-  def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
+  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
     if (flinkDefaultConfiguration == null) {
       val flinkLocalHome = System.getenv("FLINK_HOME")
       require(flinkLocalHome != null)
@@ -94,7 +94,7 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  def getSavePointDir(nameService: String): String = getOptionFromDefaultFlinkConfig(
+  private[this] def getSavePointDir(nameService: String): String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
       .stringType()
       .defaultValue(s"hdfs://$nameService$APP_SAVEPOINTS")
@@ -177,6 +177,7 @@ object FlinkSubmit extends Logger {
 
     val flinkName = new File(flinkLocalHome).getName
     val flinkHdfsHome = s"$APP_FLINK/$flinkName"
+
     if (!HdfsUtils.exists(flinkHdfsHome)) {
       logInfo(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
       HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
