@@ -132,6 +132,7 @@ object FlinkSubmit extends Logger {
          |      "nameService: ${submitInfo.nameService},"
          |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"
+         |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
@@ -225,7 +226,7 @@ object FlinkSubmit extends Logger {
         //yarn application name
         .set(YarnConfigOptions.APPLICATION_NAME, appName)
         //yarn application Type
-        .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX Flink")
+        .set(YarnConfigOptions.APPLICATION_TYPE, submitInfo.applicationType)
         //设置启动主类
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
         //设置启动参数
