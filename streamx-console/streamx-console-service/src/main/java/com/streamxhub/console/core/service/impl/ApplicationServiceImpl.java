@@ -155,7 +155,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setJobName(paramOfApp.getJobName());
         application.setArgs(paramOfApp.getArgs());
         application.setOptions(paramOfApp.getOptions());
-        application.setShortOptions(paramOfApp.getShortOptions());
         application.setDynamicOptions(paramOfApp.getDynamicOptions());
         application.setDescription(paramOfApp.getDescription());
         /**
@@ -281,12 +280,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean start(Application paramOfApp) {
+    public boolean start(Application paramOfApp) throws Exception {
         final Application application = getById(paramOfApp.getId());
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-
         String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
 
@@ -324,8 +322,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         String[] overrideOption = new String[0];
-        if (CommonUtil.notEmpty(application.getShortOptions())) {
-            String options = application.getShortOptions().replaceAll("(|\\s+)-n(\\s+|)", " ");
+        String options = application.getShortOptions();
+        if (CommonUtil.notEmpty(options)) {
             if (paramOfApp.getAllowNonRestored()) {
                 options = options.concat(" -n ");
             }

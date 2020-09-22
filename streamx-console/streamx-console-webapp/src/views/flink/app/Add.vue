@@ -440,33 +440,15 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          let shortOptions = ''
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
-              const option = this.options.filter((elem) => k === elem.name)[0]
-              const key = option.key
               if (v !== '') {
                 options[k] = v
-                shortOptions += key + ' '
               }
             }
           }
 
-          if (values.parallelism) {
-            options['parallelism'] = values.parallelism
-            shortOptions += ' -p ' + values.parallelism
-          }
-
-          if (values.slot) {
-            options['yarnslots'] = values.slot
-            shortOptions += ' -ys ' + values.slot
-          }
-
-          if (this.configItems.includes('yarnquery')) {
-            options['yarnquery'] = true
-            shortOptions += ' -yq '
-          }
           // common params...
           const params = {
             projectId: values.project,
@@ -475,7 +457,6 @@ export default {
             jobName: values.jobName,
             args: values.args,
             options: JSON.stringify(options),
-            shortOptions: shortOptions,
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }

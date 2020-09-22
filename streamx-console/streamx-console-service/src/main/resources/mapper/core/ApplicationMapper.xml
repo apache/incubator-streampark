@@ -7,7 +7,6 @@
         <result column="MODULE" jdbcType="VARCHAR" property="module"/>
         <result column="ARGS" jdbcType="VARCHAR" property="args"/>
         <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
-        <result column="SHORT_OPTIONS" jdbcType="VARCHAR" property="shortOptions"/>
         <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>

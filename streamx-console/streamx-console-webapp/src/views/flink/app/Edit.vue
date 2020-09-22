@@ -412,32 +412,13 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          let shortOptions = ''
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
-              const option = this.options.filter((elem) => k === elem.name)[0]
-              const key = option.key
               if (v !== '') {
                 options[k] = v
-                shortOptions += key + ' '
               }
             }
-          }
-
-          if (values.parallelism) {
-            options['parallelism'] = values.parallelism
-            shortOptions += ' -p ' + values.parallelism
-          }
-
-          if (values.yarnslots) {
-            options['yarnslots'] = values.yarnslots
-            shortOptions += ' -ys ' + values.yarnslots
-          }
-
-          if (this.configItems.includes('yarnquery')) {
-            options['yarnquery'] = true
-            shortOptions += ' -yq '
           }
 
           const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
@@ -451,7 +432,6 @@ export default {
             configId: configId,
             args: values.args,
             options: JSON.stringify(options),
-            shortOptions: shortOptions,
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }).then((resp) => {

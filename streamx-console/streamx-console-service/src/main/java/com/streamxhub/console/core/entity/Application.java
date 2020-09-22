@@ -27,6 +27,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.common.conf.ConfigConst;
+import com.streamxhub.common.conf.FlinkRunOption;
 import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.SpringContextUtil;
@@ -36,9 +37,12 @@ import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 import java.io.*;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -73,7 +77,6 @@ public class Application implements Serializable {
      */
     private String module;
     private String options;
-    private String shortOptions;
     private String dynamicOptions;
     private Integer appType;
     private String jar;
@@ -157,6 +160,26 @@ public class Application implements Serializable {
     @JsonIgnore
     public ApplicationType getApplicationType() {
         return ApplicationType.of(appType);
+    }
+
+    @JsonIgnore
+    public String getShortOptions() throws IOException {
+        Options allOptions = FlinkRunOption.allOptions();
+        ObjectMapper mapper = new ObjectMapper();
+        Map<String, Object> map = mapper.readValue(getOptions(), Map.class);
+        StringBuffer stringBuffer = new StringBuffer();
+        map.forEach((k, v) -> {
+            if (allOptions.hasLongOption(k)) {
+                Option opt = allOptions.getOption(k);
+                stringBuffer.append("-").append(opt.getOpt());
+                if (opt.hasArg()) {
+                    stringBuffer.append(" ").append(v.toString()).append(" ");
+                } else {
+                    stringBuffer.append(" ");
+                }
+            }
+        });
+        return stringBuffer.toString().trim();
     }
 
 }
