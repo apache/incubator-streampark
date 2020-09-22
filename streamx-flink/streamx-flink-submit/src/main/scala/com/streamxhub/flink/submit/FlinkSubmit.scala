@@ -383,12 +383,12 @@ object FlinkSubmit extends Logger {
 
     commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
       case null =>
-      case jmm => effectiveConfiguration.setInteger(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.toInt)
+      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|$)","M"))
     }
 
     commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
       case null =>
-      case tmm => effectiveConfiguration.setInteger(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.toInt)
+      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)","M"))
     }
 
     commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
@@ -398,7 +398,7 @@ object FlinkSubmit extends Logger {
 
     commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
       case null =>
-      case slot => effectiveConfiguration.setString(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot)
+      case slot => effectiveConfiguration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot.toInt)
     }
 
     /**
