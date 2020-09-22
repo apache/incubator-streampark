@@ -73,7 +73,7 @@
             v-for="(jar,index) in jars"
             :key="index"
             :value="jar">
-            {{ jar.replace(/^\/.*\//g,'') }}
+            {{ jar }}
           </a-select-option>
         </a-select>
       </a-form-item>

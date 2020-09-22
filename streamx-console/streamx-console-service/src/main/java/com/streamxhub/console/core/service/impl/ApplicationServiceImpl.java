@@ -126,8 +126,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
         if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
             configService.create(paramOfApp);
-        } else {
-            paramOfApp.setJar(new File(paramOfApp.getJar()).getName());
         }
 
         boolean saved = save(paramOfApp);

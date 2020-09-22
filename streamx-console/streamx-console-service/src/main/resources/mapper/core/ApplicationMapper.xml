@@ -51,7 +51,7 @@
         FROM t_flink_app t
         inner join t_flink_project p
         on t.project_id = p.id
-        inner join t_flink_config c
+        left join t_flink_config c
         on c.app_id = t.id
         and c.actived = 1
         where t.id = #{application.id}

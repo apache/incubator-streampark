@@ -1062,7 +1062,11 @@ export default {
 
     handleEdit (app) {
       this.SetAppId(app.id)
-      this.$router.push({ 'path': '/flink/app/edit' })
+      if (app.appType == 1) {
+        this.$router.push({ 'path': '/flink/app/edit_streamx' })
+      } else {
+        this.$router.push({ 'path': '/flink/app/edit_flink' })
+      }
     },
 
     handleCloseDeploy (app) {

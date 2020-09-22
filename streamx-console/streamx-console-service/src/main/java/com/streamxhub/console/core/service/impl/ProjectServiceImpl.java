@@ -224,7 +224,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         File apps = new File(project.getModule());
         for (File file : apps.listFiles()) {
             if (file.getName().endsWith(".jar")) {
-                list.add(file.getAbsolutePath());
+                list.add(file.getName());
             }
         }
         return list;
