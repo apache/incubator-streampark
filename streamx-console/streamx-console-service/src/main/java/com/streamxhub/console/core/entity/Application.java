@@ -30,6 +30,7 @@ import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.SpringContextUtil;
+import com.streamxhub.console.core.enums.ApplicationType;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
@@ -151,6 +152,11 @@ public class Application implements Serializable {
             throw e;
         }
         return null;
+    }
+
+    @JsonIgnore
+    public ApplicationType getApplicationType() {
+        return ApplicationType.of(appType);
     }
 
 }

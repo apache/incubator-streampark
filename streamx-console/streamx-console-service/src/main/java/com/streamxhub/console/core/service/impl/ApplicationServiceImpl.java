@@ -34,6 +34,7 @@ import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.enums.AppExistsState;
+import com.streamxhub.console.core.enums.ApplicationType;
 import com.streamxhub.console.core.enums.DeployState;
 import com.streamxhub.console.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -45,7 +46,6 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import com.streamxhub.flink.submit.SubmitInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
-import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -125,7 +125,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setCreateTime(new Date());
         paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
         boolean saved = save(paramOfApp);
-        if (paramOfApp.getAppType() == 1) {
+        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.get()) {
             configService.create(paramOfApp);
         }
         if (saved) {
@@ -147,7 +147,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
         //update config...
-        if (paramOfApp.getAppType() == 1) {
+        if (paramOfApp.getAppType() == ApplicationType.APACHE_FLINK.get()) {
             configService.update(paramOfApp);
         }
         //update other...
@@ -291,19 +291,24 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String classPath = String.format("%s/%s/%s/lib", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
 
         String appConf, flinkUserJar;
-        if (application.getAppType() == 1) {
-            ApplicationConfig applicationConfig = configService.getActived(application.getId());
-            String confContent = applicationConfig.getContent();
-            String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-            appConf = String.format("%s://%s", format, confContent);
-            flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
-        } else {
-            appConf = String.format(
-                    "json://{\"%s\":\"%s\"}",
-                    ConfigConst.KEY_FLINK_APP_MAIN(),
-                    application.getMainClass()
-            );
-            flinkUserJar = String.format("%s/%s", classPath, application.getJar());
+        switch (application.getApplicationType()) {
+            case STREAMX_FLINK:
+                ApplicationConfig applicationConfig = configService.getActived(application.getId());
+                String confContent = applicationConfig.getContent();
+                String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                appConf = String.format("%s://%s", format, confContent);
+                flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
+                break;
+            case APACHE_FLINK:
+                appConf = String.format(
+                        "json://{\"%s\":\"%s\"}",
+                        ConfigConst.KEY_FLINK_APP_MAIN(),
+                        application.getMainClass()
+                );
+                flinkUserJar = String.format("%s/%s", classPath, application.getJar());
+                break;
+            default:
+                throw new IllegalArgumentException("[StreamX] ApplicationType must be (STREAMX_FLINK|APACHE_FLINK)... ");
         }
 
         String savePointDir = null;
