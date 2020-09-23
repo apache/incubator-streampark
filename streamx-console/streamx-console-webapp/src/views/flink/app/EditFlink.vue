@@ -198,7 +198,7 @@ import { mapActions, mapGetters } from 'vuex'
 import configOptions from './option'
 
 export default {
-  name: 'AppEdit',
+  name: 'EditFlink',
   data () {
     return {
       strategy: 1,

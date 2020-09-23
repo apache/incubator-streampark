@@ -250,7 +250,7 @@
 
     </a-form>
 
-    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable"></Conf>
 
   </a-card>
 </template>
@@ -284,10 +284,7 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
-      confEdit: {
-        type: Boolean,
-        default: false
-      }
+      confVisiable: false
     }
   },
 
@@ -427,7 +424,7 @@ export default {
         config: config
       }).then((resp) => {
         const conf = Base64.decode(resp.data)
-        this.confEdit.visiable = true
+        this.confVisiable = true
         this.$refs.confEdit.set(conf)
       }).catch((error) => {
         this.$message.error(error.message)
@@ -435,7 +432,7 @@ export default {
     },
 
     handleEditConfClose () {
-      this.confEdit.visiable = false
+      this.confVisiable = false
     },
 
     handleEditConfOk (value) {

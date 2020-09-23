@@ -253,7 +253,7 @@
 
     </a-form>
 
-    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confEdit.visiable"></Conf>
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable"></Conf>
 
   </a-card>
 
@@ -269,7 +269,7 @@ import configOptions from './option'
 const Base64 = require('js-base64').Base64
 
 export default {
-  name: 'AppEdit',
+  name: 'EditStreamX',
   components: { Conf },
   data () {
     return {
@@ -291,9 +291,7 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
-      confEdit: {
-        visiable: false
-      }
+      confVisiable: false
     }
   },
 
@@ -394,12 +392,12 @@ export default {
     },
 
     handleEditConfig () {
-      this.confEdit.visiable = true
+      this.confVisiable = true
       this.$refs.confEdit.set(this.configOverride)
     },
 
     handleEditConfClose () {
-      this.confEdit.visiable = false
+      this.confVisiable = false
     },
 
     handleEditConfOk (value) {
@@ -495,7 +493,7 @@ export default {
           id: this.compareConf[1]
         }).then((resp) => {
           const conf2 = Base64.decode(resp.data.content)
-          this.confEdit.visiable = true
+          this.confVisiable = true
           this.$refs.confEdit.compact(conf1, conf2)
         })
       })
