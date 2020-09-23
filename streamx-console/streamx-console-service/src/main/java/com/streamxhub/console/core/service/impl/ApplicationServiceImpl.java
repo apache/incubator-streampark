@@ -200,7 +200,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
         }
-        HdfsUtils.upload(application.getModule(), workspace);
+        File needUpFile = new File(application.getAppBase(), application.getModule());
+        HdfsUtils.upload(needUpFile.getAbsolutePath(), workspace);
 
         //4) 更新发布状态,需要重启的应用则重新启动...
         if (paramOfApp.getRestart()) {
