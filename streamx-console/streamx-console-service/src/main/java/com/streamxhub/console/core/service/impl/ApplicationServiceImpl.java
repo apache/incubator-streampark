@@ -155,15 +155,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setOptions(paramOfApp.getOptions());
         application.setDynamicOptions(paramOfApp.getDynamicOptions());
         application.setDescription(paramOfApp.getDescription());
-
         //update config...
-        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+        if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
             configService.update(paramOfApp);
         } else {
             application.setJar(paramOfApp.getJar());
             application.setMainClass(paramOfApp.getMainClass());
         }
-
         /**
          * 配置文件已更新
          */
