@@ -123,7 +123,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         paramOfApp.setUserId(serverUtil.getUser().getUserId());
         paramOfApp.setState(FlinkAppState.CREATED.getValue());
         paramOfApp.setCreateTime(new Date());
-        paramOfApp.setModule(paramOfApp.getModule().replace(paramOfApp.getAppBase().getAbsolutePath() + "/", ""));
         if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
             configService.create(paramOfApp);
         }
@@ -182,10 +181,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //2) deploying...
         application.setBackUpDescription(paramOfApp.getBackUpDescription());
-        if (!application.getModule().startsWith(application.getAppBase().getAbsolutePath())) {
-            application.setModule(application.getAppBase().getAbsolutePath().concat("/").concat(application.getModule()));
-        }
-
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
