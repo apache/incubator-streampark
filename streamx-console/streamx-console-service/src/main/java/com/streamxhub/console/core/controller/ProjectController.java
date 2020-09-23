@@ -66,7 +66,7 @@ public class ProjectController extends BaseController {
 
     @RequestMapping("modules")
     public RestResponse modules(Long id) {
-        List<Map<String, String>> result = projectService.modules(id);
+        List<String> result = projectService.modules(id);
         return RestResponse.create().data(result);
     }
 

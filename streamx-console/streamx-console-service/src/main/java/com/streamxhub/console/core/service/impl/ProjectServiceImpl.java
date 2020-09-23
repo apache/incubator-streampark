@@ -205,28 +205,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     @Override
-    public List<Map<String, String>> modules(Long id) {
+    public List<String> modules(Long id) {
         Project project = getById(id);
         File appHome = project.getAppBase();
-        List<Map<String, String>> list = new ArrayList<>();
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> {
-            Map<String, String> map = new HashMap<>();
-            map.put("name", x.getName());
-            map.put("path", x.getAbsolutePath());
-            list.add(map);
-        });
+        List<String> list = new ArrayList<>();
+        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
         return list;
     }
 
     @Override
     public List<String> jars(Project project) {
         List<String> list = new ArrayList<>(0);
-        File apps;
-        if (project.getId() != null) {
-            apps = new File(project.getAppBase(), project.getModule());
-        } else {
-            apps = new File(project.getModule());
-        }
+        File apps = new File(project.getAppBase(), project.getModule());
         for (File file : apps.listFiles()) {
             if (file.getName().endsWith(".jar")) {
                 list.add(file.getName());

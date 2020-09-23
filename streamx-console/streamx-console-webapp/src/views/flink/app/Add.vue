@@ -35,10 +35,10 @@
           @change="handleModule"
           v-decorator="[ 'module', {rules: [{ required: true }]} ]">
           <a-select-option
-            v-for="p in moduleList"
-            :key="p.name"
-            :value="p.path">
-            {{ p.name }}
+            v-for="name in moduleList"
+            :key="name"
+            :value="name">
+            {{ name }}
           </a-select-option>
         </a-select>
       </a-form-item>
