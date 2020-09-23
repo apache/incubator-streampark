@@ -338,12 +338,12 @@ export default {
     },
 
     handleReset () {
+      this.handleJars(this.app.jar)
       this.$nextTick(() => {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
           'args': this.app.args,
           'jar': this.app.jar,
-          'mainClass': this.app.mainClass,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'yarnslots': this.defaultOptions.yarnslots,
