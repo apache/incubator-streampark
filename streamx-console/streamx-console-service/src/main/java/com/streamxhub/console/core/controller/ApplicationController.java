@@ -20,13 +20,11 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.streamxhub.common.util.Utils;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
-import com.streamxhub.console.core.entity.Project;
 import com.streamxhub.console.core.enums.AppExistsState;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
