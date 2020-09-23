@@ -116,7 +116,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Application name"
+        label="Application Name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input

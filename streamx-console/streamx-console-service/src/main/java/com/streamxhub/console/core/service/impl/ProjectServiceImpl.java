@@ -221,7 +221,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Override
     public List<String> jars(Project project) {
         List<String> list = new ArrayList<>(0);
-        File apps = new File(project.getModule());
+        File apps;
+        if (project.getId() != null) {
+            apps = new File(project.getAppBase(), project.getModule());
+        } else {
+            apps = new File(project.getModule());
+        }
         for (File file : apps.listFiles()) {
             if (file.getName().endsWith(".jar")) {
                 list.add(file.getName());

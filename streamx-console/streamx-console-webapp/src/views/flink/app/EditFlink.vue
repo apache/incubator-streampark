@@ -9,14 +9,48 @@
       </a-form-item>
 
       <a-form-item
-        label="Application"
+        label="Module"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-alert :message="app['module']" type="info"/>
       </a-form-item>
 
       <a-form-item
-        label="Application name"
+        label="Application Type"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-alert message="Apache Flink" type="info"/>
+      </a-form-item>
+
+      <a-form-item
+        label="Program Jar"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          placeholder="请选择jar"
+          @change="handleJars"
+          v-decorator="[ 'jar', {rules: [{ required: true }] }]">
+          <a-select-option
+            v-for="(jar,index) in jars"
+            :key="index"
+            :value="jar">
+            {{ jar }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="Program Main"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="请输入Main class"
+          v-decorator="[ 'mainClass', {rules: [{ required: true, message: '请输入Main class'}]} ]"/>
+      </a-form-item>
+
+      <a-form-item
+        label="Application Name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -55,7 +89,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="selectTagCount.count1"
+          :maxTagCount="selectTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -158,7 +192,8 @@
 </template>
 
 <script>
-import { get, update, exists } from '@api/application'
+import { jars } from '@api/project'
+import { get, update, exists, main } from '@api/application'
 import { mapActions, mapGetters } from 'vuex'
 import configOptions from './option'
 
@@ -169,8 +204,11 @@ export default {
       strategy: 1,
       app: null,
       switchDefaultValue: true,
+      selectTagCount: 1,
       defaultOptions: {},
+      defaultJar: null,
       configSource: [],
+      jars: [],
       configItems: [],
       form: null,
       options: configOptions,
@@ -208,7 +246,15 @@ export default {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
         this.defaultOptions = JSON.parse(this.app.options)
-        this.handleReset()
+        jars({
+          id: this.app.projectId,
+          module: this.app.module
+        }).then((resp) => {
+          this.jars = resp.data
+          this.handleReset()
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -235,6 +281,16 @@ export default {
       }
     },
 
+    handleJars (jar) {
+      main({
+        jar: jar
+      }).then((resp) => {
+        this.form.setFieldsValue({ 'mainClass': resp.data })
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
     // handler
     handleSubmit: function (e) {
       e.preventDefault()
@@ -252,6 +308,8 @@ export default {
           update({
             id: this.app.id,
             jobName: values.jobName,
+            jar: values.jar,
+            mainClass: values.mainClass,
             args: values.args,
             options: JSON.stringify(options),
             dynamicOptions: values.dynamicOptions,
@@ -275,6 +333,7 @@ export default {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
           'args': this.app.args,
+          'mainClass': this.app.mainClass,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'yarnslots': this.defaultOptions.yarnslots,
