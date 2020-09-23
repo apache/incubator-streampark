@@ -48,7 +48,7 @@ public interface ProjectService extends IService<Project> {
 
     List<String> jars(Project project);
 
-    List<Map<String,Object>> listConf(String module);
+    List<Map<String,Object>> listConf(Project project);
 
     String getAppConfPath(Long id,String module);
 }

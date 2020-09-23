@@ -61,4 +61,5 @@ public interface ApplicationService extends IService<Application> {
 
     Application getApp(Application app);
 
+    String getMain(Application application);
 }

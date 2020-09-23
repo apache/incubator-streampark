@@ -51,10 +51,10 @@
           placeholder="请选择Application type"
           @change="handleAppType"
           v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
-          <a-select-option value=1>
+          <a-select-option value="1">
             StreamX Flink
           </a-select-option>
-          <a-select-option value=2>
+          <a-select-option value="2">
             Apache Flink
           </a-select-option>
         </a-select>
@@ -131,7 +131,7 @@
           :min="1"
           :step="1"
           placeholder="The parallelism with which to run the program"
-          v-decorator="['parallelism']" />
+          v-decorator="['parallelism']"/>
       </a-form-item>
 
       <a-form-item
@@ -142,7 +142,7 @@
           :min="1"
           :step="1"
           placeholder="Number of slots per TaskManager"
-          v-decorator="['slot']" />
+          v-decorator="['slot']"/>
       </a-form-item>
 
       <a-form-item
@@ -261,6 +261,7 @@ import { select, modules, listConf, jars } from '@api/project'
 import { create, exists, name, readConf, main } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
+
 const Base64 = require('js-base64').Base64
 
 export default {
@@ -270,6 +271,7 @@ export default {
     return {
       maxTagCount: 1,
       projectList: [],
+      projectId: null,
       module: null,
       moduleList: [],
       jars: [],
@@ -315,6 +317,7 @@ export default {
     },
 
     handleProject (value) {
+      this.projectId = value
       modules({
         id: value
       }).then((resp) => {
@@ -355,6 +358,7 @@ export default {
         this.configOverride = null
         if (this.appType == 1) {
           listConf({
+            id: this.projectId,
             module: this.module
           }).then((resp) => {
             this.configSource = resp.data
@@ -363,6 +367,7 @@ export default {
           })
         } else {
           jars({
+            id: this.projectId,
             module: this.module
           }).then((resp) => {
             this.jars = resp.data
@@ -375,6 +380,8 @@ export default {
 
     handleJars (jar) {
       main({
+        projectId: this.projectId,
+        module: this.module,
         jar: jar
       }).then((resp) => {
         this.form.setFieldsValue({ 'mainClass': resp.data })

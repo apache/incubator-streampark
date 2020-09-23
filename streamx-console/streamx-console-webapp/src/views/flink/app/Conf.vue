@@ -10,8 +10,8 @@
 
     <template slot="title">
       <template>
-        <a-icon v-if="!visibleDiff" type="setting" />
-        <a-icon v-else type="deployment-unit" />
+        <a-icon v-if="!visibleDiff" type="setting"/>
+        <a-icon v-else type="deployment-unit"/>
         {{ title }}
       </template>
     </template>
@@ -23,7 +23,10 @@
           <a-button class="drwaer-button-item" @click="handleCancel">
             取消
           </a-button>
-          <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleNext()"><a-icon type="right" />下一步</a-button>
+          <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleNext()">
+            <a-icon type="right"/>
+            下一步
+          </a-button>
         </div>
       </div>
     </div>
@@ -36,8 +39,12 @@
       </div>
       <div class="drawer-bootom-button">
         <div style="float: right">
-          <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleCloseDiff"><a-icon type="left" />上一步</a-button>
-          <a-button v-if="!compactMode" class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定</a-button>
+          <a-button v-if="changed" type="primary" class="drwaer-button-item" @click="handleCloseDiff">
+            <a-icon type="left"/>
+            上一步
+          </a-button>
+          <a-button v-if="!compactMode" class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定
+          </a-button>
         </div>
       </div>
     </div>
@@ -160,7 +167,7 @@ export default {
           }
         })
         this.$nextTick(() => {
-          jQuery("#mergely-splash").remove()
+          jQuery('#mergely-splash').remove()
         })
       })
     },

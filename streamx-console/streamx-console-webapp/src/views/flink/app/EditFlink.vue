@@ -67,7 +67,7 @@
           :min="1"
           :step="1"
           placeholder="The parallelism with which to run the program"
-          v-decorator="['parallelism']" />
+          v-decorator="['parallelism']"/>
       </a-form-item>
 
       <a-form-item
@@ -78,7 +78,7 @@
           :min="1"
           :step="1"
           placeholder="Number of slots per TaskManager"
-          v-decorator="['yarnslots']" />
+          v-decorator="['yarnslots']"/>
       </a-form-item>
 
       <a-form-item
@@ -238,10 +238,6 @@ export default {
   methods: {
     ...mapActions(['CleanAppId']),
     ...mapGetters(['applicationId']),
-    filterOption (input, option) {
-      return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
-    },
-
     handleGet (appId) {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
@@ -283,6 +279,8 @@ export default {
 
     handleJars (jar) {
       main({
+        projectId: this.app.projectId,
+        module: this.app.module,
         jar: jar
       }).then((resp) => {
         this.form.setFieldsValue({ 'mainClass': resp.data })
@@ -333,6 +331,7 @@ export default {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
           'args': this.app.args,
+          'jar': this.app.jar,
           'mainClass': this.app.mainClass,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,

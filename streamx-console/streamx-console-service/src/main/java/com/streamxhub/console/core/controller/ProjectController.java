@@ -77,8 +77,8 @@ public class ProjectController extends BaseController {
     }
 
     @RequestMapping("listconf")
-    public RestResponse listConf(String module) {
-        List<Map<String, Object>> list = projectService.listConf(module);
+    public RestResponse listConf(Project project) {
+        List<Map<String, Object>> list = projectService.listConf(project);
         return RestResponse.create().data(list);
     }
 

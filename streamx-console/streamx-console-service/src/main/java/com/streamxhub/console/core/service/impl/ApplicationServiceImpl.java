@@ -25,6 +25,7 @@ import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.common.util.Utils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
@@ -56,6 +57,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.jar.Manifest;
 
 /**
  * @author benjobs
@@ -146,10 +148,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application paramOfApp) {
-        //update config...
-        if (paramOfApp.getAppType() == ApplicationType.APACHE_FLINK.getType()) {
-            configService.update(paramOfApp);
-        }
         //update other...
         Application application = getById(paramOfApp.getId());
         application.setJobName(paramOfApp.getJobName());
@@ -157,6 +155,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setOptions(paramOfApp.getOptions());
         application.setDynamicOptions(paramOfApp.getDynamicOptions());
         application.setDescription(paramOfApp.getDescription());
+
+        //update config...
+        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+            configService.update(paramOfApp);
+        } else {
+            application.setJar(paramOfApp.getJar());
+            application.setMainClass(paramOfApp.getMainClass());
+        }
+
         /**
          * 配置文件已更新
          */
@@ -243,6 +250,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
         application.setConfPath(path);
         return application;
+    }
+
+    @Override
+    public String getMain(Application application) {
+        Project project = new Project();
+        project.setId(application.getProjectId());
+        String modulePath = project.getAppBase().getAbsolutePath().concat("/").concat(application.getModule());
+        File jarFile = new File(modulePath, application.getJar());
+        Manifest manifest = Utils.getJarManifest(jarFile);
+        String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+        return mainClass;
     }
 
     @Override

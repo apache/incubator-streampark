@@ -47,6 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 
 /**
@@ -57,11 +58,11 @@ import java.util.concurrent.Executors;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> implements ProjectService {
 
-    private final Map<Long, Long> tailOutMap = new HashMap<>();
+    private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
-    private final Map<Long, StringBuilder> tailBuffer = new HashMap<>();
+    private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
-    private final Map<Long, Boolean> tailBeginning = new HashMap<>();
+    private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -237,9 +238,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     @Override
-    public List<Map<String, Object>> listConf(String module) {
+    public List<Map<String, Object>> listConf(Project project) {
         try {
-            File file = new File(module);
+            File file = new File(project.getAppBase(),project.getModule());
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
                 GZipUtil.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());

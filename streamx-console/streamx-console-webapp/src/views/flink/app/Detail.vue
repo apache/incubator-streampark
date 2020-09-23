@@ -27,7 +27,7 @@
           Apache Flink
         </a-descriptions-item>
         <a-descriptions-item label="Status" :span="3">
-          <a-badge status="processing" text="Running" />
+          <a-badge status="processing" text="Running"/>
         </a-descriptions-item>
         <a-descriptions-item label="Negotiated Amount">
           $80.00
@@ -40,16 +40,16 @@
         </a-descriptions-item>
         <a-descriptions-item label="备份信息">
           Data disk type: MongoDB
-          <br />
+          <br/>
           Database version: 3.4
-          <br />
+          <br/>
           Package: dds.mongo.mid
-          <br />
+          <br/>
           Storage space: 10 GB
-          <br />
+          <br/>
           Replication factor: 3
-          <br />
-          Region: East China 1<br />
+          <br/>
+          Region: East China 1<br/>
         </a-descriptions-item>
       </a-descriptions>
     </div>

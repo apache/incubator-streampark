@@ -26,6 +26,7 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
+import com.streamxhub.console.core.entity.Project;
 import com.streamxhub.console.core.enums.AppExistsState;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -35,11 +36,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.List;
 import java.util.concurrent.*;
-import java.util.jar.Manifest;
 
 /**
  * @author benjobs
@@ -117,9 +115,8 @@ public class ApplicationController extends BaseController {
     }
 
     @RequestMapping("main")
-    public RestResponse getMain(String jar) {
-        Manifest manifest = Utils.getJarManifest(new File(jar));
-        String mainClass = manifest.getMainAttributes().getValue("Main-Class");
+    public RestResponse getMain(Application application) {
+        String mainClass = applicationService.getMain(application);
         return RestResponse.create().data(mainClass);
     }
 
