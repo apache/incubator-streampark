@@ -424,6 +424,17 @@ export default {
           const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
           const config = this.configOverride || this.app.config
           const configId = this.strategy === 1 ? this.configId : null
+
+          const parallelism = this.form.getFieldValue('parallelism') || null
+          const yarnslots = this.form.getFieldValue('yarnslots') || null
+          if (parallelism) {
+            options['parallelism'] = parallelism
+          }
+
+          if (yarnslots) {
+            options['yarnslots'] = yarnslots
+          }
+
           update({
             id: this.app.id,
             config: Base64.encode(config),

@@ -303,6 +303,17 @@ export default {
               }
             }
           }
+
+          const parallelism = this.form.getFieldValue('parallelism') || null
+          const yarnslots = this.form.getFieldValue('yarnslots') || null
+          if (parallelism) {
+            options['parallelism'] = parallelism
+          }
+
+          if (yarnslots) {
+            options['yarnslots'] = yarnslots
+          }
+
           update({
             id: this.app.id,
             jobName: values.jobName,
