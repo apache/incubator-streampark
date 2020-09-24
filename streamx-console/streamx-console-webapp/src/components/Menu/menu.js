@@ -75,20 +75,17 @@ export default {
     updateMenu () {
       const routes = this.$route.matched.concat()
       if (routes.length >= 4) {
-        routes.pop()
-        const router = routes[2]
+        const router = routes.pop()
         if (router.meta.hidden) {
           return
-        } else {
-          this.selectedKeys = [routes[2].path]
         }
+        this.selectedKeys = [routes[2].path]
       } else {
         const router = routes.pop()
         if (router.meta.hidden) {
           return
-        } else {
-          this.selectedKeys = [router.path]
         }
+        this.selectedKeys = [router.path]
       }
       const openKeys = []
       if (this.mode === 'inline') {
