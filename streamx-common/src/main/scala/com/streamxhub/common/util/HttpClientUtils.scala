@@ -48,15 +48,13 @@ object HttpClientUtils {
     getResult(httpGet)
   }
 
-  @throws[URISyntaxException]
-  def httpGetRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  @throws[URISyntaxException] def httpGetRequest(url: String, params: util.Map[String, AnyRef]): String = {
     val ub = uriBuilder(url, params)
     val httpGet = new HttpGet(ub.build)
     getResult(httpGet)
   }
 
-  @throws[URISyntaxException]
-  def httpGetRequest(url: String, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
+  @throws[URISyntaxException] def httpGetRequest(url: String, headers: util.Map[String, AnyRef], params: util.Map[String, AnyRef]): String = {
     val ub = uriBuilder(url, params)
     val httpGet = new HttpGet(ub.build)
     for (param <- headers.entrySet) {
@@ -82,22 +80,19 @@ object HttpClientUtils {
     getResult(httpPatch)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPostRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  @throws[UnsupportedEncodingException] def httpPostRequest(url: String, params: util.Map[String, AnyRef]): String = {
     val httpPost = new HttpPost(url)
     httpPost.setEntity(new UrlEncodedFormEntity(params2NVPS(params), UTF_8))
     getResult(httpPost)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPatchRequest(url: String, params: util.Map[String, AnyRef]): String = {
+  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String, params: util.Map[String, AnyRef]): String = {
     val httpPatch = new HttpPatch(url)
     httpPatch.setEntity(new UrlEncodedFormEntity(params2NVPS(params), UTF_8))
     getResult(httpPatch)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPostRequest(url: String, params: String): String = {
+  @throws[UnsupportedEncodingException] def httpPostRequest(url: String, params: String): String = {
     val httpPost = new HttpPost(url)
     val entity = new StringEntity(params, "utf-8") //解决中文乱码问题
     entity.setContentEncoding("UTF-8")
@@ -106,8 +101,7 @@ object HttpClientUtils {
     getResult(httpPost)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPatchRequest(url: String, params: String): String = {
+  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String, params: String): String = {
     val httpPost = new HttpPatch(url)
     val entity = new StringEntity(params, "utf-8") //解决中文乱码问题
     entity.setContentEncoding("UTF-8")
@@ -116,8 +110,7 @@ object HttpClientUtils {
     getResult(httpPost)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPostRequest(url: String, params: util.Map[String, AnyRef],headers: util.Map[String, AnyRef] = Map.empty[String,AnyRef]): String = {
+  @throws[UnsupportedEncodingException] def httpPostRequest(url: String, params: util.Map[String, AnyRef], headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     val httpPost = new HttpPost(url)
     for (param <- headers.entrySet) {
       httpPost.addHeader(param.getKey, String.valueOf(param.getValue))
@@ -126,8 +119,7 @@ object HttpClientUtils {
     getResult(httpPost)
   }
 
-  @throws[UnsupportedEncodingException]
-  def httpPatchRequest(url: String,  params: util.Map[String, AnyRef],headers: util.Map[String, AnyRef] = Map.empty[String,AnyRef]): String = {
+  @throws[UnsupportedEncodingException] def httpPatchRequest(url: String, params: util.Map[String, AnyRef], headers: util.Map[String, AnyRef] = Map.empty[String, AnyRef]): String = {
     val httpPatch = new HttpPatch(url)
     for (param <- headers.entrySet) {
       httpPatch.addHeader(param.getKey, String.valueOf(param.getValue))
