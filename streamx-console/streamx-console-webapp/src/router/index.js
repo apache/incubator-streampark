@@ -106,7 +106,7 @@ function buildRouter (routes) {
           route.component = PageView
           break
         default:
-          route.component = view(route.component)
+          route.component = resolveView(route.component)
       }
       if (route.children && route.children.length) {
         route.children = buildRouter(route.children)
@@ -116,7 +116,7 @@ function buildRouter (routes) {
   })
 }
 
-function view (path) {
+function resolveView (path) {
   return function (resolve) {
     import(`@/views/${path}.vue`).then(mod => {
       resolve(mod)

@@ -74,14 +74,22 @@ export default {
     },
     updateMenu () {
       const routes = this.$route.matched.concat()
-
-      if (routes.length >= 4 && this.$route.meta.hidden) {
+      if (routes.length >= 4) {
         routes.pop()
-        this.selectedKeys = [routes[2].path]
+        const router = routes[2]
+        if (router.meta.hidden) {
+          return
+        } else {
+          this.selectedKeys = [routes[2].path]
+        }
       } else {
-        this.selectedKeys = [routes.pop().path]
+        const router = routes.pop()
+        if (router.meta.hidden) {
+          return
+        } else {
+          this.selectedKeys = [router.path]
+        }
       }
-
       const openKeys = []
       if (this.mode === 'inline') {
         routes.forEach(item => {
@@ -94,51 +102,40 @@ export default {
 
     // render
     renderItem (menu) {
-      if (!menu.meta.hidden) {
-        return menu.children && !menu.hideChildrenInMenu ? this.renderSubMenu(menu) : this.renderMenuItem(menu)
-      }
-      return null
+      return menu.children && !menu.hideChildrenInMenu ? this.renderSubMenu(menu) : this.renderMenuItem(menu)
     },
 
     renderMenuItem (menu) {
-      if (!menu.meta.hidden) {
-        const target = menu.meta.target || null
-        const tag = target && 'a' || 'router-link'
-        const props = { to: { name: menu.name } }
-        const attrs = { href: menu.path, target: menu.meta.target }
-        return (
-          <Item {...{ key: menu.path }}>
-            <tag {...{ props, attrs }}>
-              {this.renderIcon(menu.meta.icon)}
-              <span>{menu.name}</span>
-            </tag>
-          </Item>
-        )
-      }
-      return null
+      const target = menu.meta.target || null
+      const tag = target && 'a' || 'router-link'
+      const props = { to: { name: menu.name } }
+      const attrs = { href: menu.path, target: menu.meta.target }
+      return (
+        <Item {...{ key: menu.path }}>
+          <tag {...{ props, attrs }}>
+            {this.renderIcon(menu.meta.icon)}
+            <span>{menu.name}</span>
+          </tag>
+        </Item>
+      )
     },
 
     renderSubMenu (menu) {
-      if (!menu.meta.hidden) {
-        const itemArr = []
-        if (!menu.hideChildrenInMenu) {
-          menu.children.forEach(item => {
-            if (!menu.meta.hidden) {
-              itemArr.push(this.renderItem(item))
-            }
-          })
-        }
-        return (
-          <SubMenu {...{ key: menu.path }}>
-            <span slot="title">
-              {this.renderIcon(menu.meta.icon)}
-              <span>{menu.name}</span>
-            </span>
-            {itemArr}
-          </SubMenu>
-        )
+      const itemArr = []
+      if (!menu.hideChildrenInMenu) {
+        menu.children.forEach(item => {
+          itemArr.push(this.renderItem(item))
+        })
       }
-      return null
+      return (
+        <SubMenu {...{ key: menu.path }}>
+          <span slot="title">
+            {this.renderIcon(menu.meta.icon)}
+            <span>{menu.name}</span>
+          </span>
+          {itemArr}
+        </SubMenu>
+      )
     },
 
     renderIcon (icon) {
@@ -168,9 +165,6 @@ export default {
     }
 
     const menuTree = menu.map(item => {
-      if (item.hidden) {
-        return null
-      }
       return this.renderItem(item)
     })
     // {...{ props, on: on }}

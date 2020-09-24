@@ -62,24 +62,22 @@ export default {
       this.$emit('menuSelect', obj)
     },
     // 处理菜单隐藏的。。。
-    filterHidden (array, source) {
-      source.forEach((x) => {
-        if (!x.meta.hidden) {
-          if (x.children && x.children.length > 0) {
-            const children = []
-            this.filterHidden(children, x.children)
-            x.children = children
-            array.push(x)
-          } else {
-            array.push(x)
-          }
+    handleHideMenu (array, source) {
+      source.filter((x) => { return !x.meta.hidden }).forEach((x) => {
+        if (x.children && x.children.length > 0) {
+          const children = []
+          this.handleHideMenu(children, x.children)
+          x.children = children
+          array.push(x)
+        } else {
+          array.push(x)
         }
       })
     }
   },
   mounted () {
     const array = []
-    this.filterHidden(array, this.menus)
+    this.handleHideMenu(array, this.menus)
     this.menu = array
   }
 }
