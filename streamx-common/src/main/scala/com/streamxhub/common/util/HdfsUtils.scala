@@ -49,9 +49,7 @@ object HdfsUtils {
   }
 
   @throws[Exception] def getNameNode: String = {
-    Try {
-      HAUtil.getAddressOfActive(hdfs).getHostString
-    } match {
+    Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
       case Success(value) => value
       case Failure(exception) => throw exception
     }
