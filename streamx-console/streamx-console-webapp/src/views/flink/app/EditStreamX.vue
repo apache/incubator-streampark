@@ -327,13 +327,7 @@ export default {
         this.configId = this.app.configId
         this.handleReset()
         this.handleListConfVersion()
-        listConf({
-          path: this.app['confPath']
-        }).then((resp) => {
-          this.configSource = resp.data
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
+        this.handleConfList()
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -467,6 +461,17 @@ export default {
           }
         })
         this.configVersions = resp.data
+      })
+    },
+
+    handleConfList () {
+      listConf({
+        id: this.app.projectId,
+        module: this.app.module
+      }).then((resp) => {
+        this.configSource = resp.data
+      }).catch((error) => {
+        this.$message.error(error.message)
       })
     },
 
