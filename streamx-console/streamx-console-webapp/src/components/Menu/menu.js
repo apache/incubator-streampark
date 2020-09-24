@@ -74,17 +74,13 @@ export default {
     },
     updateMenu () {
       const routes = this.$route.matched.concat()
-      if (routes.length >= 4) {
-        const router = routes.pop()
-        if (router.meta.hidden) {
-          return
-        }
-        this.selectedKeys = [routes[2].path]
+      const router = routes.pop()
+      if (router.meta.hidden) {
+        return
+      }
+      if (routes.length >= 3) {
+        this.selectedKeys = [routes[1].path]
       } else {
-        const router = routes.pop()
-        if (router.meta.hidden) {
-          return
-        }
         this.selectedKeys = [router.path]
       }
       const openKeys = []
