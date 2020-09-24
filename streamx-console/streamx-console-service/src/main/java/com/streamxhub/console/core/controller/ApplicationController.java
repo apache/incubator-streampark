@@ -31,6 +31,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -52,36 +53,36 @@ public class ApplicationController extends BaseController {
     @Autowired
     private StreamXProperties properties;
 
-    @RequestMapping("list")
+    @PostMapping("list")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.list(app, request);
         return RestResponse.create().data(applicationList);
     }
 
-    @RequestMapping("yarn")
+    @PostMapping("yarn")
     public RestResponse yarn() {
         return RestResponse.create().data(properties.getYarn());
     }
 
-    @RequestMapping("name")
+    @PostMapping("name")
     public RestResponse yarnName(Application app) {
         String yarnName = applicationService.getYarnName(app);
         return RestResponse.create().data(yarnName);
     }
 
-    @RequestMapping("exists")
+    @PostMapping("exists")
     public RestResponse exists(Application app) {
         AppExistsState exists = applicationService.checkExists(app);
         return RestResponse.create().data(exists.get());
     }
 
-    @RequestMapping("create")
+    @PostMapping("create")
     public RestResponse create(Application app) throws IOException {
         boolean saved = applicationService.create(app);
         return RestResponse.create().data(saved);
     }
 
-    @RequestMapping("deploy")
+    @PostMapping("deploy")
     public RestResponse deploy(Application app) {
         Executors.newSingleThreadExecutor().submit(() -> {
             try {
@@ -94,43 +95,43 @@ public class ApplicationController extends BaseController {
         return RestResponse.create();
     }
 
-    @RequestMapping("start")
+    @PostMapping("start")
     public RestResponse start(Application app) throws Exception {
         boolean started = applicationService.start(app);
         return RestResponse.create().data(started);
     }
 
-    @RequestMapping("closeDeploy")
+    @PostMapping("closeDeploy")
     public RestResponse closeDeploy(Application app) {
         applicationService.closeDeploy(app);
         return RestResponse.create().data(true);
     }
 
-    @RequestMapping("get")
+    @PostMapping("get")
     public RestResponse get(Application app) {
         Application application = applicationService.getApp(app);
         return RestResponse.create().data(application);
     }
 
-    @RequestMapping("main")
+    @PostMapping("main")
     public RestResponse getMain(Application application) {
         String mainClass = applicationService.getMain(application);
         return RestResponse.create().data(mainClass);
     }
 
-    @RequestMapping("stop")
+    @PostMapping("stop")
     public RestResponse stop(Application app) {
         applicationService.stop(app);
         return RestResponse.create();
     }
 
-    @RequestMapping("readConf")
+    @PostMapping("readConf")
     public RestResponse readConf(Application app) throws IOException {
         String config = applicationService.readConf(app);
         return RestResponse.create().data(config);
     }
 
-    @RequestMapping("update")
+    @PostMapping("update")
     public RestResponse update(Application app) {
         try {
             applicationService.update(app);

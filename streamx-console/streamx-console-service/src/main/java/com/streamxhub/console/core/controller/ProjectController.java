@@ -58,36 +58,36 @@ public class ProjectController extends BaseController {
         return projectService.build(id);
     }
 
-    @RequestMapping("list")
+    @PostMapping("list")
     public RestResponse list(Project project, RestRequest restRequest) {
         IPage<Project> page = projectService.page(project, restRequest);
         return RestResponse.create().data(page);
     }
 
-    @RequestMapping("modules")
+    @PostMapping("modules")
     public RestResponse modules(Long id) {
         List<String> result = projectService.modules(id);
         return RestResponse.create().data(result);
     }
 
-    @RequestMapping("jars")
+    @PostMapping("jars")
     public RestResponse jars(Project project) {
         List<String> result = projectService.jars(project);
         return RestResponse.create().data(result);
     }
 
-    @RequestMapping("listconf")
+    @PostMapping("listconf")
     public RestResponse listConf(Project project) {
         List<Map<String, Object>> list = projectService.listConf(project);
         return RestResponse.create().data(list);
     }
 
-    @RequestMapping("select")
+    @PostMapping("select")
     public RestResponse select() {
         return RestResponse.create().data(projectService.list());
     }
 
-    @RequestMapping("delete")
+    @PostMapping("delete")
     public RestResponse delete(String id) {
         boolean result = projectService.delete(id);
         return RestResponse.create().message(result ? "删除成功" : "删除失败");

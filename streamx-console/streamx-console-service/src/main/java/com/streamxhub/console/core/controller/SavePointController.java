@@ -43,7 +43,6 @@ import java.util.List;
 @RequestMapping("flink/savepoint")
 public class SavePointController extends BaseController {
 
-
     @Autowired
     private SavePointService savePointService;
 

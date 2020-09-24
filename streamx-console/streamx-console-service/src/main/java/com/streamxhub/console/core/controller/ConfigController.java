@@ -28,6 +28,7 @@ import com.streamxhub.console.core.service.ApplicationConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -45,13 +46,13 @@ public class ConfigController extends BaseController {
     @Autowired
     private ApplicationConfigService applicationConfigService;
 
-    @RequestMapping("get")
+    @PostMapping("get")
     public RestResponse get(Long id) {
         ApplicationConfig config =  applicationConfigService.get(id);
         return RestResponse.create().data(config);
     }
 
-    @RequestMapping("list")
+    @PostMapping("list")
     public RestResponse list(Application app) {
         List<ApplicationConfig> list =  applicationConfigService.listConf(app.getId());
         return RestResponse.create().data(list);
