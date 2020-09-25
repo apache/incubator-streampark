@@ -27,7 +27,7 @@ import java.util.concurrent.{CompletableFuture, TimeUnit}
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
-import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, JsonUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
@@ -270,6 +270,11 @@ object FlinkSubmit extends Logger {
           optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
         }
 
+        optionMap += "-ynm" -> submitInfo.appName
+
+        //页面定义的参数优先级大于app配置文件
+        submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => optionMap += x._1 -> x._2)
+
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
           array += x._1
@@ -278,15 +283,13 @@ object FlinkSubmit extends Logger {
           }
         })
 
-        //页面定义的参数优先级大于app配置文件
-        submitInfo.overrideOption.foreach(x => array += x)
-
-        //-D
+        //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
         array.toArray
 
       }
+
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
@@ -352,17 +355,30 @@ object FlinkSubmit extends Logger {
       override def apply(t: URL): String = t.toString
     })
 
-    if (commandLine.hasOption(FlinkRunOption.PARALLELISM_OPTION.getOpt)) {
-      val parString = commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt)
-      try {
-        val parallelism = parString.toInt
-        if (parallelism <= 0) {
-          throw new NumberFormatException("[StreamX] parallelism muse be > 0. ")
+    commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
+      case null =>
+      case p =>
+        Try(p.toInt) match {
+          case Success(value) =>
+            if (value <= 0) {
+              throw new NumberFormatException("[StreamX] parallelism muse be > 0. ")
+            }
+            configuration.setInteger(CoreOptions.DEFAULT_PARALLELISM.key(), value)
+          case Failure(e) => throw new CliArgsException(s"The parallelism must be a positive number: $p,err:$e ")
         }
-        configuration.setInteger(CoreOptions.DEFAULT_PARALLELISM, parallelism)
-      } catch {
-        case e: NumberFormatException => throw new CliArgsException(s"The parallelism must be a positive number: $parString,err:$e ")
-      }
+    }
+
+    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
+      case null =>
+      case s =>
+        Try(s.toInt) match {
+          case Success(value) =>
+            if (value <= 0) {
+              throw new NumberFormatException("[StreamX] slot muse be > 0. ")
+            }
+            configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
+          case Failure(e) => throw new CliArgsException(s"The slot must be a positive number: $s,err:$e ")
+        }
     }
 
     val detachedMode = commandLine.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || commandLine.hasOption(FlinkRunOption.YARN_DETACHED_OPTION.getOpt)
@@ -389,16 +405,6 @@ object FlinkSubmit extends Logger {
     commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
       case null =>
       case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
-      case null =>
-      case parallelism => effectiveConfiguration.setInteger(CoreOptions.DEFAULT_PARALLELISM.key(), parallelism.trim.toInt)
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
-      case null =>
-      case slot => effectiveConfiguration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), slot.toInt)
     }
 
     /**
