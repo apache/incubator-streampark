@@ -26,10 +26,9 @@ import java.util.concurrent.TimeUnit
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.enums.ApiType.ApiType
-import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.Configuration
+import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
@@ -158,7 +157,9 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   private[this] def initStreamEnv() = {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
-    Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT) match {
+    Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse {
+      Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
+    } match {
       case p if p > 0 => streamEnv.setParallelism(p)
       case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
     }
