@@ -273,7 +273,14 @@ object FlinkSubmit extends Logger {
         optionMap += "-ynm" -> submitInfo.appName
 
         //页面定义的参数优先级大于app配置文件
-        submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => optionMap += x._1 -> x._2)
+        submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
+          val option = commandLineOptions.getOption(x._1)
+          if (option.hasArg) {
+            optionMap += s"-${option.getOpt}" -> x._2.toString
+          } else {
+            optionMap += s"-${option.getOpt}" -> true
+          }
+        })
 
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
