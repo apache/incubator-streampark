@@ -200,7 +200,7 @@ object FlinkSubmit extends Logger {
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
       }
 
-      val appArgs = {
+      val appArgs: ArrayBuffer[String] = {
         val array = new ArrayBuffer[String]
         Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
         array += KEY_FLINK_APP_CONF("--")
@@ -209,7 +209,11 @@ object FlinkSubmit extends Logger {
         array += flinkHdfsHomeWithNameService
         array += KEY_APP_NAME("--")
         array += appName
-        array.toList.asJava
+      }
+
+      if (submitInfo.overrideOption.containsKey("parallelism")) {
+        appArgs += s"--$KEY_FLINK_PARALLELISM"
+        appArgs += submitInfo.overrideOption.get("parallelism").toString
       }
 
       //获取flink的配置
@@ -231,7 +235,7 @@ object FlinkSubmit extends Logger {
         //设置启动主类
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
         //设置启动参数
-        .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs)
+        .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
 
       loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
     }

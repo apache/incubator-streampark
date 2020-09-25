@@ -65,7 +65,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  *
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.Scala, jdbc: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, jdbc: Properties) extends RichSourceFunction[R] with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaSqlFunc: () => String = _
@@ -75,7 +75,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: () => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
-    this(ApiType.Scala, jdbc)
+    this(ApiType.SCALA, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
   }
@@ -92,15 +92,15 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
-          case ApiType.Scala => scalaSqlFunc()
+          case ApiType.SCALA => scalaSqlFunc()
           case ApiType.JAVA => javaSqlFunc.getSQL
         }
         val result: List[Map[String, _]] = apiType match {
-          case ApiType.Scala => JdbcUtils.select(sql)(jdbc)
+          case ApiType.SCALA => JdbcUtils.select(sql)(jdbc)
           case ApiType.JAVA => JdbcUtils.select(sql)(jdbc)
         }
         apiType match {
-          case ApiType.Scala => scalaResultFunc(result).foreach(ctx.collect)
+          case ApiType.SCALA => scalaResultFunc(result).foreach(ctx.collect)
           case ApiType.JAVA => javaResultFunc.result(result.map(_.asJava)).foreach(ctx.collect)
         }
       }

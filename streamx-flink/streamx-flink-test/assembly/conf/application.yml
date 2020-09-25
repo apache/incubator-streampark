@@ -13,10 +13,10 @@ flink:
       yarnqueue:                        # -yqu (Specify YARN queue)
       yarnslots: 1                      # -ys  (Number of slots per TaskManager)
       yarntaskManagerMemory: 4096M      # -ytm
+      parallelism: 1
   watermark:
     time.characteristic: EventTime
     interval: 10000
-  parallelism: 1
   checkpoints:
     enable: true
     interval: 5000
