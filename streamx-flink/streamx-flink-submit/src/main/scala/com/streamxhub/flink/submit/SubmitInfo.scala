@@ -27,6 +27,6 @@ case class SubmitInfo(nameService: String,
                       appConf: String,
                       applicationType:String,
                       savePoint: String,
-                      overrideOption: Array[String],
+                      overrideOption: java.util.Map[String,Any],
                       dynamicOption: Array[String],
                       args: String)

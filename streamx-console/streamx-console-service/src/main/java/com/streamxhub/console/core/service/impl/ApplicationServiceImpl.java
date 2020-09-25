@@ -335,17 +335,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        String[] overrideOption = new String[0];
-        String options = application.getShortOptions();
-        if (CommonUtil.notEmpty(options)) {
+        Map<String,Object> overrideOption = application.getOptionMap();
+
+        if (CommonUtil.notEmpty(overrideOption)) {
             if (paramOfApp.getAllowNonRestored()) {
-                options = options.concat(" -n ");
+                overrideOption.put("allowNonRestoredState",true);
             }
-            overrideOption = options.trim().split("\\s+");
         } else {
             if (paramOfApp.getAllowNonRestored()) {
-                overrideOption = new String[1];
-                overrideOption[0] = "-n";
+                overrideOption = new HashMap<>(1);
+                overrideOption.put("allowNonRestoredState",true);
             }
         }
 

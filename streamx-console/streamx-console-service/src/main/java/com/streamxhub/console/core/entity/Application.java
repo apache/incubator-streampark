@@ -163,23 +163,10 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public String getShortOptions() throws IOException {
-        Options allOptions = FlinkRunOption.allOptions();
+    public Map<String,Object> getOptionMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map = mapper.readValue(getOptions(), Map.class);
-        StringBuffer stringBuffer = new StringBuffer();
-        map.forEach((k, v) -> {
-            if (allOptions.hasLongOption(k)) {
-                Option opt = allOptions.getOption(k);
-                stringBuffer.append("-").append(opt.getOpt());
-                if (opt.hasArg()) {
-                    stringBuffer.append(" ").append(v.toString()).append(" ");
-                } else {
-                    stringBuffer.append(" ");
-                }
-            }
-        });
-        return stringBuffer.toString().trim();
+        return map;
     }
 
 }
