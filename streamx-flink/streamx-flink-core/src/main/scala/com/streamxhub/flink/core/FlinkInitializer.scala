@@ -82,7 +82,7 @@ class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction
 class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
 
   def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
-    this(args, ApiType.Scala)
+    this(args, ApiType.SCALA)
     streamConfFunc = func
     initStreamEnv()
   }
@@ -111,6 +111,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       case x if x.startsWith("prop://") =>
         PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("hdfs://") =>
+
         /**
          * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
          */
@@ -138,7 +139,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       case file => file
     }
     val configArgs = readFlinkConf(config)
-    ParameterTool.fromMap(configArgs).mergeWith(argsMap).mergeWith(ParameterTool.fromSystemProperties())
+    //显示指定的优先级 > 项目配置文件 > 系统配置文件...
+    ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
@@ -173,7 +175,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
     apiType match {
       case ApiType.JAVA if javaEnvConf != null => javaEnvConf.envConfig(this.streamEnv.getJavaEnv, this.parameter)
-      case ApiType.Scala if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
+      case ApiType.SCALA if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
       case _ =>
     }
 
