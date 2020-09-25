@@ -158,15 +158,16 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   private[this] def initStreamEnv() = {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
-    val parallelism = Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT)
+    Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse(ExecutionConfig.PARALLELISM_DEFAULT) match {
+      case p if p > 0 => streamEnv.setParallelism(p)
+      case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
+    }
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {
       streamEnv.getConfig.setAutoWatermarkInterval(interval)
     }
-    streamEnv.setParallelism(parallelism)
     streamEnv.setStreamTimeCharacteristic(timeCharacteristic)
-
     //重启策略.
     restartStrategy()
 
