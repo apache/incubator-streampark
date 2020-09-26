@@ -928,6 +928,7 @@ export default {
     this.formDeploy = this.$form.createForm(this)
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
+    this.formMapping = this.$form.createForm(this)
   },
 
   methods: {
