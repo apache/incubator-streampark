@@ -366,6 +366,7 @@
             <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
             <a-tag color="#eb2f96" v-if="state === 12" class="status-processing-reconciling">RECONCILING</a-tag>
             <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
+            <a-tag color="#13c2c2" v-if="state === 14">MAPPING</a-tag>
           </div>
         </template>
 
@@ -639,8 +640,8 @@
         <a-form @submit="handleMappingOk" :form="formMapping">
           <a-form-item
             label="ApplicationId"
-            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 4} }">
             <a-input
               type="text"
               placeholder="请输入 ApplicationId"
@@ -648,8 +649,8 @@
           </a-form-item>
           <a-form-item
             label="JobId"
-            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 4} }">
             <a-input
               type="text"
               placeholder="请输入 JobId"
