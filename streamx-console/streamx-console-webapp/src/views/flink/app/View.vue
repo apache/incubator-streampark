@@ -366,7 +366,7 @@
             <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
             <a-tag color="#eb2f96" v-if="state === 12" class="status-processing-reconciling">RECONCILING</a-tag>
             <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
-            <a-tag color="#13c2c2" v-if="state === 14">MAPPING</a-tag>
+            <a-tag color="#13c2c2" v-if="state === 14" class="status-processing-restarting">MAPPING</a-tag>
           </div>
         </template>
 
