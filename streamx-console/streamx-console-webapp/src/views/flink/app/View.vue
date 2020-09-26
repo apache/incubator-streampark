@@ -525,7 +525,14 @@
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
                 :value="k.savePoint">
-                {{ k.savePoint.substr(k.savePoint.lastIndexOf('/')+1) }}
+                <template>
+                   <span style="color:#108ee9">
+                      {{ k.savePoint.substr(k.savePoint.lastIndexOf('-')+1) }}
+                   </span>
+                  <span style="float: right; color: darkgrey">
+                    <a-icon type="clock-circle"/> {{ k.createTime }}
+                  </span>
+                </template>
               </a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
@@ -542,7 +549,7 @@
               un-checked-children="false"
               v-model="allowNonRestoredState"
               v-decorator="['allowNonRestoredState']"/>
-            <span class="conf-switch"> skip savepoint that cannot be restored </span>
+            <span class="conf-switch" style="color:darkgrey"> skip savepoint that cannot be restored </span>
           </a-form-item>
         </a-form>
 
