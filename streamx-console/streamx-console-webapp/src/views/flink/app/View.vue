@@ -963,6 +963,7 @@ export default {
     handleDeployOk () {
       this.formDeploy.validateFields((err, values) => {
         if (!err) {
+          const id = this.application.id
           const savePoint = this.savePoint
           const description = values.description
           const restart = this.restart
@@ -973,7 +974,7 @@ export default {
             3
           )
           deploy({
-            id: this.application.id,
+            id: id,
             restart: restart,
             savePointed: savePoint,
             allowNonRestored: allowNonRestoredState,
@@ -999,9 +1000,10 @@ export default {
           )
           const appId = values.appId
           const jobId = values.jobId
+          const id = this.application.id
           this.handleMappingCancel()
           mapping({
-            id: this.application.id,
+            id: id,
             appId: appId,
             jobId: jobId
           }).then((resp) => {
@@ -1049,12 +1051,13 @@ export default {
             '已发送启动请求,该应用正在启动中',
             3
           )
+          const id = this.application.id
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.handleStartCancel()
           start({
-            id: this.application.id,
+            id: id,
             savePointed: savePointed,
             savePoint: savePoint,
             allowNonRestored: allowNonRestoredState
@@ -1085,9 +1088,10 @@ export default {
       )
       const savePoint = this.savePoint
       const drain = this.drain
+      const id = this.application.id
       this.handleStopCancel()
       stop({
-        id: this.application.id,
+        id: id,
         savePointed: savePoint,
         drain: drain
       }).then((resp) => {
