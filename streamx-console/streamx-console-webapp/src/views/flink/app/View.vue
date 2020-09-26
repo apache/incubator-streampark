@@ -639,9 +639,16 @@
 
         <a-form @submit="handleMappingOk" :form="formMapping">
           <a-form-item
-            label="ApplicationId"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 4} }">
+            v-if="mappingVisible"
+            label="Application Name"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-alert :message="application.jobName" type="info"/>
+          </a-form-item>
+          <a-form-item
+            label="Application Id"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-input
               type="text"
               placeholder="请输入 ApplicationId"
@@ -649,8 +656,8 @@
           </a-form-item>
           <a-form-item
             label="JobId"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 4} }">
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-input
               type="text"
               placeholder="请输入 JobId"
@@ -1199,6 +1206,10 @@ export default {
 
 .ant-upload.ant-upload-drag p.ant-upload-drag-icon .anticon {
   font-size: 100px;
+}
+
+.ant-alert.ant-alert-no-icon {
+  padding: 6px 15px;
 }
 
 .app_state {

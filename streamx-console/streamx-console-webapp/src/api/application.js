@@ -26,7 +26,7 @@ export function deploy (params) {
 }
 
 export function mapping (params) {
-  return http.mapping(api.Application.Mapping, params)
+  return http.post(api.Application.Mapping, params)
 }
 
 export function yarn (params) {
