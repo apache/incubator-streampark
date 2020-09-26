@@ -263,6 +263,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public boolean mapping(Application paramOfApp) {
+        return this.baseMapper.mapping(paramOfApp);
+    }
+
+    @Override
     public void updateState(Application application) {
         this.baseMapper.updateState(application);
     }

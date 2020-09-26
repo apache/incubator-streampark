@@ -383,6 +383,12 @@
 
         <template slot="operation" slot-scope="text, record">
           <a-icon
+            v-if="record.state !== 5"
+            type="deployment-unit"
+            style="color:#4a9ff5"
+            @click="handleMapping(record)">
+          </a-icon>
+          <a-icon
             v-show="record.deploy === 1 && record.state !== 1 "
             v-permit="'role:update'"
             type="upload"
@@ -623,6 +629,44 @@
           </a-button>
         </template>
       </a-modal>
+
+      <a-modal v-model="mappingVisible" on-ok="handleMappingOk">
+        <template slot="title">
+          <a-icon slot="icon" type="deployment-unit" style="color: green"/>
+          Mapping application
+        </template>
+
+        <a-form @submit="handleMappingOk" :form="formMapping">
+          <a-form-item
+            label="ApplicationId"
+            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-input
+              type="text"
+              placeholder="请输入 ApplicationId"
+              v-decorator="[ 'appId', {rules: [{ required: true, message: '请输入ApplicationId'}]} ]"/>
+          </a-form-item>
+          <a-form-item
+            label="JobId"
+            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-input
+              type="text"
+              placeholder="请输入 JobId"
+              v-decorator="[ 'jobId', {rules: [{ required: true, message: '请输入 JobId'}]} ]"/>
+          </a-form-item>
+        </a-form>
+
+        <template slot="footer">
+          <a-button key="back" @click="handleMappingCancel">
+            取消
+          </a-button>
+          <a-button key="submit" type="primary" :loading="loading" @click="handleMappingOk">
+            确定
+          </a-button>
+        </template>
+      </a-modal>
+
     </a-card>
   </div>
 </template>
@@ -630,7 +674,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import { mapActions } from 'vuex'
-import { list, stop, deploy, start, closeDeploy, yarn } from '@api/application'
+import { list, stop, deploy, mapping, start, closeDeploy, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
 
 export default {
@@ -648,9 +692,11 @@ export default {
       deployVisible: false,
       stopVisible: false,
       startVisible: false,
+      mappingVisible: false,
       formDeploy: null,
       formStopSavePoint: null,
       formStartCheckPoint: null,
+      formMapping: null,
       drain: false,
       savePoint: true,
       restart: false,
@@ -905,6 +951,7 @@ export default {
 
     handleDeployNo () {
       this.deployVisible = false
+      this.application = null
       this.restart = false
       this.allowNonRestoredState = false
       this.savePoint = true
@@ -936,6 +983,38 @@ export default {
       })
     },
 
+    handleMapping (app) {
+      this.mappingVisible = true
+      this.application = app
+    },
+
+    handleMappingOk () {
+      this.formMapping.validateFields((err, values) => {
+        if (!err) {
+          this.$message.info(
+            '已发送手动映射请求,请稍后',
+            3
+          )
+          const appId = values.appId
+          const jobId = values.jobId
+          this.handleMappingCancel()
+          mapping({
+            id: this.application.id,
+            appId: appId,
+            jobId: jobId
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
+      })
+    },
+
+    handleMappingCancel () {
+      this.mappingVisible = false
+      this.application = null
+      this.formMapping.resetFields()
+    },
+
     handleStart (app) {
       this.application = app
       lastest({
@@ -957,6 +1036,7 @@ export default {
       this.startVisible = false
       this.allowNonRestoredState = false
       this.formStartCheckPoint.resetFields()
+      this.application = null
       this.savePoint = true
     },
 
@@ -993,6 +1073,7 @@ export default {
       this.formStopSavePoint.resetFields()
       this.drain = false
       this.savePoint = true
+      this.application = null
     },
 
     handleStopOk () {

@@ -82,6 +82,12 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(saved);
     }
 
+    @PostMapping("mapping")
+    public RestResponse mapping(Application app) {
+        boolean flag = applicationService.mapping(app);
+        return RestResponse.create().data(flag);
+    }
+
     @PostMapping("deploy")
     public RestResponse deploy(Application app) {
         Executors.newSingleThreadExecutor().submit(() -> {

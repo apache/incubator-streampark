@@ -25,6 +25,10 @@ export function deploy (params) {
   return http.post(api.Application.Deploy, params)
 }
 
+export function mapping (params) {
+  return http.mapping(api.Application.Mapping, params)
+}
+
 export function yarn (params) {
   return http.post(api.Application.Yarn, params)
 }

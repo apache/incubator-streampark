@@ -34,6 +34,7 @@ export default {
     ReadConf: '/flink/app/readConf',
     Update: '/flink/app/update',
     Deploy: '/flink/app/deploy',
+    Mapping: '/flink/app/mapping',
     Yarn: '/flink/app/yarn',
     List: '/flink/app/list',
     Get: '/flink/app/get',
