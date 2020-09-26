@@ -54,7 +54,7 @@ public class FlinkMonitorTask {
 
     private final Map<Long, Long> cancelingMap = new ConcurrentHashMap<>();
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedDelay = 1000 * 3)
     public void run() {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         //以下状态的不再监控...
