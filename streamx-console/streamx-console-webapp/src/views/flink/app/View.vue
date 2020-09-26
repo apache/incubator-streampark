@@ -478,6 +478,20 @@
             <span class="conf-switch" style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
           <a-form-item
+            v-if="restart"
+            label="allow NonRestored"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="allowNonRestoredState"
+              v-decorator="['allowNonRestoredState']"/>
+            <span class="conf-switch" style="color:darkgrey"> skip savepoint that cannot be restored </span>
+          </a-form-item>
+          <a-form-item
             label="Backup desc"
             :labelCol="{lg: {span: 6}, sm: {span: 6}}"
             :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
@@ -892,6 +906,7 @@ export default {
     handleDeployNo () {
       this.deployVisible = false
       this.restart = false
+      this.allowNonRestoredState = false
       this.savePoint = true
       this.formDeploy.resetFields()
     },
@@ -902,6 +917,7 @@ export default {
           const savePoint = this.savePoint
           const description = values.description
           const restart = this.restart
+          const allowNonRestoredState = this.allowNonRestoredState
           this.handleDeployNo()
           this.$message.info(
             '已发送部署请求,后台正在执行部署,请耐心等待',
@@ -911,6 +927,7 @@ export default {
             id: this.application.id,
             restart: restart,
             savePointed: savePoint,
+            allowNonRestored: allowNonRestoredState,
             backUpDescription: description
           }).then((resp) => {
             console.log(resp)
