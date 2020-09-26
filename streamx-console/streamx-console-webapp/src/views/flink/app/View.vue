@@ -451,8 +451,8 @@
           <a-form-item
             v-if="application && application.state === 5 "
             label="restart"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checkedChildren="开"
               unCheckedChildren="关"
@@ -466,8 +466,8 @@
           <a-form-item
             v-if="restart"
             label="Savepoint"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checkedChildren="开"
               unCheckedChildren="关"
@@ -492,9 +492,9 @@
             <span class="conf-switch" style="color:darkgrey"> skip savepoint that cannot be restored </span>
           </a-form-item>
           <a-form-item
-            label="Backup desc"
-            :labelCol="{lg: {span: 6}, sm: {span: 6}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            label="backup desc"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-textarea
               rows="3"
               placeholder="应用重新发布前会先备份当前的应用,请输入当前应用的备份描述信息,以便回滚版本时找回"
