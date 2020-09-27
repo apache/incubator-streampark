@@ -447,7 +447,7 @@
           Deploy Application
         </template>
         <template slot="footer">
-          <a-button key="back" @click="handleDeployNo">
+          <a-button key="back" @click="handleDeployCancel">
             取消
           </a-button>
           <a-button key="submit" type="primary" :loading="loading" @click="handleDeployOk">
@@ -958,7 +958,7 @@ export default {
       this.application = value
     },
 
-    handleDeployNo () {
+    handleDeployCancel () {
       this.deployVisible = false
       this.$nextTick(() => {
         this.application = null
@@ -977,7 +977,7 @@ export default {
           const description = values.description
           const restart = this.restart
           const allowNonRestoredState = this.allowNonRestoredState
-          this.handleDeployNo()
+          this.handleDeployCancel()
           this.$message.info(
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
