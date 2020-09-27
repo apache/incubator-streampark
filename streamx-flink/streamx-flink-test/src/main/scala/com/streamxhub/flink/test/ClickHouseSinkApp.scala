@@ -21,7 +21,7 @@
 package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.HttpSink
+import com.streamxhub.flink.core.sink.scala.HttpSink
 import com.streamxhub.flink.core.sink.scala.ClickHouseSink
 import org.apache.flink.streaming.api.scala._
 
