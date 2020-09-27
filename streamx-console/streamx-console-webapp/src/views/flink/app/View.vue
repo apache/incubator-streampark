@@ -547,9 +547,9 @@
                 :key="i"
                 :value="k.savePoint">
                 <template>
-                   <span style="color:#108ee9">
-                      {{ k.savePoint.substr(k.savePoint.lastIndexOf('-')+1) }}
-                   </span>
+                  <span style="color:#108ee9">
+                    {{ k.savePoint.substr(k.savePoint.lastIndexOf('-')+1) }}
+                  </span>
                   <span style="float: right; color: darkgrey">
                     <a-icon type="clock-circle"/> {{ k.createTime }}
                   </span>
@@ -960,11 +960,13 @@ export default {
 
     handleDeployNo () {
       this.deployVisible = false
-      this.application = null
-      this.restart = false
-      this.allowNonRestoredState = false
-      this.savePoint = true
-      this.formDeploy.resetFields()
+      this.$nextTick(() => {
+        this.application = null
+        this.restart = false
+        this.allowNonRestoredState = false
+        this.savePoint = true
+        this.formDeploy.resetFields()
+      })
     },
 
     handleDeployOk () {
@@ -1022,8 +1024,10 @@ export default {
 
     handleMappingCancel () {
       this.mappingVisible = false
-      this.application = null
-      this.formMapping.resetFields()
+      this.$nextTick(() => {
+        this.application = null
+        this.formMapping.resetFields()
+      })
     },
 
     handleStart (app) {
@@ -1045,10 +1049,12 @@ export default {
 
     handleStartCancel () {
       this.startVisible = false
-      this.allowNonRestoredState = false
-      this.formStartCheckPoint.resetFields()
-      this.application = null
-      this.savePoint = true
+      this.$nextTick(() => {
+        this.allowNonRestoredState = false
+        this.formStartCheckPoint.resetFields()
+        this.application = null
+        this.savePoint = true
+      })
     },
 
     handleStartOk () {
@@ -1082,10 +1088,12 @@ export default {
 
     handleStopCancel () {
       this.stopVisible = false
-      this.formStopSavePoint.resetFields()
-      this.drain = false
-      this.savePoint = true
-      this.application = null
+      this.$nextTick(() => {
+        this.formStopSavePoint.resetFields()
+        this.drain = false
+        this.savePoint = true
+        this.application = null
+      })
     },
 
     handleStopOk () {
