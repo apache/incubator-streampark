@@ -21,7 +21,8 @@
 package com.streamxhub.flink.test
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.{AsyncClickHouseOutputFormat, ClickHouseSink, HttpSink}
+import com.streamxhub.flink.core.sink.HttpSink
+import com.streamxhub.flink.core.sink.scala.ClickHouseSink
 import org.apache.flink.streaming.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {

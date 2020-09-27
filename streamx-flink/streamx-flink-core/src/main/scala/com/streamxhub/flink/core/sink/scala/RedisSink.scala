@@ -18,33 +18,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
 import java.io.IOException
 
-import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig}
-import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => RMapper}
-import com.streamxhub.flink.core.StreamingContext
-
-import scala.collection.JavaConversions._
-import scala.collection.Map
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger, Utils}
+import com.streamxhub.flink.core.StreamingContext
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
-import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
-import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand._
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.streaming.connectors.redis.common.config.{FlinkJedisConfigBase, FlinkJedisPoolConfig}
 import org.apache.flink.streaming.connectors.redis.common.container.{RedisContainer => RContainer}
+import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand._
+import org.apache.flink.streaming.connectors.redis.common.mapper.{RedisCommand, RedisCommandDescription, RedisMapper => RMapper}
+import org.apache.flink.streaming.connectors.redis.{RedisSink => RSink}
 import redis.clients.jedis.exceptions.JedisException
 import redis.clients.jedis.{Jedis, JedisPool}
 
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
+import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 
 object RedisSink {

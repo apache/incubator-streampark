@@ -1,6 +1,7 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.{InfluxDBSink, InfluxEntity}
+import com.streamxhub.flink.core.sink.InfluxEntity
+import com.streamxhub.flink.core.sink.scala.{InfluxDBSink, InfluxEntity}
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._

@@ -18,23 +18,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
 import java.util.Optional
 import java.util.concurrent.atomic.AtomicInteger
 
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.{ConfigUtils, Logger}
-import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
-import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
 import com.streamxhub.flink.core.StreamingContext
 import javax.annotation.Nullable
+import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
+import org.apache.flink.streaming.api.datastream.{DataStreamSink, DataStream => JavaStream}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.api.datastream.{DataStream => JavaStream}
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaProducer011 => FlinkKafkaProducer}
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaProducer011 => FlinkKafkaProducer}
 
 import scala.annotation.meta.param
 import scala.collection.Map

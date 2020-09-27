@@ -18,11 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink;
+package com.streamxhub.flink.core.sink.java;
 
 import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.StreamingContext;
 import com.streamxhub.flink.core.function.ToSQLFunction;
+import com.streamxhub.flink.core.sink.scala.Dialect;
+import com.streamxhub.flink.core.sink.scala.Jdbc2PCSinkFunction;
+import com.streamxhub.flink.core.sink.scala.JdbcSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
@@ -32,7 +35,7 @@ import java.util.Properties;
 /**
  * @author benjobs
  */
-public class JdbcJavaSink<T> {
+public class JdbcSink<T> {
 
     private StreamingContext context;
     private Properties jdbc;
@@ -40,28 +43,28 @@ public class JdbcJavaSink<T> {
     private String dialect = Dialect.MYSQL().toString().toLowerCase();
     private String alias = "";
 
-    public JdbcJavaSink(StreamingContext context) {
+    public JdbcSink(StreamingContext context) {
         this.context = context;
         this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
     }
 
-    public JdbcJavaSink<T> dialect(String dialect) {
+    public JdbcSink<T> dialect(String dialect) {
         this.dialect = dialect;
         return this;
     }
 
-    public JdbcJavaSink<T> alias(String alias) {
+    public JdbcSink<T> alias(String alias) {
         this.alias = alias;
         this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
         return this;
     }
 
-    public JdbcJavaSink<T> jdbc(Properties jdbc) {
+    public JdbcSink<T> jdbc(Properties jdbc) {
         this.jdbc = jdbc;
         return this;
     }
 
-    public JdbcJavaSink<T> sql(ToSQLFunction<T> func) {
+    public JdbcSink<T> sql(ToSQLFunction<T> func) {
         this.toSQLFunc = func;
         return this;
     }

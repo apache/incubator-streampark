@@ -18,27 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
 import java.util.Properties
 import java.util.concurrent.atomic.AtomicLong
 
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, HBaseClient, Logger}
 import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.api.common.io.RichOutputFormat
+import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
-import com.streamxhub.common.conf.ConfigConst._
-import org.apache.flink.api.common.io.RichOutputFormat
-import org.apache.flink.api.common.typeinfo.TypeInformation
-
+import java.lang.{Iterable => JIter}
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ArrayBuffer
 import scala.collection.Map
+import scala.collection.mutable.ArrayBuffer
 
 object HBaseSink {
 
@@ -63,7 +63,7 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
    * @tparam T
    * @return
    */
-  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => java.lang.Iterable[Mutation]): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => JIter[Mutation]): DataStreamSink[T] = {
     implicit val prop: Properties = ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     overrideParams.foreach { case (k, v) => prop.put(k, v) }
     val sinkFun = new HBaseSinkFunction[T](tableName, fun)
@@ -73,7 +73,7 @@ class HBaseSink(@(transient@param) ctx: StreamingContext,
 
 }
 
-class HBaseSinkFunction[T](tabName: String, fun: T => java.lang.Iterable[Mutation])(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
+class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = _
   private var table: Table = _
@@ -146,7 +146,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => java.lang.Iterable[Mutatio
 
 }
 
-class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => java.lang.Iterable[Mutation])(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
+class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => JIter[Mutation])(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new HBaseSinkFunction[T](tabName, fun)
 

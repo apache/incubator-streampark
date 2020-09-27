@@ -3,9 +3,9 @@ package com.streamxhub.flink.test
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import com.streamxhub.flink.core.sink.scala.ESSink
+import com.streamxhub.flink.core.source.scala.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.ESSink
-import com.streamxhub.flink.core.source.KafkaSource
 import com.streamxhub.flink.core.util.EsIndexUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time

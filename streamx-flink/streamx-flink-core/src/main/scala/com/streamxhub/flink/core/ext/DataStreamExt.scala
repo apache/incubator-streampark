@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.ext
 
 import java.lang.reflect.Method
 
-import com.streamxhub.flink.core.sink.EchoSink
+import com.streamxhub.flink.core.sink.scala.EchoSink
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
 import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
