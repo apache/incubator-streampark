@@ -57,18 +57,6 @@
         where t.id = #{application.id}
     </select>
 
-    <update id="updateDeploy" parameterType="application">
-        update t_flink_app
-        set deploy=#{application.deploy}
-        where id=#{application.id}
-    </update>
-
-    <update id="updateState" parameterType="application">
-        update t_flink_app
-        set state=#{application.state}
-        where id=#{application.id}
-    </update>
-
     <update id="updateMonitor" parameterType="application">
         update t_flink_app
         <set>

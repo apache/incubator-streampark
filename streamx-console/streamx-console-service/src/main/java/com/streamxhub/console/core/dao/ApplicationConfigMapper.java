@@ -34,12 +34,12 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
     @Select("select max(`version`) as lastVersion from t_flink_config where app_id=#{appId}")
     Integer getLastVersion(@Param("appId") Long appId);
 
-    @Update("update t_flink_config set actived = 0 where app_id=#{appId}")
+    @Update("update t_flink_config set actived=0 where app_id=#{appId}")
     void standby(@Param("appId") Long id);
 
-    @Select("select * from t_flink_config where app_id=#{appId} and actived = 1")
+    @Select("select * from t_flink_config where app_id=#{appId} and actived=1")
     ApplicationConfig getActived(@Param("appId")Long id);
 
-    @Update("update t_flink_config set actived = 1 where id=#{id}")
+    @Update("update t_flink_config set actived=1 where id=#{id}")
     void active(@Param("id")Long id);
 }

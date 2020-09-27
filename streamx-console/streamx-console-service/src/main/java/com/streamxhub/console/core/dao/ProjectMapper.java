@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
@@ -33,12 +34,16 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     IPage<Project> findProject(Page<Project> page, @Param("project") Project project);
 
+    @Update("update t_flink_project set BUILDSTATE=2 where id=#{project.id}")
     void failureBuild(@Param("project") Project project);
 
+    @Update("update t_flink_project set lastBuild=now(),BUILDSTATE=1 where id=#{project.id}")
     void successBuild(@Param("project") Project project);
 
+    @Update("update t_flink_project set BUILDSTATE=0 where id=#{project.id}")
     void startBuild(@Param("project") Project project);
 
+    @Update("update t_flink_app set deploy=1 where project_id=#{id}")
     void deploy(@Param("id") Long id);
 
 }
