@@ -24,7 +24,7 @@ import java.util
 
 import com.streamxhub.common.util.ConfigUtils
 import com.streamxhub.flink.core.request.HBaseRequest
-import com.streamxhub.flink.core.source.HBaseSource
+import com.streamxhub.flink.core.source.scala.HBaseSource
 import com.streamxhub.flink.core.wrapper.HBaseQuery
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.CellUtil

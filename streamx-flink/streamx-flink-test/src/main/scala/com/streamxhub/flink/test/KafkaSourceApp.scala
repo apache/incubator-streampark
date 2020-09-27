@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.source.KafkaSource
+import com.streamxhub.flink.core.source.scala.KafkaSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 

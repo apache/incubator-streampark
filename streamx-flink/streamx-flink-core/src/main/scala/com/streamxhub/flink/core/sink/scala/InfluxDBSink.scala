@@ -18,23 +18,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
 import java.util.Properties
-
-import com.streamxhub.flink.core.StreamingContext
-import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.scala.DataStream
 import java.util.concurrent.TimeUnit
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, Logger}
+import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
-import org.influxdb.{InfluxDB, InfluxDBFactory}
+import org.apache.flink.streaming.api.scala.DataStream
 import org.influxdb.dto.Point
+import org.influxdb.{InfluxDB, InfluxDBFactory}
 
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._

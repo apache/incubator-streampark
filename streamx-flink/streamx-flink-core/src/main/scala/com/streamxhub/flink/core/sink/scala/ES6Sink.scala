@@ -18,25 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.Logger
+import com.streamxhub.flink.core.StreamingContext
+import org.apache.flink.api.common.functions.RuntimeContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.api.common.functions.RuntimeContext
-import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.connectors.elasticsearch.ElasticsearchSinkBase._
-import org.apache.flink.streaming.connectors.elasticsearch.{ActionRequestFailureHandler, ElasticsearchSinkFunction, RequestIndexer}
 import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExecutionFailureHandler
+import org.apache.flink.streaming.connectors.elasticsearch.{ActionRequestFailureHandler, ElasticsearchSinkFunction, RequestIndexer}
 import org.apache.flink.streaming.connectors.elasticsearch6.{ElasticsearchSink, RestClientFactory}
-import org.apache.http.message.BasicHeader
 import org.apache.http.HttpHost
 import org.apache.http.auth.{AuthScope, UsernamePasswordCredentials}
 import org.apache.http.client.CredentialsProvider
 import org.apache.http.client.config.RequestConfig
 import org.apache.http.impl.client.BasicCredentialsProvider
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
+import org.apache.http.message.BasicHeader
 import org.elasticsearch.action.index.IndexRequest
 import org.elasticsearch.client.RestClientBuilder
 

@@ -2,7 +2,7 @@ package com.streamxhub.flink.test
 
 import java.util.Date
 
-import com.streamxhub.flink.core.sink.ESSink
+import com.streamxhub.flink.core.sink.scala.ESSink
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.util.EsIndexUtils
 import org.elasticsearch.action.index.IndexRequest
