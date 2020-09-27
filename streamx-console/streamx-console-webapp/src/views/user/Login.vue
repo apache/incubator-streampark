@@ -144,7 +144,7 @@ export default {
       })
     },
     loginSuccess (resp) {
-      this.$router.push({ path: '/dashboard/analysis' })
+      this.$router.push({ path: '/flink/app' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {
         this.$notification.success({
