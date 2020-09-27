@@ -1,6 +1,5 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.sink.scala.HBaseOutputFormat
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.util.Bytes
