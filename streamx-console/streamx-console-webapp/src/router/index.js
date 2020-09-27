@@ -91,6 +91,9 @@ function go (to, next) {
 
 function buildRouter (routes) {
   return routes.filter((route) => {
+    if (route.path === '/') {
+      route.redirect = '/flink/app'
+    }
     if (route.component) {
       switch (route.component) {
         case 'BasicView':

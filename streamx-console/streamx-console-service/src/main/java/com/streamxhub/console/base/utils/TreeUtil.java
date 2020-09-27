@@ -100,7 +100,6 @@ public class TreeUtil {
         root.setName("主页");
         root.setComponent("BasicView");
         root.setPath("/");
-        root.setRedirect("/flink/app");
         root.setChildren(topRoutes);
         list.add(root);
 
