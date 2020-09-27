@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.source
+package com.streamxhub.flink.core.source.scala
 
 import java.util.Properties
 
@@ -30,13 +30,13 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
-import org.apache.hadoop.hbase.client._
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.hadoop.hbase.client._
 
-import scala.collection.JavaConversions._
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 import scala.collection.immutable.Map
 import scala.util.{Success, Try}
 

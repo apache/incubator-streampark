@@ -18,9 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.source;
+package com.streamxhub.flink.core.source.java;
 
 import com.streamxhub.flink.core.StreamingContext;
+import com.streamxhub.flink.core.source.scala.KafkaRecord;
+import com.streamxhub.flink.core.source.scala.KafkaSource;
+import com.streamxhub.flink.core.source.scala.KafkaStringDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
@@ -31,7 +34,7 @@ import static scala.collection.JavaConversions.*;
 import java.util.Collections;
 import java.util.Map;
 
-public class KafakJavaSource<T> {
+public class KafakSource<T> {
 
     private StreamingContext ctx;
     private String[] topics;
@@ -40,40 +43,40 @@ public class KafakJavaSource<T> {
     private WatermarkStrategy<KafkaRecord<T>> strategy;
     private Map<String, String> param = Collections.emptyMap();
 
-    public KafakJavaSource(StreamingContext ctx) {
+    public KafakSource(StreamingContext ctx) {
         this.ctx = ctx;
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
-    public KafakJavaSource<T> param(Map<String, String> param) {
+    public KafakSource<T> param(Map<String, String> param) {
         if (param != null) {
             this.param = param;
         }
         return this;
     }
 
-    public KafakJavaSource<T> topic(String... topic) {
+    public KafakSource<T> topic(String... topic) {
         if (topic != null) {
             this.topics = topic;
         }
         return this;
     }
 
-    public KafakJavaSource<T> alias(String alias) {
+    public KafakSource<T> alias(String alias) {
         if (alias != null) {
             this.alias = alias;
         }
         return this;
     }
 
-    public KafakJavaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
+    public KafakSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
         if (deserializer != null) {
             this.deserializer = deserializer;
         }
         return this;
     }
 
-    public KafakJavaSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
+    public KafakSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
         if (strategy != null) {
             this.strategy = strategy;
         }

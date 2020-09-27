@@ -3,10 +3,10 @@ package com.streamxhub.flink.test
 
 
 import com.mongodb.BasicDBObject
-import com.streamxhub.flink.core.source.MongoSource
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 import com.streamxhub.common.util.DateUtils
+import com.streamxhub.flink.core.source.scala.MongoSource
 
 import scala.collection.mutable.ListBuffer
 

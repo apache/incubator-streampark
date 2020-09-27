@@ -18,12 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.source
+package com.streamxhub.flink.core.source.scala
 
 import java.util.Properties
 
 import com.mongodb.MongoClient
-import org.bson.Document
 import com.mongodb.client.{FindIterable, MongoCursor, MongoDatabase}
 import com.streamxhub.common.util.{Logger, MongoConfig}
 import com.streamxhub.flink.core.StreamingContext
@@ -31,6 +30,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.DataStream
+import org.bson.Document
 
 import scala.annotation.meta.param
 import scala.collection.Map

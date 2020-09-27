@@ -18,8 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
-
+package com.streamxhub.flink.core.sink.scala
 
 import java.util.Properties
 import java.util.concurrent._
@@ -27,20 +26,19 @@ import java.util.concurrent.locks.ReentrantLock
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util._
-import com.streamxhub.flink.core.failover._
-import org.apache.http.client.methods._
-
-import scala.collection.JavaConversions._
 import com.streamxhub.flink.core.StreamingContext
+import com.streamxhub.flink.core.failover._
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.RichSinkFunction
 import org.apache.flink.streaming.api.scala.DataStream
-import org.asynchttpclient.{AsyncHttpClient, Dsl, ListenableFuture, Request, Response}
+import org.apache.http.client.methods._
+import org.asynchttpclient._
 import org.json4s.jackson.Serialization
 
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.Try

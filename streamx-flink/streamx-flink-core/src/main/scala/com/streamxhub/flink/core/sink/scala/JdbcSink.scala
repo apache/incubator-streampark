@@ -18,11 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
-
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction, TwoPhaseCommitSinkFunction}
 import java.sql._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Optional, Properties}
@@ -33,18 +30,20 @@ import com.streamxhub.flink.core.StreamingContext
 import com.streamxhub.flink.core.enums.ApiType
 import com.streamxhub.flink.core.enums.ApiType.ApiType
 import com.streamxhub.flink.core.function.ToSQLFunction
-import com.streamxhub.flink.core.sink.Dialect.Dialect
+import com.streamxhub.flink.core.sink.scala.Dialect.Dialect
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
+import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 
 import scala.annotation.meta.param
-import scala.collection.mutable.ListBuffer
 import scala.collection.JavaConversions._
+import scala.collection.mutable.ListBuffer
 
 object JdbcSink {
 

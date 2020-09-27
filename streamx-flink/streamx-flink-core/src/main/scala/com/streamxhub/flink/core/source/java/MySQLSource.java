@@ -18,34 +18,35 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.source;
+package com.streamxhub.flink.core.source.java;
 
 import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.StreamingContext;
 import com.streamxhub.flink.core.function.ResultSetFunction;
 import com.streamxhub.flink.core.function.GetSQLFunction;
-import com.streamxhub.flink.core.sink.Dialect;
+import com.streamxhub.flink.core.sink.scala.Dialect;
+import com.streamxhub.flink.core.source.scala.MySQLSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
 
-public class MySQLJavaSource<T> {
+public class MySQLSource<T> {
 
     private StreamingContext context;
     private Properties jdbc;
     private GetSQLFunction sqlFunc;
     private ResultSetFunction<T> resultSetFunc;
 
-    public MySQLJavaSource(StreamingContext context) {
+    public MySQLSource(StreamingContext context) {
         this(context, (String) null);
     }
 
-    public MySQLJavaSource(StreamingContext context, String alias) {
+    public MySQLSource(StreamingContext context, String alias) {
         this.context = context;
         this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
     }
 
-    public MySQLJavaSource(StreamingContext context, Properties jdbc) {
+    public MySQLSource(StreamingContext context, Properties jdbc) {
         this.context = context;
         this.jdbc = jdbc;
     }
@@ -59,12 +60,12 @@ public class MySQLJavaSource<T> {
         return context.getJavaEnv().addSource(sourceFunction);
     }
 
-    public MySQLJavaSource<T> sql(GetSQLFunction func) {
+    public MySQLSource<T> sql(GetSQLFunction func) {
         this.sqlFunc = func;
         return this;
     }
 
-    public MySQLJavaSource<T> result(ResultSetFunction<T> func) {
+    public MySQLSource<T> result(ResultSetFunction<T> func) {
         this.resultSetFunc = func;
         return this;
     }

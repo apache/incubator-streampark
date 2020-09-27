@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.source
+package com.streamxhub.flink.core.source.scala
 
 import java.util.Properties
 

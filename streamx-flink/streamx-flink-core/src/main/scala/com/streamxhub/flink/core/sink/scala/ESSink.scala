@@ -18,13 +18,13 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
+import com.streamxhub.flink.core.StreamingContext
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.streaming.connectors.elasticsearch.ActionRequestFailureHandler
 import org.apache.flink.streaming.connectors.elasticsearch.util.RetryRejectedExecutionFailureHandler
-import com.streamxhub.flink.core.StreamingContext
 import org.elasticsearch.action.index.IndexRequest
 
 import scala.annotation.meta.param

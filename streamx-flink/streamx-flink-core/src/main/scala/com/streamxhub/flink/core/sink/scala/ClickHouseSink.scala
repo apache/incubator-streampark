@@ -19,10 +19,9 @@
  * under the License.
  */
 
-package com.streamxhub.flink.core.sink
+package com.streamxhub.flink.core.sink.scala
 
 import java.sql.{Connection, PreparedStatement, Statement}
-import java.util
 import java.util.concurrent._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Base64, Properties}
@@ -30,6 +29,7 @@ import java.util.{Base64, Properties}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger, ThreadUtils}
 import com.streamxhub.flink.core.StreamingContext
+import com.streamxhub.flink.core.failover._
 import io.netty.handler.codec.http.HttpHeaders
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -37,17 +37,15 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
-import org.asynchttpclient._
+import org.asynchttpclient.{util, _}
 import ru.yandex.clickhouse.ClickHouseDataSource
 import ru.yandex.clickhouse.settings.ClickHouseProperties
 
+import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.Map
 import scala.collection.mutable.ListBuffer
 import scala.util.Try
-import com.streamxhub.flink.core.failover._
-
-import scala.annotation.meta.param
 
 /**
  * @author benjobs
@@ -319,7 +317,7 @@ class ClickHouseConfig(parameters: Properties) extends ThresholdConf(parameters)
     case (null, null) => null
     case (u, p) => new String(Base64.getEncoder.encode(s"$u:$p".getBytes))
   }
-  val jdbcUrls: util.List[String] = parameters.getOrElse(KEY_JDBC_URL, "")
+  val jdbcUrls: java.util.List[String] = parameters.getOrElse(KEY_JDBC_URL, "")
     .split(SIGN_COMMA)
     .filter(_.nonEmpty)
     .map(_.replaceAll("\\s+", "").replaceFirst("^http://|^", "http://"))
