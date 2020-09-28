@@ -52,8 +52,6 @@
         <global-footer />
       </a-layout-footer>
 
-      <!-- Setting Drawer (show in development mode) -->
-      <setting-drawer v-if="!production"></setting-drawer>
     </a-layout>
   </a-layout>
 
@@ -70,7 +68,6 @@ import MultiTab from '@/components/MultiTab'
 import SideMenu from '@/components/Menu/SideMenu'
 import GlobalHeader from '@/components/GlobalHeader'
 import GlobalFooter from '@/components/GlobalFooter'
-import SettingDrawer from '@/components/SettingDrawer'
 
 export default {
   name: 'BasicView',
@@ -80,8 +77,7 @@ export default {
     MultiTab,
     SideMenu,
     GlobalHeader,
-    GlobalFooter,
-    SettingDrawer
+    GlobalFooter
   },
   data () {
     return {
