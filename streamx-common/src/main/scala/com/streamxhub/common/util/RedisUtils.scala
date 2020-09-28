@@ -404,9 +404,9 @@ object RedisUtils extends Logger {
     result
   }
 
-  def doCluster[R](f: (JedisCluster, () => Unit) => R, func: () => Unit = null)(implicit endpoint: RedisEndpoint*): R = {
+  def doCluster[R](f: JedisCluster => R)(implicit endpoint: RedisEndpoint*): R = {
     val cluster = RedisClient.connectCluster(endpoint: _*)
-    val result = f(cluster, func)
+    val result = f(cluster)
     Try(cluster.close()) match {
       case Success(_) => logger.debug("cluster.close successful.")
       case Failure(_) => logger.error("cluster.close failed.")
@@ -414,10 +414,10 @@ object RedisUtils extends Logger {
     result
   }
 
-  def doPipe[R](f: (Pipeline, () => Unit) => R, func: () => Unit = null)(implicit endpoint: RedisEndpoint): R = {
+  def doPipe[R](f: Pipeline => R)(implicit endpoint: RedisEndpoint): R = {
     val redis = RedisClient.connect(endpoint)
     val pipe = redis.pipelined()
-    val result = f(pipe, func)
+    val result = f(pipe)
     Try {
       pipe.sync()
       pipe.close()
