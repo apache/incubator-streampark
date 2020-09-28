@@ -279,7 +279,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         CommonUtil.localCache.put(paramOfApp.getId(), Long.valueOf(System.currentTimeMillis()));
-        String savePointDir = FlinkSubmit.stop(properties.getNameService(), application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
+        String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
         if (paramOfApp.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
             savePoint.setAppId(application.getId());
@@ -303,7 +303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        String workspaceWithSchemaAndNameService = "hdfs://".concat(properties.getNameService()).concat(ConfigConst.APP_WORKSPACE());
+        String workspaceWithSchemaAndNameService = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
 
         String appConf, flinkUserJar;
         switch (application.getApplicationType()) {
@@ -358,7 +358,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 : new String[0];
 
         SubmitInfo submitInfo = new SubmitInfo(
-                properties.getNameService(),
                 flinkUserJar,
                 application.getJobName(),
                 appConf,

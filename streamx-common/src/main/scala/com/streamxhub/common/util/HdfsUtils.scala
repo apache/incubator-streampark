@@ -23,12 +23,12 @@ package com.streamxhub.common.util
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 
+import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FSDataOutputStream
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FileSystem
-
 import org.apache.hadoop.io.IOUtils
 
 import scala.util.{Failure, Success, Try}
@@ -36,17 +36,28 @@ import scala.util.{Failure, Success, Try}
 object HdfsUtils {
 
   lazy val conf: Configuration = {
-    val conf = new Configuration()
+    def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
+      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) conf.set("hadoop.tmp.dir", "/tmp")
+      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) conf.set("hbase.fs.tmp.dir", "/tmp")
+      //  https://issues.apache.org/jira/browse/KYLIN-3064
+      conf.set("yarn.timeline-service.enabled", "false")
+      conf
+    }
+
+    val conf = healSickConfig(new Configuration())
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
     conf
   }
+
 
   lazy val hdfs: FileSystem = Try(FileSystem.get(conf)) match {
     case Success(fs) => fs
     case Failure(e) => new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
       null
   }
+
+  def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
   @throws[Exception] def getNameNode: String = {
     Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {

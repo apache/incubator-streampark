@@ -1,7 +1,7 @@
 package com.streamxhub.console.system.aspect;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.streamxhub.console.base.properties.AdminXProperties;
+import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.HttpContextUtil;
 import com.streamxhub.console.base.utils.IPUtil;
 import com.streamxhub.console.system.authentication.JWTUtil;
@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest;
 public class LogAspect {
 
     @Autowired
-    private AdminXProperties adminxProperties;
+    private StreamXProperties streamXProperties;
 
     @Autowired
     private LogService logService;
@@ -55,7 +55,7 @@ public class LogAspect {
         // 执行时长(毫秒)
         long time = System.currentTimeMillis() - beginTime;
 
-        if (adminxProperties.isOpenAopLog()) {
+        if (streamXProperties.isOpenAopLog()) {
             // 保存日志
             String token = (String) SecurityUtils.getSubject().getPrincipal();
             String username = JWTUtil.getUsername(token);

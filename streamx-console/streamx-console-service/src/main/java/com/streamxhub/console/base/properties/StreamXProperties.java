@@ -29,9 +29,11 @@ import org.springframework.context.annotation.Configuration;
 @ConfigurationProperties(prefix = "streamx")
 public class StreamXProperties {
 
-    private String appHome;
+    private ShiroProperties shiro = new ShiroProperties();
 
-    private String nameService;
+    private boolean openAopLog = true;
+
+    private String appHome;
 
     private String yarn;
 

@@ -47,7 +47,7 @@ mybatis-plus:
     # 关闭 mybatis-plus的 banner
     banner: false
 
-adminx:
+streamx:
   # 是否异步记录用户操作日志
   openAopLog: true
   # 单次最大批量入库数量
@@ -57,9 +57,6 @@ adminx:
     anonUrl: /passport/**,/systemName,/user/check/**,/websocket/**
     # token有效期，单位秒
     jwtTimeOut: 86400
-
-streamx:
   app-home: /Users/benjobs/Workspace/deploy/workspace
-  name-service: nameservice1
   yarn: http://test-hadoop-2:8088
 

@@ -1,7 +1,7 @@
 package com.streamxhub.console.system.authentication;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.properties.AdminXProperties;
+import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.SpringContextUtil;
 import com.streamxhub.console.base.utils.WebUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -27,8 +27,8 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     @Override
     protected boolean isAccessAllowed(ServletRequest request, ServletResponse response, Object mappedValue) throws UnauthorizedException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        AdminXProperties adminxProperties = SpringContextUtil.getBean(AdminXProperties.class);
-        String[] anonUrl = StringUtils.splitByWholeSeparatorPreserveAllTokens(adminxProperties.getShiro().getAnonUrl(), StringPool.COMMA);
+        StreamXProperties properties = SpringContextUtil.getBean(StreamXProperties.class);
+        String[] anonUrl = StringUtils.splitByWholeSeparatorPreserveAllTokens(properties.getShiro().getAnonUrl(), StringPool.COMMA);
         for (String u : anonUrl) {
             if (pathMatcher.match(u, httpServletRequest.getRequestURI())) {
                 return true;

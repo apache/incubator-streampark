@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.console.base.domain.ActiveUser;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.exception.AdminXException;
-import com.streamxhub.console.base.properties.AdminXProperties;
+import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.*;
 import com.streamxhub.console.system.authentication.JWTToken;
 import com.streamxhub.console.system.authentication.JWTUtil;
@@ -47,10 +47,7 @@ public class PassportController {
     private LoginLogService loginLogService;
 
     @Autowired
-    private AdminXProperties properties;
-
-    @Autowired
-    private ObjectMapper mapper;
+    private StreamXProperties properties;
 
     @PostMapping("login")
     public RestResponse login(
