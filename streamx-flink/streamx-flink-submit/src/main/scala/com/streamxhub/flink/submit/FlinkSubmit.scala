@@ -94,16 +94,16 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  private[this] def getSavePointDir(nameService: String): String = getOptionFromDefaultFlinkConfig(
+  private[this] def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
       .stringType()
-      .defaultValue(s"hdfs://$nameService$APP_SAVEPOINTS")
+      .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
   )
 
-  def stop(nameService: String, appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
+  def stop(appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
-    val savePointDir = getSavePointDir(nameService)
+    val savePointDir = getSavePointDir()
 
     val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
       case (false, false) =>
@@ -129,7 +129,6 @@ object FlinkSubmit extends Logger {
     logInfo(
       s"""
          |"[StreamX] flink submit," +
-         |      "nameService: ${submitInfo.nameService},"
          |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
@@ -185,7 +184,7 @@ object FlinkSubmit extends Logger {
 
     val customCommandLines = {
 
-      val flinkHdfsHomeWithNameService = s"hdfs://${submitInfo.nameService}$flinkHdfsHome"
+      val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
 
       val flinkLocalConfDir = flinkLocalHome.concat("/conf")
 

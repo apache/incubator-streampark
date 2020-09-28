@@ -21,12 +21,11 @@
 package com.streamxhub.flink.submit
 
 
-case class SubmitInfo(nameService: String,
-                      flinkUserJar: String,
+case class SubmitInfo(flinkUserJar: String,
                       appName: String,
                       appConf: String,
-                      applicationType:String,
+                      applicationType: String,
                       savePoint: String,
-                      overrideOption: java.util.Map[String,Any],
+                      overrideOption: java.util.Map[String, Any],
                       dynamicOption: Array[String],
                       args: String)
