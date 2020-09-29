@@ -3,7 +3,7 @@ package com.streamxhub.console.system.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.entity.Role;
 import com.streamxhub.console.system.entity.RoleMenu;
 import com.streamxhub.console.system.service.RoleMenuServie;
@@ -60,53 +60,53 @@ public class RoleController extends BaseController {
     @Log("新增角色")
     @PostMapping("post")
     @RequiresPermissions("role:add")
-    public void addRole(@Valid Role role) throws AdminXException {
+    public void addRole(@Valid Role role) throws ServiceException {
         try {
             this.roleService.createRole(role);
         } catch (Exception e) {
             message = "新增角色失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("删除角色")
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public void deleteRoles(@NotBlank(message = "{required}") String roleIds) throws AdminXException {
+    public void deleteRoles(@NotBlank(message = "{required}") String roleIds) throws ServiceException {
         try {
             String[] ids = roleIds.split(StringPool.COMMA);
             this.roleService.deleteRoles(ids);
         } catch (Exception e) {
             message = "删除角色失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("修改角色")
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public void updateRole(Role role) throws AdminXException {
+    public void updateRole(Role role) throws ServiceException {
         try {
             this.roleService.updateRole(role);
         } catch (Exception e) {
             message = "修改角色失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PostMapping("export")
     @RequiresPermissions("role:export")
-    public void export(RestRequest restRequest, Role role, HttpServletResponse response) throws AdminXException {
+    public void export(RestRequest restRequest, Role role, HttpServletResponse response) throws ServiceException {
         try {
             List<Role> roles = this.roleService.findRoles(role, restRequest).getRecords();
             ExcelKit.$Export(Role.class, response).downXlsx(roles, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 }

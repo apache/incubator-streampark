@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.utils.ShaHashUtil;
 import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.console.system.entity.User;
@@ -67,75 +67,75 @@ public class UserController extends BaseController {
     @Log("新增用户")
     @PostMapping("post")
     @RequiresPermissions("user:add")
-    public void addUser(@Valid User user) throws AdminXException {
+    public void addUser(@Valid User user) throws ServiceException {
         try {
             this.userService.createUser(user);
         } catch (Exception e) {
             message = "新增用户失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("修改用户")
     @PutMapping("update")
     @RequiresPermissions("user:update")
-    public void updateUser(@Valid User user) throws AdminXException {
+    public void updateUser(@Valid User user) throws ServiceException {
         try {
             this.userService.updateUser(user);
         } catch (Exception e) {
             message = "修改用户失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("删除用户")
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public void deleteUsers(@NotBlank(message = "{required}") String userIds) throws AdminXException {
+    public void deleteUsers(@NotBlank(message = "{required}") String userIds) throws ServiceException {
         try {
             String[] ids = userIds.split(StringPool.COMMA);
             this.userService.deleteUsers(ids);
         } catch (Exception e) {
             message = "删除用户失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PutMapping("profile")
-    public void updateProfile(@Valid User user) throws AdminXException {
+    public void updateProfile(@Valid User user) throws ServiceException {
         try {
             this.userService.updateProfile(user);
         } catch (Exception e) {
             message = "修改个人信息失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PutMapping("avatar")
     public void updateAvatar(
             @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String avatar) throws AdminXException {
+            @NotBlank(message = "{required}") String avatar) throws ServiceException {
         try {
             this.userService.updateAvatar(username, avatar);
         } catch (Exception e) {
             message = "修改头像失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PutMapping("config")
-    public void updateUserConfig(@Valid UserConfig userConfig) throws AdminXException {
+    public void updateUserConfig(@Valid UserConfig userConfig) throws ServiceException {
         try {
             this.userConfigService.update(userConfig);
         } catch (Exception e) {
             message = "修改个性化配置失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
@@ -158,39 +158,39 @@ public class UserController extends BaseController {
     @PutMapping("password")
     public void updatePassword(
             @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password) throws AdminXException {
+            @NotBlank(message = "{required}") String password) throws ServiceException {
         try {
             userService.updatePassword(username, password);
         } catch (Exception e) {
             message = "修改密码失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PutMapping("password/reset")
     @RequiresPermissions("user:reset")
-    public void resetPassword(@NotBlank(message = "{required}") String usernames) throws AdminXException {
+    public void resetPassword(@NotBlank(message = "{required}") String usernames) throws ServiceException {
         try {
             String[] usernameArr = usernames.split(StringPool.COMMA);
             this.userService.resetPassword(usernameArr);
         } catch (Exception e) {
             message = "重置用户密码失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PostMapping("export")
     @RequiresPermissions("user:export")
-    public void export(RestRequest restRequest, User user, HttpServletResponse response) throws AdminXException {
+    public void export(RestRequest restRequest, User user, HttpServletResponse response) throws ServiceException {
         try {
             List<User> users = this.userService.findUserDetail(user, restRequest).getRecords();
             ExcelKit.$Export(User.class, response).downXlsx(users, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 }

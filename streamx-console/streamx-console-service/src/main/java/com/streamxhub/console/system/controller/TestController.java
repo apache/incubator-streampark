@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.entity.Test;
 import com.streamxhub.console.system.service.TestService;
 import com.streamxhub.console.base.domain.RestRequest;
@@ -66,14 +66,14 @@ public class TestController extends BaseController {
      * 导入Excel数据，并批量插入 T_TEST表
      */
     @PostMapping("import")
-    public RestResponse importExcels(@RequestParam("file") MultipartFile file) throws AdminXException {
+    public RestResponse importExcels(@RequestParam("file") MultipartFile file) throws ServiceException {
         try {
             if (file.isEmpty()) {
-                throw new AdminXException("导入数据为空");
+                throw new ServiceException("导入数据为空");
             }
             String filename = file.getOriginalFilename();
             if (!StringUtils.endsWith(filename, ".xlsx")) {
-                throw new AdminXException("只支持.xlsx类型文件导入");
+                throw new ServiceException("只支持.xlsx类型文件导入");
             }
             // 开始导入操作
             long beginTimeMillis = System.currentTimeMillis();
@@ -107,7 +107,7 @@ public class TestController extends BaseController {
         } catch (Exception e) {
             message = "导入Excel数据失败," + e.getMessage();
             log.info(message);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
@@ -115,14 +115,14 @@ public class TestController extends BaseController {
      * 导出 Excel
      */
     @PostMapping("export")
-    public void export(HttpServletResponse response) throws AdminXException {
+    public void export(HttpServletResponse response) throws ServiceException {
         try {
             List<Test> list = this.testService.findTests();
             ExcelKit.$Export(Test.class, response).downXlsx(list, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 }

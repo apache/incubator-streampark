@@ -1,6 +1,6 @@
 package com.streamxhub.console.base.handler;
 
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.exception.LimitAccessException;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -34,9 +34,9 @@ public class GlobalExceptionHandler {
         return new RestResponse().message("系统内部异常");
     }
 
-    @ExceptionHandler(value = AdminXException.class)
+    @ExceptionHandler(value = ServiceException.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public RestResponse handleParamsInvalidException(AdminXException e) {
+    public RestResponse handleParamsInvalidException(ServiceException e) {
         log.info("系统错误：{}", e.getMessage());
         return new RestResponse().message(e.getMessage());
     }

@@ -3,7 +3,7 @@ package com.streamxhub.console.system.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.entity.SysLog;
 import com.streamxhub.console.system.service.LogService;
 import com.streamxhub.console.base.domain.RestRequest;
@@ -42,27 +42,27 @@ public class LogController extends BaseController {
     @Log("删除系统日志")
     @DeleteMapping("delete")
     @RequiresPermissions("log:delete")
-    public void deleteLogss(@NotBlank(message = "{required}") String ids) throws AdminXException {
+    public void deleteLogss(@NotBlank(message = "{required}") String ids) throws ServiceException {
         try {
             String[] logIds = ids.split(StringPool.COMMA);
             this.logService.deleteLogs(logIds);
         } catch (Exception e) {
             message = "删除日志失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PostMapping("export")
     @RequiresPermissions("log:export")
-    public void export(RestRequest request, SysLog sysLog, HttpServletResponse response) throws AdminXException {
+    public void export(RestRequest request, SysLog sysLog, HttpServletResponse response) throws ServiceException {
         try {
             List<SysLog> sysLogs = this.logService.findLogs(request, sysLog).getRecords();
             ExcelKit.$Export(SysLog.class, response).downXlsx(sysLogs, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 }

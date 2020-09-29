@@ -1,9 +1,8 @@
 package com.streamxhub.console.system.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.console.base.domain.ActiveUser;
 import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.*;
 import com.streamxhub.console.system.authentication.JWTToken;
@@ -60,17 +59,17 @@ public class PassportController {
         User user = this.userManager.getUser(username);
 
         if (user == null) {
-            throw new AdminXException(errorMessage);
+            throw new ServiceException(errorMessage);
         }
 
         String salt = user.getSalt();
         password = ShaHashUtil.encrypt(salt, password);
 
         if (!StringUtils.equals(user.getPassword(), password)) {
-            throw new AdminXException(errorMessage);
+            throw new ServiceException(errorMessage);
         }
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            throw new AdminXException("账号已被锁定,请联系管理员！");
+            throw new ServiceException("账号已被锁定,请联系管理员！");
         }
 
         // 更新用户登录时间

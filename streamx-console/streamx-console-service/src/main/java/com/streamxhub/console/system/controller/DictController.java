@@ -3,7 +3,7 @@ package com.streamxhub.console.system.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.exception.AdminXException;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.entity.Dict;
 import com.streamxhub.console.system.service.DictService;
 import com.streamxhub.console.base.domain.RestRequest;
@@ -43,53 +43,53 @@ public class DictController extends BaseController {
     @Log("新增字典")
     @PostMapping("post")
     @RequiresPermissions("dict:add")
-    public void addDict(@Valid Dict dict) throws AdminXException {
+    public void addDict(@Valid Dict dict) throws ServiceException {
         try {
             this.dictService.createDict(dict);
         } catch (Exception e) {
             message = "新增字典成功";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("删除字典")
     @DeleteMapping("delete")
     @RequiresPermissions("dict:delete")
-    public void deleteDicts(@NotBlank(message = "{required}") String dictIds) throws AdminXException {
+    public void deleteDicts(@NotBlank(message = "{required}") String dictIds) throws ServiceException {
         try {
             String[] ids = dictIds.split(StringPool.COMMA);
             this.dictService.deleteDicts(ids);
         } catch (Exception e) {
             message = "删除字典成功";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @Log("修改字典")
     @PutMapping("update")
     @RequiresPermissions("dict:update")
-    public void updateDict(@Valid Dict dict) throws AdminXException {
+    public void updateDict(@Valid Dict dict) throws ServiceException {
         try {
             this.dictService.updateDict(dict);
         } catch (Exception e) {
             message = "修改字典成功";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 
     @PostMapping("export")
     @RequiresPermissions("dict:export")
-    public void export(RestRequest request, Dict dict, HttpServletResponse response) throws AdminXException {
+    public void export(RestRequest request, Dict dict, HttpServletResponse response) throws ServiceException {
         try {
             List<Dict> dicts = this.dictService.findDicts(request, dict).getRecords();
             ExcelKit.$Export(Dict.class, response).downXlsx(dicts, false);
         } catch (Exception e) {
             message = "导出Excel失败";
             log.info(message, e);
-            throw new AdminXException(message);
+            throw new ServiceException(message);
         }
     }
 }
