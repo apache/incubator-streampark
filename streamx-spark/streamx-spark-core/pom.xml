@@ -21,11 +21,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>streamx-spark-monitor-api</artifactId>
-            <version>1.0.0</version>
-        </dependency>
         <!--Spark 核心jar包-->
         <dependency>
             <groupId>org.apache.spark</groupId>
