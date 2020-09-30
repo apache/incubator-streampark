@@ -3,7 +3,7 @@
     <div class="table-page-search-wrapper">
       <a-form layout="inline">
         <a-row :gutter="48">
-          <div>
+          <div class="fold">
             <a-col :md="8" :sm="24">
               <a-form-item
                 label="User Name"
@@ -26,9 +26,8 @@
               </a-col>
             </template>
           </div>
-
-          <a-col :sm="24">
-            <span class="table-page-search-bar">
+          <a-col :md="8" :sm="24">
+              <span class="table-page-search-bar">
               <a-button
                 type="primary"
                 shape="circle"
