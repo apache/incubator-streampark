@@ -17,7 +17,6 @@
         <module>streamx-spark-core</module>
         <module>streamx-spark-test</module>
         <module>streamx-spark-cli</module>
-      <module>streamx-spark-monitor</module>
     </modules>
 
     <repositories>
