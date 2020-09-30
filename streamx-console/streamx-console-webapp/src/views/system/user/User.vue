@@ -3,7 +3,7 @@
     <div class="table-page-search-wrapper">
       <a-form layout="inline">
         <a-row :gutter="48">
-          <div :class="advanced ? null: 'fold'">
+          <div>
             <a-col :md="8" :sm="24">
               <a-form-item
                 label="User Name"
@@ -12,7 +12,7 @@
                 <a-input v-model="queryParams.username"/>
               </a-form-item>
             </a-col>
-            <template v-if="advanced">
+            <template>
               <a-col :md="8" :sm="24">
                 <a-form-item
                   label="Create Time"
@@ -27,8 +27,8 @@
             </template>
           </div>
 
-          <a-col :md="!advanced && 8 || 24" :sm="24">
-            <span class="table-page-search-bar" :style="advanced && { float: 'right', overflow: 'hidden' } || {} ">
+          <a-col :sm="24">
+            <span class="table-page-search-bar">
               <a-button
                 type="primary"
                 shape="circle"
@@ -62,11 +62,6 @@
                 icon="minus"
                 @click="batchDelete">
               </a-button>
-
-              <a @click="advanced = !advanced" style="margin-left: 4px">
-                {{ advanced ? 'close' : 'expand' }}
-                <a-icon :type="advanced ? 'up' : 'down'"/>
-              </a>
             </span>
           </a-col>
 
@@ -136,7 +131,6 @@ export default {
   components: { UserInfo, UserAdd, UserEdit, RangeDate },
   data () {
     return {
-      advanced: false,
       userInfo: {
         visiable: false,
         data: {}
@@ -213,13 +207,6 @@ export default {
   methods: {
     onSelectChange (selectedRowKeys) {
       this.selectedRowKeys = selectedRowKeys
-    },
-    toggleAdvanced () {
-      this.advanced = !this.advanced
-      if (!this.advanced) {
-        this.queryParams.createTimeFrom = ''
-        this.queryParams.createTimeTo = ''
-      }
     },
     view (record) {
       this.userInfo.data = record
@@ -364,10 +351,7 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
-      // 清空时间选择
-      if (this.advanced) {
-        this.$refs.createTime.reset()
-      }
+      this.$refs.createTime.reset()
       this.fetch()
     },
     handleTableChange (pagination, filters, sorter) {
