@@ -29,6 +29,7 @@ import com.streamxhub.console.core.enums.AppExistsState;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -53,10 +54,78 @@ public class ApplicationController extends BaseController {
     @Autowired
     private StreamXProperties properties;
 
+    @PostMapping("create")
+    @RequiresPermissions("app:create")
+    public RestResponse create(Application app) throws IOException {
+        boolean saved = applicationService.create(app);
+        return RestResponse.create().data(saved);
+    }
+
+    @PostMapping("get")
+    @RequiresPermissions("app:detail")
+    public RestResponse get(Application app) {
+        Application application = applicationService.getApp(app);
+        return RestResponse.create().data(application);
+    }
+
     @PostMapping("list")
+    @RequiresPermissions("app:list")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.list(app, request);
         return RestResponse.create().data(applicationList);
+    }
+
+    @PostMapping("update")
+    @RequiresPermissions("app:update")
+    public RestResponse update(Application app) {
+        try {
+            applicationService.update(app);
+            return RestResponse.create().data(true);
+        } catch (Exception e) {
+            return RestResponse.create().data(false);
+        }
+    }
+
+    @PostMapping("mapping")
+    @RequiresPermissions("app:mapping")
+    public RestResponse mapping(Application app) {
+        boolean flag = applicationService.mapping(app);
+        return RestResponse.create().data(flag);
+    }
+
+    @PostMapping("deploy")
+    @RequiresPermissions("app:deploy")
+    public RestResponse deploy(Application app) {
+        Executors.newSingleThreadExecutor().submit(() -> {
+            try {
+                app.setBackUp(true);
+                applicationService.deploy(app);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        return RestResponse.create();
+    }
+
+    @PostMapping("start")
+    @RequiresPermissions("app:start")
+    public RestResponse start(Application app) throws Exception {
+        boolean started = applicationService.start(app);
+        return RestResponse.create().data(started);
+    }
+
+    @PostMapping("closeDeploy")
+    @RequiresPermissions("app:closeDeploy")
+    public RestResponse closeDeploy(Application app) {
+        applicationService.closeDeploy(app);
+        return RestResponse.create().data(true);
+    }
+
+    @PostMapping("stop")
+    @RequiresPermissions("app:stop")
+    public RestResponse stop(Application app) {
+        applicationService.stop(app);
+        return RestResponse.create();
     }
 
     @PostMapping("yarn")
@@ -76,47 +145,10 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(exists.get());
     }
 
-    @PostMapping("create")
-    public RestResponse create(Application app) throws IOException {
-        boolean saved = applicationService.create(app);
-        return RestResponse.create().data(saved);
-    }
-
-    @PostMapping("mapping")
-    public RestResponse mapping(Application app) {
-        boolean flag = applicationService.mapping(app);
-        return RestResponse.create().data(flag);
-    }
-
-    @PostMapping("deploy")
-    public RestResponse deploy(Application app) {
-        Executors.newSingleThreadExecutor().submit(() -> {
-            try {
-                app.setBackUp(true);
-                applicationService.deploy(app);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
-        return RestResponse.create();
-    }
-
-    @PostMapping("start")
-    public RestResponse start(Application app) throws Exception {
-        boolean started = applicationService.start(app);
-        return RestResponse.create().data(started);
-    }
-
-    @PostMapping("closeDeploy")
-    public RestResponse closeDeploy(Application app) {
-        applicationService.closeDeploy(app);
-        return RestResponse.create().data(true);
-    }
-
-    @PostMapping("get")
-    public RestResponse get(Application app) {
-        Application application = applicationService.getApp(app);
-        return RestResponse.create().data(application);
+    @PostMapping("readConf")
+    public RestResponse readConf(Application app) throws IOException {
+        String config = applicationService.readConf(app);
+        return RestResponse.create().data(config);
     }
 
     @PostMapping("main")
@@ -124,28 +156,5 @@ public class ApplicationController extends BaseController {
         String mainClass = applicationService.getMain(application);
         return RestResponse.create().data(mainClass);
     }
-
-    @PostMapping("stop")
-    public RestResponse stop(Application app) {
-        applicationService.stop(app);
-        return RestResponse.create();
-    }
-
-    @PostMapping("readConf")
-    public RestResponse readConf(Application app) throws IOException {
-        String config = applicationService.readConf(app);
-        return RestResponse.create().data(config);
-    }
-
-    @PostMapping("update")
-    public RestResponse update(Application app) {
-        try {
-            applicationService.update(app);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            return RestResponse.create().data(false);
-        }
-    }
-
 
 }

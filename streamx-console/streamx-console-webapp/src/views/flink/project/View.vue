@@ -14,7 +14,7 @@
         <a-input-search @search="handleSearch" style="margin-left: 16px; width: 272px;"/>
       </div>
 
-      <div class="operate">
+      <div class="operate" v-permit="'project:create'">
         <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
       </div>
 
@@ -71,6 +71,7 @@
               @click="handleSeeLog(item)"/>
             <a-popconfirm
               v-else
+              v-permit="'project:build'"
               title="确定要编译该项目吗?"
               cancel-text="No"
               ok-text="Yes"
@@ -78,8 +79,8 @@
               <a-icon type="thunderbolt" theme="twoTone" twoToneColor="#4a9ff5"></a-icon>
             </a-popconfirm>
 
-            <a-icon type="edit" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
-            <a-icon type="delete" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
+            <a-icon type="edit" v-permit="'project:update'" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
+            <a-icon type="delete" v-permit="'project:delete'" theme="twoTone" twoToneColor="#4a9ff5" style="width:30px;"></a-icon>
           </div>
         </a-list-item>
 

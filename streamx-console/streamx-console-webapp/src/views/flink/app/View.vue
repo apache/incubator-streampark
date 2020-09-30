@@ -257,7 +257,11 @@
                 </template>
               </a-badge>
               <!-- end: record.deploy === 3-->
-              <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
+              <a-badge
+                class="close-deploy"
+                @click="handleCloseDeploy(record)"
+                v-if="record.deploy !== 0"
+                v-permit="'app:closeDeploy'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </template>
@@ -297,7 +301,11 @@
                   {{ text }}
                 </ellipsis>
               </span>
-              <a-badge class="close-deploy" @click="handleCloseDeploy(record)" v-if="record.deploy !== 0">
+              <a-badge
+                class="close-deploy"
+                @click="handleCloseDeploy(record)"
+                v-if="record.deploy !== 0"
+                v-permit="'app:closeDeploy'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </template>
@@ -373,7 +381,7 @@
         <template slot="customOperation">
           Operation
           <a-button
-            v-permit="'role:delete'"
+            v-permit="'app:create'"
             type="primary"
             shape="circle"
             icon="plus"
@@ -385,19 +393,20 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon
             v-if="record.state !== 5"
+            v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
             @click="handleMapping(record)">
           </a-icon>
           <a-icon
             v-show="record.deploy === 1 && record.state !== 1 "
-            v-permit="'role:update'"
+            v-permit="'app:deploy'"
             type="upload"
             style="color:#4a9ff5"
             @click="handleDeploy(record)">
           </a-icon>
           <a-icon
-            v-permit="'role:update'"
+            v-permit="'app:update'"
             type="setting"
             theme="twoTone"
             twoToneColor="#4a9ff5"
@@ -413,7 +422,7 @@
               || record.state === 10
               || record.state === 11
               || record.state === 13"
-            v-permit="'role:update'"
+            v-permit="'app:start'"
             theme="twoTone"
             twoToneColor="#4a9ff5"
             @click="handleStart(record)">
@@ -421,6 +430,7 @@
           <a-icon
             type="poweroff"
             title="停止应用"
+            v-permit="'app:stop'"
             style="color: #4a9ff5"
             v-show="record.state === 5"
             @click="handleStop(record)">
@@ -429,13 +439,20 @@
           <a-icon
             type="eye"
             v-show="record.state === 5"
+            v-permit="'app:detail'"
             theme="twoTone"
             twoToneColor="#4a9ff5"
             @click="handleView(record)"
             title="查看">
           </a-icon>
 
-          <a-icon type="profile" theme="twoTone" twoToneColor="#4a9ff5" @click="handleDetail(item)"/>
+          <a-icon
+            type="profile"
+            v-permit="'app:detail'"
+            theme="twoTone"
+            twoToneColor="#4a9ff5"
+            @click="handleDetail(item)"
+          />
 
         </template>
 

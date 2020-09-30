@@ -27,6 +27,7 @@ import com.streamxhub.console.core.entity.Project;
 import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,19 +50,29 @@ public class ProjectController extends BaseController {
     private ProjectService projectService;
 
     @PostMapping("create")
+    @RequiresPermissions("project:create")
     public RestResponse create(Project project) {
         return projectService.create(project);
     }
 
     @PostMapping("build")
+    @RequiresPermissions("project:build")
     public RestResponse build(Long id) throws Exception {
         return projectService.build(id);
     }
 
     @PostMapping("list")
+    @RequiresPermissions("project:list")
     public RestResponse list(Project project, RestRequest restRequest) {
         IPage<Project> page = projectService.page(project, restRequest);
         return RestResponse.create().data(page);
+    }
+
+    @PostMapping("delete")
+    @RequiresPermissions("project:delete")
+    public RestResponse delete(String id) {
+        boolean result = projectService.delete(id);
+        return RestResponse.create().message(result ? "删除成功" : "删除失败");
     }
 
     @PostMapping("modules")
@@ -87,10 +98,5 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(projectService.list());
     }
 
-    @PostMapping("delete")
-    public RestResponse delete(String id) {
-        boolean result = projectService.delete(id);
-        return RestResponse.create().message(result ? "删除成功" : "删除失败");
-    }
 
 }
