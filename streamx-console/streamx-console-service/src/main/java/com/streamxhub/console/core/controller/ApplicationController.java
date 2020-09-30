@@ -69,7 +69,7 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("app:list")
+    @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
         IPage<Application> applicationList = applicationService.list(app, request);
         return RestResponse.create().data(applicationList);

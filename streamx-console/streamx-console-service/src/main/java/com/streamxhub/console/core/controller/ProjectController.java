@@ -62,7 +62,7 @@ public class ProjectController extends BaseController {
     }
 
     @PostMapping("list")
-    @RequiresPermissions("project:list")
+    @RequiresPermissions("project:view")
     public RestResponse list(Project project, RestRequest restRequest) {
         IPage<Project> page = projectService.page(project, restRequest);
         return RestResponse.create().data(page);

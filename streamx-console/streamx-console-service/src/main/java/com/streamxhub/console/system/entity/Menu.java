@@ -66,7 +66,6 @@ public class Menu implements Serializable {
     @ExcelField(value = "修改时间", writeConverter = TimeConverter.class)
     private Date modifyTime;
 
-    @NotBlank(message = "{required}")
     @ExcelField(value = "是否显示", writeConverterExp = "0=不显示,1=显示")
     private String display;
 
