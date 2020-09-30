@@ -10,7 +10,6 @@
             <useProjectAttachments>true</useProjectAttachments>
             <includes>
                 <include>com.streamxhub:streamx-spark-core</include>
-                <include>com.streamxhub:streamx-spark-monitor-api</include>
                 <include>org.apache.curator:curator-framework</include>
                 <include>org.apache.curator:curator-recipes</include>
                 <include>org.apache.curator:curator-client</include>
