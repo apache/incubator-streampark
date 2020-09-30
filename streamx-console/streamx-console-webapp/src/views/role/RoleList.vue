@@ -15,7 +15,7 @@
         <div style="max-width: 800px">
           <a-divider v-if="isMobile()" />
           <div v-if="mdl.id">
-            <h3>角色：{{ mdl.name }}</h3>
+            <h3>Role：{{ mdl.name }}</h3>
           </div>
           <a-form :form="form" :layout="isMobile() ? 'vertical' : 'horizontal'">
             <a-form-item label="唯一键">

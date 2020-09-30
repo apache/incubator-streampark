@@ -6,7 +6,7 @@
           <div class="fold">
             <a-col :md="8" :sm="24">
               <a-form-item
-                label="角色"
+                label="Role"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
                 <a-input v-model="queryParams.roleName"/>
@@ -14,7 +14,7 @@
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item
-                label="创建时间"
+                label="Create Time"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
                 <range-date @change="handleDateChange" ref="createTime"></range-date>
@@ -163,25 +163,25 @@ export default {
       let { sortedInfo } = this
       sortedInfo = sortedInfo || {}
       return [{
-        title: '角色',
+        title: 'Role Name',
         dataIndex: 'roleName'
       }, {
-        title: '描述',
+        title: 'Description',
         dataIndex: 'remark',
         scopedSlots: { customRender: 'remark' },
         width: 350
       }, {
-        title: '创建时间',
+        title: 'Create Time',
         dataIndex: 'createTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
       }, {
-        title: '修改时间',
+        title: 'Modify Time',
         dataIndex: 'modifyTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'modifyTime' && sortedInfo.order
       }, {
-        title: '操作',
+        title: 'Operation',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]

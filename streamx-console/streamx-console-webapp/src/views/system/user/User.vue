@@ -6,7 +6,7 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="8" :sm="24">
               <a-form-item
-                label="用户名"
+                label="User Name"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
                 <a-input v-model="queryParams.username"/>
@@ -15,7 +15,7 @@
             <template v-if="advanced">
               <a-col :md="8" :sm="24">
                 <a-form-item
-                  label="创建时间"
+                  label="Create Time"
                   :labelCol="{span: 4}"
                   :wrapperCol="{span: 18, offset: 2}">
                   <range-date
@@ -64,7 +64,7 @@
               </a-button>
 
               <a @click="advanced = !advanced" style="margin-left: 4px">
-                {{ advanced ? '收起' : '展开' }}
+                {{ advanced ? 'close' : 'expand' }}
                 <a-icon :type="advanced ? 'up' : 'down'"/>
               </a>
             </span>
@@ -160,7 +160,7 @@ export default {
         defaultPageSize: 10,
         showQuickJumper: true,
         showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        showTotal: (total, range) => `display ${range[0]} ~ ${range[1]} records，total ${total}`
       }
     }
   },
@@ -170,38 +170,38 @@ export default {
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
-        title: '用户名',
+        title: 'User Name',
         dataIndex: 'username',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'username' && sortedInfo.order
       }, {
-        title: '昵称',
+        title: 'Nick Name',
         dataIndex: 'nickName'
       }, {
-        title: '状态',
+        title: 'Status',
         dataIndex: 'status',
         customRender: (text, row, index) => {
           switch (text) {
-            case '0': return <a-tag color="red"> 锁定 </a-tag>
-            case '1': return <a-tag color="cyan"> 有效 </a-tag>
+            case '0': return <a-tag color="red"> Locked </a-tag>
+            case '1': return <a-tag color="cyan"> Effective </a-tag>
             default: return text
           }
         },
         filters: [
-          { text: '有效', value: '1' },
-          { text: '锁定', value: '0' }
+          { text: 'Effective', value: '1' },
+          { text: 'Locked', value: '0' }
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.status || null,
         onFilter: (value, record) => record.status.includes(value)
       }, {
-        title: '创建时间',
+        title: 'Create Time',
         dataIndex: 'createTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'createTime' && sortedInfo.order
       },
       {
-        title: '操作',
+        title: 'Operation',
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]
@@ -278,14 +278,14 @@ export default {
           remove({
             userIds: userIds.join(',')
           }).then(() => {
-            that.$message.success('删除成功')
+            that.$message.success('delete successful')
             that.selectedRowKeys = []
             that.search()
           })
         },
         onCancel () {
           that.selectedRowKeys = []
-          that.$message.info('已取消删除')
+          that.$message.info('cancel delete')
         }
       })
     },
@@ -296,9 +296,9 @@ export default {
         return
       }
       const that = this
-      this.$confirm('此操作将永久重置密码, 是否继续?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
+      this.$confirm('this option will be reset password, are yor sure?', 'warning', {
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
         type: 'warning'
       }).then(() => {
         const usernames = []
@@ -308,14 +308,14 @@ export default {
         that.$put('user/password/reset', {
           usernames: usernames.join(',')
         }).then(() => {
-          that.$message.success('重置用户密码成功')
+          that.$message.success('reset password successful')
           that.selectedRowKeys = []
         })
       }).catch(() => {
         that.selectedRowKeys = []
         this.$message({
           type: 'info',
-          message: '已取消删除'
+          message: 'cancel delete'
         })
       })
     },

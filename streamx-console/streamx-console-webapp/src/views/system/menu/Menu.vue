@@ -6,7 +6,7 @@
           <div :class="advanced ? null: 'fold'">
             <a-col :md="8" :sm="24">
               <a-form-item
-                label="名称"
+                label="Name"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
                 <a-input v-model="queryParams.menuName"/>
@@ -14,7 +14,7 @@
             </a-col>
             <a-col :md="8" :sm="24">
               <a-form-item
-                label="创建时间"
+                label="Create Time"
                 :labelCol="{span: 4}"
                 :wrapperCol="{span: 18, offset: 2}">
                 <range-date @change="handleDateChange" ref="createTime"></range-date>
@@ -165,16 +165,16 @@ export default {
       let { filteredInfo } = this
       filteredInfo = filteredInfo || {}
       return [{
-        title: '名称',
+        title: 'Name',
         dataIndex: 'text',
         width: 250,
         fixed: 'left'
       }, {
-        title: '图标',
+        title: 'Display icon',
         dataIndex: 'icon',
         scopedSlots: { customRender: 'icon' }
       }, {
-        title: '类型',
+        title: 'Type',
         dataIndex: 'type',
         customRender: (text, row, index) => {
           switch (text) {
@@ -184,32 +184,32 @@ export default {
           }
         },
         filters: [
-          { text: '按钮', value: '1' },
-          { text: '菜单', value: '0' }
+          { text: 'Button', value: '1' },
+          { text: 'Router', value: '0' }
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.type || null,
         onFilter: (value, record) => record.type.includes(value)
       }, {
-        title: '地址',
+        title: 'Path',
         dataIndex: 'path'
       }, {
-        title: 'Vue组件',
+        title: 'Vue Component',
         dataIndex: 'component'
       }, {
-        title: '权限',
+        title: 'Permission',
         dataIndex: 'permission'
       }, {
-        title: '排序',
+        title: 'Order By',
         dataIndex: 'order'
       }, {
-        title: '创建时间',
+        title: 'Create Time',
         dataIndex: 'createTime'
       }, {
-        title: '修改时间',
+        title: 'Modify Time',
         dataIndex: 'modifyTime'
       }, {
-        title: '操作',
+        title: 'Operation',
         dataIndex: 'operation',
         width: 120,
         scopedSlots: { customRender: 'operation' },
