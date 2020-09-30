@@ -14,7 +14,7 @@
           v-decorator="['menuName',
                         {rules: [
                           { required: true, message: '菜单名称不能为空'},
-                          { max: 20, message: '长度不能超过10个字符'}
+                          { max: 20, message: '长度不能超过20个字符'}
                         ]}]"/>
       </a-form-item>
       <a-form-item

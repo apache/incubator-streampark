@@ -14,7 +14,7 @@
           v-decorator="['menuName',
                         {rules: [
                           { required: true, message: '按钮名称不能为空'},
-                          { max: 10, message: '长度不能超过10个字符'}
+                          { max: 20, message: '长度不能超过20个字符'}
                         ]}]"/>
       </a-form-item>
       <a-form-item label="相关权限" v-bind="formItemLayout">
