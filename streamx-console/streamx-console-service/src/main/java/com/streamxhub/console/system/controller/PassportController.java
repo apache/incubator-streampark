@@ -7,11 +7,8 @@ import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.*;
 import com.streamxhub.console.system.authentication.JWTToken;
 import com.streamxhub.console.system.authentication.JWTUtil;
-import com.streamxhub.console.system.entity.LoginLog;
 import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.entity.UserConfig;
 import com.streamxhub.console.system.manager.UserManager;
-import com.streamxhub.console.system.service.LoginLogService;
 import com.streamxhub.console.system.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -42,8 +39,6 @@ public class PassportController {
     private UserManager userManager;
     @Autowired
     private UserService userService;
-    @Autowired
-    private LoginLogService loginLogService;
 
     @Autowired
     private StreamXProperties properties;
@@ -74,11 +69,6 @@ public class PassportController {
 
         // 更新用户登录时间
         this.userService.updateLoginTime(username);
-        // 保存登录记录
-        LoginLog loginLog = new LoginLog();
-        loginLog.setUsername(username);
-        this.loginLogService.saveLoginLog(loginLog);
-
         String token = WebUtil.encryptToken(JWTUtil.sign(username, password));
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
@@ -138,10 +128,6 @@ public class PassportController {
 
         Set<String> permissions = this.userManager.getUserPermissions(username);
         userInfo.put("permissions", permissions);
-
-        UserConfig userConfig = this.userManager.getUserConfig(String.valueOf(user.getUserId()));
-        userInfo.put("config", userConfig);
-
         user.setPassword("******");
         userInfo.put("user", user);
         return userInfo;

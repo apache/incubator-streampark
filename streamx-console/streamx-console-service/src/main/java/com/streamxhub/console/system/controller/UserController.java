@@ -8,9 +8,7 @@ import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.utils.ShaHashUtil;
 import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.entity.UserConfig;
 import com.streamxhub.console.system.manager.UserManager;
-import com.streamxhub.console.system.service.UserConfigService;
 import com.streamxhub.console.system.service.UserService;
 import com.wuwenze.poi.ExcelKit;
 import lombok.extern.slf4j.Slf4j;
@@ -44,14 +42,6 @@ public class UserController extends BaseController {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserConfigService userConfigService;
-
-    @Autowired
-    private ServerUtil serverUtil;
-
-    @Autowired
-    private UserManager userManager;
 
     @PostMapping("detail")
     public User detail(@NotBlank(message = "{required}") @PathVariable String username) {
@@ -123,17 +113,6 @@ public class UserController extends BaseController {
             this.userService.updateAvatar(username, avatar);
         } catch (Exception e) {
             message = "修改头像失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
-    }
-
-    @PutMapping("config")
-    public void updateUserConfig(@Valid UserConfig userConfig) throws ServiceException {
-        try {
-            this.userConfigService.update(userConfig);
-        } catch (Exception e) {
-            message = "修改个性化配置失败";
             log.info(message, e);
             throw new ServiceException(message);
         }

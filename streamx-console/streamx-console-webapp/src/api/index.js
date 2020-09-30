@@ -64,13 +64,6 @@ export default {
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
   },
-  Dept: {
-    LIST: '/dept/list',
-    DELETE: '/dept/delete',
-    POST: '/dept/post',
-    EXPORT: '/dept/export',
-    UPDATE: '/dept/update'
-  },
   Role: {
     POST: '/role/post',
     UPDATE: '/role/update',

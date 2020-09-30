@@ -12,18 +12,6 @@
                 <a-input v-model="queryParams.username"/>
               </a-form-item>
             </a-col>
-            <a-col :md="8" :sm="24">
-              <a-form-item
-                label="部门"
-                :labelCol="{span: 4}"
-                :wrapperCol="{span: 18, offset: 2}">
-                <dept-tree
-                  @change="handleDeptChange"
-                  ref="deptTree">
-                </dept-tree>
-              </a-form-item>
-            </a-col>
-
             <template v-if="advanced">
               <a-col :md="8" :sm="24">
                 <a-form-item
@@ -140,13 +128,12 @@
 import UserInfo from './UserInfo'
 import UserAdd from './UserAdd'
 import UserEdit from './UserEdit'
-import DeptTree from '../dept/DeptTree'
 import RangeDate from '@/components/DateTime/RangeDate'
 import { list, remove, $export } from '@/api/user'
 
 export default {
   name: 'User',
-  components: { UserInfo, UserAdd, UserEdit, DeptTree, RangeDate },
+  components: { UserInfo, UserAdd, UserEdit, RangeDate },
   data () {
     return {
       advanced: false,
@@ -190,9 +177,6 @@ export default {
       }, {
         title: '昵称',
         dataIndex: 'nickName'
-      }, {
-        title: '部门',
-        dataIndex: 'deptName'
       }, {
         title: '状态',
         dataIndex: 'status',
@@ -266,9 +250,6 @@ export default {
     },
     handleUserInfoClose () {
       this.userInfo.visiable = false
-    },
-    handleDeptChange (value) {
-      this.queryParams.deptId = value || ''
     },
     handleDateChange (value) {
       if (value) {
@@ -383,8 +364,6 @@ export default {
       this.sortedInfo = null
       // 重置查询参数
       this.queryParams = {}
-      // 清空部门树选择
-      this.$refs.deptTree.reset()
       // 清空时间选择
       if (this.advanced) {
         this.$refs.createTime.reset()

@@ -52,11 +52,6 @@ public class User implements Serializable {
 
     private String password;
 
-    private Long deptId;
-
-    @ExcelField(value = "部门")
-    private transient String deptName;
-
     @Size(max = 50, message = "{noMoreThan}")
     @Email(message = "{email}")
     @ExcelField(value = "邮箱")

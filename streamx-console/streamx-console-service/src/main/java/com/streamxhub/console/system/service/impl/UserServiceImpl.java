@@ -14,7 +14,6 @@ import com.streamxhub.console.system.dao.UserRoleMapper;
 import com.streamxhub.console.system.entity.User;
 import com.streamxhub.console.system.entity.UserRole;
 import com.streamxhub.console.system.manager.UserManager;
-import com.streamxhub.console.system.service.UserConfigService;
 import com.streamxhub.console.system.service.UserRoleService;
 import com.streamxhub.console.system.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +33,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Autowired
     private UserRoleMapper userRoleMapper;
-
-    @Autowired
-    private UserConfigService userConfigService;
 
     @Autowired
     private UserRoleService userRoleService;
@@ -81,13 +77,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setSalt(salt);
         user.setPassword(password);
         save(user);
-
         // 保存用户角色
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
-
-        // 创建用户默认的个性化配置
-        userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
     }
 
     @Override
@@ -111,8 +103,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         removeByIds(list);
         // 删除用户角色
         this.userRoleService.deleteUserRolesByUserId(userIds);
-        // 删除用户个性化配置
-        this.userConfigService.deleteByUserId(userIds);
     }
 
     @Override
@@ -160,10 +150,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         ur.setUserId(user.getUserId());
         ur.setRoleId(2L); // 注册用户角色 ID
         this.userRoleMapper.insert(ur);
-
-        // 创建用户默认的个性化配置
-        userConfigService.initDefaultUserConfig(String.valueOf(user.getUserId()));
-
     }
 
     @Override

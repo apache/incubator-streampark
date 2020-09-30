@@ -56,14 +56,6 @@
           <a-select-option v-for="r in roleData" :key="r.roleId">{{ r.roleName }}</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="部门" v-bind="formItemLayout">
-        <a-tree-select
-          :allowClear="true"
-          :dropdownStyle="{ maxHeight: '220px', overflow: 'auto' }"
-          :treeData="deptTreeData"
-          v-decorator="['deptId']">
-        </a-tree-select>
-      </a-form-item>
       <a-form-item label="状态" v-bind="formItemLayout">
         <a-radio-group
           v-decorator="['status',{rules: [{ required: true, message: '请选择状态'}]}]">
@@ -87,7 +79,6 @@
   </a-drawer>
 </template>
 <script>
-import { list as getDept } from '@/api/dept'
 import { list as getRole } from '@/api/role'
 import { checkUserName, post } from '@/api/user'
 
@@ -106,7 +97,6 @@ export default {
     return {
       loading: false,
       roleData: [],
-      deptTreeData: [],
       formItemLayout,
       form: this.$form.createForm(this),
       validateStatus: '',
@@ -178,9 +168,6 @@ export default {
           { 'pageSize': '9999' }
         ).then((r) => {
           this.roleData = r.rows
-        })
-        getDept().then((r) => {
-          this.deptTreeData = r.rows.children
         })
       }
     }

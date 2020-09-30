@@ -5,7 +5,6 @@
         <id column="USER_ID" jdbcType="DECIMAL" property="userId"/>
         <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
         <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
-        <result column="DEPT_ID" jdbcType="DECIMAL" property="deptId"/>
         <result column="EMAIL" jdbcType="VARCHAR" property="email"/>
         <result column="MOBILE" jdbcType="VARCHAR" property="mobile"/>
         <result column="STATUS" jdbcType="CHAR" property="status"/>
@@ -27,8 +26,6 @@
         u.STATUS,
         u.create_time createTime,
         u.sex,
-        d.dept_id deptId,
-        d.dept_name deptName,
         u.AVATAR,
         u.DESCRIPTION,
         u.LAST_LOGIN_TIME lastLoginTime,
@@ -36,15 +33,11 @@
         GROUP_CONCAT(r.ROLE_NAME) roleName
         FROM
         t_user u
-        LEFT JOIN t_dept d ON u.dept_id = d.dept_id
         LEFT JOIN t_user_role ur ON u.user_id = ur.user_id
         LEFT JOIN t_role r ON r.role_id = ur.role_id
         WHERE 1 = 1
         <if test="user.username != null and user.username != ''">
             AND u.username = #{user.username}
-        </if>
-        <if test="user.deptId != null and user.deptId != ''">
-            AND d.dept_id = #{user.deptId}
         </if>
         <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
             And u.create_time &gt; #{user.createTimeFrom}

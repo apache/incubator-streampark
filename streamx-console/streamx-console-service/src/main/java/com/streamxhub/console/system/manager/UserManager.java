@@ -4,7 +4,6 @@ import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.console.system.entity.Menu;
 import com.streamxhub.console.system.entity.Role;
 import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.entity.UserConfig;
 import com.streamxhub.console.base.domain.router.RouterMeta;
 import com.streamxhub.console.base.domain.router.VueRouter;
 import com.streamxhub.console.base.utils.TreeUtil;
@@ -29,8 +28,6 @@ public class UserManager {
     private MenuService menuService;
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserConfigService userConfigService;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -92,14 +89,5 @@ public class UserManager {
         return TreeUtil.buildVueRouter(routes);
     }
 
-    /**
-     * 通过用户 ID获取前端系统个性化配置
-     *
-     * @param userId 用户 ID
-     * @return 前端系统个性化配置
-     */
-    public UserConfig getUserConfig(String userId) {
-        return this.userConfigService.findByUserId(userId);
-    }
 
 }

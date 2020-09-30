@@ -19,7 +19,6 @@
         <p><a-icon type="mail"/>邮箱：{{ userInfoData.email ? userInfoData.email : '暂未绑定邮箱' }}</p>
       </a-layout-content>
       <a-layout-content class="user-content-two">
-        <p><a-icon type="home"/>部门：{{ userInfoData.deptName ? userInfoData.deptName : '暂无部门信息' }}</p>
         <p>
           <a-icon type="smile" v-if="userInfoData.status === '1'"/>
           <a-icon type="frown" v-else/>状态：

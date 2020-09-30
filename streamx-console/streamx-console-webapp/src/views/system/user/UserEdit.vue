@@ -43,15 +43,6 @@
           <a-select-option v-for="r in roleData" :key="r.roleId.toString()">{{ r.roleName }}</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="部门" v-bind="formItemLayout">
-        <a-tree-select
-          :allowClear="true"
-          :dropdownStyle="{ maxHeight: '220px', overflow: 'auto' }"
-          :treeData="deptTreeData"
-          @change="onDeptChange"
-          :value="userDept">
-        </a-tree-select>
-      </a-form-item>
       <a-form-item label="状态" v-bind="formItemLayout">
         <a-radio-group
           v-decorator="[
@@ -82,7 +73,6 @@
 </template>
 <script>
 import { mapState, mapMutations } from 'vuex'
-import { list as getDept } from '@/api/dept'
 import { list as getRole } from '@/api/role'
 import { update, get } from '@/api/user'
 
@@ -101,13 +91,11 @@ export default {
     return {
       formItemLayout,
       form: this.$form.createForm(this),
-      deptTreeData: [],
       userTypeData: [
         { 'value': 1, 'name': '内部用户' },
         { 'value': 2, 'name': '外部用户' }
       ],
       roleData: [],
-      userDept: [],
       userId: '',
       loading: false
     }
@@ -143,12 +131,6 @@ export default {
         const roleArr = user.roleId.split(',')
         this.form.setFieldsValue({ 'roleId': roleArr })
       }
-      if (user.deptId) {
-        this.userDept = [user.deptId]
-      }
-    },
-    onDeptChange (value) {
-      this.userDept = value
     },
     handleSubmit () {
       this.form.validateFields((err, values) => {
@@ -157,7 +139,6 @@ export default {
           const user = this.form.getFieldsValue()
           user.roleId = user.roleId.join(',')
           user.userId = this.userId
-          user.deptId = this.userDept[0]
           update(user).then((r) => {
             this.loading = false
             this.$emit('success')
@@ -181,9 +162,6 @@ export default {
       if (this.userEditVisiable) {
         getRole({ 'pageSize': '9999' }).then((r) => {
           this.roleData = r.rows
-        })
-        getDept().then((r) => {
-          this.deptTreeData = r.rows.children
         })
       }
     }
