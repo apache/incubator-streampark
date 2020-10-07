@@ -148,7 +148,7 @@
         <template slot="filterRender" slot-scope="text, record, index, column">
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
-            <template v-if="column.dataIndex === 'jobName'" @click="handleDetail(record)">
+            <span v-if="column.dataIndex === 'jobName'" @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
                 v-if="record.deploy === 0"
@@ -264,7 +264,7 @@
                 v-permit="'app:closeDeploy'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
-            </template>
+            </span>
             <!--其他字段-->
             <template v-else>
               <template
@@ -280,7 +280,7 @@
           </template>
           <!--无条件搜索-->
           <template v-else>
-            <template v-if="column.dataIndex === 'jobName'" @click="handleDetail(record)">
+            <span v-if="column.dataIndex === 'jobName'" @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
                   {{ text }}
@@ -308,7 +308,7 @@
                 v-permit="'app:closeDeploy'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
-            </template>
+            </span>
             <template v-else>
               <ellipsis :length="45" tooltip>
                 {{ text }}
@@ -438,11 +438,10 @@
 
           <a-icon
             type="eye"
-            v-show="record.state === 5"
             v-permit="'app:detail'"
             theme="twoTone"
             twoToneColor="#4a9ff5"
-            @click="handleView(record)"
+            @click="handleDetail(record)"
             title="查看">
           </a-icon>
 
@@ -1179,8 +1178,10 @@ export default {
     },
 
     handleView(params) {
-      const url = this.yarn + '/proxy/' + params['appId'] + '/'
-      window.open(url)
+      if (params.state === 5) {
+        const url = this.yarn + '/proxy/' + params['appId'] + '/'
+        window.open(url)
+      }
     },
 
     handleAdd() {
