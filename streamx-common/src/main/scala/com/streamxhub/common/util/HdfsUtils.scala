@@ -41,14 +41,14 @@ object HdfsUtils extends Logger {
    */
   lazy val conf: Configuration = {
     def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
-      val props = conf.getClass.getMethod("getProps")
+      val props = classOf[Configuration].getDeclaredMethod("getProps")
       props.setAccessible(true)
-      val prop: Properties = props.invoke(conf, null).asInstanceOf[Properties]
-      if (prop.isEmpty) {
+      val prop: Properties = props.invoke(conf).asInstanceOf[Properties]
+      if (prop.get(FileSystem.FS_DEFAULT_NAME_KEY) == "file:///") {
         logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now find in $HADOOP_HOME/etc/hadoop ...")
         val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME")
         if (hadoopHome == null) {
-          throw new IllegalArgumentException("[StreamX] HADOOP_HOME is set defined... ")
+          throw new IllegalArgumentException("[StreamX] HADOOP_HOME is not defined ")
         }
         val coreDefault = new File(s"$hadoopHome/etc/hadoop/core-default.xml")
         conf.addResource(coreDefault.toURI.toURL)
