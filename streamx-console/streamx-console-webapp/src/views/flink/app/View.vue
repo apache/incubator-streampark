@@ -148,7 +148,7 @@
         <template slot="filterRender" slot-scope="text, record, index, column">
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
-            <template v-if="column.dataIndex === 'jobName'">
+            <template v-if="column.dataIndex === 'jobName'" @click="handleDetail(record)">
               <!--start: record.deploy === 0-->
               <template
                 v-if="record.deploy === 0"
@@ -280,7 +280,7 @@
           </template>
           <!--无条件搜索-->
           <template v-else>
-            <template v-if="column.dataIndex === 'jobName'">
+            <template v-if="column.dataIndex === 'jobName'" @click="handleDetail(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
                   {{ text }}
@@ -445,14 +445,6 @@
             @click="handleView(record)"
             title="查看">
           </a-icon>
-
-          <a-icon
-            type="profile"
-            v-permit="'app:detail'"
-            theme="twoTone"
-            twoToneColor="#4a9ff5"
-            @click="handleDetail(item)"
-          />
 
         </template>
 
