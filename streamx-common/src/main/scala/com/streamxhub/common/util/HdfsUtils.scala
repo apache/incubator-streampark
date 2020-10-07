@@ -21,7 +21,8 @@
 package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
+import java.util.Properties
 
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -33,12 +34,33 @@ import org.apache.hadoop.io.IOUtils
 
 import scala.util.{Failure, Success, Try}
 
-object HdfsUtils {
+object HdfsUtils extends Logger {
 
+  /**
+   * 默认加载: $HADOOP_HOME/etc/hadoop下的core-default.xml,core-site.xml
+   */
   lazy val conf: Configuration = {
     def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
-      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) conf.set("hadoop.tmp.dir", "/tmp")
-      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) conf.set("hbase.fs.tmp.dir", "/tmp")
+      val props = conf.getClass.getMethod("getProps")
+      props.setAccessible(true)
+      val prop: Properties = props.invoke(conf, null).asInstanceOf[Properties]
+      if (prop.isEmpty) {
+        logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now find in $HADOOP_HOME/etc/hadoop ...")
+        val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME")
+        if (hadoopHome == null) {
+          throw new IllegalArgumentException("[StreamX] HADOOP_HOME is set defined... ")
+        }
+        val coreDefault = new File(s"$hadoopHome/etc/hadoop/core-default.xml")
+        conf.addResource(coreDefault.toURI.toURL)
+        val coreSite = new File(s"$hadoopHome/etc/hadoop/core-site.xml")
+        conf.addResource(coreSite.toURI.toURL)
+      }
+      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
+        conf.set("hadoop.tmp.dir", "/tmp")
+      }
+      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
+        conf.set("hbase.fs.tmp.dir", "/tmp")
+      }
       //  https://issues.apache.org/jira/browse/KYLIN-3064
       conf.set("yarn.timeline-service.enabled", "false")
       conf
