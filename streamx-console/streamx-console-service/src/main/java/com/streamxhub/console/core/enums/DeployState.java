@@ -17,7 +17,7 @@ public enum DeployState {
     APP_UPDATED(1),
 
     /**
-     * 配置文件更新需要重新发布
+     * 配置文件更新需要重新启动
      */
     CONF_UPDATED(2),
 
