@@ -22,7 +22,7 @@ package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
-import java.net.URL
+import java.net.{URL, URLClassLoader}
 
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -76,6 +76,9 @@ object HdfsUtils extends Logger {
         }
       }
       val conf = new Configuration()
+      val sysClassloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+      conf.setClassLoader(sysClassloader)
+
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
