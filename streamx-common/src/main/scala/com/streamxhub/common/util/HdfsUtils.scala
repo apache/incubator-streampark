@@ -22,6 +22,7 @@ package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
+import java.net.URL
 
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -72,6 +73,7 @@ object HdfsUtils extends Logger {
         xmlList.foreach { x =>
           new File(s"$hadoopHome/etc/hadoop/$x") match {
             case f if f.exists() => Configuration.addDefaultResource(f.getAbsolutePath)
+              conf.addResource(f.toURI.toURL)
             case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
           }
         }
