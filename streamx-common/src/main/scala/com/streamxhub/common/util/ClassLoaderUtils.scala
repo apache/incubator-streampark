@@ -84,7 +84,7 @@ object ClassLoaderUtils {
     if (file.isDirectory) {
       file.listFiles.foreach(x => loopFiles(x, ext))
     } else {
-      if (ext == null) {
+      if (ext.isEmpty) {
         addURL(file)
       } else if (ext.filter(x => file.getName.endsWith(x)).nonEmpty) {
         Utils.checkJarFile(file.toURI.toURL)
