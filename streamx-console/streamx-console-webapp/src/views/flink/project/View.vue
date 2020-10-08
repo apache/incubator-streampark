@@ -40,23 +40,23 @@
 
           <div class="list-content">
             <div class="list-content-item">
-              <span>托管平台</span>
+              <span>CVS</span>
               <p>
                 <a-icon type="github" two-tone-color></a-icon>
               </p>
             </div>
             <div class="list-content-item">
-              <span>分支</span>
+              <span>Branches</span>
               <p>
                 <a-tag color="blue">{{ item.branches }}</a-tag>
               </p>
             </div>
             <div class="list-content-item">
-              <span>构建次数</span>
+              <span>Total Build</span>
               <p>21</p>
             </div>
             <div class="list-content-item" style="width: 180px">
-              <span>最后构建时间</span>
+              <span>Last Build</span>
               <p v-if="item.lastBuild">{{ item.lastBuild }}</p>
               <p v-else>--</p>
             </div>
