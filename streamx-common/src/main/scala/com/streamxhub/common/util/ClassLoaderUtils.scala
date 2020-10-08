@@ -42,8 +42,8 @@ object ClassLoaderUtils {
     require(jarDir.exists, s"[StreamX] jarPath: $path is not exists")
     require(jarDir.isFile, s"[StreamX] jarPath: $path is not directory")
     require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
-    for (jarFile <- jarDir.listFiles) {
-      loadPath(jarFile.getAbsolutePath, List(".jar", ".zip"))
+    jarDir.listFiles.foreach { x =>
+      loadPath(x.getAbsolutePath, List(".jar", ".zip"))
     }
   }
 
@@ -76,7 +76,7 @@ object ClassLoaderUtils {
   private[this] def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
       addURL(file)
-      file.listFiles.foreach(x => loopDirs(x))
+      file.listFiles.foreach(loopDirs)
     }
   }
 
