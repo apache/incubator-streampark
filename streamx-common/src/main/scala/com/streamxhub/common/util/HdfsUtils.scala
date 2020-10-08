@@ -76,7 +76,7 @@ object HdfsUtils extends Logger {
         }
       }
       val conf = new Configuration()
-      val sysClassloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+      val sysClassloader = ClassLoader.getSystemClassLoader
       conf.setClassLoader(sysClassloader)
 
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
