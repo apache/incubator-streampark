@@ -32,6 +32,7 @@ import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.hdfs.client.HdfsUtils
 import org.apache.hadoop.io.IOUtils
+import org.apache.hadoop.security.UserGroupInformation.HadoopLoginModule
 
 import scala.util.{Failure, Success, Try}
 
@@ -54,9 +55,9 @@ object HdfsUtils extends Logger {
       classLoader.getResource("core-site.xml") != null &&
         classLoader.getResource("hdfs-site.xml") != null
 
-    def healSickConfig() = { // https://issues.apache.org/jira/browse/KYLIN-953
-      val conf = if (checkConfInClassPath) new Configuration() else {
-        logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now find in $HADOOP_HOME/etc/hadoop ...")
+    val conf = {
+      if (!checkConfInClassPath) {
+        logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now load conf in $HADOOP_HOME/etc/hadoop ...")
         val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME") match {
           case null => System.getenv("HADOOP_HOME") match {
             case null => throw new IllegalArgumentException("[StreamX] HADOOP_HOME is not defined ")
@@ -65,33 +66,26 @@ object HdfsUtils extends Logger {
           case other => other
         }
         /**
-         * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml
+         * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml 到 classpath
          */
-        val conf = new Configuration()
-        conf.reloadConfiguration()
         val xmlList = List("hdfs-site.xml", "core-site.xml", "yarn-site.xml")
         xmlList.foreach { x =>
           new File(s"$hadoopHome/etc/hadoop/$x") match {
-            case f if f.exists() => Configuration.addDefaultResource(f.getAbsolutePath)
-              conf.addResource(f.toURI.toURL)
+            case f if f.exists() => ClassLoaderUtils.loadResource(f.getAbsolutePath)
             case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
           }
         }
-        conf
       }
-
+      val conf = new Configuration()
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
       if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
         conf.set("hbase.fs.tmp.dir", "/tmp")
       }
-      //  https://issues.apache.org/jira/browse/KYLIN-3064
       conf.set("yarn.timeline-service.enabled", "false")
       conf
     }
-
-    val conf = healSickConfig()
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
     conf
