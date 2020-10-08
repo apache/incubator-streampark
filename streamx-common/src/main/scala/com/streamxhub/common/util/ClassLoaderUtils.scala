@@ -33,7 +33,7 @@ object ClassLoaderUtils {
     val jarFile = new File(jarFilePath)
     require(jarFile.exists, s"[StreamX] jarFilePath:$jarFilePath is not exists")
     require(jarFile.isFile, s"[StreamX] jarFilePath:$jarFilePath is not file")
-    loadPath(jarFile.getAbsolutePath)
+    loadPath(jarFile.getAbsolutePath, List(".jar", ".zip"))
   }
 
   def loadJars(path: String): Unit = {
@@ -42,7 +42,7 @@ object ClassLoaderUtils {
     require(jarDir.isFile, s"[StreamX] jarPath: $path is not directory")
     require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
     for (jarFile <- jarDir.listFiles) {
-      loadPath(jarFile.getAbsolutePath)
+      loadPath(jarFile.getAbsolutePath, List(".jar", ".zip"))
     }
   }
 
@@ -57,17 +57,22 @@ object ClassLoaderUtils {
     case e: Exception => throw new RuntimeException(e)
   }
 
-  private def loadPath(filepath: String): Unit = {
+  private[this] def loadPath(filepath: String, ext: List[String]): Unit = {
     val file = new File(filepath)
-    loopFiles(file)
+    loopFiles(file, ext)
   }
 
-  private def loadResourceDir(filepath: String): Unit = {
+  def loadResource(filepath: String): Unit = {
+    val file = new File(filepath)
+    addURL(file)
+  }
+
+  def loadResourceDir(filepath: String): Unit = {
     val file = new File(filepath)
     loopDirs(file)
   }
 
-  private def loopDirs(file: File): Unit = { // 资源文件只加载路径
+  private[this] def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
       addURL(file)
       file.listFiles.foreach(x => loopDirs(x))
@@ -75,15 +80,20 @@ object ClassLoaderUtils {
   }
 
 
-  private def loopFiles(file: File): Unit = {
+  private[this] def loopFiles(file: File, ext: List[String] = List()): Unit = {
     if (file.isDirectory) {
-      file.listFiles.foreach(loopFiles)
-    } else if (file.getAbsolutePath.endsWith(".jar") || file.getAbsolutePath.endsWith(".zip")) {
-      addURL(file)
+      file.listFiles.foreach(x => loopFiles(x, ext))
+    } else {
+      if (ext == null) {
+        addURL(file)
+      } else if (ext.filter(x => file.getName.endsWith(x)).nonEmpty) {
+        Utils.checkJarFile(file.toURI.toURL)
+        addURL(file)
+      }
     }
   }
 
-  private def addURL(file: File): Unit = {
+  private[this] def addURL(file: File): Unit = {
     try {
       addURL.invoke(classloader, Array[AnyRef](file.toURI.toURL))
     } catch {
