@@ -43,9 +43,12 @@ object HdfsUtils extends Logger {
     def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
       if (conf.get(FileSystem.FS_DEFAULT_NAME_KEY) == "file:///") {
         logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now find in $HADOOP_HOME/etc/hadoop ...")
-        val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME")
-        if (hadoopHome == null) {
-          throw new IllegalArgumentException("[StreamX] HADOOP_HOME is not defined ")
+        val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME") match {
+          case null => System.getenv("HADOOP_HOME") match {
+            case null => throw new IllegalArgumentException("[StreamX] HADOOP_HOME is not defined ")
+            case other => other
+          }
+          case other => other
         }
         val coreDefault = new File(s"$hadoopHome/etc/hadoop/core-default.xml")
         conf.addResource(coreDefault.toURI.toURL)
