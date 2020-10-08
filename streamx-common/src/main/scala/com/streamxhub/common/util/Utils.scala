@@ -16,7 +16,7 @@ object Utils {
   @throws[IOException] def checkJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x
-      case Failure(_) => throw new IOException(s"JAR file path is invalid ${jar}")
+      case Failure(_) => throw new IOException(s"JAR file path is invalid $jar")
     }
     if (!jarFile.exists) {
       throw new IOException(s"JAR file does not exist '${jarFile.getAbsolutePath}'")
