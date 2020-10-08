@@ -27,7 +27,7 @@ import java.net.URLClassLoader
 
 object ClassLoaderUtils {
 
-  private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+  private lazy val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
