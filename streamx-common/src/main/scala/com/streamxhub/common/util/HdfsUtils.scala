@@ -22,17 +22,24 @@ package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
+
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FSDataOutputStream
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.hdfs.client.HdfsUtils
 import org.apache.hadoop.io.IOUtils
 
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
+
+  private[this] val classLoader = Thread.currentThread().getContextClassLoader() match {
+    case null => classOf[HdfsUtils].getClassLoader
+    case loader => loader
+  }
 
   /**
    * 注意:加载hadoop配置文件,有两种方式:
@@ -41,8 +48,13 @@ object HdfsUtils extends Logger {
    * 推荐第二种方法,不用copy配置文件.
    */
   lazy val conf: Configuration = {
-    def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
-      if (conf.get(FileSystem.FS_DEFAULT_NAME_KEY) == "file:///") {
+
+    def checkConfInClassPath(): Boolean =
+      classLoader.getResource("core-site.xml") != null &&
+        classLoader.getResource("hdfs-site.xml") != null
+
+    def healSickConfig() = { // https://issues.apache.org/jira/browse/KYLIN-953
+      val conf = if (checkConfInClassPath) new Configuration() else {
         logger.warn("[StreamX] can't found (core-default.xml|core-site.xml) in classpath,now find in $HADOOP_HOME/etc/hadoop ...")
         val hadoopHome = SystemPropertyUtils.get("HADOOP_HOME") match {
           case null => System.getenv("HADOOP_HOME") match {
@@ -54,15 +66,17 @@ object HdfsUtils extends Logger {
         /**
          * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml
          */
-        val xmlList = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
+        val conf = new Configuration()
+        conf.clear()
+        val xmlList = List("hdfs-site.xml", "core-site.xml", "yarn-site.xml")
         xmlList.foreach { x =>
           new File(s"$hadoopHome/etc/hadoop/$x") match {
             case f if f.exists() => conf.addResource(f.toURI.toURL)
             case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
           }
         }
+        conf
       }
-
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
@@ -74,7 +88,7 @@ object HdfsUtils extends Logger {
       conf
     }
 
-    val conf = healSickConfig(new Configuration())
+    val conf = healSickConfig()
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
     conf
