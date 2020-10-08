@@ -67,16 +67,17 @@ object HdfsUtils extends Logger {
          * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml
          */
         val conf = new Configuration()
-        conf.clear()
+        conf.reloadConfiguration()
         val xmlList = List("hdfs-site.xml", "core-site.xml", "yarn-site.xml")
         xmlList.foreach { x =>
           new File(s"$hadoopHome/etc/hadoop/$x") match {
-            case f if f.exists() => conf.addResource(f.toURI.toURL)
+            case f if f.exists() => Configuration.addDefaultResource(f.getAbsolutePath)
             case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
           }
         }
         conf
       }
+
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
