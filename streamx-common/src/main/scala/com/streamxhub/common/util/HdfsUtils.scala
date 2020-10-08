@@ -22,8 +22,6 @@ package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
-import java.util.Properties
-
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.FSDataOutputStream
@@ -37,7 +35,10 @@ import scala.util.{Failure, Success, Try}
 object HdfsUtils extends Logger {
 
   /**
-   * 默认加载: $HADOOP_HOME/etc/hadoop下的core-default.xml,core-site.xml
+   * 注意:加载hadoop配置文件,有两种方式:
+   * 1) 将hadoop的core-site.xml,hdfs-site.xml,yarn-site.xml copy到 resources下
+   * 2) 可以在部署机器中找到 $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml
+   * 推荐第二种方法,不用copy配置文件.
    */
   lazy val conf: Configuration = {
     def healSickConfig(conf: Configuration) = { // https://issues.apache.org/jira/browse/KYLIN-953
@@ -50,11 +51,18 @@ object HdfsUtils extends Logger {
           }
           case other => other
         }
-        val coreDefault = new File(s"$hadoopHome/etc/hadoop/core-default.xml")
-        conf.addResource(coreDefault.toURI.toURL)
-        val coreSite = new File(s"$hadoopHome/etc/hadoop/core-site.xml")
-        conf.addResource(coreSite.toURI.toURL)
+        /**
+         * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml
+         */
+        val xmlList = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
+        xmlList.foreach { x =>
+          new File(s"$hadoopHome/etc/hadoop/$x") match {
+            case f if f.exists() => conf.addResource(f.toURI.toURL)
+            case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
+          }
+        }
       }
+
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
