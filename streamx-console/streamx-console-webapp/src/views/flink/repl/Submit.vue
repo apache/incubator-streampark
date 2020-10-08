@@ -54,7 +54,7 @@ export default {
       matchBrackets: true,
       autofocus: true,
       extraKeys: { 'Ctrl': 'autocomplete' }, // 自定义快捷键
-      hintOptions: {// 自定义提示选项
+      hintOptions: { // 自定义提示选项
         tables: {
           users: ['name', 'score', 'birthDate'],
           countries: ['name', 'population', 'size']

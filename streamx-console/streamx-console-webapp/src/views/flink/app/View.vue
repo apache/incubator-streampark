@@ -269,7 +269,10 @@
               </a-badge>
             </span>
             <!--其他字段-->
-            <template v-else>
+            <span
+              v-else
+              :class="{pointer:record.state === 5}"
+              @click="handleView(record)">
               <template
                 v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
@@ -279,7 +282,7 @@
                   {{ fragment }}
                 </template>
               </template>
-            </template>
+            </span>
           </template>
           <!--无条件搜索-->
           <template v-else>
@@ -315,11 +318,14 @@
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
-            <template v-else>
+            <span
+              v-else
+              :class="{pointer:record.state === 5}"
+              @click="handleView(record)">
               <ellipsis :length="45" tooltip>
                 {{ text }}
               </ellipsis>
-            </template>
+            </span>
           </template>
         </template>
 
@@ -695,13 +701,13 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
-import {mapActions} from 'vuex'
-import {list, stop, deploy, mapping, start, closeDeploy, yarn} from '@api/application'
-import {lastest, history} from '@api/savepoint'
+import { mapActions } from 'vuex'
+import { list, stop, deploy, mapping, start, closeDeploy, yarn } from '@api/application'
+import { lastest, history } from '@api/savepoint'
 
 export default {
-  components: {RangeDate, Ellipsis},
-  data() {
+  components: { RangeDate, Ellipsis },
+  data () {
     return {
       loading: false,
       advanced: false,
@@ -834,8 +840,8 @@ export default {
   },
 
   computed: {
-    columns() {
-      let {sortedInfo, filteredInfo} = this
+    columns () {
+      let { sortedInfo, filteredInfo } = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
@@ -892,32 +898,32 @@ export default {
         dataIndex: 'duration',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
+        scopedSlots: { customRender: 'duration' },
         width: 150
       }, {
         title: 'End Time',
         dataIndex: 'endTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
-        scopedSlots: {customRender: 'endTime'},
+        scopedSlots: { customRender: 'endTime' },
         width: 180
       }, {
         title: 'Status',
         dataIndex: 'state',
         width: 120,
-        scopedSlots: {customRender: 'state'},
+        scopedSlots: { customRender: 'state' },
         filters: [
-          {text: 'CREATED', value: 0},
-          {text: 'DEPLOYING', value: 1},
-          {text: 'DEPLOYED', value: 2},
-          {text: 'STARTING', value: 3},
-          {text: 'RESTARTING', value: 4},
-          {text: 'RUNNING', value: 5},
-          {text: 'FAILING', value: 6},
-          {text: 'FAILED', value: 7},
-          {text: 'CANCELED', value: 9},
-          {text: 'FINISHED', value: 10},
-          {text: 'LOST', value: 13}
+          { text: 'CREATED', value: 0 },
+          { text: 'DEPLOYING', value: 1 },
+          { text: 'DEPLOYED', value: 2 },
+          { text: 'STARTING', value: 3 },
+          { text: 'RESTARTING', value: 4 },
+          { text: 'RUNNING', value: 5 },
+          { text: 'FAILING', value: 6 },
+          { text: 'FAILED', value: 7 },
+          { text: 'CANCELED', value: 9 },
+          { text: 'FINISHED', value: 10 },
+          { text: 'LOST', value: 13 }
         ],
         fixed: 'right',
         filteredValue: filteredInfo.state || null,
@@ -929,15 +935,15 @@ export default {
       }, {
         dataIndex: 'operation',
         key: 'operation',
-        scopedSlots: {customRender: 'operation'},
-        slots: {title: 'customOperation'},
+        scopedSlots: { customRender: 'operation' },
+        slots: { title: 'customOperation' },
         fixed: 'right',
         width: 150
       }]
     }
   },
 
-  mounted() {
+  mounted () {
     this.handleYarn()
     this.handleFetch(true)
     const timer = window.setInterval(() => this.handleFetch(false), 2000)
@@ -946,7 +952,7 @@ export default {
     })
   },
 
-  beforeMount() {
+  beforeMount () {
     this.formDeploy = this.$form.createForm(this)
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
@@ -955,24 +961,24 @@ export default {
 
   methods: {
     ...mapActions(['SetAppId']),
-    onSelectChange(selectedRowKeys) {
+    onSelectChange (selectedRowKeys) {
       console.log(selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
 
-    handleDateChange(value) {
+    handleDateChange (value) {
       if (value) {
         this.queryParams.dateFrom = value[0]
         this.queryParams.dateTo = value[1]
       }
     },
 
-    handleDeploy(value) {
+    handleDeploy (value) {
       this.deployVisible = true
       this.application = value
     },
 
-    handleDeployCancel() {
+    handleDeployCancel () {
       this.deployVisible = false
       this.application = null
       this.restart = false
@@ -981,7 +987,7 @@ export default {
       this.formDeploy.resetFields()
     },
 
-    handleDeployOk() {
+    handleDeployOk () {
       this.formDeploy.validateFields((err, values) => {
         if (!err) {
           const id = this.application.id
@@ -1007,12 +1013,12 @@ export default {
       })
     },
 
-    handleMapping(app) {
+    handleMapping (app) {
       this.mappingVisible = true
       this.application = app
     },
 
-    handleMappingOk() {
+    handleMappingOk () {
       this.formMapping.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
@@ -1034,13 +1040,13 @@ export default {
       })
     },
 
-    handleMappingCancel() {
+    handleMappingCancel () {
       this.mappingVisible = false
       this.application = null
       this.formMapping.resetFields()
     },
 
-    handleStart(app) {
+    handleStart (app) {
       this.application = app
       lastest({
         appId: this.application.id
@@ -1057,7 +1063,7 @@ export default {
       })
     },
 
-    handleStartCancel() {
+    handleStartCancel () {
       this.startVisible = false
       this.allowNonRestoredState = false
       this.formStartCheckPoint.resetFields()
@@ -1065,7 +1071,7 @@ export default {
       this.savePoint = true
     },
 
-    handleStartOk() {
+    handleStartOk () {
       this.formStartCheckPoint.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
@@ -1089,12 +1095,12 @@ export default {
       })
     },
 
-    handleStop(value) {
+    handleStop (value) {
       this.stopVisible = true
       this.application = value
     },
 
-    handleStopCancel() {
+    handleStopCancel () {
       this.stopVisible = false
       this.formStopSavePoint.resetFields()
       this.drain = false
@@ -1102,7 +1108,7 @@ export default {
       this.application = null
     },
 
-    handleStopOk() {
+    handleStopOk () {
       this.$message.info(
         '已发送停止请求,该应用正在停止',
         3
@@ -1120,16 +1126,16 @@ export default {
       })
     },
 
-    handleDetail() {
-      this.$router.push({'path': '/flink/app/detail'})
+    handleDetail () {
+      this.$router.push({ 'path': '/flink/app/detail' })
     },
 
-    handleSearch(selectedKeys, confirm, dataIndex) {
+    handleSearch (selectedKeys, confirm, dataIndex) {
       confirm()
       this.searchText = selectedKeys[0]
       this.searchedColumn = dataIndex
       this.queryParams[this.searchedColumn] = this.searchText
-      const {sortedInfo} = this
+      const { sortedInfo } = this
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
         this.queryParams['sortField'] = sortedInfo.field
@@ -1138,7 +1144,7 @@ export default {
       console.log(this.queryParams)
     },
 
-    handleReset(clearFilters) {
+    handleReset (clearFilters) {
       clearFilters()
       this.searchText = ''
       // 重置列排序规则
@@ -1147,14 +1153,14 @@ export default {
       this.queryParams = {}
     },
 
-    handleTableChange(pagination, filters, sorter) {
+    handleTableChange (pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.queryParams['sortField'] = sorter.field
       this.queryParams['sortOrder'] = sorter.order
       this.handleFetch(true)
     },
 
-    handleFetch(loading) {
+    handleFetch (loading) {
       if (loading) this.loading = true
       const params = Object.assign(this.queryParams, {})
       if (this.paginationInfo) {
@@ -1168,49 +1174,49 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      list({...params}).then((resp) => {
+      list({ ...params }).then((resp) => {
         this.loading = false
-        const pagination = {...this.pagination}
+        const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         this.pagination = pagination
       })
     },
 
-    handleYarn(params = {}) {
+    handleYarn (params = {}) {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
     },
 
-    handleView(params) {
+    handleView (params) {
       if (params.state === 5) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }
     },
 
-    handleAdd() {
-      this.$router.push({'path': '/flink/app/add'})
+    handleAdd () {
+      this.$router.push({ 'path': '/flink/app/add' })
     },
 
-    handleEdit(app) {
+    handleEdit (app) {
       this.SetAppId(app.id)
       if (app.appType == 1) {
-        this.$router.push({'path': '/flink/app/edit_streamx'})
+        this.$router.push({ 'path': '/flink/app/edit_streamx' })
       } else {
-        this.$router.push({'path': '/flink/app/edit_flink'})
+        this.$router.push({ 'path': '/flink/app/edit_flink' })
       }
     },
 
-    handleCloseDeploy(app) {
+    handleCloseDeploy (app) {
       closeDeploy({
         id: app.id
       }).then((resp) => {
       })
     },
 
-    exportExcel() {
+    exportExcel () {
 
     }
 

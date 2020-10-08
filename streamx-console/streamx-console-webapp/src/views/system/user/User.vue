@@ -27,7 +27,7 @@
             </template>
           </div>
           <a-col :md="8" :sm="24">
-              <span class="table-page-search-bar">
+            <span class="table-page-search-bar">
               <a-button
                 type="primary"
                 shape="circle"
