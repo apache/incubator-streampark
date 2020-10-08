@@ -32,7 +32,6 @@ import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FileSystem
 import org.apache.hadoop.hdfs.client.HdfsUtils
 import org.apache.hadoop.io.IOUtils
-import org.apache.hadoop.security.UserGroupInformation.HadoopLoginModule
 
 import scala.util.{Failure, Success, Try}
 
