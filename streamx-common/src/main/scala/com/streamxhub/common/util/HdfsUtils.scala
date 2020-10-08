@@ -22,7 +22,6 @@ package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
 import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
-import java.net.{URL, URLClassLoader}
 
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -64,21 +63,9 @@ object HdfsUtils extends Logger {
           }
           case other => other
         }
-        /**
-         * 加载: $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml 到 classpath
-         */
-        val xmlList = List("hdfs-site.xml", "core-site.xml", "yarn-site.xml")
-        xmlList.foreach { x =>
-          new File(s"$hadoopHome/etc/hadoop/$x") match {
-            case f if f.exists() => ClassLoaderUtils.loadResource(f.getAbsolutePath)
-            case _ => throw new IllegalArgumentException(s"[StreamX] can't found $x in $hadoopHome/etc/hadoop ")
-          }
-        }
+        ClassLoaderUtils.loadResourceDir(s"$hadoopHome/etc/hadoop/")
       }
       val conf = new Configuration()
-      val sysClassloader = ClassLoader.getSystemClassLoader
-      conf.setClassLoader(sysClassloader)
-
       if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
         conf.set("hadoop.tmp.dir", "/tmp")
       }
