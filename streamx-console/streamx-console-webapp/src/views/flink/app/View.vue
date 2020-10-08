@@ -148,7 +148,10 @@
         <template slot="filterRender" slot-scope="text, record, index, column">
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
-            <span v-if="column.dataIndex === 'jobName'" @click="handleView(record)">
+            <span
+              v-if="column.dataIndex === 'jobName'"
+              :class="{pointer:record.state === 5}"
+              @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
                 v-if="record.deploy === 0"
@@ -261,7 +264,7 @@
                 class="close-deploy"
                 @click="handleCloseDeploy(record)"
                 v-if="record.deploy !== 0"
-                v-permit="'app:closeDeploy'">
+                v-permit="'app:close'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
@@ -280,7 +283,10 @@
           </template>
           <!--无条件搜索-->
           <template v-else>
-            <span v-if="column.dataIndex === 'jobName'" @click="handleView(record)">
+            <span
+              v-if="column.dataIndex === 'jobName'"
+              :class="{pointer:record.state === 5}"
+              @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
                   {{ text }}
@@ -305,7 +311,7 @@
                 class="close-deploy"
                 @click="handleCloseDeploy(record)"
                 v-if="record.deploy !== 0"
-                v-permit="'app:closeDeploy'">
+                v-permit="'app:close'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
@@ -1391,4 +1397,7 @@ export default {
   right: unset !important;
 }
 
+.pointer {
+  cursor: pointer;
+}
 </style>

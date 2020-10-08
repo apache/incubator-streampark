@@ -115,7 +115,7 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("closeDeploy")
-    @RequiresPermissions("app:closeDeploy")
+    @RequiresPermissions("app:close")
     public RestResponse closeDeploy(Application app) {
         applicationService.closeDeploy(app);
         return RestResponse.create().data(true);
