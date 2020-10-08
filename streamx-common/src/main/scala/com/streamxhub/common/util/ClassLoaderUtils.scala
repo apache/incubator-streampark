@@ -23,11 +23,12 @@ package com.streamxhub.common.util
 import java.io.File
 import java.net.URL
 import java.lang.reflect.Method
-import java.net.URLClassLoader
 
 object ClassLoaderUtils {
 
-  private lazy val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+  import java.net.URLClassLoader
+
+  private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
