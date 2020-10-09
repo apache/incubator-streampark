@@ -23,10 +23,10 @@ package com.streamxhub.common.util
 import java.io.File
 import java.net.URL
 import java.lang.reflect.Method
+import java.net.URLClassLoader
+
 
 object ClassLoaderUtils {
-
-  import java.net.URLClassLoader
 
   private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
@@ -47,6 +47,17 @@ object ClassLoaderUtils {
     }
   }
 
+
+  def loadResource(filepath: String): Unit = {
+    val file = new File(filepath)
+    addURL(file)
+  }
+
+  def loadResourceDir(filepath: String): Unit = {
+    val file = new File(filepath)
+    loopDirs(file)
+  }
+
   /**
    * URLClassLoader的addURL方法
    */
@@ -63,15 +74,6 @@ object ClassLoaderUtils {
     loopFiles(file, ext)
   }
 
-  def loadResource(filepath: String): Unit = {
-    val file = new File(filepath)
-    addURL(file)
-  }
-
-  def loadResourceDir(filepath: String): Unit = {
-    val file = new File(filepath)
-    loopDirs(file)
-  }
 
   private[this] def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
