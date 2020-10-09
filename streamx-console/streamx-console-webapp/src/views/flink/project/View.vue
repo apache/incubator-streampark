@@ -5,17 +5,17 @@
       :bordered="false">
       <div slot="extra">
         <a-radio-group button-style="solid" default-value="">
-          <a-radio-button @click="handleQuery()" value="">全部</a-radio-button>
-          <a-radio-button @click="handleQuery(0)" value="0" >构建中</a-radio-button>
-          <a-radio-button @click="handleQuery(-1)" value="-1">未构建</a-radio-button>
-          <a-radio-button @click="handleQuery(1)" value="1">已构建</a-radio-button>
-          <a-radio-button @click="handleQuery(2)" value="2">构建失败</a-radio-button>
+          <a-radio-button @click="handleQuery()" value="">All</a-radio-button>
+          <a-radio-button @click="handleQuery(-1)" value="-1">Unbuild</a-radio-button>
+          <a-radio-button @click="handleQuery(0)" value="0" >Building</a-radio-button>
+          <a-radio-button @click="handleQuery(1)" value="1">Build Success</a-radio-button>
+          <a-radio-button @click="handleQuery(2)" value="2">Build Failed</a-radio-button>
         </a-radio-group>
         <a-input-search @search="handleSearch" style="margin-left: 16px; width: 272px;"/>
       </div>
 
       <div class="operate" v-permit="'project:create'">
-        <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">添加</a-button>
+        <a-button type="dashed" style="width: 100%" icon="plus" @click="handleAdd">Add New</a-button>
       </div>
 
       <a-list size="large" :pagination="pagination">
