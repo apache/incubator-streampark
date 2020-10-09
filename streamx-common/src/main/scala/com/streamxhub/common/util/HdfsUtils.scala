@@ -44,23 +44,20 @@ object HdfsUtils extends Logger {
   /**
    * 注意:加载hadoop配置文件,有两种方式:
    * 1) 将hadoop的core-site.xml,hdfs-site.xml,yarn-site.xml copy到 resources下
-   * 2) 项目在启动时动态加载 $HADOOP_HOME/etc/hadoop下的core-site.xml,hdfs-site.xml,yarn-site.xml 到 classpath中
-   *    e.g: java -cp $HADOOP_HOME/etc/hadoop ...
+   * 2) 项目在启动时动态加载 $HADOOP_HOME/etc/hadoop下的配置 到 classpath中
+   * e.g: java -cp $HADOOP_HOME/etc/hadoop ...
    * 推荐第二种方法,不用copy配置文件.
    */
   lazy val conf: Configuration = {
-    val conf = {
-      val conf = new Configuration()
-      conf.setClassLoader(classLoader)
-      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-        conf.set("hadoop.tmp.dir", "/tmp")
-      }
-      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-        conf.set("hbase.fs.tmp.dir", "/tmp")
-      }
-      conf.set("yarn.timeline-service.enabled", "false")
-      conf
+    val conf = new Configuration()
+    conf.setClassLoader(classLoader)
+    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
+      conf.set("hadoop.tmp.dir", "/tmp")
     }
+    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
+      conf.set("hbase.fs.tmp.dir", "/tmp")
+    }
+    conf.set("yarn.timeline-service.enabled", "false")
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
     conf
