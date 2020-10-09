@@ -306,9 +306,8 @@ else
 fi
 
 CP_OPTS="${APP_LIB}"
-HOP_HOME="${HADOOP_HOME}"
-if [[ ! "${HOP_HOME}" == "" ]];then
-  CP_OPTS="${CP_OPTS}:${HOP_HOME}/etc/hadoop"
+if [[ ! "${HADOOP_HOME}" == "" ]];then
+  CP_OPTS="${CP_OPTS}:${HADOOP_HOME}/etc/hadoop"
 fi
 
 MAIN_JAR="${APP_LIB}/$(basename "${APP_BASE}").jar"
