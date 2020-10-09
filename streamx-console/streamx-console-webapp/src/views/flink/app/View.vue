@@ -269,10 +269,7 @@
               </a-badge>
             </span>
             <!--其他字段-->
-            <span
-              v-else
-              :class="{pointer:record.state === 5}"
-              @click="handleView(record)">
+            <span v-else>
               <template
                 v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark v-if="fragment.toLowerCase() === searchText.toLowerCase()" :key="i" class="highlight">
@@ -318,10 +315,7 @@
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
-            <span
-              v-else
-              :class="{pointer:record.state === 5}"
-              @click="handleView(record)">
+            <span v-else>
               <ellipsis :length="45" tooltip>
                 {{ text }}
               </ellipsis>
