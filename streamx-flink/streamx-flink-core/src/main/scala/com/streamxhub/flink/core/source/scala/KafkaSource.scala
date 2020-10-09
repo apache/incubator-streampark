@@ -59,7 +59,7 @@ object KafkaSource {
     //start.form parameter...
     val timestamp = Try(Some(prop(s"$KEY_KAFKA_START_FROM.$KEY_KAFKA_START_FROM_TIMESTAMP").toLong)).getOrElse(None)
     val startFrom = StartFrom.startForm(prop)
-    require(!(timestamp.nonEmpty && startFrom != null), s"[Streamx] start.form timestamp and offset cannot be defined at the same time")
+    require(!(timestamp.nonEmpty && startFrom != null), s"[StreamX] start.form timestamp and offset cannot be defined at the same time")
 
     //topic parameter
     val topicOpt = Try(Some(prop.remove(KEY_KAFKA_TOPIC).toString)).getOrElse(None)
@@ -69,24 +69,25 @@ object KafkaSource {
 
     val consumer = (topicOpt, regexOpt) match {
       case (Some(_), Some(_)) =>
-        throw new IllegalArgumentException("[Streamx] topic and regex cannot be defined at the same time")
+        throw new IllegalArgumentException("[StreamX] topic and regex cannot be defined at the same time")
       case (Some(top), _) =>
         val topics = top.split(",|\\s+")
         val topicList = topic match {
           case null => topics.toList
           case x: String => List(x)
           case x: List[String] => x
-          case _ => throw new IllegalArgumentException("[Streamx] topic type must be String(one topic) or List[String](more topic)")
+          case _ => throw new IllegalArgumentException("[StreamX] topic type must be String(one topic) or List[String](more topic)")
         }
         new FlinkKafkaConsumer(topicList, kfkDeserializer, prop)
       case (_, Some(reg)) =>
         val pattern: Pattern = topic match {
           case null => reg.r.pattern
           case x: String => x.r.pattern
-          case _ => throw new IllegalArgumentException("[Streamx] subscriptionPattern type must be String(regex)")
+          case _ => throw new IllegalArgumentException("[StreamX] subscriptionPattern type must be String(regex)")
         }
         val kfkDeserializer = new KafkaDeserializer[T](deserializer)
         new FlinkKafkaConsumer(pattern, kfkDeserializer, prop)
+      case _ => null
     }
 
     val autoCommit = prop.getOrElse(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true").toBoolean
@@ -125,6 +126,7 @@ object KafkaSource {
               case x: String => startFrom.filter(s => x.r.findFirstIn(s.topic).nonEmpty).toList
               case _ => List.empty[StartFrom]
             }
+          case _ => null
         }
 
         //startOffsets...
