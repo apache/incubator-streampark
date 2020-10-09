@@ -305,6 +305,12 @@ else
     fi
 fi
 
+CP_OPTS="${APP_LIB}"
+HOP_HOME="${HADOOP_HOME}"
+if [[ ! "${HOP_HOME}" == "" ]];then
+  CP_OPTS="${CP_OPTS}:${HOP_HOME}/etc/hadoop"
+fi
+
 MAIN_JAR="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
 JAVA_OPTS="""-server
@@ -321,7 +327,7 @@ JAVA_OPTS="""-server
 
 eval "${RUNJAVA}" \
     $JAVA_OPTS \
-    -cp "\"${APP_LIB}\"" \
+    -cp "\"${CP_OPTS}\"" \
     -Dapp.home="${APP_HOME}" \
     -Dspring.config.location="${PROPER}" \
     -jar "${MAIN_JAR}" >> "${APP_OUT}" 2>&1 &
