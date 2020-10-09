@@ -262,7 +262,7 @@
               <!-- end: record.deploy === 3-->
               <a-badge
                 class="close-deploy"
-                @click="handleCloseDeploy(record)"
+                @click.stop="handleCloseDeploy(record)"
                 v-if="record.deploy !== 0"
                 v-permit="'app:close'">
                 <a-icon slot="count" type="close" style="color: #333"/>
@@ -312,7 +312,7 @@
               </span>
               <a-badge
                 class="close-deploy"
-                @click="handleCloseDeploy(record)"
+                @click.stop="handleCloseDeploy(record)"
                 v-if="record.deploy !== 0"
                 v-permit="'app:close'">
                 <a-icon slot="count" type="close" style="color: #333"/>
