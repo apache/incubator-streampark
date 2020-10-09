@@ -71,7 +71,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Slots"
+        label="Task Slots"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input-number
