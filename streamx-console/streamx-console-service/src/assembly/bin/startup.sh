@@ -305,11 +305,6 @@ else
     fi
 fi
 
-CP_OPTS="${APP_LIB}"
-if [[ ! "${HADOOP_HOME}" == "" ]];then
-  CP_OPTS="${CP_OPTS}:${HADOOP_HOME}/etc/hadoop"
-fi
-
 MAIN_JAR="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
 JAVA_OPTS="""-server
@@ -324,11 +319,22 @@ JAVA_OPTS="""-server
 -XX:ThreadStackSize=512
 -Xloggc:${APP_HOME}/logs/gc.log"""
 
-eval "${RUNJAVA}" \
+if [[ "${HADOOP_HOME}" == "" ]];then
+  echo_w " HADOOP_HOME is undefined. "
+  eval "${RUNJAVA}" \
     $JAVA_OPTS \
-    -cp "\"${CP_OPTS}\"" \
+    -cp "\"${APP_LIB}\"" \
     -Dapp.home="${APP_HOME}" \
     -Dspring.config.location="${PROPER}" \
     -jar "${MAIN_JAR}" >> "${APP_OUT}" 2>&1 &
+else
+  eval "${RUNJAVA}" \
+    $JAVA_OPTS \
+    -cp "\"${APP_LIB}\"" \
+    -Dapp.home="${APP_HOME}" \
+    -Dspring.config.location="${PROPER}" \
+    -Xbootclasspath/a:"${HADOOP_HOME}/etc/hadoop" \
+    -jar "${MAIN_JAR}" >> "${APP_OUT}" 2>&1 &
+fi
 
 exit 0;
