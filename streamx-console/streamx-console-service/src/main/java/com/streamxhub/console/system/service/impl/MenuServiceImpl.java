@@ -73,7 +73,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createMenu(Menu menu) {
         menu.setCreateTime(new Date());
         setMenu(menu);
@@ -81,7 +81,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateMenu(Menu menu) throws Exception {
         menu.setModifyTime(new Date());
         setMenu(menu);
@@ -89,7 +89,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMeuns(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
             // 查找与这些菜单/按钮关联的用户

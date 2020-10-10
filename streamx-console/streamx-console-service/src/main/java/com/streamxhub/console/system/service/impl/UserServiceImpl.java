@@ -29,6 +29,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("userService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
@@ -61,7 +64,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateLoginTime(String username) throws Exception {
         User user = new User();
         user.setLastLoginTime(new Date());
@@ -69,7 +72,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void createUser(User user) throws Exception {
         // 创建用户
         user.setCreateTime(new Date());
@@ -85,7 +88,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateUser(User user) throws Exception {
         // 更新用户
         user.setPassword(null);
@@ -99,7 +102,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void deleteUsers(String[] userIds) throws Exception {
         List<String> list = Arrays.asList(userIds);
         removeByIds(list);
@@ -108,13 +111,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateProfile(User user) throws Exception {
         updateById(user);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updateAvatar(String username, String avatar) throws Exception {
         User user = new User();
         user.setAvatar(avatar);
@@ -122,7 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void updatePassword(String username, String password) throws Exception {
         User user = new User();
         String salt = ShaHashUtil.getRandomSalt(26);
@@ -133,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void regist(String username, String password) throws Exception {
         User user = new User();
         String salt = ShaHashUtil.getRandomSalt(26);
@@ -150,12 +153,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         UserRole ur = new UserRole();
         ur.setUserId(user.getUserId());
-        ur.setRoleId(2L); // 注册用户角色 ID
+        /**
+         * 注册用户角色 ID
+         */
+        ur.setRoleId(2L);
         this.userRoleMapper.insert(ur);
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(String[] usernames) throws Exception {
         for (String username : usernames) {
             User user = new User();
@@ -176,7 +182,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
      */
     @Override
     public Set<String> getPermissions(String username) {
-        List<Menu> permissionList =  this.menuService.findUserPermissions(username);
+        List<Menu> permissionList = this.menuService.findUserPermissions(username);
         return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
     }
 
