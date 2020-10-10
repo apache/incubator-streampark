@@ -6,8 +6,11 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.system.entity.Role;
 
 import java.util.List;
+import java.util.Set;
 
 public interface RoleService extends IService<Role> {
+
+    Set<String> getUserRoleName(String username);
 
     IPage<Role> findRoles(Role role, RestRequest request);
 

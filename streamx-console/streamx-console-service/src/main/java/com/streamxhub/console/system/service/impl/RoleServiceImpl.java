@@ -9,7 +9,6 @@ import com.streamxhub.console.system.dao.RoleMapper;
 import com.streamxhub.console.system.dao.RoleMenuMapper;
 import com.streamxhub.console.system.entity.Role;
 import com.streamxhub.console.system.entity.RoleMenu;
-import com.streamxhub.console.system.manager.UserManager;
 import com.streamxhub.console.system.service.RoleMenuServie;
 import com.streamxhub.console.system.service.RoleService;
 import com.streamxhub.console.system.service.UserRoleService;
@@ -25,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("roleService")
@@ -33,12 +34,18 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Autowired
     private RoleMenuMapper roleMenuMapper;
+
     @Autowired
     private UserRoleService userRoleService;
+
     @Autowired
     private RoleMenuServie roleMenuService;
-    @Autowired
-    private UserManager userManager;
+
+    @Override
+    public Set<String> getUserRoleName(String username) {
+        List<Role> roleList = this.findUserRole(username);
+        return roleList.stream().map(Role::getRoleName).collect(Collectors.toSet());
+    }
 
     @Override
     public IPage<Role> findRoles(Role role, RestRequest request) {

@@ -11,9 +11,10 @@ import com.streamxhub.console.base.utils.ShaHashUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.system.dao.UserMapper;
 import com.streamxhub.console.system.dao.UserRoleMapper;
+import com.streamxhub.console.system.entity.Menu;
 import com.streamxhub.console.system.entity.User;
 import com.streamxhub.console.system.entity.UserRole;
-import com.streamxhub.console.system.manager.UserManager;
+import com.streamxhub.console.system.service.MenuService;
 import com.streamxhub.console.system.service.UserRoleService;
 import com.streamxhub.console.system.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -25,20 +26,21 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service("userService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
-    @Autowired
     private UserRoleMapper userRoleMapper;
 
     @Autowired
     private UserRoleService userRoleService;
 
     @Autowired
-    private UserManager userManager;
+    private MenuService menuService;
 
     @Override
     public User findByName(String username) {
@@ -164,6 +166,18 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         }
 
+    }
+
+    /**
+     * 通过用户名获取用户权限集合
+     *
+     * @param username 用户名
+     * @return 权限集合
+     */
+    @Override
+    public Set<String> getPermissions(String username) {
+        List<Menu> permissionList =  this.menuService.findUserPermissions(username);
+        return permissionList.stream().map(Menu::getPerms).collect(Collectors.toSet());
     }
 
     private void setUserRoles(User user, String[] roles) {

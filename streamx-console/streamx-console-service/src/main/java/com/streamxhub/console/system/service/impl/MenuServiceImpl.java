@@ -2,8 +2,11 @@ package com.streamxhub.console.system.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.base.domain.router.RouterMeta;
+import com.streamxhub.console.base.domain.router.VueRouter;
 import com.streamxhub.console.system.dao.MenuMapper;
 import com.streamxhub.console.system.entity.Menu;
+import com.streamxhub.console.system.entity.User;
 import com.streamxhub.console.system.service.MenuService;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.Tree;
@@ -20,6 +23,7 @@ import java.util.*;
 @Service("menuService")
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
+
 
     @Override
     public List<Menu> findUserPermissions(String username) {
@@ -93,6 +97,25 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             // 递归删除这些菜单/按钮
             this.baseMapper.deleteMenus(menuId);
         }
+    }
+
+    @Override
+    public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
+        List<VueRouter<Menu>> routes = new ArrayList<>();
+        //只差type为菜单类型
+        List<Menu> menus = this.findUserMenus(user.getUsername());
+        menus.forEach(menu -> {
+            VueRouter<Menu> route = new VueRouter<>();
+            route.setId(menu.getMenuId().toString());
+            route.setParentId(menu.getParentId().toString());
+            route.setPath(menu.getPath());
+            route.setComponent(menu.getComponent());
+            route.setName(menu.getMenuName());
+            boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
+            route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
+            routes.add(route);
+        });
+        return TreeUtil.buildVueRouter(routes);
     }
 
     private void buildTrees(List<Tree<Menu>> trees, List<Menu> menus, List<String> ids) {

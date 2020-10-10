@@ -4,8 +4,8 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.console.system.entity.Menu;
-import com.streamxhub.console.system.manager.UserManager;
 import com.streamxhub.console.system.service.MenuService;
 import com.streamxhub.console.base.domain.router.VueRouter;
 import com.wuwenze.poi.ExcelKit;
@@ -34,14 +34,14 @@ public class MenuController extends BaseController {
     private String message;
 
     @Autowired
-    private UserManager userManager;
+    private MenuService menuService;
 
     @Autowired
-    private MenuService menuService;
+    private ServerUtil serverUtil;
 
     @PostMapping("router")
     public ArrayList<VueRouter<Menu>> getUserRouters() {
-        return this.userManager.getUserRouters();
+        return this.menuService.getUserRouters(serverUtil.getUser());
     }
 
     @PostMapping("list")

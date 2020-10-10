@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.system.entity.User;
 
+import java.util.Set;
+
 public interface UserService extends IService<User> {
 
     /**
@@ -89,5 +91,12 @@ public interface UserService extends IService<User> {
      * @param usernames 用户集合
      */
     void resetPassword(String[] usernames) throws Exception;
+
+    /**
+     *
+     * @param username
+     * @return
+     */
+    Set<String> getPermissions(String username);
 
 }

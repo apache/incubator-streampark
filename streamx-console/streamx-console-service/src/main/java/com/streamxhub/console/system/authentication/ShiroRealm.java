@@ -1,10 +1,11 @@
 package com.streamxhub.console.system.authentication;
 
 import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.manager.UserManager;
 import com.streamxhub.console.base.utils.HttpContextUtil;
 import com.streamxhub.console.base.utils.IPUtil;
 import com.streamxhub.console.base.utils.WebUtil;
+import com.streamxhub.console.system.service.RoleService;
+import com.streamxhub.console.system.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -27,7 +28,10 @@ import java.util.Set;
 public class ShiroRealm extends AuthorizingRealm {
 
     @Autowired
-    private UserManager userManager;
+    private UserService userService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Override
     public boolean supports(AuthenticationToken token) {
@@ -48,11 +52,11 @@ public class ShiroRealm extends AuthorizingRealm {
         SimpleAuthorizationInfo simpleAuthorizationInfo = new SimpleAuthorizationInfo();
 
         // 获取用户角色集
-        Set<String> roleSet = userManager.getUserRoles(username);
+        Set<String> roleSet = roleService.getUserRoleName(username);
         simpleAuthorizationInfo.setRoles(roleSet);
 
         // 获取用户权限集
-        Set<String> permissionSet = userManager.getUserPermissions(username);
+        Set<String> permissionSet = userService.getPermissions(username);
         simpleAuthorizationInfo.setStringPermissions(permissionSet);
         return simpleAuthorizationInfo;
     }
@@ -92,7 +96,7 @@ public class ShiroRealm extends AuthorizingRealm {
         }
 
         // 通过用户名查询用户信息
-        User user = userManager.getUser(username);
+        User user = userService.findByName(username);
 
         if (user == null) {
             throw new AuthenticationException("用户名或密码错误");

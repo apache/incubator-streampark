@@ -8,7 +8,7 @@ import com.streamxhub.console.base.utils.*;
 import com.streamxhub.console.system.authentication.JWTToken;
 import com.streamxhub.console.system.authentication.JWTUtil;
 import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.manager.UserManager;
+import com.streamxhub.console.system.service.RoleService;
 import com.streamxhub.console.system.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -36,9 +36,10 @@ import java.util.Set;
 public class PassportController {
 
     @Autowired
-    private UserManager userManager;
-    @Autowired
     private UserService userService;
+
+    @Autowired
+    private RoleService roleService;
 
     @Autowired
     private StreamXProperties properties;
@@ -51,7 +52,7 @@ public class PassportController {
         username = StringUtils.lowerCase(username);
 
         final String errorMessage = "用户名或密码错误";
-        User user = this.userManager.getUser(username);
+        User user = this.userService.findByName(username);
 
         if (user == null) {
             throw new ServiceException(errorMessage);
@@ -123,10 +124,10 @@ public class PassportController {
         userInfo.put("token", token.getToken());
         userInfo.put("expire", token.getExpireAt());
 
-        Set<String> roles = this.userManager.getUserRoles(username);
+        Set<String> roles = this.roleService.getUserRoleName(username);
         userInfo.put("roles", roles);
 
-        Set<String> permissions = this.userManager.getUserPermissions(username);
+        Set<String> permissions = this.userService.getPermissions(username);
         userInfo.put("permissions", permissions);
         user.setPassword("******");
         userInfo.put("user", user);
