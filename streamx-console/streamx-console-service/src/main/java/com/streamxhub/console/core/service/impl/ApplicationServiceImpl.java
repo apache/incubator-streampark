@@ -29,7 +29,6 @@ import com.streamxhub.common.util.Utils;
 import com.streamxhub.common.util.YarnUtils;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationMapper;
@@ -81,9 +80,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ServerUtil serverUtil;
-
-    @Autowired
-    private StreamXProperties properties;
 
     @Override
     public IPage<Application> list(Application paramOfApp, RestRequest request) {
@@ -273,7 +269,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Transactional(rollbackFor = {Exception.class})
+    @Transactional(rollbackFor = Exception.class)
     public void stop(Application paramOfApp) {
         Application application = getById(paramOfApp.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
