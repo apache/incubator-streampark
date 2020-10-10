@@ -75,53 +75,9 @@ public class FlinkMonitorTask {
                  * 1)到flink的restApi中查询状态
                  */
                 JobsOverview jobsOverview = application.getJobsOverview();
-                Integer deploy = application.getDeploy();
-                application.setDeploy(null);
-
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    JobsOverview.Job job = optional.get();
-
-                    FlinkAppState state = FlinkAppState.valueOf(job.getState());
-                    long startTime = job.getStartTime();
-                    long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
-
-                    if (!job.getId().equals(application.getJobId())) {
-                        application.setJobId(job.getId());
-                    }
-
-                    if (application.getState() == FlinkAppState.STARTING.getValue() && state == FlinkAppState.RUNNING) {
-                        /**
-                         * 发布完重新启动后将"需重启"状态清空
-                         */
-                        if (DeployState.NEED_START.get() == deploy) {
-                            application.setDeploy(DeployState.NONE.get());
-                        }
-                    }
-
-                    if (!application.getState().equals(state.getValue())) {
-                        application.setState(state.getValue());
-                    }
-
-                    if (application.getStartTime() == null) {
-                        application.setStartTime(new Date(startTime));
-                    } else if (startTime != application.getStartTime().getTime()) {
-                        application.setStartTime(new Date(startTime));
-                    }
-
-                    if (endTime != -1) {
-                        if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-                            application.setEndTime(new Date(endTime));
-                        }
-                    }
-
-                    application.setDuration(job.getDuration());
-
-                    this.applicationService.updateMonitor(application);
-
-                    if (state == FlinkAppState.CANCELLING) {
-                        cancelingMap.put(application.getId(), application.getId());
-                    }
+                    callBack(application, optional.get());
                 }
             } catch (ConnectException ex) {
                 /**
@@ -175,6 +131,51 @@ public class FlinkMonitorTask {
             }
         });
 
+    }
+
+    private void callBack(Application application, JobsOverview.Job job) {
+        Integer deploy = application.getDeploy();
+        application.setDeploy(null);
+        FlinkAppState state = FlinkAppState.valueOf(job.getState());
+        long startTime = job.getStartTime();
+        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
+
+        if (!job.getId().equals(application.getJobId())) {
+            application.setJobId(job.getId());
+        }
+
+        if (application.getState() == FlinkAppState.STARTING.getValue() && state == FlinkAppState.RUNNING) {
+            /**
+             * 发布完重新启动后将"需重启"状态清空
+             */
+            if (DeployState.NEED_START.get() == deploy) {
+                application.setDeploy(DeployState.NONE.get());
+            }
+        }
+
+        if (!application.getState().equals(state.getValue())) {
+            application.setState(state.getValue());
+        }
+
+        if (application.getStartTime() == null) {
+            application.setStartTime(new Date(startTime));
+        } else if (startTime != application.getStartTime().getTime()) {
+            application.setStartTime(new Date(startTime));
+        }
+
+        if (endTime != -1) {
+            if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
+                application.setEndTime(new Date(endTime));
+            }
+        }
+
+        application.setDuration(job.getDuration());
+
+        this.applicationService.updateMonitor(application);
+
+        if (state == FlinkAppState.CANCELLING) {
+            cancelingMap.put(application.getId(), application.getId());
+        }
     }
 
 
