@@ -64,13 +64,13 @@ class FlinkReplContext(val flinkInterpreter: FlinkScalaInterpreter,
       displayRows = rows.take(maxResult)
     }
     for (row <- displayRows) {
-      var i = 0;
+      var i = 0
       while (i < row.getArity) {
         // expand array if the column is array
         builder.append(TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(row.getField(i))))
         i += 1
         if (i != row.getArity) {
-          builder.append("\t");
+          builder.append("\t")
         }
       }
       builder.append("\n")
