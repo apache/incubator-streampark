@@ -1269,6 +1269,10 @@ export default {
   padding: 9px 9px !important;
 }
 
+.app_list >>> .ant-table-thead > tr > th {
+  background: unset !important;
+}
+
 .status-processing-deploying {
   animation: deploying 800ms ease-out infinite alternate;
 }

@@ -167,10 +167,10 @@ export default {
       return [{
         title: 'Name',
         dataIndex: 'text',
-        width: 250,
+        width: 200,
         fixed: 'left'
       }, {
-        title: 'Display icon',
+        title: 'Icon',
         dataIndex: 'icon',
         scopedSlots: { customRender: 'icon' }
       }, {
