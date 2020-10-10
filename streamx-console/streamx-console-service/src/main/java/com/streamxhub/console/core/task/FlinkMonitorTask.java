@@ -21,6 +21,7 @@
 package com.streamxhub.console.core.task;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.enums.DeployState;
@@ -40,7 +41,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 /**
  * @author benjobs
@@ -52,7 +53,18 @@ public class FlinkMonitorTask {
     @Autowired
     private ApplicationService applicationService;
 
-    private final Map<Long, Long> cancelingMap = new ConcurrentHashMap<>();
+    private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
+
+    private ExecutorService executor = new ThreadPoolExecutor(
+            Math.max(Runtime.getRuntime().availableProcessors() / 4, 2),
+            Integer.MAX_VALUE,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(),
+            threadFactory
+    );
+
+    private final Map<Long, Long> canceling = new ConcurrentHashMap<>();
 
     @Scheduled(fixedDelay = 1000 * 3)
     public void run() {
@@ -69,7 +81,8 @@ public class FlinkMonitorTask {
         );
 
         List<Application> appList = applicationService.list(queryWrapper);
-        appList.forEach((application) -> {
+
+        appList.forEach((application) -> executor.execute(() -> {
             try {
                 /**
                  * 1)到flink的restApi中查询状态
@@ -81,12 +94,12 @@ public class FlinkMonitorTask {
                 }
             } catch (ConnectException ex) {
                 /**
-                 * 上一次的状态为canceling,如在获取上次信息的时候flink restServer还未关闭为canceling,且本次如获取不到(flink restServer已关闭),则认为任务已经CANCELED
+                 * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
-                if (cancelingMap.containsKey(application.getId())) {
+                if (canceling.containsKey(application.getId())) {
                     application.setState(FlinkAppState.CANCELED.getValue());
                     applicationService.updateMonitor(application);
-                    cancelingMap.remove(application.getId());
+                    canceling.remove(application.getId());
                 } else {
                     try {
                         /**
@@ -129,7 +142,7 @@ public class FlinkMonitorTask {
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
             }
-        });
+        }));
 
     }
 
@@ -174,7 +187,7 @@ public class FlinkMonitorTask {
         this.applicationService.updateMonitor(application);
 
         if (state == FlinkAppState.CANCELLING) {
-            cancelingMap.put(application.getId(), application.getId());
+            canceling.put(application.getId(), application.getId());
         }
     }
 
