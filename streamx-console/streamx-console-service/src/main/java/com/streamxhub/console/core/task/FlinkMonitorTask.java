@@ -29,6 +29,7 @@ import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.console.core.service.ApplicationService;
+import com.streamxhub.console.core.service.SavePointService;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +54,9 @@ public class FlinkMonitorTask {
 
     @Autowired
     private ApplicationService applicationService;
+
+    @Autowired
+    private SavePointService pointService;
 
     private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
 
@@ -118,6 +122,7 @@ public class FlinkMonitorTask {
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
+                        pointService.obsolete(application.getId());
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
@@ -133,6 +138,7 @@ public class FlinkMonitorTask {
                             /**s
                              * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                              */
+                            pointService.obsolete(application.getId());
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
                             e1.printStackTrace();
@@ -142,6 +148,7 @@ public class FlinkMonitorTask {
                 }
             } catch (IOException exception) {
                 exception.printStackTrace();
+                pointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
@@ -152,16 +159,29 @@ public class FlinkMonitorTask {
 
     private void callBack(Application application, JobsOverview.Job job) {
         Integer deploy = application.getDeploy();
+        FlinkAppState appState = FlinkAppState.of(application.getState());
         application.setDeploy(null);
-        FlinkAppState state = FlinkAppState.valueOf(job.getState());
-        long startTime = job.getStartTime();
-        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
+        FlinkAppState currState = FlinkAppState.valueOf(job.getState());
 
+        //jobId
         if (!job.getId().equals(application.getJobId())) {
             application.setJobId(job.getId());
         }
 
-        if (application.getState() == FlinkAppState.STARTING.getValue() && state == FlinkAppState.RUNNING) {
+        //state....
+        if (currState == FlinkAppState.CANCELLING) {
+            canceling.put(application.getId(), new Tracker(index, application.getId()));
+            /**
+             * 当前从flink restAPI拿到最新的状态为cancelling,且数据库中的app状态为非cancelling
+             * 此种情况为: 不是通过streamX页面发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将所有的savepoint设置为过期.
+             * 在启动的时候如需要查重savepoint恢复,需要手动指定.
+             */
+            if (appState != FlinkAppState.CANCELLING) {
+                pointService.obsolete(application.getId());
+            }
+        }
+
+        if (appState == FlinkAppState.STARTING && currState == FlinkAppState.RUNNING) {
             /**
              * 发布完重新启动后将"需重启"状态清空
              */
@@ -170,10 +190,13 @@ public class FlinkMonitorTask {
             }
         }
 
-        if (!application.getState().equals(state.getValue())) {
-            application.setState(state.getValue());
+        if (!appState.equals(currState)) {
+            application.setState(currState.getValue());
         }
 
+        //time....
+        long startTime = job.getStartTime();
+        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
         if (application.getStartTime() == null) {
             application.setStartTime(new Date(startTime));
         } else if (startTime != application.getStartTime().getTime()) {
@@ -190,9 +213,6 @@ public class FlinkMonitorTask {
 
         this.applicationService.updateMonitor(application);
 
-        if (state == FlinkAppState.CANCELLING) {
-            canceling.put(application.getId(), new Tracker(index, application.getId()));
-        }
     }
 
 
