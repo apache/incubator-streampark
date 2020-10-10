@@ -82,12 +82,10 @@ class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedF
     if (jobClient == null) {
       LOGGER.warn("No job is associated with paragraph: " + context.getParagraphId)
     } else {
-      var jobUrl: String = {
-        if (replacedFlinkWebUrl != null) {
-          replacedFlinkWebUrl + "#/job/" + jobClient.getJobID
-        } else {
-          flinkWebUrl + "#/job/" + jobClient.getJobID
-        }
+      val jobUrl: String = if (replacedFlinkWebUrl != null) {
+        replacedFlinkWebUrl + "#/job/" + jobClient.getJobID
+      } else {
+        flinkWebUrl + "#/job/" + jobClient.getJobID
       }
       val infos = new java.util.HashMap[String, String]
       infos.put("jobUrl", jobUrl)
@@ -163,7 +161,7 @@ class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedF
 }
 
 
-class FlinkJobProgressPoller (var flinkWebUrl: String, var jobId: JobID, var context: InterpreterContext) extends Thread {
+class FlinkJobProgressPoller(var flinkWebUrl: String, var jobId: JobID, var context: InterpreterContext) extends Thread {
   private val LOGGER = LoggerFactory.getLogger(classOf[FlinkJobProgressPoller])
 
   this.isStreamingInsertInto = context.getLocalProperties.containsKey("flink.streaming.insert_into")
