@@ -39,6 +39,6 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=1")
     SavePoint getLastest(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=0")
+    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=0 order by create_time desc ")
     List<SavePoint> getHistory(@Param("appId") Long appId);
 }
