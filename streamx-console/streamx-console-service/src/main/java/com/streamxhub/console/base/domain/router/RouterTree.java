@@ -1,4 +1,4 @@
-package com.streamxhub.console.base.domain;
+package com.streamxhub.console.base.domain.router;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
@@ -9,7 +9,7 @@ import java.util.List;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class Tree<T> {
+public class RouterTree<T> {
 
     private String id;
 
@@ -35,7 +35,7 @@ public class Tree<T> {
 
     private String component;
 
-    private List<Tree<T>> children;
+    private List<RouterTree<T>> children;
 
     private String parentId;
 

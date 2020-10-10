@@ -1,7 +1,6 @@
 package com.streamxhub.console.system.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
@@ -52,7 +51,6 @@ public class UserController extends BaseController {
         return getDataTable(userService.findUserDetail(user, restRequest));
     }
 
-    @Log("新增用户")
     @PostMapping("post")
     @RequiresPermissions("user:add")
     public void addUser(@Valid User user) throws ServiceException {
@@ -65,7 +63,6 @@ public class UserController extends BaseController {
         }
     }
 
-    @Log("修改用户")
     @PutMapping("update")
     @RequiresPermissions("user:update")
     public void updateUser(@Valid User user) throws ServiceException {
@@ -78,7 +75,6 @@ public class UserController extends BaseController {
         }
     }
 
-    @Log("删除用户")
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
     public void deleteUsers(@NotBlank(message = "{required}") String userIds) throws ServiceException {

@@ -1,7 +1,6 @@
 package com.streamxhub.console.system.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.entity.Role;
@@ -57,7 +56,6 @@ public class RoleController extends BaseController {
         return list.stream().map(roleMenu -> String.valueOf(roleMenu.getMenuId())).collect(Collectors.toList());
     }
 
-    @Log("新增角色")
     @PostMapping("post")
     @RequiresPermissions("role:add")
     public void addRole(@Valid Role role) throws ServiceException {
@@ -70,7 +68,6 @@ public class RoleController extends BaseController {
         }
     }
 
-    @Log("删除角色")
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
     public void deleteRoles(@NotBlank(message = "{required}") String roleIds) throws ServiceException {
@@ -84,7 +81,6 @@ public class RoleController extends BaseController {
         }
     }
 
-    @Log("修改角色")
     @PutMapping("update")
     @RequiresPermissions("role:update")
     public void updateRole(Role role) throws ServiceException {

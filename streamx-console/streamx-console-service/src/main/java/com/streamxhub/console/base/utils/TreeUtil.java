@@ -1,6 +1,6 @@
 package com.streamxhub.console.base.utils;
 
-import com.streamxhub.console.base.domain.Tree;
+import com.streamxhub.console.base.domain.router.RouterTree;
 import com.streamxhub.console.base.domain.router.VueRouter;
 
 import java.util.ArrayList;
@@ -21,18 +21,18 @@ public class TreeUtil {
      * @param <T>   <T>
      * @return <T> Tree<T>
      */
-    public static <T> Tree<T> build(List<Tree<T>> nodes) {
+    public static <T> RouterTree<T> build(List<RouterTree<T>> nodes) {
         if (nodes == null) {
             return null;
         }
-        List<Tree<T>> topNodes = new ArrayList<>();
+        List<RouterTree<T>> topNodes = new ArrayList<>();
         nodes.forEach(node -> {
             String pid = node.getParentId();
             if (pid == null || TOP_NODE_ID.equals(pid)) {
                 topNodes.add(node);
                 return;
             }
-            for (Tree<T> n : nodes) {
+            for (RouterTree<T> n : nodes) {
                 String id = n.getId();
                 if (id != null && id.equals(pid)) {
                     if (n.getChildren() == null) {
@@ -51,7 +51,7 @@ public class TreeUtil {
         });
 
 
-        Tree<T> root = new Tree<>();
+        RouterTree<T> root = new RouterTree<>();
         root.setId("0");
         root.setParentId("");
         root.setHasParent(false);

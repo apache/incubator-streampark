@@ -1,7 +1,6 @@
 package com.streamxhub.console.system.controller;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.annotation.Log;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.system.authentication.ServerUtil;
@@ -50,7 +49,6 @@ public class MenuController extends BaseController {
         return this.menuService.findMenus(menu);
     }
 
-    @Log("新增菜单/按钮")
     @PostMapping("post")
     @RequiresPermissions("menu:add")
     public void addMenu(@Valid Menu menu) throws ServiceException {
@@ -63,7 +61,6 @@ public class MenuController extends BaseController {
         }
     }
 
-    @Log("删除菜单/按钮")
     @DeleteMapping("delete")
     @RequiresPermissions("menu:delete")
     public void deleteMenus(@NotBlank(message = "{required}") String menuIds) throws ServiceException {
@@ -77,7 +74,6 @@ public class MenuController extends BaseController {
         }
     }
 
-    @Log("修改菜单/按钮")
     @PutMapping("update")
     @RequiresPermissions("menu:update")
     public void updateMenu(@Valid Menu menu) throws ServiceException {

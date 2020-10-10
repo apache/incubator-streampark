@@ -1,7 +1,6 @@
 package com.streamxhub.console.base.handler;
 
 import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.base.exception.LimitAccessException;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
@@ -78,13 +77,6 @@ public class GlobalExceptionHandler {
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
         return new RestResponse().message(message.toString());
-    }
-
-    @ExceptionHandler(value = LimitAccessException.class)
-    @ResponseStatus(HttpStatus.TOO_MANY_REQUESTS)
-    public RestResponse handleLimitAccessException(LimitAccessException e) {
-        log.warn(e.getMessage());
-        return new RestResponse().message(e.getMessage());
     }
 
     @ExceptionHandler(value = UnauthorizedException.class)

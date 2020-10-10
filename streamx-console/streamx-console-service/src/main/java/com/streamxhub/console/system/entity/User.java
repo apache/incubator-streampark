@@ -4,7 +4,6 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.console.base.converter.TimeConverter;
-import com.streamxhub.console.base.domain.RegexpConstant;
 import com.wuwenze.poi.annotation.Excel;
 import com.wuwenze.poi.annotation.ExcelField;
 import lombok.Data;
@@ -57,7 +56,7 @@ public class User implements Serializable {
     @ExcelField(value = "邮箱")
     private String email;
 
-    @Pattern(regexp = RegexpConstant.MOBILE_REG, message = "{mobile}")
+    @Pattern(regexp = "[1]\\d{10}", message = "{mobile}")
     @ExcelField(value = "手机号")
     private String mobile;
 

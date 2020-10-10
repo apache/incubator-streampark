@@ -9,7 +9,7 @@ import com.streamxhub.console.system.entity.Menu;
 import com.streamxhub.console.system.entity.User;
 import com.streamxhub.console.system.service.MenuService;
 import com.streamxhub.console.base.domain.Constant;
-import com.streamxhub.console.base.domain.Tree;
+import com.streamxhub.console.base.domain.router.RouterTree;
 import com.streamxhub.console.base.utils.TreeUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -43,7 +43,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             findMenuCondition(queryWrapper, menu);
             List<Menu> menus = baseMapper.selectList(queryWrapper);
 
-            List<Tree<Menu>> trees = new ArrayList<>();
+            List<RouterTree<Menu>> trees = new ArrayList<>();
             List<String> ids = new ArrayList<>();
             buildTrees(trees, menus, ids);
 
@@ -51,7 +51,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             if (StringUtils.equals(menu.getType(), Constant.TYPE_BUTTON)) {
                 result.put("rows", trees);
             } else {
-                Tree<Menu> menuTree = TreeUtil.build(trees);
+                RouterTree<Menu> menuTree = TreeUtil.build(trees);
                 result.put("rows", menuTree);
             }
             result.put("total", menus.size());
@@ -118,10 +118,10 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return TreeUtil.buildVueRouter(routes);
     }
 
-    private void buildTrees(List<Tree<Menu>> trees, List<Menu> menus, List<String> ids) {
+    private void buildTrees(List<RouterTree<Menu>> trees, List<Menu> menus, List<String> ids) {
         menus.forEach(menu -> {
             ids.add(menu.getMenuId().toString());
-            Tree<Menu> tree = new Tree<>();
+            RouterTree<Menu> tree = new RouterTree<>();
             tree.setId(menu.getMenuId().toString());
             tree.setKey(tree.getId());
             tree.setParentId(menu.getParentId().toString());
