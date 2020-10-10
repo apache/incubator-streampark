@@ -240,7 +240,7 @@ object StartFrom {
             }
           case _ => null
         }
-      }).filter(x => x != null)
+      }).filter(_ != null)
     }
   }
 
