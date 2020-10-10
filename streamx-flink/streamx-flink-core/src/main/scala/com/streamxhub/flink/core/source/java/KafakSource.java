@@ -34,6 +34,9 @@ import static scala.collection.JavaConversions.*;
 import java.util.Collections;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class KafakSource<T> {
 
     private StreamingContext ctx;
