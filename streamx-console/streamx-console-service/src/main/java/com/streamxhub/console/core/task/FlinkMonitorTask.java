@@ -29,6 +29,7 @@ import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.console.core.service.ApplicationService;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -64,10 +65,13 @@ public class FlinkMonitorTask {
             threadFactory
     );
 
-    private final Map<Long, Long> canceling = new ConcurrentHashMap<>();
+    private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
+
+    private long index;
 
     @Scheduled(fixedDelay = 1000 * 3)
     public void run() {
+        ++index;
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         //以下状态的不再监控...
         queryWrapper.notIn("state",
@@ -96,7 +100,7 @@ public class FlinkMonitorTask {
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
-                if (canceling.containsKey(application.getId())) {
+                if (canceling.containsKey(application.getId()) && canceling.get(application.getId()).getIndex() + 1 == index) {
                     application.setState(FlinkAppState.CANCELED.getValue());
                     applicationService.updateMonitor(application);
                     canceling.remove(application.getId());
@@ -187,9 +191,20 @@ public class FlinkMonitorTask {
         this.applicationService.updateMonitor(application);
 
         if (state == FlinkAppState.CANCELLING) {
-            canceling.put(application.getId(), application.getId());
+            canceling.put(application.getId(), new Tracker(index, application.getId()));
         }
     }
 
 
+    @Getter
+    class Tracker implements Serializable {
+        private Long index;
+        private Long appId;
+
+        public Tracker(Long index, Long appId) {
+            this.index = index;
+            this.appId = appId;
+        }
+
+    }
 }
