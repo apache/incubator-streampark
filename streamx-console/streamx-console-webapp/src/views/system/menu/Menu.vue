@@ -78,6 +78,7 @@
         :columns="columns"
         :key="key"
         :dataSource="dataSource"
+        :expandIcon="expandIcon"
         :pagination="pagination"
         :loading="loading"
         :rowSelection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
@@ -353,7 +354,35 @@ export default {
           this.dataSource = resp.rows.children
         }
       })
+    },
+
+    expandIcon (props) {
+      if (props.record.children && props.record.children.length > 0) {
+        if (props.expanded) {
+          return <a class="table-expanded-icon" onClick={e => {
+            props.onExpand(props.record, e)
+          }}><a-icon type="caret-down"/></a>
+        } else {
+          return <a class="table-expanded-icon" onClick={e => {
+            props.onExpand(props.record, e)
+          }}><a-icon type="caret-right"/></a>
+        }
+      } else {
+        return <span></span>
+      }
     }
   }
 }
 </script>
+
+<style>
+
+.table-expanded-icon {
+  margin-right: 8px;
+}
+
+.table-expanded-icon .anticon {
+  font-size: 10px;
+  color: #666;
+}
+</style>
