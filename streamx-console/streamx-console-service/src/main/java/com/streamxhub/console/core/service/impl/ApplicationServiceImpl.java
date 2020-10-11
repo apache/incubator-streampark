@@ -222,7 +222,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void closeDeploy(Application paramOfApp) {
+    public void clean(Application paramOfApp) {
         paramOfApp.setDeploy(DeployState.NONE.get());
         this.baseMapper.updateDeploy(paramOfApp);
     }

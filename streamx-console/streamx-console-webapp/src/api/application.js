@@ -61,6 +61,6 @@ export function start (params) {
   return http.post(api.Application.Start, params)
 }
 
-export function closeDeploy (params) {
-  return http.post(api.Application.CloseDeploy, params)
+export function clean (params) {
+  return http.post(api.Application.Clean, params)
 }

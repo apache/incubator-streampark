@@ -114,10 +114,10 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(started);
     }
 
-    @PostMapping("closeDeploy")
-    @RequiresPermissions("app:close")
-    public RestResponse closeDeploy(Application app) {
-        applicationService.closeDeploy(app);
+    @PostMapping("clean")
+    @RequiresPermissions("app:clean")
+    public RestResponse clean(Application app) {
+        applicationService.clean(app);
         return RestResponse.create().data(true);
     }
 

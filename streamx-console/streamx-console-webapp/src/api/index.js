@@ -45,7 +45,7 @@ export default {
     Delete: '/flink/app/delete',
     Create: '/flink/app/create',
     Start: '/flink/app/start',
-    CloseDeploy: '/flink/app/closeDeploy'
+    Clean: '/flink/app/clean'
   },
 
   Config: {

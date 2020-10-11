@@ -262,9 +262,9 @@
               <!-- end: record.deploy === 3-->
               <a-badge
                 class="close-deploy"
-                @click.stop="handleCloseDeploy(record)"
+                @click.stop="handleCleanDeploy(record)"
                 v-if="record.deploy !== 0"
-                v-permit="'app:close'">
+                v-permit="'app:clean'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
@@ -309,9 +309,9 @@
               </span>
               <a-badge
                 class="close-deploy"
-                @click.stop="handleCloseDeploy(record)"
+                @click.stop="handleCleanDeploy(record)"
                 v-if="record.deploy !== 0"
-                v-permit="'app:close'">
+                v-permit="'app:clean'">
                 <a-icon slot="count" type="close" style="color: #333"/>
               </a-badge>
             </span>
@@ -696,7 +696,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import { mapActions } from 'vuex'
-import { list, stop, deploy, mapping, start, closeDeploy, yarn } from '@api/application'
+import { list, stop, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
 
 export default {
@@ -1203,8 +1203,8 @@ export default {
       }
     },
 
-    handleCloseDeploy (app) {
-      closeDeploy({
+    handleCleanDeploy (app) {
+      clean({
         id: app.id
       }).then((resp) => {
       })
