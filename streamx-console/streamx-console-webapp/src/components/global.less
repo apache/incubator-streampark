@@ -571,4 +571,18 @@ body {
 
 .ant-checkbox-inner {
   border-radius: 50% !important;
+  width: 14px !important;
+  height: 14px !important;
+}
+
+.ant-checkbox-indeterminate .ant-checkbox-inner:after {
+  border-radius: 50%;
+}
+
+.ant-checkbox-checked::after {
+  border: unset !important;
+}
+
+.ant-checkbox-checked .ant-checkbox-inner::after {
+  left: 2px;
 }
