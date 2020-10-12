@@ -6,6 +6,7 @@ import com.streamxhub.flink.core.sink.scala.RedisMapper
 import com.streamxhub.flink.core.sink.scala.{RedisMapper, RedisSink}
 import com.streamxhub.flink.core.source.scala.KafkaSource
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, SessionWindowTimeGapExtractor}
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 
@@ -37,6 +38,9 @@ object FlinkSinkApp extends FlinkStreaming {
       }
     })
 
+    ds.keyBy(_.age)
+      .sessionWindow(org.apache.flink.streaming.api.windowing.time.Time.minutes(20))
+
     val ds2 = source.flatMap(x => {
       x.split(",") match {
         case Array(d, a, b, c) => Some(User(d.toInt, a, b.toInt, c.toInt))
@@ -52,8 +56,8 @@ object FlinkSinkApp extends FlinkStreaming {
     val userMapper: RedisMapper[User] = RedisMapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)
 
     //3)下沉数据.done
-    sink.towPCSink[User](ds2, userMapper,201800)
-    sink.towPCSink[Person](ds, personMapper,204800)
+    sink.towPCSink[User](ds2, userMapper, 201800)
+    sink.towPCSink[Person](ds, personMapper, 204800)
 
 
   }
