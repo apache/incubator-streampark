@@ -29,17 +29,11 @@ import org.apache.hadoop.fs.FSDataOutputStream
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.fs.FSDataInputStream
 import org.apache.hadoop.fs.FileSystem
-import org.apache.hadoop.hdfs.client.HdfsUtils
 import org.apache.hadoop.io.IOUtils
 
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
-
-  private[this] val classLoader = Thread.currentThread().getContextClassLoader() match {
-    case null => classOf[HdfsUtils].getClassLoader
-    case loader => loader
-  }
 
   /**
    * 注意:加载hadoop配置文件,有两种方式:
@@ -50,7 +44,6 @@ object HdfsUtils extends Logger {
    */
   lazy val conf: Configuration = {
     val conf = new Configuration()
-    conf.setClassLoader(classLoader)
     if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
       conf.set("hadoop.tmp.dir", "/tmp")
     }
