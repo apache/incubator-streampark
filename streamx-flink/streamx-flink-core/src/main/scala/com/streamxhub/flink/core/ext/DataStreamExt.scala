@@ -20,15 +20,18 @@
  */
 package com.streamxhub.flink.core.ext
 
-import java.lang.reflect.Method
+import java.time.Duration
 
 import com.streamxhub.flink.core.sink.scala.EchoSink
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction}
-import org.apache.flink.streaming.api.functions.timestamps.{AscendingTimestampExtractor, BoundedOutOfOrdernessTimestampExtractor}
-import org.apache.flink.streaming.api.scala.{OutputTag, DataStream => DStream}
+import org.apache.flink.streaming.api.functions._
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.watermark.Watermark
+import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, SessionWindowTimeGapExtractor}
 import org.apache.flink.streaming.api.windowing.time.Time
+import org.apache.flink.streaming.api.windowing.windows.TimeWindow
+import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
 import org.apache.flink.util.Collector
 
 /**
@@ -36,27 +39,21 @@ import org.apache.flink.util.Collector
  * @param dataStream DataStream 扩展方法.
  * @tparam T
  */
-class DataStreamExt[T: TypeInformation](val dataStream: DStream[T]) {
-
-  private[this] val assignerWithPeriodicMethod: Method = dataStream.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPeriodicWatermarks[T]])
-  assignerWithPeriodicMethod.setAccessible(true)
-
-  private[this] val assignerWithPunctuatedMethod: Method = dataStream.getClass.getMethod("assignTimestampsAndWatermarks", classOf[AssignerWithPunctuatedWatermarks[T]])
-  assignerWithPunctuatedMethod.setAccessible(true)
+class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
 
   /**
    *
    * @param fun
    * @return
    */
-  def sideOut(fun: (T, ProcessFunction[T, T]#Context) => Unit): DStream[T] = dataStream.process(new ProcessFunction[T, T] {
+  def sideOut(fun: (T, ProcessFunction[T, T]#Context) => Unit): DataStream[T] = dataStream.process(new ProcessFunction[T, T] {
     override def processElement(value: T, ctx: ProcessFunction[T, T]#Context, out: Collector[T]): Unit = {
       fun(value, ctx)
       out.collect(value)
     }
   })
 
-  def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
+  def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
   /**
    *
@@ -69,17 +66,13 @@ class DataStreamExt[T: TypeInformation](val dataStream: DStream[T]) {
   /**
    * 基于最大延迟时间的Watermark生成
    *
-   * @param fun
-   * @param maxOutOfOrderness
    * @return
-   **/
+   * */
 
-  def boundedOutOfOrdernessWatermark(fun: T => Long)(implicit maxOutOfOrderness: Time): DStream[T] = {
-    val assigner = new BoundedOutOfOrdernessTimestampExtractor[T](maxOutOfOrderness) {
-      override def extractTimestamp(element: T): Long = fun(element)
-    }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DStream[T]]
+  def boundedOutOfOrdernessWatermark(func: T => Long, duration: Duration): DataStream[T] = {
+    dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness[T](duration).withTimestampAssigner(new SerializableTimestampAssigner[T]() {
+      override def extractTimestamp(element: T, recordTimestamp: Long): Long = func(element)
+    }))
   }
 
   /**
@@ -89,34 +82,36 @@ class DataStreamExt[T: TypeInformation](val dataStream: DStream[T]) {
    * @param maxTimeLag
    * @return
    */
-  def timeLagWatermarkWatermark(fun: T => Long)(implicit maxTimeLag: Time): DStream[T] = {
+  def timeLagWatermarkWatermark(fun: T => Long)(implicit maxTimeLag: Time): DataStream[T] = {
     val assigner = new AssignerWithPeriodicWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
 
       override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
     }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DStream[T]]
+    dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPeriodicWatermarksAdapter.Strategy[T](assigner)))
   }
 
-  def punctuatedWatermark(extractTimeFun: T => Long, checkFun: T => Boolean): DStream[T] = {
+  def punctuatedWatermark(extractTimeFun: T => Long, checkFunc: T => Boolean): DataStream[T] = {
     val assigner = new AssignerWithPunctuatedWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = extractTimeFun(element)
 
       override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
-        if (checkFun(lastElement)) new Watermark(extractedTimestamp) else null
+        if (checkFunc(lastElement)) new Watermark(extractedTimestamp) else null
       }
     }
-    assignerWithPunctuatedMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DStream[T]]
+    dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)))
   }
 
-  def ascendingTimestampWatermark(fun: T => Long): DStream[T] = {
-    val assigner = new AscendingTimestampExtractor[T] {
-      def extractAscendingTimestamp(element: T): Long = fun(element)
-    }
-    assignerWithPeriodicMethod.invoke(dataStream, assigner)
-    dataStream.asInstanceOf[DStream[T]]
+}
+
+class KeyedStreamExt[K: TypeInformation, T: TypeInformation](val keyedStream: KeyedStream[K, T]) {
+
+  def sessionWindow(size: Time): WindowedStream[K, T, TimeWindow] = {
+    keyedStream.window(EventTimeSessionWindows.withGap(size))
+  }
+
+  def sessionWindowD(gapExtractor: SessionWindowTimeGapExtractor[T]): WindowedStream[K, T, TimeWindow] = {
+    keyedStream.window(EventTimeSessionWindows.withDynamicGap(gapExtractor))
   }
 
 }
