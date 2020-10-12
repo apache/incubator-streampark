@@ -28,9 +28,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions._
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.streaming.api.watermark.Watermark
-import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, SessionWindowTimeGapExtractor}
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.api.windowing.windows.TimeWindow
 import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
 import org.apache.flink.util.Collector
 
@@ -56,7 +54,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
   def sideGet[R: TypeInformation](sideTag: String): DataStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
   /**
-   *
+   * ¬
    * 两阶段精准一次的print...
    *
    * @param sinkIdentifier
@@ -82,7 +80,7 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
    * @param maxTimeLag
    * @return
    */
-  def timeLagWatermarkWatermark(fun: T => Long)(implicit maxTimeLag: Time): DataStream[T] = {
+  def timeLagWatermarkWatermark(fun: T => Long, maxTimeLag: Time): DataStream[T] = {
     val assigner = new AssignerWithPeriodicWatermarks[T] {
       override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
 
@@ -100,18 +98,6 @@ class DataStreamExt[T: TypeInformation](val dataStream: DataStream[T]) {
       }
     }
     dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)))
-  }
-
-}
-
-class KeyedStreamExt[K: TypeInformation, T: TypeInformation](val keyedStream: KeyedStream[K, T]) {
-
-  def sessionWindow(size: Time): WindowedStream[K, T, TimeWindow] = {
-    keyedStream.window(EventTimeSessionWindows.withGap(size))
-  }
-
-  def sessionWindowD(gapExtractor: SessionWindowTimeGapExtractor[T]): WindowedStream[K, T, TimeWindow] = {
-    keyedStream.window(EventTimeSessionWindows.withDynamicGap(gapExtractor))
   }
 
 }
