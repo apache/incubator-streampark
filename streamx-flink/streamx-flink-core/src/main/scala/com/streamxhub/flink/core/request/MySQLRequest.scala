@@ -85,6 +85,7 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
  */
 
 class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
+
   @transient private[this] var client: SQLClient = _
 
   override def open(parameters: Configuration): Unit = {
@@ -105,8 +106,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
     client.close()
   }
 
-  @throws[Exception]
-  def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
+  @throws[Exception] def asyncInvoke(input: T, resultFuture: ResultFuture[R]): Unit = {
     client.getConnection(new Handler[AsyncResult[SQLConnection]]() {
       def handle(asyncResult: AsyncResult[SQLConnection]): Unit = {
         if (asyncResult.succeeded()) {

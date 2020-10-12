@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.request
 
 
 import java.util.Properties
-import java.util.concurrent.{CompletableFuture, ExecutorService, TimeUnit, Executors => JExec}
+import java.util.concurrent.{CompletableFuture, ExecutorService, TimeUnit, Executors}
 import java.util.function.{Consumer, Supplier}
 
 import com.streamxhub.common.util.Logger
@@ -83,7 +83,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    executorService = JExec.newFixedThreadPool(capacity)
+    executorService = Executors.newFixedThreadPool(capacity)
   }
 
   override def asyncInvoke(input: T, resultFuture: async.ResultFuture[R]): Unit = {
@@ -100,7 +100,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[Streamx] HBaseASync request timeout. retrying... ")
+    logger.warn("[StreamX] HBaseASync request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 
