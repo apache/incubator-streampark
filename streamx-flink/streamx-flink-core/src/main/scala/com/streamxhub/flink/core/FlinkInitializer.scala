@@ -96,8 +96,6 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
   private[this] var javaEnvConf: StreamEnvConfigFunction = _
 
-  private[this] var datasetConfFun: (ExecutionEnvironment, ParameterTool) => Unit = _
-
   val parameter: ParameterTool = initParameter()
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
@@ -152,7 +150,6 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     }
     streamEnv
   }
-
 
   private[this] def initStreamEnv() = {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
