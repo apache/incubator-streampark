@@ -370,8 +370,4 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     }
   }
 
-  def initDatasetEnv() = {
-
-  }
-
 }
