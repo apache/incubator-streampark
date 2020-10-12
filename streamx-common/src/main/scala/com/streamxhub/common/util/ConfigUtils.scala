@@ -23,27 +23,27 @@ package com.streamxhub.common.util
 import java.util.Properties
 
 import com.streamxhub.common.conf.ConfigConst._
-import java.util.{Map => JMap}
-import scala.collection.immutable.{Map => SMap}
+import java.util.{Map => JavaMap}
+import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
 import scala.collection.JavaConversions._
 
 object ConfigUtils {
 
-  def getConf(parameter: JMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
+  def getConf(parameter: JavaMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.filter(_._2.nonEmpty).foreach { case (k, v) => prop.put(addfix + k, v) }
     prop
   }
 
-  def getHBaseConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
+  def getHBaseConfig(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
-  def getInfluxConfig(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX)
+  def getInfluxConfig(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX)
 
-  def getKafkaSinkConf(parameter: JMap[String, String], topic: String = "", alias: String = ""): Properties = {
+  def getKafkaSinkConf(parameter: JavaMap[String, String], topic: String = "", alias: String = ""): Properties = {
     val prefix = KAFKA_SINK_PREFIX + alias
-    val param: SMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
+    val param: ScalaMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
@@ -65,7 +65,7 @@ object ConfigUtils {
     }
   }
 
-  def getMySQLConf(parameter: JMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
+  def getMySQLConf(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
   /**
    *
@@ -74,7 +74,7 @@ object ConfigUtils {
    * @param alias
    * @return
    */
-  def getJdbcConf(parameter: JMap[String, String], dialect: String, alias: String): Properties = {
+  def getJdbcConf(parameter: JavaMap[String, String], dialect: String, alias: String): Properties = {
     val prefix = if (dialect.endsWith(".")) dialect.toLowerCase() else s"${dialect.toLowerCase()}."
     val fix = alias match {
       case "" | null => prefix
@@ -93,7 +93,7 @@ object ConfigUtils {
       case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }
-    val param: SMap[String, String] = filterParam(parameter, fix)
+    val param: ScalaMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
     val instance = if (alias == null || alias.trim == "") "default" else alias
     properties.put(KEY_INSTANCE, instance)
@@ -102,7 +102,7 @@ object ConfigUtils {
     properties
   }
 
-  private[this] def filterParam(parameter: JMap[String, String], fix: String): SMap[String, String] = {
+  private[this] def filterParam(parameter: JavaMap[String, String], fix: String): ScalaMap[String, String] = {
     parameter
       .toMap
       .filter(x => x._1.startsWith(fix) && Try(x._2 != null).getOrElse(false))
