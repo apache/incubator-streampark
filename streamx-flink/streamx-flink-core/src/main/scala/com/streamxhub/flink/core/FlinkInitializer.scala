@@ -37,7 +37,6 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import com.streamxhub.flink.core.enums.{ApiType, StateBackend => XStateBackend}
 import com.streamxhub.flink.core.function.StreamEnvConfigFunction
-import org.apache.flink.api.scala.ExecutionEnvironment
 import com.streamxhub.flink.core.enums.RestartStrategy
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
