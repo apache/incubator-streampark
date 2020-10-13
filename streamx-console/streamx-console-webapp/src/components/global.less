@@ -520,12 +520,12 @@ body {
 }
 
 .ant-table-thead > tr > th {
-  padding: 12px 6px !important;
+  padding: 10px 6px !important;
   font-size: 14px;
 }
 
 .ant-table-thead > tr > td,.ant-table-tbody > tr > td {
-  padding: 12px 6px !important;
+  padding: 10px 6px !important;
 }
 
 .ant-input {
@@ -585,4 +585,20 @@ body {
 
 .ant-checkbox-checked .ant-checkbox-inner::after {
   left: 2px;
+}
+
+/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+::-webkit-scrollbar {
+  width: 14px;  /*滚动条宽度*/
+  height: 14px;  /*滚动条高度*/
+}
+
+/*定义滚动条轨道 内阴影+圆角*/
+::-webkit-scrollbar-track {
+  background-color: unset;
+}
+
+/*定义滑块 内阴影+圆角*/
+::-webkit-scrollbar-thumb {
+  background-color: #e7e7e7  /*滚动条的背景颜色*/
 }
