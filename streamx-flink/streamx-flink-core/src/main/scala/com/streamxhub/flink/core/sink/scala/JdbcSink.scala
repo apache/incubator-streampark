@@ -202,8 +202,9 @@ object Dialect extends Enumeration {
 }
 
 
-//-------------Jdbc2PCSinkFunction,端到端精准一次---------------------------------------------------------------------------------------
+//-------------Jdbc2PCSinkFunction exactly-once support ---------------------------------------------------------------------------------------
 /**
+ * (flink checkpoint + db transactionId) 模拟了提交读.充分利用flink的checkpoint机制,经过flink checkpoint确认过的数据才提交
  *
  * @param apiType
  * @param jdbc
@@ -282,6 +283,10 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties)
       try {
         //获取jdbc连接....
         connection = JdbcUtils.getConnection(jdbc)
+        /**
+         * 设置当前事务的隔离级别为提交读...
+         */
+        connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED)
         connection.setAutoCommit(false)
         statement = connection.createStatement()
         //全部是插入则走批量插入
