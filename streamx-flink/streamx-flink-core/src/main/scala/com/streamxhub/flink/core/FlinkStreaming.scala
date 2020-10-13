@@ -26,7 +26,7 @@ import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala._
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import com.streamxhub.flink.core.ext.{DataStreamExt, ProcessFuncContextExt}
+import com.streamxhub.flink.core.ext.OperatorExt
 import org.apache.flink.streaming.api.functions.ProcessFunction
 
 
@@ -85,9 +85,9 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
 
 trait FlinkStreaming extends Logger {
 
-  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt[T] = new DataStreamExt(dataStream)
+  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): OperatorExt.DataStream[T] = new OperatorExt.DataStream[T](dataStream)
 
-  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): ProcessFuncContextExt[IN, OUT] = new ProcessFuncContextExt[IN, OUT](ctx)
+  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): OperatorExt.ProcessFunction[IN, OUT] = new OperatorExt.ProcessFunction[IN, OUT](ctx)
 
   @transient
   private var env: StreamExecutionEnvironment = _
