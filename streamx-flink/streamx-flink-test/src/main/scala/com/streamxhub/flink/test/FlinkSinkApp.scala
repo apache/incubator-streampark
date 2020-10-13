@@ -2,11 +2,9 @@ package com.streamxhub.flink.test
 
 
 import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.scala.RedisMapper
 import com.streamxhub.flink.core.sink.scala.{RedisMapper, RedisSink}
 import com.streamxhub.flink.core.source.scala.KafkaSource
 import org.apache.flink.streaming.api.scala._
-import org.apache.flink.streaming.api.windowing.assigners.{EventTimeSessionWindows, SessionWindowTimeGapExtractor}
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 
@@ -37,9 +35,6 @@ object FlinkSinkApp extends FlinkStreaming {
         case _ => None
       }
     })
-
-    ds.keyBy(_.age)
-      .sessionWindow(org.apache.flink.streaming.api.windowing.time.Time.minutes(20))
 
     val ds2 = source.flatMap(x => {
       x.split(",") match {
