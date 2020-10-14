@@ -587,7 +587,15 @@ body {
   left: 2px;
 }
 
-/*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
+.ant-select-selection,.ant-input-number-input,.ant-input-number,.ant-pagination-item,.ant-btn,.ant-input-group-addon {
+  border-radius: 2px !important;
+}
+
+.ant-btn-circle {
+  border-radius: 50% !important;
+}
+
+  /*定义滚动条高宽及背景 高宽分别对应横竖滚动条的尺寸*/
 ::-webkit-scrollbar {
   width: 14px;  /*滚动条宽度*/
   height: 14px;  /*滚动条高度*/
@@ -601,4 +609,12 @@ body {
 /*定义滑块 内阴影+圆角*/
 ::-webkit-scrollbar-thumb {
   background-color: #e7e7e7  /*滚动条的背景颜色*/
+}
+
+.ant-radio-button-wrapper:first-child {
+  border-radius: 2px 0 0 2px !important;
+}
+
+.ant-radio-button-wrapper:last-child {
+  border-radius: 0 2px 2px 0!important;
 }
