@@ -69,6 +69,8 @@ object ConfigConst {
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
+  val KEY_FLINK_CHECKPOINTS_UNALIGNED = "flink.checkpoints.unaligned"
+
   val KEY_FLINK_CHECKPOINTS_INTERVAL = "flink.checkpoints.interval"
 
   val KEY_FLINK_CHECKPOINTS_MODE = "flink.checkpoints.mode"

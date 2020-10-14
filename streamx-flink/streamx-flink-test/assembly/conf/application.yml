@@ -18,6 +18,7 @@ flink:
     time.characteristic: EventTime
     interval: 10000
   checkpoints:
+    unaligned: true
     enable: true
     interval: 5000
     mode: EXACTLY_ONCE
