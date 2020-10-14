@@ -1118,7 +1118,8 @@ export default {
       })
     },
 
-    handleDetail () {
+    handleDetail (app) {
+      this.SetAppId(app.id)
       this.$router.push({ 'path': '/flink/app/detail' })
     },
 
@@ -1226,19 +1227,6 @@ export default {
   padding: 6px 15px;
 }
 
-.app_state {
-  width: 80px;
-}
-
-.app_state > .ant-tag {
-  border-radius: 0;
-  font-weight: 700;
-  font-size: 13px;
-  text-align: center;
-  padding: 0 4px;
-  cursor: default;
-}
-
 .ant-modal-header {
   border-bottom: unset;
 }
@@ -1269,6 +1257,19 @@ export default {
 
 .app_list >>> .ant-table-thead > tr > th {
   background: unset !important;
+}
+
+.app_state {
+  width: 80px;
+}
+
+.app_state > .ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  cursor: default;
 }
 
 .status-processing-deploying {
