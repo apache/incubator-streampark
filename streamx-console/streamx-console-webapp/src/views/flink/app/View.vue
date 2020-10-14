@@ -604,7 +604,19 @@
         </template>
 
         <a-form @submit="handleStopOk" :form="formStopSavePoint">
-
+          <a-form-item
+            label="Savepoint"
+            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
+            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="savePoint"
+              v-decorator="['savePoint']"/>
+            <span class="conf-switch" style="color:darkgrey"> trigger savePoint before taking stoping </span>
+          </a-form-item>
           <a-form-item
             label="Drain"
             :labelCol="{lg: {span: 5}, sm: {span: 5}}"
@@ -618,20 +630,6 @@
               v-model="drain"
               v-decorator="['drain']"/>
             <span class="conf-switch" style="color:darkgrey"> Send max watermark before stoping</span>
-          </a-form-item>
-
-          <a-form-item
-            label="Savepoint"
-            :labelCol="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapperCol="{lg: {span: 17}, sm: {span: 5} }">
-            <a-switch
-              checkedChildren="开"
-              unCheckedChildren="关"
-              checked-children="true"
-              un-checked-children="false"
-              v-model="savePoint"
-              v-decorator="['savePoint']"/>
-            <span class="conf-switch" style="color:darkgrey"> trigger savePoint before taking stoping </span>
           </a-form-item>
         </a-form>
 
