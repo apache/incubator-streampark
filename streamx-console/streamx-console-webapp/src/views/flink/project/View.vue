@@ -154,9 +154,6 @@ export default {
       }
     }
   },
-  computed: {
-
-  },
 
   mounted () {
     this.handleFetch(this.queryParams, true)
