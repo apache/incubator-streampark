@@ -43,8 +43,7 @@
             <a-icon type="left"/>
             上一步
           </a-button>
-          <a-button v-if="!compactMode" class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定
-          </a-button>
+          <a-button v-if="!compactMode" class="drwaer-button-item" type="primary" icon="cloud" @click="handleOk">确定</a-button>
         </div>
       </div>
     </div>
@@ -66,6 +65,10 @@ export default {
   name: 'Conf',
   props: {
     visiable: {
+      type: Boolean,
+      default: false
+    },
+    readOnly: {
       type: Boolean,
       default: false
     }
@@ -98,7 +101,7 @@ export default {
           showCursorWhenSelecting: true,
           extraKeys: { 'Ctrl': 'autocomplete' },
           lint: true,
-          readOnly: false,
+          readOnly: this.readOnly,
           autoMatchParens: true,
           mode: 'text/x-yaml',
           theme: 'default',	// 设置主题
@@ -141,6 +144,9 @@ export default {
       this.changed = false
       this.confCode = null
       this.value = value
+      if (this.readOnly) {
+        this.title = '配置详情'
+      }
       this.$nextTick(() => {
         this.handleCodeMirror()
       })
