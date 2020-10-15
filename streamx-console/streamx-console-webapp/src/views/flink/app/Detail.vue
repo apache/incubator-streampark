@@ -91,7 +91,7 @@
               </a-icon>
               <a-icon
                 v-if="configVersions.length>1"
-                type="fork"
+                type="branches"
                 style="color: #4a9ff5"
                 @click="handleDetail(record)"
                 title="比较">
@@ -102,7 +102,7 @@
       </a-descriptions>
     </div>
 
-    <div v-if="app && savePoints">
+    <div v-if="app && savePoints" :class="{'desc-item': app && app.appType == 2}">
       <a-descriptions title="SavePoints">
         <a-descriptions-item class="desc-item">
           <a-table
