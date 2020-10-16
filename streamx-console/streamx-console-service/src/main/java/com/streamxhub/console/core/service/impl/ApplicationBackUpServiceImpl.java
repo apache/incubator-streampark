@@ -43,7 +43,7 @@ public class ApplicationBackUpServiceImpl extends ServiceImpl<ApplicationBackUpM
     @Override
     public List<ApplicationBackUp> getBackups(ApplicationBackUp backUp) {
         QueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("app_id",backUp.getId());
+        queryWrapper.eq("app_id",backUp.getAppId());
         return this.list(queryWrapper);
     }
 }
