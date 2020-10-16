@@ -21,10 +21,10 @@
 package com.streamxhub.console.core.service;
 
 import com.streamxhub.console.core.entity.ApplicationBackUp;
-import com.streamxhub.console.base.domain.RestRequest;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
-    IPage<ApplicationBackUp> query(ApplicationBackUp backUp, RestRequest request);
+    List<ApplicationBackUp> getBackups(ApplicationBackUp backUp);
 }

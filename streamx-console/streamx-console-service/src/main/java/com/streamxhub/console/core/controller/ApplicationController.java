@@ -27,6 +27,7 @@ import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
 import com.streamxhub.console.core.enums.AppExistsState;
+import com.streamxhub.console.core.service.ApplicationBackUpService;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
@@ -52,6 +53,9 @@ public class ApplicationController extends BaseController {
 
     @Autowired
     private ApplicationService applicationService;
+
+    @Autowired
+    private ApplicationBackUpService backUpService;
 
     @Autowired
     private StreamXProperties properties;
@@ -160,8 +164,8 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("backups")
-    public RestResponse backups(Application application) {
-        List<ApplicationBackUp> backups = applicationService.getBackups(application);
+    public RestResponse backups(ApplicationBackUp backUp) {
+        List<ApplicationBackUp> backups = backUpService.getBackups(backUp);
         return RestResponse.create().data(backups);
     }
 

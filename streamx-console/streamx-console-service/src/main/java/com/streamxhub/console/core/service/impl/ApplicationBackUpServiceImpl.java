@@ -20,9 +20,8 @@
  */
 package com.streamxhub.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.core.dao.ApplicationBackUpMapper;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
 import com.streamxhub.console.core.service.ApplicationBackUpService;
@@ -31,6 +30,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 
 /**
  * @author benjobs
@@ -41,7 +41,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationBackUpServiceImpl extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp> implements ApplicationBackUpService {
 
     @Override
-    public IPage<ApplicationBackUp> query(ApplicationBackUp backUp, RestRequest request) {
-        return null;
+    public List<ApplicationBackUp> getBackups(ApplicationBackUp backUp) {
+        QueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("app_id",backUp.getId());
+        return this.list(queryWrapper);
     }
 }
