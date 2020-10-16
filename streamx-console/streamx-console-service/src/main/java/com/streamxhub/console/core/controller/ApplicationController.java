@@ -25,6 +25,7 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
+import com.streamxhub.console.core.entity.ApplicationBackUp;
 import com.streamxhub.console.core.enums.AppExistsState;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -37,6 +38,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.*;
 
 /**
@@ -155,6 +157,12 @@ public class ApplicationController extends BaseController {
     public RestResponse getMain(Application application) {
         String mainClass = applicationService.getMain(application);
         return RestResponse.create().data(mainClass);
+    }
+
+    @PostMapping("backups")
+    public RestResponse backups(Application application) {
+        List<ApplicationBackUp> backups = applicationService.getBackups(application);
+        return RestResponse.create().data(backups);
     }
 
 }

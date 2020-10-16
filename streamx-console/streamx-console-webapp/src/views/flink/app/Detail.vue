@@ -89,13 +89,12 @@
                 @click="handleConfDetail(record)"
                 title="查看">
               </a-icon>
-              <a-icon
+              <icon-font
                 v-if="configVersions.length>1"
-                type="branches"
-                style="color: #4a9ff5"
+                type="icon-git-compare"
                 @click="handleDetail(record)"
                 title="比较">
-              </a-icon>
+              </icon-font>
             </template>
           </a-table>
         </a-descriptions-item>
@@ -125,18 +124,42 @@
       </a-descriptions>
     </div>
 
+    <div v-if="app && backUps" :class="{'desc-item': (app && app.appType == 2) || savePoints }">
+      <a-descriptions title="BackUp">
+        <a-descriptions-item class="desc-item">
+          <a-table
+            ref="TableInfo"
+            :columns="backUpsColumns"
+            size="middle"
+            rowKey="id"
+            style="margin-top: -24px"
+            :dataSource="backUps"
+            :pagination='pagination'
+            class="desc-table">
+            <template slot="timeStamp" slot-scope="text, record">
+              <a-icon type="clock-circle"/>{{record.timeStamp}}
+            </template>
+          </a-table>
+        </a-descriptions-item>
+      </a-descriptions>
+    </div>
+
     <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable" :readOnly="true"></Conf>
 
   </a-card>
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { get } from '@api/application'
+import { get, backUps } from '@api/application'
 import State from './State'
 import configOptions from './option'
-import {get as getVer, list as listVer} from '@api/config'
+import { get as getVer, list as listVer } from '@api/config'
 import { history } from '@api/savepoint'
 import Conf from './Conf'
+import { Icon } from 'ant-design-vue'
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2006309_3si041qc8rg.js'
+})
 const Base64 = require('js-base64').Base64
 
 configOptions.push(
@@ -151,7 +174,7 @@ configOptions.push(
 )
 
 export default {
-  components: { State, Conf },
+  components: { IconFont, State, Conf },
   data () {
     return {
       app: null,
@@ -160,7 +183,8 @@ export default {
       configVersions: null,
       savePoints: null,
       pagination: false,
-      confVisiable: false
+      confVisiable: false,
+      backUps: null
     }
   },
 
@@ -212,6 +236,41 @@ export default {
           title: 'Lastest',
           dataIndex: 'lastest',
           scopedSlots: { customRender: 'lastest' }
+        },
+        {
+          title: 'Operation',
+          dataIndex: 'operation',
+          key: 'operation',
+          scopedSlots: { customRender: 'operation' },
+          fixed: 'right',
+          width: 150
+        }
+      ]
+    },
+    backUpsColumns () {
+      return [
+        {
+          title: 'Save Path',
+          dataIndex: 'path',
+          width: '50%'
+        },
+        {
+          title: 'Description',
+          dataIndex: 'description',
+          width: '30%'
+        },
+        {
+          title: 'Create Time',
+          dataIndex: 'timeStamp',
+          scopedSlots: { customRender: 'timeStamp' }
+        },
+        {
+          title: 'Operation',
+          dataIndex: 'operation',
+          key: 'operation',
+          scopedSlots: { customRender: 'operation' },
+          fixed: 'right',
+          width: 150
         }
       ]
     }
@@ -245,9 +304,10 @@ export default {
     handleGet (appId) {
       get({ id: appId }).then((resp) => {
         this.app = resp.data
+        this.options = JSON.parse(this.app.options)
         this.handleListConfVersion()
         this.handleSavePoint()
-        this.options = JSON.parse(this.app.options)
+        this.handleBackUps()
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -269,6 +329,14 @@ export default {
         appId: this.app.id
       }).then((resp) => {
         this.savePoints = resp.data || []
+      })
+    },
+
+    handleBackUps () {
+      backUps({
+        appId: this.app.id
+      }).then((resp) => {
+        this.backUps = resp.data || []
       })
     },
 

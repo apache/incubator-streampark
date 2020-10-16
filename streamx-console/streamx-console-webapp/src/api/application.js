@@ -64,3 +64,7 @@ export function start (params) {
 export function clean (params) {
   return http.post(api.Application.Clean, params)
 }
+
+export function backUps (params) {
+  return http.post(api.Application.BackUps, params)
+}

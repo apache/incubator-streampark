@@ -264,6 +264,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    public List<ApplicationBackUp> getBackups(Application paramOfApp) {
+        QueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper();
+        queryWrapper.eq("app_id", paramOfApp.getAppId());
+        return this.backUpService.list(queryWrapper);
+    }
+
+    @Override
     public void updateState(Application application) {
         this.baseMapper.updateState(application);
     }
