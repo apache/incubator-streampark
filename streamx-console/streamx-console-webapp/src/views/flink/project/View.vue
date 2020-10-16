@@ -40,7 +40,7 @@
 
           <div class="list-content">
             <div class="list-content-item">
-              <span>CVS</span>
+              <span>VCS</span>
               <p>
                 <a-icon type="github" two-tone-color></a-icon>
               </p>
