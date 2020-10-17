@@ -81,6 +81,9 @@
             <template  slot="actived" slot-scope="text, record">
               <a-tag color="green" v-if="record.actived">current</a-tag>
             </template>
+            <template slot="createTime" slot-scope="text, record">
+              <a-icon type="clock-circle"/> {{ record.createTime }}
+            </template>
             <template slot="operation"  slot-scope="text, record">
               <a-icon
                 type="eye"
@@ -214,8 +217,9 @@ export default {
     columns () {
       return [
         {
-          title: 'Job Id',
-          dataIndex: 'appId'
+          title: 'Version',
+          dataIndex: 'version',
+          scopedSlots: { customRender: 'version' }
         },
         {
           title: 'Conf Format',
@@ -223,14 +227,14 @@ export default {
           scopedSlots: { customRender: 'format' }
         },
         {
-          title: 'Version',
-          dataIndex: 'version',
-          scopedSlots: { customRender: 'version' }
-        },
-        {
           title: 'Actived',
           dataIndex: 'actived',
           scopedSlots: { customRender: 'actived' }
+        },
+        {
+          title: 'Create Time',
+          dataIndex: 'createTime',
+          scopedSlots: { customRender: 'createTime' }
         },
         {
           title: 'Operation',

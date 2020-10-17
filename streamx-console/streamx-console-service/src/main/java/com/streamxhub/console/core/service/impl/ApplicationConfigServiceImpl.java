@@ -34,6 +34,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -53,6 +54,7 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
         applicationConfig.setActived(true);
         applicationConfig.setFormat(application.getFormat());
         applicationConfig.setContent(config);
+        applicationConfig.setCreateTime(new Date());
         Integer version = this.baseMapper.getLastVersion(application.getId());
         applicationConfig.setVersion(version == null ? 1 : version + 1);
         //先前的激活的配置设置为备胎....

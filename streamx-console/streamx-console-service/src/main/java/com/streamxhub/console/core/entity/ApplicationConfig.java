@@ -25,6 +25,8 @@ import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
+
 /**
  * @author benjobs
  */
@@ -53,6 +55,8 @@ public class ApplicationConfig {
     private Integer version = 1;
 
     private String content;
+
+    private Date createTime;
 
 
 }
