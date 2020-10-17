@@ -29,8 +29,8 @@
         <influxdb.version>2.17</influxdb.version>
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
-
         <project.build.jdk>1.8</project.build.jdk>
+
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
         <clickhouse.version>0.1.53</clickhouse.version>
@@ -207,7 +207,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>1.18.16</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- quartz -->
@@ -265,7 +266,6 @@
         <sourceDirectory>src/main/java</sourceDirectory>
         <testSourceDirectory>src/test/java</testSourceDirectory>
         <plugins>
-
             <!-- jar plugin -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -283,6 +283,7 @@
                     </archive>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
@@ -327,4 +328,3 @@
     </repositories>
 
 </project>
-
