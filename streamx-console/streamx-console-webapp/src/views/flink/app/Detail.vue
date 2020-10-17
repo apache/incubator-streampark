@@ -101,7 +101,7 @@
       </a-descriptions>
     </div>
 
-    <div v-if="app && savePoints" :class="{'desc-item': app && app.appType == 2}">
+    <div v-if="app && savePoints && savePoints.length>0">
       <a-descriptions title="SavePoints">
         <a-descriptions-item class="desc-item">
           <a-table
@@ -114,30 +114,52 @@
             :pagination='pagination'
             class="desc-table">
             <template slot="createTime" slot-scope="text, record">
-              <a-icon type="clock-circle"/>{{record.createTime}}
+              <a-icon type="clock-circle"/> {{ record.createTime }}
             </template>
             <template  slot="lastest" slot-scope="text, record">
               <a-tag color="green" v-if="record.lastest">lastest</a-tag>
+            </template>
+            <template slot="operation" slot-scope="text, record">
+              <a-popconfirm
+                title="确定要删除吗?"
+                cancel-text="No"
+                ok-text="Yes"
+                @confirm="handleDeleteSavePoint(record)">
+                <a-icon
+                  type="delete"
+                  v-permit="'savepoint:delete'"
+                  theme="twoTone"
+                  twoToneColor="#4a9ff5">
+                </a-icon>
+              </a-popconfirm>
             </template>
           </a-table>
         </a-descriptions-item>
       </a-descriptions>
     </div>
 
-    <div v-if="app && backUps" :class="{'desc-item': (app && app.appType == 2) || savePoints }">
+    <div v-if="app && backUpList && backUpList.length > 0">
       <a-descriptions title="BackUp">
-        <a-descriptions-item class="desc-item">
+        <a-descriptions-item>
           <a-table
             ref="TableInfo"
             :columns="backUpsColumns"
             size="middle"
             rowKey="id"
             style="margin-top: -24px"
-            :dataSource="backUps"
+            :dataSource="backUpList"
             :pagination='pagination'
             class="desc-table">
             <template slot="timeStamp" slot-scope="text, record">
               <a-icon type="clock-circle"/>{{record.timeStamp}}
+            </template>
+            <template slot="operation" slot-scope="text, record">
+              <icon-font
+                type="icon-deploy"
+                v-permit="'backup:resume'"
+                style="color:#4a9ff5"
+                @click="handleResume(record)">
+              </icon-font>
             </template>
           </a-table>
         </a-descriptions-item>
@@ -154,7 +176,7 @@ import { get, backUps } from '@api/application'
 import State from './State'
 import configOptions from './option'
 import { get as getVer, list as listVer } from '@api/config'
-import { history } from '@api/savepoint'
+import { history, remove } from '@api/savepoint'
 import Conf from './Conf'
 import { Icon } from 'ant-design-vue'
 const IconFont = Icon.createFromIconfontCN({
@@ -184,7 +206,7 @@ export default {
       savePoints: null,
       pagination: false,
       confVisiable: false,
-      backUps: null
+      backUpList: null
     }
   },
 
@@ -252,7 +274,7 @@ export default {
         {
           title: 'Save Path',
           dataIndex: 'path',
-          width: '50%'
+          width: '40%'
         },
         {
           title: 'Description',
@@ -336,7 +358,7 @@ export default {
       backUps({
         appId: this.app.id
       }).then((resp) => {
-        this.backUps = resp.data || []
+        this.backUpList = resp.data || []
       })
     },
 
@@ -356,6 +378,17 @@ export default {
         const text = Base64.decode(resp.data.content)
         this.$refs.confEdit.set(text)
       })
+    },
+
+    handleDeleteSavePoint (record) {
+      remove({
+        id: record.id
+      }).then((resp) => {
+        this.handleGet(this.app.id)
+      })
+    },
+
+    handleResume (record) {
     }
 
   }

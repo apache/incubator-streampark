@@ -358,13 +358,13 @@
             style="color:#4a9ff5"
             @click="handleMapping(record)">
           </a-icon>
-          <a-icon
+          <icon-font
+            type="icon-deploy"
             v-show="record.deploy === 1 && record.state !== 1 "
             v-permit="'app:deploy'"
-            type="upload"
             style="color:#4a9ff5"
             @click="handleDeploy(record)">
-          </a-icon>
+          </icon-font>
           <a-icon
             v-permit="'app:update'"
             type="setting"

@@ -25,6 +25,7 @@ import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -56,6 +57,13 @@ public class SavePointController extends BaseController {
     public RestResponse history(Long appId) {
         List<SavePoint> savePoint = savePointService.getHistory(appId);
         return RestResponse.create().data(savePoint);
+    }
+
+    @PostMapping("delete")
+    @RequiresPermissions("savepoint:delete")
+    public RestResponse delete(Long id) {
+        Boolean deleted = savePointService.removeById(id);
+        return RestResponse.create().data(deleted);
     }
 
 }

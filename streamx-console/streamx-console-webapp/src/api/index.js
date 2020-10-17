@@ -4,58 +4,50 @@ export default {
   SendSms: '/account/sms',
   SendSmsErr: '/account/sms_err',
   Passport: {
-    Login: '/passport/login',
-    Logout: '/passport/logout',
-    KICKOUT: '/passport/kickout'
-  },
-  Job: {
-    JobList: '/job/view',
-    JobAdd: '/job/addJob',
-    AddNode: '/job/addNode',
-    GetJob: '/job/getJob'
+    LOGIN: '/passport/login',
+    LOGOUT: '/passport/logout'
   },
   Project: {
-    Create: '/flink/project/create',
-    Build: '/flink/project/build',
-    List: '/flink/project/list',
-    FileList: '/flink/project/filelist',
-    Modules: '/flink/project/modules',
-    ListConf: '/flink/project/listconf',
-    Jars: '/flink/project/jars',
-    Delete: '/flink/project/delete',
-    Select: '/flink/project/select'
+    CREATE: '/flink/project/create',
+    BUILD: '/flink/project/build',
+    LIST: '/flink/project/list',
+    FILELIST: '/flink/project/filelist',
+    MODULES: '/flink/project/modules',
+    LISTCONF: '/flink/project/listconf',
+    JARS: '/flink/project/jars',
+    DELETE: '/flink/project/delete',
+    SELECT: '/flink/project/select'
   },
   SavePoint: {
-    Lastest: '/flink/savepoint/lastest',
-    History: '/flink/savepoint/history'
+    LASTEST: '/flink/savepoint/lastest',
+    HISTORY: '/flink/savepoint/history',
+    DELETE: '/flink/savepoint/delete'
   },
   Application: {
-    Add: '/flink/app/add',
-    ReadConf: '/flink/app/readConf',
-    Update: '/flink/app/update',
-    Deploy: '/flink/app/deploy',
-    Mapping: '/flink/app/mapping',
-    Yarn: '/flink/app/yarn',
-    List: '/flink/app/list',
-    Get: '/flink/app/get',
-    Main: '/flink/app/main',
-    Name: '/flink/app/name',
-    Exists: '/flink/app/exists',
-    Stop: '/flink/app/stop',
-    Delete: '/flink/app/delete',
-    Create: '/flink/app/create',
-    Start: '/flink/app/start',
-    Clean: '/flink/app/clean',
-    BackUps: '/flink/app/backups'
+    ADD: '/flink/app/add',
+    READCONF: '/flink/app/readConf',
+    UPDATE: '/flink/app/update',
+    DEPLOY: '/flink/app/deploy',
+    MAPPING: '/flink/app/mapping',
+    YARN: '/flink/app/yarn',
+    LIST: '/flink/app/list',
+    GET: '/flink/app/get',
+    MAIN: '/flink/app/main',
+    NAME: '/flink/app/name',
+    EXISTS: '/flink/app/exists',
+    STOP: '/flink/app/stop',
+    DELETE: '/flink/app/delete',
+    CREATE: '/flink/app/create',
+    START: '/flink/app/start',
+    CLEAN: '/flink/app/clean',
+    BACKUPS: '/flink/app/backups'
   },
-
   Config: {
-    Get: '/flink/conf/get',
-    List: '/flink/conf/list'
+    GET: '/flink/conf/get',
+    LIST: '/flink/conf/list'
   },
-
   User: {
-    ExecUser: '/user/execUser',
+    EXECUSER: '/user/execUser',
     LIST: '/user/list',
     UPDATE: '/user/update',
     GET: '/user/get',
@@ -87,5 +79,4 @@ export default {
     DELETE: '/log/delete',
     EXPORT: '/log/export'
   }
-
 }

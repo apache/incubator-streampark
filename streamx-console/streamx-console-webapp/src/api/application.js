@@ -2,69 +2,69 @@ import api from './index'
 import http from '@/utils/request'
 
 export function add (params) {
-  return http.post(api.Application.Add, params)
+  return http.post(api.Application.ADD, params)
 }
 
 export function readConf (params) {
-  return http.post(api.Application.ReadConf, params)
+  return http.post(api.Application.READCONF, params)
 }
 
 export function get (params) {
-  return http.post(api.Application.Get, params)
+  return http.post(api.Application.GET, params)
 }
 
 export function main (params) {
-  return http.post(api.Application.Main, params)
+  return http.post(api.Application.MAIN, params)
 }
 
 export function update (params) {
-  return http.post(api.Application.Update, params)
+  return http.post(api.Application.UPDATE, params)
 }
 
 export function deploy (params) {
-  return http.post(api.Application.Deploy, params)
+  return http.post(api.Application.DEPLOY, params)
 }
 
 export function mapping (params) {
-  return http.post(api.Application.Mapping, params)
+  return http.post(api.Application.MAPPING, params)
 }
 
 export function yarn (params) {
-  return http.post(api.Application.Yarn, params)
+  return http.post(api.Application.YARN, params)
 }
 
 export function list (params) {
-  return http.post(api.Application.List, params)
+  return http.post(api.Application.LIST, params)
 }
 
 export function name (params) {
-  return http.post(api.Application.Name, params)
+  return http.post(api.Application.NAME, params)
 }
 
 export function exists (params) {
-  return http.post(api.Application.Exists, params)
+  return http.post(api.Application.EXISTS, params)
 }
 
 export function stop (params) {
-  return http.post(api.Application.Stop, params)
+  return http.post(api.Application.STOP, params)
 }
 
 export function create (params) {
-  return http.post(api.Application.Create, params)
+  return http.post(api.Application.CREATE, params)
 }
 
 export function remove (params) {
-  return http.post(api.Application.Delete, params)
+  return http.post(api.Application.DELETE, params)
 }
 
 export function start (params) {
-  return http.post(api.Application.Start, params)
+  return http.post(api.Application.START, params)
 }
 
 export function clean (params) {
-  return http.post(api.Application.Clean, params)
+  return http.post(api.Application.CLEAN, params)
 }
 
 export function backUps (params) {
-  return http.post(api.Application.BackUps, params)
+  return http.post(api.Application.BACKUPS, params)
 }

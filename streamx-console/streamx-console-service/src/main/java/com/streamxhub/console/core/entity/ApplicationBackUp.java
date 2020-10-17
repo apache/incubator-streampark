@@ -24,18 +24,25 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.common.conf.ConfigConst;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * @author benjobs
  */
 @Data
 @TableName("t_app_backup")
 @Excel("app备份实体")
+@Slf4j
 public class ApplicationBackUp {
     private Long id;
     private Long appId;
     private String path;
     private String description;
     private Long timeStamp;
+
+    public ApplicationBackUp() {
+
+    }
 
     public ApplicationBackUp(Application application) {
         this.appId = application.getId();

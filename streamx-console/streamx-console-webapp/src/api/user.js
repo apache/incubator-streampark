@@ -2,7 +2,7 @@ import api from './index'
 import http from '@/utils/request'
 
 export function getExecUser () {
-  return http.post(api.User.ExecUser)
+  return http.post(api.User.EXECUSER)
 }
 
 export function list (queryParam) {
