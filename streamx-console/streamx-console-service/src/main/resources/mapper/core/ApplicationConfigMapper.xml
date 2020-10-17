@@ -9,5 +9,6 @@
         <result column="FORMAT" jdbcType="INTEGER" property="format"/>
         <result column="VERSION" jdbcType="INTEGER" property="version"/>
         <result column="CONTENT" jdbcType="LONGVARCHAR" property="content"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>
 </mapper>

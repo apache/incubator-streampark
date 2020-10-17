@@ -26,6 +26,8 @@ import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.Date;
+
 /**
  * @author benjobs
  */
@@ -38,7 +40,7 @@ public class ApplicationBackUp {
     private Long appId;
     private String path;
     private String description;
-    private Long timeStamp;
+    private Date createDate;
 
     public ApplicationBackUp() {
 
@@ -47,12 +49,8 @@ public class ApplicationBackUp {
     public ApplicationBackUp(Application application) {
         this.appId = application.getId();
         this.description = application.getBackUpDescription();
-        this.timeStamp = System.currentTimeMillis();
-        this.path = ConfigConst.APP_HISTORY()
-                .concat("/")
-                .concat(application.getId().toString())
-                .concat("/")
-                .concat(timeStamp.toString());
+        this.createDate = new Date();
+        this.path = String.format("%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createDate.getTime());
     }
 
 }

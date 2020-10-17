@@ -153,8 +153,8 @@
             :dataSource="backUpList"
             :pagination='pagination'
             class="desc-table">
-            <template slot="timeStamp" slot-scope="text, record">
-              <a-icon type="clock-circle"/>{{record.timeStamp}}
+            <template slot="createTime" slot-scope="text, record">
+              <a-icon type="clock-circle"/>{{record.createTime}}
             </template>
             <template slot="operation" slot-scope="text, record">
               <icon-font
@@ -287,8 +287,8 @@ export default {
         },
         {
           title: 'Create Time',
-          dataIndex: 'timeStamp',
-          scopedSlots: { customRender: 'timeStamp' }
+          dataIndex: 'createTime',
+          scopedSlots: { customRender: 'createTime' }
         },
         {
           title: 'Operation',

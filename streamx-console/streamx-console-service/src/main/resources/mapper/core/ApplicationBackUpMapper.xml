@@ -7,6 +7,6 @@
         <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
         <result column="PATH" jdbcType="VARCHAR" property="path"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
-        <result column="TIME_STAMP" jdbcType="BIGINT" property="timeStamp"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>
 </mapper>
