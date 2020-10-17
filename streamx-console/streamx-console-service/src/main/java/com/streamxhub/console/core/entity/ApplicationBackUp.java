@@ -40,7 +40,7 @@ public class ApplicationBackUp {
     private Long appId;
     private String path;
     private String description;
-    private Date createDate;
+    private Date createTime;
 
     public ApplicationBackUp() {
 
@@ -49,8 +49,8 @@ public class ApplicationBackUp {
     public ApplicationBackUp(Application application) {
         this.appId = application.getId();
         this.description = application.getBackUpDescription();
-        this.createDate = new Date();
-        this.path = String.format("%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createDate.getTime());
+        this.createTime = new Date();
+        this.path = String.format("%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createTime.getTime());
     }
 
 }
