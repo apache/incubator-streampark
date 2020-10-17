@@ -123,6 +123,13 @@
               <a-tag color="green" v-if="record.lastest">lastest</a-tag>
             </template>
             <template slot="operation" slot-scope="text, record">
+              <a-icon
+                type="copy"
+                style="color:#4a9ff5"
+                v-clipboard:copy="record.savePoint"
+                v-clipboard:success="handleCopySuccess"
+                v-clipboard:error="handleCopyError">
+              </a-icon>
               <a-popconfirm
                 title="确定要删除吗?"
                 cancel-text="No"
@@ -182,6 +189,7 @@ import { get as getVer, list as listVer } from '@api/config'
 import { history, remove } from '@api/savepoint'
 import Conf from './Conf'
 import { Icon } from 'ant-design-vue'
+import notification from 'ant-design-vue/lib/notification'
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_3si041qc8rg.js'
 })
@@ -389,6 +397,20 @@ export default {
         id: record.id
       }).then((resp) => {
         this.handleGet(this.app.id)
+      })
+    },
+
+    handleCopySuccess () {
+      notification.success({
+        message: '复制成功',
+        description: '该SavePoint路径已经复制到剪切板'
+      })
+    },
+
+    handleCopyError () {
+      notification.error({
+        message: '复制失败',
+        description: '该SavePoint路径复制失败'
       })
     },
 
