@@ -106,7 +106,7 @@ module.exports = {
         target: 'http://pro-hadoop-2:10001',
         ws: false,
         changeOrigin: true,
-        pathRewrite: {"^/api": ""}
+        pathRewrite: { '^/api': '' }
       }
     }
   },
