@@ -95,7 +95,7 @@
               <icon-font
                 v-if="configVersions.length>1"
                 type="icon-git-compare"
-                @click="handleDetail(record)"
+                @click="handleCompare(record)"
                 title="比较">
               </icon-font>
             </template>
@@ -178,6 +178,51 @@
 
     <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable" :readOnly="true"></Conf>
 
+    <a-modal v-model="compareVisible" on-ok="handleCompareOk" v-if="compareVisible">
+      <template slot="title">
+        <icon-font slot="icon" type="icon-git-compare" style="color: green"/>
+        Compare Config
+      </template>
+      <template slot="footer">
+        <a-button key="back" @click="handleCompareCancel">
+          取消
+        </a-button>
+        <a-button key="submit" type="primary" @click="handleCompareOk">
+          确定
+        </a-button>
+      </template>
+      <a-form @submit="handleCompareOk" :form="formCompare">
+        <a-form-item
+          label="source version"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+          <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
+            {{ compare.version }}
+          </a-button>
+          <a-icon type="clock-circle" style="color:darkgrey"/> <span style="color:darkgrey">{{ compare.createTime }}</span>
+        </a-form-item>
+        <a-form-item
+          label="target version"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+          <a-select @change="handleCompareTarget">
+            <a-select-option
+              v-for="(ver,index) in configVersions"
+              :value="ver.id"
+              v-if="compare.version !== ver.version"
+              :key="index">
+              <div style="padding-left: 5px">
+                <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
+                  {{ ver.version }}
+                </a-button>
+                <a-tag color="green" style=";margin-left: 10px;" size="small" v-if="ver.actived">current</a-tag>
+              </div>
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
   </a-card>
 </template>
 <script>
@@ -217,7 +262,10 @@ export default {
       savePoints: null,
       pagination: false,
       confVisiable: false,
-      backUpList: null
+      backUpList: null,
+      compareVisible: false,
+      formCompare: null,
+      compare: { },
     }
   },
 
@@ -308,6 +356,10 @@ export default {
         }
       ]
     }
+  },
+
+  beforeMount () {
+    this.formCompare = this.$form.createForm(this)
   },
 
   mounted () {
@@ -411,6 +463,39 @@ export default {
       notification.error({
         message: '复制失败',
         description: '该SavePoint路径复制失败'
+      })
+    },
+
+    handleCompare (record) {
+      this.compareVisible = true
+      this.compare = {
+        id: record.id,
+        version: record.version,
+        createTime: record.createTime
+      }
+    },
+
+    handleCompareTarget (v) {
+      this.compare.target = v
+    },
+
+    handleCompareCancel () {
+      this.compareVisible = false
+    },
+
+    handleCompareOk () {
+      getVer({
+        id: this.compare.id
+      }).then((resp) => {
+        const conf1 = Base64.decode(resp.data.content)
+        getVer({
+          id: this.compare.target
+        }).then((resp) => {
+          const conf2 = Base64.decode(resp.data.content)
+          this.confVisiable = true
+          this.$refs.confEdit.compact(conf1, conf2)
+          this.handleCompareCancel()
+        })
       })
     },
 
