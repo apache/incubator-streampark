@@ -2,6 +2,8 @@ package com.streamxhub.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.dao.SavePointMapper;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
@@ -27,11 +29,26 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     public SavePoint getLastest(Long id) {
-       return this.baseMapper.getLastest(id);
+        return this.baseMapper.getLastest(id);
     }
 
     @Override
     public List<SavePoint> getHistory(Long appId) {
         return this.baseMapper.getHistory(appId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Boolean delete(Long id) throws ServiceException {
+        SavePoint savePoint = getById(id);
+        try {
+            if (HdfsUtils.exists(savePoint.getSavePoint())) {
+                HdfsUtils.deleteFile(savePoint.getSavePoint());
+            }
+            removeById(id);
+            return true;
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 }

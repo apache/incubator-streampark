@@ -22,6 +22,7 @@ package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
@@ -61,8 +62,8 @@ public class SavePointController extends BaseController {
 
     @PostMapping("delete")
     @RequiresPermissions("savepoint:delete")
-    public RestResponse delete(Long id) {
-        Boolean deleted = savePointService.removeById(id);
+    public RestResponse delete(Long id) throws ServiceException {
+        Boolean deleted = savePointService.delete(id);
         return RestResponse.create().data(deleted);
     }
 

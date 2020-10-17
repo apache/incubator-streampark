@@ -111,7 +111,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
         /**
          * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
          */
-        val text = HdfsUtils.read(config)
+        val text = HdfsUtils.read(x)
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
