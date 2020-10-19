@@ -390,6 +390,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ApplicationLog log = new ApplicationLog();
             log.setException(exception);
             log.setSuccess(false);
+            log.setStartTime(new Date());
             applicationLogService.save(log);
             return false;
         }
