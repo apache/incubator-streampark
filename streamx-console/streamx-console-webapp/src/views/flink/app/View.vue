@@ -1041,7 +1041,7 @@ export default {
             savePoint: savePoint,
             allowNonRestored: allowNonRestoredState
           }).then((resp) => {
-            if ( !resp.data ) {
+            if (!resp.data) {
               this.$message.error(
                 '应用启动失败,请查看启动日志',
                 3

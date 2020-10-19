@@ -13,16 +13,16 @@
             {{ app.projectName }}
           </a-descriptions-item>
           <a-descriptions-item label="Application Type">
-          <span v-if="app.appType == 1">
-            <a-tag color="cyan">
-              StreamX Flink
-            </a-tag>
-          </span>
+            <span v-if="app.appType == 1">
+              <a-tag color="cyan">
+                StreamX Flink
+              </a-tag>
+            </span>
             <span v-else-if="app.appType == 2">
-            <a-tag color="blue">
-              Apache Flink
-            </a-tag>
-          </span>
+              <a-tag color="blue">
+                Apache Flink
+              </a-tag>
+            </span>
           </a-descriptions-item>
           <a-descriptions-item label="Status">
             <State :state="app.state"></State>
@@ -63,7 +63,7 @@
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="configVersions"
-              :pagination='pagination'
+              :pagination="pagination"
               class="desc-table">
               <template slot="format" slot-scope="text, record">
                 <a-tag color="#2db7f5" v-if="record.format == 1">
@@ -73,18 +73,18 @@
                   properties
                 </a-tag>
               </template>
-              <template  slot="version" slot-scope="text, record">
+              <template slot="version" slot-scope="text, record">
                 <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
                   {{ record.version }}
                 </a-button>
               </template>
-              <template  slot="actived" slot-scope="text, record">
+              <template slot="actived" slot-scope="text, record">
                 <a-tag color="green" v-if="record.actived">current</a-tag>
               </template>
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/> {{ record.createTime }}
               </template>
-              <template slot="operation"  slot-scope="text, record">
+              <template slot="operation" slot-scope="text, record">
                 <a-icon
                   type="eye"
                   theme="twoTone"
@@ -114,12 +114,12 @@
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="savePoints"
-              :pagination='pagination'
+              :pagination="pagination"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/> {{ record.createTime }}
               </template>
-              <template  slot="lastest" slot-scope="text, record">
+              <template slot="lastest" slot-scope="text, record">
                 <a-tag color="green" v-if="record.lastest">lastest</a-tag>
               </template>
               <template slot="operation" slot-scope="text, record">
@@ -158,10 +158,10 @@
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="backUpList"
-              :pagination='pagination'
+              :pagination="pagination"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/>{{record.createTime}}
+                <a-icon type="clock-circle"/>{{ record.createTime }}
               </template>
               <template slot="operation" slot-scope="text, record">
                 <icon-font
@@ -186,10 +186,10 @@
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="startLogList"
-              :pagination='pagination2'
+              :pagination="pagination2"
               class="desc-table">
               <template slot="startTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/>{{record.startTime}}
+                <a-icon type="clock-circle"/>{{ record.startTime }}
               </template>
               <template slot="success" slot-scope="text, record">
                 <a-tag class="start-state" color="#52c41a" v-if="record.success">SUCCESS</a-tag>
@@ -330,7 +330,7 @@ export default {
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
       codeMirror: null,
-      execOption : {
+      execOption: {
         modalStyle: {
           height: '600px',
           padding: '5px'
@@ -644,7 +644,7 @@ export default {
     },
 
     handleCodeMirror () {
-      this.codeMirror = CodeMirror.fromTextArea(document.querySelector(".startExp"), {
+      this.codeMirror = CodeMirror.fromTextArea(document.querySelector('.startExp'), {
         tabSize: 8,
         styleActiveLine: true,
         lineNumbers: true,
