@@ -1,7 +1,6 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
-
-    <a-tabs default-active-key="1">
+    <a-tabs default-active-key="1" style="margin-top: -20px">
       <a-tab-pane v-if="app" key="1" tab="Basic Info">
         <a-descriptions bordered size="middle" layout="vertical">
           <a-descriptions-item label="Application Name">
