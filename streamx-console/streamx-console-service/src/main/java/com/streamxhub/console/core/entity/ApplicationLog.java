@@ -15,13 +15,13 @@ public class ApplicationLog {
 
     private Long id;
     /**
-     * jobId
+     * appId
      */
-    private Long jobId;
+    private Long appId;
     /**
      * applicationId
      */
-    private String appId;
+    private String yarnAppId;
     /**
      * 启动状态
      */

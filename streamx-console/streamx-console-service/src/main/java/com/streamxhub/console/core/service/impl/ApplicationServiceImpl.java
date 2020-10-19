@@ -379,8 +379,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setEndTime(null);
             this.baseMapper.updateById(application);
             ApplicationLog log = new ApplicationLog();
-            log.setJobId(application.getId());
-            log.setAppId(appId.toString());
+            log.setAppId(application.getId());
+            log.setYarnAppId(appId.toString());
             log.setStartTime(new Date(appId.getClusterTimestamp()));
             log.setSuccess(true);
             applicationLogService.save(log);
@@ -388,7 +388,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } catch (Exception e) {
             String exception = ExceptionUtils.getStackTrace(e);
             ApplicationLog log = new ApplicationLog();
-            log.setJobId(application.getId());
             log.setException(exception);
             log.setSuccess(false);
             applicationLogService.save(log);
