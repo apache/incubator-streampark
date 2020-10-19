@@ -652,9 +652,12 @@ import State from './State'
 import { mapActions } from 'vuex'
 import { list, stop, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
-
+import { Icon } from 'ant-design-vue'
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
+})
 export default {
-  components: { RangeDate, Ellipsis, State },
+  components: { RangeDate, Ellipsis, State, IconFont },
   data () {
     return {
       loading: false,

@@ -331,4 +331,9 @@ export default {
   width: 80px;
 }
 
+.CodeMirror {
+  border: 1px solid #eee;
+  height: auto;
+}
+
 </style>

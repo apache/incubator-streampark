@@ -192,13 +192,19 @@
               <template slot="startTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>{{record.startTime}}
               </template>
+              <template slot="success" slot-scope="text, record">
+                <a-tag class="start-state" color="#52c41a" v-if="record.success">SUCCESS</a-tag>
+                <a-tag class="start-state" color="#f5222d" v-else>FAILED</a-tag>
+              </template>
               <template slot="operation" slot-scope="text, record">
-                <icon-font
-                  type="icon-deploy"
-                  v-permit="'backup:resume'"
-                  style="color:#4a9ff5"
-                  @click="handleResume(record)">
-                </icon-font>
+                <a-icon
+                  v-if="!record.success"
+                  type="eye"
+                  theme="twoTone"
+                  twoToneColor="#4a9ff5"
+                  @click="handleException(record)"
+                  title="查看">
+                </a-icon>
               </template>
             </a-table>
           </a-descriptions-item>
@@ -254,6 +260,23 @@
       </a-form>
     </a-modal>
 
+    <a-modal
+      v-model="execOption.visible"
+      width="80%"
+      :bodyStyle="execOption.modalStyle"
+      :destroyOnClose="execOption.modalDestroyOnClose"
+      @ok="handleExpClose">
+      <template slot="title">
+        <a-icon type="code" style="color:RED"/>&nbsp; Exception Info
+      </template>
+      <template slot="footer">
+        <a-button key="submit" type="primary" @click="handleExpClose">
+          确定
+        </a-button>
+      </template>
+      <textarea id="startExp" ref="startExp" class="startExp"></textarea>
+    </a-modal>
+
   </a-card>
 </template>
 <script>
@@ -264,13 +287,13 @@ import configOptions from './option'
 import { get as getVer, list as listVer } from '@api/config'
 import { history, remove } from '@api/savepoint'
 import Conf from './Conf'
+import 'codemirror/lib/codemirror.css'
 import { Icon } from 'ant-design-vue'
 import notification from 'ant-design-vue/lib/notification'
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
 })
 const Base64 = require('js-base64').Base64
-
 configOptions.push(
   {
     key: '-p',
@@ -307,6 +330,16 @@ export default {
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
       },
+      codeMirror: null,
+      execOption : {
+        modalStyle: {
+          height: '600px',
+          padding: '5px'
+        },
+        visible: false,
+        modalDestroyOnClose: true,
+        content: null
+      }
     }
   },
 
@@ -597,6 +630,58 @@ export default {
     },
 
     handleResume (record) {
+    },
+
+    handleException (record) {
+      this.execOption.visible = true
+      this.execOption.content = record.exception
+      this.$nextTick(() => {
+        this.handleCodeMirror()
+      })
+    },
+
+    handleExpClose () {
+      this.execOption.visible = false
+    },
+
+    handleCodeMirror () {
+      this.codeMirror = CodeMirror.fromTextArea(document.querySelector(".startExp"), {
+        tabSize: 8,
+        styleActiveLine: true,
+        lineNumbers: true,
+        line: true,
+        foldGutter: true,
+        styleSelectedText: true,
+        matchBrackets: true,
+        showCursorWhenSelecting: true,
+        extraKeys: { 'Ctrl': 'autocomplete' },
+        lint: true,
+        readOnly: true,
+        autoMatchParens: true,
+        indentWithTabs: true,
+        smartIndent: true,
+        cursorHeight: 1, // 光标高度
+        autoRefresh: true,
+        modes: [
+          {
+            value: 'x-java',
+            label: 'Java'
+          },
+          {
+            value: 'x-scala',
+            label: 'Scala'
+          }
+        ],
+        theme: 'default',	// 设置主题
+        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
+      })
+      this.codeMirror.setSize('auto', '600px')
+      this.$nextTick(() => {
+        this.codeMirror.setValue(this.execOption.content)
+        setTimeout(() => {
+          this.codeMirror.refresh()
+        }, 1)
+      })
     }
 
   }
@@ -611,4 +696,14 @@ export default {
 .desc-table {
   margin-top: unset !important;
 }
+
+.start-state {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  cursor: default;
+}
+
 </style>
