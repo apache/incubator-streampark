@@ -236,7 +236,7 @@ import Conf from './Conf'
 import { Icon } from 'ant-design-vue'
 import notification from 'ant-design-vue/lib/notification'
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2006309_3si041qc8rg.js'
+  scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
 })
 const Base64 = require('js-base64').Base64
 
