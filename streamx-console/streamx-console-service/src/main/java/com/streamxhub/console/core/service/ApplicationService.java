@@ -33,7 +33,7 @@ import java.io.IOException;
  */
 public interface ApplicationService extends IService<Application> {
 
-    IPage<Application> list(Application app, RestRequest request);
+    IPage<Application> page(Application app, RestRequest request);
 
     boolean create(Application app) throws IOException;
 

@@ -68,3 +68,7 @@ export function clean (params) {
 export function backUps (params) {
   return http.post(api.Application.BACKUPS, params)
 }
+
+export function startLog (params) {
+  return http.post(api.Application.STARTLOG, params)
+}

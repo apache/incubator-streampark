@@ -10,4 +10,5 @@
         <result column="EXCEPTION" jdbcType="LONGVARCHAR" property="exception"/>
         <result column="START_TIME" jdbcType="DATE" property="startTime"/>
     </resultMap>
+
 </mapper>

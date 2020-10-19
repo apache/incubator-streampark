@@ -26,8 +26,10 @@ import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
+import com.streamxhub.console.core.entity.ApplicationLog;
 import com.streamxhub.console.core.enums.AppExistsState;
 import com.streamxhub.console.core.service.ApplicationBackUpService;
+import com.streamxhub.console.core.service.ApplicationLogService;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import lombok.extern.slf4j.Slf4j;
@@ -58,6 +60,9 @@ public class ApplicationController extends BaseController {
     private ApplicationBackUpService backUpService;
 
     @Autowired
+    private ApplicationLogService applicationLogService;
+
+    @Autowired
     private StreamXProperties properties;
 
     @PostMapping("create")
@@ -77,7 +82,7 @@ public class ApplicationController extends BaseController {
     @PostMapping("list")
     @RequiresPermissions("app:view")
     public RestResponse list(Application app, RestRequest request) {
-        IPage<Application> applicationList = applicationService.list(app, request);
+        IPage<Application> applicationList = applicationService.page(app, request);
         return RestResponse.create().data(applicationList);
     }
 
@@ -168,5 +173,12 @@ public class ApplicationController extends BaseController {
         List<ApplicationBackUp> backups = backUpService.getBackups(backUp);
         return RestResponse.create().data(backups);
     }
+
+    @PostMapping("startlog")
+    public RestResponse startlog(ApplicationLog applicationLog,RestRequest request) {
+        IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
+        return RestResponse.create().data(applicationList);
+    }
+
 
 }

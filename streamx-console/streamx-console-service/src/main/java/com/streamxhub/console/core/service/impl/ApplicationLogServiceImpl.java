@@ -21,8 +21,11 @@
 package com.streamxhub.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationLogMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.service.*;
@@ -40,7 +43,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog> implements ApplicationLogService {
 
     @Override
-    public IPage<Application> list(ApplicationLog app, RestRequest request) {
-        return null;
+    public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {
+        Page<Application> page = new Page<>();
+        SortUtil.handlePageSort(request, page, "start_time", Constant.ORDER_DESC, false);
+        return this.baseMapper.page(page, applicationLog);
     }
 }

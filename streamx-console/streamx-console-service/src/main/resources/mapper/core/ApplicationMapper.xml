@@ -24,7 +24,7 @@
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>
 
-    <select id="findApplication" resultType="application" parameterType="application">
+    <select id="page" resultType="application" parameterType="application">
         SELECT t.*,p.name as projectName,u.username FROM t_flink_app t
         inner join t_flink_project p
         on t.project_id = p.id

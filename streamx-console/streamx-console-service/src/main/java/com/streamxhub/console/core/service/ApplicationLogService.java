@@ -23,7 +23,6 @@ package com.streamxhub.console.core.service;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationLog;
 
 /**
@@ -31,6 +30,5 @@ import com.streamxhub.console.core.entity.ApplicationLog;
  */
 public interface ApplicationLogService extends IService<ApplicationLog> {
 
-    IPage<Application> list(ApplicationLog app, RestRequest request);
-
+    IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
 }

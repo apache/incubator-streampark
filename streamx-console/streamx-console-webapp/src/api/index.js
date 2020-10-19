@@ -40,7 +40,8 @@ export default {
     CREATE: '/flink/app/create',
     START: '/flink/app/start',
     CLEAN: '/flink/app/clean',
-    BACKUPS: '/flink/app/backups'
+    BACKUPS: '/flink/app/backups',
+    STARTLOG: '/flink/app/startlog'
   },
   Config: {
     GET: '/flink/conf/get',

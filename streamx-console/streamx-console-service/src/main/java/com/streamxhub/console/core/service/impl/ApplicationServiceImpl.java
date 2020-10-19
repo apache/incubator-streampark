@@ -86,10 +86,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ServerUtil serverUtil;
 
     @Override
-    public IPage<Application> list(Application paramOfApp, RestRequest request) {
+    public IPage<Application> page(Application paramOfApp, RestRequest request) {
         Page<Application> page = new Page<>();
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.findApplication(page, paramOfApp);
+        return this.baseMapper.page(page, paramOfApp);
     }
 
     @Override

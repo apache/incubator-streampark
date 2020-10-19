@@ -1,180 +1,212 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
-    <div v-if="app">
-      <a-descriptions title="Application Info" bordered size="middle" layout="vertical">
-        <a-descriptions-item label="Application Name">
-          {{ app.jobName }}
-        </a-descriptions-item>
-        <a-descriptions-item label="Module">
-          {{ app.module }}
-        </a-descriptions-item>
-        <a-descriptions-item label="Project">
-          {{ app.projectName }}
-        </a-descriptions-item>
-        <a-descriptions-item label="Application Type">
+
+    <a-tabs default-active-key="1">
+      <a-tab-pane v-if="app" key="1" tab="Basic Info">
+        <a-descriptions bordered size="middle" layout="vertical">
+          <a-descriptions-item label="Application Name">
+            {{ app.jobName }}
+          </a-descriptions-item>
+          <a-descriptions-item label="Module">
+            {{ app.module }}
+          </a-descriptions-item>
+          <a-descriptions-item label="Project">
+            {{ app.projectName }}
+          </a-descriptions-item>
+          <a-descriptions-item label="Application Type">
           <span v-if="app.appType == 1">
             <a-tag color="cyan">
               StreamX Flink
             </a-tag>
           </span>
-          <span v-else-if="app.appType == 2">
+            <span v-else-if="app.appType == 2">
             <a-tag color="blue">
               Apache Flink
             </a-tag>
           </span>
-        </a-descriptions-item>
-        <a-descriptions-item label="Status">
-          <State :state="app.state"></State>
-        </a-descriptions-item>
-        <a-descriptions-item label="Start Time">
-          <template v-if="app.startTime">
-            <a-icon type="clock-circle" /> {{ app.startTime }}
-          </template>
-        </a-descriptions-item>
-        <a-descriptions-item v-if="app.endTime" label="End Time">
-          <a-icon type="clock-circle" /> {{ app.endTime }}
-        </a-descriptions-item>
-        <a-descriptions-item v-if="app.duration" label="Duration">
-          {{ app.duration | duration }}
-        </a-descriptions-item>
-        <a-descriptions-item label="Description" :span="3">
-          {{ app.description }}
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
-    <div class="desc-item">
-      <a-descriptions title="Options Info" bordered size="middle" layout="vertical">
-        <a-descriptions-item v-for="(v,k) in options" :key="k">
-          <template slot="label">
-            {{ k | optionKey }} <span style="color: darkgrey">({{ k }})</span>
-          </template>
-          {{ v }}
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
-
-    <div class="desc-item" v-if="app && app.appType == 1">
-      <a-descriptions title="Conf History">
-        <a-descriptions-item class="desc-item">
-          <a-table
-            ref="TableInfo"
-            :columns="columns"
-            size="middle"
-            rowKey="id"
-            style="margin-top: -24px"
-            :dataSource="configVersions"
-            :pagination='pagination'
-            class="desc-table">
-            <template slot="format" slot-scope="text, record">
-              <a-tag color="#2db7f5" v-if="record.format == 1">
-                yaml
-              </a-tag>
-              <a-tag color="#108ee9" v-if="record.format == 2">
-                properties
-              </a-tag>
+          </a-descriptions-item>
+          <a-descriptions-item label="Status">
+            <State :state="app.state"></State>
+          </a-descriptions-item>
+          <a-descriptions-item label="Start Time">
+            <template v-if="app.startTime">
+              <a-icon type="clock-circle" /> {{ app.startTime }}
             </template>
-            <template  slot="version" slot-scope="text, record">
-              <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
-                {{ record.version }}
-              </a-button>
+          </a-descriptions-item>
+          <a-descriptions-item v-if="app.endTime" label="End Time">
+            <a-icon type="clock-circle" /> {{ app.endTime }}
+          </a-descriptions-item>
+          <a-descriptions-item v-if="app.duration" label="Duration">
+            {{ app.duration | duration }}
+          </a-descriptions-item>
+          <a-descriptions-item label="Description" :span="3">
+            {{ app.description }}
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane key="2" tab="Options" force-render>
+        <a-descriptions bordered size="middle" layout="vertical">
+          <a-descriptions-item v-for="(v,k) in options" :key="k">
+            <template slot="label">
+              {{ k | optionKey }} <span style="color: darkgrey">({{ k }})</span>
             </template>
-            <template  slot="actived" slot-scope="text, record">
-              <a-tag color="green" v-if="record.actived">current</a-tag>
-            </template>
-            <template slot="createTime" slot-scope="text, record">
-              <a-icon type="clock-circle"/> {{ record.createTime }}
-            </template>
-            <template slot="operation"  slot-scope="text, record">
-              <a-icon
-                type="eye"
-                theme="twoTone"
-                twoToneColor="#4a9ff5"
-                @click="handleConfDetail(record)"
-                title="查看">
-              </a-icon>
-              <icon-font
-                v-if="configVersions.length>1"
-                type="icon-git-compare"
-                @click="handleCompare(record)"
-                title="比较">
-              </icon-font>
-            </template>
-          </a-table>
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
-
-    <div v-if="app && savePoints && savePoints.length>0">
-      <a-descriptions title="SavePoints">
-        <a-descriptions-item class="desc-item">
-          <a-table
-            ref="TableInfo"
-            :columns="savePointsColumns"
-            size="middle"
-            rowKey="id"
-            style="margin-top: -24px"
-            :dataSource="savePoints"
-            :pagination='pagination'
-            class="desc-table">
-            <template slot="createTime" slot-scope="text, record">
-              <a-icon type="clock-circle"/> {{ record.createTime }}
-            </template>
-            <template  slot="lastest" slot-scope="text, record">
-              <a-tag color="green" v-if="record.lastest">lastest</a-tag>
-            </template>
-            <template slot="operation" slot-scope="text, record">
-              <a-icon
-                type="copy"
-                style="color:#4a9ff5"
-                v-clipboard:copy="record.savePoint"
-                v-clipboard:success="handleCopySuccess"
-                v-clipboard:error="handleCopyError">
-              </a-icon>
-              <a-popconfirm
-                title="确定要删除吗?"
-                cancel-text="No"
-                ok-text="Yes"
-                @confirm="handleDeleteSavePoint(record)">
+            {{ v }}
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane key="3" tab="Conf History" v-if="app && app.appType == 1">
+        <a-descriptions>
+          <a-descriptions-item class="desc-item">
+            <a-table
+              ref="TableInfo"
+              :columns="columns"
+              size="middle"
+              rowKey="id"
+              style="margin-top: -24px"
+              :dataSource="configVersions"
+              :pagination='pagination'
+              class="desc-table">
+              <template slot="format" slot-scope="text, record">
+                <a-tag color="#2db7f5" v-if="record.format == 1">
+                  yaml
+                </a-tag>
+                <a-tag color="#108ee9" v-if="record.format == 2">
+                  properties
+                </a-tag>
+              </template>
+              <template  slot="version" slot-scope="text, record">
+                <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
+                  {{ record.version }}
+                </a-button>
+              </template>
+              <template  slot="actived" slot-scope="text, record">
+                <a-tag color="green" v-if="record.actived">current</a-tag>
+              </template>
+              <template slot="createTime" slot-scope="text, record">
+                <a-icon type="clock-circle"/> {{ record.createTime }}
+              </template>
+              <template slot="operation"  slot-scope="text, record">
                 <a-icon
-                  type="delete"
-                  v-permit="'savepoint:delete'"
+                  type="eye"
                   theme="twoTone"
-                  twoToneColor="#4a9ff5">
+                  twoToneColor="#4a9ff5"
+                  @click="handleConfDetail(record)"
+                  title="查看">
                 </a-icon>
-              </a-popconfirm>
-            </template>
-          </a-table>
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
+                <icon-font
+                  v-if="configVersions.length>1"
+                  type="icon-git-compare"
+                  @click="handleCompare(record)"
+                  title="比较">
+                </icon-font>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
 
-    <div v-if="app && backUpList && backUpList.length > 0">
-      <a-descriptions title="BackUp">
-        <a-descriptions-item>
-          <a-table
-            ref="TableInfo"
-            :columns="backUpsColumns"
-            size="middle"
-            rowKey="id"
-            style="margin-top: -24px"
-            :dataSource="backUpList"
-            :pagination='pagination'
-            class="desc-table">
-            <template slot="createTime" slot-scope="text, record">
-              <a-icon type="clock-circle"/>{{record.createTime}}
-            </template>
-            <template slot="operation" slot-scope="text, record">
-              <icon-font
-                type="icon-deploy"
-                v-permit="'backup:resume'"
-                style="color:#4a9ff5"
-                @click="handleResume(record)">
-              </icon-font>
-            </template>
-          </a-table>
-        </a-descriptions-item>
-      </a-descriptions>
-    </div>
+      <a-tab-pane key="4" tab="SavePoints" v-if="app && savePoints && savePoints.length>0">
+        <a-descriptions>
+          <a-descriptions-item class="desc-item">
+            <a-table
+              ref="TableInfo"
+              :columns="savePointsColumns"
+              size="middle"
+              rowKey="id"
+              style="margin-top: -24px"
+              :dataSource="savePoints"
+              :pagination='pagination'
+              class="desc-table">
+              <template slot="createTime" slot-scope="text, record">
+                <a-icon type="clock-circle"/> {{ record.createTime }}
+              </template>
+              <template  slot="lastest" slot-scope="text, record">
+                <a-tag color="green" v-if="record.lastest">lastest</a-tag>
+              </template>
+              <template slot="operation" slot-scope="text, record">
+                <a-icon
+                  type="copy"
+                  style="color:#4a9ff5"
+                  v-clipboard:copy="record.savePoint"
+                  v-clipboard:success="handleCopySuccess"
+                  v-clipboard:error="handleCopyError">
+                </a-icon>
+                <a-popconfirm
+                  title="确定要删除吗?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteSavePoint(record)">
+                  <a-icon
+                    type="delete"
+                    v-permit="'savepoint:delete'"
+                    theme="twoTone"
+                    twoToneColor="#4a9ff5">
+                  </a-icon>
+                </a-popconfirm>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+
+      <a-tab-pane key="5" tab="BackUp" v-if="app && backUpList && backUpList.length > 0">
+        <a-descriptions>
+          <a-descriptions-item>
+            <a-table
+              ref="TableInfo"
+              :columns="backUpsColumns"
+              size="middle"
+              rowKey="id"
+              style="margin-top: -24px"
+              :dataSource="backUpList"
+              :pagination='pagination'
+              class="desc-table">
+              <template slot="createTime" slot-scope="text, record">
+                <a-icon type="clock-circle"/>{{record.createTime}}
+              </template>
+              <template slot="operation" slot-scope="text, record">
+                <icon-font
+                  type="icon-deploy"
+                  v-permit="'backup:resume'"
+                  style="color:#4a9ff5"
+                  @click="handleResume(record)">
+                </icon-font>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+
+      <a-tab-pane key="6" tab="Start Log" v-if="app && backUpList && backUpList.length > 0">
+        <a-descriptions>
+          <a-descriptions-item>
+            <a-table
+              ref="TableInfo"
+              :columns="startLogColumns"
+              size="middle"
+              rowKey="id"
+              style="margin-top: -24px"
+              :dataSource="startLogList"
+              :pagination='pagination'
+              class="desc-table">
+              <template slot="startTime" slot-scope="text, record">
+                <a-icon type="clock-circle"/>{{record.startTime}}
+              </template>
+              <template slot="operation" slot-scope="text, record">
+                <icon-font
+                  type="icon-deploy"
+                  v-permit="'backup:resume'"
+                  style="color:#4a9ff5"
+                  @click="handleResume(record)">
+                </icon-font>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+
+
+    </a-tabs>
 
     <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable" :readOnly="true"></Conf>
 
@@ -227,7 +259,7 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { get, backUps } from '@api/application'
+import { get, backUps, startLog, list } from '@api/application'
 import State from './State'
 import configOptions from './option'
 import { get as getVer, list as listVer } from '@api/config'
@@ -265,7 +297,17 @@ export default {
       backUpList: null,
       compareVisible: false,
       formCompare: null,
-      compare: { },
+      compare: null,
+      startLogList: null,
+      queryParams: {},
+      pagination2: {
+        pageSizeOptions: ['10', '20', '30', '40', '100'],
+        defaultCurrent: 1,
+        defaultPageSize: 10,
+        showQuickJumper: true,
+        showSizeChanger: true,
+        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+      },
     }
   },
 
@@ -355,6 +397,33 @@ export default {
           width: 150
         }
       ]
+    },
+    startLogColumns () {
+      return [
+        {
+          title: 'Application Id',
+          dataIndex: 'yarnAppId',
+          width: '40%'
+        },
+        {
+          title: 'Start Statue',
+          dataIndex: 'success',
+          scopedSlots: { customRender: 'success' }
+        },
+        {
+          title: 'Start Time',
+          dataIndex: 'startTime',
+          scopedSlots: { customRender: 'startTime' }
+        },
+        {
+          title: 'Operation',
+          dataIndex: 'operation',
+          key: 'operation',
+          scopedSlots: { customRender: 'operation' },
+          fixed: 'right',
+          width: 150
+        }
+      ]
     }
   },
 
@@ -394,6 +463,7 @@ export default {
         this.handleListConfVersion()
         this.handleSavePoint()
         this.handleBackUps()
+        this.handleStartLog()
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -423,6 +493,29 @@ export default {
         appId: this.app.id
       }).then((resp) => {
         this.backUpList = resp.data || []
+      })
+    },
+
+    handleStartLog () {
+      const params = {
+        appId: this.app.id
+      }
+      if (this.paginationInfo) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableInfo.pagination.current = this.paginationInfo.current
+        this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
+        params.pageSize = this.paginationInfo.pageSize
+        params.pageNum = this.paginationInfo.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination2.defaultPageSize
+        params.pageNum = this.pagination2.defaultCurrent
+      }
+      list({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination2 }
+        pagination.total = parseInt(resp.data.total)
+        this.startLogList = resp.data.records
+        this.pagination2 = pagination
       })
     },
 
