@@ -1037,7 +1037,12 @@ export default {
             savePoint: savePoint,
             allowNonRestored: allowNonRestoredState
           }).then((resp) => {
-            console.log(resp)
+            if (resp.data === 'false') {
+              this.$message.error(
+                '应用启动失败',
+                3
+              )
+            }
           })
         }
       })

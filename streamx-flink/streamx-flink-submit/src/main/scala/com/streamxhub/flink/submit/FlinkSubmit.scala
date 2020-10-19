@@ -125,7 +125,8 @@ object FlinkSubmit extends Logger {
     }
   }
 
-  def submit(submitInfo: SubmitInfo): ApplicationId = {
+
+  @throws[Exception]def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
          |"[StreamX] flink submit," +

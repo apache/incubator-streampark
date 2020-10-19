@@ -46,6 +46,7 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import com.streamxhub.flink.submit.SubmitInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -77,6 +78,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private SavePointService savePointService;
+
+    @Autowired
+    private ApplicationLogService applicationLogService;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -294,6 +298,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public boolean start(Application paramOfApp) throws Exception {
         final Application application = getById(paramOfApp.getId());
         assert application != null;
@@ -364,15 +369,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getArgs()
         );
 
-        ApplicationId appId = FlinkSubmit.submit(submitInfo);
-        application.setAppId(appId.toString());
-        /**
-         * 一定要在flink job提交完毕才置状态...
-         */
-        application.setState(FlinkAppState.STARTING.getValue());
-        application.setEndTime(null);
-        this.baseMapper.updateById(application);
-        return true;
+        try {
+            ApplicationId appId = FlinkSubmit.submit(submitInfo);
+            application.setAppId(appId.toString());
+            /**
+             * 一定要在flink job提交完毕才置状态...
+             */
+            application.setState(FlinkAppState.STARTING.getValue());
+            application.setEndTime(null);
+            this.baseMapper.updateById(application);
+            ApplicationLog log = new ApplicationLog();
+            log.setJobId(application.getId());
+            log.setAppId(appId.toString());
+            log.setStartTime(new Date(appId.getClusterTimestamp()));
+            log.setSuccess(true);
+            applicationLogService.save(log);
+            return true;
+        } catch (Exception e) {
+            String exception = ExceptionUtils.getStackTrace(e);
+            ApplicationLog log = new ApplicationLog();
+            log.setJobId(application.getId());
+            log.setException(exception);
+            log.setSuccess(false);
+            applicationLogService.save(log);
+            return false;
+        }
+
     }
 
 }
