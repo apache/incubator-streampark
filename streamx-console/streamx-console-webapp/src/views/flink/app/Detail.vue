@@ -258,7 +258,7 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { get, backUps, startLog, list } from '@api/application'
+import { get, backUps, startLog } from '@api/application'
 import State from './State'
 import configOptions from './option'
 import { get as getVer, list as listVer } from '@api/config'

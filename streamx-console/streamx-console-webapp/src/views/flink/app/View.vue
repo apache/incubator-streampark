@@ -683,6 +683,7 @@ export default {
       searchText: '',
       searchInput: null,
       searchedColumn: '',
+      paginationInfo: null,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -1109,6 +1110,7 @@ export default {
 
     handleTableChange (pagination, filters, sorter) {
       this.sortedInfo = sorter
+      this.paginationInfo = pagination
       this.queryParams['sortField'] = sorter.field
       this.queryParams['sortOrder'] = sorter.order
       this.handleFetch(true)
