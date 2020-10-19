@@ -187,7 +187,7 @@
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="startLogList"
-              :pagination='pagination'
+              :pagination='pagination2'
               class="desc-table">
               <template slot="startTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>{{record.startTime}}
@@ -204,7 +204,6 @@
           </a-descriptions-item>
         </a-descriptions>
       </a-tab-pane>
-
 
     </a-tabs>
 
