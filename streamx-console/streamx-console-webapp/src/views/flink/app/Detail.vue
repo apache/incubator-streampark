@@ -457,12 +457,17 @@ export default {
     ...mapGetters(['applicationId']),
     handleGet (appId) {
       get({ id: appId }).then((resp) => {
-        this.app = resp.data
-        this.options = JSON.parse(this.app.options)
-        this.handleListConfVersion()
-        this.handleSavePoint()
-        this.handleBackUps()
-        this.handleStartLog()
+        if (!this.app) {
+          this.app = resp.data
+          this.options = JSON.parse(this.app.options)
+          this.handleListConfVersion()
+          this.handleSavePoint()
+          this.handleBackUps()
+          this.handleStartLog()
+        } else {
+          this.app = resp.data
+          this.options = JSON.parse(this.app.options)
+        }
       }).catch((error) => {
         this.$message.error(error.message)
       })
