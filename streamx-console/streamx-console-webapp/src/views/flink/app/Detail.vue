@@ -1,6 +1,6 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
-    <a-tabs default-active-key="1" style="margin-top: -20px">
+    <a-tabs default-active-key="1" style="margin-top: -20px" animated="false" @change="handleChangeTab">
       <a-tab-pane v-if="app" key="1" tab="Basic Info">
         <a-descriptions bordered size="middle" layout="vertical">
           <a-descriptions-item label="Application Name">
@@ -29,11 +29,13 @@
           </a-descriptions-item>
           <a-descriptions-item label="Start Time">
             <template v-if="app.startTime">
-              <a-icon type="clock-circle" /> {{ app.startTime }}
+              <a-icon type="clock-circle"/>
+              {{ app.startTime }}
             </template>
           </a-descriptions-item>
           <a-descriptions-item v-if="app.endTime" label="End Time">
-            <a-icon type="clock-circle" /> {{ app.endTime }}
+            <a-icon type="clock-circle"/>
+            {{ app.endTime }}
           </a-descriptions-item>
           <a-descriptions-item v-if="app.duration" label="Duration">
             {{ app.duration | duration }}
@@ -58,7 +60,7 @@
           <a-descriptions-item class="desc-item">
             <a-table
               ref="TableInfo"
-              :columns="columns"
+              :columns="column.conf"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
@@ -82,7 +84,8 @@
                 <a-tag color="green" v-if="record.actived">current</a-tag>
               </template>
               <template slot="createTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/> {{ record.createTime }}
+                <a-icon type="clock-circle"/>
+                {{ record.createTime }}
               </template>
               <template slot="operation" slot-scope="text, record">
                 <a-icon
@@ -109,7 +112,7 @@
           <a-descriptions-item class="desc-item">
             <a-table
               ref="TableInfo"
-              :columns="savePointsColumns"
+              :columns="column.savePoints"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
@@ -117,7 +120,8 @@
               :pagination="pagination"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/> {{ record.createTime }}
+                <a-icon type="clock-circle"/>
+                {{ record.createTime }}
               </template>
               <template slot="lastest" slot-scope="text, record">
                 <a-tag color="green" v-if="record.lastest">lastest</a-tag>
@@ -153,7 +157,7 @@
           <a-descriptions-item>
             <a-table
               ref="TableInfo"
-              :columns="backUpsColumns"
+              :columns="column.backUps"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
@@ -161,7 +165,8 @@
               :pagination="pagination"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/>{{ record.createTime }}
+                <a-icon type="clock-circle"/>
+                {{ record.createTime }}
               </template>
               <template slot="operation" slot-scope="text, record">
                 <icon-font
@@ -181,7 +186,7 @@
           <a-descriptions-item>
             <a-table
               ref="TableInfo"
-              :columns="startLogColumns"
+              :columns="column.startLog"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
@@ -189,7 +194,8 @@
               :pagination="pagination2"
               class="desc-table">
               <template slot="startTime" slot-scope="text, record">
-                <a-icon type="clock-circle"/>{{ record.startTime }}
+                <a-icon type="clock-circle"/>
+                {{ record.startTime }}
               </template>
               <template slot="success" slot-scope="text, record">
                 <a-tag class="start-state" color="#52c41a" v-if="record.success">SUCCESS</a-tag>
@@ -212,7 +218,12 @@
 
     </a-tabs>
 
-    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable" :readOnly="true"></Conf>
+    <conf
+      ref="confEdit"
+      @close="handleEditConfClose"
+      @ok="handleEditConfOk"
+      :visiable="confVisiable"
+      :readOnly="true"></Conf>
 
     <a-modal v-model="compareVisible" on-ok="handleCompareOk" v-if="compareVisible">
       <template slot="title">
@@ -235,7 +246,8 @@
           <a-button type="primary" shape="circle" size="small" style="margin-right: 10px;">
             {{ compare.version }}
           </a-button>
-          <a-icon type="clock-circle" style="color:darkgrey"/> <span style="color:darkgrey">{{ compare.createTime }}</span>
+          <a-icon type="clock-circle" style="color:darkgrey"/>
+          <span style="color:darkgrey">{{ compare.createTime }}</span>
         </a-form-item>
         <a-form-item
           label="target version"
@@ -289,6 +301,7 @@ import Conf from './Conf'
 import 'codemirror/lib/codemirror.css'
 import { Icon } from 'ant-design-vue'
 import notification from 'ant-design-vue/lib/notification'
+
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
 })
@@ -338,123 +351,115 @@ export default {
         visible: false,
         modalDestroyOnClose: true,
         content: null
+      },
+      activeTab: '1',
+      column: {
+        conf: [
+          {
+            title: 'Version',
+            dataIndex: 'version',
+            scopedSlots: { customRender: 'version' }
+          },
+          {
+            title: 'Conf Format',
+            dataIndex: 'format',
+            scopedSlots: { customRender: 'format' }
+          },
+          {
+            title: 'Actived',
+            dataIndex: 'actived',
+            scopedSlots: { customRender: 'actived' }
+          },
+          {
+            title: 'Create Time',
+            dataIndex: 'createTime',
+            scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        savePoints: [
+          {
+            title: 'SavePoint',
+            dataIndex: 'savePoint',
+            width: '50%'
+          },
+          {
+            title: 'Create Time',
+            dataIndex: 'createTime',
+            scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Lastest',
+            dataIndex: 'lastest',
+            scopedSlots: { customRender: 'lastest' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        backUps: [
+          {
+            title: 'Save Path',
+            dataIndex: 'path',
+            width: '40%'
+          },
+          {
+            title: 'Description',
+            dataIndex: 'description',
+            width: '30%'
+          },
+          {
+            title: 'Create Time',
+            dataIndex: 'createTime',
+            scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        startLog: [
+          {
+            title: 'Application Id',
+            dataIndex: 'yarnAppId',
+            width: '40%'
+          },
+          {
+            title: 'Start Statue',
+            dataIndex: 'success',
+            scopedSlots: { customRender: 'success' }
+          },
+          {
+            title: 'Start Time',
+            dataIndex: 'startTime',
+            scopedSlots: { customRender: 'startTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ]
       }
-    }
-  },
-
-  computed: {
-    columns () {
-      return [
-        {
-          title: 'Version',
-          dataIndex: 'version',
-          scopedSlots: { customRender: 'version' }
-        },
-        {
-          title: 'Conf Format',
-          dataIndex: 'format',
-          scopedSlots: { customRender: 'format' }
-        },
-        {
-          title: 'Actived',
-          dataIndex: 'actived',
-          scopedSlots: { customRender: 'actived' }
-        },
-        {
-          title: 'Create Time',
-          dataIndex: 'createTime',
-          scopedSlots: { customRender: 'createTime' }
-        },
-        {
-          title: 'Operation',
-          dataIndex: 'operation',
-          key: 'operation',
-          scopedSlots: { customRender: 'operation' },
-          fixed: 'right',
-          width: 150
-        }
-      ]
-    },
-    savePointsColumns () {
-      return [
-        {
-          title: 'SavePoint',
-          dataIndex: 'savePoint',
-          width: '50%'
-        },
-        {
-          title: 'Create Time',
-          dataIndex: 'createTime',
-          scopedSlots: { customRender: 'createTime' }
-        },
-        {
-          title: 'Lastest',
-          dataIndex: 'lastest',
-          scopedSlots: { customRender: 'lastest' }
-        },
-        {
-          title: 'Operation',
-          dataIndex: 'operation',
-          key: 'operation',
-          scopedSlots: { customRender: 'operation' },
-          fixed: 'right',
-          width: 150
-        }
-      ]
-    },
-    backUpsColumns () {
-      return [
-        {
-          title: 'Save Path',
-          dataIndex: 'path',
-          width: '40%'
-        },
-        {
-          title: 'Description',
-          dataIndex: 'description',
-          width: '30%'
-        },
-        {
-          title: 'Create Time',
-          dataIndex: 'createTime',
-          scopedSlots: { customRender: 'createTime' }
-        },
-        {
-          title: 'Operation',
-          dataIndex: 'operation',
-          key: 'operation',
-          scopedSlots: { customRender: 'operation' },
-          fixed: 'right',
-          width: 150
-        }
-      ]
-    },
-    startLogColumns () {
-      return [
-        {
-          title: 'Application Id',
-          dataIndex: 'yarnAppId',
-          width: '40%'
-        },
-        {
-          title: 'Start Statue',
-          dataIndex: 'success',
-          scopedSlots: { customRender: 'success' }
-        },
-        {
-          title: 'Start Time',
-          dataIndex: 'startTime',
-          scopedSlots: { customRender: 'startTime' }
-        },
-        {
-          title: 'Operation',
-          dataIndex: 'operation',
-          key: 'operation',
-          scopedSlots: { customRender: 'operation' },
-          fixed: 'right',
-          width: 150
-        }
-      ]
     }
   },
 
@@ -467,7 +472,11 @@ export default {
     if (appId) {
       this.CleanAppId()
       this.handleGet(appId)
-      const timer = window.setInterval(() => this.handleGet(appId), 2000)
+      const timer = window.setInterval(function () {
+        if (this.activeTab === '1') {
+          this.handleGet(appId)
+        }
+      }, 2000)
       this.$once('hook:beforeDestroy', () => {
         clearInterval(timer)
       })
@@ -681,6 +690,10 @@ export default {
           this.codeMirror.refresh()
         }, 1)
       })
+    },
+
+    handleChangeTab (key) {
+      this.activeTab = key
     }
 
   }
