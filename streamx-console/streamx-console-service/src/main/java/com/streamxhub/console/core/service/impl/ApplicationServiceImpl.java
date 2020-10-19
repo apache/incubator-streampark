@@ -370,6 +370,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         ApplicationLog log = new ApplicationLog();
         log.setAppId(application.getId());
+        log.setStartTime(new Date());
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
@@ -381,7 +382,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setEndTime(null);
             this.baseMapper.updateById(application);
             log.setYarnAppId(appId.toString());
-            log.setStartTime(new Date(appId.getClusterTimestamp()));
             log.setSuccess(true);
             applicationLogService.save(log);
             return true;
@@ -389,7 +389,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String exception = ExceptionUtils.getStackTrace(e);
             log.setException(exception);
             log.setSuccess(false);
-            log.setStartTime(new Date());
             applicationLogService.save(log);
             return false;
         }
