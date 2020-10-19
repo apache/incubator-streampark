@@ -298,7 +298,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public boolean start(Application paramOfApp) throws Exception {
         final Application application = getById(paramOfApp.getId());
         assert application != null;
