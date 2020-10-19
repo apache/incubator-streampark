@@ -1,6 +1,11 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
-    <a-tabs default-active-key="1" style="margin-top: -20px" animated="false" @change="handleChangeTab">
+    <a-tabs
+      default-active-key="1"
+      style="margin-top: -20px"
+      :tabBarGutter="tabBarGutter"
+      :animated='animated'
+      @change="handleChangeTab">
       <a-tab-pane v-if="app" key="1" tab="Basic Info">
         <a-descriptions bordered size="middle" layout="vertical">
           <a-descriptions-item label="Application Name">
@@ -334,6 +339,8 @@ export default {
       compare: null,
       startLogList: null,
       queryParams: {},
+      animated: false,
+      tabBarGutter: 20,
       pagination2: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -716,6 +723,10 @@ export default {
   text-align: center;
   padding: 0 4px;
   cursor: default;
+}
+
+>>> .ant-tabs-nav .ant-tabs-tab-active {
+  font-weight: unset !important;
 }
 
 </style>
