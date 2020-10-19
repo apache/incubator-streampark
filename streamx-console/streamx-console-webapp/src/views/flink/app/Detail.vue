@@ -511,7 +511,7 @@ export default {
         params.pageSize = this.pagination2.defaultPageSize
         params.pageNum = this.pagination2.defaultCurrent
       }
-      list({ ...params }).then((resp) => {
+      startLog({ ...params }).then((resp) => {
         const pagination = { ...this.pagination2 }
         pagination.total = parseInt(resp.data.total)
         this.startLogList = resp.data.records
