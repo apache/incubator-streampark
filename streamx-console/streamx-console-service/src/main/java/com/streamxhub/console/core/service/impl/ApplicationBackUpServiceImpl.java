@@ -22,8 +22,11 @@ package com.streamxhub.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.dao.ApplicationBackUpMapper;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
+import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.ApplicationBackUpService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -46,5 +49,19 @@ public class ApplicationBackUpServiceImpl extends ServiceImpl<ApplicationBackUpM
         queryWrapper.eq("app_id",backUp.getAppId());
         queryWrapper.orderByDesc("create_time");
         return this.list(queryWrapper);
+    }
+
+    @Override
+    public Boolean delete(Long id) throws ServiceException {
+        ApplicationBackUp backUp = getById(id);
+        try {
+            if (HdfsUtils.exists(backUp.getPath())) {
+                HdfsUtils.deleteFile(backUp.getPath());
+            }
+            removeById(id);
+            return true;
+        } catch (Exception e) {
+            throw new ServiceException(e.getMessage());
+        }
     }
 }

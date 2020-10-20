@@ -23,6 +23,7 @@ package com.streamxhub.console.core.controller;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
@@ -181,8 +182,8 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("deletebak")
-    public RestResponse deleteBak(ApplicationBackUp backUp) {
-        Boolean removeed = backUpService.removeById(backUp.getId());
+    public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
+        Boolean removeed = backUpService.delete(backUp.getId());
         return RestResponse.create().data(removeed);
     }
 

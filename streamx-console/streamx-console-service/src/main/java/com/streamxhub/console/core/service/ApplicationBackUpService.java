@@ -20,6 +20,7 @@
  */
 package com.streamxhub.console.core.service;
 
+import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -30,4 +31,6 @@ import java.util.List;
  */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     List<ApplicationBackUp> getBackups(ApplicationBackUp backUp);
+
+    Boolean delete(Long id) throws ServiceException;
 }
