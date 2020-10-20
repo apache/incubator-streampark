@@ -43,13 +43,6 @@
               <a-button
                 type="primary"
                 shape="circle"
-                icon="export"
-                v-permit="'user:export'"
-                @click="exportExcel">
-              </a-button>
-              <a-button
-                type="primary"
-                shape="circle"
                 icon="plus"
                 v-permit="'user:add'"
                 @click="add">

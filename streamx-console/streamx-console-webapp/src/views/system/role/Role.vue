@@ -36,13 +36,6 @@
                   @click="reset">
                 </a-button>
                 <a-button
-                  type="primary"
-                  shape="circle"
-                  icon="export"
-                  v-permit="'role:export'"
-                  @click="exportExcel">
-                </a-button>
-                <a-button
                   v-permit="'role:add'"
                   type="primary"
                   shape="circle"

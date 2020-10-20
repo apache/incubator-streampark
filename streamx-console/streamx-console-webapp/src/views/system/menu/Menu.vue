@@ -35,14 +35,6 @@
                   @click="reset">
                 </a-button>
 
-                <a-button
-                  type="primary"
-                  shape="circle"
-                  icon="export"
-                  v-permit="'menu:export'"
-                  @click="exportExcel">
-                </a-button>
-
                 <a-popconfirm
                   title="请选择创建类型"
                   okText="按钮"
