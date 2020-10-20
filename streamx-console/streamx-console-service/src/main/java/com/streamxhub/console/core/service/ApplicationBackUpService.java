@@ -25,6 +25,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
 
+/**
+ * @author benjobs
+ */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     List<ApplicationBackUp> getBackups(ApplicationBackUp backUp);
 }

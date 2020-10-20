@@ -44,6 +44,7 @@ public class ApplicationBackUpServiceImpl extends ServiceImpl<ApplicationBackUpM
     public List<ApplicationBackUp> getBackups(ApplicationBackUp backUp) {
         QueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("app_id",backUp.getAppId());
+        queryWrapper.orderByDesc("create_time");
         return this.list(queryWrapper);
     }
 }
