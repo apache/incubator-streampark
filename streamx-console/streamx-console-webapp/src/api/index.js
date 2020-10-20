@@ -37,6 +37,7 @@ export default {
     EXISTS: '/flink/app/exists',
     STOP: '/flink/app/stop',
     DELETE: '/flink/app/delete',
+    DELETEBAK: '/flink/app/deletebak',
     CREATE: '/flink/app/create',
     START: '/flink/app/start',
     CLEAN: '/flink/app/clean',

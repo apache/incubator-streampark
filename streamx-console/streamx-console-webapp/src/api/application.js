@@ -57,6 +57,10 @@ export function remove (params) {
   return http.post(api.Application.DELETE, params)
 }
 
+export function removeBak (params) {
+  return http.post(api.Application.DELETEBAK, params)
+}
+
 export function start (params) {
   return http.post(api.Application.START, params)
 }

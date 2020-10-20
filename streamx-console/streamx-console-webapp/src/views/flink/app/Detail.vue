@@ -181,6 +181,18 @@
                   style="color:#4a9ff5"
                   @click="handleResume(record)">
                 </icon-font>
+                <a-popconfirm
+                  title="确定要删除吗?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteBackUp(record)">
+                  <a-icon
+                    type="delete"
+                    v-permit="'backup:delete'"
+                    theme="twoTone"
+                    twoToneColor="#4a9ff5">
+                  </a-icon>
+                </a-popconfirm>
               </template>
             </a-table>
           </a-descriptions-item>
@@ -297,11 +309,11 @@
 </template>
 <script>
 import { mapActions, mapGetters } from 'vuex'
-import { get, backUps, startLog } from '@api/application'
+import { get, backUps, startLog, removeBak } from '@api/application'
 import State from './State'
 import configOptions from './option'
 import { get as getVer, list as listVer } from '@api/config'
-import { history, remove } from '@api/savepoint'
+import { history, remove as removeSp } from '@api/savepoint'
 import Conf from './Conf'
 import 'codemirror/lib/codemirror.css'
 import { Icon } from 'ant-design-vue'
@@ -586,10 +598,18 @@ export default {
     },
 
     handleDeleteSavePoint (record) {
-      remove({
+      removeSp({
         id: record.id
       }).then((resp) => {
-        this.handleGet(this.app.id)
+        this.handleSavePoint()
+      })
+    },
+
+    handleDeleteBackUp (record) {
+      removeBak({
+        id: record.id
+      }).then((resp) => {
+        this.handleBackUps()
       })
     },
 

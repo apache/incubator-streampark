@@ -175,10 +175,15 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("startlog")
-    public RestResponse startlog(ApplicationLog applicationLog,RestRequest request) {
+    public RestResponse startlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
         return RestResponse.create().data(applicationList);
     }
 
+    @PostMapping("deletebak")
+    public RestResponse deleteBak(ApplicationBackUp backUp) {
+        Boolean removeed = backUpService.removeById(backUp.getId());
+        return RestResponse.create().data(removeed);
+    }
 
 }
