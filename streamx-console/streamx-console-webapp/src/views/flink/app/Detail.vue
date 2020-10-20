@@ -3,6 +3,8 @@
     <a-descriptions v-if="app" bordered size="middle" layout="vertical">
       <template slot="title">
         <span class="app-bar">Application Info</span>
+        <a-button type="primary" shape="circle" icon="arrow-left" @click="handleGoBack()" style="float: right;margin-top: -6px"></a-button>
+        <a-divider style="margin-top: 8px;margin-bottom: 2px"></a-divider>
       </template>
       <a-descriptions-item label="Application Name">
         {{ app.jobName }}
@@ -403,7 +405,7 @@ export default {
             scopedSlots: { customRender: 'actived' }
           },
           {
-            title: 'Create Time',
+            title: 'Modify Time',
             dataIndex: 'createTime',
             scopedSlots: { customRender: 'createTime' }
           },
@@ -423,7 +425,7 @@ export default {
             width: '50%'
           },
           {
-            title: 'Create Time',
+            title: 'Trigger Time',
             dataIndex: 'createTime',
             scopedSlots: { customRender: 'createTime' }
           },
@@ -453,7 +455,7 @@ export default {
             width: '30%'
           },
           {
-            title: 'Create Time',
+            title: 'Backup Time',
             dataIndex: 'createTime',
             scopedSlots: { customRender: 'createTime' }
           },
@@ -694,6 +696,10 @@ export default {
 
     handleExpClose () {
       this.execOption.visible = false
+    },
+
+    handleGoBack () {
+      this.$router.back(-1)
     },
 
     handleCodeMirror () {
