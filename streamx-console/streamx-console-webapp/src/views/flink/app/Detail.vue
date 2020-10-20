@@ -1,56 +1,57 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
+    <a-descriptions v-if="app" bordered size="middle" layout="vertical">
+      <template slot="title">
+        <span class="app-bar">Application Info</span>
+      </template>
+      <a-descriptions-item label="Application Name">
+        {{ app.jobName }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Module">
+        {{ app.module }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Project">
+        {{ app.projectName }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Application Type">
+        <span v-if="app.appType == 1">
+          <a-tag color="cyan">
+            StreamX Flink
+          </a-tag>
+        </span>
+        <span v-else-if="app.appType == 2">
+          <a-tag color="blue">
+            Apache Flink
+          </a-tag>
+        </span>
+      </a-descriptions-item>
+      <a-descriptions-item label="Status">
+        <State :state="app.state"></State>
+      </a-descriptions-item>
+      <a-descriptions-item label="Start Time">
+        <template v-if="app.startTime">
+          <a-icon type="clock-circle"/>
+          {{ app.startTime }}
+        </template>
+      </a-descriptions-item>
+      <a-descriptions-item v-if="app.endTime" label="End Time">
+        <a-icon type="clock-circle"/>
+        {{ app.endTime }}
+      </a-descriptions-item>
+      <a-descriptions-item v-if="app.duration" label="Duration">
+        {{ app.duration | duration }}
+      </a-descriptions-item>
+      <a-descriptions-item label="Description" :span="3">
+        {{ app.description }}
+      </a-descriptions-item>
+    </a-descriptions>
     <a-tabs
       default-active-key="1"
-      style="margin-top: -20px"
+      style="margin-top: 15px"
+      :animated="animated"
       :tabBarGutter="tabBarGutter"
-      :animated='animated'
       @change="handleChangeTab">
-      <a-tab-pane v-if="app" key="1" tab="Basic Info">
-        <a-descriptions bordered size="middle" layout="vertical">
-          <a-descriptions-item label="Application Name">
-            {{ app.jobName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Module">
-            {{ app.module }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Project">
-            {{ app.projectName }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Application Type">
-            <span v-if="app.appType == 1">
-              <a-tag color="cyan">
-                StreamX Flink
-              </a-tag>
-            </span>
-            <span v-else-if="app.appType == 2">
-              <a-tag color="blue">
-                Apache Flink
-              </a-tag>
-            </span>
-          </a-descriptions-item>
-          <a-descriptions-item label="Status">
-            <State :state="app.state"></State>
-          </a-descriptions-item>
-          <a-descriptions-item label="Start Time">
-            <template v-if="app.startTime">
-              <a-icon type="clock-circle"/>
-              {{ app.startTime }}
-            </template>
-          </a-descriptions-item>
-          <a-descriptions-item v-if="app.endTime" label="End Time">
-            <a-icon type="clock-circle"/>
-            {{ app.endTime }}
-          </a-descriptions-item>
-          <a-descriptions-item v-if="app.duration" label="Duration">
-            {{ app.duration | duration }}
-          </a-descriptions-item>
-          <a-descriptions-item label="Description" :span="3">
-            {{ app.description }}
-          </a-descriptions-item>
-        </a-descriptions>
-      </a-tab-pane>
-      <a-tab-pane key="2" tab="Options" force-render>
+      <a-tab-pane key="1" tab="Option" force-render>
         <a-descriptions bordered size="middle" layout="vertical">
           <a-descriptions-item v-for="(v,k) in options" :key="k">
             <template slot="label">
@@ -60,7 +61,7 @@
           </a-descriptions-item>
         </a-descriptions>
       </a-tab-pane>
-      <a-tab-pane key="3" tab="Conf History" v-if="app && app.appType == 1">
+      <a-tab-pane key="2" tab="Configure" v-if="app && app.appType == 1">
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
@@ -112,7 +113,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="4" tab="SavePoints" v-if="app && savePoints && savePoints.length>0">
+      <a-tab-pane key="3" tab="SavePoint" v-if="app && savePoints && savePoints.length>0">
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
@@ -157,7 +158,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="5" tab="BackUp" v-if="app && backUpList && backUpList.length > 0">
+      <a-tab-pane key="4" tab="BackUp" v-if="app && backUpList && backUpList.length > 0">
         <a-descriptions>
           <a-descriptions-item>
             <a-table
@@ -186,7 +187,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="6" tab="Start Log" v-if="app && backUpList && backUpList.length > 0">
+      <a-tab-pane key="5" tab="Start Log" v-if="app && backUpList && backUpList.length > 0">
         <a-descriptions>
           <a-descriptions-item>
             <a-table
@@ -222,7 +223,6 @@
       </a-tab-pane>
 
     </a-tabs>
-
     <conf
       ref="confEdit"
       @close="handleEditConfClose"
@@ -340,7 +340,7 @@ export default {
       startLogList: null,
       queryParams: {},
       animated: false,
-      tabBarGutter: 20,
+      tabBarGutter: 0,
       pagination2: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -479,11 +479,7 @@ export default {
     if (appId) {
       this.CleanAppId()
       this.handleGet(appId)
-      const timer = window.setInterval(function () {
-        if (this.activeTab === '1') {
-          this.handleGet(appId)
-        }
-      }, 2000)
+      const timer = window.setInterval(() => this.handleGet(appId), 2000)
       this.$once('hook:beforeDestroy', () => {
         clearInterval(timer)
       })
@@ -727,6 +723,23 @@ export default {
 
 >>> .ant-tabs-nav .ant-tabs-tab-active {
   font-weight: unset !important;
+  background-color: #f0f2f5;
 }
 
+>>> .ant-tabs-nav .ant-tabs-tab {
+  margin: 0 32px 0 0;
+  padding: 8px 15px;
+}
+
+.app-bar {
+  background-color: #f0f2f5;
+  color: rgba(0, 0, 0, 0.65);
+  height: 100%;font-weight: 500;
+  margin: 0 32px 0 0;
+  padding: 10px 15px;
+}
+
+>>> .ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {
+  padding: 10px 24px;
+}
 </style>
