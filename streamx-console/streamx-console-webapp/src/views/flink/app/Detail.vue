@@ -3,8 +3,8 @@
     <a-descriptions v-if="app" bordered size="middle" layout="vertical">
       <template slot="title">
         <span class="app-bar">Application Info</span>
-        <a-button type="primary" shape="circle" icon="arrow-left" @click="handleGoBack()" style="float: right;margin-top: -6px"></a-button>
-        <a-divider style="margin-top: 8px;margin-bottom: -5px"></a-divider>
+        <a-button type="primary" shape="circle" icon="arrow-left" @click="handleGoBack()" style="float: right;margin-top: -8px"></a-button>
+        <a-divider style="margin-top: 7px;margin-bottom: -5px"></a-divider>
       </template>
       <a-descriptions-item label="Application Name">
         {{ app.jobName }}
