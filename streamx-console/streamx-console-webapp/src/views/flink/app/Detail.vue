@@ -61,7 +61,7 @@
           </a-descriptions-item>
         </a-descriptions>
       </a-tab-pane>
-      <a-tab-pane key="2" tab="Configure" v-if="app && app.appType == 1">
+      <a-tab-pane key="2" tab="Configuration" v-if="app && app.appType == 1">
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
@@ -126,7 +126,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="3" tab="SavePoint" v-if="app && savePoints && savePoints.length>0">
+      <a-tab-pane key="3" tab="Savepoints" v-if="app && savePoints && savePoints.length>0">
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
@@ -171,7 +171,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="4" tab="BackUp" v-if="app && backUpList && backUpList.length > 0">
+      <a-tab-pane key="4" tab="Backups" v-if="app && backUpList && backUpList.length > 0">
         <a-descriptions>
           <a-descriptions-item>
             <a-table
@@ -212,7 +212,7 @@
         </a-descriptions>
       </a-tab-pane>
 
-      <a-tab-pane key="5" tab="Start Log" v-if="app && backUpList && backUpList.length > 0">
+      <a-tab-pane key="5" tab="Start Logs" v-if="app && backUpList && backUpList.length > 0">
         <a-descriptions>
           <a-descriptions-item>
             <a-table
