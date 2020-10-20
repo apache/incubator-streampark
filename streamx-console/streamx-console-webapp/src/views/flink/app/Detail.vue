@@ -107,6 +107,19 @@
                   @click="handleCompare(record)"
                   title="比较">
                 </icon-font>
+                <a-popconfirm
+                  v-if="!record.actived"
+                  title="确定要删除吗?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteConf(record)">
+                  <a-icon
+                    type="delete"
+                    v-permit="'conf:delete'"
+                    theme="twoTone"
+                    twoToneColor="#4a9ff5">
+                  </a-icon>
+                </a-popconfirm>
               </template>
             </a-table>
           </a-descriptions-item>
@@ -312,7 +325,7 @@ import { mapActions, mapGetters } from 'vuex'
 import { get, backUps, startLog, removeBak } from '@api/application'
 import State from './State'
 import configOptions from './option'
-import { get as getVer, list as listVer } from '@api/config'
+import { get as getVer, list as listVer, remove as removeConf } from '@api/config'
 import { history, remove as removeSp } from '@api/savepoint'
 import Conf from './Conf'
 import 'codemirror/lib/codemirror.css'
@@ -516,7 +529,7 @@ export default {
         if (!this.app) {
           this.app = resp.data
           this.options = JSON.parse(this.app.options)
-          this.handleListConfVersion()
+          this.handleConfig()
           this.handleSavePoint()
           this.handleBackUps()
           this.handleStartLog()
@@ -528,7 +541,7 @@ export default {
         this.$message.error(error.message)
       })
     },
-    handleListConfVersion () {
+    handleConfig () {
       listVer({
         id: this.app.id
       }).then((resp) => {
@@ -610,6 +623,14 @@ export default {
         id: record.id
       }).then((resp) => {
         this.handleBackUps()
+      })
+    },
+
+    handleDeleteConf (record) {
+      removeConf({
+        id: record.id
+      }).then((resp) => {
+        this.handleConfig()
       })
     },
 

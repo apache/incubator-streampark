@@ -46,7 +46,8 @@ export default {
   },
   Config: {
     GET: '/flink/conf/get',
-    LIST: '/flink/conf/list'
+    LIST: '/flink/conf/list',
+    DELETE: '/flink/conf/delete'
   },
   User: {
     EXECUSER: '/user/execUser',

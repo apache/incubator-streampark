@@ -8,3 +8,7 @@ export function get (params) {
 export function list (params) {
   return http.post(api.Config.LIST, params)
 }
+
+export function remove (params) {
+  return http.post(api.Config.DELETE, params)
+}

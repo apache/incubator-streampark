@@ -58,4 +58,10 @@ public class ConfigController extends BaseController {
         return RestResponse.create().data(list);
     }
 
+    @PostMapping("delete")
+    public RestResponse delete(Long id) {
+        Boolean deleted =  applicationConfigService.removeById(id);
+        return RestResponse.create().data(deleted);
+    }
+
 }
