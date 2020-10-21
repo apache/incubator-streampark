@@ -131,11 +131,13 @@ object FlinkSubmit extends Logger {
    * @param pluginPath
    */
   private[this] def loadPlugins(pluginPath: String) = {
+    logInfo("[StreamX] loadPlugins starting...")
     val appHome = System.getProperty("app.home")
     val streamXPlugins = new File(appHome, "plugins")
     streamXPlugins.listFiles().foreach(x => {
-      if (HdfsUtils.exists(s"$pluginPath/${x.getName}")) {
-        HdfsUtils.upload(x.getAbsolutePath, pluginPath);
+      if (!HdfsUtils.exists(s"$pluginPath/${x.getName}")) {
+        logInfo(s"[StreamX] load plugin:${x.getName} to $pluginPath")
+        HdfsUtils.upload(x.getAbsolutePath, pluginPath)
       }
     })
   }
