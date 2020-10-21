@@ -203,10 +203,9 @@ object FlinkSubmit extends Logger {
     val flinkLocalConfDir = flinkLocalHome.concat("/conf")
     //存放flink集群相关的jar包目录
     val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
-    val pluginPath = s"$flinkHdfsHomeWithNameService/plugins"
-    val flinkHdfsPlugins = new Path(pluginPath)
+    val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
     //加载streamx下的plugins到$FLINK_HOME/plugins下
-    loadPlugins(pluginPath)
+    loadPlugins(flinkHdfsPlugins.toString)
 
     val customCommandLines = {
 
@@ -311,10 +310,10 @@ object FlinkSubmit extends Logger {
         })
 
         //-D 动态参数配置....
-        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-yD"))
 
         //-jvm profile support
-        array += """-Denv.java.opts.taskmanager="-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50""""
+        array += """-yDenv.java.opts.taskmanager="-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50""""
 
         array.toArray
 
