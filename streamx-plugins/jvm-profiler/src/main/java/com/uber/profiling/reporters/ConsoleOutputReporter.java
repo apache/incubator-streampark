@@ -19,7 +19,6 @@ package com.uber.profiling.reporters;
 import com.uber.profiling.Reporter;
 import com.uber.profiling.util.JsonUtils;
 
-import java.util.List;
 import java.util.Map;
 
 public class ConsoleOutputReporter implements Reporter {
