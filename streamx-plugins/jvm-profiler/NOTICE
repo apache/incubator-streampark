@@ -1,0 +1,35 @@
+Uber JVM Profiler
+Copyright (c) 2018 Uber Technologies, Inc.
+
+I. Included Software
+
+This product may include software developed at
+The Apache Software Foundation (https://www.apache.org/).
+Licensed under the Apache License.
+
+This product may include software developed by 
+etsy (https://github.com/etsy/statsd-jvm-profiler).
+Licensed under the MIT License.
+
+This product depends on software developed by 
+Javassist (http://jboss-javassist.github.io/javassist/).
+Licensed under the Apache License.
+
+This product depends on software developed by 
+Javassist (http://jboss-javassist.github.io/javassist/).
+Licensed under the Apache License.
+
+This product depends on software developed by 
+FasterXML (https://github.com/FasterXML).
+Licensed under the Apache License.
+
+This product depends on software developed by 
+JUnit (http://junit.org/junit4).
+Licensed under the Eclipse Public License.
+
+This product depends on software developed by 
+Andrey Somov (https://bitbucket.org/asomov/snakeyaml).
+Licensed under the Apache License.
+
+II. License Summary
+- Apache License 2.0
