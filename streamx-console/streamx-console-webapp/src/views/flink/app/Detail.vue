@@ -4,7 +4,7 @@
       <template slot="title">
         <span class="app-bar">Application Info</span>
         <a-button type="primary" shape="circle" icon="arrow-left" @click="handleGoBack()" style="float: right;margin-top: -8px"></a-button>
-        <a-divider style="margin-top: 7px;margin-bottom: -5px"></a-divider>
+        <a-divider style="margin-top: 5px;margin-bottom: -5px"></a-divider>
       </template>
       <a-descriptions-item label="Application Name">
         {{ app.jobName }}
@@ -47,7 +47,9 @@
         {{ app.description }}
       </a-descriptions-item>
     </a-descriptions>
+    <a-divider style="margin-top: 20px;margin-bottom: -17px"></a-divider>
     <a-tabs
+      v-if="app"
       default-active-key="1"
       style="margin-top: 15px"
       :animated="animated"
@@ -781,9 +783,10 @@ export default {
 .app-bar {
   background-color: #f0f2f5;
   color: rgba(0, 0, 0, 0.65);
-  height: 100%;font-weight: 500;
+  height: 100%;
+  font-weight: normal;
   margin: 0 32px 0 0;
-  padding: 10px 15px;
+  padding: 8px 12px;
 }
 
 >>> .ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {

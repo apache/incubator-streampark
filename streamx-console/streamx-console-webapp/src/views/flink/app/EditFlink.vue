@@ -91,7 +91,7 @@
           mode="multiple"
           :maxTagCount="selectTagCount"
           placeholder="请选择要设置的资源参数"
-          @change="handleConf"
+          @change="handleOptions"
           v-decorator="['options']">
           <a-select-opt-group label="run options">
             <a-select-option
@@ -256,7 +256,7 @@ export default {
       })
     },
 
-    handleConf (name) {
+    handleOptions (name) {
       this.configItems = name
     },
 

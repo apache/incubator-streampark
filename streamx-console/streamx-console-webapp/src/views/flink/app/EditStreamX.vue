@@ -148,7 +148,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Run Options"
+        label="Configuration"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -156,7 +156,28 @@
           allowClear
           mode="multiple"
           :maxTagCount="selectTagCount.count1"
-          placeholder="请选择要设置的资源参数"
+          placeholder="请选择要配置的选项"
+          @change="handleConf"
+          v-decorator="['configuration']">
+          <a-select-option
+            v-for="(conf,index) in configuration"
+            :key="index"
+            :value="conf.key">
+            {{ conf.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        label="Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="selectTagCount.count1"
+          placeholder="请选择要设置的参数"
           @change="handleConf"
           v-decorator="['options']">
           <a-select-opt-group label="run options">
@@ -291,6 +312,12 @@ export default {
       configItems: [],
       form: null,
       options: configOptions,
+      configuration: [
+        { key: 'tc', name: ' time characteristic' },
+        { key: 'cp', name: ' checkpoints' },
+        { key: 'rs', name: ' restart strategy' },
+        { key: 'sb', name: ' state backend' }
+      ],
       confVisiable: false
     }
   },
