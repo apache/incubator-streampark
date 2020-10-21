@@ -47,6 +47,12 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
+            <artifactId>jvm-profiler</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub</groupId>
             <artifactId>streamx-flink-submit</artifactId>
             <version>1.0.0</version>
             <exclusions>

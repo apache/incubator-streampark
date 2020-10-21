@@ -125,8 +125,22 @@ object FlinkSubmit extends Logger {
     }
   }
 
+  /**
+   * 加载streamx的plugins到flink下的plugins下.
+   *
+   * @param pluginPath
+   */
+  private[this] def loadPlugins(pluginPath: String) = {
+    val appHome = System.getProperty("app.home")
+    val streamXPlugins = new File(appHome, "plugins")
+    streamXPlugins.listFiles().foreach(x => {
+      if (HdfsUtils.exists(s"$pluginPath/${x.getName}")) {
+        HdfsUtils.upload(x.getAbsolutePath, pluginPath);
+      }
+    })
+  }
 
-  @throws[Exception]def submit(submitInfo: SubmitInfo): ApplicationId = {
+  @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
          |"[StreamX] flink submit," +
@@ -183,16 +197,16 @@ object FlinkSubmit extends Logger {
       HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
     }
 
+    val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
+    val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+    //存放flink集群相关的jar包目录
+    val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
+    val pluginPath = s"$flinkHdfsHomeWithNameService/plugins"
+    val flinkHdfsPlugins = new Path(pluginPath)
+    //加载streamx下的plugins到$FLINK_HOME/plugins下
+    loadPlugins(pluginPath)
+
     val customCommandLines = {
-
-      val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
-
-      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
-
-      //存放flink集群相关的jar包目录
-      val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
-
-      val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
 
       val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")

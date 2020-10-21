@@ -7,6 +7,15 @@
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
+            <excludes>
+                <exclude>com.streamxhub:jvm-profiler</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>plugins</outputDirectory>
+            <includes>
+                <include>com.streamxhub:jvm-profiler</include>
+            </includes>
         </dependencySet>
     </dependencySets>
     <fileSets>
@@ -18,6 +27,11 @@
         <fileSet>
             <directory>src/assembly/logs</directory>
             <outputDirectory>logs</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/assembly/plugins</directory>
+            <outputDirectory>plugins</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
