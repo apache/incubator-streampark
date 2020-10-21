@@ -313,6 +313,9 @@ object FlinkSubmit extends Logger {
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
+        //-jvm profile support
+        array+= "-Denv.java.opts.taskmanager=-javaagent:jvm-profiler-1.0.0.jar=reporter=com.uber.profiling.reporters.ConsoleOutputReporter,metricInterval=5000"
+
         array.toArray
 
       }
