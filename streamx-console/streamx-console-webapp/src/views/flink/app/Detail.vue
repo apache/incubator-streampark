@@ -77,7 +77,7 @@
               :dataSource="configVersions"
               :pagination="pagination.config"
               :loading="pager.config.loading"
-              class="desc-table">
+              class="detail-table">
               <template slot="format" slot-scope="text, record">
                 <a-tag color="#2db7f5" v-if="record.format == 1">
                   yaml
@@ -143,7 +143,7 @@
               :dataSource="savePoints"
               :pagination="pagination.savePoints"
               :loading="pager.savePoints.loading"
-              class="desc-table">
+              class="detail-table">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
                 {{ record.createTime }}
@@ -189,7 +189,7 @@
               :dataSource="backUpList"
               :pagination="pagination.backUp"
               :loading="pager.backUp.loading"
-              class="desc-table"
+              class="detail-table"
               @change="handleTableChange">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
@@ -233,7 +233,7 @@
               :pagination="pagination.startLog"
               :loading="pager.startLog.loading"
               @change="handleTableChange"
-              class="desc-table">
+              class="detail-table">
               <template slot="startTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
                 {{ record.startTime }}
@@ -891,10 +891,6 @@ export default {
   padding-top: 20px;
 }
 
-.desc-table {
-  margin-top: unset !important;
-}
-
 .start-state {
   border-radius: 0;
   font-weight: 700;
@@ -926,4 +922,13 @@ export default {
 >>> .ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {
   padding: 10px 24px;
 }
+
+.detail-table {
+  margin-top: unset !important;
+}
+
+.detail-table >>> .ant-table-thead > tr > td, .detail-table >>> .ant-table-tbody > tr > td {
+  padding: 9px 9px !important;
+}
+
 </style>
