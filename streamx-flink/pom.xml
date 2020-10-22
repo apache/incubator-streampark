@@ -15,7 +15,9 @@
 
     <modules>
         <module>streamx-flink-core</module>
+<!--
         <module>streamx-flink-repl</module>
+-->
         <module>streamx-flink-submit</module>
         <module>streamx-flink-test</module>
     </modules>
