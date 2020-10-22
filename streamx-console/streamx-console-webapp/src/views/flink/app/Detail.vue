@@ -377,18 +377,22 @@ export default {
       tabBarGutter: 0,
       pager: {
         config: {
+          key: '2',
           info: null,
           loading: false
         },
         savePoints: {
+          key: '3',
           info: null,
           loading: false
         },
         backUp: {
+          key: '4',
           info: null,
           loading: false
         },
         startLog: {
+          key: '5',
           info: null,
           loading: false
         }
@@ -874,31 +878,8 @@ export default {
     },
 
     handlePagerLoading () {
-      switch (this.activeTab) {
-        case '2':
-          this.pager.config.loading = true
-          this.pager.savePoints.loading = false
-          this.pager.backUp.loading = false
-          this.pager.startLog.loading = false
-          break
-        case '3':
-          this.pager.config.loading = false
-          this.pager.savePoints.loading = true
-          this.pager.backUp.loading = false
-          this.pager.startLog.loading = false
-          break
-        case '4':
-          this.pager.config.loading = false
-          this.pager.savePoints.loading = false
-          this.pager.backUp.loading = true
-          this.pager.startLog.loading = false
-          break
-        case '5':
-          this.pager.config.loading = false
-          this.pager.savePoints.loading = false
-          this.pager.backUp.loading = false
-          this.pager.startLog.loading = true
-          break
+      for (const k in this.pager) {
+        this.pager[k]['loading'] = this.pager[k]['key'] === this.activeTab
       }
     }
   }
