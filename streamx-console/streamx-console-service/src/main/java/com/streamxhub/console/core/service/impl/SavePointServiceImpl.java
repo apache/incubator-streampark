@@ -1,10 +1,16 @@
 package com.streamxhub.console.core.service.impl;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.console.base.domain.Constant;
+import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.SavePointMapper;
+import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
@@ -33,11 +39,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     @Override
-    public List<SavePoint> getHistory(Long appId) {
-        return this.baseMapper.getHistory(appId);
-    }
-
-    @Override
     @Transactional(rollbackFor = Exception.class)
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
@@ -50,5 +51,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
         }
+    }
+
+    @Override
+    public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
+        Page<SavePoint> page = new Page<>();
+        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        return this.baseMapper.page(page, savePoint);
     }
 }

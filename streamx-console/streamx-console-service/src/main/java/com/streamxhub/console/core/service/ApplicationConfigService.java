@@ -21,11 +21,11 @@
 package com.streamxhub.console.core.service;
 
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationConfig;
-
-import java.util.List;
 
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
@@ -35,7 +35,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     ApplicationConfig getActived(Long id);
 
-    List<ApplicationConfig> listConf(Long appId);
-
     ApplicationConfig get(Long id);
+
+    IPage<ApplicationConfig> page(Application app, RestRequest request);
 }

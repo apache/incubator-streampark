@@ -22,8 +22,13 @@ package com.streamxhub.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.common.util.DeflaterUtils;
+import com.streamxhub.console.base.domain.Constant;
+import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationConfigMapper;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationConfig;
@@ -35,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Base64;
 import java.util.Date;
-import java.util.List;
 
 /**
  * @author benjobs
@@ -102,15 +106,6 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
     }
 
     @Override
-    public List<ApplicationConfig> listConf(Long appId) {
-        QueryWrapper<ApplicationConfig> queryWrapper = new QueryWrapper<>();
-        queryWrapper.lambda()
-                .eq(ApplicationConfig::getAppId, appId)
-                .orderByDesc(ApplicationConfig::getVersion);
-        return this.list(queryWrapper);
-    }
-
-    @Override
     public ApplicationConfig get(Long id) {
         ApplicationConfig config = getById(id);
         if (config.getContent() != null) {
@@ -119,6 +114,13 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
             config.setContent(encode);
         }
         return config;
+    }
+
+    @Override
+    public IPage<ApplicationConfig> page(Application app, RestRequest request) {
+        Page<ApplicationConfig> page = new Page<>();
+        SortUtil.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
+        return this.baseMapper.page(page, app);
     }
 
 }

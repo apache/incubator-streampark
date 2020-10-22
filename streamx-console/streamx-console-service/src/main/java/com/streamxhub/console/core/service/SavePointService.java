@@ -20,11 +20,11 @@
  */
 package com.streamxhub.console.core.service;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.entity.SavePoint;
-
-import java.util.List;
 
 /**
  * @author benjobs
@@ -38,7 +38,7 @@ public interface SavePointService extends IService<SavePoint> {
 
     SavePoint getLastest(Long id);
 
-    List<SavePoint> getHistory(Long appId);
-
     Boolean delete(Long id) throws ServiceException;
+
+    IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
 }

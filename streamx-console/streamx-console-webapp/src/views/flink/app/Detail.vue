@@ -69,13 +69,13 @@
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
-              ref="TableInfo"
+              ref="TableConf"
               :columns="column.conf"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="configVersions"
-              :pagination="pagination"
+              :pagination="pagination.config"
               class="desc-table">
               <template slot="format" slot-scope="text, record">
                 <a-tag color="#2db7f5" v-if="record.format == 1">
@@ -134,13 +134,13 @@
         <a-descriptions>
           <a-descriptions-item class="desc-item">
             <a-table
-              ref="TableInfo"
+              ref="TableSavePoints"
               :columns="column.savePoints"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="savePoints"
-              :pagination="pagination"
+              :pagination="pagination.savePoints"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
@@ -179,14 +179,15 @@
         <a-descriptions>
           <a-descriptions-item>
             <a-table
-              ref="TableInfo"
+              ref="TableBackUp"
               :columns="column.backUps"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="backUpList"
-              :pagination="pagination"
-              class="desc-table">
+              :pagination="pagination.backUp"
+              class="desc-table"
+              @change="handleTableChange">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
                 {{ record.createTime }}
@@ -220,13 +221,14 @@
         <a-descriptions>
           <a-descriptions-item>
             <a-table
-              ref="TableInfo"
+              ref="TableStartLog"
               :columns="column.startLog"
               size="middle"
               rowKey="id"
               style="margin-top: -24px"
               :dataSource="startLogList"
-              :pagination="pagination2"
+              :pagination="pagination.startLog"
+              @change="handleTableChange"
               class="desc-table">
               <template slot="startTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
@@ -360,7 +362,6 @@ export default {
       defaultConfigId: null,
       configVersions: null,
       savePoints: null,
-      pagination: false,
       confVisiable: false,
       backUpList: null,
       compareVisible: false,
@@ -370,13 +371,45 @@ export default {
       queryParams: {},
       animated: false,
       tabBarGutter: 0,
-      pagination2: {
-        pageSizeOptions: ['10', '20', '30', '40', '100'],
-        defaultCurrent: 1,
-        defaultPageSize: 10,
-        showQuickJumper: true,
-        showSizeChanger: true,
-        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+      pager: {
+        config: null,
+        savePoints: null,
+        backUp: null,
+        startLog: null
+      },
+      pagination: {
+        config: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        savePoints: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        backUp : {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        startLog: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        }
       },
       codeMirror: null,
       execOption: {
@@ -546,30 +579,75 @@ export default {
       })
     },
     handleConfig () {
-      listVer({
+      const params = {
         id: this.app.id
-      }).then((resp) => {
-        resp.data.forEach((value, index) => {
+      }
+      if (this.pager.config) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableConf.pagination.current = this.pager.config.current
+        this.$refs.TableConf.pagination.pageSize = this.pager.config.pageSize
+        params.pageSize = this.pager.config.pageSize
+        params.pageNum = this.pager.config.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.config.defaultPageSize
+        params.pageNum = this.pagination.config.defaultCurrent
+      }
+      listVer({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.config }
+        pagination.total = parseInt(resp.data.total)
+        resp.data.records.forEach((value, index) => {
           if (value.actived) {
             this.defaultConfigId = value.id
           }
         })
-        this.configVersions = resp.data
+        this.configVersions = resp.data.records
+        this.pagination.config = pagination
       })
     },
     handleSavePoint () {
-      history({
+      const params = {
         appId: this.app.id
-      }).then((resp) => {
-        this.savePoints = resp.data || []
+      }
+      if (this.pager.savePoints) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableSavePoints.pagination.current = this.pager.savePoints.current
+        this.$refs.TableSavePoints.pagination.pageSize = this.pager.savePoints.pageSize
+        params.pageSize = this.pager.savePoints.pageSize
+        params.pageNum = this.pager.savePoints.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.savePoints.defaultPageSize
+        params.pageNum = this.pagination.savePoints.defaultCurrent
+      }
+      history({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.savePoints }
+        pagination.total = parseInt(resp.data.total)
+        this.savePoints = resp.data.records
+        this.pagination.savePoints = pagination
       })
     },
 
     handleBackUps () {
-      backUps({
+      const params = {
         appId: this.app.id
-      }).then((resp) => {
-        this.backUpList = resp.data || []
+      }
+      if (this.pager.backUp) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableBackUp.pagination.current = this.pager.backUp.current
+        this.$refs.TableBackUp.pagination.pageSize = this.pager.backUp.pageSize
+        params.pageSize = this.pager.backUp.pageSize
+        params.pageNum = this.pager.backUp.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.backUp.defaultPageSize
+        params.pageNum = this.pagination.backUp.defaultCurrent
+      }
+      backUps({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.backUp }
+        pagination.total = parseInt(resp.data.total)
+        this.backUpList = resp.data.records
+        this.pagination.backUp = pagination
       })
     },
 
@@ -577,22 +655,22 @@ export default {
       const params = {
         appId: this.app.id
       }
-      if (this.paginationInfo) {
+      if (this.pager.startLog) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableInfo.pagination.current = this.paginationInfo.current
-        this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
-        params.pageSize = this.paginationInfo.pageSize
-        params.pageNum = this.paginationInfo.current
+        this.$refs.TableStartLog.pagination.current = this.pager.startLog.current
+        this.$refs.TableStartLog.pagination.pageSize = this.pager.startLog.pageSize
+        params.pageSize = this.pager.startLog.pageSize
+        params.pageNum = this.pager.startLog.current
       } else {
         // 如果分页信息为空，则设置为默认值
-        params.pageSize = this.pagination2.defaultPageSize
-        params.pageNum = this.pagination2.defaultCurrent
+        params.pageSize = this.pagination.startLog.defaultPageSize
+        params.pageNum = this.pagination.startLog.defaultCurrent
       }
       startLog({ ...params }).then((resp) => {
-        const pagination = { ...this.pagination2 }
+        const pagination = { ...this.pagination.startLog }
         pagination.total = parseInt(resp.data.total)
         this.startLogList = resp.data.records
-        this.pagination2 = pagination
+        this.pagination.startLog = pagination
       })
     },
 
@@ -702,6 +780,28 @@ export default {
 
     handleGoBack () {
       this.$router.back(-1)
+    },
+
+    handleTableChange (pagination, filters, sorter) {
+      // 将这两个参数赋值给Vue data，用于后续使用
+      switch (this.activeTab) {
+        case '2':
+          this.pager.config = pagination
+          this.handleConfig()
+          break
+        case '3':
+          this.pager.savePoints = pagination
+          this.handleSavePoint()
+          break
+        case '4':
+          this.pager.backUp = pagination
+          this.handleBackUps()
+          break
+        case '5':
+          this.pager.startLog = pagination
+          this.handleStartLog()
+          break
+      }
     },
 
     handleCodeMirror () {

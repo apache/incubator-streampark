@@ -21,12 +21,12 @@
 package com.streamxhub.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.console.core.entity.SavePoint;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
-
-import java.util.List;
 
 /**
  * @author benjobs
@@ -39,6 +39,6 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=1")
     SavePoint getLastest(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=0 order by create_time desc ")
-    List<SavePoint> getHistory(@Param("appId") Long appId);
+    @Select("select * from t_flink_savepoint where app_id=#{savePoint.appId} and lastest=0")
+    IPage<SavePoint> page(Page<SavePoint> page, SavePoint savePoint);
 }

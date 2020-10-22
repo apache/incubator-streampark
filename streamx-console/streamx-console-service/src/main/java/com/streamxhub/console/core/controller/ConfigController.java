@@ -20,10 +20,13 @@
  */
 package com.streamxhub.console.core.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationConfig;
+import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.ApplicationConfigService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,9 +56,9 @@ public class ConfigController extends BaseController {
     }
 
     @PostMapping("list")
-    public RestResponse list(Application app) {
-        List<ApplicationConfig> list =  applicationConfigService.listConf(app.getId());
-        return RestResponse.create().data(list);
+    public RestResponse list(Application app, RestRequest request) {
+        IPage<ApplicationConfig> configIPage = applicationConfigService.page(app, request);
+        return RestResponse.create().data(configIPage);
     }
 
     @PostMapping("delete")

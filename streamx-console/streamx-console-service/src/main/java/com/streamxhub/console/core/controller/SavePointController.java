@@ -20,9 +20,12 @@
  */
 package com.streamxhub.console.core.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.core.entity.ApplicationLog;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,9 +58,9 @@ public class SavePointController extends BaseController {
     }
 
     @PostMapping("history")
-    public RestResponse history(Long appId) {
-        List<SavePoint> savePoint = savePointService.getHistory(appId);
-        return RestResponse.create().data(savePoint);
+    public RestResponse history(SavePoint savePoint, RestRequest request) {
+        IPage<SavePoint> savePointIPage = savePointService.page(savePoint, request);
+        return RestResponse.create().data(savePointIPage);
     }
 
     @PostMapping("delete")

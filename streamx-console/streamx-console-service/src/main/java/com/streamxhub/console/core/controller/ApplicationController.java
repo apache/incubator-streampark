@@ -170,8 +170,8 @@ public class ApplicationController extends BaseController {
     }
 
     @PostMapping("backups")
-    public RestResponse backups(ApplicationBackUp backUp) {
-        List<ApplicationBackUp> backups = backUpService.getBackups(backUp);
+    public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
+        IPage<ApplicationBackUp> backups = backUpService.page(backUp,request);
         return RestResponse.create().data(backups);
     }
 
