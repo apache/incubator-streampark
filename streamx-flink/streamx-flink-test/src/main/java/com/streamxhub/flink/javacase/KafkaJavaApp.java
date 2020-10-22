@@ -62,7 +62,8 @@ public class KafkaJavaApp {
                         //value to logBean....
                         return logBean;
                     }
-                }).getDataStream()
+                })
+                .getDataStream()
                 .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
 
         new KafkaJavaSink<LogBean>(context).sink(source);

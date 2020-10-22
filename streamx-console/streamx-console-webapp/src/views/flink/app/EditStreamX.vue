@@ -480,14 +480,16 @@ export default {
 
     handleListConfVersion () {
       listVer({
-        id: this.app.id
+        appId: this.app.id,
+        pageNo: 1,
+        pageSize: 999999
       }).then((resp) => {
-        resp.data.forEach((value, index) => {
+        resp.data.records.forEach((value, index) => {
           if (value.actived) {
             this.defaultConfigId = value.id
           }
         })
-        this.configVersions = resp.data
+        this.configVersions = resp.data.records
       })
     },
 

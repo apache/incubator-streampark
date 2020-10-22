@@ -3,7 +3,12 @@
     <a-descriptions v-if="app" bordered size="middle" layout="vertical">
       <template slot="title">
         <span class="app-bar">Application Info</span>
-        <a-button type="primary" shape="circle" icon="arrow-left" @click="handleGoBack()" style="float: right;margin-top: -8px"></a-button>
+        <a-button
+          type="primary"
+          shape="circle"
+          icon="arrow-left"
+          @click="handleGoBack()"
+          style="float: right;margin-top: -8px"></a-button>
         <a-divider style="margin-top: 5px;margin-bottom: -5px"></a-divider>
       </template>
       <a-descriptions-item label="Application Name">
@@ -295,7 +300,7 @@
           :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
           <a-select @change="handleCompareTarget">
             <a-select-option
-              v-for="(ver,index) in configVersions"
+              v-for="(ver,index) in allConfigVersions"
               :value="ver.id"
               v-if="compare.version !== ver.version"
               :key="index">
@@ -364,6 +369,7 @@ export default {
       app: null,
       options: {},
       defaultConfigId: null,
+      allConfigVersions: null,
       configVersions: null,
       savePoints: null,
       confVisiable: false,
@@ -414,7 +420,7 @@ export default {
           showSizeChanger: true,
           showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
         },
-        backUp : {
+        backUp: {
           pageSizeOptions: ['10', '20', '30', '40', '100'],
           defaultCurrent: 1,
           defaultPageSize: 10,
@@ -623,9 +629,12 @@ export default {
           }
         })
         this.configVersions = resp.data.records
+        const pageSize = this.pager.config.info.pageSize || this.pagination.config.defaultPageSize
+        if (pagination.total >= pageSize) {
+          this.allConfigVersions = this.configVersions
+        }
         this.pagination.config = pagination
         this.pager.config.loading = false
-
       })
     },
     handleSavePoint () {
@@ -760,6 +769,15 @@ export default {
     },
 
     handleCompare (record) {
+      if (this.allConfigVersions == null) {
+        listVer({
+          appId: this.app.id,
+          pageNo: 1,
+          pageSize: 999999
+        }).then((resp) => {
+          this.allConfigVersions = resp.data.records
+        })
+      }
       this.compareVisible = true
       this.compare = {
         id: record.id,
