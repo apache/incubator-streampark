@@ -18,6 +18,9 @@ export default {
     DELETE: '/flink/project/delete',
     SELECT: '/flink/project/select'
   },
+  MarkDown: {
+    READ: '/markdown/read'
+  },
   SavePoint: {
     LASTEST: '/flink/savepoint/lastest',
     HISTORY: '/flink/savepoint/history',

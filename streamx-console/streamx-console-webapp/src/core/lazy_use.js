@@ -12,6 +12,5 @@ import './directives/permission'
 VueClipboard.config.autoSetContainer = true
 
 Vue.use(Viser)
-
 Vue.use(VueClipboard)
 Vue.use(PermissionHelper)

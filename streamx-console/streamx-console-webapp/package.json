@@ -23,6 +23,7 @@
     "js-cookie": "^2.2.0",
     "lodash.get": "^4.4.2",
     "lodash.pick": "^4.4.0",
+    "mavon-editor": "^2.9.0",
     "md5": "^2.2.1",
     "mergely": "^4.1.0",
     "mockjs2": "^1.0.5",

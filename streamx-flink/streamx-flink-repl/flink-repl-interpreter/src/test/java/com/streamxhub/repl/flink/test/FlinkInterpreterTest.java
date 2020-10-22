@@ -225,7 +225,7 @@ public class FlinkInterpreterTest {
     InterpreterContext context = getInterpreterContext();
     InterpreterResult result = interpreter.interpret(
             "senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")" +
-                    "  .flatMap(line => line.split(\"\\\\s\"))\n" +
+                    "  .flatMap(_.split(\"\\\\s\"))\n" +
                     "  .map(w => (w, 1))\n" +
                     "  .keyBy(0)\n" +
                     "  .sum(1)\n" +

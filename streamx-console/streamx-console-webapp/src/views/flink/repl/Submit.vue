@@ -1,24 +1,61 @@
 <template>
-  <div class="card-list" ref="content" style="padding: 10px;background-color: #fff;">
-    <div class="icon-list" style="height: 30px;width: 100px;z-index: 5">
-      <a-icon
-        type="fullscreen-exit"
-        twoToneColor="#4a9ff5"
-        style="float: right; padding-left: 10px;"/>
-      <a-icon
-        type="play-circle"
-        twoToneColor="#4a9ff5"
-        @click="handleReplSubmit"
-        style="float: right;padding-left: 10px;"/>
-      <a-icon
-        type="project"
-        twoToneColor="#4a9ff5"
-        style="float: right;padding-left: 10px;"/>
-    </div>
-    <textarea ref="code" class="code" v-model="code"></textarea>
+  <div class="card-list table-page-search-wrapper" ref="content" style="padding: 10px;background-color: #fff;">
+    <a-form layout="inline" @submit="handleReplSubmit" :form="form" style="height: 35px;">
+      <a-row :gutter="24" style="height: 35px;">
+        <a-col :md="4" :sm="12" style="float: right">
+          <a-form-item>
+            <a-select>
+              <a-select-option
+                v-for="(env,index) in envs"
+                :value="env.env"
+                :key="index">
+                <div>
+                  {{ env.env }}
+                </div>
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-col>
+        <a-col :md="4" :sm="12" class="icon-list" style="float: right">
+          <a-icon
+            type="fullscreen-exit"
+            twoToneColor="#4a9ff5"
+            style="float: right; padding-left: 10px;"/>
+          <a-icon
+            type="play-circle"
+            twoToneColor="#4a9ff5"
+            @click="handleReplSubmit"
+            style="float: right;padding-left: 10px;"/>
+          <a-icon
+            type="project"
+            twoToneColor="#4a9ff5"
+            style="float: right;padding-left: 10px;"/>
+        </a-col>
+      </a-row>
+    </a-form>
+    <a-divider style="margin-bottom: 20px;top: -15px"></a-divider>
+    <mavon-editor
+      v-if="tutorial"
+      v-model="tutorial"
+      :toolbarsFlag="false"
+      :subfield="false"
+      :ishljs="true"
+      :preview="true"
+      defaultOpen="preview">
+    </mavon-editor>
+    <a-row :gutter="24" style="clear: right;top: -20px">
+      <a-col>
+        <textarea ref="code" class="code"></textarea>
+      </a-col>
+    </a-row>
   </div>
 </template>
+
 <script>
+import { mavonEditor } from 'mavon-editor'
+import 'mavon-editor/dist/css/index.css'
+import { read } from '@api/markdown'
+
 import 'codemirror/theme/idea.css'
 import 'codemirror/theme/cobalt.css'
 import 'codemirror/theme/eclipse.css'
@@ -30,18 +67,42 @@ import 'codemirror/addon/selection/active-line'
 import 'codemirror/addon/hint/anyword-hint'
 import 'codemirror/mode/clike/clike'
 import 'codemirror/mode/sql/sql'
-
 const CodeMirror = require('codemirror/lib/codemirror')
 
 export default {
   name: 'CodeMirror',
+  components: { mavonEditor },
   data () {
     return {
       editor: null,
-      code: ''
+      code: '',
+      form: null,
+      envs: [
+        {
+          env: 'flink',
+          info: 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment '
+        },
+        {
+          env: 'flink.pyflink',
+          info: 'Provides a python environment '
+        },
+        {
+          env: 'flink.ipyflink',
+          info: ' Provides an ipython environment '
+        },
+        {
+          env: 'flink.ssql',
+          info: 'Provides a stream sql environment '
+        },
+        {
+          env: 'flink.bsql',
+          info: ' Provides a batch sql environment'
+        }
+      ],
+      tutorial: null,
+      toolbars: false
     }
   },
-
   mounted () {
     this.editor = CodeMirror.fromTextArea(this.$refs.code, {
       theme: 'eclipse',
@@ -61,21 +122,34 @@ export default {
         }
       }
     })
+    this.handleReadmd()
+    this.form = this.$form.createForm(this)
   },
 
   methods: {
     handleReplSubmit () {
-      console.log(this.code)
+      const code = this.editor.getValue()
+      console.log(code)
+    },
+    handleReadmd () {
+      read({
+        name: 'repl.md'
+      }).then((resp) => {
+        this.tutorial = resp.data
+      })
     }
   }
 }
 </script>
 
-<style scoped lang="less">
+<style scoped>
+
 .code {
   height: 500px;
+  display: block;
   font-size: 11pt;
-  position: absolute;
+  position: relative;
+  width: 100%;
   z-index: 4;
   font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
@@ -85,10 +159,10 @@ export default {
   left: 0px;
 }
 
-.CodeMirror-line::before {
+>>>.CodeMirror-line::before {
   content: '';
-  background-color: #d9d9d9;
-  width: 4px;
+  background-color: #1890ff;
+  width: 6px;
   height: 21px;
   margin-left: 5px;
   position: absolute;
@@ -96,14 +170,8 @@ export default {
   left: 0;
 }
 
-.CodeMirror pre.CodeMirror-line {
+>>>.CodeMirror pre.CodeMirror-line {
   padding: 0 4px 0 14px;
-}
-
-.code {
-  display: block;
-  position: relative;
-  top: -31px;
 }
 
 .card-list {
@@ -111,12 +179,8 @@ export default {
 }
 
 .icon-list {
+  top: 10px;
   height: 30px;
-  width: 200px;
-  z-index: 5;
-  position: absolute;
-  right: 20px;
-  top: 18px;
 }
 
 .CodeMirror {
@@ -126,4 +190,5 @@ export default {
   top: 0;
   z-index: 4;
 }
+
 </style>
