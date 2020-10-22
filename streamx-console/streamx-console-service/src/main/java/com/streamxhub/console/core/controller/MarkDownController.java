@@ -38,12 +38,12 @@ public class MarkDownController {
 
     @PostMapping("read")
     public RestResponse read(String name) throws IOException {
-        URL url = Thread.currentThread().getContextClassLoader().getResource("/md/".concat(name));
+        URL url = Thread.currentThread().getContextClassLoader().getResource("md/".concat(name));
         BufferedReader bufferedReader = new BufferedReader(new FileReader(url.getFile()));
         StringBuilder content = new StringBuilder();
         String line;
         while ((line = bufferedReader.readLine()) != null) {
-            content.append(line);
+            content.append(line).append("\n");
         }
         return RestResponse.create().data(content.toString());
     }
