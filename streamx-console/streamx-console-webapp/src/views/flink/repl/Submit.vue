@@ -135,7 +135,7 @@ export default {
       get({
         name: 'repl'
       }).then((resp) => {
-        this.tutorial = resp.data
+        this.tutorial = resp.data.content
       })
     }
   }
