@@ -40,5 +40,5 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     SavePoint getLastest(@Param("appId") Long appId);
 
     @Select("select * from t_flink_savepoint where app_id=#{savePoint.appId} and lastest=0")
-    IPage<SavePoint> page(Page<SavePoint> page, SavePoint savePoint);
+    IPage<SavePoint> page(Page<SavePoint> page,@Param("savePoint") SavePoint savePoint);
 }

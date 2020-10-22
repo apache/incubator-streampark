@@ -541,10 +541,10 @@ export default {
     if (appId) {
       this.CleanAppId()
       this.handleGet(appId)
-      const timer = window.setInterval(() => this.handleGet(appId), 2000)
-      this.$once('hook:beforeDestroy', () => {
-        clearInterval(timer)
-      })
+      //const timer = window.setInterval(() => this.handleGet(appId), 2000)
+      //this.$once('hook:beforeDestroy', () => {
+      //  clearInterval(timer)
+      //})
     } else {
       this.$router.back(-1)
     }
