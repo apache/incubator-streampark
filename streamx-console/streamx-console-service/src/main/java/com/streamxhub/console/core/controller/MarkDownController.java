@@ -22,16 +22,13 @@ package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.domain.RestResponse;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.net.URL;
 
 @Slf4j
 @Validated
@@ -41,9 +38,8 @@ public class MarkDownController {
 
     @PostMapping("read")
     public RestResponse read(String name) throws IOException {
-        ClassPathResource classPathResource = new ClassPathResource("/md/".concat(name));
-        File file = classPathResource.getFile();
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(file));
+        URL url = Thread.currentThread().getContextClassLoader().getResource("/md/".concat(name));
+        BufferedReader bufferedReader = new BufferedReader(new FileReader(url.getFile()));
         StringBuilder content = new StringBuilder();
         String line;
         while ((line = bufferedReader.readLine()) != null) {
