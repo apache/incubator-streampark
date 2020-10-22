@@ -54,7 +54,7 @@
 <script>
 import { mavonEditor } from 'mavon-editor'
 import 'mavon-editor/dist/css/index.css'
-import { read } from '@api/markdown'
+import { get } from '@api/tutorial'
 
 import 'codemirror/theme/idea.css'
 import 'codemirror/theme/cobalt.css'
@@ -132,8 +132,8 @@ export default {
       console.log(code)
     },
     handleReadmd () {
-      read({
-        name: 'repl.md'
+      get({
+        name: 'repl'
       }).then((resp) => {
         this.tutorial = resp.data
       })

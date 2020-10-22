@@ -21,14 +21,16 @@
 package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.Tutorial;
+import com.streamxhub.console.core.service.TutorialService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.*;
-import java.net.URL;
 
 /**
  * @author benjobs
@@ -36,19 +38,16 @@ import java.net.URL;
 @Slf4j
 @Validated
 @RestController
-@RequestMapping("markdown")
-public class MarkDownController {
+@RequestMapping("tutorial")
+public class TutorialController {
 
-    @PostMapping("read")
-    public RestResponse read(String name) throws IOException {
-        URL url = Thread.currentThread().getContextClassLoader().getResource("md/".concat(name));
-        BufferedReader bufferedReader = new BufferedReader(new FileReader(url.getFile()));
-        StringBuilder content = new StringBuilder();
-        String line;
-        while ((line = bufferedReader.readLine()) != null) {
-            content.append(line).append("\n");
-        }
-        return RestResponse.create().data(content.toString());
+    @Autowired
+    private TutorialService tutorialService;
+
+    @PostMapping("get")
+    public RestResponse get(String name) throws IOException {
+        Tutorial tutorial =  tutorialService.getByName(name);
+        return RestResponse.create().data(tutorial);
     }
 
 }
