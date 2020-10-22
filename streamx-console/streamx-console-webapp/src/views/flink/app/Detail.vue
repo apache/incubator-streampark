@@ -580,7 +580,7 @@ export default {
     },
     handleConfig () {
       const params = {
-        id: this.app.id
+        appId: this.app.id
       }
       if (this.pager.config) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数

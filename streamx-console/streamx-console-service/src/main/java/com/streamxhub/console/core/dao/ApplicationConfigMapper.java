@@ -23,7 +23,6 @@ package com.streamxhub.console.core.dao;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationConfig;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -46,6 +45,6 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
     @Update("update t_flink_config set actived=1 where id=#{id}")
     void active(@Param("id")Long id);
 
-    @Select("select * from t_flink_config where app_id=#{app.appId}")
-    IPage<ApplicationConfig> page(Page<ApplicationConfig> page,@Param("app") Application app);
+    @Select("select * from t_flink_config where app_id=#{config.appId}")
+    IPage<ApplicationConfig> page(Page<ApplicationConfig> page,@Param("config") ApplicationConfig config);
 }

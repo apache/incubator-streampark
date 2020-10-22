@@ -117,10 +117,10 @@ public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigM
     }
 
     @Override
-    public IPage<ApplicationConfig> page(Application app, RestRequest request) {
+    public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
         Page<ApplicationConfig> page = new Page<>();
         SortUtil.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, app);
+        return this.baseMapper.page(page, config);
     }
 
 }

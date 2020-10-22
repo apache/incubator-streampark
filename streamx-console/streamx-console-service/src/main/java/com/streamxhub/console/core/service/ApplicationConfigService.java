@@ -37,5 +37,5 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     ApplicationConfig get(Long id);
 
-    IPage<ApplicationConfig> page(Application app, RestRequest request);
+    IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
 }
