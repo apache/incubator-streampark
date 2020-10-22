@@ -76,6 +76,7 @@
               style="margin-top: -24px"
               :dataSource="configVersions"
               :pagination="pagination.config"
+              :loading="pager.config.loading"
               class="desc-table">
               <template slot="format" slot-scope="text, record">
                 <a-tag color="#2db7f5" v-if="record.format == 1">
@@ -141,6 +142,7 @@
               style="margin-top: -24px"
               :dataSource="savePoints"
               :pagination="pagination.savePoints"
+              :loading="pager.savePoints.loading"
               class="desc-table">
               <template slot="createTime" slot-scope="text, record">
                 <a-icon type="clock-circle"/>
@@ -186,6 +188,7 @@
               style="margin-top: -24px"
               :dataSource="backUpList"
               :pagination="pagination.backUp"
+              :loading="pager.backUp.loading"
               class="desc-table"
               @change="handleTableChange">
               <template slot="createTime" slot-scope="text, record">
@@ -228,6 +231,7 @@
               style="margin-top: -24px"
               :dataSource="startLogList"
               :pagination="pagination.startLog"
+              :loading="pager.startLog.loading"
               @change="handleTableChange"
               class="desc-table">
               <template slot="startTime" slot-scope="text, record">
@@ -372,10 +376,22 @@ export default {
       animated: false,
       tabBarGutter: 0,
       pager: {
-        config: null,
-        savePoints: null,
-        backUp: null,
-        startLog: null
+        config: {
+          info: null,
+          loading: false
+        },
+        savePoints: {
+          info: null,
+          loading: false
+        },
+        backUp: {
+          info: null,
+          loading: false
+        },
+        startLog: {
+          info: null,
+          loading: false
+        }
       },
       pagination: {
         config: {
@@ -541,10 +557,10 @@ export default {
     if (appId) {
       this.CleanAppId()
       this.handleGet(appId)
-      //const timer = window.setInterval(() => this.handleGet(appId), 2000)
-      //this.$once('hook:beforeDestroy', () => {
-      //  clearInterval(timer)
-      //})
+      const timer = window.setInterval(() => this.handleGet(appId), 2000)
+      this.$once('hook:beforeDestroy', () => {
+        clearInterval(timer)
+      })
     } else {
       this.$router.back(-1)
     }
@@ -582,17 +598,18 @@ export default {
       const params = {
         appId: this.app.id
       }
-      if (this.pager.config) {
+      if (this.pager.config.info) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableConf.pagination.current = this.pager.config.current
-        this.$refs.TableConf.pagination.pageSize = this.pager.config.pageSize
-        params.pageSize = this.pager.config.pageSize
-        params.pageNum = this.pager.config.current
+        this.$refs.TableConf.pagination.current = this.pager.config.info.current
+        this.$refs.TableConf.pagination.pageSize = this.pager.config.info.pageSize
+        params.pageSize = this.pager.config.info.pageSize
+        params.pageNum = this.pager.config.info.current
       } else {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.config.defaultPageSize
         params.pageNum = this.pagination.config.defaultCurrent
       }
+      this.handlePagerLoading()
       listVer({ ...params }).then((resp) => {
         const pagination = { ...this.pagination.config }
         pagination.total = parseInt(resp.data.total)
@@ -603,28 +620,32 @@ export default {
         })
         this.configVersions = resp.data.records
         this.pagination.config = pagination
+        this.pager.config.loading = false
+
       })
     },
     handleSavePoint () {
       const params = {
         appId: this.app.id
       }
-      if (this.pager.savePoints) {
+      if (this.pager.savePoints.info) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableSavePoints.pagination.current = this.pager.savePoints.current
-        this.$refs.TableSavePoints.pagination.pageSize = this.pager.savePoints.pageSize
-        params.pageSize = this.pager.savePoints.pageSize
-        params.pageNum = this.pager.savePoints.current
+        this.$refs.TableSavePoints.pagination.current = this.pager.savePoints.info.current
+        this.$refs.TableSavePoints.pagination.pageSize = this.pager.savePoints.info.pageSize
+        params.pageSize = this.pager.savePoints.info.pageSize
+        params.pageNum = this.pager.savePoints.info.current
       } else {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.savePoints.defaultPageSize
         params.pageNum = this.pagination.savePoints.defaultCurrent
       }
+      this.handlePagerLoading()
       history({ ...params }).then((resp) => {
         const pagination = { ...this.pagination.savePoints }
         pagination.total = parseInt(resp.data.total)
         this.savePoints = resp.data.records
         this.pagination.savePoints = pagination
+        this.pager.savePoints.loading = false
       })
     },
 
@@ -632,22 +653,24 @@ export default {
       const params = {
         appId: this.app.id
       }
-      if (this.pager.backUp) {
+      if (this.pager.backUp.info) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableBackUp.pagination.current = this.pager.backUp.current
-        this.$refs.TableBackUp.pagination.pageSize = this.pager.backUp.pageSize
-        params.pageSize = this.pager.backUp.pageSize
-        params.pageNum = this.pager.backUp.current
+        this.$refs.TableBackUp.pagination.current = this.pager.backUp.info.current
+        this.$refs.TableBackUp.pagination.pageSize = this.pager.backUp.info.pageSize
+        params.pageSize = this.pager.backUp.info.pageSize
+        params.pageNum = this.pager.backUp.info.current
       } else {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.backUp.defaultPageSize
         params.pageNum = this.pagination.backUp.defaultCurrent
       }
+      this.handlePagerLoading()
       backUps({ ...params }).then((resp) => {
         const pagination = { ...this.pagination.backUp }
         pagination.total = parseInt(resp.data.total)
         this.backUpList = resp.data.records
         this.pagination.backUp = pagination
+        this.pager.backUp.loading = false
       })
     },
 
@@ -655,22 +678,24 @@ export default {
       const params = {
         appId: this.app.id
       }
-      if (this.pager.startLog) {
+      if (this.pager.startLog.info) {
         // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-        this.$refs.TableStartLog.pagination.current = this.pager.startLog.current
-        this.$refs.TableStartLog.pagination.pageSize = this.pager.startLog.pageSize
-        params.pageSize = this.pager.startLog.pageSize
-        params.pageNum = this.pager.startLog.current
+        this.$refs.TableStartLog.pagination.current = this.pager.startLog.info.current
+        this.$refs.TableStartLog.pagination.pageSize = this.pager.startLog.info.pageSize
+        params.pageSize = this.pager.startLog.info.pageSize
+        params.pageNum = this.pager.startLog.info.current
       } else {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.startLog.defaultPageSize
         params.pageNum = this.pagination.startLog.defaultCurrent
       }
+      this.handlePagerLoading()
       startLog({ ...params }).then((resp) => {
         const pagination = { ...this.pagination.startLog }
         pagination.total = parseInt(resp.data.total)
         this.startLogList = resp.data.records
         this.pagination.startLog = pagination
+        this.pager.startLog.loading = false
       })
     },
 
@@ -786,19 +811,19 @@ export default {
       // 将这两个参数赋值给Vue data，用于后续使用
       switch (this.activeTab) {
         case '2':
-          this.pager.config = pagination
+          this.pager.config.info = pagination
           this.handleConfig()
           break
         case '3':
-          this.pager.savePoints = pagination
+          this.pager.savePoints.info = pagination
           this.handleSavePoint()
           break
         case '4':
-          this.pager.backUp = pagination
+          this.pager.backUp.info = pagination
           this.handleBackUps()
           break
         case '5':
-          this.pager.startLog = pagination
+          this.pager.startLog.info = pagination
           this.handleStartLog()
           break
       }
@@ -846,8 +871,36 @@ export default {
 
     handleChangeTab (key) {
       this.activeTab = key
-    }
+    },
 
+    handlePagerLoading () {
+      switch (this.activeTab) {
+        case '2':
+          this.pager.config.loading = true
+          this.pager.savePoints.loading = false
+          this.pager.backUp.loading = false
+          this.pager.startLog.loading = false
+          break
+        case '3':
+          this.pager.config.loading = false
+          this.pager.savePoints.loading = true
+          this.pager.backUp.loading = false
+          this.pager.startLog.loading = false
+          break
+        case '4':
+          this.pager.config.loading = false
+          this.pager.savePoints.loading = false
+          this.pager.backUp.loading = true
+          this.pager.startLog.loading = false
+          break
+        case '5':
+          this.pager.config.loading = false
+          this.pager.savePoints.loading = false
+          this.pager.backUp.loading = false
+          this.pager.startLog.loading = true
+          break
+      }
+    }
   }
 }
 </script>
