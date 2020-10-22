@@ -33,7 +33,12 @@
         </a-col>
       </a-row>
     </a-form>
-    <a-divider style="margin-bottom: 20px;top: -15px"></a-divider>
+    <a-divider style="margin-bottom: 20px;top: -20px"></a-divider>
+    <a-row :gutter="24" style="clear: right;top: -30px">
+      <a-col>
+        <textarea ref="code" class="code"></textarea>
+      </a-col>
+    </a-row>
     <mavon-editor
       v-if="tutorial"
       v-model="tutorial"
@@ -43,11 +48,6 @@
       :preview="true"
       defaultOpen="preview">
     </mavon-editor>
-    <a-row :gutter="24" style="clear: right;top: -20px">
-      <a-col>
-        <textarea ref="code" class="code"></textarea>
-      </a-col>
-    </a-row>
   </div>
 </template>
 
