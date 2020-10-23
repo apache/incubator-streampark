@@ -131,7 +131,7 @@ class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedF
         val savePointPath = jobClient.stopWithSavepoint(true, savePointDir).get
         val config = new java.util.HashMap[String, String]
         config.put(JobManager.SAVEPOINT_PATH, savePointPath)
-        context.getIntpEventClient.updateParagraphConfig(context.getNoteId, context.getParagraphId, config)
+//        context.getIntpEventClient.updateParagraphConfig(context.getNoteId, context.getParagraphId, config)
         LOGGER.info("Job {} of paragraph {} is stopped with save point path: {}", jobClient.getJobID, context.getParagraphId, savePointPath)
       }
       cancelled = true
@@ -220,7 +220,7 @@ class FlinkJobProgressPoller(var flinkWebUrl: String, var jobId: JobID, var cont
                 if (!StringUtils.isBlank(checkpointPath)) {
                   val config = new java.util.HashMap[String, String]
                   config.put(JobManager.LATEST_CHECKPOINT_PATH, checkpointPath)
-                  context.getIntpEventClient.updateParagraphConfig(context.getNoteId, context.getParagraphId, config)
+//                  context.getIntpEventClient.updateParagraphConfig(context.getNoteId, context.getParagraphId, config)
                 }
               }
             }
