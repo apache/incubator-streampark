@@ -276,20 +276,18 @@ public class FlinkInterpreterTest {
   public void testBatchWordCount() throws InterpreterException, IOException {
     InterpreterContext context = getInterpreterContext();
     InterpreterResult result = interpreter.interpret(
-            "val data = benv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")",
+            "val data = benv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
+                    "\n" +
+                    "data.flatMap(line => line.split(\"\\\\s\"))\n" +
+                    "  .map(w => (w, 1))\n" +
+                    "  .keyBy(0)\n" +
+                    "  .sum(1)\n" +
+                    "  .print()\n" +
+                    "\n" +
+                    "benv.execute()\n",
         context);
     assertEquals(InterpreterResult.Code.SUCCESS, result.code());
-    context = getInterpreterContext();
-    result = interpreter.interpret(
-            "data.flatMap(_.split(\"\\\\s\"))\n" +
-            "  .map(w => (w, 1))\n" +
-            "  .groupBy(0)\n" +
-            "  .sum(1)\n" +
-            "  .print()", context);
-
     System.out.println(context.out.toString());
-
-    assertEquals(InterpreterResult.Code.SUCCESS, result.code());
 
     String[] expectedCounts = {"(hello,3)", "(world,1)", "(flink,1)", "(hadoop,1)"};
     Arrays.sort(expectedCounts);

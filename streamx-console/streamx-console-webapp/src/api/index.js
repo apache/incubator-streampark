@@ -21,6 +21,9 @@ export default {
   Tutorial: {
     GET: '/tutorial/get'
   },
+  NoteBook: {
+    SUBMIT: '/flink/noteboot/submit'
+  },
   SavePoint: {
     LASTEST: '/flink/savepoint/lastest',
     HISTORY: '/flink/savepoint/history',

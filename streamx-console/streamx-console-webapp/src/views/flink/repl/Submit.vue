@@ -1,51 +1,61 @@
 <template>
-  <div class="card-list table-page-search-wrapper" ref="content" style="padding: 10px;background-color: #fff;">
-    <a-form layout="inline" @submit="handleReplSubmit" :form="form" style="height: 35px;">
-      <a-row :gutter="24" style="height: 35px;">
-        <a-col :md="4" :sm="12" style="float: right">
-          <a-form-item>
-            <a-select>
-              <a-select-option
-                v-for="(env,index) in envs"
-                :value="env.env"
-                :key="index">
-                <div>
-                  {{ env.env }}
-                </div>
-              </a-select-option>
-            </a-select>
-          </a-form-item>
+  <div>
+    <a-card :bordered="false" style="margin-top: 0px;padding: 0px">
+      <a-row :gutter="24" type="flex" justify="space-between">
+        <a-col :span="22">
+          <span style="height: 40px;margin-left: 17px;" class="code-prefix"></span>
+          <a-form layout="inline" @submit="handleReplSubmit" :form="form" class="env-select">
+            <a-form-item>
+              <a-select style="z-index: 5;width: 100%" default-value="flink" @change="handleChangeEnv">
+                <a-select-option
+                  v-for="(env,index) in envs"
+                  :value="env.env"
+                  :key="index">
+                  <div>
+                    {{ env.env }}
+                  </div>
+                </a-select-option>
+              </a-select>
+            </a-form-item>
+          </a-form>
+          <div>
+            <span style="height: 100%;margin-left: 17px;" class="code-prefix"></span>
+            <span style="margin-left: 15px;color: grey">
+              {{introduction}}
+            </span>
+          </div>
         </a-col>
-        <a-col :md="4" :sm="12" class="icon-list" style="float: right">
-          <a-icon
-            type="fullscreen-exit"
-            twoToneColor="#4a9ff5"
-            style="float: right; padding-left: 10px;"/>
+        <a-col :span="2" class="icon-list" style="z-index: 2">
           <a-icon
             type="play-circle"
             twoToneColor="#4a9ff5"
             @click="handleReplSubmit"
-            style="float: right;padding-left: 10px;"/>
+            style="padding-left: 10px;"/>
           <a-icon
-            type="project"
+            type="read"
             twoToneColor="#4a9ff5"
-            style="float: right;padding-left: 10px;"/>
+            @click="showTutorial = !showTutorial"
+            style="padding-left: 10px;"/>
+          <a-icon
+            type="fullscreen-exit"
+            twoToneColor="#4a9ff5"
+            style="padding-left: 10px;"/>
         </a-col>
       </a-row>
-    </a-form>
-    <a-divider style="margin-bottom: 20px;top: -20px"></a-divider>
-    <a-row :gutter="24" style="clear: right;top: -30px">
-      <a-col>
-        <textarea ref="code" class="code"></textarea>
-      </a-col>
-    </a-row>
+      <a-row :gutter="24" style="clear: right;">
+        <a-col>
+          <textarea ref="code" class="code"></textarea>
+        </a-col>
+      </a-row>
+    </a-card>
     <mavon-editor
-      v-if="tutorial"
+      v-if="tutorial && showTutorial"
       v-model="tutorial"
       :toolbarsFlag="false"
       :subfield="false"
       :ishljs="true"
       :preview="true"
+      style="margin-top: 10px;z-index: 5"
       defaultOpen="preview">
     </mavon-editor>
   </div>
@@ -53,6 +63,7 @@
 
 <script>
 import { mavonEditor } from 'mavon-editor'
+import { submit } from '@api/notebook'
 import 'mavon-editor/dist/css/index.css'
 import { get } from '@api/tutorial'
 
@@ -80,27 +91,30 @@ export default {
       envs: [
         {
           env: 'flink',
-          info: 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment '
+          introduction: 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment as "senv"'
         },
         {
-          env: 'flink.pyflink',
-          info: 'Provides a python environment '
+          env: 'pyflink',
+          introduction: 'Provides a python environment '
         },
         {
-          env: 'flink.ipyflink',
-          info: ' Provides an ipython environment '
+          env: 'ipyflink',
+          introduction: ' Provides an ipython environment '
         },
         {
-          env: 'flink.ssql',
-          info: 'Provides a stream sql environment '
+          env: 'ssql',
+          introduction: 'Provides a stream sql environment '
         },
         {
-          env: 'flink.bsql',
-          info: ' Provides a batch sql environment'
+          env: 'bsql',
+          introduction: ' Provides a batch sql environment'
         }
       ],
       tutorial: null,
-      toolbars: false
+      toolbars: false,
+      showTutorial: false,
+      env: 'flink',
+      introduction: null
     }
   },
   mounted () {
@@ -123,6 +137,7 @@ export default {
       }
     })
     this.handleReadmd()
+    this.handleIntroduction()
     this.form = this.$form.createForm(this)
   },
 
@@ -130,6 +145,12 @@ export default {
     handleReplSubmit () {
       const code = this.editor.getValue()
       console.log(code)
+      submit({
+        env: 'senv',
+        sourceCode: code
+      }).then((resp) => {
+        console.log(resp.data)
+      })
     },
     handleReadmd () {
       get({
@@ -137,6 +158,14 @@ export default {
       }).then((resp) => {
         this.tutorial = resp.data.content
       })
+    },
+    handleIntroduction () {
+      const env = this.envs.filter((x) => x.env === this.env)[0]
+      this.introduction = env.introduction
+    },
+    handleChangeEnv (env) {
+      this.env = env
+      this.handleIntroduction()
     }
   }
 }
@@ -145,12 +174,11 @@ export default {
 <style scoped>
 
 .code {
-  height: 500px;
+  height: 800px;
   display: block;
   font-size: 11pt;
   position: relative;
   width: 100%;
-  z-index: 4;
   font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
 }
 
@@ -159,10 +187,10 @@ export default {
   left: 0px;
 }
 
->>>.CodeMirror-line::before {
+>>>.CodeMirror-line::before,.code-prefix {
   content: '';
-  background-color: #1890ff;
-  width: 6px;
+  background-color: #DDD;
+  width: 4px;
   height: 21px;
   margin-left: 5px;
   position: absolute;
@@ -179,8 +207,8 @@ export default {
 }
 
 .icon-list {
-  top: 10px;
-  height: 30px;
+  top: 0px;
+  height: 20px;
 }
 
 .CodeMirror {
@@ -188,7 +216,38 @@ export default {
   overflow: hidden;
   background: white;
   top: 0;
-  z-index: 4;
+}
+>>>.CodeMirror-lines{
+  padding: 0px !important;
+}
+
+>>>.ant-select-selection--single {
+  height: 24px !important;
+  border-radius: 4px !important;
+}
+
+>>>.ant-select-selection__rendered{
+  line-height: unset;
+  margin-left: 5px;
+}
+
+>>>.ant-select-arrow {
+  right: 5px;
+}
+
+.env-select {
+  width: 110px;
+  margin-left: 14px;
+  margin-top: -4px;
+  padding: 0px;
+}
+
+>>>.ant-card-body {
+  padding: 15px !important;
+}
+
+>>>.v-note-wrapper {
+  z-index: 5;
 }
 
 </style>
