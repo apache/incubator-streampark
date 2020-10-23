@@ -10,6 +10,8 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.Properties;
+import java.util.concurrent.Executors;
+
 import static org.junit.Assert.assertEquals;
 
 @Slf4j
@@ -46,10 +48,16 @@ public class NoteBookServiceImpl implements NoteBookService {
 
     @Override
     public void submit(Note note) throws Exception {
-        InterpreterContext context = getInterpreterContext();
-        InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
-        System.out.println(context.out.toString());
-        assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+        Executors.newSingleThreadExecutor().submit(() -> {
+            try{
+                InterpreterContext context = getInterpreterContext();
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
+                System.out.println(context.out.toString());
+                assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+            }catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override

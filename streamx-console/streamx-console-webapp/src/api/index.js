@@ -22,7 +22,7 @@ export default {
     GET: '/tutorial/get'
   },
   NoteBook: {
-    SUBMIT: '/flink/noteboot/submit'
+    SUBMIT: '/flink/notebook/submit'
   },
   SavePoint: {
     LASTEST: '/flink/savepoint/lastest',

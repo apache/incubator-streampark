@@ -55,6 +55,16 @@
             <groupId>com.streamxhub</groupId>
             <artifactId>flink-repl-interpreter</artifactId>
             <version>1.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -143,6 +153,7 @@
             <artifactId>mybatis-plus-boot-starter</artifactId>
             <version>${mybatis-plus.version}</version>
         </dependency>
+
 
         <!-- 代码生成器 -->
         <dependency>
@@ -271,12 +282,7 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.8.1.202007141445-r</version>
         </dependency>
-        <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>flink-repl-interpreter</artifactId>
-            <version>1.0.0</version>
-            <scope>compile</scope>
-        </dependency>
+
 
     </dependencies>
 
