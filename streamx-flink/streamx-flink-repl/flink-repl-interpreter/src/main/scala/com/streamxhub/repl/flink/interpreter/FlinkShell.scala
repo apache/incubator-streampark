@@ -13,7 +13,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.HdfsUtils
+import com.streamxhub.common.util.{HdfsUtils, Logger}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -21,7 +21,7 @@ import scala.collection.mutable.ArrayBuffer
  * Copy from flink, because we need to customize it to make sure
  * it work with multiple versions of flink.
  */
-object FlinkShell extends {
+object FlinkShell extends Logger {
 
   object ExecutionMode extends Enumeration {
     val UNDEFINED, LOCAL, REMOTE, YARN, APPLICATION = Value
@@ -58,17 +58,19 @@ object FlinkShell extends {
     config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
   }
 
-  @Internal def fetchConnectionInfo(config: Config,
-                                    flinkConfig: Configuration,
-                                    flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
-    config.executionMode match {
+  @Internal def getDeployInfo(config: Config,
+                              flinkConfig: Configuration,
+                              flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
+
+    val (effectiveConfig, clusterClient) = config.executionMode match {
       case ExecutionMode.LOCAL => createLocalClusterAndConfig(flinkConfig)
       case ExecutionMode.REMOTE => createRemoteConfig(config, flinkConfig)
       case ExecutionMode.YARN => createYarnClusterAndConfig(config, flinkConfig, flinkShims)
       case ExecutionMode.APPLICATION => createApplicationAndConfig(config, flinkConfig, flinkShims)
-      case ExecutionMode.UNDEFINED => // Wrong input
-        throw new IllegalArgumentException("please specify execution mode:[local | remote <host> <port> | yarn]")
+      case _ => throw new IllegalArgumentException("please specify execution mode:[local | remote <host> <port> | yarn]")
     }
+    logInfo(s"[StreamX] Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
+    (effectiveConfig, clusterClient)
   }
 
   private[this] def createApplicationAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
@@ -101,9 +103,9 @@ object FlinkShell extends {
       case Some(_) => getEffectiveConfiguration(config, clusterConfig, "application", flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, "default", flinkShims)
     }
-    println("Configuration: " + effectiveConfig)
     (effectiveConfig, clusterClient)
   }
+
 
   private[this] def createYarnClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
@@ -116,7 +118,6 @@ object FlinkShell extends {
       case Some(_) => getEffectiveConfiguration(config, clusterConfig, "yarn-cluster", flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, "default", flinkShims)
     }
-    println("Configuration: " + effectiveConfig)
     (effectiveConfig, clusterClient)
   }
 
@@ -220,7 +221,6 @@ object FlinkShell extends {
     setJobManagerInfoToConfig(effectiveConfig, config.host.get, config.port.get)
     effectiveConfig.set(DeploymentOptions.TARGET, RemoteExecutor.NAME)
     effectiveConfig.setBoolean(DeploymentOptions.ATTACHED, true)
-
     (effectiveConfig, None)
   }
 
@@ -234,9 +234,7 @@ object FlinkShell extends {
     setJobManagerInfoToConfig(config, "localhost", port)
     config.set(DeploymentOptions.TARGET, RemoteExecutor.NAME)
     config.setBoolean(DeploymentOptions.ATTACHED, true)
-
     println(s"\nStarting local Flink cluster (host: localhost, port: ${port}).\n")
-
     val clusterClient = new MiniClusterClient(config, cluster)
     (config, Some(clusterClient))
   }

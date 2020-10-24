@@ -61,7 +61,7 @@ public class FlinkInterpreterTest {
     @Before
     public void setUp() throws InterpreterException {
         Properties p = new Properties();
-        p.setProperty("printREPLOutput", "true");
+        p.setProperty("repl.out", "true");
         p.setProperty("scala.color", "false");
         p.setProperty("flink.execution.mode", "local");
         p.setProperty("local.number-taskmanager", "4");
