@@ -217,7 +217,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def createFlinkILoop(config: Config): Unit = {
-    val printReplOutput = properties.getProperty("printREPLOutput", "true").toBoolean
+    val printReplOutput = properties.getProperty("repl.out", "true").toBoolean
     val replOut = if (printReplOutput) {
       new JPrintWriter(interpreterOutput, true)
     } else {
@@ -235,7 +235,7 @@ class FlinkScalaInterpreter(properties: Properties) {
         }
       }
 
-      val (effectiveConfig, cluster) = fetchConnectionInfo(config, configuration, flinkShims)
+      val (effectiveConfig, cluster) = getDeployInfo(config, configuration, flinkShims)
       this.configuration = effectiveConfig
       cluster match {
         case Some(clusterClient) =>

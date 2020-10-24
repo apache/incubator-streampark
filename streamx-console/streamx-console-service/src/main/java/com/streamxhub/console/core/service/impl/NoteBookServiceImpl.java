@@ -3,6 +3,7 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.FlinkShell;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.interpreter.*;
@@ -24,9 +25,9 @@ public class NoteBookServiceImpl implements NoteBookService {
 
     private InterpreterContext getInterpreterContext() throws InterpreterException {
         Properties prop = new Properties();
-        prop.setProperty("printREPLOutput", "true");
-        prop.setProperty("scala.color", "false");
-        prop.setProperty("flink.execution.mode", "yarn");
+        prop.setProperty("repl.out", "true");
+        prop.setProperty("scala.color", "true");
+        prop.setProperty("flink.execution.mode", "application");
         interpreter = new FlinkInterpreter(prop);
         InterpreterGroup interpreterGroup = new InterpreterGroup();
         interpreter.setInterpreterGroup(interpreterGroup);
