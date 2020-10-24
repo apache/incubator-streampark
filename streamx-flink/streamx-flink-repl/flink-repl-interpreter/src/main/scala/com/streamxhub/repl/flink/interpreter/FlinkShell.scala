@@ -151,6 +151,7 @@ object FlinkShell extends Logger {
         println("Flink Job Started: applicationId: " + applicationId)
         println()
         println("------------------------------------")
+        clusterClient
       } finally if (clusterDescriptor != null) {
         clusterDescriptor.close()
       }
