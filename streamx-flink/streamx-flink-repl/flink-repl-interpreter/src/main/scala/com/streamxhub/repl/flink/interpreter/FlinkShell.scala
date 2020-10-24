@@ -72,11 +72,11 @@ object FlinkShell extends Logger {
 
   private[this] def createYarnClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
+    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
-      case Some(_) => deployNewYarnCluster(config, flinkConfig, flinkShims)
+      case Some(_) => deployYarnCluster(config, flinkConfig, flinkShims)
       case None => (flinkConfig, None)
     }
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
     val effectiveConfig = clusterClient match {
       case Some(_) => getEffectiveConfiguration(config, clusterConfig, "yarn-cluster", flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, "default", flinkShims)
@@ -84,16 +84,14 @@ object FlinkShell extends Logger {
     (effectiveConfig, clusterClient)
   }
 
-  private def deployNewYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+  private def deployYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     val effectiveConfig = new Configuration(flinkConfig)
     val args = parseArgList(config, "yarn-cluster")
     val configurationDirectory = getConfigDir(config)
     val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configurationDirectory))
-
     val commandOptions = CliFrontendParser.getRunCommandOptions
     val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
     val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
-
     val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
     val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
 
@@ -101,11 +99,9 @@ object FlinkShell extends Logger {
     val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
     val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
     val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
-
     val clusterClient = try {
       clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
     } finally {
-      executorConfig.set(DeploymentOptions.TARGET, "yarn-session")
       clusterDescriptor.close()
     }
 
