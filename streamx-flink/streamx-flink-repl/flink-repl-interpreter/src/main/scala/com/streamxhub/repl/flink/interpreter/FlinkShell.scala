@@ -93,7 +93,7 @@ object FlinkShell extends Logger {
       //设置部署模式为"application"
       .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
       //yarn application Type
-      .set(YarnConfigOptions.APPLICATION_TYPE, "NoteBook")
+      .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX NoteBook")
 
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => deployApplicationCluster(config, flinkConfig, flinkShims)
