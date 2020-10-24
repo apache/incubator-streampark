@@ -3,7 +3,6 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.FlinkShell;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.interpreter.*;
