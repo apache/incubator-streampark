@@ -26,7 +26,7 @@ public class NoteBookServiceImpl implements NoteBookService {
         Properties prop = new Properties();
         prop.setProperty("zeppelin.flink.printREPLOutput", "true");
         prop.setProperty("zeppelin.flink.scala.color", "false");
-        prop.setProperty("flink.execution.mode", "local");
+        prop.setProperty("flink.execution.mode", "yarn");
         interpreter = new FlinkInterpreter(prop);
         InterpreterGroup interpreterGroup = new InterpreterGroup();
         interpreter.setInterpreterGroup(interpreterGroup);
