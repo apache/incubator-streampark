@@ -37,101 +37,101 @@ import java.util.stream.Collectors;
 
 public class AppendStreamSqlJob extends AbstractStreamSqlJob {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(UpdateStreamSqlJob.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(UpdateStreamSqlJob.class);
 
-  private List<Row> materializedTable = new ArrayList<>();
-  private long tsWindowThreshold;
+    private List<Row> materializedTable = new ArrayList<>();
+    private long tsWindowThreshold;
 
-  public AppendStreamSqlJob(StreamExecutionEnvironment senv,
-                            TableEnvironment stEnv,
-                            JobManager jobManager,
-                            InterpreterContext context,
-                            int defaultParallelism,
-                            FlinkShims flinkShims) {
-    super(senv, stEnv, jobManager, context, defaultParallelism, flinkShims);
-    this.tsWindowThreshold = Long.parseLong(context.getLocalProperties()
-            .getOrDefault("threshold", 1000 * 60 * 60 + ""));
-  }
-
-  @Override
-  protected String getType() {
-    return "ts";
-  }
-
-  @Override
-  protected void checkTableSchema(TableSchema schema) throws Exception {
-    //    if (!(schema.getFieldDataType(0).get() instanceof TimestampType)) {
-    //      throw new Exception("The first column must be TimestampType, but is " +
-    //              schema.getFieldDataType(0));
-    //    }
-  }
-
-  @Override
-  protected void processInsert(Row row) {
-    LOGGER.debug("processInsert: " + row.toString());
-    materializedTable.add(row);
-  }
-
-  @Override
-  protected void processDelete(Row row) {
-    throw new RuntimeException("Delete operation is not expected");
-  }
-
-  @Override
-  protected String buildResult() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("%table\n");
-    for (int i = 0; i < schema.getFieldCount(); ++i) {
-      String field = schema.getFieldNames()[i];
-      builder.append(field);
-      if (i != (schema.getFieldCount() - 1)) {
-        builder.append("\t");
-      }
+    public AppendStreamSqlJob(StreamExecutionEnvironment senv,
+                              TableEnvironment stEnv,
+                              JobManager jobManager,
+                              InterpreterContext context,
+                              int defaultParallelism,
+                              FlinkShims flinkShims) {
+        super(senv, stEnv, jobManager, context, defaultParallelism, flinkShims);
+        this.tsWindowThreshold = Long.parseLong(context.getLocalProperties()
+                .getOrDefault("threshold", 1000 * 60 * 60 + ""));
     }
-    builder.append("\n");
 
-    // sort it by the first column
-    materializedTable.sort((r1, r2) -> {
-      String f1 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r1.getField(0)));
-      String f2 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r2.getField(0)));
-      return f1.compareTo(f2);
-    });
+    @Override
+    protected String getType() {
+        return "ts";
+    }
 
-    if (materializedTable.size() != 0) {
-      long maxTimestamp =
-              ((java.sql.Timestamp) materializedTable.get(materializedTable.size() - 1)
-                      .getField(0)).getTime();
+    @Override
+    protected void checkTableSchema(TableSchema schema) throws Exception {
+        //    if (!(schema.getFieldDataType(0).get() instanceof TimestampType)) {
+        //      throw new Exception("The first column must be TimestampType, but is " +
+        //              schema.getFieldDataType(0));
+        //    }
+    }
 
-      materializedTable = materializedTable.stream()
-              .filter(row -> ((java.sql.Timestamp) row.getField(0)).getTime() >
-                      maxTimestamp - tsWindowThreshold)
-              .collect(Collectors.toList());
+    @Override
+    protected void processInsert(Row row) {
+        LOGGER.debug("processInsert: " + row.toString());
+        materializedTable.add(row);
+    }
 
-      for (Row row : materializedTable) {
-        for (int i = 0; i < row.getArity(); ++i) {
-          Object field = row.getField(i);
-          builder.append(TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(field)));
-          if (i != (row.getArity() - 1)) {
-            builder.append("\t");
-          }
+    @Override
+    protected void processDelete(Row row) {
+        throw new RuntimeException("Delete operation is not expected");
+    }
+
+    @Override
+    protected String buildResult() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("%table\n");
+        for (int i = 0; i < schema.getFieldCount(); ++i) {
+            String field = schema.getFieldNames()[i];
+            builder.append(field);
+            if (i != (schema.getFieldCount() - 1)) {
+                builder.append("\t");
+            }
         }
         builder.append("\n");
-      }
-    }
-    builder.append("\n%text ");
-    return builder.toString();
-  }
 
-  @Override
-  protected void refresh(InterpreterContext context) {
-    context.out().clear(false);
-    try {
-      String result = buildResult();
-      context.out.write(result);
-      context.out.flush();
-      LOGGER.debug("Refresh with data: " + result);
-    } catch (IOException e) {
-      LOGGER.error("Fail to refresh data", e);
+        // sort it by the first column
+        materializedTable.sort((r1, r2) -> {
+            String f1 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r1.getField(0)));
+            String f2 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r2.getField(0)));
+            return f1.compareTo(f2);
+        });
+
+        if (materializedTable.size() != 0) {
+            long maxTimestamp =
+                    ((java.sql.Timestamp) materializedTable.get(materializedTable.size() - 1)
+                            .getField(0)).getTime();
+
+            materializedTable = materializedTable.stream()
+                    .filter(row -> ((java.sql.Timestamp) row.getField(0)).getTime() >
+                            maxTimestamp - tsWindowThreshold)
+                    .collect(Collectors.toList());
+
+            for (Row row : materializedTable) {
+                for (int i = 0; i < row.getArity(); ++i) {
+                    Object field = row.getField(i);
+                    builder.append(TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(field)));
+                    if (i != (row.getArity() - 1)) {
+                        builder.append("\t");
+                    }
+                }
+                builder.append("\n");
+            }
+        }
+        builder.append("\n%text ");
+        return builder.toString();
     }
-  }
+
+    @Override
+    protected void refresh(InterpreterContext context) {
+        context.out().clear(false);
+        try {
+            String result = buildResult();
+            context.out.write(result);
+            context.out.flush();
+            LOGGER.debug("Refresh with data: " + result);
+        } catch (IOException e) {
+            LOGGER.error("Fail to refresh data", e);
+        }
+    }
 }

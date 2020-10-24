@@ -192,7 +192,7 @@ abstract class FlinkSqlInterrpeter(properties: Properties) extends Interpreter(p
   }
 
   @throws[IOException] private def callCreateDatabase(sql: String, context: InterpreterContext): Unit = {
-    try this.tbenv.sqlUpdate(sql)  finally if (lock.isHeldByCurrentThread) lock.unlock()
+    try this.tbenv.sqlUpdate(sql) finally if (lock.isHeldByCurrentThread) lock.unlock()
     context.out.write("Database has been created.\n")
   }
 

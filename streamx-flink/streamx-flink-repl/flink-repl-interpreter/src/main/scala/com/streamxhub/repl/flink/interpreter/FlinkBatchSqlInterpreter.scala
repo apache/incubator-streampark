@@ -10,6 +10,7 @@ import org.apache.zeppelin.scheduler.{Scheduler, SchedulerFactory}
 
 class FlinkBatchSqlInterpreter(val prop: Properties) extends FlinkSqlInterrpeter(prop) {
   private var flinkContext: FlinkReplContext = _
+
   override protected def isBatch = true
 
   @throws[InterpreterException] override def open(): Unit = {

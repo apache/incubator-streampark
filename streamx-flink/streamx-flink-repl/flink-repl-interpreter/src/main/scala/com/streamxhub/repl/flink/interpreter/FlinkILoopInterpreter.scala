@@ -62,20 +62,18 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
         name.length
       }
 
-      private def isFlattenedSymbol(sym: Symbol): Boolean =
+      private def isFlattenedSymbol(sym: Symbol): Boolean = {
         sym.owner.isPackageClass &&
           sym.name.containsName(nme.NAME_JOIN_STRING) &&
           sym.owner.info.member(sym.name.take(
             safeIndexOf(sym.name, nme.NAME_JOIN_STRING))) != NoSymbol
+      }
 
-      private def importableTargetMembers =
-        importableMembers(exitingTyper(targetType)).filterNot(isFlattenedSymbol).toList
+      private def importableTargetMembers = importableMembers(exitingTyper(targetType)).filterNot(isFlattenedSymbol).toList
 
-      def isIndividualImport(s: ImportSelector): Boolean =
-        s.name != nme.WILDCARD && s.rename != nme.WILDCARD
+      def isIndividualImport(s: ImportSelector): Boolean = s.name != nme.WILDCARD && s.rename != nme.WILDCARD
 
-      def isWildcardImport(s: ImportSelector): Boolean =
-        s.name == nme.WILDCARD
+      def isWildcardImport(s: ImportSelector): Boolean = s.name == nme.WILDCARD
 
       // non-wildcard imports
       private def individualSelectors = selectors filter isIndividualImport
@@ -83,14 +81,12 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
       override val importsWildcard: Boolean = selectors exists isWildcardImport
 
       lazy val importableSymbolsWithRenames: List[(Symbol, Name)] = {
-        val selectorRenameMap =
-          individualSelectors.flatMap(x => x.name.bothNames zip x.rename.bothNames).toMap
+        val selectorRenameMap = individualSelectors.flatMap(x => x.name.bothNames zip x.rename.bothNames).toMap
         importableTargetMembers flatMap (m => selectorRenameMap.get(m.name) map (m -> _))
       }
 
       override lazy val individualSymbols: List[Symbol] = importableSymbolsWithRenames map (_._1)
-      override lazy val wildcardSymbols: List[Symbol] =
-        if (importsWildcard) importableTargetMembers else Nil
+      override lazy val wildcardSymbols: List[Symbol] = if (importsWildcard) importableTargetMembers else Nil
 
     }
 
@@ -209,7 +205,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
               maybeWrap(sym.name)
               x match {
                 case _: ClassHandler =>
-                  code.append(s"import ${objName}${req.accessPath}.`${sym.name}`\n")
+                  code.append(s"import $objName${req.accessPath}.`${sym.name}`\n")
                 case _ =>
                   val valName = s"${req.lineRep.packageName}${req.lineRep.readName}"
                   if (!tempValLines.contains(req.lineRep.lineId)) {
@@ -225,12 +221,11 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
           // ambiguity errors will not be generated. Also, quote
           // the name of the variable, so that we don't need to
           // handle quoting keywords separately.
-          case x =>
-            for (sym <- x.definedSymbols) {
-              maybeWrap(sym.name)
-              code append s"import ${x.path}\n"
-              currentImps += sym.name
-            }
+          case x => for (sym <- x.definedSymbols) {
+            maybeWrap(sym.name)
+            code append s"import ${x.path}\n"
+            currentImps += sym.name
+          }
         }
       }
     }

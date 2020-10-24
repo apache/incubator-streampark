@@ -34,72 +34,72 @@ import java.util.List;
 
 public class SingleRowStreamSqlJob extends AbstractStreamSqlJob {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(SingleRowStreamSqlJob.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SingleRowStreamSqlJob.class);
 
-  private Row latestRow;
-  private String template;
-  private boolean isFirstRefresh = true;
+    private Row latestRow;
+    private String template;
+    private boolean isFirstRefresh = true;
 
-  public SingleRowStreamSqlJob(StreamExecutionEnvironment senv,
-                               TableEnvironment stenv,
-                               JobManager jobManager,
-                               InterpreterContext context,
-                               int defaultParallelism,
-                               FlinkShims flinkShims) {
-    super(senv, stenv, jobManager, context, defaultParallelism, flinkShims);
-    this.template = context.getLocalProperties().getOrDefault("template", "{0}");
-  }
-
-  @Override
-  protected String getType() {
-    return "single";
-  }
-
-  @Override
-  protected void processInsert(Row row) {
-    LOGGER.debug("processInsert: " + row.toString());
-    latestRow = row;
-  }
-
-  @Override
-  protected void processDelete(Row row) {
-    //LOGGER.debug("Ignore delete");
-  }
-
-  @Override
-  protected String buildResult() {
-    SingleRowInterpreterResult singleRowResult =
-            new SingleRowInterpreterResult(rowToList(latestRow), template, context);
-    singleRowResult.pushAngularObjects();
-    return singleRowResult.toAngular();
-  }
-
-  @Override
-  protected void refresh(InterpreterContext context) throws Exception {
-    if (latestRow == null) {
-      LOGGER.warn("Skip RefreshTask as no data available");
-      return;
-    }
-    SingleRowInterpreterResult singleRowResult =
-            new SingleRowInterpreterResult(rowToList(latestRow), template, context);
-    if (isFirstRefresh) {
-      context.out().clear(false);
-      context.out.write(singleRowResult.toAngular());
-      context.out.flush();
-      // should checkpoint the html output, otherwise frontend won't display the output
-      // after recovering.
-      context.getIntpEventClient().checkpointOutput(context.getNoteId(), context.getParagraphId());
-      isFirstRefresh = false;
+    public SingleRowStreamSqlJob(StreamExecutionEnvironment senv,
+                                 TableEnvironment stenv,
+                                 JobManager jobManager,
+                                 InterpreterContext context,
+                                 int defaultParallelism,
+                                 FlinkShims flinkShims) {
+        super(senv, stenv, jobManager, context, defaultParallelism, flinkShims);
+        this.template = context.getLocalProperties().getOrDefault("template", "{0}");
     }
 
-    singleRowResult.pushAngularObjects();
-  }
-
-  private List rowToList(Row row) {
-    List list = new ArrayList<>();
-    for (int i = 0; i < row.getArity(); i++) {
-      list.add(row.getField(i));
+    @Override
+    protected String getType() {
+        return "single";
     }
-    return list;
-  }
+
+    @Override
+    protected void processInsert(Row row) {
+        LOGGER.debug("processInsert: " + row.toString());
+        latestRow = row;
+    }
+
+    @Override
+    protected void processDelete(Row row) {
+        //LOGGER.debug("Ignore delete");
+    }
+
+    @Override
+    protected String buildResult() {
+        SingleRowInterpreterResult singleRowResult =
+                new SingleRowInterpreterResult(rowToList(latestRow), template, context);
+        singleRowResult.pushAngularObjects();
+        return singleRowResult.toAngular();
+    }
+
+    @Override
+    protected void refresh(InterpreterContext context) throws Exception {
+        if (latestRow == null) {
+            LOGGER.warn("Skip RefreshTask as no data available");
+            return;
+        }
+        SingleRowInterpreterResult singleRowResult =
+                new SingleRowInterpreterResult(rowToList(latestRow), template, context);
+        if (isFirstRefresh) {
+            context.out().clear(false);
+            context.out.write(singleRowResult.toAngular());
+            context.out.flush();
+            // should checkpoint the html output, otherwise frontend won't display the output
+            // after recovering.
+            context.getIntpEventClient().checkpointOutput(context.getNoteId(), context.getParagraphId());
+            isFirstRefresh = false;
+        }
+
+        singleRowResult.pushAngularObjects();
+    }
+
+    private List rowToList(Row row) {
+        List list = new ArrayList<>();
+        for (int i = 0; i < row.getArity(); i++) {
+            list.add(row.getField(i));
+        }
+        return list;
+    }
 }
