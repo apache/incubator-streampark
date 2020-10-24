@@ -21,7 +21,7 @@ package com.streamxhub.repl.flink.interpreter
 import java.io.IOException
 import java.util.concurrent.atomic.AtomicInteger
 
-import com.streamxhub.repl.flink.interpreter.sql.{AppendStreamSqlJob, SingleRowStreamSqlJob, UpdateStreamSqlJob}
+import com.streamxhub.repl.flink.interpreter.sql._
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.table.api.Table
 import org.apache.flink.table.api.internal.TableImpl
@@ -55,7 +55,7 @@ class FlinkReplContext(val flinkInterpreter: FlinkScalaInterpreter,
   override def getInterpreterClassMap: _root_.java.util.Map[String, String] = JavaConversions.mapAsJavaMap(interpreterClassMap)
 
   private def showTable(columnsNames: Array[String], rows: Seq[Row]): String = {
-    val builder = new java.lang.StringBuilder("%table ")
+    val builder = new _root_.java.lang.StringBuilder("%table ")
     builder.append(columnsNames.mkString("\t"))
     builder.append("\n")
     val isLargerThanMaxResult = rows.size > maxResult
@@ -163,7 +163,7 @@ class FlinkReplContext(val flinkInterpreter: FlinkScalaInterpreter,
    * @param configs
    */
   def show(table: Table, streamType: String, configs: java.util.Map[String, String]): Unit = {
-    show(table, streamType, JavaConversions.mapAsScalaMap(configs).toMap)
+    show(table, streamType, configs.asScala.toMap)
   }
 
 }

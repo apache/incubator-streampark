@@ -16,7 +16,7 @@ class FlinkBatchSqlInterpreter(val prop: Properties) extends FlinkSqlInterrpeter
   @throws[InterpreterException] override def open(): Unit = {
     this.flinkInterpreter = getInterpreterInTheSameSessionByClassName(classOf[FlinkInterpreter])
     this.tbenv = flinkInterpreter.getJavaBatchTableEnvironment("blink")
-    this.flinkContext = flinkInterpreter.getZeppelinContext
+    this.flinkContext = flinkInterpreter.getReplContext
     super.open()
   }
 
