@@ -151,8 +151,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.flinkShims = FlinkShims.getInstance(properties)
     this.configuration = GlobalConfiguration.loadConfiguration(flinkConfDir)
 
-    mode = ExecutionMode.withName(
-      properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
+    mode = ExecutionMode.withName(properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
     var config = Config(executionMode = mode)
     val jmMemory = properties.getProperty("flink.jm.memory", "1024")
     config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(jobManagerMemory = Some(jmMemory))))
@@ -161,20 +160,15 @@ class FlinkScalaInterpreter(properties: Properties) {
     config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(taskManagerMemory = Some(tmMemory))))
 
     val appName = properties.getProperty("flink.yarn.appName", "Flink Yarn App Name")
-    config = config.copy(yarnConfig =
-      Some(ensureYarnConfig(config)
-        .copy(name = Some(appName))))
+    config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(name = Some(appName))))
 
     val slotNum = Integer.parseInt(properties.getProperty("flink.tm.slot", "1"))
-    config = config.copy(yarnConfig =
-      Some(ensureYarnConfig(config)
-        .copy(slots = Some(slotNum))))
+    config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(slots = Some(slotNum))))
+
     this.configuration.setInteger("taskmanager.numberOfTaskSlots", slotNum)
 
     val queue = properties.getProperty("flink.yarn.queue", "default")
-    config = config.copy(yarnConfig =
-      Some(ensureYarnConfig(config)
-        .copy(queue = Some(queue))))
+    config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(queue = Some(queue))))
 
     this.userUdfJars = getUserUdfJars()
     this.userJars = getUserJarsExceptUdfJars ++ this.userUdfJars
@@ -200,15 +194,12 @@ class FlinkScalaInterpreter(properties: Properties) {
       val host = properties.getProperty("flink.execution.remote.host")
       val port = properties.getProperty("flink.execution.remote.port")
       if (host == null) {
-        throw new InterpreterException("flink.execution.remote.host is not " +
-          "specified when using REMOTE mode")
+        throw new InterpreterException("flink.execution.remote.host is not specified when using REMOTE mode")
       }
       if (port == null) {
-        throw new InterpreterException("flink.execution.remote.port is not " +
-          "specified when using REMOTE mode")
+        throw new InterpreterException("flink.execution.remote.port is not specified when using REMOTE mode")
       }
-      config = config.copy(host = Some(host))
-        .copy(port = Some(Integer.parseInt(port)))
+      config = config.copy(host = Some(host)).copy(port = Some(Integer.parseInt(port)))
     }
 
     config
@@ -331,10 +322,8 @@ class FlinkScalaInterpreter(properties: Properties) {
       )
 
       flinkILoop.intp.interpret("import " + packageImports.mkString(", "))
-
       flinkILoop.intp.interpret("import org.apache.flink.table.api._")
       flinkILoop.intp.interpret("import org.apache.flink.table.api.bridge.scala._")
-
       flinkILoop.intp.interpret("import org.apache.flink.table.functions.ScalarFunction")
       flinkILoop.intp.interpret("import org.apache.flink.table.functions.AggregateFunction")
       flinkILoop.intp.interpret("import org.apache.flink.table.functions.TableFunction")
@@ -436,8 +425,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def registerHiveCatalog(): Unit = {
-    val hiveConfDir =
-      properties.getOrDefault("HIVE_CONF_DIR", System.getenv("HIVE_CONF_DIR")).toString
+    val hiveConfDir = properties.getOrDefault("HIVE_CONF_DIR", System.getenv("HIVE_CONF_DIR")).toString
     if (hiveConfDir == null) {
       throw new InterpreterException("HIVE_CONF_DIR is not specified");
     }
@@ -480,13 +468,11 @@ class FlinkScalaInterpreter(properties: Properties) {
                 flinkShims.registerAggregateFunction(btenv, c.getSimpleName, aggregateUDF)
               case tableAggregateUDF: TableAggregateFunction[_, _] =>
                 flinkShims.registerTableAggregateFunction(btenv, c.getSimpleName, tableAggregateUDF)
-              case _ =>
-                LOGGER.warn("No UDF definition found in class file: " + je.getName)
+              case _ => LOGGER.warn("No UDF definition found in class file: " + je.getName)
             }
           }
         } catch {
-          case e: Throwable =>
-            LOGGER.info("Fail to inspect udf class: " + je.getName, e)
+          case e: Throwable => LOGGER.info("Fail to inspect udf class: " + je.getName, e)
         }
       }
     }
@@ -497,8 +483,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       override def createExecutionEnvironment: JStreamExecutionEnvironment = senv.getJavaEnv
     }
     //StreamExecutionEnvironment
-    var method = classOf[JStreamExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment",
-      classOf[StreamExecutionEnvironmentFactory])
+    var method = classOf[JStreamExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[StreamExecutionEnvironmentFactory])
     method.setAccessible(true)
     method.invoke(null, streamFactory);
 
@@ -506,8 +491,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       override def createExecutionEnvironment: JExecutionEnvironment = benv.getJavaEnv
     }
     //StreamExecutionEnvironment
-    method = classOf[JExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment",
-      classOf[ExecutionEnvironmentFactory])
+    method = classOf[JExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[ExecutionEnvironmentFactory])
     method.setAccessible(true)
     method.invoke(null, batchFactory);
   }
@@ -812,7 +796,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     new URLClassLoader(userJars.map(e => new File(e).toURL).toArray)
   }
 
-  def getZeppelinContext = this.flinkReplContext
+  def getReplContext = this.flinkReplContext
 
   def getConfiguration = this.configuration
 

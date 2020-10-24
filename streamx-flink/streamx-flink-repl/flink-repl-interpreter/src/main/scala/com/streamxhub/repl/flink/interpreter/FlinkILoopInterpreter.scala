@@ -69,7 +69,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
             safeIndexOf(sym.name, nme.NAME_JOIN_STRING))) != NoSymbol
       }
 
-      private def importableTargetMembers = importableMembers(exitingTyper(targetType)).filterNot(isFlattenedSymbol).toList
+      def importableTargetMembers: List[Symbol] = importableMembers(exitingTyper(targetType)).filterNot(isFlattenedSymbol).toList
 
       def isIndividualImport(s: ImportSelector): Boolean = s.name != nme.WILDCARD && s.rename != nme.WILDCARD
 
@@ -134,13 +134,10 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
         // try to finesse this, we will mimic all imports for now.
         def keepHandler(handler: MemberHandler) = handler match {
           // While defining classes in class based mode - implicits are not needed.
-          case h: ImportHandler if isClassBased && definesClass =>
-            h.importedNames.exists(x => wanted.contains(x))
+          case h: ImportHandler if isClassBased && definesClass => h.importedNames.exists(x => wanted.contains(x))
           case _: ImportHandler => true
-          case x if generousImports => x.definesImplicit ||
-            (x.definedNames exists (d => wanted.exists(w => d.startsWith(w))))
-          case x => x.definesImplicit ||
-            (x.definedNames exists wanted)
+          case x if generousImports => x.definesImplicit || (x.definedNames exists (d => wanted.exists(w => d.startsWith(w))))
+          case x => x.definesImplicit || (x.definedNames exists wanted)
         }
 
         reqs match {
@@ -234,7 +231,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
     ComputedImports(computedHeader, code.toString, trailingBraces.toString, accessPath.toString)
   }
 
-  private def allReqAndHandlers =
+  def allReqAndHandlers =
     prevRequestList flatMap (req => req.handlers map (req -> _))
 
 }

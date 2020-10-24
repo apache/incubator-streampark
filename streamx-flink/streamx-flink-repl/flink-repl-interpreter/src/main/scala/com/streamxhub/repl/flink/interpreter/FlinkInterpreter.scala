@@ -16,10 +16,9 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
   private val LOGGER = LoggerFactory.getLogger(classOf[FlinkInterpreter])
 
   private var innerIntp: FlinkScalaInterpreter = _
-  private var zeppelinContext: FlinkReplContext = _
+  private var replContext: FlinkReplContext = _
 
-  @throws[InterpreterException]
-  private def checkScalaVersion(): Unit = {
+  @throws[InterpreterException] private def checkScalaVersion(): Unit = {
     val scalaVersionString = scala.util.Properties.versionString
     LOGGER.info("Using Scala: " + scalaVersionString)
 
@@ -28,25 +27,22 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
     }*/
   }
 
-  @throws[InterpreterException]
-  override def open(): Unit = {
+  @throws[InterpreterException] override def open(): Unit = {
     checkScalaVersion()
     this.innerIntp = new FlinkScalaInterpreter(getProperties)
     this.innerIntp.open()
-    this.zeppelinContext = this.innerIntp.getZeppelinContext
+    this.replContext = this.innerIntp.getReplContext
   }
 
-  @throws[InterpreterException]
-  override def close(): Unit = {
+  @throws[InterpreterException] override def close(): Unit = {
     if (this.innerIntp != null) this.innerIntp.close()
   }
 
-  @throws[InterpreterException]
-  override def interpret(st: String, context: InterpreterContext): InterpreterResult = {
+  @throws[InterpreterException] override def interpret(st: String, context: InterpreterContext): InterpreterResult = {
     LOGGER.debug("Interpret code: " + st)
-    this.zeppelinContext.setInterpreterContext(context)
-    this.zeppelinContext.setGui(context.getGui)
-    this.zeppelinContext.setNoteGui(context.getNoteGui)
+    this.replContext.setInterpreterContext(context)
+    this.replContext.setGui(context.getGui)
+    this.replContext.setNoteGui(context.getNoteGui)
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
     val originClassLoader = Thread.currentThread.getContextClassLoader
@@ -59,18 +55,15 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
     } finally Thread.currentThread.setContextClassLoader(originClassLoader)
   }
 
-  @throws[InterpreterException]
-  override def cancel(context: InterpreterContext): Unit = {
+  @throws[InterpreterException] override def cancel(context: InterpreterContext): Unit = {
     this.innerIntp.cancel(context)
   }
 
   @throws[InterpreterException] override def getFormType = FormType.SIMPLE
 
-  @throws[InterpreterException]
-  override def getProgress(context: InterpreterContext): Int = this.innerIntp.getProgress(context)
+  @throws[InterpreterException] override def getProgress(context: InterpreterContext): Int = this.innerIntp.getProgress(context)
 
-  @throws[InterpreterException]
-  override def completion(buf: String, cursor: Int, interpreterContext: InterpreterContext): java.util.List[InterpreterCompletion] = innerIntp.completion(buf, cursor, interpreterContext)
+  @throws[InterpreterException] override def completion(buf: String, cursor: Int, interpreterContext: InterpreterContext): java.util.List[InterpreterCompletion] = innerIntp.completion(buf, cursor, interpreterContext)
 
   private[flink] def getExecutionEnvironment = this.innerIntp.getExecutionEnvironment()
 
@@ -99,7 +92,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
 
   def getFlinkScalaShellLoader: ClassLoader = innerIntp.getFlinkScalaShellLoader
 
-  private[flink] def getZeppelinContext = this.zeppelinContext
+  private[flink] def getZeppelinContext = this.replContext
 
   private[flink] def getFlinkConfiguration = this.innerIntp.getConfiguration
 
