@@ -37,6 +37,7 @@ import java.util.Properties;
 /**
  * This is abstract class for anything that is api incompatible between different flink versions. It will
  * load the correct version of FlinkShims based on the version of flink.
+ *
  * @author benjobs
  */
 public abstract class FlinkShims {
@@ -51,8 +52,7 @@ public abstract class FlinkShims {
         this.properties = properties;
     }
 
-    private static FlinkShims loadShims(Properties properties)
-            throws Exception {
+    private static FlinkShims loadShims(Properties properties) throws Exception {
         Class<?> flinkShimsClass;
         LOGGER.info("Initializing shims for Flink 1.11");
         flinkShimsClass = Class.forName("com.streamxhub.repl.flink.shims.Flink111Shims");

@@ -92,7 +92,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
 
   def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
 
-  private[flink] def getZeppelinContext = this.replContext
+  private[flink] def getReplContext = this.replContext
 
   private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
 

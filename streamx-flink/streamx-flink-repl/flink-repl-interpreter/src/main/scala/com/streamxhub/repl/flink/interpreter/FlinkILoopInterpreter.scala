@@ -142,7 +142,8 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
 
         reqs match {
           case Nil =>
-            predefEscapes = wanted contains PredefModule.name; Nil
+            predefEscapes = wanted contains PredefModule.name
+            Nil
           case rh :: rest if !keepHandler(rh.handler) => select(rest, wanted)
           case rh :: rest =>
             import rh.handler._
