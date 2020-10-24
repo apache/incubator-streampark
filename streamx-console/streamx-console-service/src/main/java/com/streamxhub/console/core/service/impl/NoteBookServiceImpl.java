@@ -51,6 +51,7 @@ public class NoteBookServiceImpl implements NoteBookService {
                 System.out.println(context.out.toString());
                 assertEquals(InterpreterResult.Code.SUCCESS, result.code());
             } catch (Exception e) {
+                e.printStackTrace();
                 throw new RuntimeException(e);
             } finally {
                 if (interpreter != null) {
