@@ -14,7 +14,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package com.streamxhub.repl.flink.shims;
 
 
@@ -38,6 +37,7 @@ import java.util.Properties;
 /**
  * This is abstract class for anything that is api incompatible between different flink versions. It will
  * load the correct version of FlinkShims based on the version of flink.
+ * @author benjobs
  */
 public abstract class FlinkShims {
 
