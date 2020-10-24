@@ -26,7 +26,7 @@ public class NoteBookServiceImpl implements NoteBookService {
         Properties prop = new Properties();
         prop.setProperty("repl.out", "true");
         prop.setProperty("scala.color", "true");
-        prop.setProperty("flink.execution.mode", "yarn");
+        prop.setProperty("flink.execution.mode", "application");
         interpreter = new FlinkInterpreter(prop);
         InterpreterGroup interpreterGroup = new InterpreterGroup();
         interpreter.setInterpreterGroup(interpreterGroup);
@@ -43,26 +43,24 @@ public class NoteBookServiceImpl implements NoteBookService {
     }
 
     @Override
-    public void submit(Note note) throws Exception {
-        Executors.newSingleThreadExecutor().submit(() -> {
-            try {
-                InterpreterContext context = getInterpreterContext();
-                InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
-                System.out.println(context.out.toString());
-                assertEquals(InterpreterResult.Code.SUCCESS, result.code());
-            } catch (Exception e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            } finally {
-                if (interpreter != null) {
-                    try {
-                        interpreter.close();
-                    } catch (InterpreterException e) {
-                        e.printStackTrace();
-                    }
+    public void submit(Note note) {
+        try {
+            InterpreterContext context = getInterpreterContext();
+            InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
+            System.out.println(context.out.toString());
+            assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        } finally {
+            if (interpreter != null) {
+                try {
+                    interpreter.close();
+                } catch (InterpreterException e) {
+                    e.printStackTrace();
                 }
             }
-        });
+        }
     }
 
     @Override

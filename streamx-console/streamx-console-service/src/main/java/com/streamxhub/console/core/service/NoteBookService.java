@@ -7,11 +7,10 @@ import com.streamxhub.console.core.entity.Note;
  */
 public interface NoteBookService {
     /**
-     *
      * @param note
      * @throws Exception
      */
-    void submit(Note note) throws Exception;
+    void submit(Note note);
 
     void submit2(Note note);
 }

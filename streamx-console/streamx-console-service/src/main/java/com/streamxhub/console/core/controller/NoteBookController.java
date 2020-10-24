@@ -20,7 +20,7 @@ public class NoteBookController {
     private NoteBookService noteBookService;
 
     @PostMapping("submit")
-    public void submit(Note Note) throws Exception {
+    public void submit(Note Note) {
         noteBookService.submit(Note);
     }
 
