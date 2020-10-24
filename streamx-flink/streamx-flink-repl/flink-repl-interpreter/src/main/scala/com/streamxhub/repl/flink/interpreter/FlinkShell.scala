@@ -56,7 +56,7 @@ object FlinkShell extends Logger {
     case None => YarnConfig()
   }
 
-  private def getConfigDir(config: Config) = {
+  private def getConfigDir(config: Config): String = {
     config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
   }
 
