@@ -25,8 +25,6 @@ import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarFile
 
-import com.streamxhub.common.conf.ConfigConst.APP_FLINK
-import com.streamxhub.common.util.HdfsUtils
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import com.streamxhub.repl.flink.util.{DependencyUtils, HadoopUtils}
@@ -50,7 +48,6 @@ import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, Tabl
 import org.apache.flink.table.module.ModuleManager
 import org.apache.flink.table.module.hive.HiveModule
 import org.apache.flink.yarn.cli.FlinkYarnSessionCli
-import org.apache.hadoop.fs.Path
 import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
 import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException, InterpreterHookRegistry, InterpreterResult}
@@ -140,15 +137,6 @@ class FlinkScalaInterpreter(properties: Properties) {
   private def initFlinkConfig(): Config = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
     require(flinkLocalHome != null)
-
-    LOGGER.info(s"[StreamX] flinkHome: $flinkLocalHome")
-    val flinkName = new File(flinkLocalHome).getName
-    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
-    if (!HdfsUtils.exists(flinkHdfsHome)) {
-      LOGGER.info(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
-      HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
-    }
-
     val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"$flinkLocalHome/conf")
     val hadoopConfDir = sys.env.getOrElse("HADOOP_CONF_DIR", "")
     val yarnConfDir = sys.env.getOrElse("YARN_CONF_DIR", "")
@@ -244,7 +232,7 @@ class FlinkScalaInterpreter(properties: Properties) {
             case ExecutionMode.LOCAL =>
               LOGGER.info("Starting FlinkCluster in local mode")
               this.jmWebUrl = clusterClient.getWebInterfaceURL
-            case ExecutionMode.YARN | ExecutionMode.APPLICATION   =>
+            case ExecutionMode.YARN =>
               LOGGER.info("Starting FlinkCluster in yarn mode")
               if (properties.getProperty("flink.webui.yarn.useProxy", "false").toBoolean) {
                 this.jmWebUrl = HadoopUtils.getYarnAppTrackingUrl(clusterClient)
