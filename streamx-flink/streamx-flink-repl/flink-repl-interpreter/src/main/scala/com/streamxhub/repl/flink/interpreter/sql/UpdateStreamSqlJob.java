@@ -35,92 +35,92 @@ import java.util.List;
 
 public class UpdateStreamSqlJob extends AbstractStreamSqlJob {
 
-  private static Logger LOGGER = LoggerFactory.getLogger(UpdateStreamSqlJob.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(UpdateStreamSqlJob.class);
 
-  private List<Row> materializedTable = new ArrayList<>();
-  private List<Row> lastSnapshot = new ArrayList<>();
+    private List<Row> materializedTable = new ArrayList<>();
+    private List<Row> lastSnapshot = new ArrayList<>();
 
-  public UpdateStreamSqlJob(StreamExecutionEnvironment senv,
-                            TableEnvironment stEnv,
-                            JobManager jobManager,
-                            InterpreterContext context,
-                            int defaultParallelism,
-                            FlinkShims flinkShims) {
-    super(senv, stEnv, jobManager, context, defaultParallelism, flinkShims);
-  }
-
-  @Override
-  protected String getType() {
-    return "retract";
-  }
-
-  @Override
-  protected void processInsert(Row row) {
-    enableToRefresh = true;
-    resultLock.notify();
-    LOGGER.debug("processInsert: " + row.toString());
-    materializedTable.add(row);
-  }
-
-  @Override
-  protected void processDelete(Row row) {
-    enableToRefresh = false;
-    LOGGER.debug("processDelete: " + row.toString());
-    for (int i = 0; i < materializedTable.size(); i++) {
-      if (flinkShims.rowEquals(materializedTable.get(i), row)) {
-        LOGGER.debug("real processDelete: " + row.toString());
-        materializedTable.remove(i);
-        break;
-      }
+    public UpdateStreamSqlJob(StreamExecutionEnvironment senv,
+                              TableEnvironment stEnv,
+                              JobManager jobManager,
+                              InterpreterContext context,
+                              int defaultParallelism,
+                              FlinkShims flinkShims) {
+        super(senv, stEnv, jobManager, context, defaultParallelism, flinkShims);
     }
-  }
 
-  @Override
-  protected String buildResult() {
-    StringBuilder builder = new StringBuilder();
-    builder.append("%table\n");
-    for (int i = 0; i < schema.getFieldCount(); ++i) {
-      String field = schema.getFieldNames()[i];
-      builder.append(field);
-      if (i != (schema.getFieldCount() - 1)) {
-        builder.append("\t");
-      }
+    @Override
+    protected String getType() {
+        return "retract";
     }
-    builder.append("\n");
-    // sort it by the first column
-    materializedTable.sort((r1, r2) -> {
-      String f1 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r1.getField(0)));
-      String f2 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r2.getField(0)));
-      return f1.compareTo(f2);
-    });
-    for (Row row : materializedTable) {
-      for (int i = 0; i < row.getArity(); ++i) {
-        Object field = row.getField(i);
-        builder.append(TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(field)));
-        if (i != (row.getArity() - 1)) {
-          builder.append("\t");
+
+    @Override
+    protected void processInsert(Row row) {
+        enableToRefresh = true;
+        resultLock.notify();
+        LOGGER.debug("processInsert: " + row.toString());
+        materializedTable.add(row);
+    }
+
+    @Override
+    protected void processDelete(Row row) {
+        enableToRefresh = false;
+        LOGGER.debug("processDelete: " + row.toString());
+        for (int i = 0; i < materializedTable.size(); i++) {
+            if (flinkShims.rowEquals(materializedTable.get(i), row)) {
+                LOGGER.debug("real processDelete: " + row.toString());
+                materializedTable.remove(i);
+                break;
+            }
         }
-      }
-      builder.append("\n");
     }
-    builder.append("\n%text\n");
-    return builder.toString();
-  }
 
-  @Override
-  protected void refresh(InterpreterContext context) {
-    context.out().clear(false);
-    try {
-      String result = buildResult();
-      context.out.write(result);
-      context.out.flush();
-      LOGGER.debug("Refresh with data: " + result);
-      this.lastSnapshot.clear();
-      for (Row row : materializedTable) {
-        this.lastSnapshot.add(row);
-      }
-    } catch (IOException e) {
-      LOGGER.error("Fail to refresh data", e);
+    @Override
+    protected String buildResult() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("%table\n");
+        for (int i = 0; i < schema.getFieldCount(); ++i) {
+            String field = schema.getFieldNames()[i];
+            builder.append(field);
+            if (i != (schema.getFieldCount() - 1)) {
+                builder.append("\t");
+            }
+        }
+        builder.append("\n");
+        // sort it by the first column
+        materializedTable.sort((r1, r2) -> {
+            String f1 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r1.getField(0)));
+            String f2 = TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(r2.getField(0)));
+            return f1.compareTo(f2);
+        });
+        for (Row row : materializedTable) {
+            for (int i = 0; i < row.getArity(); ++i) {
+                Object field = row.getField(i);
+                builder.append(TableDataUtils.normalizeColumn(StringUtils.arrayAwareToString(field)));
+                if (i != (row.getArity() - 1)) {
+                    builder.append("\t");
+                }
+            }
+            builder.append("\n");
+        }
+        builder.append("\n%text\n");
+        return builder.toString();
     }
-  }
+
+    @Override
+    protected void refresh(InterpreterContext context) {
+        context.out().clear(false);
+        try {
+            String result = buildResult();
+            context.out.write(result);
+            context.out.flush();
+            LOGGER.debug("Refresh with data: " + result);
+            this.lastSnapshot.clear();
+            for (Row row : materializedTable) {
+                this.lastSnapshot.add(row);
+            }
+        } catch (IOException e) {
+            LOGGER.error("Fail to refresh data", e);
+        }
+    }
 }

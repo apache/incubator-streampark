@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory
 /**
  * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
  */
-class FlinkInterpreter(properties: Properties) extends Interpreter(properties)  {
+class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
   private val LOGGER = LoggerFactory.getLogger(classOf[FlinkInterpreter])
 
   private var innerIntp: FlinkScalaInterpreter = _

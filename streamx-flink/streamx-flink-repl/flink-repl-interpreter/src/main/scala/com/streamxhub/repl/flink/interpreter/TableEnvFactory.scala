@@ -44,7 +44,7 @@ class TableEnvFactory(var flinkShims: FlinkShims,
       moduleManager
     )
   } catch {
-    case e: Exception =>  throw new TableException("Fail to createScalaFlinkBatchTableEnvironment", e)
+    case e: Exception => throw new TableException("Fail to createScalaFlinkBatchTableEnvironment", e)
   }
 
   def createScalaFlinkStreamTableEnvironment(settings: EnvironmentSettings, classLoader: ClassLoader): TableEnvironment = try {
@@ -85,7 +85,7 @@ class TableEnvFactory(var flinkShims: FlinkShims,
       classLoader
     )
   } catch {
-    case e: Exception =>  throw new TableException("Fail to createJavaFlinkStreamTableEnvironment", e)
+    case e: Exception => throw new TableException("Fail to createJavaFlinkStreamTableEnvironment", e)
   }
 
   def createScalaBlinkStreamTableEnvironment(settings: EnvironmentSettings, classLoader: ClassLoader): TableEnvironment = try {
