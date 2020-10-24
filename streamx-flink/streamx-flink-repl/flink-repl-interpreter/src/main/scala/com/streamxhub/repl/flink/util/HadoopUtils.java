@@ -37,6 +37,7 @@ import java.io.IOException;
  * Move the hadoop related operation (depends on hadoop api) out of FlinkScalaInterpreter to this
  * class is because in this way we don't need to load hadoop class for non-yarn mode. Otherwise
  * even in non-yarn mode, user still need hadoop shaded jar which doesnt' make sense.
+ * @author benjobs
  */
 public class HadoopUtils {
 

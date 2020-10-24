@@ -24,8 +24,8 @@ public class NoteBookServiceImpl implements NoteBookService {
 
     private InterpreterContext getInterpreterContext() throws InterpreterException {
         Properties prop = new Properties();
-        prop.setProperty("zeppelin.flink.printREPLOutput", "true");
-        prop.setProperty("zeppelin.flink.scala.color", "false");
+        prop.setProperty("printREPLOutput", "true");
+        prop.setProperty("scala.color", "false");
         prop.setProperty("flink.execution.mode", "yarn");
         interpreter = new FlinkInterpreter(prop);
         InterpreterGroup interpreterGroup = new InterpreterGroup();
