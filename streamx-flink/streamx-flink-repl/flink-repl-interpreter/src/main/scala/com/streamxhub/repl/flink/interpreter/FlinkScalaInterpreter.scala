@@ -111,10 +111,12 @@ class FlinkScalaInterpreter(properties: Properties) {
     createFlinkILoop(config)
     createTableEnvs()
     setTableEnvConfig()
-
-    // init ZeppelinContext
-    this.flinkReplContext = new FlinkReplContext(this, new InterpreterHookRegistry(),
-      Integer.parseInt(properties.getProperty("zeppelin.flink.maxResult", "1000")))
+    // init
+    this.flinkReplContext = new FlinkReplContext(
+      this,
+      new InterpreterHookRegistry(),
+      properties.getProperty("zeppelin.flink.maxResult", "1000").toInt
+    )
     val modifiers = new java.util.ArrayList[String]()
     modifiers.add("@transient")
     this.bind("z", flinkReplContext.getClass.getCanonicalName, flinkReplContext, modifiers)
@@ -123,7 +125,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     val jobListener = new FlinkJobListener()
     this.benv.registerJobListener(jobListener)
     this.senv.registerJobListener(jobListener)
-
     // register hive catalog
     if (properties.getProperty("zeppelin.flink.enableHive", "false").toBoolean) {
       LOGGER.info("Hive is enabled, registering hive catalog.")
@@ -131,7 +132,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     } else {
       LOGGER.info("Hive is disabled.")
     }
-
     // load udf jar
     this.userUdfJars.foreach(jar => loadUDFJar(jar))
   }
@@ -150,7 +150,6 @@ class FlinkScalaInterpreter(properties: Properties) {
 
     this.flinkShims = FlinkShims.getInstance(properties)
     this.configuration = GlobalConfiguration.loadConfiguration(flinkConfDir)
-
     mode = ExecutionMode.withName(properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
     var config = Config(executionMode = mode)
     val jmMemory = properties.getProperty("flink.jm.memory", "1024")

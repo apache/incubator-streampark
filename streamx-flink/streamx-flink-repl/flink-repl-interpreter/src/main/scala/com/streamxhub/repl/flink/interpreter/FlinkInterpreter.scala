@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
   private val LOGGER = LoggerFactory.getLogger(classOf[FlinkInterpreter])
 
-  private var innerIntp: FlinkScalaInterpreter = _
+  private var interpreter: FlinkScalaInterpreter = _
   private var replContext: FlinkReplContext = _
 
   @throws[InterpreterException] private def checkScalaVersion(): Unit = {
@@ -29,13 +29,13 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
 
   @throws[InterpreterException] override def open(): Unit = {
     checkScalaVersion()
-    this.innerIntp = new FlinkScalaInterpreter(getProperties)
-    this.innerIntp.open()
-    this.replContext = this.innerIntp.getReplContext
+    this.interpreter = new FlinkScalaInterpreter(getProperties)
+    this.interpreter.open()
+    this.replContext = this.interpreter.getReplContext
   }
 
   @throws[InterpreterException] override def close(): Unit = {
-    if (this.innerIntp != null) this.innerIntp.close()
+    if (this.interpreter != null) this.interpreter.close()
   }
 
   @throws[InterpreterException] override def interpret(st: String, context: InterpreterContext): InterpreterResult = {
@@ -51,61 +51,61 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
       createPlannerAgain()
       setParallelismIfNecessary(context)
       setSavepointIfNecessary(context)
-      innerIntp.interpret(st, context)
+      interpreter.interpret(st, context)
     } finally Thread.currentThread.setContextClassLoader(originClassLoader)
   }
 
   @throws[InterpreterException] override def cancel(context: InterpreterContext): Unit = {
-    this.innerIntp.cancel(context)
+    this.interpreter.cancel(context)
   }
 
   @throws[InterpreterException] override def getFormType = FormType.SIMPLE
 
-  @throws[InterpreterException] override def getProgress(context: InterpreterContext): Int = this.innerIntp.getProgress(context)
+  @throws[InterpreterException] override def getProgress(context: InterpreterContext): Int = this.interpreter.getProgress(context)
 
-  @throws[InterpreterException] override def completion(buf: String, cursor: Int, interpreterContext: InterpreterContext): java.util.List[InterpreterCompletion] = innerIntp.completion(buf, cursor, interpreterContext)
+  @throws[InterpreterException] override def completion(buf: String, cursor: Int, interpreterContext: InterpreterContext): java.util.List[InterpreterCompletion] = interpreter.completion(buf, cursor, interpreterContext)
 
-  private[flink] def getExecutionEnvironment = this.innerIntp.getExecutionEnvironment()
+  private[flink] def getExecutionEnvironment = this.interpreter.getExecutionEnvironment()
 
-  private[flink] def getStreamExecutionEnvironment = this.innerIntp.getStreamExecutionEnvironment()
+  private[flink] def getStreamExecutionEnvironment = this.interpreter.getStreamExecutionEnvironment()
 
-  private[flink] def getStreamTableEnvironment = this.innerIntp.getStreamTableEnvironment("blink")
+  private[flink] def getStreamTableEnvironment = this.interpreter.getStreamTableEnvironment("blink")
 
-  private[flink] def getJavaBatchTableEnvironment(planner: String) = this.innerIntp.getJavaBatchTableEnvironment(planner)
+  private[flink] def getJavaBatchTableEnvironment(planner: String) = this.interpreter.getJavaBatchTableEnvironment(planner)
 
-  private[flink] def getJavaStreamTableEnvironment(planner: String) = this.innerIntp.getJavaStreamTableEnvironment(planner)
+  private[flink] def getJavaStreamTableEnvironment(planner: String) = this.interpreter.getJavaStreamTableEnvironment(planner)
 
-  private[flink] def getBatchTableEnvironment = this.innerIntp.getBatchTableEnvironment("blink")
+  private[flink] def getBatchTableEnvironment = this.interpreter.getBatchTableEnvironment("blink")
 
-  private[flink] def getJobManager = this.innerIntp.getJobManager
+  private[flink] def getJobManager = this.interpreter.getJobManager
 
-  private[flink] def getDefaultParallelism = this.innerIntp.getDefaultParallelism
+  private[flink] def getDefaultParallelism = this.interpreter.getDefaultParallelism
 
-  private[flink] def getDefaultSqlParallelism = this.innerIntp.getDefaultSqlParallelism
+  private[flink] def getDefaultSqlParallelism = this.interpreter.getDefaultSqlParallelism
 
   /**
    * Workaround for issue of FLINK-16936.
    */
   def createPlannerAgain(): Unit = {
-    this.innerIntp.createPlannerAgain()
+    this.interpreter.createPlannerAgain()
   }
 
-  def getFlinkScalaShellLoader: ClassLoader = innerIntp.getFlinkScalaShellLoader
+  def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
 
   private[flink] def getZeppelinContext = this.replContext
 
-  private[flink] def getFlinkConfiguration = this.innerIntp.getConfiguration
+  private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
 
-  def getInnerIntp: FlinkScalaInterpreter = this.innerIntp
+  def getInnerIntp: FlinkScalaInterpreter = this.interpreter
 
-  def getFlinkShims: FlinkShims = this.innerIntp.getFlinkShims
+  def getFlinkShims: FlinkShims = this.interpreter.getFlinkShims
 
   def setSavepointIfNecessary(context: InterpreterContext): Unit = {
-    this.innerIntp.setSavepointPathIfNecessary(context)
+    this.interpreter.setSavepointPathIfNecessary(context)
   }
 
   def setParallelismIfNecessary(context: InterpreterContext): Unit = {
-    this.innerIntp.setParallelismIfNecessary(context)
+    this.interpreter.setParallelismIfNecessary(context)
   }
 
 }
