@@ -244,7 +244,7 @@ class FlinkScalaInterpreter(properties: Properties) {
             case ExecutionMode.LOCAL =>
               LOGGER.info("Starting FlinkCluster in local mode")
               this.jmWebUrl = clusterClient.getWebInterfaceURL
-            case ExecutionMode.YARN || ExecutionMode.APPLICATION   =>
+            case ExecutionMode.YARN | ExecutionMode.APPLICATION   =>
               LOGGER.info("Starting FlinkCluster in yarn mode")
               if (properties.getProperty("flink.webui.yarn.useProxy", "false").toBoolean) {
                 this.jmWebUrl = HadoopUtils.getYarnAppTrackingUrl(clusterClient)
