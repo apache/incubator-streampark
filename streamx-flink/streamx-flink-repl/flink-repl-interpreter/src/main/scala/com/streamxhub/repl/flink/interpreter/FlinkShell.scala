@@ -105,7 +105,7 @@ object FlinkShell extends Logger {
   private[this] def createYarnClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
-      case Some(_) => deployNewYarnCluster(config, flinkConfig, flinkShims)
+      case Some(_) => deployYarnCluster(config, flinkConfig, flinkShims)
       case None => (flinkConfig, None)
     }
     flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
@@ -141,7 +141,7 @@ object FlinkShell extends Logger {
     (effectiveConfig, Some(clusterClient))
   }
 
-  private def deployNewYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+  private def deployYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     val effectiveConfig = new Configuration(flinkConfig)
     val args = parseArgList(config, "yarn-cluster")
     val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, getConfigurationDirectory(config)))
@@ -167,10 +167,10 @@ object FlinkShell extends Logger {
     (executorConfig, Some(clusterClient))
   }
 
-  private def getEffectiveConfiguration(config: Config,
-                                        flinkConfig: Configuration,
-                                        mode: String,
-                                        flinkShims: FlinkShims) = {
+  private[this] def getEffectiveConfiguration(config: Config,
+                                              flinkConfig: Configuration,
+                                              mode: String,
+                                              flinkShims: FlinkShims) = {
     val effectiveConfig = new Configuration(flinkConfig)
     val args = parseArgList(config, mode)
     val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, getConfigurationDirectory(config)))
@@ -200,7 +200,7 @@ object FlinkShell extends Logger {
     }
   }
 
-  private def createRemoteConfig(config: Config, flinkConfig: Configuration): (Configuration, None.type) = {
+  private[this] def createRemoteConfig(config: Config, flinkConfig: Configuration): (Configuration, None.type) = {
     if (config.host.isEmpty || config.port.isEmpty) {
       throw new IllegalArgumentException("<host> or <port> is not specified!")
     }
@@ -211,7 +211,7 @@ object FlinkShell extends Logger {
     (effectiveConfig, None)
   }
 
-  private def createLocalClusterAndConfig(flinkConfig: Configuration) = {
+  private[this] def createLocalClusterAndConfig(flinkConfig: Configuration) = {
     val config = new Configuration(flinkConfig)
     config.setInteger(JobManagerOptions.PORT, 0)
     val cluster = createLocalCluster(config)
