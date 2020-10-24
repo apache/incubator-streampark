@@ -14,6 +14,8 @@ import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfigurati
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{HdfsUtils, Logger}
+import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -126,23 +128,33 @@ object FlinkShell extends Logger {
     val args = parseArgList(config, "application")
     val configurationDirectory = getConfigDir(config)
     val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configurationDirectory))
-
     val commandOptions = CliFrontendParser.getRunCommandOptions
     val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
     val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
     val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
-    val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
-
-    val serviceLoader = new DefaultClusterClientServiceLoader
-    val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
-    val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
-    val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
+    val effectiveConfiguration = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
     val clusterClient = try {
-      clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
-    } finally {
-      clusterDescriptor.close()
+      val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
+      val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
+      val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
+      var applicationId: ApplicationId = null
+      val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
+      try {
+        val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
+        println("------------------<<specification>>------------------")
+        println(clusterSpecification)
+        println("------------------------------------")
+        val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+        applicationId = clusterClient.getClusterId
+        println("------------------<<applicationId>>------------------")
+        println()
+        println("Flink Job Started: applicationId: " + applicationId)
+        println()
+        println("------------------------------------")
+      } finally if (clusterDescriptor != null) {
+        clusterDescriptor.close()
+      }
     }
-
     (effectiveConfig, Some(clusterClient))
   }
 
