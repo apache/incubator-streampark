@@ -25,6 +25,8 @@ import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarFile
 
+import com.streamxhub.common.conf.ConfigConst.APP_FLINK
+import com.streamxhub.common.util.HdfsUtils
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import com.streamxhub.repl.flink.util.{DependencyUtils, HadoopUtils}
@@ -48,13 +50,13 @@ import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, Tabl
 import org.apache.flink.table.module.ModuleManager
 import org.apache.flink.table.module.hive.HiveModule
 import org.apache.flink.yarn.cli.FlinkYarnSessionCli
+import org.apache.hadoop.fs.Path
 import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
 import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException, InterpreterHookRegistry, InterpreterResult}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
-
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.Completion.ScalaCompleter
@@ -136,16 +138,26 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def initFlinkConfig(): Config = {
-    val flinkHome = sys.env.getOrElse("FLINK_HOME", "")
-    val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"${flinkHome}/conf")
+    val flinkLocalHome = System.getenv("FLINK_HOME")
+    require(flinkLocalHome != null)
+
+    LOGGER.info(s"[StreamX] flinkHome: $flinkLocalHome")
+    val flinkName = new File(flinkLocalHome).getName
+    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
+    if (!HdfsUtils.exists(flinkHdfsHome)) {
+      LOGGER.info(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
+      HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
+    }
+
+    val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"$flinkLocalHome/conf")
     val hadoopConfDir = sys.env.getOrElse("HADOOP_CONF_DIR", "")
     val yarnConfDir = sys.env.getOrElse("YARN_CONF_DIR", "")
     val hiveConfDir = sys.env.getOrElse("HIVE_CONF_DIR", "")
-    LOGGER.info("FLINK_HOME: " + flinkHome)
-    LOGGER.info("FLINK_CONF_DIR: " + flinkConfDir)
-    LOGGER.info("HADOOP_CONF_DIR: " + hadoopConfDir)
-    LOGGER.info("YARN_CONF_DIR: " + yarnConfDir)
-    LOGGER.info("HIVE_CONF_DIR: " + hiveConfDir)
+    LOGGER.info(s"FLINK_HOME: $flinkLocalHome")
+    LOGGER.info(s"FLINK_CONF_DIR: $flinkLocalHome")
+    LOGGER.info(s"HADOOP_CONF_DIR: $hadoopConfDir")
+    LOGGER.info(s"YARN_CONF_DIR: $yarnConfDir")
+    LOGGER.info(s"HIVE_CONF_DIR: $hiveConfDir")
 
     this.flinkShims = FlinkShims.getInstance(properties)
     this.configuration = GlobalConfiguration.loadConfiguration(flinkConfDir)
@@ -216,10 +228,8 @@ class FlinkScalaInterpreter(properties: Properties) {
         try {
           Class.forName(classOf[FlinkYarnSessionCli].getName)
         } catch {
-          case e: ClassNotFoundException =>
-            throw new InterpreterException("Unable to load FlinkYarnSessionCli for yarn mode", e)
-          case e: NoClassDefFoundError =>
-            throw new InterpreterException("No hadoop jar found, make sure you have hadoop command in your PATH", e)
+          case e: ClassNotFoundException => throw new InterpreterException("Unable to load FlinkYarnSessionCli for yarn mode", e)
+          case e: NoClassDefFoundError => throw new InterpreterException("No hadoop jar found, make sure you have hadoop command in your PATH", e)
         }
       }
 
@@ -257,15 +267,14 @@ class FlinkScalaInterpreter(properties: Properties) {
       if (InterpreterContext.get() != null) {
         //        InterpreterContext.get().getIntpEventClient.sendWebUrlInfo(this.jmWebUrl)
       }
-      LOGGER.info("externalJars: " +
-        config.externalJars.getOrElse(Array.empty[String]).mkString(":"))
+      LOGGER.info("externalJars: " + config.externalJars.getOrElse(Array.empty[String]).mkString(":"))
       val classLoader = Thread.currentThread().getContextClassLoader
       try {
         // use FlinkClassLoader to initialize FlinkILoop, otherwise TableFactoryService could not find
         // the TableFactory properly
         Thread.currentThread().setContextClassLoader(getFlinkClassLoader)
-        val repl = new FlinkILoop(configuration, config.externalJars, None, replOut)
-        (repl, cluster)
+        val iLoop = new FlinkILoop(configuration, config.externalJars, None, replOut)
+        (iLoop, cluster)
       } catch {
         case e: Exception =>
           LOGGER.error(ExceptionUtils.getStackTrace(e))
@@ -483,7 +492,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     //StreamExecutionEnvironment
     var method = classOf[JStreamExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[StreamExecutionEnvironmentFactory])
     method.setAccessible(true)
-    method.invoke(null, streamFactory);
+    method.invoke(null, streamFactory)
 
     val batchFactory = new ExecutionEnvironmentFactory() {
       override def createExecutionEnvironment: JExecutionEnvironment = benv.getJavaEnv

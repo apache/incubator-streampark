@@ -1,6 +1,7 @@
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.BufferedReader
+import java.io.{BufferedReader, File}
+import java.util.Arrays
 
 import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.flink.annotation.Internal
@@ -10,7 +11,9 @@ import org.apache.flink.client.deployment.executors.RemoteExecutor
 import org.apache.flink.client.program.{ClusterClient, MiniClusterClient}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
-import org.apache.flink.yarn.executors.YarnSessionClusterExecutor
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
+import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.util.{HdfsUtils}
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -18,10 +21,10 @@ import scala.collection.mutable.ArrayBuffer
  * Copy from flink, because we need to customize it to make sure
  * it work with multiple versions of flink.
  */
-object FlinkShell {
+object FlinkShell extends {
 
   object ExecutionMode extends Enumeration {
-    val UNDEFINED, LOCAL, REMOTE, YARN = Value
+    val UNDEFINED, LOCAL, REMOTE, YARN, APPLICATION = Value
   }
 
   /** Configuration object */
@@ -55,31 +58,65 @@ object FlinkShell {
     config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
   }
 
-  @Internal def fetchConnectionInfo(
-                                     config: Config,
-                                     flinkConfig: Configuration,
-                                     flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
-
+  @Internal def fetchConnectionInfo(config: Config,
+                                    flinkConfig: Configuration,
+                                    flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
     config.executionMode match {
       case ExecutionMode.LOCAL => createLocalClusterAndConfig(flinkConfig)
       case ExecutionMode.REMOTE => createRemoteConfig(config, flinkConfig)
-      case ExecutionMode.YARN => createYarnClusterIfNeededAndGetConfig(config, flinkConfig, flinkShims)
+      case ExecutionMode.YARN => createYarnClusterAndConfig(config, flinkConfig, flinkShims)
+      case ExecutionMode.APPLICATION => createApplicationAndConfig(config, flinkConfig, flinkShims)
       case ExecutionMode.UNDEFINED => // Wrong input
         throw new IllegalArgumentException("please specify execution mode:\n" +
           "[local | remote <host> <port> | yarn]")
     }
   }
 
-  private def createYarnClusterIfNeededAndGetConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+
+  private[this] def createApplicationAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+    val (clusterConfig, clusterClient) = config.yarnConfig match {
+      case Some(_) => deployNewYarnCluster(config, flinkConfig, flinkShims)
+      case None => (flinkConfig, None)
+    }
+    val flinkLocalHome = System.getenv("FLINK_HOME")
+    val flinkHdfsLibs = s"$flinkLocalHome/lib"
+    val flinkHdfsPlugins = s"$flinkLocalHome/plugins"
+
+    val flinkName = new File(flinkLocalHome).getName
+    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
+    val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
+
+    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+      case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+    }
+
+    //设置yarn.provided.lib.dirs
+    flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs, flinkHdfsPlugins))
+      //设置flinkDistJar
+      .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
+      //设置部署模式为"application"
+      .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+      //yarn application Type
+      .set(YarnConfigOptions.APPLICATION_TYPE, "NoteBook")
+
+    val (effectiveConfig, _) = clusterClient match {
+      case Some(_) => fetchDeployedYarnClusterInfo(config, clusterConfig, "yarn-cluster", flinkShims)
+      case None => fetchDeployedYarnClusterInfo(config, clusterConfig, "default", flinkShims)
+    }
+    println("Configuration: " + effectiveConfig)
+    (effectiveConfig, clusterClient)
+  }
+
+  private[this] def createYarnClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
 
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => deployNewYarnCluster(config, flinkConfig, flinkShims)
       case None => (flinkConfig, None)
     }
-
-    // workaround for FLINK-17788, otherwise it won't work with flink 1.10.1 which has been released.
-    flinkConfig.set(DeploymentOptions.TARGET, YarnSessionClusterExecutor.NAME)
+    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
     val (effectiveConfig, _) = clusterClient match {
       case Some(_) => fetchDeployedYarnClusterInfo(config, clusterConfig, "yarn-cluster", flinkShims)
@@ -91,17 +128,14 @@ object FlinkShell {
     (effectiveConfig, clusterClient)
   }
 
-  private def deployNewYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+  private def deployApplicationCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     val effectiveConfig = new Configuration(flinkConfig)
     val args = parseArgList(config, "yarn-cluster")
     val configurationDirectory = getConfigDir(config)
-    val frontend = new CliFrontend(
-      effectiveConfig,
-      CliFrontend.loadCustomCommandLines(effectiveConfig, configurationDirectory))
+    val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configurationDirectory))
 
     val commandOptions = CliFrontendParser.getRunCommandOptions
-    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions,
-      frontend.getCustomCommandLineOptions)
+    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
     val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
 
     val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
@@ -113,9 +147,34 @@ object FlinkShell {
     val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
 
     val clusterClient = try {
-      clusterDescriptor
-        .deploySessionCluster(clusterSpecification)
-        .getClusterClient
+      clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
+    } finally {
+      clusterDescriptor.close()
+    }
+
+    (executorConfig, Some(clusterClient))
+  }
+
+  private def deployNewYarnCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+    val effectiveConfig = new Configuration(flinkConfig)
+    val args = parseArgList(config, "yarn-cluster")
+    val configurationDirectory = getConfigDir(config)
+    val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configurationDirectory))
+
+    val commandOptions = CliFrontendParser.getRunCommandOptions
+    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
+    val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
+
+    val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
+    val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
+
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
+    val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
+    val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
+
+    val clusterClient = try {
+      clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
     } finally {
       executorConfig.set(DeploymentOptions.TARGET, "yarn-session")
       clusterDescriptor.close()
@@ -159,19 +218,17 @@ object FlinkShell {
 
     config.yarnConfig match {
       case Some(yarnConfig) =>
-        yarnConfig.jobManagerMemory.foreach((jmMem) => args ++= Seq("-yjm", jmMem.toString))
-        yarnConfig.taskManagerMemory.foreach((tmMem) => args ++= Seq("-ytm", tmMem.toString))
-        yarnConfig.name.foreach((name) => args ++= Seq("-ynm", name.toString))
-        yarnConfig.queue.foreach((queue) => args ++= Seq("-yqu", queue.toString))
-        yarnConfig.slots.foreach((slots) => args ++= Seq("-ys", slots.toString))
+        yarnConfig.jobManagerMemory.foreach(jmMem => args ++= Seq("-yjm", jmMem))
+        yarnConfig.taskManagerMemory.foreach(tmMem => args ++= Seq("-ytm", tmMem))
+        yarnConfig.name.foreach(name => args ++= Seq("-ynm", name))
+        yarnConfig.queue.foreach(queue => args ++= Seq("-yqu", queue))
+        yarnConfig.slots.foreach(slots => args ++= Seq("-ys", slots.toString))
         args.toArray
       case None => args.toArray
     }
   }
 
-  private def createRemoteConfig(
-                                  config: Config,
-                                  flinkConfig: Configuration): (Configuration, None.type) = {
+  private def createRemoteConfig(config: Config, flinkConfig: Configuration): (Configuration, None.type) = {
 
     if (config.host.isEmpty || config.port.isEmpty) {
       throw new IllegalArgumentException("<host> or <port> is not specified!")
@@ -219,9 +276,7 @@ object FlinkShell {
     cluster
   }
 
-  private def setJobManagerInfoToConfig(
-                                         config: Configuration,
-                                         host: String, port: Integer): Unit = {
+  private def setJobManagerInfoToConfig(config: Configuration, host: String, port: Integer): Unit = {
 
     config.setString(JobManagerOptions.ADDRESS, host)
     config.setInteger(JobManagerOptions.PORT, port)
