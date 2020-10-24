@@ -185,7 +185,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     LOGGER.info("Default SQL Parallelism: " + this.defaultSqlParallelism)
 
     // set scala.color
-    if (properties.getProperty("zeppelin.flink.scala.color", "true").toBoolean) {
+    if (properties.getProperty("scala.color", "true").toBoolean) {
       System.setProperty("scala.color", "true")
     }
     // set host/port when it is remote mode
@@ -214,17 +214,20 @@ class FlinkScalaInterpreter(properties: Properties) {
 
     val (iLoop, cluster) = {
       // workaround of checking hadoop jars in yarn  mode
-      if (mode == ExecutionMode.YARN) {
-        try {
-          Class.forName(classOf[FlinkYarnSessionCli].getName)
-        } catch {
-          case e: ClassNotFoundException => throw new InterpreterException("Unable to load FlinkYarnSessionCli for yarn mode", e)
-          case e: NoClassDefFoundError => throw new InterpreterException("No hadoop jar found, make sure you have hadoop command in your PATH", e)
-        }
+      mode match {
+        case ExecutionMode.YARN =>
+          try {
+            Class.forName(classOf[FlinkYarnSessionCli].getName)
+          } catch {
+            case e: ClassNotFoundException => throw new InterpreterException("Unable to load FlinkYarnSessionCli for yarn mode", e)
+            case e: NoClassDefFoundError => throw new InterpreterException("No hadoop jar found, make sure you have hadoop command in your PATH", e)
+          }
+        case _ =>
       }
 
-      val (effectiveConfig, cluster) = getDeployInfo(config, configuration, flinkShims)
-      this.configuration = effectiveConfig
+      val (effectiveConfiguration, cluster) = getDeployInfo(config, configuration, flinkShims)
+
+      this.configuration = effectiveConfiguration
       cluster match {
         case Some(clusterClient) =>
           // local mode or yarn
@@ -232,7 +235,7 @@ class FlinkScalaInterpreter(properties: Properties) {
             case ExecutionMode.LOCAL =>
               LOGGER.info("Starting FlinkCluster in local mode")
               this.jmWebUrl = clusterClient.getWebInterfaceURL
-            case ExecutionMode.YARN =>
+            case ExecutionMode.YARN | ExecutionMode.APPLICATION =>
               LOGGER.info("Starting FlinkCluster in yarn mode")
               if (properties.getProperty("flink.webui.yarn.useProxy", "false").toBoolean) {
                 this.jmWebUrl = HadoopUtils.getYarnAppTrackingUrl(clusterClient)
