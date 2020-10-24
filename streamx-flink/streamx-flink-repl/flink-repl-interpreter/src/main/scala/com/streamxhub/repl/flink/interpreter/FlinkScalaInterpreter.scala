@@ -50,6 +50,7 @@ import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, Tabl
 import org.apache.flink.table.module.ModuleManager
 import org.apache.flink.table.module.hive.HiveModule
 import org.apache.flink.yarn.cli.FlinkYarnSessionCli
+import org.apache.hadoop.fs.Path
 import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
 import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException, InterpreterHookRegistry, InterpreterResult}
@@ -158,10 +159,12 @@ class FlinkScalaInterpreter(properties: Properties) {
     LOGGER.info(s"YARN_CONF_DIR: $yarnConfDir")
     LOGGER.info(s"HIVE_CONF_DIR: $hiveConfDir")
 
+    this.mode = ExecutionMode.withName(properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
+    var config = Config(executionMode = mode)
+
     this.flinkShims = FlinkShims.getInstance(properties)
     this.configuration = GlobalConfiguration.loadConfiguration(flinkConfDir)
-    mode = ExecutionMode.withName(properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
-    var config = Config(executionMode = mode)
+
     val jmMemory = properties.getProperty("flink.jm.memory", "1024")
     config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(jobManagerMemory = Some(jmMemory))))
 
@@ -214,7 +217,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def createFlinkILoop(config: Config): Unit = {
-    val printReplOutput = properties.getProperty("zeppelin.flink.printREPLOutput", "true").toBoolean
+    val printReplOutput = properties.getProperty("printREPLOutput", "true").toBoolean
     val replOut = if (printReplOutput) {
       new JPrintWriter(interpreterOutput, true)
     } else {
