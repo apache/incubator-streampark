@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import static org.mockito.Mockito.mock;
 
 import java.util.Properties;
-import java.util.concurrent.Executors;
 
 import static org.junit.Assert.assertEquals;
 
@@ -26,7 +25,7 @@ public class NoteBookServiceImpl implements NoteBookService {
         Properties prop = new Properties();
         prop.setProperty("repl.out", "true");
         prop.setProperty("scala.color", "true");
-        prop.setProperty("flink.execution.mode", "application");
+        prop.setProperty("flink.execution.mode", "yarn");
         interpreter = new FlinkInterpreter(prop);
         InterpreterGroup interpreterGroup = new InterpreterGroup();
         interpreter.setInterpreterGroup(interpreterGroup);
