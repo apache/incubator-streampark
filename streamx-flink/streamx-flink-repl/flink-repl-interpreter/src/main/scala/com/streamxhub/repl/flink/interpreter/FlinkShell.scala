@@ -156,6 +156,7 @@ object FlinkShell extends Logger {
           executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
           clusterDescriptor.close()
         }
+
         (executorConfig, Some(clusterClient))
       }
       case None => (flinkConfig, None)
@@ -170,7 +171,7 @@ object FlinkShell extends Logger {
 
   def parseArgList(config: Config, target: YarnDeploymentTarget): Array[String] = {
     val args = target match {
-      case YarnDeploymentTarget.SESSION => ArrayBuffer[String]("-m", "yarn-cluster")
+      case YarnDeploymentTarget.SESSION | YarnDeploymentTarget.PER_JOB => ArrayBuffer[String]("-m", "yarn-cluster")
       case _ => ArrayBuffer[String]()
     }
     config.yarnConfig match {
