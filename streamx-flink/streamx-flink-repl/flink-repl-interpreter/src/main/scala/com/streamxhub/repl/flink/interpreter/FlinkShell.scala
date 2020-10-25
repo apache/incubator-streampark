@@ -100,7 +100,7 @@ object FlinkShell extends Logger {
         val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
         val effectiveConfiguration = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
 
-        val clusterClient = try {
+        val clusterClient = {
           val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
           val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
           val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
