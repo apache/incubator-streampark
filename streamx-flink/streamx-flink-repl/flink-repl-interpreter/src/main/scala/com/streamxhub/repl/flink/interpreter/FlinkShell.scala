@@ -56,11 +56,9 @@ object FlinkShell extends Logger {
     case None => YarnConfig()
   }
 
-  private def getConfigurationDirectory(config: Config): String = config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
-
   @Internal def getClusterClient(config: Config,
-                              flinkConfig: Configuration,
-                              flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
+                                 flinkConfig: Configuration,
+                                 flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
 
     val (effectiveConfig, clusterClient) = config.executionMode match {
       case ExecutionMode.LOCAL => createLocalClusterAndConfig(flinkConfig)
@@ -95,7 +93,7 @@ object FlinkShell extends Logger {
       case Some(_) => {
         val effectiveConfig = new Configuration(flinkConfig)
         val args = parseArgList(config, YarnDeploymentTarget.APPLICATION)
-        val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, getConfigurationDirectory(config)))
+        val frontend = getCliFrontend(effectiveConfig, config)
         val commandOptions = CliFrontendParser.getRunCommandOptions
         val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
         val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
@@ -126,14 +124,18 @@ object FlinkShell extends Logger {
   }
 
 
+  def getCliFrontend(effectiveConfig: Configuration, config: Config) = {
+    val configDir = config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
+    new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configDir))
+  }
+
   private[this] def createYarnSessionClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => {
         val effectiveConfig = new Configuration(flinkConfig)
         val args = parseArgList(config, YarnDeploymentTarget.SESSION)
-        val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, getConfigurationDirectory(config)))
-
+        val frontend = getCliFrontend(effectiveConfig, config)
         val commandOptions = CliFrontendParser.getRunCommandOptions
         val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
         val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
@@ -146,7 +148,7 @@ object FlinkShell extends Logger {
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
 
-        println(s"[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification")
+        logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n\n")
 
         val clusterClient = try {
           clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
@@ -236,7 +238,7 @@ object FlinkShell extends Logger {
                                               flinkShims: FlinkShims) = {
     val effectiveConfig = new Configuration(flinkConfig)
     val args = parseArgList(config, target)
-    val frontend = new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, getConfigurationDirectory(config)))
+    val frontend = getCliFrontend(effectiveConfig, config)
     val commandOptions = CliFrontendParser.getRunCommandOptions
     val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
     val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
