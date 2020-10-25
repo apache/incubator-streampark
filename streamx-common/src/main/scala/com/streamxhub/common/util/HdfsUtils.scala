@@ -88,7 +88,7 @@ object HdfsUtils extends Logger {
     outputStream.close()
   }
 
-  def exists(path: String) = hdfs.exists(getPath(path))
+  def exists(path: String): Boolean = hdfs.exists(getPath(path))
 
   @throws[IOException] def read(fileName: String): String = {
     val path: Path = getPath(fileName)
