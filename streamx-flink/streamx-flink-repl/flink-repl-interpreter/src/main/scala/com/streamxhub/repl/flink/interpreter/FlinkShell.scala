@@ -58,7 +58,7 @@ object FlinkShell extends Logger {
 
   private def getConfigurationDirectory(config: Config): String = config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
 
-  @Internal def getDeployInfo(config: Config,
+  @Internal def getClusterClient(config: Config,
                               flinkConfig: Configuration,
                               flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
 
