@@ -60,6 +60,7 @@ public class FlinkVersion {
     return minorVersion;
   }
 
+  @Override
   public String toString() {
     return versionString;
   }

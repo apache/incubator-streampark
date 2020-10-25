@@ -56,8 +56,8 @@ public abstract class FlinkShims {
         Class<?> flinkShimsClass;
         LOGGER.info("Initializing shims for Flink 1.11");
         flinkShimsClass = Class.forName("com.streamxhub.repl.flink.shims.Flink111Shims");
-        Constructor c = flinkShimsClass.getConstructor(Properties.class);
-        return (FlinkShims) c.newInstance(properties);
+        Constructor constructor = flinkShimsClass.getConstructor(Properties.class);
+        return (FlinkShims) constructor.newInstance(properties);
     }
 
     /**

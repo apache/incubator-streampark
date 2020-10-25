@@ -24,7 +24,6 @@ import java.nio.file.Files
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarFile
-
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import com.streamxhub.repl.flink.util.{DependencyUtils, HadoopUtils}
@@ -446,7 +445,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     val entries = jarFile.entries
 
     val udfPackages = properties.getProperty("flink.udf.jars.packages", "").split(",").toSet
-    val urls = Array(new URL("jar:file:" + jar + "!/"))
+    val urls = Array(new URL(s"jar:file:$jar!/"))
     val cl = new URLClassLoader(urls, getFlinkScalaShellLoader)
 
     while (entries.hasMoreElements) {
@@ -822,15 +821,13 @@ class FlinkScalaInterpreter(properties: Properties) {
       if (e != null) {
         LOGGER.warn("Fail to execute job")
       } else {
-        LOGGER.info("Job {} is executed with time {} seconds", jobExecutionResult.getJobID,
-          jobExecutionResult.getNetRuntime(TimeUnit.SECONDS))
+        LOGGER.info("Job {} is executed with time {} seconds", jobExecutionResult.getJobID, jobExecutionResult.getNetRuntime(TimeUnit.SECONDS))
       }
       if (InterpreterContext.get() != null) {
         jobManager.removeJob(InterpreterContext.get().getParagraphId)
       } else {
         if (e == null) {
-          LOGGER.warn("Unable to remove this job {}, as InterpreterContext is null",
-            jobExecutionResult.getJobID)
+          LOGGER.warn("Unable to remove this job {}, as InterpreterContext is null", jobExecutionResult.getJobID)
         }
       }
     }
