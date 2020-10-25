@@ -170,8 +170,7 @@ object FlinkShell extends Logger {
 
   def parseArgList(config: Config, target: YarnDeploymentTarget): Array[String] = {
     val args = target match {
-      case YarnDeploymentTarget.SESSION =>
-        ArrayBuffer[String]("-m", "yarn-cluster")
+      case YarnDeploymentTarget.SESSION => ArrayBuffer[String]("-m", "yarn-cluster")
       case _ => ArrayBuffer[String]()
     }
     config.yarnConfig match {
