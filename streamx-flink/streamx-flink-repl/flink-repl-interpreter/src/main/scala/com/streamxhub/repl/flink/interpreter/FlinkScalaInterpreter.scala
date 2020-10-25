@@ -225,7 +225,7 @@ class FlinkScalaInterpreter(properties: Properties) {
         case _ =>
       }
 
-      val (effectiveConfiguration, cluster) = getDeployInfo(config, configuration, flinkShims)
+      val (effectiveConfiguration, cluster) = FlinkShell.getClusterClient(config, configuration, flinkShims)
 
       this.configuration = effectiveConfiguration
       cluster match {
@@ -248,15 +248,15 @@ class FlinkScalaInterpreter(properties: Properties) {
                 this.jmWebUrl = clusterClient.getWebInterfaceURL
               }
             case _ =>
-              throw new Exception("Starting FlinkCluster in invalid mode: " + mode)
+              throw new Exception(s"Starting FlinkCluster in invalid mode: $mode")
           }
         case None =>
           // remote mode
           LOGGER.info("Use FlinkCluster in remote mode")
-          this.jmWebUrl = "http://" + config.host.get + ":" + config.port.get
+          this.jmWebUrl = s"http://${config.host.get}:${config.port.get}"
       }
 
-      LOGGER.info(s"\nConnecting to Flink cluster: " + this.jmWebUrl)
+      LOGGER.info(s"\nConnecting to Flink cluster: ${this.jmWebUrl}")
       if (InterpreterContext.get() != null) {
         //        InterpreterContext.get().getIntpEventClient.sendWebUrlInfo(this.jmWebUrl)
       }
