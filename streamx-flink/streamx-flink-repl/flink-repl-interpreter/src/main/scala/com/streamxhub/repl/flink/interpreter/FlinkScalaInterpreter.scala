@@ -424,7 +424,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def registerHiveCatalog(): Unit = {
-    val hiveConfDir = properties.getOrDefault("HIVE_CONF_DIR", System.getenv("HIVE_CONF_DIR")).toString
+    val hiveConfDir = properties.getOrDefault("HIVE_CONF_DIR", sys.env.get("HIVE_CONF_DIR")).toString
     if (hiveConfDir == null) {
       throw new InterpreterException("HIVE_CONF_DIR is not specified");
     }
