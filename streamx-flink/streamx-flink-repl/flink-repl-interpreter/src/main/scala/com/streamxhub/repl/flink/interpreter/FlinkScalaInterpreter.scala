@@ -551,6 +551,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     val originalStdOut = System.out
     val originalStdErr = System.err
     if (context != null) {
+      require(context.out != null)
       interpreterOutput.setInterpreterOutput(context.out)
       context.out.clear()
     }
