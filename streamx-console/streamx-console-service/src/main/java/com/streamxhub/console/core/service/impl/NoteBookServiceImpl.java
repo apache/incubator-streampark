@@ -41,26 +41,9 @@ public class NoteBookServiceImpl implements NoteBookService {
                 AngularObjectRegistry angularObjectRegistry = new AngularObjectRegistry("flink", null);
                 InterpreterContext context = InterpreterContext.builder()
                         .setParagraphId("paragraphId")
-                        .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
-
-                            @SneakyThrows
-                            @Override
-                            public void onUpdateAll(InterpreterOutput out) {
-                                System.out.println("NoteBook submit :onUpdateAll----");
-                            }
-
-                            @Override
-                            public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
-                                System.out.println("NoteBook submit :onAppend----");
-                            }
-
-                            @Override
-                            public void onUpdate(int index, InterpreterResultMessageOutput out) {
-                                System.out.println("NoteBook submit :onUpdate----");
-                            }
-                        }))
                         .setAngularObjectRegistry(angularObjectRegistry)
                         .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
+                        .setInterpreterOut(new InterpreterOutput(null))
                         .build();
                 InterpreterContext.set(context);
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
