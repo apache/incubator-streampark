@@ -63,7 +63,7 @@ public class FlinkInterpreterTest {
         Properties p = new Properties();
         p.setProperty("repl.out", "true");
         p.setProperty("scala.color", "false");
-        p.setProperty("flink.execution.mode", "local");
+        p.setProperty("flink.execution.mode", "yarn");
         p.setProperty("local.number-taskmanager", "4");
 
         interpreter = new FlinkInterpreter(p);
