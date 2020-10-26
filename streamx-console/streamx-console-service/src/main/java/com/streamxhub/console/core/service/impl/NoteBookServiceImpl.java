@@ -15,6 +15,7 @@ import javax.annotation.PostConstruct;
 import static org.mockito.Mockito.mock;
 
 import java.util.Properties;
+import java.util.concurrent.Executors;
 
 @Slf4j
 @Service("noteBookService")
@@ -31,52 +32,53 @@ public class NoteBookServiceImpl implements NoteBookService {
 
     @Override
     public void submit(Note note) {
-        FlinkInterpreter interpreter = new FlinkInterpreter(properties);
-        InterpreterGroup interpreterGroup = new InterpreterGroup();
-        interpreter.setInterpreterGroup(interpreterGroup);
-        try {
-            interpreter.open();
-            AngularObjectRegistry angularObjectRegistry = new AngularObjectRegistry("flink", null);
-            InterpreterContext context = InterpreterContext.builder()
-                    .setParagraphId("paragraphId")
-                    .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
+        Executors.newSingleThreadExecutor().submit(() -> {
+            FlinkInterpreter interpreter = new FlinkInterpreter(properties);
+            InterpreterGroup interpreterGroup = new InterpreterGroup();
+            interpreter.setInterpreterGroup(interpreterGroup);
+            try {
+                interpreter.open();
+                AngularObjectRegistry angularObjectRegistry = new AngularObjectRegistry("flink", null);
+                InterpreterContext context = InterpreterContext.builder()
+                        .setParagraphId("paragraphId")
+                        .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
 
-                        @SneakyThrows
-                        @Override
-                        public void onUpdateAll(InterpreterOutput out) {
-                            System.out.println("NoteBook submit :onUpdateAll----");
-                            System.out.println(out.getCurrentOutput().toInterpreterResultMessage().getData());
-                        }
+                            @SneakyThrows
+                            @Override
+                            public void onUpdateAll(InterpreterOutput out) {
+                                System.out.println("NoteBook submit :onUpdateAll----");
+                            }
 
-                        @Override
-                        public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
-                            System.out.println("NoteBook submit :onAppend----");
-                        }
+                            @Override
+                            public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
+                                System.out.println("NoteBook submit :onAppend----");
+                            }
 
-                        @Override
-                        public void onUpdate(int index, InterpreterResultMessageOutput out) {
-                            System.out.println("NoteBook submit :onUpdate----");
-                        }
-                    }))
-                    .setAngularObjectRegistry(angularObjectRegistry)
-                    .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
-                    .build();
-            InterpreterContext.set(context);
-            InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
-            System.out.println(context.out.toString());
-            assert InterpreterResult.Code.SUCCESS.equals(result.code());
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        } finally {
-            if (interpreter != null) {
-                try {
-                    interpreter.close();
-                } catch (InterpreterException e) {
-                    e.printStackTrace();
+                            @Override
+                            public void onUpdate(int index, InterpreterResultMessageOutput out) {
+                                System.out.println("NoteBook submit :onUpdate----");
+                            }
+                        }))
+                        .setAngularObjectRegistry(angularObjectRegistry)
+                        .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
+                        .build();
+                InterpreterContext.set(context);
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
+                System.out.println(context.out.toString());
+                assert InterpreterResult.Code.SUCCESS.equals(result.code());
+            } catch (Exception e) {
+                e.printStackTrace();
+                throw new RuntimeException(e);
+            } finally {
+                if (interpreter != null) {
+                    try {
+                        interpreter.close();
+                    } catch (InterpreterException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
-        }
+        });
     }
 
     @Override
