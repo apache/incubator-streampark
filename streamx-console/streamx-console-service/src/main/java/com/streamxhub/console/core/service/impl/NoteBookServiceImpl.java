@@ -3,7 +3,6 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.interpreter.*;
@@ -17,6 +16,9 @@ import static org.mockito.Mockito.mock;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Service("noteBookService")
 public class NoteBookServiceImpl implements NoteBookService {
