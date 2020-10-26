@@ -29,7 +29,7 @@ public class NoteBookServiceImpl implements NoteBookService {
     public void initProperty() {
         properties.setProperty("repl.out", "true");
         properties.setProperty("scala.color", "true");
-        properties.setProperty("flink.execution.mode", "local");
+        properties.setProperty("flink.execution.mode", "yarn");
     }
 
     @Override

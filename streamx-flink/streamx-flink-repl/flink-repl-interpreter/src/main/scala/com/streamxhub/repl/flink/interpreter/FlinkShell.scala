@@ -142,6 +142,7 @@ object FlinkShell extends Logger {
 
         val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
         val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
+        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
         val serviceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
@@ -153,7 +154,6 @@ object FlinkShell extends Logger {
         val clusterClient = try {
           clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
         } finally {
-          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
           clusterDescriptor.close()
         }
 
