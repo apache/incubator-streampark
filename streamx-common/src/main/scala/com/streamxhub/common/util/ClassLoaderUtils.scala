@@ -40,7 +40,7 @@ object ClassLoaderUtils {
   def loadJars(path: String): Unit = {
     val jarDir = new File(path)
     require(jarDir.exists, s"[StreamX] jarPath: $path is not exists")
-    require(jarDir.isFile, s"[StreamX] jarPath: $path is not directory")
+    require(jarDir.isDirectory, s"[StreamX] jarPath: $path is not directory")
     require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
     jarDir.listFiles.foreach { x =>
       loadPath(x.getAbsolutePath, List(".jar", ".zip"))
