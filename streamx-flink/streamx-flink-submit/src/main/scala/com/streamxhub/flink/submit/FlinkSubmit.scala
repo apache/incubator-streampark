@@ -455,5 +455,16 @@ object FlinkSubmit extends Logger {
     effectiveConfiguration
   }
 
+
+  case class SubmitInfo(flinkUserJar: String,
+                        appName: String,
+                        appConf: String,
+                        applicationType: String,
+                        savePoint: String,
+                        overrideOption: java.util.Map[String, Any],
+                        dynamicOption: Array[String],
+                        args: String)
+
+
 }
 
