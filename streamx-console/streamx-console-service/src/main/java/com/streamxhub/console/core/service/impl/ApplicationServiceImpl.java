@@ -43,7 +43,6 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
-import com.streamxhub.flink.submit.SubmitInfo;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -357,7 +356,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 ? application.getDynamicOptions().split("\\s+")
                 : new String[0];
 
-        SubmitInfo submitInfo = new SubmitInfo(
+        FlinkSubmit.SubmitInfo submitInfo = new FlinkSubmit.SubmitInfo(
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
