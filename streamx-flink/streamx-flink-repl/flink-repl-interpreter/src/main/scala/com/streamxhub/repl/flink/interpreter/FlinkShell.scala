@@ -1,6 +1,7 @@
 package com.streamxhub.repl.flink.interpreter
 
 import java.io.{BufferedReader, File}
+import java.net.URLClassLoader
 import java.util.Arrays
 
 import com.streamxhub.repl.flink.shims.FlinkShims
@@ -13,7 +14,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{HdfsUtils, Logger}
+import com.streamxhub.common.util.{ClassLoaderUtils, HdfsUtils, Logger}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
@@ -61,17 +62,17 @@ object FlinkShell extends Logger {
                                  flinkShims: FlinkShims): (Configuration, Option[ClusterClient[_]]) = {
 
     val (effectiveConfig, clusterClient) = config.executionMode match {
-      case ExecutionMode.LOCAL => createLocalClusterAndConfig(flinkConfig)
+      case ExecutionMode.LOCAL => createLocalCluster(flinkConfig)
       case ExecutionMode.REMOTE => createRemoteConfig(config, flinkConfig)
-      case ExecutionMode.YARN => createYarnSessionClusterAndConfig(config, flinkConfig, flinkShims)
-      case ExecutionMode.APPLICATION => createApplicationAndConfig(config, flinkConfig, flinkShims)
+      case ExecutionMode.YARN => createYarnSessionCluster(config, flinkConfig, flinkShims)
+      case ExecutionMode.APPLICATION => createApplicationCluster(config, flinkConfig, flinkShims)
       case _ => throw new IllegalArgumentException("please specify execution mode:[local | remote <host> <port> | yarn]")
     }
     logInfo(s"[StreamX] Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
     (effectiveConfig, clusterClient)
   }
 
-  private[this] def createApplicationAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+  private[this] def createApplicationCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
     val flinkHdfsLibs = s"$flinkLocalHome/lib"
     val flinkHdfsPlugins = s"$flinkLocalHome/plugins"
@@ -112,7 +113,9 @@ object FlinkShell extends Logger {
             clusterDescriptor.close()
           }
         }
+
         (effectiveConfig, Some(clusterClient))
+
       }
       case None => (flinkConfig, None)
     }
@@ -129,7 +132,7 @@ object FlinkShell extends Logger {
     new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configDir))
   }
 
-  private[this] def createYarnSessionClusterAndConfig(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
+  private[this] def createYarnSessionCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => {
@@ -144,6 +147,13 @@ object FlinkShell extends Logger {
         val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
         executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
+        val flinkLocalHome = System.getenv("FLINK_HOME")
+        val flinkHdfsLibs = new File(flinkLocalHome,"lib")
+
+        val classLoader = Thread.currentThread().getContextClassLoader
+        val flinkLoader = new URLClassLoader(flinkHdfsLibs.listFiles().map(_.toURL))
+
+        Thread.currentThread().setContextClassLoader(flinkLoader)
         val serviceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
@@ -157,6 +167,7 @@ object FlinkShell extends Logger {
           clusterDescriptor.close()
         }
 
+        Thread.currentThread().setContextClassLoader(classLoader)
         (executorConfig, Some(clusterClient))
       }
       case None => (flinkConfig, None)
@@ -197,7 +208,7 @@ object FlinkShell extends Logger {
     (effectiveConfig, None)
   }
 
-  private[this] def createLocalClusterAndConfig(flinkConfig: Configuration) = {
+  private[this] def createLocalCluster(flinkConfig: Configuration) = {
     val config = new Configuration(flinkConfig)
     config.setInteger(JobManagerOptions.PORT, 0)
 

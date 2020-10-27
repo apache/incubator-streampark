@@ -24,6 +24,8 @@ import java.nio.file.Files
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.jar.JarFile
+
+import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import com.streamxhub.repl.flink.util.{DependencyUtils, HadoopUtils}
@@ -265,6 +267,8 @@ class FlinkScalaInterpreter(properties: Properties) {
         // use FlinkClassLoader to initialize FlinkILoop, otherwise TableFactoryService could not find
         // the TableFactory properly
         Thread.currentThread().setContextClassLoader(getFlinkClassLoader)
+        val jars = "/opt/flink-1.11.1/lib"
+        ClassLoaderUtils.loadJars(jars)
         val iLoop = new FlinkILoop(configuration, config.externalJars, None, replOut)
         (iLoop, cluster)
       } catch {
