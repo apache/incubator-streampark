@@ -145,7 +145,7 @@ redis:
 
 kafka.sink:
   bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
-  topic: hello2
+  topic: kfk_sink
   transaction.timeout.ms: 1000
   semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
   batch.size: 1

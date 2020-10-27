@@ -1,0 +1,64 @@
+flink:
+  deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明细的问题的找不到jar文件
+    dynamic: ##这里放动态熟悉... -yD key=value
+    option: ## 这里放启动资源相关配置...
+      # main class
+      class: com.streamxhub.flink.test.FlinkSinkApp
+      yarnname: KafkaSinkApp
+      detached: true
+      jobmanager: yarn-cluster
+      shutdownOnAttachedExit:
+      yarnapplicationType:
+      yarndetached:
+      yarnapplicationId:
+      yarnjobManagerMemory: 1024M
+      yarncontainer:
+      yarnnodeLabel:
+      yarnqueue:
+      yarnslots: 1
+      parallelism: 1
+      yarntaskManagerMemory: 2048M
+  time.characteristic: EventTime
+  checkpoints:
+    enable: false
+    unaligned: true
+    interval: 30000
+    mode: EXACTLY_ONCE
+    timeout: 300000
+
+#state.backend
+state.backend: rocksdb #保存类型(jobmanager,filesystem,rocksdb)
+state.backend.memory: 5242880 #针对jobmanager有效,最大内存
+state.backend.async: false # 针对(jobmanager,filesystem)有效,是否开启异步
+state.backend.incremental: true #针对rocksdb有效,是否开启增量
+#rocksdb config: https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options
+#state.backend.rocksdb.block.blocksize:
+
+# 重启策略
+restart-strategy: fixed-delay #(fixed-delay|failure-rate|none共3个可配置的策略)
+restart-strategy.fixed-delay:
+  attempts: 3
+  delay: 5000
+  #failure-rate:
+  #  max-failures-per-interval:
+  #  failure-rate-interval:
+  #  delay:
+  #none:
+
+#state.backend
+state:
+  backend: filesystem #保存类型('jobmanager', 'filesystem', 'rocksdb')
+  backend.memory: 5242880 #针对jobmanager有效,最大内存
+  backend.async: false # 针对(jobmanager,filesystem)有效,是否开启异步
+  incremental: true #针对rocksdb有效,是否开启增量
+  #rocksdb config: https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options
+  #state.backend.rocksdb.block.blocksize:
+  checkpoints.dir: file:///tmp/chkdir
+  savepoints.dir: file:///tmp/chkdir
+
+kafka.sink:
+  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  topic: user_behavior
+  transaction.timeout.ms: 1000
+  semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
+  batch.size: 1
