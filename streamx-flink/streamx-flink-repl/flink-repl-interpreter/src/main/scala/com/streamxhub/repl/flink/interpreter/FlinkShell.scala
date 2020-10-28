@@ -139,31 +139,34 @@ object FlinkShell extends Logger {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => {
-        val effectiveConfig = new Configuration(flinkConfig)
-        val args = parseArgList(config, YarnDeploymentTarget.PER_JOB)
-        val frontend = getCliFrontend(effectiveConfig, config)
-        val commandOptions = CliFrontendParser.getRunCommandOptions
-        val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
-        val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
 
-        val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
-        val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
+        val executorConfig = {
+          val effectiveConfig = new Configuration(flinkConfig)
+          val args = parseArgList(config, YarnDeploymentTarget.PER_JOB)
+          val frontend = getCliFrontend(effectiveConfig, config)
+          val commandOptions = CliFrontendParser.getRunCommandOptions
+          val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
+          val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
 
-        val flinkHome = System.getenv("FLINK_HOME")
-        val flinkLibDir = new Path(s"$flinkHome/lib")
-        val flinkPluginsDir = new Path(s"$flinkHome/plugins")
+          val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
+          val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
 
-        val flinkDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-          case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
-          case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
-          case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+          val flinkHome = System.getenv("FLINK_HOME")
+          val flinkLibDir = new Path(s"$flinkHome/lib")
+          val flinkPluginsDir = new Path(s"$flinkHome/plugins")
+
+          val flinkDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
+            case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
+            case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+          }
+
+          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+            //设置yarn.provided.lib.dirs
+            .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibDir.toString, flinkPluginsDir.toString))
+            //设置flinkDistJar
+            .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
         }
-
-        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
-          //设置yarn.provided.lib.dirs
-          .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibDir.toString, flinkPluginsDir.toString))
-          //设置flinkDistJar
-          .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
 
         val serviceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
