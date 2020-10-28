@@ -142,7 +142,7 @@ object FlinkShell extends Logger {
 
         val executorConfig = {
           val effectiveConfig = new Configuration(flinkConfig)
-          val args = parseArgList(config, YarnDeploymentTarget.PER_JOB)
+          val args = parseArgList(config, YarnDeploymentTarget.SESSION)
           val frontend = getCliFrontend(effectiveConfig, config)
           val commandOptions = CliFrontendParser.getRunCommandOptions
           val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
@@ -167,7 +167,7 @@ object FlinkShell extends Logger {
             case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
           }
 
-          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
             //设置yarn.provided.lib.dirs
             .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
             //设置flinkDistJar
@@ -178,9 +178,9 @@ object FlinkShell extends Logger {
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
-        logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.PER_JOB},clusterSpecification:$clusterSpecification\n\n")
+        logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n\n")
         val clusterClient = try {
-          clusterDescriptor.deployJobCluster(clusterSpecification, null, true).getClusterClient
+          clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
         } finally {
           clusterDescriptor.close()
         }
@@ -189,7 +189,7 @@ object FlinkShell extends Logger {
       case None => (flinkConfig, None)
     }
     val effectiveConfig = clusterClient match {
-      case Some(_) => getEffectiveConfiguration(config, clusterConfig, YarnDeploymentTarget.PER_JOB, flinkShims)
+      case Some(_) => getEffectiveConfiguration(config, clusterConfig, YarnDeploymentTarget.SESSION, flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, null, flinkShims)
     }
     (effectiveConfig, clusterClient)
