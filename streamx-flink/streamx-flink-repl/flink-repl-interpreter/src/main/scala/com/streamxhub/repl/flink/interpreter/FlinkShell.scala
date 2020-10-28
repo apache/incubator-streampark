@@ -85,15 +85,18 @@ object FlinkShell extends Logger {
 
           val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
           val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
+          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
+          /**
+           * 如部署的环境未设置环境变量"FLINK_LIB_DIR",则一定要指定本地的Flink dist jar位置,不然yarn启动报错(错误: 找不到或无法加载主类 org.apache.flink.yarn.entrypoint.YarnSessionClusterEntrypoint)
+           */
           val flinkLocalHome = System.getenv("FLINK_HOME")
           val flinkDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
             case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
             case array if array.length == 1 => s"$flinkLocalHome/lib/${array.head}"
             case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
           }
-
-          executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName).set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
+          executorConfig.set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
         }
 
         val serviceLoader = new DefaultClusterClientServiceLoader
@@ -145,7 +148,7 @@ object FlinkShell extends Logger {
     (effectiveConfig, None)
   }
 
-  private[this] def createLocalCluster(flinkConfig: Configuration) = {
+  private[this] def createLocalCluster(flinkConfig: Configuration): (Configuration, Option[MiniClusterClient]) = {
     val config = new Configuration(flinkConfig)
     config.setInteger(JobManagerOptions.PORT, 0)
 
