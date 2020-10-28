@@ -151,21 +151,27 @@ object FlinkShell extends Logger {
           val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
           val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
 
-          val flinkHome = System.getenv("FLINK_HOME")
-          val flinkLibDir = new Path(s"$flinkHome/lib")
-          val flinkPluginsDir = new Path(s"$flinkHome/plugins")
+          val flinkLocalHome = System.getenv("FLINK_HOME")
+          val flinkName = new File(flinkLocalHome).getName
+          val flinkHdfsHome = s"$APP_FLINK/$flinkName"
 
-          val flinkDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
-            case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
-            case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+          val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
+
+          //存放flink集群相关的jar包目录
+          val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
+          val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
+
+          val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+            case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+            case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
           }
 
           executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
             //设置yarn.provided.lib.dirs
-            .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibDir.toString, flinkPluginsDir.toString))
+            .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
             //设置flinkDistJar
-            .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
+            .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
         }
 
         val serviceLoader = new DefaultClusterClientServiceLoader
