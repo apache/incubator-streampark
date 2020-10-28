@@ -73,20 +73,23 @@ object FlinkShell extends Logger {
   }
 
   private[this] def createApplicationCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
-    val flinkLocalHome = System.getenv("FLINK_HOME")
-    val flinkHdfsLibs = s"$flinkLocalHome/lib"
-    val flinkHdfsPlugins = s"$flinkLocalHome/plugins"
-    val flinkName = new File(flinkLocalHome).getName
-    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
-    val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
-    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-      case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+    val flinkHome = System.getenv("FLINK_HOME")
+    val flinkLibDir = s"$flinkHome/lib"
+    val flinkPluginDir = s"$flinkHome/plugins"
+
+    val flinkDistJar = {
+      val flinkName = new File(flinkHome).getName
+      val flinkHdfsHome = s"$APP_FLINK/$flinkName"
+      val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
+      new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
+        case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+      }
     }
 
-    flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs, flinkHdfsPlugins))
-      .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
+    flinkConfig.set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibDir, flinkPluginDir))
+      .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
       .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
       .set(YarnConfigOptions.APPLICATION_TYPE, "StreamX NoteBook")
 
@@ -137,7 +140,7 @@ object FlinkShell extends Logger {
     val (clusterConfig, clusterClient) = config.yarnConfig match {
       case Some(_) => {
         val effectiveConfig = new Configuration(flinkConfig)
-        val args = parseArgList(config, YarnDeploymentTarget.SESSION)
+        val args = parseArgList(config, YarnDeploymentTarget.PER_JOB)
         val frontend = getCliFrontend(effectiveConfig, config)
         val commandOptions = CliFrontendParser.getRunCommandOptions
         val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
@@ -145,36 +148,33 @@ object FlinkShell extends Logger {
 
         val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
         val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
-        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
 
-        val flinkLocalHome = System.getenv("FLINK_HOME")
-        val flinkHdfsLibs = new File(flinkLocalHome,"lib")
+        val flinkHome = System.getenv("FLINK_HOME")
+        val flinkLibDir = new File(flinkHome, "lib")
 
         val classLoader = Thread.currentThread().getContextClassLoader
-        val flinkLoader = new URLClassLoader(flinkHdfsLibs.listFiles().map(_.toURL))
+        val flinkLoader = new URLClassLoader(flinkLibDir.listFiles().map(_.toURL))
 
         Thread.currentThread().setContextClassLoader(flinkLoader)
         val serviceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
-
-        logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n\n")
-
+        logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.PER_JOB},clusterSpecification:$clusterSpecification\n\n")
         val clusterClient = try {
-          clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
+          clusterDescriptor.deployJobCluster(clusterSpecification,null,true).getClusterClient
         } finally {
           clusterDescriptor.close()
         }
-
         Thread.currentThread().setContextClassLoader(classLoader)
         (executorConfig, Some(clusterClient))
       }
       case None => (flinkConfig, None)
     }
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
+    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     val effectiveConfig = clusterClient match {
-      case Some(_) => getEffectiveConfiguration(config, clusterConfig, YarnDeploymentTarget.SESSION, flinkShims)
+      case Some(_) => getEffectiveConfiguration(config, clusterConfig, YarnDeploymentTarget.PER_JOB, flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, null, flinkShims)
     }
     (effectiveConfig, clusterClient)
