@@ -188,7 +188,6 @@ object FlinkSubmit extends Logger {
      */
     val flinkLocalHome = System.getenv("FLINK_HOME")
     require(flinkLocalHome != null)
-
     logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
 
     val flinkName = new File(flinkLocalHome).getName
@@ -200,7 +199,8 @@ object FlinkSubmit extends Logger {
     }
 
     val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
-    val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+    val flinkLocalConfDir = s"$flinkLocalHome/conf"
+
     //存放flink集群相关的jar包目录
     val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")

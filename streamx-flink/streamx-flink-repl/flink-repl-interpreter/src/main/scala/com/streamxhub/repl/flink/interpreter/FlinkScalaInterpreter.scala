@@ -49,6 +49,7 @@ import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, Tabl
 import org.apache.flink.table.module.ModuleManager
 import org.apache.flink.table.module.hive.HiveModule
 import org.apache.flink.yarn.cli.FlinkYarnSessionCli
+import org.apache.flink.yarn.entrypoint.{YarnJobClusterEntrypoint, YarnSessionClusterEntrypoint}
 import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
 import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException, InterpreterHookRegistry, InterpreterResult}
@@ -136,14 +137,14 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def initFlinkConfig(): Config = {
-    val flinkLocalHome = System.getenv("FLINK_HOME")
-    require(flinkLocalHome != null)
-    val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"$flinkLocalHome/conf")
+    val flinkHome = System.getenv("FLINK_HOME")
+    require(flinkHome != null)
+    val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"$flinkHome/conf")
     val hadoopConfDir = sys.env.getOrElse("HADOOP_CONF_DIR", "")
     val yarnConfDir = sys.env.getOrElse("YARN_CONF_DIR", "")
     val hiveConfDir = sys.env.getOrElse("HIVE_CONF_DIR", "")
-    LOGGER.info(s"FLINK_HOME: $flinkLocalHome")
-    LOGGER.info(s"FLINK_CONF_DIR: $flinkLocalHome")
+    LOGGER.info(s"FLINK_HOME: $flinkHome")
+    LOGGER.info(s"FLINK_CONF_DIR: $flinkHome")
     LOGGER.info(s"HADOOP_CONF_DIR: $hadoopConfDir")
     LOGGER.info(s"YARN_CONF_DIR: $yarnConfDir")
     LOGGER.info(s"HIVE_CONF_DIR: $hiveConfDir")
@@ -218,7 +219,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       mode match {
         case ExecutionMode.YARN =>
           try {
-            Class.forName(classOf[FlinkYarnSessionCli].getName)
+            Class.forName(classOf[YarnJobClusterEntrypoint].getName)
           } catch {
             case e: ClassNotFoundException => throw new InterpreterException("Unable to load FlinkYarnSessionCli for yarn mode", e)
             case e: NoClassDefFoundError => throw new InterpreterException("No hadoop jar found, make sure you have hadoop command in your PATH", e)
@@ -267,8 +268,6 @@ class FlinkScalaInterpreter(properties: Properties) {
         // use FlinkClassLoader to initialize FlinkILoop, otherwise TableFactoryService could not find
         // the TableFactory properly
         Thread.currentThread().setContextClassLoader(getFlinkClassLoader)
-        val jars = "/opt/flink-1.11.1/lib"
-        ClassLoaderUtils.loadJars(jars)
         val iLoop = new FlinkILoop(configuration, config.externalJars, None, replOut)
         (iLoop, cluster)
       } catch {
@@ -333,10 +332,8 @@ class FlinkScalaInterpreter(properties: Properties) {
       flinkILoop.intp.interpret("import org.apache.flink.table.functions.TableAggregateFunction")
     }
 
-    val in0 = getField(flinkILoop, "scala$tools$nsc$interpreter$ILoop$$in0")
-      .asInstanceOf[Option[BufferedReader]]
-    val reader = in0.fold(flinkILoop.chooseReader(settings))(r =>
-      SimpleReader(r, replOut, interactive = true))
+    val in0 = getField(flinkILoop, "scala$tools$nsc$interpreter$ILoop$$in0").asInstanceOf[Option[BufferedReader]]
+    val reader = in0.fold(flinkILoop.chooseReader(settings))(r => SimpleReader(r, replOut, interactive = true))
 
     flinkILoop.in = reader
     flinkILoop.initializeSynchronous()
