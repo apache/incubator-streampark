@@ -25,10 +25,29 @@ import java.net.URL
 import java.lang.reflect.Method
 import java.net.URLClassLoader
 
-
 object ClassLoaderUtils {
 
   private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+
+  /**
+   * 指定 classLoader执行代码...
+   *
+   * @param targetClassLoader
+   * @param func
+   * @tparam R
+   * @return
+   */
+  def wrapClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
+    val originalClassLoader = Thread.currentThread.getContextClassLoader
+    try {
+      Thread.currentThread.setContextClassLoader(targetClassLoader)
+      func()
+    } catch {
+      case e: Exception => throw e
+    } finally {
+      Thread.currentThread.setContextClassLoader(originalClassLoader)
+    }
+  }
 
   def loadJar(jarFilePath: String): Unit = {
     val jarFile = new File(jarFilePath)
