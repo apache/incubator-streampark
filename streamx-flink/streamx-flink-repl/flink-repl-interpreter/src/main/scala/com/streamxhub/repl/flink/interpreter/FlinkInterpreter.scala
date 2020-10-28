@@ -30,7 +30,6 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
   @throws[InterpreterException] override def open(): Unit = {
     checkScalaVersion()
     this.interpreter = new FlinkScalaInterpreter(getProperties)
-    this.interpreter.open()
     this.replContext = this.interpreter.getReplContext
   }
 
