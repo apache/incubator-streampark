@@ -1,7 +1,6 @@
 package com.streamxhub.repl.flink.interpreter
 
 import java.io.{BufferedReader, File}
-import java.net.URLClassLoader
 import java.util.Arrays
 
 import com.streamxhub.repl.flink.shims.FlinkShims
@@ -14,8 +13,9 @@ import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{ClassLoaderUtils, HdfsUtils, Logger}
+import com.streamxhub.common.util.{HdfsUtils, Logger}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import scala.collection.mutable.ArrayBuffer
@@ -148,31 +148,37 @@ object FlinkShell extends Logger {
 
         val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
         val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
-        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
 
         val flinkHome = System.getenv("FLINK_HOME")
-        val flinkLibDir = new File(flinkHome, "lib")
+        val flinkLibDir = new Path(s"$flinkHome/lib")
+        val flinkPluginsDir = new Path(s"$flinkHome/plugins")
 
-        val classLoader = Thread.currentThread().getContextClassLoader
-        val flinkLoader = new URLClassLoader(flinkLibDir.listFiles().map(_.toURL))
+        val flinkDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+          case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
+          case array if array.length == 1 => s"$flinkHome/lib/${array.head}"
+          case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+        }
 
-        Thread.currentThread().setContextClassLoader(flinkLoader)
+        executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
+          //设置yarn.provided.lib.dirs
+          .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkLibDir.toString, flinkPluginsDir.toString))
+          //设置flinkDistJar
+          .set(YarnConfigOptions.FLINK_DIST_JAR, flinkDistJar)
+
         val serviceLoader = new DefaultClusterClientServiceLoader
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
         logInfo(s"\n\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.PER_JOB},clusterSpecification:$clusterSpecification\n\n")
         val clusterClient = try {
-          clusterDescriptor.deployJobCluster(clusterSpecification,null,true).getClusterClient
+          clusterDescriptor.deployJobCluster(clusterSpecification, null, true).getClusterClient
         } finally {
           clusterDescriptor.close()
         }
-        Thread.currentThread().setContextClassLoader(classLoader)
         (executorConfig, Some(clusterClient))
       }
       case None => (flinkConfig, None)
     }
-    flinkConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     val effectiveConfig = clusterClient match {
       case Some(_) => getEffectiveConfiguration(config, clusterConfig, YarnDeploymentTarget.PER_JOB, flinkShims)
       case None => getEffectiveConfiguration(config, clusterConfig, null, flinkShims)
