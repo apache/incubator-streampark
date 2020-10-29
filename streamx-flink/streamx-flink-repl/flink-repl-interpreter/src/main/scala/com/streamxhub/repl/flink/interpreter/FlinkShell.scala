@@ -104,11 +104,9 @@ object FlinkShell extends Logger {
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
         logInfo(s"\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n")
-        val clusterClient = try {
-          clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
-        } finally {
-          clusterDescriptor.close()
-        }
+        val clusterClient = try clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
+        finally clusterDescriptor.close()
+
         (executorConfig, Some(clusterClient))
       }
       case None => (flinkConfig, None)
