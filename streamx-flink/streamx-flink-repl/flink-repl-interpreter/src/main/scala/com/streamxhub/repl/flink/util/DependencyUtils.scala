@@ -64,23 +64,23 @@ object DependencyUtils {
   var printStream = Console.out
 
   /**
-    * Represents a Maven Coordinate
-    *
-    * @param groupId    the groupId of the coordinate
-    * @param artifactId the artifactId of the coordinate
-    * @param version    the version of the coordinate
-    */
+   * Represents a Maven Coordinate
+   *
+   * @param groupId    the groupId of the coordinate
+   * @param artifactId the artifactId of the coordinate
+   * @param version    the version of the coordinate
+   */
   case class MavenCoordinate(groupId: String, artifactId: String, version: String) {
     override def toString: String = s"$groupId:$artifactId:$version"
   }
 
   /**
-    * Extracts maven coordinates from a comma-delimited string. Coordinates should be provided
-    * in the format `groupId:artifactId:version` or `groupId/artifactId:version`.
-    *
-    * @param coordinates Comma-delimited string of maven coordinates
-    * @return Sequence of Maven coordinates
-    */
+   * Extracts maven coordinates from a comma-delimited string. Coordinates should be provided
+   * in the format `groupId:artifactId:version` or `groupId/artifactId:version`.
+   *
+   * @param coordinates Comma-delimited string of maven coordinates
+   * @return Sequence of Maven coordinates
+   */
   def extractMavenCoordinates(coordinates: String): Seq[MavenCoordinate] = {
     coordinates.split(",").map { p =>
       val splits = p.replace("/", ":").split(":")
@@ -102,11 +102,11 @@ object DependencyUtils {
   }
 
   /**
-    * Extracts maven coordinates from a comma-delimited string
-    *
-    * @param defaultIvyUserDir The default user path for Ivy
-    * @return A ChainResolver used by Ivy to search for and resolve dependencies.
-    */
+   * Extracts maven coordinates from a comma-delimited string
+   *
+   * @param defaultIvyUserDir The default user path for Ivy
+   * @return A ChainResolver used by Ivy to search for and resolve dependencies.
+   */
   def createRepoResolvers(defaultIvyUserDir: File): ChainResolver = {
     // We need a chain resolver if we want to check multiple repositories
     val cr = new ChainResolver
@@ -143,12 +143,12 @@ object DependencyUtils {
   }
 
   /**
-    * Output a comma-delimited list of paths for the downloaded jars to be added to the classpath
-    *
-    * @param artifacts      Sequence of dependencies that were resolved and retrieved
-    * @param cacheDirectory directory where jars are cached
-    * @return a comma-delimited list of paths for the dependencies
-    */
+   * Output a comma-delimited list of paths for the downloaded jars to be added to the classpath
+   *
+   * @param artifacts      Sequence of dependencies that were resolved and retrieved
+   * @param cacheDirectory directory where jars are cached
+   * @return a comma-delimited list of paths for the dependencies
+   */
   def resolveDependencyPaths(
                               artifacts: Array[AnyRef],
                               cacheDirectory: File): String = {
@@ -185,12 +185,12 @@ object DependencyUtils {
   }
 
   /**
-    * Build Ivy Settings using options with default resolvers
-    *
-    * @param remoteRepos Comma-delimited string of remote repositories other than maven central
-    * @param ivyPath     The path to the local ivy repository
-    * @return An IvySettings object
-    */
+   * Build Ivy Settings using options with default resolvers
+   *
+   * @param remoteRepos Comma-delimited string of remote repositories other than maven central
+   * @param ivyPath     The path to the local ivy repository
+   * @return An IvySettings object
+   */
   def buildIvySettings(remoteRepos: Option[String], ivyPath: Option[String]): IvySettings = {
     val ivySettings: IvySettings = new IvySettings
     processIvyPathArg(ivySettings, ivyPath)
@@ -206,13 +206,13 @@ object DependencyUtils {
   }
 
   /**
-    * Load Ivy settings from a given filename, using supplied resolvers
-    *
-    * @param settingsFile Path to Ivy settings file
-    * @param remoteRepos  Comma-delimited string of remote repositories other than maven central
-    * @param ivyPath      The path to the local ivy repository
-    * @return An IvySettings object
-    */
+   * Load Ivy settings from a given filename, using supplied resolvers
+   *
+   * @param settingsFile Path to Ivy settings file
+   * @param remoteRepos  Comma-delimited string of remote repositories other than maven central
+   * @param ivyPath      The path to the local ivy repository
+   * @return An IvySettings object
+   */
   def loadIvySettings(
                        settingsFile: String,
                        remoteRepos: Option[String],
@@ -290,14 +290,14 @@ object DependencyUtils {
   }
 
   /**
-    * Resolves any dependencies that were supplied through maven coordinates
-    *
-    * @param coordinates Comma-delimited string of maven coordinates
-    * @param ivySettings An IvySettings containing resolvers to use
-    * @param exclusions  Exclusions to apply when resolving transitive dependencies
-    * @return The comma-delimited path to the jars of the given maven artifacts including their
-    *         transitive dependencies
-    */
+   * Resolves any dependencies that were supplied through maven coordinates
+   *
+   * @param coordinates Comma-delimited string of maven coordinates
+   * @param ivySettings An IvySettings containing resolvers to use
+   * @param exclusions  Exclusions to apply when resolving transitive dependencies
+   * @return The comma-delimited path to the jars of the given maven artifacts including their
+   *         transitive dependencies
+   */
   def resolveMavenCoordinates(
                                coordinates: String,
                                ivySettings: IvySettings,

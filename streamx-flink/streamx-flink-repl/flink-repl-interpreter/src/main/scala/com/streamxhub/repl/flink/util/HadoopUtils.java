@@ -37,47 +37,48 @@ import java.io.IOException;
  * Move the hadoop related operation (depends on hadoop api) out of FlinkScalaInterpreter to this
  * class is because in this way we don't need to load hadoop class for non-yarn mode. Otherwise
  * even in non-yarn mode, user still need hadoop shaded jar which doesnt' make sense.
+ *
  * @author benjobs
  */
 public class HadoopUtils {
 
-  private static final Logger LOGGER = LoggerFactory.getLogger(HadoopUtils.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(HadoopUtils.class);
 
-  public static String getYarnAppTrackingUrl(ClusterClient clusterClient) throws IOException, YarnException {
-    ApplicationId yarnAppId = (ApplicationId) clusterClient.getClusterId();
-    YarnClient yarnClient = YarnClient.createYarnClient();
-    YarnConfiguration yarnConf = new YarnConfiguration();
-    // disable timeline service as we only query yarn app here.
-    // Otherwise we may hit this kind of ERROR:
-    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-    yarnConf.set("yarn.timeline-service.enabled", "false");
-    yarnClient.init(yarnConf);
-    yarnClient.start();
-    return yarnClient.getApplicationReport(yarnAppId).getTrackingUrl();
-  }
-
-  public static void cleanupStagingDirInternal(ClusterClient clusterClient) {
-    try {
-      ApplicationId appId = (ApplicationId) clusterClient.getClusterId();
-      FileSystem fs = FileSystem.get(new Configuration());
-      Path stagingDirPath = new Path(fs.getHomeDirectory(), ".flink/" + appId.toString());
-      if (fs.delete(stagingDirPath, true)) {
-        LOGGER.info("Deleted staging directory " + stagingDirPath);
-      }
-    } catch (IOException e){
-        LOGGER.warn("Failed to cleanup staging dir", e);
+    public static String getYarnAppTrackingUrl(ClusterClient clusterClient) throws IOException, YarnException {
+        ApplicationId yarnAppId = (ApplicationId) clusterClient.getClusterId();
+        YarnClient yarnClient = YarnClient.createYarnClient();
+        YarnConfiguration yarnConf = new YarnConfiguration();
+        // disable timeline service as we only query yarn app here.
+        // Otherwise we may hit this kind of ERROR:
+        // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
+        yarnConf.set("yarn.timeline-service.enabled", "false");
+        yarnClient.init(yarnConf);
+        yarnClient.start();
+        return yarnClient.getApplicationReport(yarnAppId).getTrackingUrl();
     }
-  }
 
-  public static String downloadJar(String jarOnHdfs) throws IOException {
-    File tmpDir = Files.createTempDir();
-    FileSystem fs = FileSystem.get(new Configuration());
-    Path sourcePath = fs.makeQualified(new Path(jarOnHdfs));
-    if (!fs.exists(sourcePath)) {
-      throw new IOException("jar file: " + jarOnHdfs + " doesn't exist.");
+    public static void cleanupStagingDirInternal(ClusterClient clusterClient) {
+        try {
+            ApplicationId appId = (ApplicationId) clusterClient.getClusterId();
+            FileSystem fs = FileSystem.get(new Configuration());
+            Path stagingDirPath = new Path(fs.getHomeDirectory(), ".flink/" + appId.toString());
+            if (fs.delete(stagingDirPath, true)) {
+                LOGGER.info("Deleted staging directory " + stagingDirPath);
+            }
+        } catch (IOException e) {
+            LOGGER.warn("Failed to cleanup staging dir", e);
+        }
     }
-    Path destPath = new Path(tmpDir.getAbsolutePath() + "/" + sourcePath.getName());
-    fs.copyToLocalFile(sourcePath, destPath);
-    return new File(destPath.toString()).getAbsolutePath();
-  }
+
+    public static String downloadJar(String jarOnHdfs) throws IOException {
+        File tmpDir = Files.createTempDir();
+        FileSystem fs = FileSystem.get(new Configuration());
+        Path sourcePath = fs.makeQualified(new Path(jarOnHdfs));
+        if (!fs.exists(sourcePath)) {
+            throw new IOException("jar file: " + jarOnHdfs + " doesn't exist.");
+        }
+        Path destPath = new Path(tmpDir.getAbsolutePath() + "/" + sourcePath.getName());
+        fs.copyToLocalFile(sourcePath, destPath);
+        return new File(destPath.toString()).getAbsolutePath();
+    }
 }
