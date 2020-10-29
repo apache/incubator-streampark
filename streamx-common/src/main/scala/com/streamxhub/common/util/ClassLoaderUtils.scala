@@ -37,7 +37,7 @@ object ClassLoaderUtils {
    * @tparam R
    * @return
    */
-  def wrapClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
+  def runAsClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
     val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
