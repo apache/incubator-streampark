@@ -62,7 +62,7 @@ abstract class FlinkSqlInterrpeter(properties: Properties) extends Interpreter(p
     flinkInterpreter.getReplContext.setGui(context.getGui)
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
-    ClassLoaderUtils.wrapClassLoader(flinkInterpreter.getFlinkScalaShellLoader, () => {
+    ClassLoaderUtils.runAsClassLoader(flinkInterpreter.getFlinkScalaShellLoader, () => {
       flinkInterpreter.createPlannerAgain()
       flinkInterpreter.setParallelismIfNecessary(context)
       flinkInterpreter.setSavepointIfNecessary(context)

@@ -266,7 +266,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       LOGGER.info("externalJars: " + config.externalJars.getOrElse(Array.empty[String]).mkString(":"))
       try {
         // use FlinkClassLoader to initialize FlinkILoop, otherwise TableFactoryService could not find
-        ClassLoaderUtils.wrapClassLoader(getFlinkClassLoader, () => {
+        ClassLoaderUtils.runAsClassLoader(getFlinkClassLoader, () => {
           val iLoop = new FlinkILoop(configuration, config.externalJars, None, replOut)
           (iLoop, cluster)
         })
@@ -350,7 +350,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def createTableEnvs(): Unit = {
-    ClassLoaderUtils.wrapClassLoader(getFlinkClassLoader, () => {
+    ClassLoaderUtils.runAsClassLoader(getFlinkClassLoader, () => {
       val tblConfig = new TableConfig
       tblConfig.getConfiguration.addAll(configuration)
       // Step 1.1 Initialize the CatalogManager if required.
@@ -537,7 +537,7 @@ class FlinkScalaInterpreter(properties: Properties) {
    * This is just a workaround to make table api work in multiple threads.
    */
   def createPlannerAgain(): Unit = {
-    ClassLoaderUtils.wrapClassLoader(getFlinkClassLoader, () => {
+    ClassLoaderUtils.runAsClassLoader(getFlinkClassLoader, () => {
       val stEnvSetting = EnvironmentSettings.newInstance().inStreamingMode().useBlinkPlanner().build()
       this.tableEnvFactory.createPlanner(stEnvSetting)
     })

@@ -31,6 +31,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
   @throws[InterpreterException] override def open(): Unit = {
     checkScalaVersion()
     this.interpreter = new FlinkScalaInterpreter(getProperties)
+    this.interpreter.open()
     this.replContext = this.interpreter.getReplContext
   }
 
@@ -43,7 +44,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
     this.replContext.setNoteGui(context.getNoteGui)
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
-    ClassLoaderUtils.wrapClassLoader(getFlinkScalaShellLoader, () => {
+    ClassLoaderUtils.runAsClassLoader(getFlinkScalaShellLoader, () => {
       createPlannerAgain()
       setParallelismIfNecessary(context)
       setSavepointIfNecessary(context)
