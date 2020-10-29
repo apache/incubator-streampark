@@ -4,9 +4,11 @@ import java.io.{FileInputStream, IOException}
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{Map, Properties}
 
+import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.shims.sql.{SqlCommand, SqlCommandCall, SqlCommandParser}
 import com.streamxhub.repl.flink.util.SqlSplitter
 import javax.annotation.Nullable
+import jodd.util.ClassLoaderUtil
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
@@ -60,14 +62,12 @@ abstract class FlinkSqlInterrpeter(properties: Properties) extends Interpreter(p
     flinkInterpreter.getReplContext.setGui(context.getGui)
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
-    val originClassLoader = Thread.currentThread.getContextClassLoader
-    try {
-      Thread.currentThread.setContextClassLoader(flinkInterpreter.getFlinkScalaShellLoader)
+    ClassLoaderUtils.wrapClassLoader(flinkInterpreter.getFlinkScalaShellLoader, () => {
       flinkInterpreter.createPlannerAgain()
       flinkInterpreter.setParallelismIfNecessary(context)
       flinkInterpreter.setSavepointIfNecessary(context)
       runSqlList(st, context)
-    } finally Thread.currentThread.setContextClassLoader(originClassLoader)
+    })
   }
 
   private def runSqlList(st: String, context: InterpreterContext): InterpreterResult = {
