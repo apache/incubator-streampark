@@ -37,8 +37,8 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
 
   @throws[InterpreterException] override def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
-  @throws[InterpreterException] override def interpret(st: String, context: InterpreterContext): InterpreterResult = {
-    LOGGER.debug("Interpret code: " + st)
+  @throws[InterpreterException] override def interpret(code: String, context: InterpreterContext): InterpreterResult = {
+    LOGGER.debug("Interpret code: " + code)
     this.replContext.setInterpreterContext(context)
     this.replContext.setGui(context.getGui)
     this.replContext.setNoteGui(context.getNoteGui)
@@ -48,7 +48,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
       createPlannerAgain()
       setParallelismIfNecessary(context)
       setSavepointIfNecessary(context)
-      interpreter.interpret(st, context)
+      interpreter.interpret(code, context)
     })
   }
 

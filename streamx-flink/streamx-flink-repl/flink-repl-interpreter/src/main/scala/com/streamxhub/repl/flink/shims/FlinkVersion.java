@@ -21,55 +21,55 @@ import org.slf4j.LoggerFactory;
 
 
 public class FlinkVersion {
-  private static final Logger logger = LoggerFactory.getLogger(FlinkVersion.class);
+    private static final Logger logger = LoggerFactory.getLogger(FlinkVersion.class);
 
-  private int majorVersion;
-  private int minorVersion;
-  private int patchVersion;
-  private String versionString;
+    private int majorVersion;
+    private int minorVersion;
+    private int patchVersion;
+    private String versionString;
 
-  FlinkVersion(String versionString) {
-    this.versionString = versionString;
+    FlinkVersion(String versionString) {
+        this.versionString = versionString;
 
-    try {
-      int pos = versionString.indexOf('-');
+        try {
+            int pos = versionString.indexOf('-');
 
-      String numberPart = versionString;
-      if (pos > 0) {
-        numberPart = versionString.substring(0, pos);
-      }
+            String numberPart = versionString;
+            if (pos > 0) {
+                numberPart = versionString.substring(0, pos);
+            }
 
-      String versions[] = numberPart.split("\\.");
-      this.majorVersion = Integer.parseInt(versions[0]);
-      this.minorVersion = Integer.parseInt(versions[1]);
-      if (versions.length == 3) {
-        this.patchVersion = Integer.parseInt(versions[2]);
-      }
+            String versions[] = numberPart.split("\\.");
+            this.majorVersion = Integer.parseInt(versions[0]);
+            this.minorVersion = Integer.parseInt(versions[1]);
+            if (versions.length == 3) {
+                this.patchVersion = Integer.parseInt(versions[2]);
+            }
 
-    } catch (Exception e) {
-      logger.error("Can not recognize Flink version " + versionString +
-          ". Assume it's a future release", e);
+        } catch (Exception e) {
+            logger.error("Can not recognize Flink version " + versionString +
+                    ". Assume it's a future release", e);
+        }
     }
-  }
 
-  public int getMajorVersion() {
-    return majorVersion;
-  }
+    public int getMajorVersion() {
+        return majorVersion;
+    }
 
-  public int getMinorVersion() {
-    return minorVersion;
-  }
+    public int getMinorVersion() {
+        return minorVersion;
+    }
 
-  @Override
-  public String toString() {
-    return versionString;
-  }
+    @Override
+    public String toString() {
+        return versionString;
+    }
 
-  public static FlinkVersion fromVersionString(String versionString) {
-    return new FlinkVersion(versionString);
-  }
+    public static FlinkVersion fromVersionString(String versionString) {
+        return new FlinkVersion(versionString);
+    }
 
-  public boolean isFlink110() {
-    return this.majorVersion == 1 && minorVersion == 10;
-  }
+    public boolean isFlink110() {
+        return this.majorVersion == 1 && minorVersion == 10;
+    }
 }

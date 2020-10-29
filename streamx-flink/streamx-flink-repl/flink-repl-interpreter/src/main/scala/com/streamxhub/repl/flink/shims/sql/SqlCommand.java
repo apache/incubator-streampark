@@ -72,11 +72,11 @@ public enum SqlCommand {
 
 
     private static Function<String[], Optional<String[]>> getNoOperands() {
-       return  (x) -> Optional.of(new String[0]);
+        return (x) -> Optional.of(new String[0]);
     }
 
     private static Function<String[], Optional<String[]>> getSingleOperand() {
-        return  (operands) -> Optional.of(new String[]{operands[0]});
+        return (operands) -> Optional.of(new String[]{operands[0]});
     }
 
     @Override
