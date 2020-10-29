@@ -26,6 +26,7 @@ import java.util.Optional;
  * Simple parser for determining the type of command and its parameters.
  * All the SqlCommands should be put into this class, and the parsing logic needs to be put ito FlinkShims
  * because each version of flink has different sql syntax support.
+ * @author benjobs
  */
 public final class SqlCommandParser {
 
