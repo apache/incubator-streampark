@@ -2,6 +2,7 @@ package com.streamxhub.repl.flink.interpreter
 
 import java.util.Properties
 
+import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.zeppelin.interpreter.Interpreter.FormType
 import org.apache.zeppelin.interpreter.{Interpreter, InterpreterContext, InterpreterException, InterpreterResult}
@@ -42,14 +43,12 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
     this.replContext.setNoteGui(context.getNoteGui)
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
-    val originClassLoader = Thread.currentThread.getContextClassLoader
-    try {
-      Thread.currentThread.setContextClassLoader(getFlinkScalaShellLoader)
+    ClassLoaderUtils.wrapClassLoader(getFlinkScalaShellLoader, () => {
       createPlannerAgain()
       setParallelismIfNecessary(context)
       setSavepointIfNecessary(context)
       interpreter.interpret(st, context)
-    } finally Thread.currentThread.setContextClassLoader(originClassLoader)
+    })
   }
 
   @throws[InterpreterException] override def cancel(context: InterpreterContext): Unit = {
