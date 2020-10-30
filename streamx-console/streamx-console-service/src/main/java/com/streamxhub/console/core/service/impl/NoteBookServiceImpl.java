@@ -9,8 +9,6 @@ import org.apache.zeppelin.interpreter.*;
 import org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
-
 import static org.mockito.Mockito.mock;
 
 import java.util.Properties;
@@ -23,18 +21,14 @@ import java.util.concurrent.Executors;
 @Service("noteBookService")
 public class NoteBookServiceImpl implements NoteBookService {
 
-    private Properties properties = new Properties();
-
-    @PostConstruct
-    public void initProperty() {
-        properties.setProperty("repl.out", "true");
-        properties.setProperty("scala.color", "true");
-        properties.setProperty("flink.execution.mode", "yarn");
-    }
-
     @Override
     public void submit(Note note) {
         Executors.newSingleThreadExecutor().submit(() -> {
+            Properties properties = new Properties();
+            properties.setProperty("repl.out", "true");
+            properties.setProperty("scala.color", "true");
+            properties.setProperty("flink.execution.mode", "yarn");
+
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             InterpreterGroup interpreterGroup = new InterpreterGroup();
             interpreter.setInterpreterGroup(interpreterGroup);
