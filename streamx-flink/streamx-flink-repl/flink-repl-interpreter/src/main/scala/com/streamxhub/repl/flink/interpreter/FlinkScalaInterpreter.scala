@@ -284,10 +284,12 @@ class FlinkScalaInterpreter(properties: Properties) {
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
 
+    /**
+     * -usejavacp to scala
+     */
     val javaHome = sys.env.get("JAVA_HOME")
     val jdkClassPath = Seq(s"$javaHome/lib", s"$javaHome/jre/lib")
     settings.classpath.value = userJars.mkString(File.pathSeparator) + File.pathSeparator + jdkClassPath.mkString(File.pathSeparator)
-
     logDebug(s"\n[StramX] FlinkScalaInterpreter, settings.classpath:${settings.classpath.value}\n")
 
     val outputDir = Files.createTempDirectory("flink-repl");
