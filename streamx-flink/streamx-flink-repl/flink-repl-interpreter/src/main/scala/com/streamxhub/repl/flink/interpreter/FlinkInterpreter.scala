@@ -76,9 +76,9 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
 
   private[flink] def getJobManager = this.interpreter.getJobManager
 
-  private[flink] def getDefaultParallelism = this.interpreter.getDefaultParallelism
+  private[flink] def getDefaultParallelism:Int = this.interpreter.defaultParallelism
 
-  private[flink] def getDefaultSqlParallelism = this.interpreter.getDefaultSqlParallelism
+  private[flink] def getDefaultSqlParallelism:Int = this.interpreter.defaultSqlParallelism
 
   /**
    * Workaround for issue of FLINK-16936.
