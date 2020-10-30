@@ -814,7 +814,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
           logWarn(s"Job ${jobClient.getJobID} is submitted but unable to associate this job to paragraph, " +
             "as InterpreterContext is null")
         } else {
-          logInfo(s"Job ${Array(jobClient.getJobID)} is submitted for paragraph ${InterpreterContext.get().getParagraphId: _ *}")
+          logInfo(s"Job ${jobClient.getJobID} is submitted for paragraph ${InterpreterContext.get.getParagraphId}")
           jobManager.addJob(InterpreterContext.get(), jobClient)
           if (jmWebUrl != null) {
             jobManager.sendFlinkJobUrl(InterpreterContext.get());
