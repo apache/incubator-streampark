@@ -280,7 +280,6 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     val settings = new Settings()
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
-
     /**
      * -usejavacp to scala
      */
@@ -496,7 +495,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     //StreamExecutionEnvironment
     method = classOf[JExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[ExecutionEnvironmentFactory])
     method.setAccessible(true)
-    method.invoke(null, batchFactory);
+    method.invoke(null, batchFactory)
   }
 
   // for use in java side
@@ -700,39 +699,25 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
   def getStreamExecutionEnvironment(): StreamExecutionEnvironment = this.senv
 
-  def getBatchTableEnvironment(planner: String = "blink"): TableEnvironment = {
-    if (planner == "blink")
-      this.btenv
-    else
-      this.btenv_2
+  def getBatchTableEnvironment(planner: String = "blink"): TableEnvironment = planner match {
+    case "blink" => this.btenv
+    case _ => this.btenv_2
   }
 
-  def getStreamTableEnvironment(planner: String = "blink"): TableEnvironment = {
-    if (planner == "blink")
-      this.stenv
-    else
-      this.stenv_2
+  def getStreamTableEnvironment(planner: String = "blink"): TableEnvironment = planner match {
+    case "blink" => this.stenv
+    case _ => this.stenv_2
   }
 
-  def getJavaBatchTableEnvironment(planner: String): TableEnvironment = {
-    if (planner == "blink") {
-      this.java_btenv
-    } else {
-      this.java_btenv_2
-    }
+  def getJavaBatchTableEnvironment(planner: String): TableEnvironment = planner match {
+    case "blink" => this.java_btenv
+    case _ => this.java_btenv_2
   }
 
-  def getJavaStreamTableEnvironment(planner: String): TableEnvironment = {
-    if (planner == "blink") {
-      this.java_stenv
-    } else {
-      this.java_stenv_2
-    }
+  def getJavaStreamTableEnvironment(planner: String): TableEnvironment = planner match {
+    case "blink" => this.java_stenv
+    case _ => this.java_stenv_2
   }
-
-  def getDefaultParallelism = this.defaultParallelism
-
-  def getDefaultSqlParallelism = this.defaultSqlParallelism
 
   private def getUserJarsExceptUdfJars: Seq[String] = {
     val flinkJars =
@@ -810,17 +795,17 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
       if (e != null) {
         logWarn("Fail to submit job")
       } else {
-        if (InterpreterContext.get() == null) {
-          logWarn(s"Job ${jobClient.getJobID} is submitted but unable to associate this job to paragraph, " +
-            "as InterpreterContext is null")
-        } else {
-          logInfo(s"Job ${jobClient.getJobID} is submitted for paragraph ${InterpreterContext.get.getParagraphId}")
-          jobManager.addJob(InterpreterContext.get(), jobClient)
-          if (jmWebUrl != null) {
-            jobManager.sendFlinkJobUrl(InterpreterContext.get());
-          } else {
-            logError("Unable to link JobURL, because JobManager weburl is null")
-          }
+        InterpreterContext.get() match {
+          case null =>
+            logWarn(s"Job ${jobClient.getJobID} is submitted but unable to associate this job to paragraph,as InterpreterContext is null")
+          case _ =>
+            logInfo(s"Job ${jobClient.getJobID} is submitted for paragraph ${InterpreterContext.get.getParagraphId}")
+            jobManager.addJob(InterpreterContext.get(), jobClient)
+            if (jmWebUrl != null) {
+              jobManager.sendFlinkJobUrl(InterpreterContext.get())
+            } else {
+              logError("Unable to link JobURL, because JobManager weburl is null")
+            }
         }
       }
     }
@@ -843,7 +828,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
   def replaceYarnAddress(webURL: String, yarnAddress: String): String = {
     val pattern = "(https?://.*:\\d+)(.*)".r
-    val pattern(prefix, remaining) = webURL
+    val pattern(_, remaining) = webURL
     yarnAddress + remaining
   }
 }

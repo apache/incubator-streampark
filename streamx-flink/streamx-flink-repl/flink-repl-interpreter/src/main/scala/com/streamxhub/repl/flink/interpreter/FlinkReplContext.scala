@@ -125,21 +125,22 @@ class FlinkReplContext(val flinkInterpreter: FlinkScalaInterpreter,
     configs.foreach(e => context.getLocalProperties.put(e._1, e._2))
     val tableName = s"UnnamedTable_${context.getParagraphId.replace("-", "_")}_${SQL_INDEX.getAndIncrement()}"
     val streamJob = streamType.toLowerCase match {
-      case "single" => new SingleRowStreamSqlJob(
-        flinkInterpreter.getStreamExecutionEnvironment(),
-        table.asInstanceOf[TableImpl].getTableEnvironment,
-        flinkInterpreter.getJobManager,
-        context,
-        flinkInterpreter.getDefaultParallelism,
-        flinkInterpreter.getFlinkShims
-      )
+      case "single" =>
+        new SingleRowStreamSqlJob(
+          flinkInterpreter.getStreamExecutionEnvironment(),
+          table.asInstanceOf[TableImpl].getTableEnvironment,
+          flinkInterpreter.getJobManager,
+          context,
+          flinkInterpreter.defaultParallelism,
+          flinkInterpreter.getFlinkShims
+        )
       case "append" =>
         new AppendStreamSqlJob(
           flinkInterpreter.getStreamExecutionEnvironment(),
           table.asInstanceOf[TableImpl].getTableEnvironment,
           flinkInterpreter.getJobManager,
           context,
-          flinkInterpreter.getDefaultParallelism,
+          flinkInterpreter.defaultParallelism,
           flinkInterpreter.getFlinkShims
         )
       case "update" =>
@@ -148,7 +149,7 @@ class FlinkReplContext(val flinkInterpreter: FlinkScalaInterpreter,
           table.asInstanceOf[TableImpl].getTableEnvironment,
           flinkInterpreter.getJobManager,
           context,
-          flinkInterpreter.getDefaultParallelism,
+          flinkInterpreter.defaultParallelism,
           flinkInterpreter.getFlinkShims)
       case _ => throw new IOException(s"Unrecognized stream type:$streamType ")
     }
