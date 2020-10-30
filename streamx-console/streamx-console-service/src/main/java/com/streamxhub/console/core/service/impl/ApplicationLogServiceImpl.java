@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author benjobs
  */
 @Slf4j
-@Service("applicationLogService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog> implements ApplicationLogService {
 

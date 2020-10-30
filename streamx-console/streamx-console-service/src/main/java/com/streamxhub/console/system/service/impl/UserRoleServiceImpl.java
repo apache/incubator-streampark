@@ -13,7 +13,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service("userRoleService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole> implements UserRoleService {
 

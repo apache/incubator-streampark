@@ -10,7 +10,6 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.SavePointMapper;
-import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,13 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
  * @author benjobs
  */
 @Slf4j
-@Service("savePointService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
 

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * @author benjobs
  */
 @Slf4j
-@Service("userService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 

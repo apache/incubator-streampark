@@ -62,7 +62,7 @@ import java.util.jar.Manifest;
  * @author benjobs
  */
 @Slf4j
-@Service("applicationService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application> implements ApplicationService {
 

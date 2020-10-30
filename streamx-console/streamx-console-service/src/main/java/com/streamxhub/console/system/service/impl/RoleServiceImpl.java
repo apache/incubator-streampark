@@ -28,7 +28,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service("roleService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements RoleService {
 

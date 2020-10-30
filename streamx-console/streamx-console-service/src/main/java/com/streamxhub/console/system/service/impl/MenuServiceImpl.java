@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Slf4j
-@Service("menuService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
 

@@ -40,7 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author benjobs
  */
 @Slf4j
-@Service("applicationBackUpService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationBackUpServiceImpl extends ServiceImpl<ApplicationBackUpMapper, ApplicationBackUp> implements ApplicationBackUpService {
 

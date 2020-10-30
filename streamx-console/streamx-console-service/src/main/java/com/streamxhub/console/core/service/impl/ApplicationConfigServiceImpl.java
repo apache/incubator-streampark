@@ -45,7 +45,7 @@ import java.util.Date;
  * @author benjobs
  */
 @Slf4j
-@Service("applicationConfigService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationConfigServiceImpl extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig> implements ApplicationConfigService {
 

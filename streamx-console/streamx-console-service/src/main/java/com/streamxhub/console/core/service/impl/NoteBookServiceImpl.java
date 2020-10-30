@@ -18,7 +18,7 @@ import java.util.concurrent.Executors;
  * @author benjobs
  */
 @Slf4j
-@Service("noteBookService")
+@Service
 public class NoteBookServiceImpl implements NoteBookService {
 
     @Override

@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * @author benjobs
  */
-@Service("roleMenuService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu> implements RoleMenuServie {
 

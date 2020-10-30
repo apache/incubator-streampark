@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
  * @author benjobs
  */
 @Slf4j
-@Service("tutorialService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class TutorialServiceImpl extends ServiceImpl<TutorialMapper, Tutorial> implements TutorialService {
     @Override

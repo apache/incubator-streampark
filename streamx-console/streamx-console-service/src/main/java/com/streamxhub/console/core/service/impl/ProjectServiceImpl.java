@@ -54,7 +54,7 @@ import java.util.concurrent.Executors;
  * @author benjobs
  */
 @Slf4j
-@Service("projectService")
+@Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> implements ProjectService {
 
