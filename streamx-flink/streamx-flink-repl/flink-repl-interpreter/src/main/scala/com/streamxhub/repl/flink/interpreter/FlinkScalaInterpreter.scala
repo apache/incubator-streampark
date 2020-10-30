@@ -287,10 +287,9 @@ class FlinkScalaInterpreter(properties: Properties) {
     /**
      * -usejavacp to scala
      */
-    val javaHome = sys.env.get("JAVA_HOME")
+    val javaHome = System.getenv("JAVA_HOME")
     val classpath = userJars ++ Seq(s"$javaHome/lib", s"$javaHome/jre/lib")
     settings.classpath.value = classpath.mkString(File.pathSeparator)
-    println(s"[StreamX]: classpath:--->$classpath")
     logInfo(s"\n[StreamX] scalaInterpreter settings.classpath:${settings.classpath.value}\n")
 
     val outputDir = Files.createTempDirectory("flink-repl");
