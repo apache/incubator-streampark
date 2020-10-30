@@ -4,26 +4,17 @@ import org.apache.flink.streaming.api.scala._
 
 object WordCountApp extends App {
 
+  val senv = StreamExecutionEnvironment.getExecutionEnvironment
 
-  val env = StreamExecutionEnvironment.getExecutionEnvironment
-
-  val stream = env.readTextFile("data/in/wordcount.txt")
-
-  val ds = stream.flatMap(x => x.split("\\s+"))
-
-  val wc1 = ds.flatMap(x => Some(x -> 1))
-    .keyBy("_1")
-    .sum("_2")
-
-  val wc2 = ds.flatMap(x => Some(WC(x)))
+  senv.socketTextStream("localhost", 9999, '\n')
+    .flatMap(_.split("\\s+"))
+    .map((_, 1))
     .keyBy(0)
-    .sum("count")
+    .sum(1)
+    .print()
 
-  wc2.print()
+  senv.execute()
 
-  env.execute()
 
 }
 
-
-case class WC(word: String, count: Int = 1)
