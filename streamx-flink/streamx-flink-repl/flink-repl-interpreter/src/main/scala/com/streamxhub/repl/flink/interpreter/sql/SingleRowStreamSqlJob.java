@@ -32,6 +32,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 
+/**
+ * @author benjobs
+ */
 public class SingleRowStreamSqlJob extends AbstractStreamSqlJob {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SingleRowStreamSqlJob.class);

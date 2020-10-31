@@ -161,7 +161,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     val appName = properties.getProperty("flink.yarn.appName", "Flink Yarn App Name")
     config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(name = Some(appName))))
 
-    val slotNum = Integer.parseInt(properties.getProperty("flink.tm.slot", "1"))
+    val slotNum = properties.getProperty("flink.tm.slot", "1").toInt
     config = config.copy(yarnConfig = Some(ensureYarnConfig(config).copy(slots = Some(slotNum))))
 
     this.configuration.setInteger("taskmanager.numberOfTaskSlots", slotNum)
