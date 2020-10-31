@@ -280,13 +280,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     val settings = new Settings()
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
-    /**
-     * -usejavacp to scala
-     */
-    val javaHome = System.getenv("JAVA_HOME")
-    val classpath = userJars ++ Seq(s"$javaHome/lib", s"$javaHome/jre/lib")
-    settings.classpath.value = classpath.mkString(File.pathSeparator)
-    logInfo(s"\n[StreamX] scalaInterpreter settings.classpath:${settings.classpath.value}\n")
+    settings.classpath.value = userJars.mkString(File.pathSeparator)
 
     val outputDir = Files.createTempDirectory("flink-repl");
     val interpArguments = List(
@@ -763,9 +757,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
   def getJobManager = this.jobManager
 
-  def getFlinkScalaShellLoader: ClassLoader = {
-    new URLClassLoader(Array(getUserCodeJarFile().toURL) ++ userJars.map(e => new File(e).toURL))
-  }
+  def getFlinkScalaShellLoader: ClassLoader = new URLClassLoader(Array(getUserCodeJarFile().toURL) ++ userJars.map(e => new File(e).toURL))
 
   def getUserCodeJarFile(): File = {
     this.userCodeJarFile match {
@@ -777,7 +769,7 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
   }
 
   private def getFlinkClassLoader: ClassLoader = {
-    new URLClassLoader(userJars.map(e => new File(e).toURL).toArray)
+    new URLClassLoader(userJars.map(e => new File(e).toURI.toURL).toArray)
   }
 
   def getReplContext = this.flinkReplContext
