@@ -281,6 +281,9 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
     settings.classpath.value = userJars.mkString(File.pathSeparator)
+    settings.classpath.append(System.getProperty("java.class.path"))
+    val bootJars = s"${System.getenv("JAVA_HOME")}/jre/lib"
+    settings.bootclasspath.value = settings.bootclasspath.value + bootJars
 
     val outputDir = Files.createTempDirectory("flink-repl");
     val interpArguments = List(
