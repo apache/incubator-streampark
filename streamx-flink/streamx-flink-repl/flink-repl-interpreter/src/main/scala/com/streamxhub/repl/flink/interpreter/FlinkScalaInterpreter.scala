@@ -62,8 +62,11 @@ import scala.tools.nsc.interpreter.{JPrintWriter, SimpleReader}
 /**
  * It instantiate flink scala shell and create env, senv, btenv, stenv.
  *
- * @param properties
  */
+
+import scala.tools.nsc._
+trait ForUseJavaCp
+
 class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
   private var flinkILoop: FlinkILoop = _
@@ -278,13 +281,11 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     this.cluster = cluster
 
     val settings = new Settings()
+    settings.embeddedDefaults[ForUseJavaCp]
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
     settings.classpath.value = userJars.mkString(File.pathSeparator)
     settings.classpath.append(System.getProperty("java.class.path"))
-    val bootJars = s"${System.getenv("JAVA_HOME")}/jre/lib/rt.jar"
-    settings.bootclasspath.value = settings.bootclasspath.value + File.pathSeparator + bootJars
-
     val outputDir = Files.createTempDirectory("flink-repl");
     val interpArguments = List(
       "-Yrepl-class-based",
