@@ -64,9 +64,6 @@ import scala.tools.nsc.interpreter.{JPrintWriter, SimpleReader}
  *
  */
 
-import scala.tools.nsc._
-trait ForUseJavaCp
-
 class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
   private var flinkILoop: FlinkILoop = _
@@ -281,13 +278,13 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
     this.cluster = cluster
 
     val settings = new Settings()
-    settings.embeddedDefaults[ForUseJavaCp]
     settings.usejavacp.value = true
     settings.Yreplsync.value = true
     settings.classpath.value = userJars.mkString(File.pathSeparator)
     settings.classpath.append(System.getProperty("java.class.path"))
     val outputDir = Files.createTempDirectory("flink-repl");
     val interpArguments = List(
+      "-Dusejavacp",
       "-Yrepl-class-based",
       "-Yrepl-outdir", s"${outputDir.toFile.getAbsolutePath}"
     )
