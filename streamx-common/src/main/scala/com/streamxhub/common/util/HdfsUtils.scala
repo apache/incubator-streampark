@@ -21,7 +21,8 @@
 package com.streamxhub.common.util
 
 import org.apache.hadoop.hdfs.HAUtil
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.io.{ByteArrayOutputStream, File, FileWriter, IOException}
+import java.net.URLClassLoader
 
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -43,17 +44,22 @@ object HdfsUtils extends Logger {
    * 推荐第二种方法,不用copy配置文件.
    */
   lazy val conf: Configuration = {
-    val conf = new Configuration()
-    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-      conf.set("hadoop.tmp.dir", "/tmp")
-    }
-    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-      conf.set("hbase.fs.tmp.dir", "/tmp")
-    }
-    conf.set("yarn.timeline-service.enabled", "false")
-    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
-    conf.set("fs.hdfs.impl.disable.cache", "true")
-    conf
+    val hadoopHome = System.getenv("HADOOP_HOME")
+    require(hadoopHome != null)
+    val hadoopConfDir = new File(s"$hadoopHome/etc/hadoop")
+    ClassLoaderUtils.runAsClassLoader(new URLClassLoader(Array(hadoopConfDir.toURI.toURL)), () => {
+      val conf = new Configuration()
+      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
+        conf.set("hadoop.tmp.dir", "/tmp")
+      }
+      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
+        conf.set("hbase.fs.tmp.dir", "/tmp")
+      }
+      conf.set("yarn.timeline-service.enabled", "false")
+      conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
+      conf.set("fs.hdfs.impl.disable.cache", "true")
+      conf
+    })
   }
 
 
