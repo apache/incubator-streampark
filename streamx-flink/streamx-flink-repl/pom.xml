@@ -74,7 +74,8 @@
                     <target>${project.build.jdk}</target>
                     <encoding>UTF-8</encoding>
                     <compilerArguments>
-                        <usejavacp></usejavacp>
+                        <verbose />
+                        <usejavacp>true</usejavacp>
                     </compilerArguments>
                 </configuration>
             </plugin>
