@@ -69,7 +69,7 @@ object HdfsUtils extends Logger {
       null
   }
 
-  def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
+  def getDefaultFS: String = "hdfs:///test-hadoop-2"
 
   @throws[Exception] def getNameNode: String = {
     Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
