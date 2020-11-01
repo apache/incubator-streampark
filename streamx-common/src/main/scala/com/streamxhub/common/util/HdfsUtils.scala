@@ -44,22 +44,17 @@ object HdfsUtils extends Logger {
    * 推荐第二种方法,不用copy配置文件.
    */
   lazy val conf: Configuration = {
-    val hadoopHome = System.getenv("HADOOP_HOME")
-    require(hadoopHome != null)
-    val hadoopConfDir = new File(s"$hadoopHome/etc/hadoop")
-    ClassLoaderUtils.runAsClassLoader(new URLClassLoader(Array(hadoopConfDir.toURI.toURL)), () => {
-      val conf = new Configuration()
-      if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-        conf.set("hadoop.tmp.dir", "/tmp")
-      }
-      if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-        conf.set("hbase.fs.tmp.dir", "/tmp")
-      }
-      conf.set("yarn.timeline-service.enabled", "false")
-      conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
-      conf.set("fs.hdfs.impl.disable.cache", "true")
-      conf
-    })
+    val conf = new Configuration()
+    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
+      conf.set("hadoop.tmp.dir", "/tmp")
+    }
+    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
+      conf.set("hbase.fs.tmp.dir", "/tmp")
+    }
+    conf.set("yarn.timeline-service.enabled", "false")
+    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
+    conf.set("fs.hdfs.impl.disable.cache", "true")
+    conf
   }
 
 
@@ -69,7 +64,7 @@ object HdfsUtils extends Logger {
       null
   }
 
-  def getDefaultFS: String = "hdfs:///test-hadoop-2"
+  def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
   @throws[Exception] def getNameNode: String = {
     Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
