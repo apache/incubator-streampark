@@ -47,7 +47,7 @@ public class NoteBookServiceImpl implements NoteBookService {
             Properties properties = new Properties();
             properties.setProperty("repl.out", "true");
             properties.setProperty("scala.color", "true");
-            properties.setProperty("flink.yarn.queue","root.users.hst");
+            properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
 
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
@@ -60,7 +60,22 @@ public class NoteBookServiceImpl implements NoteBookService {
                         .setParagraphId("paragraphId")
                         .setAngularObjectRegistry(angularObjectRegistry)
                         .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
-                        .setInterpreterOut(new InterpreterOutput(null))
+                        .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
+                            @Override
+                            public void onUpdateAll(InterpreterOutput out) {
+                                System.out.println("onUpdateAll...");
+                            }
+
+                            @Override
+                            public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
+                                System.out.println("onAppend...");
+                            }
+
+                            @Override
+                            public void onUpdate(int index, InterpreterResultMessageOutput out) {
+                                System.out.println("onUpdate...");
+                            }
+                        }))
                         .build();
                 InterpreterContext.set(context);
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
