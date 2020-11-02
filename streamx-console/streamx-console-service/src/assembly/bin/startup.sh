@@ -308,7 +308,7 @@ fi
 if [ "${HADOOP_HOME}"x == ""x ]; then
   echo_r "ERROR: HADOOP_HOME is undefined on your system env,please check it."
 else
-  echo_g "Using HADOOP_HOME:   ${HADOOP_HOME}"
+  echo_w "Using HADOOP_HOME:   ${HADOOP_HOME}"
 fi
 
 #
@@ -319,7 +319,7 @@ fi
 
 STREAMX_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
-  echo_g "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
+  echo_w "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
   STREAMX_CLASSPATH+=":${HADOOP_CONF_DIR}"
 else
   STREAMX_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
@@ -338,10 +338,10 @@ JAVA_OPTS="""-server
 -Xloggc:${APP_HOME}/logs/gc.log"""
 
 eval "${RUNJAVA}" \
-  $JAVA_OPTS \
-  -cp "${STREAMX_CLASSPATH}" \
-  -Dapp.home="${APP_HOME}" \
-  -Dspring.config.location="${PROPER}" \
-  $MAIN >> "${APP_OUT}" 2>&1 &
+  "$JAVA_OPTS" \
+  -cp "$STREAMX_CLASSPATH" \
+  -Dapp.home="$APP_HOME" \
+  -Dspring.config.location="$PROPER" \
+  $MAIN >> "$APP_OUT" 2>&1 &
 
 exit 0;
