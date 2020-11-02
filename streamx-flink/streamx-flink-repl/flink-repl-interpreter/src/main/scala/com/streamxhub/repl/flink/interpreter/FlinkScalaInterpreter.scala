@@ -171,10 +171,12 @@ class FlinkScalaInterpreter(properties: Properties) extends Logger {
 
     this.userUdfJars = getUserUdfJars()
     this.userJars = getUserJarsExceptUdfJars ++ this.userUdfJars
-    logInfo("UserJars: " + userJars.mkString(","))
-    config = config.copy(externalJars = Some(userJars.toArray))
-    logInfo("Config: " + config)
-    configuration.setString("flink.yarn.jars", userJars.mkString(":"))
+    if(this.userJars.nonEmpty) {
+      logInfo("UserJars: " + userJars.mkString(","))
+      config = config.copy(externalJars = Some(userJars.toArray))
+      logInfo("Config: " + config)
+      configuration.setString("flink.yarn.jars", userJars.mkString(":"))
+    }
 
     // load other configuration from interpreter properties
     properties.asScala.foreach(entry => configuration.setString(entry._1, entry._2))
