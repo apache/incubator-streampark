@@ -309,13 +309,21 @@ if [ "${HADOOP_HOME}"x == ""x ]; then
   echo_r "ERROR: HADOOP_HOME is undefined on your system env,please check it."
 fi
 
+#
+# classpath options:
+# 1): java env (lib and jre/lib)
+# 2): Streamx
+# 3): hadoop conf
+
 STREAMX_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
+  echo_g "find HADOOP_CONF_DIR :${HADOOP_CONF_DIR}"
   STREAMX_CLASSPATH+=":${HADOOP_CONF_DIR}"
 else
   STREAMX_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
 fi
-MAIN_CLASS="com.streamxhub.console.BootStrap"
+# StreamX main
+MAIN="com.streamxhub.console.StreamXBootStrap"
 
 JAVA_OPTS="""-server
 -Xms1024m
@@ -329,21 +337,11 @@ JAVA_OPTS="""-server
 -XX:ThreadStackSize=512
 -Xloggc:${APP_HOME}/logs/gc.log"""
 
-if [[ "${HADOOP_HOME}" == "" ]];then
-  echo_w " HADOOP_HOME is undefined. "
-  eval "${RUNJAVA}" \
-    $JAVA_OPTS \
-    -cp "${STREAMX_CLASSPATH}" \
-    -Dapp.home="${APP_HOME}" \
-    -Dspring.config.location="${PROPER}" \
-    ${MAIN_CLASS} >> "${APP_OUT}" 2>&1 &
-else
-  eval "${RUNJAVA}" \
-    $JAVA_OPTS \
-    -cp "${STREAMX_CLASSPATH}" \
-    -Dapp.home="${APP_HOME}" \
-    -Dspring.config.location="${PROPER}" \
-    ${MAIN_CLASS} >> "${APP_OUT}" 2>&1 &
-fi
+eval "${RUNJAVA}" \
+  $JAVA_OPTS \
+  -cp "${STREAMX_CLASSPATH}" \
+  -Dapp.home="${APP_HOME}" \
+  -Dspring.config.location="${PROPER}" \
+  $MAIN >> "${APP_OUT}" 2>&1 &
 
 exit 0;
