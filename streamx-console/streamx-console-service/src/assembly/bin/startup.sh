@@ -254,12 +254,12 @@ if [[ ${have_tty} -eq 1 ]]; then
   echo_w "Using APP_BASE:   $APP_BASE"
   echo_w "Using APP_HOME:   $APP_HOME"
   if [[ "$1" = "debug" ]] ; then
-    echo_w "Using JAVA_HOME:      $JAVA_HOME"
+    echo_w "Using JAVA_HOME:   $JAVA_HOME"
   else
-    echo_w "Using JRE_HOME:       $JRE_HOME"
+    echo_w "Using JRE_HOME:   $JRE_HOME"
   fi
   if [[ ! -z "$APP_PID" ]]; then
-    echo_w "Using APP_PID:    $APP_PID"
+    echo_w "Using APP_PID:   $APP_PID"
   fi
 fi
 
@@ -307,6 +307,8 @@ fi
 
 if [ "${HADOOP_HOME}"x == ""x ]; then
   echo_r "ERROR: HADOOP_HOME is undefined on your system env,please check it."
+else
+  echo_g "Using HADOOP_HOME:   ${HADOOP_HOME}"
 fi
 
 #
@@ -317,13 +319,13 @@ fi
 
 STREAMX_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
-  echo_g "find HADOOP_CONF_DIR :${HADOOP_CONF_DIR}"
+  echo_g "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
   STREAMX_CLASSPATH+=":${HADOOP_CONF_DIR}"
 else
   STREAMX_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
 fi
 # StreamX main
-MAIN="com.streamxhub.console.StreamXBootStrap"
+MAIN="com.streamxhub.console.StreamXConsole"
 
 JAVA_OPTS="""-server
 -Xms1024m
@@ -332,8 +334,6 @@ JAVA_OPTS="""-server
 -XX:NewSize=100m
 -XX:+UseConcMarkSweepGC
 -XX:CMSInitiatingOccupancyFraction=70
--XX:PermSize=128m
--XX:MaxPermSize=128m
 -XX:ThreadStackSize=512
 -Xloggc:${APP_HOME}/logs/gc.log"""
 
