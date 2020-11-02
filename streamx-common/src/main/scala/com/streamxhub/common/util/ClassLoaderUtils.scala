@@ -25,7 +25,7 @@ import java.net.URL
 import java.lang.reflect.Method
 import java.net.URLClassLoader
 
-object ClassLoaderUtils {
+object ClassLoaderUtils extends Logger {
 
   private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
@@ -39,6 +39,7 @@ object ClassLoaderUtils {
    */
   def runAsClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
     val originalClassLoader = Thread.currentThread.getContextClassLoader
+    logInfo(s"[StreamX] runAsClassLoader, originalClassLoader: ${originalClassLoader}, targetClassLoader:${targetClassLoader}")
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
       func()
