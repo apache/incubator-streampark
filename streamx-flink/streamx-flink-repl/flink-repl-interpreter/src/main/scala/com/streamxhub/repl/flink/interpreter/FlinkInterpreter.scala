@@ -22,24 +22,27 @@ package com.streamxhub.repl.flink.interpreter
 
 import java.util.Properties
 
-import com.streamxhub.common.util.{ClassLoaderUtils, Logger}
+import com.streamxhub.common.util.{ClassLoaderUtils}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.zeppelin.interpreter.Interpreter.FormType
 import org.apache.zeppelin.interpreter.{Interpreter, InterpreterContext, InterpreterException, InterpreterResult}
 import org.apache.zeppelin.interpreter.thrift.InterpreterCompletion
+import org.slf4j.LoggerFactory
 
 
 /**
  * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
  */
-class FlinkInterpreter(properties: Properties) extends Interpreter(properties) with Logger {
+class FlinkInterpreter(properties: Properties) extends Interpreter(properties) {
+
+  private lazy val LOGGER = LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
 
   private var interpreter: FlinkScalaInterpreter = _
   private var replContext: FlinkReplContext = _
 
   @throws[InterpreterException] private def checkScalaVersion(): Unit = {
     val scalaVersionString = scala.util.Properties.versionString
-    logInfo("Using Scala: " + scalaVersionString)
+    LOGGER.info("Using Scala: " + scalaVersionString)
 
     /*if (!scalaVersionString.contains("version 2")) {
       throw new InterpreterException("Unsupported scala version: " + scalaVersionString + ", Only scala 2.11 is supported")
@@ -56,7 +59,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) w
   @throws[InterpreterException] override def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
   @throws[InterpreterException] override def interpret(code: String, context: InterpreterContext): InterpreterResult = {
-    logInfo(s"Interpret code: \n$code\n")
+    LOGGER.info(s"Interpret code: \n$code\n")
     this.replContext.setInterpreterContext(context)
     this.replContext.setGui(context.getGui)
     this.replContext.setNoteGui(context.getNoteGui)
