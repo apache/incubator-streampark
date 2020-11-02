@@ -55,11 +55,8 @@ public class NoteBookServiceImpl implements NoteBookService {
             interpreter.setInterpreterGroup(interpreterGroup);
             try {
                 interpreter.open();
-                AngularObjectRegistry angularObjectRegistry = new AngularObjectRegistry("flink", null);
                 InterpreterContext context = InterpreterContext.builder()
                         .setParagraphId("paragraphId")
-                        .setAngularObjectRegistry(angularObjectRegistry)
-                        .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
                         .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
                             @Override
                             public void onUpdateAll(InterpreterOutput out) {
