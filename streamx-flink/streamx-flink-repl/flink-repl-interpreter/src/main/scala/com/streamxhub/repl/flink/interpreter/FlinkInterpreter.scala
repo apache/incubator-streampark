@@ -36,7 +36,7 @@ class FlinkInterpreter(properties: Properties) extends Interpreter(properties) w
   @throws[InterpreterException] override def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
   @throws[InterpreterException] override def interpret(code: String, context: InterpreterContext): InterpreterResult = {
-    logDebug("Interpret code: " + code)
+    logInfo(s"Interpret code: \n$code\n")
     this.replContext.setInterpreterContext(context)
     this.replContext.setGui(context.getGui)
     this.replContext.setNoteGui(context.getNoteGui)
