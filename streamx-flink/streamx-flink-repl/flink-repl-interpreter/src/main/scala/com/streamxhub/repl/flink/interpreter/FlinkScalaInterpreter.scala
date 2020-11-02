@@ -547,7 +547,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   def interpret(code: String, context: InterpreterContext): InterpreterResult = {
-    LOGGER.info(s"[StreamX]  interpret starting!,code:\n$code\n")
+    LOGGER.info(s"[StreamX]  interpret starting!code:\n$code\n")
     val originalStdOut = System.out
     val originalStdErr = System.err
     if (context != null) {
