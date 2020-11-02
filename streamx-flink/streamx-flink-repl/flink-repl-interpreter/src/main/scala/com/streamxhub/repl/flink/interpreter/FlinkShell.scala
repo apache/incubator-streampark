@@ -11,7 +11,7 @@ import org.apache.flink.client.program.{ClusterClient, MiniClusterClient}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import com.streamxhub.common.util.Logger
+import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -19,7 +19,9 @@ import scala.collection.mutable.ArrayBuffer
  * Copy from flink, because we need to customize it to make sure
  * it work with multiple versions of flink.
  */
-object FlinkShell extends Logger {
+object FlinkShell {
+
+  private lazy val LOGGER = LoggerFactory.getLogger(getClass)
 
   object ExecutionMode extends Enumeration {
     val UNDEFINED, LOCAL, REMOTE, YARN = Value
@@ -62,7 +64,7 @@ object FlinkShell extends Logger {
       case ExecutionMode.YARN => createYarnSessionCluster(config, flinkConfig, flinkShims)
       case _ => throw new IllegalArgumentException("please specify execution mode:[local | remote <host> <port> | yarn]")
     }
-    logInfo(s"[StreamX] Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
+    LOGGER.info(s"[StreamX] Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
     (effectiveConfig, clusterClient)
   }
 
@@ -103,7 +105,7 @@ object FlinkShell extends Logger {
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
-        logInfo(s"\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n")
+        LOGGER.info(s"\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n")
         val clusterClient = try clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
         finally clusterDescriptor.close()
 
