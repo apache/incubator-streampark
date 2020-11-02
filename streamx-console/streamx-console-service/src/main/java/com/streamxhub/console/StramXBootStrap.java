@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 @SpringBootApplication
 @EnableScheduling
-public class BootStrap {
+public class StramXBootStrap {
 
     public static void main(String[] args) {
-        SpringApplication.run(BootStrap.class, args);
+        SpringApplication.run(StramXBootStrap.class, args);
     }
 
 }
