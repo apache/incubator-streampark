@@ -53,8 +53,8 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
-            <artifactId>flink-repl-interpreter</artifactId>
-            <version>1.0.0</version>
+            <artifactId>streamx-flink-repl</artifactId>
+            <version>${project.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

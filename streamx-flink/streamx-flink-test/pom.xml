@@ -6,7 +6,7 @@
 
     <parent>
         <groupId>com.streamxhub</groupId>
-        <artifactId>streamx-flink</artifactId>
+        <artifactId>streamx-flink-parent</artifactId>
         <version>1.0.0</version>
     </parent>
 
