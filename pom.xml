@@ -13,7 +13,7 @@
         <module>streamx-common</module>
         <module>streamx-flink</module>
         <module>streamx-console</module>
-        <module>streamx-plugins</module>
+       <!-- <module>streamx-plugins</module>-->
         <!--
          <module>streamx-spark</module>
          -->
