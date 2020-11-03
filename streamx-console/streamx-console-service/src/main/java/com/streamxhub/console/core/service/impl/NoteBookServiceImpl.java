@@ -23,7 +23,10 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.configuration.DeploymentOptions;
 import org.apache.flink.runtime.akka.AkkaUtils;
+import org.apache.flink.yarn.configuration.YarnConfigOptions;
+import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.flink.FlinkInterpreter;
 import org.apache.zeppelin.interpreter.*;
@@ -31,6 +34,9 @@ import org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient;
 import org.springframework.stereotype.Service;
 
 import static org.mockito.Mockito.mock;
+
+import java.io.File;
+import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -49,9 +55,13 @@ public class NoteBookServiceImpl implements NoteBookService {
             properties.setProperty("zeppelin.flink.scala.color", "true");
             properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
-            properties.setProperty("akka.ask.timeout","10s");
+            properties.setProperty("akka.ask.timeout", "10s");
 
-            FlinkInterpreter   interpreter = new FlinkInterpreter(properties);
+            String flinkLocalHome = System.getenv("FLINK_HOME");
+            String flinkDistJar = Arrays.stream(new File(flinkLocalHome, "lib").listFiles()).filter(x -> x.getName().matches("flink-dist_.*\\.jar")).findFirst().get().getAbsolutePath();
+            properties.setProperty(YarnConfigOptions.FLINK_DIST_JAR.key(), flinkDistJar);
+
+            FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             InterpreterGroup interpreterGroup = new InterpreterGroup();
             interpreter.setInterpreterGroup(interpreterGroup);
             try {
