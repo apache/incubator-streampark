@@ -4,7 +4,7 @@
 
     <parent>
         <groupId>com.streamxhub</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-flink-repl</artifactId>
         <version>1.0.0</version>
     </parent>
 
@@ -19,45 +19,10 @@
     </modules>
 
     <properties>
-        <flink1.10.version>1.10.1</flink1.10.version>
-        <flink1.11.version>1.11.1</flink1.11.version>
-        <mockito.version>1.10.19</mockito.version>
+
     </properties>
 
     <dependencies>
 
-        <dependency>
-            <groupId>org.jline</groupId>
-            <artifactId>jline</artifactId>
-            <version>3.16.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>streamx-common</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>
-            <version>${mockito.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.zeppelin</groupId>
-            <artifactId>zeppelin-interpreter</artifactId>
-            <version>0.9.0-preview2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-log4j12</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 </project>
