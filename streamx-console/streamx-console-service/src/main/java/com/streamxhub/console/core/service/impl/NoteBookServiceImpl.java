@@ -22,7 +22,7 @@ package com.streamxhub.console.core.service.impl;
 
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
-import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.flink.repl.FlinkInterpreter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.interpreter.*;
@@ -30,7 +30,6 @@ import org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient;
 import org.springframework.stereotype.Service;
 
 import static org.mockito.Mockito.mock;
-
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -47,38 +46,26 @@ public class NoteBookServiceImpl implements NoteBookService {
             Properties properties = new Properties();
             properties.setProperty("repl.out", "true");
             properties.setProperty("scala.color", "true");
-            properties.setProperty("flink.yarn.queue", "root.users.hst");
+            //properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
 
-            FlinkInterpreter interpreter = new FlinkInterpreter(properties);
+            FlinkInterpreter   interpreter = new FlinkInterpreter(properties);
             InterpreterGroup interpreterGroup = new InterpreterGroup();
             interpreter.setInterpreterGroup(interpreterGroup);
             try {
                 interpreter.open();
+                AngularObjectRegistry angularObjectRegistry = new AngularObjectRegistry("flink", null);
                 InterpreterContext context = InterpreterContext.builder()
                         .setParagraphId("paragraphId")
-                        .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
-                            @Override
-                            public void onUpdateAll(InterpreterOutput out) {
-                                System.out.println("onUpdateAll...");
-                            }
-
-                            @Override
-                            public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
-                                System.out.println("onAppend...");
-                            }
-
-                            @Override
-                            public void onUpdate(int index, InterpreterResultMessageOutput out) {
-                                System.out.println("onUpdate...");
-                            }
-                        }))
+                        .setAngularObjectRegistry(angularObjectRegistry)
+                        .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
+                        .setInterpreterOut(new InterpreterOutput(null))
                         .build();
                 InterpreterContext.set(context);
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
                 System.out.println(context.out.toString());
                 assert InterpreterResult.Code.SUCCESS.equals(result.code());
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             } finally {

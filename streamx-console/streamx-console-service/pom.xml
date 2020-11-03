@@ -53,7 +53,7 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
-            <artifactId>flink-repl-interpreter</artifactId>
+            <artifactId>streamx-flink-repl</artifactId>
             <version>1.0.0</version>
             <exclusions>
                 <exclusion>
@@ -282,7 +282,18 @@
             <artifactId>org.eclipse.jgit</artifactId>
             <version>5.8.1.202007141445-r</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.zeppelin</groupId>
+            <artifactId>zeppelin-interpreter</artifactId>
+            <version>0.9.0-preview2</version>
+            <scope>compile</scope>
+        </dependency>
 
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>1.10.19</version>
+        </dependency>
 
     </dependencies>
 
