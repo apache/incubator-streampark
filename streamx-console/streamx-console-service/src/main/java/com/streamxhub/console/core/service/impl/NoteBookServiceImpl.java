@@ -23,6 +23,7 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.flink.runtime.akka.AkkaUtils;
 import org.apache.zeppelin.display.AngularObjectRegistry;
 import org.apache.zeppelin.flink.FlinkInterpreter;
 import org.apache.zeppelin.interpreter.*;
@@ -48,6 +49,7 @@ public class NoteBookServiceImpl implements NoteBookService {
             properties.setProperty("zeppelin.flink.scala.color", "true");
             properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
+            properties.setProperty("akka.ask.timeout","10s");
 
             FlinkInterpreter   interpreter = new FlinkInterpreter(properties);
             InterpreterGroup interpreterGroup = new InterpreterGroup();
