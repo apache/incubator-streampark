@@ -30,6 +30,7 @@
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
         <project.build.jdk>1.8</project.build.jdk>
+        <zeppelin.version>0.9.0-preview2</zeppelin.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -52,9 +53,41 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>streamx-flink-repl</artifactId>
-            <version>1.0.0</version>
+            <groupId>org.apache.zeppelin</groupId>
+            <artifactId>zeppelin-flink</artifactId>
+            <version>${zeppelin.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.zeppelin</groupId>
+            <artifactId>zeppelin-interpreter</artifactId>
+            <version>0.9.0-preview2</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.zeppelin</groupId>
+            <artifactId>flink1.11-shims</artifactId>
+            <version>${zeppelin.version}</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.slf4j</groupId>

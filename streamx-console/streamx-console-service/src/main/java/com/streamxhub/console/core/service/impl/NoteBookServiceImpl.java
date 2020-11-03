@@ -22,9 +22,9 @@ package com.streamxhub.console.core.service.impl;
 
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
-import com.streamxhub.flink.repl.FlinkInterpreter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.zeppelin.display.AngularObjectRegistry;
+import org.apache.zeppelin.flink.FlinkInterpreter;
 import org.apache.zeppelin.interpreter.*;
 import org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient;
 import org.springframework.stereotype.Service;
@@ -44,9 +44,9 @@ public class NoteBookServiceImpl implements NoteBookService {
     public void submit(Note note) {
         Executors.newSingleThreadExecutor().submit(() -> {
             Properties properties = new Properties();
-            properties.setProperty("repl.out", "true");
-            properties.setProperty("scala.color", "true");
-            //properties.setProperty("flink.yarn.queue", "root.users.hst");
+            properties.setProperty("zeppelin.flink.printREPLOutput", "true");
+            properties.setProperty("zeppelin.flink.scala.color", "true");
+            properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
 
             FlinkInterpreter   interpreter = new FlinkInterpreter(properties);
