@@ -22,21 +22,15 @@ package com.streamxhub.console.core.service.impl;
 
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
+import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.flink.configuration.DeploymentOptions;
-import org.apache.flink.runtime.akka.AkkaUtils;
-import org.apache.flink.yarn.configuration.YarnConfigOptions;
-import org.apache.flink.yarn.configuration.YarnDeploymentTarget;
 import org.apache.zeppelin.display.AngularObjectRegistry;
-import org.apache.zeppelin.flink.FlinkInterpreter;
 import org.apache.zeppelin.interpreter.*;
 import org.apache.zeppelin.interpreter.remote.RemoteInterpreterEventClient;
 import org.springframework.stereotype.Service;
 
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
-import java.util.Arrays;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -51,15 +45,10 @@ public class NoteBookServiceImpl implements NoteBookService {
     public void submit(Note note) {
         Executors.newSingleThreadExecutor().submit(() -> {
             Properties properties = new Properties();
-            properties.setProperty("zeppelin.flink.printREPLOutput", "true");
-            properties.setProperty("zeppelin.flink.scala.color", "true");
+            properties.setProperty("repl.out", "true");
+            properties.setProperty("scala.color", "true");
             properties.setProperty("flink.yarn.queue", "root.users.hst");
             properties.setProperty("flink.execution.mode", "yarn");
-            properties.setProperty("akka.ask.timeout", "10s");
-
-            String flinkLocalHome = System.getenv("FLINK_HOME");
-            String flinkDistJar = Arrays.stream(new File(flinkLocalHome, "lib").listFiles()).filter(x -> x.getName().matches("flink-dist_.*\\.jar")).findFirst().get().getAbsolutePath();
-            properties.setProperty(YarnConfigOptions.FLINK_DIST_JAR.key(), flinkDistJar);
 
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             InterpreterGroup interpreterGroup = new InterpreterGroup();
@@ -71,13 +60,28 @@ public class NoteBookServiceImpl implements NoteBookService {
                         .setParagraphId("paragraphId")
                         .setAngularObjectRegistry(angularObjectRegistry)
                         .setIntpEventClient(mock(RemoteInterpreterEventClient.class))
-                        .setInterpreterOut(new InterpreterOutput(null))
+                        .setInterpreterOut(new InterpreterOutput(new InterpreterOutputListener() {
+                            @Override
+                            public void onUpdateAll(InterpreterOutput out) {
+                                System.out.println("onUpdateAll...");
+                            }
+
+                            @Override
+                            public void onAppend(int index, InterpreterResultMessageOutput out, byte[] line) {
+                                System.out.println("onAppend...");
+                            }
+
+                            @Override
+                            public void onUpdate(int index, InterpreterResultMessageOutput out) {
+                                System.out.println("onUpdate...");
+                            }
+                        }))
                         .build();
                 InterpreterContext.set(context);
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), context);
                 System.out.println(context.out.toString());
                 assert InterpreterResult.Code.SUCCESS.equals(result.code());
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             } finally {
