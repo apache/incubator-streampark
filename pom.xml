@@ -45,6 +45,7 @@
         <MaxPermGen>512m</MaxPermGen>
         <clickhouse.version>0.1.53</clickhouse.version>
         <CodeCacheSize>512m</CodeCacheSize>
+        <MaxMetaspace>512m</MaxMetaspace>
     </properties>
 
     <dependencies>
