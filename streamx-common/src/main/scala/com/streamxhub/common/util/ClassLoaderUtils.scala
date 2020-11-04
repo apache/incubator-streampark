@@ -39,7 +39,6 @@ object ClassLoaderUtils extends Logger {
    */
   def runAsClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
     val originalClassLoader = Thread.currentThread.getContextClassLoader
-    logInfo(s"[StreamX] runAsClassLoader, originalClassLoader: ${originalClassLoader}, targetClassLoader:${targetClassLoader}")
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
       func()
