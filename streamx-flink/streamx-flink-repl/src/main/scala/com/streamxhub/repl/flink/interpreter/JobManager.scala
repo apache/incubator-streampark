@@ -7,7 +7,7 @@ import com.mashape.unirest.http.{JsonNode, Unirest}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.core.execution.JobClient
-import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException}
+import org.apache.zeppelin.interpreter.{InterpreterContext}
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
@@ -45,10 +45,8 @@ object JobManager {
 
 }
 
-class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedFlinkWebUrl: String) {
+class JobManager(var flinkWebUrl: String, var replacedFlinkWebUrl: String) {
   private val LOGGER = LoggerFactory.getLogger(classOf[JobManager])
-
-
   private val jobs = new java.util.HashMap[String, JobClient]()
   private val jobProgressPollerMap = new ConcurrentHashMap[JobID, FlinkJobProgressPoller]
 
@@ -111,8 +109,7 @@ class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedF
     jobProgressPoller.getProgress
   }
 
-  @throws[InterpreterException]
-  def cancelJob(context: InterpreterContext): Unit = {
+  @throws[RuntimeException] def cancelJob(context: InterpreterContext): Unit = {
     LOGGER.info("Canceling job associated of paragraph: {}", context.getParagraphId)
     val jobClient = this.jobs.get(context.getParagraphId)
     if (jobClient == null) {
@@ -139,7 +136,7 @@ class JobManager(var z: FlinkReplContext, var flinkWebUrl: String, var replacedF
       case e: Exception =>
         val errorMessage = String.format("Fail to cancel job %s that is associated " + "with paragraph %s", jobClient.getJobID, context.getParagraphId)
         LOGGER.warn(errorMessage, e)
-        throw new InterpreterException(errorMessage, e)
+        throw new RuntimeException(errorMessage, e)
     } finally if (cancelled) {
       LOGGER.info("Cancelling is successful, remove the associated FlinkJobProgressPoller of paragraph: " + context.getParagraphId)
       val jobProgressPoller = jobProgressPollerMap.remove(jobClient.getJobID)

@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 /**
  * Supported SQL commands.
+ *
  * @author benjobs
  */
 public enum SqlCommand {
