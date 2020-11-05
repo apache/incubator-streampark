@@ -25,8 +25,6 @@ import org.junit.Test;
 
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-
 
 public class FlinkInterpreterTest {
 
@@ -53,18 +51,23 @@ public class FlinkInterpreterTest {
 
     @Test
     public void testWordCount() throws Exception {
-        InterpreterResult result = interpreter.interpret(
-                "val data = senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
-                        "\n" +
-                        "data.flatMap(line => line.split(\"\\\\s\"))\n" +
-                        "  .map(w => (w, 1))\n" +
-                        "  .keyBy(0)\n" +
-                        "  .sum(1)\n" +
-                        "  .print()\n" +
-                        "\n" +
-                        "senv.execute()\n");
+        try {
+            InterpreterResult result = interpreter.interpret(
+                    "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
+                            "\n" +
+                            "data.flatMap(line => line.split(\"\\\\s\"))\n" +
+                            "  .map(w => (w, 1))\n" +
+                            "  .keyBy(0)\n" +
+                            "  .sum(1)\n" +
+                            "  .print()\n" +
+                            "\n" +
+                            "env.execute()\n");
 
-        System.out.println(result.code());
+            System.out.println(result.code());
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+
     }
 
 
