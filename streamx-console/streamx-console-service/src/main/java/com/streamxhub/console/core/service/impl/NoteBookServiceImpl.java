@@ -46,13 +46,13 @@ public class NoteBookServiceImpl implements NoteBookService {
         properties.setProperty("flink.yarn.queue", "root.users.hst");
         properties.setProperty("flink.execution.mode", "yarn");
 
-        InterpreterOutStream outStream = new InterpreterOutStream(line -> System.out.println(line));
-
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             try {
                 interpreter.open();
-                InterpreterResult result = interpreter.interpret(note.getSourceCode(), outStream);
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), new InterpreterOutStream(line -> {
+                    System.out.println(line);
+                }));
                 System.out.println("[StreamX] repl submit code:" + result.code());
             } catch (Throwable e) {
                 e.printStackTrace();

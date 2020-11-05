@@ -41,8 +41,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFactory, StreamExecutionEnvironment => JStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
-import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
-import org.apache.zeppelin.interpreter.InterpreterContext
+import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterResult}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -343,7 +342,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
       var incompleteCode = ""
-      var lastStatus: InterpreterResult.Code.Value = null
+      var lastStatus: InterpreterResult.Value = null
       for ((line, i) <- lines.zipWithIndex if !line.trim.isEmpty) {
         val nextLine = if (incompleteCode != "") {
           incompleteCode + "\n" + line
@@ -357,13 +356,13 @@ class FlinkScalaInterpreter(properties: Properties) {
             case scala.tools.nsc.interpreter.IR.Success =>
               // continue the next line
               incompleteCode = ""
-              lastStatus = InterpreterResult.Code.SUCCESS
+              lastStatus = InterpreterResult.SUCCESS
             case error@scala.tools.nsc.interpreter.IR.Error =>
-              return new InterpreterResult(InterpreterResult.Code.ERROR, out.toString)
+              lastStatus = InterpreterResult.ERROR
             case scala.tools.nsc.interpreter.IR.Incomplete =>
               // put this line into inCompleteCode for the next execution.
               incompleteCode = incompleteCode + "\n" + line
-              lastStatus = InterpreterResult.Code.INCOMPLETE
+              lastStatus = InterpreterResult.INCOMPLETE
           }
         }
       }
@@ -372,7 +371,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       // reset the java stdout
       System.setOut(originalStdOut)
       System.setErr(originalStdErr)
-      return new InterpreterResult(lastStatus, out.toString)
+      return new InterpreterResult(lastStatus)
     }
   }
 
