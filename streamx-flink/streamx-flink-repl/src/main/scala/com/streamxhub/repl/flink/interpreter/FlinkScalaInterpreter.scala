@@ -351,7 +351,6 @@ class FlinkScalaInterpreter(properties: Properties) {
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
 
-
       var incompleteCode = ""
       var lastStatus: InterpreterResult.Code.Value = null
 
