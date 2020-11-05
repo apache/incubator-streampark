@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.Completion.ScalaCompleter
 import scala.tools.nsc.interpreter.{JPrintWriter, SimpleReader}
 
 /**
@@ -61,7 +60,6 @@ class FlinkScalaInterpreter(properties: Properties) {
 
   private var flinkILoop: FlinkILoop = _
   private var cluster: Option[ClusterClient[_]] = _
-  private var scalaCompleter: ScalaCompleter = _
   private var configuration: Configuration = _
   private var mode: ExecutionMode.Value = _
   private var batchEnv: ExecutionEnvironment = _
@@ -272,7 +270,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     flinkILoop.initializeSynchronous()
     flinkILoop.intp.setContextClassLoader()
     reader.postInit()
-    this.scalaCompleter = reader.completion.completer()
 
     this.batchEnv = flinkILoop.scalaBenv
     this.streamEnv = flinkILoop.scalaSenv
@@ -336,6 +333,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     LOGGER.info(s"[StreamX]  interpret starting!code:\n$code\n")
     val originalStdOut = System.out
     val originalStdErr = System.err
+    out.clear()
     Console.withOut(out) {
       System.setOut(Console.out)
       System.setErr(Console.err)

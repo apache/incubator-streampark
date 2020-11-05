@@ -60,7 +60,7 @@ public class FlinkInterpreterTest {
                             "  .sum(1)\n" +
                             "  .print()\n" +
                             "\n" +
-                            "env.execute()\n", new InterpreterOutStream((line -> System.out.println(line))));
+                            "env.execute()\n", new InterpreterOutStream((line -> System.out.println("------>" + line))));
 
             System.out.println(result.code());
         } catch (Throwable e) {
