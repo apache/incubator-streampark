@@ -8,12 +8,10 @@ import scala.collection.JavaConversions._
 
 object InterpreterResult {
   private val gson: Gson = new Gson
-
   object Code extends Enumeration {
     type Code = Value
     val SUCCESS, INCOMPLETE, ERROR, KEEP_PREVIOUS_RESULT = Value
   }
-
   def fromJson(json: String): InterpreterResult = gson.fromJson(json, classOf[InterpreterResult])
 }
 
