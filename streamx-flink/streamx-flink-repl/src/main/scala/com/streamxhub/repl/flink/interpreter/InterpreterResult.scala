@@ -16,8 +16,8 @@ object InterpreterResult {
 }
 
 class InterpreterResult extends Serializable {
-  private[interpreter] var code: InterpreterResult.Code.Value = null
-  private[interpreter] val message = new util.LinkedList[String]
+  var code: InterpreterResult.Code.Value = null
+  val message = new util.LinkedList[String]
 
   def this(code: InterpreterResult.Code.Value) {
     this()
