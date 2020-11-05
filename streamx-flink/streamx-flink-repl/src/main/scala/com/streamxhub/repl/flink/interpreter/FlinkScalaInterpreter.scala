@@ -43,8 +43,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
 import org.apache.zeppelin.interpreter.{InterpreterContext}
-import org.slf4j.{Logger, LoggerFactory}
-
+import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
@@ -52,7 +51,7 @@ import scala.tools.nsc.interpreter.Completion.ScalaCompleter
 import scala.tools.nsc.interpreter.{JPrintWriter, SimpleReader}
 
 /**
- * It instantiate flink scala shell and create env, senv, btenv, stenv.
+ * It instantiate flink scala shell and create env, benv.
  *
  */
 
@@ -66,8 +65,8 @@ class FlinkScalaInterpreter(properties: Properties) {
   private val interpreterOutput = new InterpreterOutputStream(LOGGER)
   private var configuration: Configuration = _
   private var mode: ExecutionMode.Value = _
-  private var benv: ExecutionEnvironment = _
-  private var senv: StreamExecutionEnvironment = _
+  private var batchEnv: ExecutionEnvironment = _
+  private var streamEnv: StreamExecutionEnvironment = _
   var flinkShims: FlinkShims = _
   var jmWebUrl: String = _
   var replacedJMWebUrl: String = _
@@ -85,8 +84,8 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.jobManager = new JobManager(jmWebUrl, replacedJMWebUrl)
     // register JobListener
     val jobListener = new FlinkJobListener()
-    this.benv.registerJobListener(jobListener)
-    this.senv.registerJobListener(jobListener)
+    this.batchEnv.registerJobListener(jobListener)
+    this.streamEnv.registerJobListener(jobListener)
   }
 
   private def initFlinkConfig(): Config = {
@@ -246,8 +245,8 @@ class FlinkScalaInterpreter(properties: Properties) {
     flinkILoop.intp = new FlinkILoopInterpreter(settings, replOut)
     flinkILoop.intp.beQuietDuring {
       // set execution environment
+      flinkILoop.intp.bind("env", flinkILoop.scalaSenv)
       flinkILoop.intp.bind("benv", flinkILoop.scalaBenv)
-      flinkILoop.intp.bind("senv", flinkILoop.scalaSenv)
 
       val packageImports = Seq[String](
         "org.apache.flink.core.fs._",
@@ -283,19 +282,19 @@ class FlinkScalaInterpreter(properties: Properties) {
     reader.postInit()
     this.scalaCompleter = reader.completion.completer()
 
-    this.benv = flinkILoop.scalaBenv
-    this.senv = flinkILoop.scalaSenv
+    this.batchEnv = flinkILoop.scalaBenv
+    this.streamEnv = flinkILoop.scalaSenv
     val timeType = properties.getProperty("flink.senv.timecharacteristic", "EventTime")
-    this.senv.setStreamTimeCharacteristic(TimeCharacteristic.valueOf(timeType))
-    this.benv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
-    this.senv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
+    this.streamEnv.setStreamTimeCharacteristic(TimeCharacteristic.valueOf(timeType))
+    this.batchEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
+    this.streamEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
 
     setAsContext()
   }
 
   private def setAsContext(): Unit = {
     val streamFactory = new StreamExecutionEnvironmentFactory() {
-      override def createExecutionEnvironment: JStreamExecutionEnvironment = senv.getJavaEnv
+      override def createExecutionEnvironment: JStreamExecutionEnvironment = streamEnv.getJavaEnv
     }
     //StreamExecutionEnvironment
     var method = classOf[JStreamExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[StreamExecutionEnvironmentFactory])
@@ -303,7 +302,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     method.invoke(null, streamFactory)
 
     val batchFactory = new ExecutionEnvironmentFactory() {
-      override def createExecutionEnvironment: JExecutionEnvironment = benv.getJavaEnv
+      override def createExecutionEnvironment: JExecutionEnvironment = batchEnv.getJavaEnv
     }
     //StreamExecutionEnvironment
     method = classOf[JExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[ExecutionEnvironmentFactory])
@@ -433,13 +432,13 @@ class FlinkScalaInterpreter(properties: Properties) {
     val parallelismStr = context.getLocalProperties.get("parallelism")
     if (!StringUtils.isBlank(parallelismStr)) {
       val parallelism = parallelismStr.toInt
-      this.senv.setParallelism(parallelism)
-      this.benv.setParallelism(parallelism)
+      this.streamEnv.setParallelism(parallelism)
+      this.batchEnv.setParallelism(parallelism)
     }
     val maxParallelismStr = context.getLocalProperties.get("maxParallelism")
     if (!StringUtils.isBlank(maxParallelismStr)) {
       val maxParallelism = maxParallelismStr.toInt
-      senv.setParallelism(maxParallelism)
+      streamEnv.setParallelism(maxParallelism)
     }
   }
 
@@ -481,9 +480,9 @@ class FlinkScalaInterpreter(properties: Properties) {
     }
   }
 
-  def getExecutionEnvironment(): ExecutionEnvironment = this.benv
+  def getExecutionEnvironment(): ExecutionEnvironment = this.batchEnv
 
-  def getStreamExecutionEnvironment(): StreamExecutionEnvironment = this.senv
+  def getStreamExecutionEnvironment(): StreamExecutionEnvironment = this.streamEnv
 
   private def getUserJarsExceptUdfJars: Seq[String] = {
     val flinkJars =
