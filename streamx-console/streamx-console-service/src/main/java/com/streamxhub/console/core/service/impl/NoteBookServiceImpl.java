@@ -43,11 +43,9 @@ public class NoteBookServiceImpl implements NoteBookService {
         Properties properties = new Properties();
         properties.setProperty("flink.yarn.queue", "root.users.hst");
         properties.setProperty("flink.execution.mode", "yarn");
-
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             try {
-                interpreter.open();
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), new InterpreterOutStream(line -> {
                     System.out.println(line);
                 }));
