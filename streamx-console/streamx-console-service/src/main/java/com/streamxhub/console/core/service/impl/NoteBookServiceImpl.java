@@ -23,6 +23,7 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.InterpreterOutStream;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -44,11 +45,14 @@ public class NoteBookServiceImpl implements NoteBookService {
         properties.setProperty("scala.color", "true");
         properties.setProperty("flink.yarn.queue", "root.users.hst");
         properties.setProperty("flink.execution.mode", "yarn");
+
+        InterpreterOutStream outStream = new InterpreterOutStream(line -> System.out.println(line));
+
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             try {
                 interpreter.open();
-                InterpreterResult result = interpreter.interpret(note.getSourceCode());
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), outStream);
                 System.out.println("[StreamX] repl submit code:" + result.code());
             } catch (Throwable e) {
                 e.printStackTrace();
