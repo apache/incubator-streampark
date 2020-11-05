@@ -361,11 +361,7 @@ class FlinkScalaInterpreter(properties: Properties) {
         if (i < (lines.length - 1) && lines(i + 1).trim.startsWith(".")) {
           incompleteCode = nextLine
         } else {
-          LOGGER.info(s"[StreamX] interpret nextLine:$nextLine ")
           flinkILoop.interpret(nextLine) match {
-            case e: Throwable =>
-              LOGGER.error(s"[StreamX] interpret error:${e.fillInStackTrace()}")
-              return new InterpreterResult(InterpreterResult.Code.ERROR, ExceptionUtils.getMessage(e))
             case scala.tools.nsc.interpreter.IR.Success =>
               // continue the next line
               incompleteCode = ""
