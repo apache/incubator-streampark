@@ -539,8 +539,6 @@
                 </executions>
                 <configuration>
                     <scalaVersion>${scala.version}</scalaVersion>
-                    <!--<recompileMode>incremental</recompileMode>-->
-                    <!--<useZincServer>true</useZincServer>-->
                     <args>
                         <arg>-unchecked</arg>
                         <arg>-deprecation</arg>
@@ -561,6 +559,42 @@
                     </javacArgs>
                 </configuration>
             </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <configuration>
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                            <excludes>
+                                <exclude>org/datanucleus/**</exclude>
+                                <exclude>META-INF/*.SF</exclude>
+                                <exclude>META-INF/*.DSA</exclude>
+                                <exclude>META-INF/*.RSA</exclude>
+                            </excludes>
+                        </filter>
+                    </filters>
+
+                    <artifactSet>
+                        <excludes>
+                            <exclude>org.scala-lang:scala-library</exclude>
+                            <exclude>org.scala-lang:scala-compiler</exclude>
+                            <exclude>org.scala-lang:scala-reflect</exclude>
+                            <exclude>org.apache.flink:*</exclude>
+                        </excludes>
+                    </artifactSet>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
