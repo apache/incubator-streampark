@@ -235,7 +235,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     settings.classpath.append(System.getProperty("java.class.path"))
     val outputDir = Files.createTempDirectory("flink-repl");
     val interpArguments = List(
-      "-Dusejavacp",
       "-Yrepl-class-based",
       "-Yrepl-outdir", s"${outputDir.toFile.getAbsolutePath}"
     )
