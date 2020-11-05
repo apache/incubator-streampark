@@ -18,6 +18,7 @@ package com.streamxhub.repl.flink.test;
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.InterpreterOutStream;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;
 import org.junit.Before;
@@ -37,9 +38,7 @@ public class FlinkInterpreterTest {
         p.setProperty("scala.color", "false");
         p.setProperty("flink.execution.mode", "yarn");
         p.setProperty("local.number-taskmanager", "4");
-
         interpreter = new FlinkInterpreter(p);
-        interpreter.open();
     }
 
     @After
@@ -61,7 +60,7 @@ public class FlinkInterpreterTest {
                             "  .sum(1)\n" +
                             "  .print()\n" +
                             "\n" +
-                            "env.execute()\n");
+                            "env.execute()\n", new InterpreterOutStream((line -> System.out.println(line))));
 
             System.out.println(result.code());
         } catch (Throwable e) {
