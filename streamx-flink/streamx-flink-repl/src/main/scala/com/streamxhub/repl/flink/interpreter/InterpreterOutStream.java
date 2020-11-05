@@ -15,9 +15,9 @@ public class InterpreterOutStream extends OutputStream {
 
     private ByteArrayOutputStream lineBuffer = new ByteArrayOutputStream();
 
-    private final InterpreterOutListener flushListener;
+    private final FlushListener flushListener;
 
-    public InterpreterOutStream(InterpreterOutListener listener) {
+    public InterpreterOutStream(FlushListener listener) {
         this.flushListener = listener;
     }
 
@@ -57,9 +57,10 @@ public class InterpreterOutStream extends OutputStream {
         return buffer.toByteArray();
     }
 
-
     @Override
     public void close() throws IOException {
+        //最后一行..
+        flushListener.onLine(new String(lineBuffer.toByteArray()));
         flush();
     }
 
@@ -67,4 +68,19 @@ public class InterpreterOutStream extends OutputStream {
     public String toString() {
         return new String(toByteArray());
     }
+
+    /**
+     * @author benjobs
+     */
+    public interface FlushListener {
+        /**
+         * 新的一行
+         *
+         * @param line
+         */
+        void onLine(String line);
+    }
+
 }
+
+
