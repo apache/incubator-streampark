@@ -17,13 +17,11 @@ package com.streamxhub.repl.flink.test;/*
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import org.apache.zeppelin.interpreter.InterpreterException;
-import org.apache.zeppelin.interpreter.InterpreterResult;
+import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
@@ -34,7 +32,7 @@ public class FlinkInterpreterTest {
     private FlinkInterpreter interpreter;
 
     @Before
-    public void setUp() throws InterpreterException {
+    public void setUp() throws Exception {
         Properties p = new Properties();
         p.setProperty("repl.out", "true");
         p.setProperty("scala.color", "false");
@@ -46,14 +44,14 @@ public class FlinkInterpreterTest {
     }
 
     @After
-    public void tearDown() throws InterpreterException {
+    public void tearDown() throws Exception {
         if (interpreter != null) {
             interpreter.close();
         }
     }
 
     @Test
-    public void testWordCount() throws InterpreterException {
+    public void testWordCount() throws Exception {
         InterpreterResult result = interpreter.interpret(
                 "val data = senv.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
                         "\n" +
@@ -64,7 +62,9 @@ public class FlinkInterpreterTest {
                         "  .print()\n" +
                         "\n" +
                         "senv.execute()\n");
-        assertEquals(InterpreterResult.Code.SUCCESS, result.code());
+
+        System.out.println(result.code());
+        assertEquals(InterpreterResult.Code.SUCCESS(), result.code());
     }
 
 

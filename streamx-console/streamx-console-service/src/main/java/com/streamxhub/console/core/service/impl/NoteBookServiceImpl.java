@@ -23,8 +23,8 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.zeppelin.interpreter.*;
 import org.springframework.stereotype.Service;
 
 import java.util.Properties;
@@ -49,7 +49,7 @@ public class NoteBookServiceImpl implements NoteBookService {
             try {
                 interpreter.open();
                 InterpreterResult result = interpreter.interpret(note.getSourceCode());
-                assert InterpreterResult.Code.SUCCESS.equals(result.code());
+                System.out.println(result.code());
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -57,7 +57,7 @@ public class NoteBookServiceImpl implements NoteBookService {
                 if (interpreter != null) {
                     try {
                         interpreter.close();
-                    } catch (InterpreterException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }
