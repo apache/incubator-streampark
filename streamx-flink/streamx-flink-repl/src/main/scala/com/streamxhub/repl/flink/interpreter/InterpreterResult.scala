@@ -7,6 +7,4 @@ object InterpreterResult extends Enumeration {
 }
 
 
-class InterpreterResult(val code: InterpreterResult.Code) extends Serializable {
-
-}
+class InterpreterResult(val code: InterpreterResult.Code) extends Serializable
