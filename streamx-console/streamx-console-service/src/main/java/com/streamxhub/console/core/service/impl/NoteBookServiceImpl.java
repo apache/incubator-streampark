@@ -41,8 +41,6 @@ public class NoteBookServiceImpl implements NoteBookService {
     @Override
     public void submit(Note note) {
         Properties properties = new Properties();
-        properties.setProperty("repl.out", "true");
-        properties.setProperty("scala.color", "true");
         properties.setProperty("flink.yarn.queue", "root.users.hst");
         properties.setProperty("flink.execution.mode", "yarn");
 
