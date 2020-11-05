@@ -20,7 +20,6 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.PrintStream
 import java.util.Properties
 
 import com.streamxhub.common.util.ClassLoaderUtils
