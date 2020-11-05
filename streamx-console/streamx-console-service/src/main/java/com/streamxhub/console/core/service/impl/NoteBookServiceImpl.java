@@ -49,8 +49,8 @@ public class NoteBookServiceImpl implements NoteBookService {
             try {
                 interpreter.open();
                 InterpreterResult result = interpreter.interpret(note.getSourceCode());
-                System.out.println(result.code());
-            } catch (Exception e) {
+                System.out.println("[StreamX] repl submit code:" + result.code());
+            } catch (Throwable e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             } finally {
