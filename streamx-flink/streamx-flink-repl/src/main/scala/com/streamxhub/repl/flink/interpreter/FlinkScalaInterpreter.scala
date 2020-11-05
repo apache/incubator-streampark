@@ -42,7 +42,7 @@ import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFac
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
-import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterResult}
+import org.apache.zeppelin.interpreter.{InterpreterContext}
 import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConverters._
@@ -211,9 +211,6 @@ class FlinkScalaInterpreter(properties: Properties) {
       }
 
       LOGGER.info(s"\nConnecting to Flink cluster: ${this.jmWebUrl}")
-      if (InterpreterContext.get() != null) {
-        //        InterpreterContext.get().getIntpEventClient.sendWebUrlInfo(this.jmWebUrl)
-      }
 
       LOGGER.info("externalJars: " + config.externalJars.getOrElse(Array.empty[String]).mkString(":"))
       try {
@@ -355,7 +352,7 @@ class FlinkScalaInterpreter(properties: Properties) {
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
       var incompleteCode = ""
-      var lastStatus: InterpreterResult.Code = null
+      var lastStatus: InterpreterResult.Code.Value = null
 
       for ((line, i) <- lines.zipWithIndex if !line.trim.isEmpty) {
         val nextLine = if (incompleteCode != "") {

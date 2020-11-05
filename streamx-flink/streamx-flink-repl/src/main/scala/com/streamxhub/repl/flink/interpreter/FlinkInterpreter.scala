@@ -24,7 +24,7 @@ import java.util.Properties
 
 import com.streamxhub.common.util.{ClassLoaderUtils}
 import com.streamxhub.repl.flink.shims.FlinkShims
-import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterException, InterpreterResult}
+import org.apache.zeppelin.interpreter.{InterpreterContext}
 import org.slf4j.LoggerFactory
 
 
@@ -36,20 +36,20 @@ class FlinkInterpreter(properties: Properties) {
   private lazy val LOGGER = LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
   private var interpreter: FlinkScalaInterpreter = _
 
-  @throws[InterpreterException] private def checkScalaVersion(): Unit = {
+  private def checkScalaVersion(): Unit = {
     val scalaVersionString = scala.util.Properties.versionString
     LOGGER.info("Using Scala: " + scalaVersionString)
   }
 
-  @throws[InterpreterException] def open(): Unit = {
+  @throws[Exception] def open(): Unit = {
     checkScalaVersion()
     this.interpreter = new FlinkScalaInterpreter(properties)
     this.interpreter.open()
   }
 
-  @throws[InterpreterException] def close(): Unit = if (this.interpreter != null) this.interpreter.close()
+  @throws[Exception] def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
-  @throws[InterpreterException] def interpret(code: String): InterpreterResult = {
+  @throws[Exception] def interpret(code: String): InterpreterResult = {
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
     ClassLoaderUtils.runAsClassLoader(getFlinkScalaShellLoader, () => {
@@ -57,10 +57,9 @@ class FlinkInterpreter(properties: Properties) {
     })
   }
 
-  @throws[InterpreterException] def cancel(context: InterpreterContext): Unit = {
+  @throws[Exception] def cancel(context: InterpreterContext): Unit = {
     this.interpreter.cancel(context)
   }
-
 
   private[flink] def getExecutionEnvironment = this.interpreter.getExecutionEnvironment()
 
@@ -70,12 +69,9 @@ class FlinkInterpreter(properties: Properties) {
 
   private[flink] def getDefaultParallelism: Int = this.interpreter.defaultParallelism
 
-
   def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
 
   private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
-
-  def getInnerIntp: FlinkScalaInterpreter = this.interpreter
 
   def getFlinkShims: FlinkShims = this.interpreter.getFlinkShims
 
