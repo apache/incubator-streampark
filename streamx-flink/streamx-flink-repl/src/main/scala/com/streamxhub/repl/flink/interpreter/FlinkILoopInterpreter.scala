@@ -96,12 +96,9 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
     val repl: FlinkILoopInterpreter.this.type = self
   } with FlinkExprTyper {}
 
-  override def symbolOfLine(code: String): global.Symbol =
-    expressionTyper.symbolOfLine(code)
+  override def symbolOfLine(code: String): global.Symbol = expressionTyper.symbolOfLine(code)
 
-  override def typeOfExpression(expr: String, silent: Boolean): global.Type =
-    expressionTyper.typeOfExpression(expr, silent)
-
+  override def typeOfExpression(expr: String, silent: Boolean): global.Type = expressionTyper.typeOfExpression(expr, silent)
 
   import global.Name
 
