@@ -350,22 +350,23 @@ class FlinkScalaInterpreter(properties: Properties) {
       interpreterOutput.ignoreLeadingNewLinesFromScalaReporter()
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
-
       var incompleteCode = ""
       var lastStatus: InterpreterResult.Code.Value = null
-
       for ((line, i) <- lines.zipWithIndex if !line.trim.isEmpty) {
         val nextLine = if (incompleteCode != "") {
           incompleteCode + "\n" + line
         } else {
           line
         }
-        LOGGER.info(s"[StreamX] interpret nextLine:${nextLine} ")
 
         if (i < (lines.length - 1) && lines(i + 1).trim.startsWith(".")) {
           incompleteCode = nextLine
         } else {
+          LOGGER.info(s"[StreamX] interpret nextLine:$nextLine ")
           flinkILoop.interpret(nextLine) match {
+            case e: Throwable =>
+              LOGGER.error(s"[StreamX] interpret error:${e.fillInStackTrace()}")
+              return new InterpreterResult(InterpreterResult.Code.ERROR, ExceptionUtils.getMessage(e))
             case scala.tools.nsc.interpreter.IR.Success =>
               // continue the next line
               incompleteCode = ""
