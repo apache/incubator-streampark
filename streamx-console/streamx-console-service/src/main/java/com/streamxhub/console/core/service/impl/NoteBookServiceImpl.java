@@ -50,8 +50,12 @@ public class NoteBookServiceImpl implements NoteBookService {
             try {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 ByteArrayOutputStream err = new ByteArrayOutputStream();
-                InterpreterResult result = interpreter.interpret(note.getSourceCode(), out,err);
-                System.out.println("[StreamX] repl submit code:" + result.code());
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), out, err);
+                if (result.code().equals(InterpreterResult.Code.ERROR)) {
+                    System.out.println("[StreamX] repl submit error:" + new String(err.toByteArray()));
+                } else {
+                    System.out.println("[StreamX] repl submit success:" + new String(out.toByteArray()));
+                }
             } catch (Throwable e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
