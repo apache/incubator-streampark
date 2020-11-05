@@ -15,6 +15,7 @@ object InterpreterResult {
   def fromJson(json: String): InterpreterResult = gson.fromJson(json, classOf[InterpreterResult])
 }
 
+
 class InterpreterResult extends Serializable {
   var code: InterpreterResult.Code.Value = null
   val message = new util.LinkedList[String]

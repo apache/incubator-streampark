@@ -65,7 +65,6 @@ public class FlinkInterpreterTest {
                         "senv.execute()\n");
 
         System.out.println(result.code());
-        assertEquals(InterpreterResult.Code.SUCCESS(), result.code());
     }
 
 
