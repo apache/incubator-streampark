@@ -104,7 +104,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.mode = ExecutionMode.withName(properties.getProperty("flink.execution.mode", "LOCAL").toUpperCase)
     var config = Config(executionMode = mode)
 
-    this.flinkShims = FlinkShims.getInstance(properties)
+    this.flinkShims = new FlinkShims(properties)
     this.configuration = GlobalConfiguration.loadConfiguration(flinkConfDir)
 
     val jmMemory = properties.getProperty("flink.jm.memory", "1024")
