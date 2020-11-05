@@ -18,7 +18,7 @@
 
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.{BufferedReader, File}
+import java.io.{BufferedReader, ByteArrayOutputStream, File, StringReader}
 import java.net.{URL, URLClassLoader}
 import java.nio.file.Files
 import java.util.Properties
@@ -41,7 +41,7 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFactory, StreamExecutionEnvironment => JStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
-import org.apache.zeppelin.interpreter.InterpreterContext
+import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterResult, InterpreterResultMessageOutput}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -328,48 +328,48 @@ class FlinkScalaInterpreter(properties: Properties) {
     field.get(obj)
   }
 
-
-  def interpret(code: String, out: InterpreterOutStream): InterpreterResult = {
+  def interpret(code: String, out: ByteArrayOutputStream, err: ByteArrayOutputStream): InterpreterResult = {
     LOGGER.info(s"[StreamX]  interpret starting!code:\n$code\n")
     val originalStdOut = System.out
     val originalStdErr = System.err
-    out.clear()
     Console.withOut(out) {
-      System.setOut(Console.out)
-      System.setErr(Console.err)
-      // add print("") at the end in case the last line is comment which lead to INCOMPLETE
-      val lines = code.split("\\n") ++ List("print(\"\")")
-      var incompleteCode = ""
-      var lastStatus: InterpreterResult.Value = null
-      for ((line, i) <- lines.zipWithIndex if !line.trim.isEmpty) {
-        val nextLine = if (incompleteCode != "") {
-          incompleteCode + "\n" + line
-        } else {
-          line
-        }
-        if (i < (lines.length - 1) && lines(i + 1).trim.startsWith(".")) {
-          incompleteCode = nextLine
-        } else {
-          flinkILoop.interpret(nextLine) match {
-            case scala.tools.nsc.interpreter.IR.Success =>
-              // continue the next line
-              incompleteCode = ""
-              lastStatus = InterpreterResult.SUCCESS
-            case error@scala.tools.nsc.interpreter.IR.Error =>
-              lastStatus = InterpreterResult.ERROR
-            case scala.tools.nsc.interpreter.IR.Incomplete =>
-              // put this line into inCompleteCode for the next execution.
-              incompleteCode = incompleteCode + "\n" + line
-              lastStatus = InterpreterResult.INCOMPLETE
+      Console.withErr(err) {
+        System.setOut(Console.out)
+        System.setErr(Console.err)
+        // add print("") at the end in case the last line is comment which lead to INCOMPLETE
+        val lines = code.split("\\n") ++ List("print(\"\")")
+        var incompleteCode = ""
+        var lastStatus: InterpreterResult.Code = null
+        for ((line, i) <- lines.zipWithIndex if !line.trim.isEmpty) {
+          val nextLine = if (incompleteCode != "") {
+            incompleteCode + "\n" + line
+          } else {
+            line
+          }
+          if (i < (lines.length - 1) && lines(i + 1).trim.startsWith(".")) {
+            incompleteCode = nextLine
+          } else {
+            flinkILoop.interpret(nextLine) match {
+              case scala.tools.nsc.interpreter.IR.Success =>
+                // continue the next line
+                incompleteCode = ""
+                lastStatus = InterpreterResult.Code.SUCCESS
+              case error@scala.tools.nsc.interpreter.IR.Error =>
+                lastStatus = InterpreterResult.Code.ERROR
+              case scala.tools.nsc.interpreter.IR.Incomplete =>
+                // put this line into inCompleteCode for the next execution.
+                incompleteCode = incompleteCode + "\n" + line
+                lastStatus = InterpreterResult.Code.INCOMPLETE
+            }
           }
         }
+        // flush all output before returning result to frontend
+        Console.flush()
+        // reset the java stdout
+        System.setOut(originalStdOut)
+        System.setErr(originalStdErr)
+        return new InterpreterResult(lastStatus)
       }
-      // flush all output before returning result to frontend
-      Console.flush()
-      // reset the java stdout
-      System.setOut(originalStdOut)
-      System.setErr(originalStdErr)
-      return new InterpreterResult(lastStatus)
     }
   }
 
