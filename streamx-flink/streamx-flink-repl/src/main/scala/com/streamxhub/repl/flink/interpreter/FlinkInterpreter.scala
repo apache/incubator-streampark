@@ -50,11 +50,12 @@ class FlinkInterpreter(properties: Properties) {
 
   @throws[Exception] def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
-  @throws[Exception] def interpret(code: String,out:InterpreterOutStream): InterpreterResult = {
+  @throws[Exception] def interpret(code: String, out: InterpreterOutStream): InterpreterResult = {
+    this.open()
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
     ClassLoaderUtils.runAsClassLoader(getFlinkScalaShellLoader, () => {
-      interpreter.interpret(code,out)
+      interpreter.interpret(code, out)
     })
   }
 
