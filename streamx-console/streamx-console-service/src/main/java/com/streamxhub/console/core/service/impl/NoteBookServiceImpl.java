@@ -23,11 +23,13 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.InterpreterOutStream;
-import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResultMessageOutput;
+import org.apache.zeppelin.interpreter.InterpreterResultMessageOutputListener;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 
@@ -46,7 +48,9 @@ public class NoteBookServiceImpl implements NoteBookService {
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             try {
-                InterpreterResult result = interpreter.interpret(note.getSourceCode(), new InterpreterOutStream(line -> System.out.println("[StreamX] NoteBook out: " + line)));
+                ByteArrayOutputStream out = new ByteArrayOutputStream();
+                ByteArrayOutputStream err = new ByteArrayOutputStream();
+                InterpreterResult result = interpreter.interpret(note.getSourceCode(), out,err);
                 System.out.println("[StreamX] repl submit code:" + result.code());
             } catch (Throwable e) {
                 e.printStackTrace();

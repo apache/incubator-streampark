@@ -18,12 +18,13 @@ package com.streamxhub.repl.flink.test;
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.InterpreterOutStream;
-import com.streamxhub.repl.flink.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResult;
+import org.apache.zeppelin.interpreter.InterpreterResultMessageOutput;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 
 
@@ -51,6 +52,10 @@ public class FlinkInterpreterTest {
     @Test
     public void testWordCount() throws Exception {
         try {
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            ByteArrayOutputStream err = new ByteArrayOutputStream();
+
             InterpreterResult result = interpreter.interpret(
                     "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
                             "\n" +
@@ -60,9 +65,12 @@ public class FlinkInterpreterTest {
                             "  .sum(1)\n" +
                             "  .print()\n" +
                             "\n" +
-                            "env.execute()\n", new InterpreterOutStream((line -> System.out.println("------>" + line))));
-
-            System.out.println(result.code());
+                            "env.execute()\n", out , err);
+            if( result.code().equals(InterpreterResult.Code.ERROR) ) {
+                System.err.println(new String(err.toByteArray()));
+            }else {
+                System.out.println(new String(out.toByteArray()));
+            }
         } catch (Throwable e) {
             e.printStackTrace();
         }
