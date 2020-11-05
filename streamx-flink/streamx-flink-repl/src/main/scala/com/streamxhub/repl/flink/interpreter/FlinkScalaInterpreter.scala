@@ -24,7 +24,7 @@ import java.nio.file.Files
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 
-import com.streamxhub.common.util.{ClassLoaderUtils}
+import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
 import com.streamxhub.repl.flink.util.{DependencyUtils, HadoopUtils}
@@ -42,8 +42,9 @@ import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFac
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.zeppelin.interpreter.util.InterpreterOutputStream
-import org.apache.zeppelin.interpreter.{InterpreterContext}
+import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
+
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
@@ -62,7 +63,6 @@ class FlinkScalaInterpreter(properties: Properties) {
   private var flinkILoop: FlinkILoop = _
   private var cluster: Option[ClusterClient[_]] = _
   private var scalaCompleter: ScalaCompleter = _
-  private val interpreterOutput = new InterpreterOutputStream(LOGGER)
   private var configuration: Configuration = _
   private var mode: ExecutionMode.Value = _
   private var batchEnv: ExecutionEnvironment = _
@@ -158,13 +158,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def createFlinkILoop(config: Config): Unit = {
-    val printReplOutput = properties.getProperty("repl.out", "true").toBoolean
-    val replOut = if (printReplOutput) {
-      new JPrintWriter(interpreterOutput, true)
-    } else {
-      new JPrintWriter(Console.out, true)
-    }
-
+    val replOut = new JPrintWriter(Console.out, true)
     val (iLoop, cluster) = {
       // workaround of checking hadoop jars in yarn  mode
       mode match {
@@ -339,14 +333,13 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
 
-  def interpret(code: String): InterpreterResult = {
+  def interpret(code: String, out: InterpreterOutStream): InterpreterResult = {
     LOGGER.info(s"[StreamX]  interpret starting!code:\n$code\n")
     val originalStdOut = System.out
     val originalStdErr = System.err
-    Console.withOut(Console.out) {
+    Console.withOut(out) {
       System.setOut(Console.out)
-      System.setErr(Console.out)
-      interpreterOutput.ignoreLeadingNewLinesFromScalaReporter()
+      System.setErr(Console.err)
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
       var incompleteCode = ""
@@ -357,7 +350,6 @@ class FlinkScalaInterpreter(properties: Properties) {
         } else {
           line
         }
-
         if (i < (lines.length - 1) && lines(i + 1).trim.startsWith(".")) {
           incompleteCode = nextLine
         } else {
@@ -367,7 +359,7 @@ class FlinkScalaInterpreter(properties: Properties) {
               incompleteCode = ""
               lastStatus = InterpreterResult.Code.SUCCESS
             case error@scala.tools.nsc.interpreter.IR.Error =>
-              return new InterpreterResult(InterpreterResult.Code.ERROR)
+              return new InterpreterResult(InterpreterResult.Code.ERROR, out.toString)
             case scala.tools.nsc.interpreter.IR.Incomplete =>
               // put this line into inCompleteCode for the next execution.
               incompleteCode = incompleteCode + "\n" + line
@@ -377,11 +369,10 @@ class FlinkScalaInterpreter(properties: Properties) {
       }
       // flush all output before returning result to frontend
       Console.flush()
-      interpreterOutput.setInterpreterOutput(null)
       // reset the java stdout
       System.setOut(originalStdOut)
       System.setErr(originalStdErr)
-      return new InterpreterResult(lastStatus)
+      return new InterpreterResult(lastStatus, out.toString)
     }
   }
 
