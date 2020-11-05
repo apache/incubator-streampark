@@ -47,7 +47,7 @@ public class InterpreterOutStream extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len) {
         for (int i = off; i < len; i++) {
             write(b[i]);
         }
