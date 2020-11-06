@@ -338,11 +338,18 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
 
+  /**
+   *
+   * @param code
+   * @param out
+   * @return
+   */
   def interpret(code: String, out: InterpreterOutput): InterpreterResult = {
     LOGGER.info(s"[StreamX]  interpret starting!code:\n$code\n")
     val originalStdOut = System.out
     val originalStdErr = System.err
     interpreterOutput.setInterpreterOutput(out)
+
     Console.withOut(out) {
       System.setOut(Console.out)
       System.setErr(Console.out)
