@@ -346,7 +346,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     Console.withOut(out) {
       System.setOut(Console.out)
       System.setErr(Console.out)
-      interpreterOutput.ignore()
+      interpreterOutput.ignoreLeadingNewLinesFromScalaReporter()
       // add print("") at the end in case the last line is comment which lead to INCOMPLETE
       val lines = code.split("\\n") ++ List("print(\"\")")
       var incompleteCode = ""
