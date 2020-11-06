@@ -16,19 +16,14 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
 
   override def write(b: Int): Unit = {
     buffer.write(b)
-    lineBuffer += b.toByte
-    if (b == NEW_LINE_CHAR) {
-      flushLine()
+    if (flushListener != null) {
+      lineBuffer += b.toByte
+      if (b == NEW_LINE_CHAR) {
+        flushLine()
+      }
     }
   }
 
-  def flushLine(): Unit = {
-    val line = new String(lineBuffer.toArray)
-    lineBuffer.clear()
-    if (flushListener != null && line.nonEmpty) {
-      flushListener.onLine(line)
-    }
-  }
 
   @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
@@ -38,10 +33,18 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
 
   @throws[IOException] override def close(): Unit = {
     flush()
-    flushLine()
+    if (this.flushListener != null) {
+      flushLine()
+    }
   }
 
   override def toString() = new String(toByteArray)
+
+  def flushLine(): Unit = {
+    val line = new String(lineBuffer.toArray)
+    lineBuffer.clear()
+    flushListener.onLine(line)
+  }
 
 }
 
