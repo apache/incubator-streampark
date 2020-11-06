@@ -23,7 +23,6 @@ package com.streamxhub.repl.flink.interpreter
 import java.util.Properties
 
 import com.streamxhub.common.util.ClassLoaderUtils
-import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
 
@@ -73,8 +72,6 @@ class FlinkInterpreter(properties: Properties) {
   def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
 
   private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
-
-  def getFlinkShims: FlinkShims = this.interpreter.getFlinkShims
 
   def setSavepointIfNecessary(context: InterpreterContext): Unit = {
     this.interpreter.setSavepointPathIfNecessary(context)

@@ -18,6 +18,7 @@ package com.streamxhub.repl.flink.test;
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.FlushListener;
 import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;
@@ -51,7 +52,9 @@ public class FlinkInterpreterTest {
     @Test
     public void testWordCount() throws Exception {
         try {
-            InterpreterOutput out = new InterpreterOutput();
+            InterpreterOutput out = new InterpreterOutput(line -> {
+
+            });
 
             InterpreterResult result = interpreter.interpret(
                     "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +

@@ -23,6 +23,7 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.FlushListener;
 import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +48,10 @@ public class NoteBookServiceImpl implements NoteBookService {
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(properties);
             try {
-                InterpreterOutput out = new InterpreterOutput();
+                InterpreterOutput out = new InterpreterOutput(line -> {
+                    //TODO, show line to html.
+                    //
+                });
                 InterpreterResult result = interpreter.interpret(note.getSourceCode(), out);
                 System.out.println("[StreamX] repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {
