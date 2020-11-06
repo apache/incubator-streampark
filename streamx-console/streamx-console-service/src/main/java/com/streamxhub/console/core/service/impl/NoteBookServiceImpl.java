@@ -23,7 +23,6 @@ package com.streamxhub.console.core.service.impl;
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.FlushListener;
 import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
