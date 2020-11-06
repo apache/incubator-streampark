@@ -20,12 +20,11 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.ByteArrayOutputStream
 import java.util.Properties
 
 import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.shims.FlinkShims
-import org.apache.zeppelin.interpreter.{InterpreterContext, InterpreterResult, InterpreterResultMessageOutput}
+import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
 
 
@@ -50,12 +49,12 @@ class FlinkInterpreter(properties: Properties) {
 
   @throws[Exception] def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
-  @throws[Exception] def interpret(code: String, out: ByteArrayOutputStream, err: ByteArrayOutputStream): InterpreterResult = {
+  @throws[Exception] def interpret(code: String, out: InterpreterOutput): InterpreterResult = {
     this.open()
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
     ClassLoaderUtils.runAsClassLoader(getFlinkScalaShellLoader, () => {
-      interpreter.interpret(code, out,err)
+      interpreter.interpret(code, out)
     })
   }
 

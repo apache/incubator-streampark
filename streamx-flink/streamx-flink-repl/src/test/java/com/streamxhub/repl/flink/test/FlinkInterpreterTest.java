@@ -18,13 +18,12 @@ package com.streamxhub.repl.flink.test;
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import org.apache.zeppelin.interpreter.InterpreterResult;
-import org.apache.zeppelin.interpreter.InterpreterResultMessageOutput;
+import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
+import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.ByteArrayOutputStream;
 import java.util.Properties;
 
 
@@ -33,7 +32,7 @@ public class FlinkInterpreterTest {
     private FlinkInterpreter interpreter;
 
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         Properties p = new Properties();
         p.setProperty("repl.out", "true");
         p.setProperty("scala.color", "false");
@@ -52,9 +51,7 @@ public class FlinkInterpreterTest {
     @Test
     public void testWordCount() throws Exception {
         try {
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            ByteArrayOutputStream err = new ByteArrayOutputStream();
+            InterpreterOutput out = new InterpreterOutput();
 
             InterpreterResult result = interpreter.interpret(
                     "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
@@ -65,12 +62,10 @@ public class FlinkInterpreterTest {
                             "  .sum(1)\n" +
                             "  .print()\n" +
                             "\n" +
-                            "env.execute()\n", out , err);
-            if( result.code().equals(InterpreterResult.Code.ERROR) ) {
-                System.err.println(new String(err.toByteArray()));
-            }else {
-                System.out.println(new String(out.toByteArray()));
-            }
+                            "env.execute()\n", out);
+
+            System.out.println(out.toString());
+            System.out.println(result.code());
         } catch (Throwable e) {
             e.printStackTrace();
         }
