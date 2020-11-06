@@ -8,46 +8,27 @@ class InterpreterOutput extends OutputStream {
 
   private val buffer = new ByteArrayOutputStream
 
-  def clear(): Unit = {
-    buffer.reset()
-  }
+  def clear(): Unit = buffer.reset()
 
-  override def write(b: Int): Unit = {
-    buffer.write(b)
-  }
+  override def write(b: Int): Unit = buffer.write(b)
 
+  @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
-  @throws[IOException] override def write(b: Array[Byte]): Unit = {
-    write(b, 0, b.length)
-  }
-
-  override def write(b: Array[Byte], off: Int, len: Int): Unit = {
-    for (i <- off until len) {
-      write(b(i))
-    }
-  }
+  override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
 
   private[this] def toByteArray(): Array[Byte] = buffer.toByteArray
 
-  @throws[IOException] override def close(): Unit = {
-    flush()
-  }
+  @throws[IOException] override def close(): Unit = flush()
 
   override def toString = new String(toByteArray)
 
 }
 
 
-private[interpreter] class InterpreterOutputStream extends LogOutputStream {
+private[interpreter] class InterpreterOutputStream(logger: Logger) extends LogOutputStream {
 
-  private var logger: Logger = null
   private[this] var interpreterOutput: InterpreterOutput = null
-  private[this] var ignoreLeadingNewLinesFromScalaReporter: Boolean = false
-
-  def this(logger: Logger) {
-    this()
-    this.logger = logger
-  }
+  private[this] var ignore: Boolean = false
 
   def getInterpreterOutput: InterpreterOutput = interpreterOutput
 
@@ -56,13 +37,13 @@ private[interpreter] class InterpreterOutputStream extends LogOutputStream {
   }
 
   @throws[IOException] override def write(b: Int): Unit = {
-    if (ignoreLeadingNewLinesFromScalaReporter && b == '\n') {
+    if (ignore && b == '\n') {
       val error = Thread.currentThread.getStackTrace.filter(x => x.getClassName == "scala.tools.nsc.interpreter.ReplReporter" && x.getMethodName == "error")
       if (error.nonEmpty) {
         return
       }
     } else {
-      ignoreLeadingNewLinesFromScalaReporter = false
+      ignore = false
     }
     super.write(b)
     if (interpreterOutput != null) {
@@ -70,13 +51,9 @@ private[interpreter] class InterpreterOutputStream extends LogOutputStream {
     }
   }
 
-  @throws[IOException] override def write(b: Array[Byte]): Unit = {
-    write(b, 0, b.length)
-  }
+  @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
-  @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = {
-    for (i <- off until len) write(b(i))
-  }
+  @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
 
   @Override def processLine(s: String, i: Int): Unit = {
     logger.debug("Interpreter output:" + s)
@@ -92,9 +69,7 @@ private[interpreter] class InterpreterOutputStream extends LogOutputStream {
     if (interpreterOutput != null) interpreterOutput.flush()
   }
 
-  def ignore(): Unit = {
-    ignoreLeadingNewLinesFromScalaReporter = true
-  }
+  def ignoreLeadingNewLinesFromScalaReporter(): Unit = ignore = true
 
 }
 
@@ -127,8 +102,6 @@ private[this] abstract class LogOutputStream extends OutputStream {
     super.close()
   }
 
-  def getMessageLevel: Int = this.level
-
   @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = {
     var offset = off
     var blockStartOffset = off
@@ -156,9 +129,9 @@ private[this] abstract class LogOutputStream extends OutputStream {
     this.buffer.reset()
   }
 
-  protected def processLine(line: String): Unit = {
-    this.processLine(line, this.level)
-  }
+  def getMessageLevel: Int = this.level
+
+  protected def processLine(line: String): Unit = this.processLine(line, this.level)
 
   protected def processLine(var1: String, var2: Int): Unit
 }
