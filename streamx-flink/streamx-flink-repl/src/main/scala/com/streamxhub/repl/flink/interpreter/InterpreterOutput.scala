@@ -4,13 +4,31 @@ import java.io.{ByteArrayOutputStream, IOException, OutputStream}
 
 import org.slf4j.Logger
 
-class InterpreterOutput extends OutputStream {
+import scala.collection.mutable.ArrayBuffer
+
+class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
 
   private val buffer = new ByteArrayOutputStream
+  private val lineBuffer = new ArrayBuffer[Byte]()
+  private val NEW_LINE_CHAR = '\n'
 
   def clear(): Unit = buffer.reset()
 
-  override def write(b: Int): Unit = buffer.write(b)
+  override def write(b: Int): Unit = {
+    buffer.write(b)
+    lineBuffer += b.toByte
+    if (b == NEW_LINE_CHAR) {
+      flushLine()
+    }
+  }
+
+  def flushLine(): Unit = {
+    val line = new String(lineBuffer.toArray)
+    lineBuffer.clear()
+    if (flushListener != null && line.nonEmpty) {
+      flushListener.onLine(line)
+    }
+  }
 
   @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
@@ -18,9 +36,12 @@ class InterpreterOutput extends OutputStream {
 
   private[this] def toByteArray(): Array[Byte] = buffer.toByteArray
 
-  @throws[IOException] override def close(): Unit = flush()
+  @throws[IOException] override def close(): Unit = {
+    flush()
+    flushLine()
+  }
 
-  override def toString = new String(toByteArray)
+  override def toString() = new String(toByteArray)
 
 }
 
@@ -134,5 +155,14 @@ private[this] abstract class LogOutputStream extends OutputStream {
   protected def processLine(line: String): Unit = this.processLine(line, this.level)
 
   protected def processLine(var1: String, var2: Int): Unit
+}
+
+trait FlushListener {
+  /**
+   * 注意:返回的数据,千万不能调用println打印,因为此时的Console.out,System.out,System.err已经被interpreter占用,
+   * 专门用来输出执行flink代码的信息
+   * 如果显示的调用println,会导致递归...
+   */
+  def onLine(line: String)
 }
 
