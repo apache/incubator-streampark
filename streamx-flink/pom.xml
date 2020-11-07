@@ -11,7 +11,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>streamx-flink-parent</artifactId>
-    <name>streamx-flink-parent</name>
+    <name>streamx-flink</name>
     <packaging>pom</packaging>
 
     <modules>

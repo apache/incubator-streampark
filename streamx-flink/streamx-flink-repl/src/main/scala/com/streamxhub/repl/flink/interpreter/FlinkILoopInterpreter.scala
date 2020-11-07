@@ -76,7 +76,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
       def isWildcardImport(s: ImportSelector): Boolean = s.name == nme.WILDCARD
 
       // non-wildcard imports
-      private def individualSelectors = selectors filter isIndividualImport
+      private def individualSelectors: List[ImportSelector] = selectors filter isIndividualImport
 
       override val importsWildcard: Boolean = selectors exists isWildcardImport
 
@@ -184,7 +184,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain
         val objName = req.lineRep.readPathInstance
         handler match {
           case h: ImportHandler if checkHeader(h) =>
-            header.clear()
+            header clear()
             header append f"${h.member}%n"
           // If the user entered an import, then just use it; add an import wrapping
           // level if the import might conflict with some other import
