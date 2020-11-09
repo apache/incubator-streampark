@@ -42,8 +42,8 @@ public class NoteBookServiceImpl implements NoteBookService {
         Note.Content content = note.getContent();
         Executors.newSingleThreadExecutor().submit(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
-            interpreter.open();
             try {
+                interpreter.open();
                 InterpreterOutput out = new InterpreterOutput(line -> log.info(line));
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 System.out.println("[StreamX] repl submit code:" + result.code());

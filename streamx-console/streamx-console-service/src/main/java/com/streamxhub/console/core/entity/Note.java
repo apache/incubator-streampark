@@ -35,7 +35,7 @@ public class Note {
                     String[] dyProp = line.trim().split("\\=");
                     properties.setProperty(dyProp[0].replaceFirst("^\\%", ""), dyProp[1]);
                 } else {
-                    codeBuffer.append(line);
+                    codeBuffer.append(line).append("\n");
                 }
             }
             this.content = new Content(properties, codeBuffer.toString());

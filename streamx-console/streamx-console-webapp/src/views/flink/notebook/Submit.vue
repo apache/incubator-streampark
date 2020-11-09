@@ -137,8 +137,8 @@ export default {
         '%flink.yarn.queue=default\n' +
         '%flink.execution.mode=yarn\n'+
         '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
-        'val data = env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
-        'data.flatMap(line => line.split("\\\\s"))\n' +
+        'env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
+        '.flatMap(line => line.split("\\\\s"))\n' +
         '.map(w => (w, 1))\n'+
         '.keyBy(0)\n'+
         '.sum(1)\n'+
