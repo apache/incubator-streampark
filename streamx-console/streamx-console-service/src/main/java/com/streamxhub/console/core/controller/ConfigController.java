@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.ApplicationConfig;
 import com.streamxhub.console.core.service.ApplicationConfigService;
 import lombok.extern.slf4j.Slf4j;
