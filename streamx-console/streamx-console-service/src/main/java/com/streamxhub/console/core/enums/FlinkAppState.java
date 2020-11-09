@@ -24,6 +24,10 @@ import lombok.Getter;
 
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
+
 @Getter
 public enum FlinkAppState {
 
