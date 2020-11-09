@@ -67,9 +67,7 @@ import { submit } from '@api/notebook'
 import 'mavon-editor/dist/css/index.css'
 import { get } from '@api/tutorial'
 
-import 'codemirror/theme/idea.css'
-import 'codemirror/theme/cobalt.css'
-import 'codemirror/theme/eclipse.css'
+import "codemirror/theme/base16-light.css"
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint.css'
 
@@ -78,7 +76,27 @@ import 'codemirror/addon/selection/active-line'
 import 'codemirror/addon/hint/anyword-hint'
 import 'codemirror/mode/clike/clike'
 import 'codemirror/mode/sql/sql'
-const CodeMirror = require('codemirror/lib/codemirror')
+
+
+let CodeMirror = require("codemirror/lib/codemirror")
+require("codemirror/addon/edit/matchbrackets")
+require("codemirror/addon/selection/active-line")
+
+import "codemirror/addon/fold/foldgutter.css"
+require("codemirror/addon/fold/foldcode")
+require("codemirror/addon/fold/brace-fold")
+require("codemirror/addon/fold/comment-fold")
+require("codemirror/addon/fold/indent-fold")
+require("codemirror/addon/fold/foldgutter")
+
+import "codemirror/addon/lint/lint.css"
+require("codemirror/addon/lint/lint")
+require("codemirror/addon/lint/javascript-lint")
+
+require("codemirror/addon/hint/show-hint")
+require("codemirror/mode/javascript/javascript")
+require("codemirror/addon/comment/comment")
+
 
 export default {
   name: 'CodeMirror',
@@ -114,7 +132,18 @@ export default {
       toolbars: false,
       showTutorial: false,
       env: 'flink',
-      introduction: null
+      introduction: null,
+      woldCount : '\n%flink.repl.out=true\n' +
+        '%flink.yarn.queue=default\n' +
+        '%flink.execution.mode=yarn\n'+
+        '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
+        'val data = env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
+        'data.flatMap(line => line.split("\\\\s"))\n' +
+        '.map(w => (w, 1))\n'+
+        '.keyBy(0)\n'+
+        '.sum(1)\n'+
+        '.print()\n\n' +
+        'env.execute()\n'
     }
   },
   mounted () {
@@ -130,12 +159,20 @@ export default {
       autofocus: true,
       extraKeys: { 'Ctrl': 'autocomplete' }, // 自定义快捷键
       hintOptions: { // 自定义提示选项
+        completeSingle: false,
         tables: {
           users: ['name', 'score', 'birthDate'],
           countries: ['name', 'population', 'size']
         }
       }
     })
+
+    this.editor.setValue(this.woldCount)
+
+    this.editor.on("inputRead", () => {
+      this.editor.showHint()
+    })
+
     this.handleReadmd()
     this.handleIntroduction()
     this.form = this.$form.createForm(this)
@@ -147,7 +184,7 @@ export default {
       console.log(code)
       submit({
         env: 'senv',
-        sourceCode: code
+        text: code
       }).then((resp) => {
         console.log(resp.data)
       })

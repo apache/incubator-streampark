@@ -159,7 +159,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   }
 
   private def createFlinkILoop(config: Config): Unit = {
-    val printReplOutput = properties.getProperty("repl.out", "true").toBoolean
+    val printReplOutput = properties.getProperty("flink.repl.out", "true").toBoolean
     val replOut = if (printReplOutput) {
       new JPrintWriter(interpreterOutput, true)
     } else {

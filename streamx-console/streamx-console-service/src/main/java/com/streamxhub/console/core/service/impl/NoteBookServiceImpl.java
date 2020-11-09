@@ -28,7 +28,6 @@ import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.Properties;
 import java.util.concurrent.Executors;
 
 /**
@@ -40,15 +39,13 @@ public class NoteBookServiceImpl implements NoteBookService {
 
     @Override
     public void submit(Note note) {
-        Properties properties = new Properties();
-        properties.setProperty("repl.out", "true");
-        properties.setProperty("flink.yarn.queue", "root.users.hst");
-        properties.setProperty("flink.execution.mode", "yarn");
+        Note.Content content = note.getContent();
         Executors.newSingleThreadExecutor().submit(() -> {
-            FlinkInterpreter interpreter = new FlinkInterpreter(properties);
+            FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
+            interpreter.open();
             try {
                 InterpreterOutput out = new InterpreterOutput(line -> log.info(line));
-                InterpreterResult result = interpreter.interpret(note.getSourceCode(), out);
+                InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 System.out.println("[StreamX] repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {
                     log.info("[StreamX] NoteBook submit error: {}", out.toString());

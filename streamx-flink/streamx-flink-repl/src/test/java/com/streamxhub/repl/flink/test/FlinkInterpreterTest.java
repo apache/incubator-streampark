@@ -56,19 +56,29 @@ public class FlinkInterpreterTest {
 
             });
 
+            interpreter.open();
+
             InterpreterResult result = interpreter.interpret(
+                    "class WoldCount(val wold: String,val count: Int)",out
+            );
+
+            System.out.println(result.code().equals(InterpreterResult.SUCCESS()));
+
+            result = interpreter.interpret(
                     "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
                             "\n" +
                             "data.flatMap(line => line.split(\"\\\\s\"))\n" +
-                            "  .map(w => (w, 1))\n" +
-                            "  .keyBy(0)\n" +
-                            "  .sum(1)\n" +
+                            "  .map(x=>new WoldCount(x,1))\n" +
+                            "  .keyBy(_.wold)\n" +
+                            "  .sum(\"count\")\n" +
                             "  .print()\n" +
                             "\n" +
                             "env.execute()\n", out);
 
             System.out.println(out.toString());
+
             System.out.println(result.code());
+            interpreter.close();
         } catch (Throwable e) {
             e.printStackTrace();
         }
