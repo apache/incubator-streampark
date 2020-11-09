@@ -91,7 +91,7 @@ export default {
       envs: [
         {
           env: 'flink',
-          introduction: 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment as "senv"'
+          introduction: 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment as "env"'
         },
         {
           env: 'pyflink',
