@@ -33,7 +33,7 @@ public class Note {
                 String line = scanner.nextLine();
                 if (line.startsWith("%flink.")) {
                     String[] dyProp = line.trim().split("\\=");
-                    properties.setProperty(dyProp[0].replaceFirst("^\\%", ""), dyProp[1]);
+                    properties.setProperty(dyProp[0].substring(1), dyProp[1]);
                 } else {
                     codeBuffer.append(line).append("\n");
                 }
