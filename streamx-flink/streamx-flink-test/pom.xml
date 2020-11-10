@@ -13,7 +13,6 @@
     <artifactId>streamx-flink-test</artifactId>
 
     <dependencies>
-
         <dependency>
             <groupId>com.streamxhub</groupId>
             <artifactId>streamx-flink-core</artifactId>
