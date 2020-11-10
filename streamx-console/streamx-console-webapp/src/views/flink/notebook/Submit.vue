@@ -138,12 +138,12 @@ export default {
         '%flink.execution.mode=yarn\n'+
         '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
         'env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
-        '.flatMap(line => line.split("\\\\s"))\n' +
-        '.map(w => (w, 1))\n'+
+        '.flatMap(_.split("\\\\s"))\n' +
+        '.map((_, 1))\n'+
         '.keyBy(0)\n'+
         '.sum(1)\n'+
         '.print()\n\n' +
-        'env.execute()\n'
+        'env.execute(\"StreamX NoteBook Job\")\n'
     }
   },
   mounted () {
