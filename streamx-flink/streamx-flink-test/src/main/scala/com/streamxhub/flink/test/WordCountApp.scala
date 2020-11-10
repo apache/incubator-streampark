@@ -4,19 +4,16 @@ import org.apache.flink.streaming.api.scala._
 
 object WordCountApp extends App {
 
+  val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-  val senv = StreamExecutionEnvironment.getExecutionEnvironment
-
-  case class WoldCount(wold: String, count: Int)
-
-  senv.fromElements("hello world", "hello flink", "hello hadoop")
+  env.fromElements("hello world", "hello flink", "hello hadoop")
     .flatMap(_.split("\\s+"))
-    .map(WoldCount(_, 1))
+    .map(x => WoldCount(x, 1))
     .keyBy(_.wold)
     .sum("count")
     .print()
 
-  senv.execute()
+  env.execute()
 
 }
 
