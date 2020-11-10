@@ -140,7 +140,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     LOGGER.info("Default Parallelism: " + this.defaultParallelism)
 
     // set scala.color
-    if (properties.getProperty("scala.color", "true").toBoolean) {
+    if (properties.getProperty("flink.scala.color", "true").toBoolean) {
       System.setProperty("scala.color", "true")
     }
     // set host/port when it is remote mode
