@@ -151,7 +151,11 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
       //kafka have 1 partition
       case (_, 1) => 0
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
-      case (_, y) => if (partitionIndex.get() == y - 1) partitionIndex.getAndSet(0) else partitionIndex.getAndIncrement()
+      case (_, y) =>
+        partitionIndex.get() match {
+          case x if x == y - 1 => partitionIndex.getAndSet(0)
+          case _ => partitionIndex.incrementAndGet()
+        }
     }
   }
 
