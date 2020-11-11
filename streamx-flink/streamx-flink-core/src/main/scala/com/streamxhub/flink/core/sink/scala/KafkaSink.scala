@@ -141,15 +141,15 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
     logger.info(s"[StreamX] KafkaEqualityPartitioner: parallelism $parallelism")
-    checkArgument(parallelInstanceId >= 0, "[StreamX] KafkaEqualityPartitioner:Id of this subtask cannot be negative.")
-    checkArgument(parallelInstances > 0, "[StreamX] KafkaEqualityPartitioner:Number of subtasks must be larger than 0.")
+    require(parallelInstanceId >= 0 && parallelInstances > 0, "[StreamX] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }
 
   override def partition(record: T, key: Array[Byte], value: Array[Byte], targetTopic: String, partitions: Array[Int]): Int = {
-    checkArgument(partitions != null && partitions.length > 0, "[StreamX] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
+    require(partitions != null && partitions.length > 0, "[StreamX] KafkaEqualityPartitioner:Partitions of the target topic is empty.")
     (parallelism, partitions.length) match {
-      case (_, 1) => 0 //kafka only have 1 partition
+      //kafka have 1 partition
+      case (_, 1) => 0
       case (x, y) if x % y == 0 => partitions(parallelInstanceId % partitions.length)
       case (_, y) => if (partitionIndex.get() == y - 1) partitionIndex.getAndSet(0) else partitionIndex.getAndIncrement()
     }
