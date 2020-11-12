@@ -14,18 +14,23 @@
           <a-tab-pane tab="通知" key="1">
             <a-list>
               <a-list-item>
-                <a-list-item-meta title="你收到了 14 份新周报" description="一年前">
+                <a-list-item-meta title="eas告警-2020-10-12正常" description="2020-10-12 07:00:00">
                   <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
               </a-list-item>
               <a-list-item>
-                <a-list-item-meta title="你推荐的 曲妮妮 已通过第三轮面试" description="一年前">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/OKJXDXrmkNshAMvwtvhu.png"/>
+                <a-list-item-meta title="eas告警-2020-10-11正常" description="2020-10-11 07:00:00">
+                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
               </a-list-item>
               <a-list-item>
-                <a-list-item-meta title="这种模板可以区分多种通知类型" description="一年前">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/kISTdvpyTAhtGxpovNWd.png"/>
+                <a-list-item-meta title="eas告警-2020-10-10正常" description="2020-10-10 07:00:00">
+                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
+                </a-list-item-meta>
+              </a-list-item>
+              <a-list-item>
+                <a-list-item-meta title="eas告警-2020-10-09正常" description="2020-10-09s 07:00:00">
+                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
               </a-list-item>
             </a-list>
