@@ -29,7 +29,7 @@
                 </a-list-item-meta>
               </a-list-item>
               <a-list-item>
-                <a-list-item-meta title="eas告警-2020-10-09正常" description="2020-10-09s 07:00:00">
+                <a-list-item-meta title="eas告警-2020-10-09正常" description="2020-10-09 07:00:00">
                   <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
               </a-list-item>
