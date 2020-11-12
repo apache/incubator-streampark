@@ -1,6 +1,6 @@
 English | [简体中文](./README.zh-CN.md)
 
-<h1 align="center">StreamX</h1>
+<h1 align="center">StreamX Console</h1>
 
 <div align="center">
 An out-of-box UI solution for enterprise applications as a Vue boilerplate. based on  <a href="https://vuecomponent.github.io/ant-design-vue/docs/vue/introduce-cn/" target="_blank">Ant Design of Vue</a>
