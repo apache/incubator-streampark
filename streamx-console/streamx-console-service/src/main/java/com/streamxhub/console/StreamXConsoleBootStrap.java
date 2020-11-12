@@ -31,10 +31,10 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 @CrossOrigin
 @SpringBootApplication
 @EnableScheduling
-public class StreamXConsole {
+public class StreamXConsoleBootStrap {
 
     public static void main(String[] args) {
-        SpringApplication.run(StreamXConsole.class, args);
+        SpringApplication.run(StreamXConsoleBootStrap.class, args);
     }
 
 }
