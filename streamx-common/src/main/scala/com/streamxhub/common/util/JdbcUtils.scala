@@ -87,6 +87,10 @@ object JdbcUtils {
     }
   }
 
+  def count(sql: String)(implicit jdbcConfig: Properties): Long = {
+    unique(sql).head._2.toString.toLong
+  }
+
   /**
    * 直接查询一个对象
    *
