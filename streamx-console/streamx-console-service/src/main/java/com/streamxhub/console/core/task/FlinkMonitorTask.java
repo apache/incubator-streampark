@@ -73,6 +73,8 @@ public class FlinkMonitorTask {
 
     private long index;
 
+    private long jobMonitorTimeOut = 1 * 60 * 1000;
+
     @Scheduled(fixedDelay = 1000 * 3)
     public void run() {
         ++index;
@@ -101,7 +103,7 @@ public class FlinkMonitorTask {
                     callBack(application, optional.get());
                 }
             } catch (ConnectException ex) {
-                log.error("[StreamX] get jobsOverview error,{}",ex.getCause());
+                log.error("[StreamX] get jobsOverview error,{}", ex.getCause());
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
@@ -125,7 +127,14 @@ public class FlinkMonitorTask {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
                         log.error("[StreamX] query jobsOverview from yarn,job killed,savePoint obsoleted!");
-                        savePointService.obsolete(application.getId());
+
+                        /**
+                         * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
+                         */
+                        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
+                        if (!checkTimeOut(timeMillis)) {
+                            savePointService.obsolete(application.getId());
+                        }
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
@@ -133,12 +142,7 @@ public class FlinkMonitorTask {
                          * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
                          */
                         Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
-                        boolean flag = false;
-                        if (timeMillis != null) {
-                            long timeOut = 1 * 60 * 1000;
-                            flag = System.currentTimeMillis() - (Long) timeMillis <= timeOut;
-                        }
-                        if (flag) {
+                        if (!checkTimeOut(timeMillis)) {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         } else {
                             /**s
@@ -163,6 +167,10 @@ public class FlinkMonitorTask {
             }
         }));
 
+    }
+
+    private boolean checkTimeOut(Serializable timeMillis) {
+        return timeMillis == null ? true : System.currentTimeMillis() - (Long) timeMillis <= jobMonitorTimeOut;
     }
 
     /**
