@@ -56,7 +56,7 @@ public class FlinkMonitorTask {
     private ApplicationService applicationService;
 
     @Autowired
-    private SavePointService pointService;
+    private SavePointService savePointService;
 
     private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
 
@@ -123,7 +123,8 @@ public class FlinkMonitorTask {
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
-                        pointService.obsolete(application.getId());
+                        log.error("[StreamX] query jobsOverview from yarn,job killed,savePoint obsoleted!");
+                        savePointService.obsolete(application.getId());
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
@@ -142,7 +143,8 @@ public class FlinkMonitorTask {
                             /**s
                              * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                              */
-                            pointService.obsolete(application.getId());
+                            log.info("[StreamX] query jobsOverview from restApi and yarn error,job last,savePoint obsoleted!");
+                            savePointService.obsolete(application.getId());
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
                             e1.printStackTrace();
@@ -151,8 +153,9 @@ public class FlinkMonitorTask {
                     }
                 }
             } catch (IOException exception) {
+                log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted!");
                 exception.printStackTrace();
-                pointService.obsolete(application.getId());
+                savePointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
@@ -197,7 +200,8 @@ public class FlinkMonitorTask {
         Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
             if (timeMillis == null) {
-                pointService.obsolete(application.getId());
+                log.info("[StreamX] monitor callback from restApi, job stop time is null,savePoint obsoleted!");
+                savePointService.obsolete(application.getId());
             }
         }
 
