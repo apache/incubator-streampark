@@ -104,7 +104,8 @@ public class FlinkMonitorTask {
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
-                if (canceling.containsKey(application.getId()) && canceling.get(application.getId()).isPrevious(index)) {
+                Tracker tracker = canceling.get(application.getId());
+                if (tracker != null && tracker.isPrevious(index)) {
                     application.setState(FlinkAppState.CANCELED.getValue());
                     applicationService.updateMonitor(application);
                     canceling.remove(application.getId());
@@ -126,6 +127,9 @@ public class FlinkMonitorTask {
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
+                        /**
+                         * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
+                         */
                         Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
                         boolean flag = false;
                         if (timeMillis != null) {
@@ -157,44 +161,61 @@ public class FlinkMonitorTask {
 
     }
 
+    /**
+     * 从flink restapi成功拿到当前任务的运行状态信息...
+     *
+     * @param application
+     * @param job
+     */
     private void callBack(Application application, JobsOverview.Job job) {
-        Integer deploy = application.getDeploy();
-        FlinkAppState appState = FlinkAppState.of(application.getState());
-        application.setDeploy(null);
-        FlinkAppState currState = FlinkAppState.valueOf(job.getState());
+        FlinkAppState previousState = FlinkAppState.of(application.getState());
+        FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
+        /**
+         * 1) application状态以restapi返回的状态为准
+         */
+        application.setState(currentState.getValue());
 
-        //jobId
+        /**
+         * 2) application中记录的jobId和restapi返回的不一致,则以返回的jobId为准,更新application中记录的
+         */
         if (!job.getId().equals(application.getJobId())) {
             application.setJobId(job.getId());
         }
 
-        //state....
-        if (currState == FlinkAppState.CANCELLING) {
+        /**
+         * 3) savePoint obsolete check
+         */
+        if (FlinkAppState.CANCELLING.equals(currentState)) {
             canceling.put(application.getId(), new Tracker(index, application.getId()));
-            /**
-             * 当前从flink restAPI拿到最新的状态为cancelling,且数据库中的app状态为非cancelling
-             * 此种情况为: 不是通过streamX页面发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将所有的savepoint设置为过期.
-             * 在启动的时候如需要查重savepoint恢复,需要手动指定.
-             */
-            if (appState != FlinkAppState.CANCELLING) {
+        }
+
+        /**
+         * 当前从flink restAPI拿到最新的状态为cancelling,或者为CANCELED,且获取不到停止的时间
+         * 此种情况为: 不是通过streamX发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将savepoint设置为过期.
+         * 在启动的时候如需要从savepoint恢复,则需要手动指定.
+         */
+        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
+        if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
+            if (timeMillis == null) {
                 pointService.obsolete(application.getId());
             }
         }
 
-        if (appState == FlinkAppState.STARTING && currState == FlinkAppState.RUNNING) {
+        /**
+         * 4) NEED_START check
+         */
+        if (FlinkAppState.RUNNING.equals(currentState) && FlinkAppState.STARTING.equals(previousState)) {
             /**
              * 发布完重新启动后将"需重启"状态清空
              */
-            if (DeployState.NEED_START.get() == deploy) {
+            if (DeployState.NEED_START.get() == application.getDeploy()) {
                 application.setDeploy(DeployState.NONE.get());
             }
         }
 
-        if (!appState.equals(currState)) {
-            application.setState(currState.getValue());
-        }
-
-        //time....
+        /**
+         * 5) duration
+         */
         long startTime = job.getStartTime();
         long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
         if (application.getStartTime() == null) {
@@ -202,13 +223,11 @@ public class FlinkMonitorTask {
         } else if (startTime != application.getStartTime().getTime()) {
             application.setStartTime(new Date(startTime));
         }
-
         if (endTime != -1) {
             if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
                 application.setEndTime(new Date(endTime));
             }
         }
-
         application.setDuration(job.getDuration());
 
         this.applicationService.updateMonitor(application);
