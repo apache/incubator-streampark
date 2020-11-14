@@ -280,7 +280,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
          */
-        CommonUtil.localCache.put(paramOfApp.getId(),paramOfApp.getAppId());
+        CommonUtil.localCache.put(paramOfApp.getId(),true);
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
         if (paramOfApp.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
