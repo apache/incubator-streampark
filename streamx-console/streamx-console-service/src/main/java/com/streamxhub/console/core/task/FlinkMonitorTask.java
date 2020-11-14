@@ -103,7 +103,6 @@ public class FlinkMonitorTask {
                     callBack(application, optional.get());
                 }
             } catch (ConnectException ex) {
-                log.error("[StreamX] get jobsOverview error,{}", ex.getCause());
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
@@ -127,7 +126,6 @@ public class FlinkMonitorTask {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
                         log.error("[StreamX] query jobsOverview from yarn,job killed,savePoint obsoleted!");
-
                         /**
                          * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
                          */
