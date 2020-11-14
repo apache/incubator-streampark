@@ -245,7 +245,7 @@ public class FlinkMonitorTask {
         }
 
         public boolean isPrevious(long index) {
-            return index - this.index == 1;
+            return index - this.index <= 5;
         }
     }
 }
