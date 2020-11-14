@@ -93,6 +93,7 @@ public class FlinkMonitorTask {
         List<Application> appList = applicationService.list(queryWrapper);
 
         appList.forEach((application) -> executor.execute(() -> {
+            boolean stopNotFound = CommonUtil.localCache.remove(application.getId()) == null;
             try {
                 /**
                  * 1)到flink的restApi中查询状态
@@ -100,7 +101,7 @@ public class FlinkMonitorTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    callBack(application, optional.get());
+                    callBack(application, optional.get(), stopNotFound);
                 }
             } catch (ConnectException ex) {
                 /**
@@ -125,32 +126,23 @@ public class FlinkMonitorTask {
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
-                        log.error("[StreamX] query jobsOverview from yarn,job killed,savePoint obsoleted!");
-                        /**
-                         * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
-                         */
-                        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
-                        if (!checkTimeOut(timeMillis)) {
+                        if (stopNotFound) {
+                            log.error("[StreamX] query jobsOverview from yarn,job was killed and stopNotFound,savePoint obsoleted!");
                             savePointService.obsolete(application.getId());
                         }
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
                     } catch (Exception e1) {
-                        /**
-                         * 在发起"stop"指令后的一分钟之内,都算"CANCELED"
+                        /**s
+                         * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
-                        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
-                        if (!checkTimeOut(timeMillis)) {
-                            application.setState(FlinkAppState.CANCELED.getValue());
-                        } else {
-                            /**s
-                             * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
-                             */
-                            log.info("[StreamX] query jobsOverview from restApi and yarn error,job last,savePoint obsoleted!");
+                        if (stopNotFound) {
                             savePointService.obsolete(application.getId());
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
                             e1.printStackTrace();
+                        } else {
+                            application.setState(FlinkAppState.CANCELED.getValue());
                         }
                         applicationService.updateMonitor(application);
                     }
@@ -158,17 +150,14 @@ public class FlinkMonitorTask {
             } catch (IOException exception) {
                 log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted!");
                 exception.printStackTrace();
-                savePointService.obsolete(application.getId());
+                if (stopNotFound) {
+                    savePointService.obsolete(application.getId());
+                }
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
             }
         }));
-
-    }
-
-    private boolean checkTimeOut(Serializable timeMillis) {
-        return timeMillis == null ? true : System.currentTimeMillis() - (Long) timeMillis <= jobMonitorTimeOut;
     }
 
     /**
@@ -177,7 +166,7 @@ public class FlinkMonitorTask {
      * @param application
      * @param job
      */
-    private void callBack(Application application, JobsOverview.Job job) {
+    private void callBack(Application application, JobsOverview.Job job, Boolean stopNotFound) {
         FlinkAppState previousState = FlinkAppState.of(application.getState());
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
         /**
@@ -204,12 +193,10 @@ public class FlinkMonitorTask {
          * 此种情况为: 不是通过streamX发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将savepoint设置为过期.
          * 在启动的时候如需要从savepoint恢复,则需要手动指定.
          */
-        Serializable timeMillis = CommonUtil.localCache.get(application.getId());
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
-            if (timeMillis == null) {
+            if (stopNotFound) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
-                CommonUtil.localCache.remove(application.getId());
             }
         }
 
