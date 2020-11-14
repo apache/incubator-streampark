@@ -934,7 +934,7 @@ export default {
 
     handleDeployCancel() {
       this.deployVisible = false
-      window.setTimeout(() => {
+      setTimeout(() => {
         this.application = null
         this.restart = false
         this.allowNonRestoredState = false
@@ -998,7 +998,7 @@ export default {
 
     handleMappingCancel() {
       this.mappingVisible = false
-      window.setTimeout(() => {
+      setTimeout(() => {
         this.application = null
         this.formMapping.resetFields()
       },1000)
@@ -1025,7 +1025,7 @@ export default {
 
     handleStartCancel() {
       this.startVisible = false
-      window.setTimeout(() => {
+      setTimeout(() => {
         this.allowNonRestoredState = false
         this.formStartCheckPoint.resetFields()
         this.application = null
@@ -1069,7 +1069,7 @@ export default {
 
     handleStopCancel() {
       this.stopVisible = false
-      window.setTimeout(() => {
+      setTimeout(() => {
         this.formStopSavePoint.resetFields()
         this.drain = false
         this.savePoint = true
