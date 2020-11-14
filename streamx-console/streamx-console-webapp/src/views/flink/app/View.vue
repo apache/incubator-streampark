@@ -454,7 +454,7 @@
           </a-form-item>
           <a-form-item
             v-if="restart"
-            label="allow NonRestored"
+            label="ignore restored"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
@@ -464,7 +464,7 @@
               un-checked-children="false"
               v-model="allowNonRestoredState"
               v-decorator="['allowNonRestoredState']"/>
-            <span class="conf-switch" style="color:darkgrey"> skip savepoint that cannot be restored </span>
+            <span class="conf-switch" style="color:darkgrey"> ignore savepoint then cannot be restored </span>
           </a-form-item>
           <a-form-item
             label="backup desc"
@@ -501,6 +501,21 @@
           </a-form-item>
 
           <a-form-item
+            v-if="savePoint"
+            label="ignore restored"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="allowNonRestoredState"
+              v-decorator="['allowNonRestoredState']"/>
+            <span class="conf-switch" style="color:darkgrey"> ignore savepoint then cannot be restored </span>
+          </a-form-item>
+
+          <a-form-item
             v-if="savePoint && !lastestSavePoint "
             label="savepoint"
             style="margin-bottom: 10px"
@@ -509,7 +524,7 @@
             <a-select
               mode="combobox"
               allowClear
-              v-decorator="['savePointPath',{ rules: [{ required: true } ]}]">
+              v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
@@ -525,20 +540,6 @@
               </a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
-          </a-form-item>
-
-          <a-form-item
-            label="allow NonRestored"
-            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checkedChildren="开"
-              unCheckedChildren="关"
-              checked-children="true"
-              un-checked-children="false"
-              v-model="allowNonRestoredState"
-              v-decorator="['allowNonRestoredState']"/>
-            <span class="conf-switch" style="color:darkgrey"> skip savepoint that cannot be restored </span>
           </a-form-item>
         </a-form>
 
@@ -1007,9 +1008,11 @@ export default {
         this.startVisible = true
         if (!this.lastestSavePoint) {
           history({
-            appId: this.application.id
+            appId: this.application.id,
+            pageNum : 1,
+            pageSize : 9999
           }).then((resp) => {
-            this.historySavePoint = resp.data || []
+            this.historySavePoint = resp.data.records || []
           })
         }
       })
@@ -1032,7 +1035,7 @@ export default {
           )
           const id = this.application.id
           const savePointed = this.savePoint
-          const savePoint = savePointed ? (values.savePointPath || this.lastestSavePoint.savePoint) : null
+          const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.handleStartCancel()
           start({
@@ -1173,10 +1176,6 @@ export default {
         id: app.id
       }).then((resp) => {
       })
-    },
-
-    exportExcel () {
-
     }
 
   }

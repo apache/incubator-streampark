@@ -299,13 +299,7 @@ export default {
         }
       })
     },
-    exportExcel () {
-      const { filteredInfo } = this
-      $export({
-        ...this.queryParams,
-        ...filteredInfo
-      })
-    },
+
     search () {
       const { filteredInfo } = this
       this.fetch({

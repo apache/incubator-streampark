@@ -298,21 +298,7 @@ export default {
         })
       })
     },
-    exportExcel () {
-      const { sortedInfo, filteredInfo } = this
-      let sortField, sortOrder
-      // 获取当前列的排序和列的过滤规则
-      if (sortedInfo) {
-        sortField = sortedInfo.field
-        sortOrder = sortedInfo.order
-      }
-      $export({
-        sortField: sortField,
-        sortOrder: sortOrder,
-        ...this.queryParams,
-        ...filteredInfo
-      })
-    },
+
     search () {
       const { sortedInfo, filteredInfo } = this
       let sortField, sortOrder
