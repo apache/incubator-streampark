@@ -277,6 +277,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(paramOfApp.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
+        /**
+         * 在任务停止时,保存一个信息,后续用于判断是否从StreamX发起过停止.
+         */
         CommonUtil.localCache.put(paramOfApp.getId(), Long.valueOf(System.currentTimeMillis()));
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
         if (paramOfApp.getSavePointed()) {
