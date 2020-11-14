@@ -198,11 +198,12 @@ public class FlinkMonitorTask {
          * 此种情况为: 不是通过streamX发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将savepoint设置为过期.
          * 在启动的时候如需要从savepoint恢复,则需要手动指定.
          */
-        Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
+        Serializable timeMillis = CommonUtil.localCache.get(application.getId());
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
             if (timeMillis == null) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
+                CommonUtil.localCache.remove(application.getId());
             }
         }
 
