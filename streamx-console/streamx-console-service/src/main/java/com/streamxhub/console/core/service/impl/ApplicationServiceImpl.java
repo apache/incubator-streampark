@@ -33,14 +33,11 @@ import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.entity.*;
-import com.streamxhub.console.core.enums.AppExistsState;
-import com.streamxhub.console.core.enums.ApplicationType;
-import com.streamxhub.console.core.enums.DeployState;
+import com.streamxhub.console.core.enums.*;
 import com.streamxhub.console.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
@@ -280,7 +277,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
          */
-        CommonUtil.localCache.put(paramOfApp.getId(),true);
+        CommonUtil.localCache.put(paramOfApp.getId(), StopFrom.STREAMX);
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
         if (paramOfApp.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
