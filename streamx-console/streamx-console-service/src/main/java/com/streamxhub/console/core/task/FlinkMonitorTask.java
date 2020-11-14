@@ -200,7 +200,7 @@ public class FlinkMonitorTask {
         Serializable timeMillis = CommonUtil.localCache.remove(application.getId());
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
             if (timeMillis == null) {
-                log.info("[StreamX] monitor callback from restApi, job stop time is null,savePoint obsoleted!");
+                log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
             }
         }
