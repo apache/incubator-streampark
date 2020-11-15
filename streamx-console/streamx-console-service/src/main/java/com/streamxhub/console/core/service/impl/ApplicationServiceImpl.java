@@ -82,32 +82,32 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ServerUtil serverUtil;
 
     @Override
-    public IPage<Application> page(Application paramOfApp, RestRequest request) {
+    public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, paramOfApp);
+        return this.baseMapper.page(page, appParam);
     }
 
     @Override
-    public String getYarnName(Application paramOfApp) {
+    public String getYarnName(Application appParam) {
         String[] args = new String[2];
         args[0] = "--name";
-        args[1] = paramOfApp.getConfig();
+        args[1] = appParam.getConfig();
         return ParameterCli.read(args);
     }
 
     /**
      * 检查当前的jobName在表和yarn中是否已经存在
      *
-     * @param paramOfApp
+     * @param appParam
      * @return
      */
     @Override
-    public AppExistsState checkExists(Application paramOfApp) {
+    public AppExistsState checkExists(Application appParam) {
         QueryWrapper<Application> queryWrapper = new QueryWrapper();
-        queryWrapper.eq("job_name", paramOfApp.getJobName());
+        queryWrapper.eq("job_name", appParam.getJobName());
         int count = this.baseMapper.selectCount(queryWrapper);
-        boolean exists = YarnUtils.isContains(paramOfApp.getJobName());
+        boolean exists = YarnUtils.isContains(appParam.getJobName());
         if (count == 0 && !exists) {
             return AppExistsState.NO;
         }
@@ -116,22 +116,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public boolean create(Application paramOfApp) {
+    public boolean create(Application appParam) {
         //配置文件中配置的yarnName..
-        paramOfApp.setUserId(serverUtil.getUser().getUserId());
-        paramOfApp.setState(FlinkAppState.CREATED.getValue());
-        paramOfApp.setCreateTime(new Date());
-        if (paramOfApp.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
-            configService.create(paramOfApp);
+        appParam.setUserId(serverUtil.getUser().getUserId());
+        appParam.setState(FlinkAppState.CREATED.getValue());
+        appParam.setCreateTime(new Date());
+        if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+            configService.create(appParam);
         }
 
-        boolean saved = save(paramOfApp);
+        boolean saved = save(appParam);
         if (saved) {
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
-                    paramOfApp.setBackUp(false);
-                    paramOfApp.setRestart(false);
-                    deploy(paramOfApp);
+                    appParam.setBackUp(false);
+                    appParam.setRestart(false);
+                    deploy(appParam);
                     return true;
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -143,20 +143,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public boolean update(Application paramOfApp) {
+    public boolean update(Application appParam) {
         //update other...
-        Application application = getById(paramOfApp.getId());
-        application.setJobName(paramOfApp.getJobName());
-        application.setArgs(paramOfApp.getArgs());
-        application.setOptions(paramOfApp.getOptions());
-        application.setDynamicOptions(paramOfApp.getDynamicOptions());
-        application.setDescription(paramOfApp.getDescription());
+        Application application = getById(appParam.getId());
+        application.setJobName(appParam.getJobName());
+        application.setArgs(appParam.getArgs());
+        application.setOptions(appParam.getOptions());
+        application.setDynamicOptions(appParam.getDynamicOptions());
+        application.setDescription(appParam.getDescription());
         //update config...
         if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
-            configService.update(paramOfApp);
+            configService.update(appParam);
         } else {
-            application.setJar(paramOfApp.getJar());
-            application.setMainClass(paramOfApp.getMainClass());
+            application.setJar(appParam.getJar());
+            application.setMainClass(appParam.getMainClass());
         }
         /**
          * 配置文件已更新
@@ -167,13 +167,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void deploy(Application paramOfApp) throws Exception {
-        Application application = getById(paramOfApp.getId());
+    public void deploy(Application appParam) throws Exception {
+        Application application = getById(appParam.getId());
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
 
         //1) 需要重启的先停止服务
-        if (paramOfApp.getRestart()) {
-            cancel(paramOfApp);
+        if (appParam.getRestart()) {
+            cancel(appParam);
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
@@ -181,12 +181,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         //2) deploying...
-        application.setBackUpDescription(paramOfApp.getBackUpDescription());
+        application.setBackUpDescription(appParam.getBackUpDescription());
         String workspaceWithModule = application.getWorkspace(true);
         if (HdfsUtils.exists(workspaceWithModule)) {
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
             //3) 需要备份的做备份...
-            if (paramOfApp.getBackUp()) {
+            if (appParam.getBackUp()) {
                 backUpService.save(applicationBackUp);
                 HdfsUtils.mkdirs(applicationBackUp.getPath());
                 HdfsUtils.movie(workspaceWithModule, applicationBackUp.getPath());
@@ -200,9 +200,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         HdfsUtils.upload(needUpFile.getAbsolutePath(), workspace);
 
         //4) 更新发布状态,需要重启的应用则重新启动...
-        if (paramOfApp.getRestart()) {
+        if (appParam.getRestart()) {
             //重新启动.
-            start(paramOfApp);
+            start(appParam);
             //将"需要重新发布"状态清空...
             application.setDeploy(DeployState.NONE.get());
             updateDeploy(application);
@@ -222,21 +222,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void clean(Application paramOfApp) {
-        paramOfApp.setDeploy(DeployState.NONE.get());
-        this.baseMapper.updateDeploy(paramOfApp);
+    public void clean(Application appParam) {
+        appParam.setDeploy(DeployState.NONE.get());
+        this.baseMapper.updateDeploy(appParam);
     }
 
     @Override
-    public String readConf(Application paramOfApp) throws IOException {
-        File file = new File(paramOfApp.getConfig());
+    public String readConf(Application appParam) throws IOException {
+        File file = new File(appParam.getConfig());
         String conf = FileUtils.readFileToString(file, "utf-8");
         return Base64.getEncoder().encodeToString(conf.getBytes());
     }
 
     @Override
-    public Application getApp(Application paramOfApp) {
-        Application application = this.baseMapper.getApp(paramOfApp);
+    public Application getApp(Application appParam) {
+        Application application = this.baseMapper.getApp(appParam);
         if (application.getConfig() != null) {
             String unzipString = DeflaterUtils.unzipString(application.getConfig());
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
@@ -259,8 +259,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean mapping(Application paramOfApp) {
-        return this.baseMapper.mapping(paramOfApp);
+    public boolean mapping(Application appParam) {
+        return this.baseMapper.mapping(appParam);
     }
 
     @Override
@@ -270,16 +270,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void cancel(Application paramOfApp) {
-        Application application = getById(paramOfApp.getId());
+    public void cancel(Application appParam) {
+        Application application = getById(appParam.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
         /**
          * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
          */
-        CommonUtil.localCache.put(paramOfApp.getId(), StopFrom.STREAMX);
-        String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), paramOfApp.getSavePointed(), paramOfApp.getDrain());
-        if (paramOfApp.getSavePointed()) {
+        CommonUtil.localCache.put(appParam.getId(), StopFrom.STREAMX);
+        String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+        if (appParam.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
             savePoint.setAppId(application.getId());
             savePoint.setLastest(true);
@@ -292,13 +292,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void updateMonitor(Application paramOfApp) {
-        this.baseMapper.updateMonitor(paramOfApp);
+    public void updateMonitor(Application appParam) {
+        this.baseMapper.updateMonitor(appParam);
     }
 
     @Override
-    public boolean start(Application paramOfApp) throws Exception {
-        final Application application = getById(paramOfApp.getId());
+    public boolean start(Application appParam) throws Exception {
+        final Application application = getById(appParam.getId());
         assert application != null;
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
@@ -328,25 +328,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         String savePointDir = null;
-        if (paramOfApp.getSavePointed()) {
-            if (paramOfApp.getSavePoint() == null) {
-                SavePoint savePoint = savePointService.getLastest(paramOfApp.getId());
+        if (appParam.getSavePointed()) {
+            if (appParam.getSavePoint() == null) {
+                SavePoint savePoint = savePointService.getLastest(appParam.getId());
                 if (savePoint != null) {
                     savePointDir = savePoint.getSavePoint();
                 }
             } else {
-                savePointDir = paramOfApp.getSavePoint();
+                savePointDir = appParam.getSavePoint();
             }
         }
 
         Map<String, Object> overrideOption = application.getOptionMap();
 
         if (CommonUtil.notEmpty(overrideOption)) {
-            if (paramOfApp.getAllowNonRestored()) {
+            if (appParam.getAllowNonRestored()) {
                 overrideOption.put("allowNonRestoredState", true);
             }
         } else {
-            if (paramOfApp.getAllowNonRestored()) {
+            if (appParam.getAllowNonRestored()) {
                 overrideOption = new HashMap<>(1);
                 overrideOption.put("allowNonRestoredState", true);
             }
