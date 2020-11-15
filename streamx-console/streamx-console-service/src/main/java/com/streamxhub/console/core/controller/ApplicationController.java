@@ -132,10 +132,10 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(true);
     }
 
-    @PostMapping("stop")
-    @RequiresPermissions("app:stop")
-    public RestResponse stop(Application app) {
-        applicationService.stop(app);
+    @PostMapping("cancel")
+    @RequiresPermissions("app:cancel")
+    public RestResponse cancel(Application app) {
+        applicationService.cancel(app);
         return RestResponse.create();
     }
 

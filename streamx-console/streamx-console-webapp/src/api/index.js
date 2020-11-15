@@ -41,7 +41,7 @@ export default {
     MAIN: '/flink/app/main',
     NAME: '/flink/app/name',
     EXISTS: '/flink/app/exists',
-    STOP: '/flink/app/stop',
+    CANCEL: '/flink/app/cancel',
     DELETE: '/flink/app/delete',
     DELETEBAK: '/flink/app/deletebak',
     CREATE: '/flink/app/create',

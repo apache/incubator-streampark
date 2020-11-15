@@ -1,5 +1,9 @@
 package com.streamxhub.console.core.enums;
 
+/**
+ * @author benjobs
+ */
+
 public enum AppExistsState {
 
     /**

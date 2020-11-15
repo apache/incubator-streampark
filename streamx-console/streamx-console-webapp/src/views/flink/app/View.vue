@@ -390,10 +390,10 @@
           <a-icon
             type="poweroff"
             title="停止应用"
-            v-permit="'app:stop'"
+            v-permit="'app:cancel'"
             style="color: #4a9ff5"
             v-show="record.state === 5"
-            @click="handleStop(record)">
+            @click="handleCancel(record)">
           </a-icon>
 
           <a-icon
@@ -651,7 +651,7 @@ import RangeDate from '@comp/DateTime/RangeDate'
 import State from './State'
 
 import {mapActions} from 'vuex'
-import {list, stop, deploy, mapping, start, clean, yarn} from '@api/application'
+import {list, cancel, deploy, mapping, start, clean, yarn} from '@api/application'
 import {lastest, history} from '@api/savepoint'
 import {Icon} from 'ant-design-vue'
 
@@ -1062,7 +1062,7 @@ export default {
       })
     },
 
-    handleStop(value) {
+    handleCancel(value) {
       this.stopVisible = true
       this.application = value
     },
@@ -1086,7 +1086,7 @@ export default {
       const drain = this.drain
       const id = this.application.id
       this.handleStopCancel()
-      stop({
+      cancel({
         id: id,
         savePointed: savePoint,
         drain: drain

@@ -173,7 +173,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //1) 需要重启的先停止服务
         if (paramOfApp.getRestart()) {
-            stop(paramOfApp);
+            cancel(paramOfApp);
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
@@ -270,7 +270,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void stop(Application paramOfApp) {
+    public void cancel(Application paramOfApp) {
         Application application = getById(paramOfApp.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
