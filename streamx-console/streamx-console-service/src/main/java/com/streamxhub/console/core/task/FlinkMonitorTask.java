@@ -126,8 +126,8 @@ public class FlinkMonitorTask {
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
-                        if (stopFrom == null) {
-                            log.error("[StreamX] query jobsOverview from yarn,job was killed and stopNotFound,savePoint obsoleted!");
+                        if (stopFrom == StopFrom.NONE) {
+                            log.error("[StreamX] query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
                             savePointService.obsolete(application.getId());
                         }
                         application.setState(flinkAppState.getValue());
@@ -137,10 +137,10 @@ public class FlinkMonitorTask {
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
                         if (stopFrom == StopFrom.NONE) {
+                            log.error("[StreamX] query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}",e1);
                             savePointService.obsolete(application.getId());
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
-                            e1.printStackTrace();
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
@@ -148,7 +148,7 @@ public class FlinkMonitorTask {
                     }
                 }
             } catch (IOException exception) {
-                log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted!", exception);
+                log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted! {}", exception);
                 if (stopFrom == null) {
                     savePointService.obsolete(application.getId());
                 }
