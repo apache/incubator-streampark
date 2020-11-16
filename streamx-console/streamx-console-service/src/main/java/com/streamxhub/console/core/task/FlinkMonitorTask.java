@@ -93,12 +93,7 @@ public class FlinkMonitorTask {
 
         appList.forEach((application) -> executor.execute(() -> {
             StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.get(application.getId());
-            if (stopFrom == null) {
-                stopFrom = StopFrom.NONE;
-            }
-            if (stopFrom == StopFrom.STREAMX) {
-                CommonUtil.jvmCache.put(application.getId(), StopFrom.EXPIRE);
-            }
+            stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
             try {
                 /**
                  * 1)到flink的restApi中查询状态
