@@ -26,9 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,15 +34,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -61,36 +55,6 @@ public abstract class CommonUtil implements Serializable {
      * jvm内存级别的cache,应用重启数据丢失,用于简单的临时的数据缓存,跨越服务层级,同一个jvm的应用内可以存储获取使用...
      */
     public static final Map<Serializable, Serializable> jvmCache = new ConcurrentHashMap<>();
-
-
-    private static Properties properties;
-
-    public static String getProperties(String key) {
-        if (properties == null) {
-            properties = new Properties();
-            InputStream in = null;
-            try {
-                String propDir = System.getProperty("nutz.boot.configure.properties.dir");
-                if (propDir == null) {
-                    in = CommonUtil.class.getClassLoader().getResourceAsStream("application.properties");
-                } else {
-                    in = new FileInputStream(new File(propDir + File.separator + "application.properties"));
-                }
-                properties.load(in);
-            } catch (IOException e) {
-                throw new RuntimeException("web.properties load error");
-            } finally {
-                if (in != null) {
-                    try {
-                        in.close();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        }
-        return properties.getProperty(key);
-    }
 
     /**
      * 非空判断
@@ -234,44 +198,6 @@ public abstract class CommonUtil implements Serializable {
     public static Float toFloat(Object val) {
         return toFloat(val, 0f);
     }
-
-    /**
-     * 对Null作预处理
-     *
-     * @param obj   待处理的对象
-     * @param clazz 该对象的类型
-     * @return T 返回处理后的不为Null的该对象
-     * @author <a href="mailto:benjobs@qq.com">Ben</a>
-     * @see <b>对Null作预处理,有效避免NullPointerException</b>
-     * @since 1.0
-     */
-    public static <T> T preparedNull(T obj, Class<?> clazz) {
-
-        if (notEmpty(obj)) {
-            return obj;
-        }
-
-        AssertUtil.notNull(clazz, "this class must be not null!");
-
-        Object val = null;
-
-        // 单列集合
-        if (List.class.isAssignableFrom(clazz)) {
-            val = new ArrayList<Object>(0);
-        } else if (Set.class.isAssignableFrom(clazz)) {
-            val = new HashSet<Object>(0);
-        } else if (Map.class.isAssignableFrom(clazz)) {
-            val = new HashMap<Object, Object>(0);
-        } else {
-            try {
-                val = clazz.newInstance();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return (T) val;
-    }
-
 
     public static List arrayToList(Object source) {
         return Arrays.asList(ObjectUtil.toObjectArray(source));
@@ -515,15 +441,8 @@ public abstract class CommonUtil implements Serializable {
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map) {
         List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
-        Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
-
-            @Override
-            public int compare(Map.Entry<K, V> o1, Map.Entry<K, V> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
-            }
-        });
-
-        Map<K, V> result = new LinkedHashMap<K, V>();
+        Collections.sort(list, Comparator.comparing(Map.Entry::getValue));
+        Map<K, V> result = new LinkedHashMap<>();
         for (Map.Entry<K, V> entry : list) {
             result.put(entry.getKey(), entry.getValue());
         }
@@ -532,7 +451,7 @@ public abstract class CommonUtil implements Serializable {
 
     public static <T> T[] arrayRemoveElements(T[] array, T... elem) {
         AssertUtil.notNull(array);
-        List<T> arrayList = new ArrayList<T>(0);
+        List<T> arrayList = new ArrayList<>(0);
         Collections.addAll(arrayList, array);
         if (isEmpty(elem)) {
             return array;
@@ -550,7 +469,7 @@ public abstract class CommonUtil implements Serializable {
                 throw new IndexOutOfBoundsException("index error.@" + j);
             }
         }
-        List<T> arrayList = new ArrayList<T>(0);
+        List<T> arrayList = new ArrayList<>(0);
         Collections.addAll(arrayList, array);
         int i = 0;
         for (int j : index) {
@@ -578,7 +497,6 @@ public abstract class CommonUtil implements Serializable {
         return arrayList.toArray(array);
     }
 
-    //org.apache.httpcomponents:httpcore:jar
     public static String uuid() {
         return UUID.randomUUID().toString().replaceAll("-", "");
     }
