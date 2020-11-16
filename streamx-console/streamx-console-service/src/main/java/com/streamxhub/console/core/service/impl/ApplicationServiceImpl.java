@@ -285,7 +285,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         new ScheduledThreadPoolExecutor(
                 1,
                 new BasicThreadFactory.Builder().namingPattern("streamx-cancel-schedule-%d").daemon(true).build()
-        ).schedule(() -> CommonUtil.jvmCache.remove(appParam.getId()), 1000 * 10, TimeUnit.SECONDS);
+        ).schedule(() -> CommonUtil.jvmCache.remove(appParam.getId()), 10, TimeUnit.SECONDS);
 
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
         if (appParam.getSavePointed()) {
