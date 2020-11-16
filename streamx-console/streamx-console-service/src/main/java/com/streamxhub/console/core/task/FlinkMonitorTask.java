@@ -121,14 +121,14 @@ public class FlinkMonitorTask {
                         String state = appInfo.getApp().getFinalStatus();
                         FlinkAppState flinkAppState;
                         if ("KILLED".equals(state)) {
+                            if (stopFrom == StopFrom.NONE) {
+                                log.error("[StreamX] query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
+                                obsolete(application);
+                            }
                             flinkAppState = FlinkAppState.CANCELED;
                             application.setEndTime(new Date());
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
-                        }
-                        if (stopFrom == StopFrom.NONE) {
-                            log.error("[StreamX] query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
-                            savePointService.obsolete(application.getId());
                         }
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
@@ -137,8 +137,8 @@ public class FlinkMonitorTask {
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
                         if (stopFrom == StopFrom.NONE) {
-                            log.error("[StreamX] query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}",e1);
-                            savePointService.obsolete(application.getId());
+                            log.error("[StreamX] query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}", e1);
+                            obsolete(application);
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
                         } else {
@@ -149,14 +149,22 @@ public class FlinkMonitorTask {
                 }
             } catch (IOException exception) {
                 log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted! {}", exception);
-                if (stopFrom == null) {
-                    savePointService.obsolete(application.getId());
-                }
+                obsolete(application);
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 applicationService.updateMonitor(application);
             }
         }));
+    }
+
+    /**
+     * 要解决的实际问题是:不论从那种方式(flink restapi 还是yarn 中检查到任务已经停止了,且触发停止的方式不是从streamx里发起的,这就无法确定是否在cancel的时候是否保存的savepoint,所以得将之前的savepint设为过期)
+     *
+     * @param application
+     */
+    private void obsolete(Application application) {
+        savePointService.obsolete(application.getId());
+        CommonUtil.jvmCache.get(application.getId());
     }
 
     /**
@@ -195,7 +203,7 @@ public class FlinkMonitorTask {
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
             if (stopFrom == StopFrom.NONE) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
-                savePointService.obsolete(application.getId());
+                obsolete(application);
             }
         }
 
