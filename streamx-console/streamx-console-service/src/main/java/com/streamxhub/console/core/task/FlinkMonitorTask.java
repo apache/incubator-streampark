@@ -158,7 +158,7 @@ public class FlinkMonitorTask {
     }
 
     /**
-     * 要解决的实际问题是:不论从那种方式(flink restapi 还是yarn 中检查到任务已经停止了,且触发停止的方式不是从streamx里发起的,这就无法确定是否在cancel的时候是否保存的savepoint,所以得将之前的savepint设为过期)
+     * 要解决的实际问题是:不论从那种方式(flink restapi 还是yarn 中检查到任务已经停止了,且触发停止的方式不是从streamx里发起的,这就无法确定是否在cancel的时候是否保存的savepoint,所以得将之前的savepoint设为过期)
      *
      * @param application
      */
