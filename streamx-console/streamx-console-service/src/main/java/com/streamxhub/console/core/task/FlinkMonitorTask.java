@@ -74,7 +74,7 @@ public class FlinkMonitorTask {
 
     private long index;
 
-    @Scheduled(fixedDelay = 1000 * 3)
+    @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
         ++index;
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
@@ -92,8 +92,13 @@ public class FlinkMonitorTask {
         List<Application> appList = applicationService.list(queryWrapper);
 
         appList.forEach((application) -> executor.execute(() -> {
-            Serializable stop = CommonUtil.localCache.get(application.getId());
-            StopFrom stopFrom = stop == null ? StopFrom.NONE : (StopFrom) stop;
+            StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.get(application.getId());
+            if (stopFrom == null) {
+                stopFrom = StopFrom.NONE;
+            }
+            if (stopFrom == StopFrom.STREAMX) {
+                CommonUtil.jvmCache.put(application.getId(), StopFrom.EXPIRE);
+            }
             try {
                 /**
                  * 1)到flink的restApi中查询状态
@@ -126,11 +131,9 @@ public class FlinkMonitorTask {
                         } else {
                             flinkAppState = FlinkAppState.valueOf(state);
                         }
-                        if (stopFrom == StopFrom.NONE) {
+                        if (stopFrom == null) {
                             log.error("[StreamX] query jobsOverview from yarn,job was killed and stopNotFound,savePoint obsoleted!");
                             savePointService.obsolete(application.getId());
-                            //过期
-                            CommonUtil.localCache.put(application.getId(), StopFrom.EXPIRE);
                         }
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
@@ -140,7 +143,6 @@ public class FlinkMonitorTask {
                          */
                         if (stopFrom == StopFrom.NONE) {
                             savePointService.obsolete(application.getId());
-                            CommonUtil.localCache.put(application.getId(), StopFrom.EXPIRE);
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
                             e1.printStackTrace();
@@ -151,11 +153,9 @@ public class FlinkMonitorTask {
                     }
                 }
             } catch (IOException exception) {
-                log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted!");
-                exception.printStackTrace();
-                if (stopFrom == StopFrom.NONE) {
+                log.error("[StreamX] query jobsOverview from restApi error,job failed,savePoint obsoleted!", exception);
+                if (stopFrom == null) {
                     savePointService.obsolete(application.getId());
-                    CommonUtil.localCache.put(application.getId(), StopFrom.EXPIRE);
                 }
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
@@ -201,7 +201,6 @@ public class FlinkMonitorTask {
             if (stopFrom == StopFrom.NONE) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
-                CommonUtil.localCache.put(application.getId(), StopFrom.EXPIRE);
             }
         }
 
@@ -249,7 +248,7 @@ public class FlinkMonitorTask {
         }
 
         public boolean isPrevious(long index) {
-            return index - this.index <= 10;
+            return index - this.index <= 5;
         }
     }
 }

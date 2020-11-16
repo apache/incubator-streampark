@@ -42,6 +42,7 @@ import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.concurrent.BasicThreadFactory;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -277,7 +278,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
          */
-        CommonUtil.localCache.put(appParam.getId(), StopFrom.STREAMX);
+        CommonUtil.jvmCache.put(appParam.getId(), StopFrom.STREAMX);
+        /**
+         * 10秒钟之后移除
+         */
+        new ScheduledThreadPoolExecutor(
+                1,
+                new BasicThreadFactory.Builder().namingPattern("streamx-cancel-schedule-%d").daemon(true).build()
+        ).scheduleAtFixedRate(() -> CommonUtil.jvmCache.remove(appParam.getId()), 1000 * 10, 0, TimeUnit.SECONDS);
+
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
         if (appParam.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
