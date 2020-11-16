@@ -164,7 +164,7 @@ public class FlinkMonitorTask {
      */
     private void obsolete(Application application) {
         savePointService.obsolete(application.getId());
-        CommonUtil.jvmCache.get(application.getId());
+        CommonUtil.jvmCache.remove(application.getId());
     }
 
     /**
