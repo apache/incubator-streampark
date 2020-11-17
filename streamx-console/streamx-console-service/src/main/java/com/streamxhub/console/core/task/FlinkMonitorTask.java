@@ -225,11 +225,13 @@ public class FlinkMonitorTask {
         } else if (startTime != application.getStartTime().getTime()) {
             application.setStartTime(new Date(startTime));
         }
+
         if (endTime != -1) {
             if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
                 application.setEndTime(new Date(endTime));
             }
         }
+
         application.setDuration(job.getDuration());
 
         this.applicationService.updateMonitor(application);
