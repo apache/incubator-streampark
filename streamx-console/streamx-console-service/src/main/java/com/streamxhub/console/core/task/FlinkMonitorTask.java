@@ -102,7 +102,7 @@ public class FlinkMonitorTask {
                 if (optional.isPresent()) {
                     callBack(application, optional.get(), stopFrom);
                 }
-            } catch (ConnectException ex) {
+            } catch (ConnectException exp) {
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
@@ -135,13 +135,13 @@ public class FlinkMonitorTask {
                         }
                         application.setState(flinkAppState.getValue());
                         applicationService.updateMonitor(application);
-                    } catch (Exception e1) {
+                    } catch (Exception e) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
                         CommonUtil.jvmCache.remove(application.getId());
                         if (StopFrom.NONE.equals(stopFrom)) {
-                            log.error("[StreamX] query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}", e1);
+                            log.error("[StreamX] query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}", e);
                             savePointService.obsolete(application.getId());
                             application.setState(FlinkAppState.LOST.getValue());
                             //TODO send msg or emails
