@@ -54,11 +54,15 @@ import java.util.concurrent.*;
 public class FlinkMonitorTask {
 
     private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
+
     @Autowired
     private ApplicationService applicationService;
+
     @Autowired
     private SavePointService savePointService;
+
     private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
+
     private ExecutorService executor = new ThreadPoolExecutor(
             Math.max(Runtime.getRuntime().availableProcessors() / 4, 2),
             Integer.MAX_VALUE,
