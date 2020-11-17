@@ -80,7 +80,12 @@ public enum FlinkAppState {
     /**
      * 失联
      */
-    LOST(13);
+    LOST(13),
+
+    /**
+     * yarn 中检查到被killed
+     */
+    KILLED(-9);
 
     int value;
 

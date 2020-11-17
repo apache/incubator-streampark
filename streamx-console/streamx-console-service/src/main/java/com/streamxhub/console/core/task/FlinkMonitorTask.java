@@ -120,7 +120,7 @@ public class FlinkMonitorTask {
                         AppInfo appInfo = application.getYarnAppInfo();
                         String state = appInfo.getApp().getFinalStatus();
                         FlinkAppState flinkAppState;
-                        if ("KILLED".equals(state)) {
+                        if (FlinkAppState.KILLED.name().equals(state)) {
                             CommonUtil.jvmCache.remove(application.getId());
                             if (stopFrom == StopFrom.NONE) {
                                 log.error("[StreamX] query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
