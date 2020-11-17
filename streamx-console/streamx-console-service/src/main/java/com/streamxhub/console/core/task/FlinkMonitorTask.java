@@ -53,14 +53,12 @@ import java.util.concurrent.*;
 @Component
 public class FlinkMonitorTask {
 
+    private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
     @Autowired
     private ApplicationService applicationService;
-
     @Autowired
     private SavePointService savePointService;
-
     private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
-
     private ExecutorService executor = new ThreadPoolExecutor(
             Math.max(Runtime.getRuntime().availableProcessors() / 4, 2),
             Integer.MAX_VALUE,
@@ -69,9 +67,6 @@ public class FlinkMonitorTask {
             new LinkedBlockingQueue<>(),
             threadFactory
     );
-
-    private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
-
     private long index;
 
     @Scheduled(fixedDelay = 1000 * 2)
@@ -248,7 +243,7 @@ public class FlinkMonitorTask {
         }
 
         public boolean isPrevious(long index) {
-            return index - this.index <= 5;
+            return index - this.index == 1;
         }
     }
 }
