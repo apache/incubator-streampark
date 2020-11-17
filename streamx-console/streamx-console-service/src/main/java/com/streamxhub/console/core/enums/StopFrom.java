@@ -7,5 +7,5 @@ import java.io.Serializable;
  */
 
 public enum StopFrom implements Serializable {
-    NONE, EXPIRE,STREAMX
+    NONE,STREAMX
 }
