@@ -88,8 +88,7 @@ public class FlinkMonitorTask {
         );
 
         applicationService.list(queryWrapper).forEach((application) -> executor.execute(() -> {
-            StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.get(application.getId());
-            stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
+            StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.getOrDefault(application.getId(), StopFrom.NONE);
             try {
                 /**
                  * 1)到flink的restApi中查询状态
@@ -173,28 +172,21 @@ public class FlinkMonitorTask {
         application.setState(currentState.getValue());
 
         /**
-         * 2) application中记录的jobId和restapi返回的不一致,则以返回的jobId为准,更新application中记录的
+         * 2) jobId以restapi返回的状态为准
          */
-        if (!job.getId().equals(application.getJobId())) {
-            application.setJobId(job.getId());
-        }
+        application.setJobId(job.getId());
 
         /**
          * 3) savePoint obsolete check
          */
-        if (FlinkAppState.CANCELLING.equals(currentState)) {
-            canceling.put(application.getId(), new Tracker(index, application.getId()));
-        }
-
-        /**
-         * 当前从flink restAPI拿到最新的状态为cancelling,或者为CANCELED,且获取不到停止的时间
-         * 此种情况为: 不是通过streamX发起的job的停止操作.此时的savepoint无法确认是否手动触发.则将savepoint设置为过期.
-         * 在启动的时候如需要从savepoint恢复,则需要手动指定.
-         */
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
+            if (FlinkAppState.CANCELLING.equals(currentState)) {
+                canceling.put(application.getId(), new Tracker(index, application.getId()));
+            }
+            log.info("[StreamX] application state {}, delete stopFrom!", currentState.name());
+            CommonUtil.jvmCache.remove(application.getId());
             if (StopFrom.NONE.equals(stopFrom)) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
-                CommonUtil.jvmCache.remove(application.getId());
                 savePointService.obsolete(application.getId());
             }
         }
@@ -227,7 +219,6 @@ public class FlinkMonitorTask {
                 application.setEndTime(new Date(endTime));
             }
         }
-
         application.setDuration(job.getDuration());
 
         this.applicationService.updateMonitor(application);
