@@ -96,7 +96,7 @@ public class FlinkMonitorTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    log.info("[StreamX] flinkMonitorTask get state from flink restApi success, new callBack!");
+                    log.info("[StreamX] flinkMonitorTask get state from flink restApi success, now callBack!");
                     callBack(application, optional.get(), stopFrom);
                 }
             } catch (ConnectException exp) {
