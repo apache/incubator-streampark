@@ -96,22 +96,26 @@ public class FlinkMonitorTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
+                    log.info("[StreamX] get state from flink restApi success, new callBack!");
                     callBack(application, optional.get(), stopFrom);
                 }
             } catch (ConnectException exp) {
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
+                log.info("[StreamX] get state from flink restApi error {}", exp);
                 Tracker tracker = canceling.remove(application.getId());
                 if (tracker != null && tracker.isPrevious(index)) {
+                    log.info("[StreamX] previous state was canceling.");
                     if (StopFrom.NONE.equals(stopFrom)) {
-                        log.error("[StreamX] query previous state was canceling current state is failed and stopFrom NotFound,savePoint obsoleted!");
+                        log.error("[StreamX] query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
                         CommonUtil.jvmCache.remove(application.getId());
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
                     applicationService.updateMonitor(application);
                 } else {
+                    log.info("[StreamX] previous state was not canceling.");
                     try {
                         /**
                          * 2)到yarn的restApi中查询状态
