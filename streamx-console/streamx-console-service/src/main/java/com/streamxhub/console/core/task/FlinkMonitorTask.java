@@ -192,9 +192,9 @@ public class FlinkMonitorTask {
          * 在启动的时候如需要从savepoint恢复,则需要手动指定.
          */
         if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
-            CommonUtil.jvmCache.remove(application.getId());
             if (StopFrom.NONE.equals(stopFrom)) {
                 log.info("[StreamX] monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
+                CommonUtil.jvmCache.remove(application.getId());
                 savePointService.obsolete(application.getId());
             }
         }
