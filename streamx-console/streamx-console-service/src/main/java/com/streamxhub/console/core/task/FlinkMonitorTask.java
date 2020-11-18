@@ -96,7 +96,6 @@ public class FlinkMonitorTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    log.info("[StreamX] flinkMonitorTask get state from flink restApi success, now callBack!");
                     callBack(application, optional.get(), stopFrom);
                 }
             } catch (ConnectException exp) {
@@ -183,10 +182,11 @@ public class FlinkMonitorTask {
         /**
          * 3) savePoint obsolete check
          */
-        if (FlinkAppState.CANCELLING.equals(currentState) || FlinkAppState.CANCELED.equals(currentState)) {
-            if (FlinkAppState.CANCELLING.equals(currentState)) {
-                canceling.put(application.getId(), new Tracker(index, application.getId()));
-            }
+        if (FlinkAppState.CANCELLING.equals(currentState)) {
+            canceling.put(application.getId(), new Tracker(index, application.getId()));
+        }
+
+        if (FlinkAppState.CANCELED.equals(currentState)) {
             log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
             CommonUtil.jvmCache.remove(application.getId());
             if (StopFrom.NONE.equals(stopFrom)) {
