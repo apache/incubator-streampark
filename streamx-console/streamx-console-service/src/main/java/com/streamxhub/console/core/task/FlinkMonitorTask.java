@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
@@ -88,9 +87,7 @@ public class FlinkMonitorTask {
                 FlinkAppState.LOST.getValue()
         );
 
-        List<Application> appList = applicationService.list(queryWrapper);
-
-        appList.forEach((application) -> executor.execute(() -> {
+        applicationService.list(queryWrapper).forEach((application) -> executor.execute(() -> {
             StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.get(application.getId());
             stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
             try {
