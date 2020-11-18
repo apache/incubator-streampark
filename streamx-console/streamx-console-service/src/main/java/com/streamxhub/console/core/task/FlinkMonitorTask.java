@@ -103,7 +103,7 @@ public class FlinkMonitorTask {
                 /**
                  * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
                  */
-                Tracker tracker = canceling.get(application.getId());
+                Tracker tracker = canceling.remove(application.getId());
                 if (tracker != null && tracker.isPrevious(index)) {
                     if (StopFrom.NONE.equals(stopFrom)) {
                         log.error("[StreamX] query previous state was canceling current state is failed and stopFrom NotFound,savePoint obsoleted!");
@@ -112,7 +112,6 @@ public class FlinkMonitorTask {
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
                     applicationService.updateMonitor(application);
-                    canceling.remove(application.getId());
                 } else {
                     try {
                         /**
