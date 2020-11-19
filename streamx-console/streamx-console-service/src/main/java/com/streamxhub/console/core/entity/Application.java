@@ -31,14 +31,18 @@ import com.streamxhub.common.util.HttpClientUtils;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.SpringContextUtil;
 import com.streamxhub.console.core.enums.ApplicationType;
+import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.*;
 import java.util.Date;
 import java.util.Map;
+
+import static com.streamxhub.console.core.enums.FlinkAppState.*;
 
 /**
  * @author benjobs
@@ -75,6 +79,10 @@ public class Application implements Serializable {
     private String options;
     private String dynamicOptions;
     private Integer appType;
+    /**
+     * 是否需要跟踪监控状态
+     */
+    private Integer tracking;
     private String jar;
     private String mainClass;
 
@@ -108,6 +116,30 @@ public class Application implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String backUpDescription;
+
+    public void checkTracking() {
+        FlinkAppState appState = of(this.state);
+        switch (appState) {
+            case DEPLOYING:
+                this.tracking = 1;
+            case DEPLOYED:
+                this.tracking = 1;
+            case CREATED:
+                this.tracking = 1;
+            case FINISHED:
+                this.tracking = 1;
+            case FAILED:
+                this.tracking = 1;
+            case CANCELED:
+                this.tracking = 1;
+            case LOST:
+                this.tracking = 1;
+                break;
+            default:
+                this.tracking = 0;
+                break;
+        }
+    }
 
     @JsonIgnore
     public File getAppBase() {
@@ -159,7 +191,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Map<String,Object> getOptionMap() throws IOException {
+    public Map<String, Object> getOptionMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         Map<String, Object> map = mapper.readValue(getOptions(), Map.class);
         return map;
