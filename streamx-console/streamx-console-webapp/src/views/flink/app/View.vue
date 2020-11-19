@@ -663,9 +663,7 @@ export default {
   data() {
     return {
       loading: false,
-      advanced: false,
       dataSource: [],
-      selectedRowKeys: [],
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
@@ -915,17 +913,6 @@ export default {
 
   methods: {
     ...mapActions(['SetAppId']),
-    onSelectChange(selectedRowKeys) {
-      console.log(selectedRowKeys)
-      this.selectedRowKeys = selectedRowKeys
-    },
-
-    handleDateChange(value) {
-      if (value) {
-        this.queryParams.dateFrom = value[0]
-        this.queryParams.dateTo = value[1]
-      }
-    },
 
     handleDeploy(value) {
       this.deployVisible = true
