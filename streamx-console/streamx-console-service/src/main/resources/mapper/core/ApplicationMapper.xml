@@ -64,6 +64,9 @@
             <if test="application.jobId != null and application.jobId != ''">
                 job_id=#{application.jobId},
             </if>
+            <if test="application.tracking != null">
+                tracking=#{application.tracking},
+            </if>
             <if test="application.state != null">
                 state=#{application.state},
             </if>

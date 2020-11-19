@@ -76,17 +76,7 @@ public class FlinkMonitorTask {
     public void run() {
         ++index;
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
-        //以下状态的不再监控...
-        queryWrapper.notIn("state",
-                FlinkAppState.DEPLOYING.getValue(),
-                FlinkAppState.DEPLOYED.getValue(),
-                FlinkAppState.CREATED.getValue(),
-                FlinkAppState.FINISHED.getValue(),
-                FlinkAppState.FAILED.getValue(),
-                FlinkAppState.CANCELED.getValue(),
-                FlinkAppState.LOST.getValue()
-        );
-
+        queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((application) -> executor.execute(() -> {
             StopFrom stopFrom = (StopFrom) CommonUtil.jvmCache.getOrDefault(application.getId(), StopFrom.NONE);
             try {
@@ -112,6 +102,7 @@ public class FlinkMonitorTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
+                    application.checkTracking();
                     applicationService.updateMonitor(application);
                 } else {
                     log.info("[StreamX] flinkMonitorTask previous state was not canceling.");
@@ -132,6 +123,7 @@ public class FlinkMonitorTask {
                             application.setEndTime(new Date());
                         }
                         application.setState(flinkAppState.getValue());
+                        application.checkTracking();
                         applicationService.updateMonitor(application);
                     } catch (Exception e) {
                         /**s
@@ -146,6 +138,7 @@ public class FlinkMonitorTask {
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
+                        application.checkTracking();
                         applicationService.updateMonitor(application);
                     }
                 }
@@ -155,6 +148,7 @@ public class FlinkMonitorTask {
                 savePointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
+                application.checkTracking();
                 applicationService.updateMonitor(application);
             }
         }));
@@ -224,9 +218,8 @@ public class FlinkMonitorTask {
             }
         }
         application.setDuration(job.getDuration());
-
+        application.checkTracking();
         this.applicationService.updateMonitor(application);
-
     }
 
     @Getter
