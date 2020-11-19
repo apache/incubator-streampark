@@ -352,7 +352,10 @@
 
         <template slot="operation" slot-scope="text, record">
           <a-icon
-            v-if="record.state !== 5"
+            v-if="record.state !== 5
+              && optionApps.deploy.findIndex((x) => x.id == record.id) == -1
+              && optionApps.stoping.findIndex((x) => x.id == record.id) == -1
+              && optionApps.starting.findIndex((x) => x.id == record.id) == -1"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
@@ -360,9 +363,8 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="record.deploy === 1 && record.state !== 1 "
+            v-show="record.deploy === 1 && record.state !== 1 && optionApps.deploy.findIndex((x) => x.id == record.id) == -1 "
             v-permit="'app:deploy'"
-            style="color:#4a9ff5"
             @click="handleDeploy(record)">
           </icon-font>
           <a-icon
@@ -375,13 +377,13 @@
           </a-icon>
           <a-icon
             type="play-circle"
-            v-if="record.state === 0
+            v-if="(record.state === 0
               || record.state === 2
               || record.state === 7
               || record.state === 9
               || record.state === 10
               || record.state === 11
-              || record.state === 13"
+              || record.state === 13) && optionApps.deploy.findIndex((x) => x.id == record.id) == -1"
             v-permit="'app:start'"
             theme="twoTone"
             :twoToneColor="optionApps.starting.findIndex((x) => x.id == record.id) == -1?'#4a9ff5':'gray'"
@@ -656,7 +658,7 @@ import { lastest, history } from '@api/savepoint'
 import { Icon } from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
+  scriptUrl: '//at.alicdn.com/t/font_2006309_wqixwmes1xi.js'
 })
 export default {
   components: { RangeDate, Ellipsis, State, IconFont },
@@ -687,7 +689,8 @@ export default {
       searchInput: null,
       optionApps: {
         'starting': [],
-        'stoping': []
+        'stoping': [],
+        'deploy': []
       },
       searchedColumn: '',
       paginationInfo: null,
@@ -918,9 +921,11 @@ export default {
   methods: {
     ...mapActions(['SetAppId']),
 
-    handleDeploy (value) {
-      this.deployVisible = true
-      this.application = value
+    handleDeploy (app) {
+      if (this.optionApps.deploy.findIndex((x) => x.id === app.id) === -1) {
+        this.deployVisible = true
+        this.application = app
+      }
     },
 
     handleDeployCancel () {
@@ -947,6 +952,11 @@ export default {
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
           )
+          this.optionApps.deploy.push({
+            'id': id,
+            'timestamp': new Date().getTime(),
+            'state': this.application.state
+          })
           deploy({
             id: id,
             restart: restart,
@@ -954,6 +964,15 @@ export default {
             allowNonRestored: allowNonRestoredState,
             backUpDescription: description
           }).then((resp) => {
+            if (!restart) {
+              for (let i = 0; i < this.optionApps.deploy.length; i++) {
+                const s = this.optionApps.deploy[i]
+                if (id === s.id) {
+                  this.optionApps.deploy.splice(i, 1)
+                  break
+                }
+              }
+            }
             console.log(resp)
           })
         }
@@ -996,7 +1015,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.findIndex((x) => x.id == app.id) == -1) {
+      if (this.optionApps.starting.findIndex((x) => x.id === app.id) === -1) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1061,7 +1080,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.findIndex((x) => x.id == app.id) == -1) {
+      if (this.optionApps.stoping.findIndex((x) => x.id === app.id) === -1) {
         this.stopVisible = true
         this.application = app
       }
@@ -1154,28 +1173,38 @@ export default {
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         const now = new Date().getTime()
-        if (this.optionApps.starting.length > 0) {
-          this.dataSource.forEach(x => {
-            for (let i = 0; i < this.optionApps.starting.length; i++) {
-              const s = this.optionApps.starting[i]
-              if (x.id == s.id && x.state != s.state && (now - s.timestamp) > 2000) {
-                this.optionApps.starting.splice(i, 1)
-                break
-              }
-            }
-          })
-        }
-        if (this.optionApps.stoping.length > 0) {
-          this.dataSource.forEach(x => {
+        this.dataSource.forEach(x => {
+          if (this.optionApps.stoping.length > 0) {
             for (let i = 0; i < this.optionApps.stoping.length; i++) {
               const s = this.optionApps.stoping[i]
-              if (x.id == s.id && s.state != 5 && (now - s.timestamp) > 2000) {
+              if (x.id === s.id && s.state !== 5 && (now - s.timestamp) > 2000) {
                 this.optionApps.stoping.splice(i, 1)
                 break
               }
             }
-          })
-        }
+          }
+          if (this.optionApps.starting.length > 0) {
+            for (let i = 0; i < this.optionApps.starting.length; i++) {
+              const s = this.optionApps.starting[i]
+              if (x.id === s.id && x.state !== s.state && (now - s.timestamp) > 2000) {
+                this.optionApps.starting.splice(i, 1)
+                break
+              }
+            }
+          }
+          if (this.optionApps.deploy.length > 0) {
+            for (let i = 0; i < this.optionApps.deploy.length; i++) {
+              const s = this.optionApps.deploy[i]
+              if (x.id === s.id && (now - s.timestamp) > 2000) {
+                if (x.state === 5 || x.state === 6 || x.state === 7) {
+                  this.optionApps.deploy.splice(i, 1)
+                  break
+                }
+              }
+            }
+          }
+        })
+        console.log(this.optionApps)
         this.pagination = pagination
       })
     },

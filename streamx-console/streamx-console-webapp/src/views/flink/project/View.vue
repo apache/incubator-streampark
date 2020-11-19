@@ -119,7 +119,7 @@ import { Icon } from 'ant-design-vue'
 import baseUrl from '@/api/baseUrl'
 
 const IconFont = Icon.createFromIconfontCN({
-  scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
+  scriptUrl: '//at.alicdn.com/t/font_2006309_wqixwmes1xi.js'
 })
 
 export default {
