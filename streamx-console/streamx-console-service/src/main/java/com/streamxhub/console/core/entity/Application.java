@@ -117,7 +117,8 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
-    public void checkTracking() {
+    public void setState(Integer state) {
+        this.state = state;
         FlinkAppState appState = of(this.state);
         switch (appState) {
             case DEPLOYING:

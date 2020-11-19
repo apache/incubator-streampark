@@ -102,7 +102,6 @@ public class FlinkMonitorTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
-                    application.checkTracking();
                     applicationService.updateMonitor(application);
                 } else {
                     log.info("[StreamX] flinkMonitorTask previous state was not canceling.");
@@ -123,7 +122,6 @@ public class FlinkMonitorTask {
                             application.setEndTime(new Date());
                         }
                         application.setState(flinkAppState.getValue());
-                        application.checkTracking();
                         applicationService.updateMonitor(application);
                     } catch (Exception e) {
                         /**s
@@ -138,7 +136,6 @@ public class FlinkMonitorTask {
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
-                        application.checkTracking();
                         applicationService.updateMonitor(application);
                     }
                 }
@@ -148,7 +145,6 @@ public class FlinkMonitorTask {
                 savePointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
-                application.checkTracking();
                 applicationService.updateMonitor(application);
             }
         }));
@@ -218,7 +214,6 @@ public class FlinkMonitorTask {
             }
         }
         application.setDuration(job.getDuration());
-        application.checkTracking();
         this.applicationService.updateMonitor(application);
     }
 
