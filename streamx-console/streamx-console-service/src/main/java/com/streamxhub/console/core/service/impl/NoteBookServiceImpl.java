@@ -46,7 +46,7 @@ public class NoteBookServiceImpl implements NoteBookService {
                 interpreter.open();
                 InterpreterOutput out = new InterpreterOutput(line -> log.info(line));
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
-                System.out.println("[StreamX] repl submit code:" + result.code());
+                log.info("[StreamX] repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {
                     log.info("[StreamX] NoteBook submit error: {}", out.toString());
                 } else if (result.code().equals(InterpreterResult.SUCCESS())) {

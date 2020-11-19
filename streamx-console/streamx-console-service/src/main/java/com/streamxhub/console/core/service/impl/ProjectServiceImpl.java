@@ -405,7 +405,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         }
         String out = builder.toString();
         tailCleanUp(project.getId());
-        System.out.println(out);
+        log.info(out);
         return out.contains("BUILD SUCCESS");
     }
 
