@@ -1115,7 +1115,6 @@ export default {
         this.queryParams['sortField'] = sortedInfo.field
         this.queryParams['sortOrder'] = sortedInfo.order
       }
-      console.log(this.queryParams)
     },
 
     handleReset (clearFilters) {
