@@ -194,6 +194,8 @@ public class FlinkMonitorTask {
                     }
                 }
                 break;
+            default:
+                break;
         }
 
         /**
