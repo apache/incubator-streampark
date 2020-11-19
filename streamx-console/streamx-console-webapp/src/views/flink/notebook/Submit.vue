@@ -21,7 +21,7 @@
           <div>
             <span style="height: 100%;margin-left: 17px;" class="code-prefix"></span>
             <span style="margin-left: 15px;color: grey">
-              {{introduction}}
+              {{ introduction }}
             </span>
           </div>
         </a-col>
@@ -67,7 +67,7 @@ import { submit } from '@api/notebook'
 import 'mavon-editor/dist/css/index.css'
 import { get } from '@api/tutorial'
 
-import "codemirror/theme/base16-light.css"
+import 'codemirror/theme/base16-light.css'
 import 'codemirror/lib/codemirror.css'
 import 'codemirror/addon/hint/show-hint.css'
 
@@ -77,26 +77,24 @@ import 'codemirror/addon/hint/anyword-hint'
 import 'codemirror/mode/clike/clike'
 import 'codemirror/mode/sql/sql'
 
+import 'codemirror/addon/fold/foldgutter.css'
 
-let CodeMirror = require("codemirror/lib/codemirror")
-require("codemirror/addon/edit/matchbrackets")
-require("codemirror/addon/selection/active-line")
+import 'codemirror/addon/lint/lint.css'
 
-import "codemirror/addon/fold/foldgutter.css"
-require("codemirror/addon/fold/foldcode")
-require("codemirror/addon/fold/brace-fold")
-require("codemirror/addon/fold/comment-fold")
-require("codemirror/addon/fold/indent-fold")
-require("codemirror/addon/fold/foldgutter")
+const CodeMirror = require('codemirror/lib/codemirror')
+require('codemirror/addon/edit/matchbrackets')
+require('codemirror/addon/selection/active-line')
+require('codemirror/addon/fold/foldcode')
+require('codemirror/addon/fold/brace-fold')
+require('codemirror/addon/fold/comment-fold')
+require('codemirror/addon/fold/indent-fold')
+require('codemirror/addon/fold/foldgutter')
+require('codemirror/addon/lint/lint')
+require('codemirror/addon/lint/javascript-lint')
 
-import "codemirror/addon/lint/lint.css"
-require("codemirror/addon/lint/lint")
-require("codemirror/addon/lint/javascript-lint")
-
-require("codemirror/addon/hint/show-hint")
-require("codemirror/mode/javascript/javascript")
-require("codemirror/addon/comment/comment")
-
+require('codemirror/addon/hint/show-hint')
+require('codemirror/mode/javascript/javascript')
+require('codemirror/addon/comment/comment')
 
 export default {
   name: 'CodeMirror',
@@ -133,15 +131,15 @@ export default {
       showTutorial: false,
       env: 'flink',
       introduction: null,
-      woldCount : '\n%flink.repl.out=true\n' +
+      woldCount: '\n%flink.repl.out=true\n' +
         '%flink.yarn.queue=default\n' +
-        '%flink.execution.mode=yarn\n'+
+        '%flink.execution.mode=yarn\n' +
         '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
         'env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
         '.flatMap(_.split("\\\\s"))\n' +
-        '.map((_, 1))\n'+
-        '.keyBy(0)\n'+
-        '.sum(1)\n'+
+        '.map((_, 1))\n' +
+        '.keyBy(0)\n' +
+        '.sum(1)\n' +
         '.print()\n\n' +
         'env.execute(\"StreamX NoteBook Job\")\n'
     }
@@ -169,7 +167,7 @@ export default {
 
     this.editor.setValue(this.woldCount)
 
-    this.editor.on("inputRead", () => {
+    this.editor.on('inputRead', () => {
       this.editor.showHint()
     })
 

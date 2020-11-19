@@ -384,14 +384,14 @@
               || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="optionApps.starting.indexOf(record.id) == -1?'#4a9ff5':'gray'"
+            :twoToneColor="optionApps.starting.findIndex((x) => x.id == record.id) == -1?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': optionApps.starting.indexOf(record.id) == -1?'#4a9ff5':'gray'}"
+            :style="{'color': optionApps.stoping.findIndex((x) => x.id == record.id) == -1?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -650,17 +650,17 @@ import Ellipsis from '@/components/Ellipsis'
 import RangeDate from '@comp/DateTime/RangeDate'
 import State from './State'
 
-import {mapActions} from 'vuex'
-import {list, cancel, deploy, mapping, start, clean, yarn} from '@api/application'
-import {lastest, history} from '@api/savepoint'
-import {Icon} from 'ant-design-vue'
+import { mapActions } from 'vuex'
+import { list, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
+import { lastest, history } from '@api/savepoint'
+import { Icon } from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_bo5pga6ctds.js'
 })
 export default {
-  components: {RangeDate, Ellipsis, State, IconFont},
-  data() {
+  components: { RangeDate, Ellipsis, State, IconFont },
+  data () {
     return {
       loading: false,
       dataSource: [],
@@ -686,8 +686,8 @@ export default {
       searchText: '',
       searchInput: null,
       optionApps: {
-        'starting':[],
-        'stoping': [],
+        'starting': [],
+        'stoping': []
       },
       searchedColumn: '',
       paginationInfo: null,
@@ -796,8 +796,8 @@ export default {
   },
 
   computed: {
-    columns() {
-      let {sortedInfo, filteredInfo} = this
+    columns () {
+      let { sortedInfo, filteredInfo } = this
       sortedInfo = sortedInfo || {}
       filteredInfo = filteredInfo || {}
       return [{
@@ -854,32 +854,32 @@ export default {
         dataIndex: 'duration',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: {customRender: 'duration'},
+        scopedSlots: { customRender: 'duration' },
         width: 150
       }, {
         title: 'End Time',
         dataIndex: 'endTime',
         sorter: true,
         sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
-        scopedSlots: {customRender: 'endTime'},
+        scopedSlots: { customRender: 'endTime' },
         width: 180
       }, {
         title: 'Status',
         dataIndex: 'state',
         width: 120,
-        scopedSlots: {customRender: 'state'},
+        scopedSlots: { customRender: 'state' },
         filters: [
-          {text: 'CREATED', value: 0},
-          {text: 'DEPLOYING', value: 1},
-          {text: 'DEPLOYED', value: 2},
-          {text: 'STARTING', value: 3},
-          {text: 'RESTARTING', value: 4},
-          {text: 'RUNNING', value: 5},
-          {text: 'FAILING', value: 6},
-          {text: 'FAILED', value: 7},
-          {text: 'CANCELED', value: 9},
-          {text: 'FINISHED', value: 10},
-          {text: 'LOST', value: 13}
+          { text: 'CREATED', value: 0 },
+          { text: 'DEPLOYING', value: 1 },
+          { text: 'DEPLOYED', value: 2 },
+          { text: 'STARTING', value: 3 },
+          { text: 'RESTARTING', value: 4 },
+          { text: 'RUNNING', value: 5 },
+          { text: 'FAILING', value: 6 },
+          { text: 'FAILED', value: 7 },
+          { text: 'CANCELED', value: 9 },
+          { text: 'FINISHED', value: 10 },
+          { text: 'LOST', value: 13 }
         ],
         fixed: 'right',
         filteredValue: filteredInfo.state || null,
@@ -891,15 +891,15 @@ export default {
       }, {
         dataIndex: 'operation',
         key: 'operation',
-        scopedSlots: {customRender: 'operation'},
-        slots: {title: 'customOperation'},
+        scopedSlots: { customRender: 'operation' },
+        slots: { title: 'customOperation' },
         fixed: 'right',
         width: 150
       }]
     }
   },
 
-  mounted() {
+  mounted () {
     this.handleYarn()
     this.handleFetch(true)
     const timer = window.setInterval(() => this.handleFetch(false), 2000)
@@ -908,7 +908,7 @@ export default {
     })
   },
 
-  beforeMount() {
+  beforeMount () {
     this.formDeploy = this.$form.createForm(this)
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
@@ -918,12 +918,12 @@ export default {
   methods: {
     ...mapActions(['SetAppId']),
 
-    handleDeploy(value) {
+    handleDeploy (value) {
       this.deployVisible = true
       this.application = value
     },
 
-    handleDeployCancel() {
+    handleDeployCancel () {
       this.deployVisible = false
       setTimeout(() => {
         this.application = null
@@ -931,10 +931,10 @@ export default {
         this.allowNonRestoredState = false
         this.savePoint = true
         this.formDeploy.resetFields()
-      },1000)
+      }, 1000)
     },
 
-    handleDeployOk() {
+    handleDeployOk () {
       this.formDeploy.validateFields((err, values) => {
         if (!err) {
           const id = this.application.id
@@ -960,12 +960,12 @@ export default {
       })
     },
 
-    handleMapping(app) {
+    handleMapping (app) {
       this.mappingVisible = true
       this.application = app
     },
 
-    handleMappingOk() {
+    handleMappingOk () {
       this.formMapping.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
@@ -987,16 +987,16 @@ export default {
       })
     },
 
-    handleMappingCancel() {
+    handleMappingCancel () {
       this.mappingVisible = false
       setTimeout(() => {
         this.application = null
         this.formMapping.resetFields()
-      },1000)
+      }, 1000)
     },
 
-    handleStart(app) {
-      if(this.optionApps.starting.indexOf(app.id) == -1) {
+    handleStart (app) {
+      if (this.optionApps.starting.findIndex((x) => x.id == app.id) == -1) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1016,17 +1016,17 @@ export default {
       }
     },
 
-    handleStartCancel() {
+    handleStartCancel () {
       this.startVisible = false
       setTimeout(() => {
         this.allowNonRestoredState = false
         this.formStartCheckPoint.resetFields()
         this.application = null
         this.savePoint = true
-      },1000)
+      }, 1000)
     },
 
-    handleStartOk() {
+    handleStartOk () {
       this.formStartCheckPoint.validateFields((err, values) => {
         if (!err) {
           this.$message.info(
@@ -1037,7 +1037,11 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
-          this.optionApps.starting.push(id)
+          this.optionApps.starting.push({
+            'id': id,
+            'timestamp': new Date().getTime(),
+            'state': this.application.state // 记录当前的状态
+          })
           this.handleStartCancel()
           start({
             id: id,
@@ -1056,14 +1060,14 @@ export default {
       })
     },
 
-    handleCancel(value) {
-      if(this.optionApps.stoping.indexOf(value.id) == -1) {
+    handleCancel (app) {
+      if (this.optionApps.stoping.findIndex((x) => x.id == app.id) == -1) {
         this.stopVisible = true
-        this.application = value
+        this.application = app
       }
     },
 
-    handleStopCancel() {
+    handleStopCancel () {
       this.stopVisible = false
       setTimeout(() => {
         this.formStopSavePoint.resetFields()
@@ -1073,12 +1077,15 @@ export default {
       }, 1000)
     },
 
-    handleStopOk() {
+    handleStopOk () {
       this.$message.info(
         '已发送停止请求,该应用正在停止',
         3
       )
-      this.optionApps.stoping.push(id)
+      this.optionApps.stoping.push({
+        'id': this.application.id,
+        'timestamp': new Date().getTime()
+      })
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
@@ -1092,17 +1099,17 @@ export default {
       })
     },
 
-    handleDetail(app) {
+    handleDetail (app) {
       this.SetAppId(app.id)
-      this.$router.push({'path': '/flink/app/detail'})
+      this.$router.push({ 'path': '/flink/app/detail' })
     },
 
-    handleSearch(selectedKeys, confirm, dataIndex) {
+    handleSearch (selectedKeys, confirm, dataIndex) {
       confirm()
       this.searchText = selectedKeys[0]
       this.searchedColumn = dataIndex
       this.queryParams[this.searchedColumn] = this.searchText
-      const {sortedInfo} = this
+      const { sortedInfo } = this
       // 获取当前列的排序和列的过滤规则
       if (sortedInfo) {
         this.queryParams['sortField'] = sortedInfo.field
@@ -1111,7 +1118,7 @@ export default {
       console.log(this.queryParams)
     },
 
-    handleReset(clearFilters) {
+    handleReset (clearFilters) {
       clearFilters()
       this.searchText = ''
       // 重置列排序规则
@@ -1120,7 +1127,7 @@ export default {
       this.queryParams = {}
     },
 
-    handleTableChange(pagination, filters, sorter) {
+    handleTableChange (pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.paginationInfo = pagination
       this.queryParams['sortField'] = sorter.field
@@ -1128,7 +1135,7 @@ export default {
       this.handleFetch(true)
     },
 
-    handleFetch(loading) {
+    handleFetch (loading) {
       if (loading) this.loading = true
       const params = Object.assign(this.queryParams, {})
       if (this.paginationInfo) {
@@ -1142,44 +1149,65 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
-      list({...params}).then((resp) => {
+      list({ ...params }).then((resp) => {
         this.loading = false
-        const pagination = {...this.pagination}
+        const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
-        this.optionApps.starting = []
-        this.optionApps.stoping = []
         this.dataSource = resp.data.records
+        const now = new Date().getTime()
+        if (this.optionApps.starting.length > 0) {
+          this.dataSource.forEach(x => {
+            for (let i = 0; i < this.optionApps.starting.length; i++) {
+              const s = this.optionApps.starting[i]
+              if (x.id == s.id && x.state != s.state && (now - s.timestamp) > 2000) {
+                this.optionApps.starting.splice(i, 1)
+                break
+              }
+            }
+          })
+        }
+        if (this.optionApps.stoping.length > 0) {
+          this.dataSource.forEach(x => {
+            for (let i = 0; i < this.optionApps.stoping.length; i++) {
+              const s = this.optionApps.stoping[i]
+              if (x.id == s.id && s.state != 5 && (now - s.timestamp) > 2000) {
+                this.optionApps.stoping.splice(i, 1)
+                break
+              }
+            }
+          })
+        }
         this.pagination = pagination
       })
     },
 
-    handleYarn(params = {}) {
+    handleYarn (params = {}) {
       yarn({}).then((resp) => {
         this.yarn = resp.data
       })
     },
 
-    handleView(params) {
+    handleView (params) {
       if (params.state === 5) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }
     },
 
-    handleAdd() {
-      this.$router.push({'path': '/flink/app/add'})
+    handleAdd () {
+      this.$router.push({ 'path': '/flink/app/add' })
     },
 
-    handleEdit(app) {
+    handleEdit (app) {
       this.SetAppId(app.id)
       if (app.appType == 1) {
-        this.$router.push({'path': '/flink/app/edit_streamx'})
+        this.$router.push({ 'path': '/flink/app/edit_streamx' })
       } else {
-        this.$router.push({'path': '/flink/app/edit_flink'})
+        this.$router.push({ 'path': '/flink/app/edit_flink' })
       }
     },
 
-    handleCleanDeploy(app) {
+    handleCleanDeploy (app) {
       clean({
         id: app.id
       }).then((resp) => {
