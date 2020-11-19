@@ -14,42 +14,7 @@
           <a-tab-pane tab="通知" key="1">
             <a-list>
               <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-12正常" description="2020-11-12 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-11正常" description="2020-11-11 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-10正常" description="2020-11-10 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-09正常" description="2020-11-09 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-08正常" description="2020-11-08 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-07正常" description="2020-11-07 07:00:00">
-                  <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-06异常" description="2020-11-06 07:00:00">
-                  <a-avatar style="background-color: red" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
-                </a-list-item-meta>
-              </a-list-item>
-              <a-list-item>
-                <a-list-item-meta title="eas告警-2020-11-05正常" description="2020-11-05 07:00:00">
+                <a-list-item-meta title="告警" description="2020-11-12 07:00:00">
                   <a-avatar style="background-color: white" slot="avatar" src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
               </a-list-item>
