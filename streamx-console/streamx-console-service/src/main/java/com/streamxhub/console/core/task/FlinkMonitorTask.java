@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * @author benjobs
@@ -70,11 +71,11 @@ public class FlinkMonitorTask {
             new LinkedBlockingQueue<>(),
             threadFactory
     );
-    private long index;
+    private AtomicLong atomicIndex = new AtomicLong(0);
 
     @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
-        ++index;
+        Long index = atomicIndex.incrementAndGet();
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((application) -> executor.execute(() -> {
@@ -163,7 +164,7 @@ public class FlinkMonitorTask {
          */
         switch (currentState) {
             case CANCELLING:
-                canceling.put(application.getId(), new Tracker(index, application.getId()));
+                canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
                 break;
             case CANCELED:
                 log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
