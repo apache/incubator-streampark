@@ -81,7 +81,7 @@ object SystemPropertyUtils extends Logger {
 
   def getInt(key: String, default: Int): Int = {
     Try(
-      get(key).toString.toInt
+      get(key).toInt
     ) match {
       case Success(ok) => ok
       case Failure(_) => default
@@ -90,7 +90,7 @@ object SystemPropertyUtils extends Logger {
 
   def getLong(key: String, default: Long): Long = {
     Try(
-      get(key).toString.toLong
+      get(key).toLong
     ) match {
       case Success(ok) => ok
       case Failure(_) => default
