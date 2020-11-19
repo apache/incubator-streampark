@@ -157,20 +157,9 @@ public class FlinkMonitorTask {
      * @param job
      */
     private void callBack(Application application, JobsOverview.Job job, StopFrom stopFrom) {
-        FlinkAppState previousState = FlinkAppState.of(application.getState());
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
         /**
-         * 1) application状态以restapi返回的状态为准
-         */
-        application.setState(currentState.getValue());
-
-        /**
-         * 2) jobId以restapi返回的状态为准
-         */
-        application.setJobId(job.getId());
-
-        /**
-         * 3) savePoint obsolete check and NEED_START check
+         * 1) savePoint obsolete check and NEED_START check
          */
         switch (currentState) {
             case CANCELLING:
@@ -185,6 +174,7 @@ public class FlinkMonitorTask {
                 }
                 break;
             case RUNNING:
+                FlinkAppState previousState = FlinkAppState.of(application.getState());
                 if (FlinkAppState.STARTING.equals(previousState)) {
                     /**
                      * 发布完重新启动后将"需重启"状态清空
@@ -199,7 +189,7 @@ public class FlinkMonitorTask {
         }
 
         /**
-         * 4) duration
+         * 2) duration
          */
         long startTime = job.getStartTime();
         long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
@@ -208,13 +198,23 @@ public class FlinkMonitorTask {
         } else if (startTime != application.getStartTime().getTime()) {
             application.setStartTime(new Date(startTime));
         }
-
         if (endTime != -1) {
             if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
                 application.setEndTime(new Date(endTime));
             }
         }
         application.setDuration(job.getDuration());
+
+        /**
+         * 3) application状态以restapi返回的状态为准
+         */
+        application.setState(currentState.getValue());
+
+        /**
+         * 4) jobId以restapi返回的状态为准
+         */
+        application.setJobId(job.getId());
+
         this.applicationService.updateMonitor(application);
     }
 
