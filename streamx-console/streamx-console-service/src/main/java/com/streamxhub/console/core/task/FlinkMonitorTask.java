@@ -170,35 +170,34 @@ public class FlinkMonitorTask {
         application.setJobId(job.getId());
 
         /**
-         * 3) savePoint obsolete check
+         * 3) savePoint obsolete check and NEED_START check
          */
-        if (FlinkAppState.CANCELLING.equals(currentState)) {
-            canceling.put(application.getId(), new Tracker(index, application.getId()));
-        }
-
-        if (FlinkAppState.CANCELED.equals(currentState)) {
-            log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
-            CommonUtil.jvmCache.remove(application.getId());
-            if (StopFrom.NONE.equals(stopFrom)) {
-                log.info("[StreamX] flinkMonitorTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
-                savePointService.obsolete(application.getId());
-            }
+        switch (currentState) {
+            case CANCELLING:
+                canceling.put(application.getId(), new Tracker(index, application.getId()));
+                break;
+            case CANCELED:
+                log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
+                CommonUtil.jvmCache.remove(application.getId());
+                if (StopFrom.NONE.equals(stopFrom)) {
+                    log.info("[StreamX] flinkMonitorTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
+                    savePointService.obsolete(application.getId());
+                }
+                break;
+            case RUNNING:
+                if (FlinkAppState.STARTING.equals(previousState)) {
+                    /**
+                     * 发布完重新启动后将"需重启"状态清空
+                     */
+                    if (DeployState.NEED_START.get() == application.getDeploy()) {
+                        application.setDeploy(DeployState.NONE.get());
+                    }
+                }
+                break;
         }
 
         /**
-         * 4) NEED_START check
-         */
-        if (FlinkAppState.RUNNING.equals(currentState) && FlinkAppState.STARTING.equals(previousState)) {
-            /**
-             * 发布完重新启动后将"需重启"状态清空
-             */
-            if (DeployState.NEED_START.get() == application.getDeploy()) {
-                application.setDeploy(DeployState.NONE.get());
-            }
-        }
-
-        /**
-         * 5) duration
+         * 4) duration
          */
         long startTime = job.getStartTime();
         long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
