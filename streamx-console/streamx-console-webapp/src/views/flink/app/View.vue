@@ -384,14 +384,14 @@
               || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            twoToneColor="#4a9ff5"
+            :twoToneColor="optionApps.starting.indexOf(record.id) == -1?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            style="color: #4a9ff5"
+            :style="{'color': optionApps.starting.indexOf(record.id) == -1?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -685,6 +685,10 @@ export default {
       allowNonRestoredState: false,
       searchText: '',
       searchInput: null,
+      optionApps: {
+        'starting':[],
+        'stoping': [],
+      },
       searchedColumn: '',
       paginationInfo: null,
       pagination: {
@@ -992,22 +996,24 @@ export default {
     },
 
     handleStart(app) {
-      this.application = app
-      lastest({
-        appId: this.application.id
-      }).then((resp) => {
-        this.lastestSavePoint = resp.data || null
-        this.startVisible = true
-        if (!this.lastestSavePoint) {
-          history({
-            appId: this.application.id,
-            pageNum: 1,
-            pageSize: 9999
-          }).then((resp) => {
-            this.historySavePoint = resp.data.records || []
-          })
-        }
-      })
+      if(this.optionApps.starting.indexOf(app.id) == -1) {
+        this.application = app
+        lastest({
+          appId: this.application.id
+        }).then((resp) => {
+          this.lastestSavePoint = resp.data || null
+          this.startVisible = true
+          if (!this.lastestSavePoint) {
+            history({
+              appId: this.application.id,
+              pageNum: 1,
+              pageSize: 9999
+            }).then((resp) => {
+              this.historySavePoint = resp.data.records || []
+            })
+          }
+        })
+      }
     },
 
     handleStartCancel() {
@@ -1031,6 +1037,7 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
+          this.optionApps.starting.push(id)
           this.handleStartCancel()
           start({
             id: id,
@@ -1050,8 +1057,10 @@ export default {
     },
 
     handleCancel(value) {
-      this.stopVisible = true
-      this.application = value
+      if(this.optionApps.stoping.indexOf(value.id) == -1) {
+        this.stopVisible = true
+        this.application = value
+      }
     },
 
     handleStopCancel() {
@@ -1069,6 +1078,7 @@ export default {
         '已发送停止请求,该应用正在停止',
         3
       )
+      this.optionApps.stoping.push(id)
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
@@ -1136,6 +1146,8 @@ export default {
         this.loading = false
         const pagination = {...this.pagination}
         pagination.total = parseInt(resp.data.total)
+        this.optionApps.starting = []
+        this.optionApps.stoping = []
         this.dataSource = resp.data.records
         this.pagination = pagination
       })
