@@ -122,17 +122,11 @@ public class Application implements Serializable {
         FlinkAppState appState = of(this.state);
         switch (appState) {
             case DEPLOYING:
-                this.tracking = 0;
             case DEPLOYED:
-                this.tracking = 0;
             case CREATED:
-                this.tracking = 0;
             case FINISHED:
-                this.tracking = 0;
             case FAILED:
-                this.tracking = 0;
             case CANCELED:
-                this.tracking = 0;
             case LOST:
                 this.tracking = 0;
                 break;
