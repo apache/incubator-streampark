@@ -86,6 +86,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
+        List<Application> records = page.getRecords();
+        List<Application> newRecords = new ArrayList<>(records.size());
+        if (!records.isEmpty()) {
+            records.forEach((x) -> {
+                Application app = FlinkTrackingTask.getTracking(x.getId());
+                newRecords.add(app == null ? x : app);
+            });
+        }
+        /**
+         * 偷梁换柱,釜底抽薪,瞒天过海,鱼目混珠.
+         */
+        page.setRecords(newRecords);
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, appParam);
     }

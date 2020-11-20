@@ -293,6 +293,10 @@ public class FlinkTrackingTask {
         trackingApp.invalidate(appId);
     }
 
+    public static Application getTracking(Long appId) {
+        return trackingApp.getIfPresent(appId);
+    }
+
     public static Application syncTracking(Long id) {
         Application application = trackingApp.getIfPresent(id);
         if (application != null) {
