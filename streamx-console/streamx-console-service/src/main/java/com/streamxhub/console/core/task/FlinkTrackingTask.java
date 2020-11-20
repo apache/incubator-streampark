@@ -281,6 +281,8 @@ public class FlinkTrackingTask {
         }
     }
 
+    //===============================  static public method...  =========================================
+
     public static void addTracking(Long appId) {
         byte b = 0;
         trackingAppId.put(appId, b);
