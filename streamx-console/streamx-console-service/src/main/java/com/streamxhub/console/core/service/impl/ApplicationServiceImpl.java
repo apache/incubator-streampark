@@ -31,6 +31,7 @@ import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
+import com.streamxhub.console.core.annotation.Tracking;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.enums.*;
@@ -144,9 +145,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
+    @Tracking
     public boolean update(Application appParam) {
         //update other...
-        FlinkTrackingTask.syncTracking(appParam.getId());
         Application application = getById(appParam.getId());
         application.setJobName(appParam.getJobName());
         application.setArgs(appParam.getArgs());
@@ -165,7 +166,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
          */
         application.setDeploy(DeployState.CONF_UPDATED.get());
         this.baseMapper.updateById(application);
-        FlinkTrackingTask.cleanTracking(appParam.getId());
         return true;
     }
 
@@ -173,7 +173,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
         Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
-
         //1) 需要重启的先停止服务
         if (appParam.getRestart()) {
             cancel(appParam);
@@ -220,22 +219,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Tracking
     public void updateDeploy(Application appParam) {
-        //最新的状态信息保存
-        FlinkTrackingTask.syncTracking(appParam.getId());
         this.baseMapper.updateDeploy(appParam);
-        //更新监控缓存中的应用
-        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override
+    @Tracking
     public void clean(Application appParam) {
-        //最新的状态信息保存
-        FlinkTrackingTask.syncTracking(appParam.getId());
         appParam.setDeploy(DeployState.NONE.get());
         this.baseMapper.updateDeploy(appParam);
-        //清除缓存,下次从数据库获取最新数据库.
-        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override
@@ -276,18 +269,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Tracking
     public boolean mapping(Application appParam) {
-        FlinkTrackingTask.syncTracking(appParam.getId());
-        boolean state = this.baseMapper.mapping(appParam);
-        FlinkTrackingTask.cleanTracking(appParam.getId());
-        return state;
+        return this.baseMapper.mapping(appParam);
     }
 
     @Override
+    @Tracking
     public void updateState(Application appParam) {
-        FlinkTrackingTask.syncTracking(appParam.getId());
         this.baseMapper.updateState(appParam);
-        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override

@@ -132,7 +132,7 @@ public class FlinkTrackingTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
-                    this.updateMonitor(application);
+                    this.updateAndClean(application);
                 } else {
                     log.info("[StreamX] flinkMonitorTask previous state was not canceling.");
                     try {
@@ -152,7 +152,7 @@ public class FlinkTrackingTask {
                             application.setEndTime(new Date());
                         }
                         application.setState(flinkAppState.getValue());
-                        this.updateMonitor(application);
+                        this.updateAndClean(application);
                     } catch (Exception e) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
@@ -166,7 +166,7 @@ public class FlinkTrackingTask {
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
-                        this.updateMonitor(application);
+                        this.updateAndClean(application);
                     }
                 }
             } catch (IOException exception) {
@@ -175,12 +175,12 @@ public class FlinkTrackingTask {
                 savePointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
-                this.updateMonitor(application);
+                this.updateAndClean(application);
             }
         }));
     }
 
-    private void updateMonitor(Application application) {
+    private void updateAndClean(Application application) {
         //application不在监控
         trackingAppId.invalidate(application.getId());
         trackingApp.invalidate(application.getId());
@@ -293,14 +293,10 @@ public class FlinkTrackingTask {
         trackingApp.invalidate(appId);
     }
 
-    public static Application getTracking(Long appId) {
-        return trackingApp.getIfPresent(appId);
-    }
-
     public static Application syncTracking(Long id) {
         Application application = trackingApp.getIfPresent(id);
         if (application != null) {
-            applicationService.update(application);
+            applicationService.updateMonitor(application);
         }
         return application;
     }
