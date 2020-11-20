@@ -86,6 +86,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
+        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        this.baseMapper.page(page, appParam);
+        /**
+         * 偷梁换柱,釜底抽薪,瞒天过海,鱼目混珠.
+         */
         List<Application> records = page.getRecords();
         List<Application> newRecords = new ArrayList<>(records.size());
         if (!records.isEmpty()) {
@@ -94,12 +99,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 newRecords.add(app == null ? x : app);
             });
         }
-        /**
-         * 偷梁换柱,釜底抽薪,瞒天过海,鱼目混珠.
-         */
         page.setRecords(newRecords);
-        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
-        return this.baseMapper.page(page, appParam);
+        return page;
     }
 
     @Override
