@@ -52,11 +52,6 @@ public abstract class CommonUtil implements Serializable {
     private static String OS = System.getProperty("os.name").toLowerCase();
 
     /**
-     * jvm内存级别的cache,应用重启数据丢失,用于简单的临时的数据缓存,跨越服务层级,同一个jvm的应用内可以存储获取使用...
-     */
-    public static final Map<Serializable, Serializable> jvmCache = new ConcurrentHashMap<>();
-
-    /**
      * 非空判断
      *
      * @param objs 要判断,处理的对象
