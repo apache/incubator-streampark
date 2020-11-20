@@ -71,9 +71,10 @@ public class FlinkMonitorTask {
             new LinkedBlockingQueue<>(),
             threadFactory
     );
+
     private AtomicLong atomicIndex = new AtomicLong(0);
 
-    @Scheduled(fixedDelay = 1000 * 2)
+    @Scheduled(fixedDelay = 1000 * 5)
     public void run() {
         Long index = atomicIndex.incrementAndGet();
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
