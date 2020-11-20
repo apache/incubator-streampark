@@ -57,8 +57,12 @@ public class FlinkTrackingTask {
 
     private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
 
+    private static ApplicationService applicationService;
+
     @Autowired
-    private ApplicationService applicationService;
+    public void setApplicationService(ApplicationService appService) {
+        applicationService = appService;
+    }
 
     @Autowired
     private SavePointService savePointService;
@@ -77,21 +81,21 @@ public class FlinkTrackingTask {
     /**
      * 存放所有需要跟踪检查的应用...
      */
-    public static Cache<Long, Long> trackingAppId = null;
+    private static Cache<Long, Byte> trackingAppId = null;
 
-    public static Cache<Long, StopFrom> stopCache = null;
+    private static Cache<Long, StopFrom> stopApp = null;
 
-    public static Cache<Long, Application> trackingApp = null;
+    private static Cache<Long, Application> trackingApp = null;
 
     @PostConstruct
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        stopCache = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
+        stopApp = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         trackingApp = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
-            trackingAppId.put(app.getId(), app.getId());
+            trackingAppId.put(app.getId(), Byte.valueOf("0"));
             trackingApp.put(app.getId(), app);
         });
     }
@@ -103,7 +107,7 @@ public class FlinkTrackingTask {
         Long index = atomicIndex.incrementAndGet();
         trackingAppId.asMap().forEach((k, v) -> executor.execute(() -> {
             Application application = trackingApp.getIfPresent(k);
-            StopFrom stopFrom = stopCache.getIfPresent(application.getId());
+            StopFrom stopFrom = stopApp.getIfPresent(application.getId());
             stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
             try {
                 /**
@@ -124,7 +128,7 @@ public class FlinkTrackingTask {
                     log.info("[StreamX] flinkMonitorTask previous state was canceling.");
                     if (StopFrom.NONE.equals(stopFrom)) {
                         log.error("[StreamX] flinkMonitorTask query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
-                        stopCache.invalidate(application.getId());
+                        stopApp.invalidate(application.getId());
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
@@ -139,7 +143,7 @@ public class FlinkTrackingTask {
                         String state = appInfo.getApp().getFinalStatus();
                         FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                         if (FlinkAppState.KILLED.equals(flinkAppState)) {
-                            stopCache.invalidate(application.getId());
+                            stopApp.invalidate(application.getId());
                             if (StopFrom.NONE.equals(stopFrom)) {
                                 log.error("[StreamX] flinkMonitorTask query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
                                 savePointService.obsolete(application.getId());
@@ -153,7 +157,7 @@ public class FlinkTrackingTask {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
-                        stopCache.invalidate(application.getId());
+                        stopApp.invalidate(application.getId());
                         if (StopFrom.NONE.equals(stopFrom)) {
                             log.error("[StreamX] flinkMonitorTask query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted! {}", e);
                             savePointService.obsolete(application.getId());
@@ -167,7 +171,7 @@ public class FlinkTrackingTask {
                 }
             } catch (IOException exception) {
                 log.error("[StreamX] flinkMonitorTask query jobsOverview from restApi error,job failed,savePoint obsoleted! {}", exception);
-                stopCache.invalidate(application.getId());
+                stopApp.invalidate(application.getId());
                 savePointService.obsolete(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
@@ -180,7 +184,7 @@ public class FlinkTrackingTask {
         //application不在监控
         trackingAppId.invalidate(application.getId());
         trackingApp.invalidate(application.getId());
-        this.applicationService.updateMonitor(application);
+        applicationService.updateMonitor(application);
     }
 
 
@@ -190,7 +194,7 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
-        trackingApp.asMap().forEach((k, v) -> this.applicationService.updateMonitor(v));
+        trackingApp.asMap().forEach((k, v) -> applicationService.updateMonitor(v));
     }
 
     /**
@@ -210,7 +214,7 @@ public class FlinkTrackingTask {
                 break;
             case CANCELED:
                 log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
-                stopCache.invalidate(application.getId());
+                stopApp.invalidate(application.getId());
                 if (StopFrom.NONE.equals(stopFrom)) {
                     log.info("[StreamX] flinkMonitorTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
@@ -274,5 +278,30 @@ public class FlinkTrackingTask {
         public boolean isPrevious(long index) {
             return index - this.index == 1;
         }
+    }
+
+    public static void addTracking(Long appId) {
+        byte b = 0;
+        trackingAppId.put(appId, b);
+    }
+
+    public static void addStopping(Long appId) {
+        stopApp.put(appId, StopFrom.STREAMX);
+    }
+
+    public static void cleanTracking(Long appId) {
+        trackingApp.invalidate(appId);
+    }
+
+    public static Application getTracking(Long appId) {
+        return trackingApp.getIfPresent(appId);
+    }
+
+    public static Application syncTracking(Long id) {
+        Application application = trackingApp.getIfPresent(id);
+        if (application != null) {
+            applicationService.update(application);
+        }
+        return application;
     }
 }

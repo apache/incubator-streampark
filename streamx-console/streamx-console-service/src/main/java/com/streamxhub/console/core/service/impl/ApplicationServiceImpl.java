@@ -80,9 +80,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationLogService applicationLogService;
 
     @Autowired
-    private FlinkTrackingTask monitorTask;
-
-    @Autowired
     private ServerUtil serverUtil;
 
     @Override
@@ -149,6 +146,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application appParam) {
         //update other...
+        FlinkTrackingTask.syncTracking(appParam.getId());
         Application application = getById(appParam.getId());
         application.setJobName(appParam.getJobName());
         application.setArgs(appParam.getArgs());
@@ -167,6 +165,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
          */
         application.setDeploy(DeployState.CONF_UPDATED.get());
         this.baseMapper.updateById(application);
+        FlinkTrackingTask.cleanTracking(appParam.getId());
         return true;
     }
 
@@ -221,14 +220,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void updateDeploy(Application application) {
-        this.baseMapper.updateDeploy(application);
+    public void updateDeploy(Application appParam) {
+        //最新的状态信息保存
+        FlinkTrackingTask.syncTracking(appParam.getId());
+        this.baseMapper.updateDeploy(appParam);
+        //更新监控缓存中的应用
+        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override
     public void clean(Application appParam) {
+        //最新的状态信息保存
+        FlinkTrackingTask.syncTracking(appParam.getId());
         appParam.setDeploy(DeployState.NONE.get());
         this.baseMapper.updateDeploy(appParam);
+        //清除缓存,下次从数据库获取最新数据库.
+        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override
@@ -240,7 +247,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public Application getApp(Application appParam) {
-        Application application = this.baseMapper.getApp(appParam);
+        /**
+         * 从监控状态中获取最新的应用并持久化到数据库...
+         */
+        Application application = FlinkTrackingTask.syncTracking(appParam.getId());
+        if (application == null) {
+            application = this.baseMapper.getApp(appParam);
+        }
         if (application.getConfig() != null) {
             String unzipString = DeflaterUtils.unzipString(application.getConfig());
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
@@ -264,12 +277,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean mapping(Application appParam) {
-        return this.baseMapper.mapping(appParam);
+        FlinkTrackingTask.syncTracking(appParam.getId());
+        boolean state = this.baseMapper.mapping(appParam);
+        FlinkTrackingTask.cleanTracking(appParam.getId());
+        return state;
     }
 
     @Override
-    public void updateState(Application application) {
-        this.baseMapper.updateState(application);
+    public void updateState(Application appParam) {
+        FlinkTrackingTask.syncTracking(appParam.getId());
+        this.baseMapper.updateState(appParam);
+        FlinkTrackingTask.cleanTracking(appParam.getId());
     }
 
     @Override
@@ -278,10 +296,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(appParam.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
         this.baseMapper.updateById(application);
-        /**
-         * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
-         */
-        FlinkTrackingTask.stopCache.put(appParam.getId(), StopFrom.STREAMX);
+        //准备停止...
+        FlinkTrackingTask.addStopping(appParam.getId());
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
         if (appParam.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
@@ -383,6 +399,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
              */
             application.setState(FlinkAppState.STARTING.getValue());
             application.setEndTime(null);
+            //加入到跟踪监控中...
+            FlinkTrackingTask.addTracking(application.getId());
             this.baseMapper.updateById(application);
             log.setYarnAppId(appId.toString());
             log.setSuccess(true);
