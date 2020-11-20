@@ -89,7 +89,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         this.baseMapper.page(page, appParam);
         /**
-         * 偷梁换柱,釜底抽薪,瞒天过海,鱼目混珠.
+         * 瞒天过海,暗度陈仓,偷天换日,鱼目混珠.
          */
         List<Application> records = page.getRecords();
         List<Application> newRecords = new ArrayList<>(records.size());
