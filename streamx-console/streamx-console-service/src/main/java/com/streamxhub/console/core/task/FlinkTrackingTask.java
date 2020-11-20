@@ -107,11 +107,7 @@ public class FlinkTrackingTask {
     public void run() {
         Long index = atomicIndex.incrementAndGet();
         trackingAppId.asMap().forEach((k, v) -> executor.execute(() -> {
-            Application application = trackingApp.getIfPresent(k);
-            if (application == null) {
-                application = applicationService.getById(k);
-                trackingApp.put(k, application);
-            }
+            Application application = trackingApp.get(k, appId -> applicationService.getById(appId));
             StopFrom stopFrom = stopApp.getIfPresent(application.getId());
             stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
             try {
