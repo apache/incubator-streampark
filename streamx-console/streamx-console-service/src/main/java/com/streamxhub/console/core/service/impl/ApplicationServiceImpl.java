@@ -256,13 +256,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public Application getApp(Application appParam) {
-        /**
-         * 从监控状态中获取最新的应用并持久化到数据库...
-         */
-        Application application = FlinkTrackingTask.syncTracking(appParam.getId());
-        if (application == null) {
-            application = this.baseMapper.getApp(appParam);
-        }
+        FlinkTrackingTask.syncTracking(appParam.getId());
+        Application application = this.baseMapper.getApp(appParam);
         if (application.getConfig() != null) {
             String unzipString = DeflaterUtils.unzipString(application.getConfig());
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
