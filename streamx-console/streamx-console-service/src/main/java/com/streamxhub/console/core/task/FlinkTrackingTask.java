@@ -79,7 +79,7 @@ public class FlinkTrackingTask {
     );
 
     /**
-     * 存放所有需要跟踪检查的应用...
+     * 存放所有需要跟踪检查的应用,value用Byte...
      */
     private static Cache<Long, Byte> trackingAppId = null;
 
@@ -284,8 +284,7 @@ public class FlinkTrackingTask {
     //===============================  static public method...  =========================================
 
     public static void addTracking(Long appId) {
-        byte b = 0;
-        trackingAppId.put(appId, b);
+        trackingAppId.put(appId, null);
     }
 
     public static void addStopping(Long appId) {
