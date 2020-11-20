@@ -293,6 +293,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @Tracking
     public void cancel(Application appParam) {
         Application application = getById(appParam.getId());
         application.setState(FlinkAppState.CANCELLING.getValue());
