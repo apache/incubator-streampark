@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @Slf4j
 @Component
-public class FlinkMonitorTask {
+public class FlinkTrackingTask {
 
     private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
 
@@ -77,36 +77,32 @@ public class FlinkMonitorTask {
     /**
      * 存放所有需要跟踪检查的应用...
      */
-    public static Cache<Long, Long> trackingApp = null;
+    public static Cache<Long, Long> trackingAppId = null;
 
     public static Cache<Long, StopFrom> stopCache = null;
 
-    /**
-     * 三分钟过期,避免频繁的查询数据库.
-     */
-    public static Cache<Long, Application> appCache = null;
+    public static Cache<Long, Application> trackingApp = null;
 
     @PostConstruct
     public void initialization() {
-        trackingApp = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
+        trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         stopCache = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        appCache = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
-
+        trackingApp = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
-            trackingApp.put(app.getId(), app.getId());
-            appCache.put(app.getId(), app);
+            trackingAppId.put(app.getId(), app.getId());
+            trackingApp.put(app.getId(), app);
         });
     }
 
     private AtomicLong atomicIndex = new AtomicLong(0);
 
-    @Scheduled(fixedDelay = 1000 * 5)
+    @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
         Long index = atomicIndex.incrementAndGet();
-        trackingApp.asMap().forEach((k, v) -> executor.execute(() -> {
-            Application application = appCache.getIfPresent(k);
+        trackingAppId.asMap().forEach((k, v) -> executor.execute(() -> {
+            Application application = trackingApp.getIfPresent(k);
             StopFrom stopFrom = stopCache.getIfPresent(application.getId());
             stopFrom = stopFrom == null ? StopFrom.NONE : stopFrom;
             try {
@@ -182,8 +178,8 @@ public class FlinkMonitorTask {
 
     private void updateMonitor(Application application) {
         //application不在监控
+        trackingAppId.invalidate(application.getId());
         trackingApp.invalidate(application.getId());
-        appCache.invalidate(application.getId());
         this.applicationService.updateMonitor(application);
     }
 
@@ -194,7 +190,7 @@ public class FlinkMonitorTask {
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
-        appCache.asMap().forEach((k, v) -> this.applicationService.updateMonitor(v));
+        trackingApp.asMap().forEach((k, v) -> this.applicationService.updateMonitor(v));
     }
 
     /**
@@ -262,7 +258,7 @@ public class FlinkMonitorTask {
          */
         application.setJobId(job.getId());
 
-        appCache.put(application.getId(), application);
+        trackingApp.put(application.getId(), application);
     }
 
     @Getter

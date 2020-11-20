@@ -38,7 +38,7 @@ import com.streamxhub.console.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.console.core.task.FlinkMonitorTask;
+import com.streamxhub.console.core.task.FlinkTrackingTask;
 import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
@@ -80,7 +80,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationLogService applicationLogService;
 
     @Autowired
-    private FlinkMonitorTask monitorTask;
+    private FlinkTrackingTask monitorTask;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -281,7 +281,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /**
          * 在任务停止时,保存一个信息,后续用于判断是否从StreamX
          */
-        FlinkMonitorTask.stopCache.put(appParam.getId(), StopFrom.STREAMX);
+        FlinkTrackingTask.stopCache.put(appParam.getId(), StopFrom.STREAMX);
         String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
         if (appParam.getSavePointed()) {
             SavePoint savePoint = new SavePoint();
