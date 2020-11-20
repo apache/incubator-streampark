@@ -23,6 +23,7 @@ package com.streamxhub.console.core.task;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.enums.DeployState;
@@ -91,7 +92,13 @@ public class FlinkTrackingTask {
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         stopApp = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        trackingApp = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
+        trackingApp = Caffeine.newBuilder()
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .removalListener((RemovalListener<Long, Application>) (key, value, cause) -> {
+                    log.info("[StreamX] tracking app {} will be expire,now persistent.", value.getId());
+                    applicationService.updateMonitor(value);
+                })
+                .build(key -> applicationService.getById(key));
 
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
