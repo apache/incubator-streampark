@@ -91,7 +91,8 @@ public class FlinkTrackingTask {
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         stopApp = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        trackingApp = Caffeine.newBuilder().expireAfterWrite(5, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
+        trackingApp = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(key -> applicationService.getById(key));
+
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
