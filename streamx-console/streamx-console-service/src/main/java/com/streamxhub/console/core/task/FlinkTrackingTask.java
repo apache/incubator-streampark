@@ -82,7 +82,7 @@ public class FlinkTrackingTask {
     /**
      * 存放所有需要跟踪检查的应用,value用Byte...
      */
-    private static Cache<Long, Byte> trackingAppId = null;
+    private static Cache<Long, Long> trackingAppId = null;
 
     private static Map<Long, StopFrom> stopAppMap = new ConcurrentHashMap<>();
 
@@ -102,7 +102,7 @@ public class FlinkTrackingTask {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
-            trackingAppId.put(app.getId(), null);
+            trackingAppId.put(app.getId(), app.getId());
             trackingApp.put(app.getId(), app);
         });
     }
@@ -290,7 +290,7 @@ public class FlinkTrackingTask {
     //===============================  static public method...  =========================================
 
     public static void addTracking(Long appId) {
-        trackingAppId.put(appId, null);
+        trackingAppId.put(appId, appId);
     }
 
     public static void addStopping(Long appId) {
