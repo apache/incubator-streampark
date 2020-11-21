@@ -93,15 +93,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
          */
         List<Application> records = page.getRecords();
         List<Application> newRecords = new ArrayList<>(records.size());
-        if (!records.isEmpty()) {
-            records.forEach((x) -> {
-                Application app = FlinkTrackingTask.getTracking(x.getId());
-                if (app != null) {
-                    app.setProjectName(x.getProjectName());
-                }
-                newRecords.add(app == null ? x : app);
-            });
-        }
+        records.stream().forEach((x) -> {
+            Application app = FlinkTrackingTask.getTracking(x.getId());
+            if (app != null) {
+                app.setProjectName(x.getProjectName());
+            }
+            newRecords.add(app == null ? x : app);
+        });
         page.setRecords(newRecords);
         return page;
     }
