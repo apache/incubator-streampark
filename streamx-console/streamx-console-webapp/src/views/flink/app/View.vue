@@ -1114,7 +1114,13 @@ export default {
         savePointed: savePoint,
         drain: drain
       }).then((resp) => {
-        console.log(resp)
+        if (resp.status === 'error') {
+          this.$notification.open({
+            message: 'cancel application failed',
+            description: resp.message,
+            icon: <a-icon type="error" style="color: #f5222d" />
+          })
+        }
       })
     },
 
