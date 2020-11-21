@@ -20,6 +20,7 @@
  */
 package com.streamxhub.console.core.aspect;
 
+import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +29,7 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -42,8 +44,14 @@ public class StreamXConsoleAspect {
     public void tracking() {
     }
 
+    @Pointcut("@execution(public * com.streamxhub.console.core.controller.*.*(..))")
+    public void restResponse() {
+    }
+
+
     @Around(value = "tracking()")
-    public Object trackingAround(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Order(1)
+    public Object tracking(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         Application application = (Application) args[0];
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -53,4 +61,21 @@ public class StreamXConsoleAspect {
         FlinkTrackingTask.cleanTracking(application.getId());
         return result;
     }
+
+    @Around(value = "restResponse()")
+    @Order(2)
+    public Object restResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+        Object[] args = joinPoint.getArgs();
+        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
+        log.info("[StreamX] restResponse aspect, method:{}", methodSignature.getName());
+        RestResponse response;
+        try {
+            response = (RestResponse) joinPoint.proceed(args);
+            response.put("status", "success");
+        } catch (Exception e) {
+            response = RestResponse.create().put("status", "error").message(e.getMessage());
+        }
+        return response;
+    }
+
 }
