@@ -1210,7 +1210,6 @@ export default {
             }
           }
         })
-        console.log(this.optionApps)
         this.pagination = pagination
       })
     },

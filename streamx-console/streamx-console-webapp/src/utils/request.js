@@ -12,7 +12,7 @@ import baseUrl from '@/api/baseUrl'
 const http = axios.create({
   baseURL: baseUrl,
   withCredentials: false,
-  timeout: 5000, // 请求超时时间
+  timeout: 1000 * 60, // 请求超时时间
   responseType: 'json',
   validateStatus (status) {
     // 200 外的状态码都认定为失败
