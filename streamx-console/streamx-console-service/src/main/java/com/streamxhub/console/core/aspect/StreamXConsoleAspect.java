@@ -64,13 +64,12 @@ public class StreamXConsoleAspect {
 
     @Around(value = "restResponse()")
     @Order(2)
-    public Object restResponse(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object[] args = joinPoint.getArgs();
+    public RestResponse restResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.info("[StreamX] restResponse aspect, method:{}", methodSignature.getName());
         RestResponse response;
         try {
-            response = (RestResponse) joinPoint.proceed(args);
+            response = (RestResponse) joinPoint.proceed();
             response.put("status", "success");
         } catch (Exception e) {
             response = RestResponse.create().put("status", "error").message(e.getMessage());
