@@ -280,6 +280,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Tracking
     public boolean mapping(Application appParam) {
+        FlinkTrackingTask.addTracking(appParam.getId());
         return this.baseMapper.mapping(appParam);
     }
 
