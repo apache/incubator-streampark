@@ -102,7 +102,7 @@ public class FlinkTrackingTask {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
-            trackingAppId.put(app.getId(), Byte.valueOf("0"));
+            trackingAppId.put(app.getId(), null);
             trackingApp.put(app.getId(), app);
         });
     }
@@ -290,8 +290,7 @@ public class FlinkTrackingTask {
     //===============================  static public method...  =========================================
 
     public static void addTracking(Long appId) {
-        byte b = 0;
-        trackingAppId.put(appId, b);
+        trackingAppId.put(appId, null);
     }
 
     public static void addStopping(Long appId) {
