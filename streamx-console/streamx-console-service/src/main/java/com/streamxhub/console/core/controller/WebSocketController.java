@@ -20,7 +20,6 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.streamxhub.console.core.annotation.MethodMark;
 import com.streamxhub.console.core.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -37,7 +36,6 @@ public class WebSocketController {
     private ProjectService projectService;
 
     @MessageMapping("/tail/{id}")
-    @MethodMark("skip_")
     public void tail(@DestinationVariable("id") Long id) {
         projectService.tailBuildLog(id);
     }
