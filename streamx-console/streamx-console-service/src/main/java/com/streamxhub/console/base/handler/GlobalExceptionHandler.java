@@ -56,7 +56,6 @@ public class GlobalExceptionHandler {
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));
         return new RestResponse().message(message.toString());
-
     }
 
     /**
