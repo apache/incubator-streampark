@@ -140,7 +140,7 @@ public class FlinkTrackingTask {
                     application.setState(FlinkAppState.CANCELED.getValue());
                     this.updateAndClean(application);
                 } else {
-                    log.info("[StreamX] flinkMonitorTask previous state was not canceling.");
+                    log.info("[StreamX] flinkMonitorTask previous state was not \"canceling\".");
                     try {
                         /**
                          * 2)到yarn的restApi中查询状态
@@ -178,7 +178,9 @@ public class FlinkTrackingTask {
             } catch (IOException exception) {
                 log.error("[StreamX] flinkMonitorTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
                 stopAppMap.remove(application.getId());
-                savePointService.obsolete(application.getId());
+                if (StopFrom.NONE.equals(stopFrom)) {
+                    savePointService.obsolete(application.getId());
+                }
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 this.updateAndClean(application);
@@ -282,7 +284,7 @@ public class FlinkTrackingTask {
         }
 
         public boolean isPrevious(long index) {
-            return index - this.index <= 5;
+            return index - this.index == 1;
         }
     }
 
