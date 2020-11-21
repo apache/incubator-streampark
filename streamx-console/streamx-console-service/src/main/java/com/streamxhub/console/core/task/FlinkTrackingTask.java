@@ -112,7 +112,9 @@ public class FlinkTrackingTask {
     @Scheduled(fixedDelay = 1000 * 2)
     public void run() {
         Long index = atomicIndex.incrementAndGet();
-        trackingAppId.asMap().forEach((k, v) -> executor.execute(() -> {
+        Map<Long, Byte> trackingIds = trackingAppId.asMap();
+        log.info("[StreamX] flink tracking app size:{}", trackingIds.size());
+        trackingIds.forEach((k, v) -> executor.execute(() -> {
             Application application = trackingApp.get(k, appId -> applicationService.getById(appId));
             StopFrom stopFrom = stopAppMap.getOrDefault(k, StopFrom.NONE);
             try {
