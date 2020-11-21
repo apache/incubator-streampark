@@ -83,6 +83,11 @@ public enum FlinkAppState {
     LOST(13),
 
     /**
+     * 射影中...
+     */
+    MAPPING(14),
+
+    /**
      * yarn 中检查到被killed
      */
     KILLED(-9);

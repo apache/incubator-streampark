@@ -176,14 +176,16 @@ public class FlinkTrackingTask {
                     }
                 }
             } catch (IOException exception) {
-                log.error("[StreamX] flinkMonitorTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
-                stopAppMap.remove(application.getId());
-                if (StopFrom.NONE.equals(stopFrom)) {
-                    savePointService.obsolete(application.getId());
+                if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                    log.error("[StreamX] flinkMonitorTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
+                    stopAppMap.remove(application.getId());
+                    if (StopFrom.NONE.equals(stopFrom)) {
+                        savePointService.obsolete(application.getId());
+                    }
+                    application.setState(FlinkAppState.FAILED.getValue());
+                    application.setEndTime(new Date());
+                    this.updateAndClean(application);
                 }
-                application.setState(FlinkAppState.FAILED.getValue());
-                application.setEndTime(new Date());
-                this.updateAndClean(application);
             }
         }));
     }
