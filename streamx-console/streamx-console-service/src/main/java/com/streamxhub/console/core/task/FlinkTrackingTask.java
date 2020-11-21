@@ -114,7 +114,7 @@ public class FlinkTrackingTask {
         Long index = atomicIndex.incrementAndGet();
         trackingAppId.asMap().forEach((k, v) -> executor.execute(() -> {
             Application application = trackingApp.get(k, appId -> applicationService.getById(appId));
-            StopFrom stopFrom = stopAppMap.getOrDefault(application.getId(), StopFrom.NONE);
+            StopFrom stopFrom = stopAppMap.getOrDefault(k, StopFrom.NONE);
             try {
                 /**
                  * 1)到flink的restApi中查询状态
@@ -134,8 +134,8 @@ public class FlinkTrackingTask {
                     log.info("[StreamX] flinkMonitorTask previous state was canceling.");
                     if (StopFrom.NONE.equals(stopFrom)) {
                         log.error("[StreamX] flinkMonitorTask query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
-                        savePointService.obsolete(application.getId());
                         stopAppMap.remove(application.getId());
+                        savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
                     this.updateAndClean(application);
@@ -149,13 +149,13 @@ public class FlinkTrackingTask {
                         String state = appInfo.getApp().getFinalStatus();
                         FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                         if (FlinkAppState.KILLED.equals(flinkAppState)) {
+                            stopAppMap.remove(application.getId());
                             if (StopFrom.NONE.equals(stopFrom)) {
                                 log.error("[StreamX] flinkMonitorTask query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
                                 savePointService.obsolete(application.getId());
                             }
                             flinkAppState = FlinkAppState.CANCELED;
                             application.setEndTime(new Date());
-                            stopAppMap.remove(application.getId());
                         }
                         application.setState(flinkAppState.getValue());
                         this.updateAndClean(application);
@@ -163,6 +163,7 @@ public class FlinkTrackingTask {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                          */
+                        stopAppMap.remove(application.getId());
                         if (StopFrom.NONE.equals(stopFrom)) {
                             log.error("[StreamX] flinkMonitorTask query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted!");
                             savePointService.obsolete(application.getId());
@@ -172,29 +173,26 @@ public class FlinkTrackingTask {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
                         this.updateAndClean(application);
-                        stopAppMap.remove(application.getId());
                     }
                 }
             } catch (IOException exception) {
                 log.error("[StreamX] flinkMonitorTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
+                stopAppMap.remove(application.getId());
                 if (StopFrom.NONE.equals(stopFrom)) {
                     savePointService.obsolete(application.getId());
                 }
                 application.setState(FlinkAppState.FAILED.getValue());
                 application.setEndTime(new Date());
                 this.updateAndClean(application);
-                stopAppMap.remove(application.getId());
             }
         }));
     }
 
     private void updateAndClean(Application application) {
-        //application不在监控
         trackingAppId.invalidate(application.getId());
         trackingApp.invalidate(application.getId());
         applicationService.updateMonitor(application);
     }
-
 
     /**
      * 1分钟往数据库同步一次状态.
@@ -221,12 +219,13 @@ public class FlinkTrackingTask {
                 canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
                 break;
             case CANCELED:
-                log.info("[StreamX] flinkMonitorTask application state {}, delete stopFrom!", currentState.name());
+                log.info("[StreamX] flinkMonitorTask application state {}, stop tracking and delete stopFrom!", currentState.name());
+                stopTracking(application.getId());
+                stopAppMap.remove(application.getId());
                 if (StopFrom.NONE.equals(stopFrom)) {
                     log.info("[StreamX] flinkMonitorTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
                 }
-                stopAppMap.remove(application.getId());
                 break;
             case RUNNING:
                 FlinkAppState previousState = FlinkAppState.of(application.getState());
@@ -300,6 +299,11 @@ public class FlinkTrackingTask {
     }
 
     public static void cleanTracking(Long appId) {
+        trackingApp.invalidate(appId);
+    }
+
+    public static void stopTracking(Long appId) {
+        trackingAppId.invalidate(appId);
         trackingApp.invalidate(appId);
     }
 
