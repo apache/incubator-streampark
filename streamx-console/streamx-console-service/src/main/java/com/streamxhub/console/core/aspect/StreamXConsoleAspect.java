@@ -29,7 +29,6 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 /**
@@ -50,7 +49,6 @@ public class StreamXConsoleAspect {
 
 
     @Around(value = "tracking()")
-    @Order(1)
     public Object tracking(ProceedingJoinPoint joinPoint) throws Throwable {
         Object[] args = joinPoint.getArgs();
         Application application = (Application) args[0];
@@ -63,7 +61,6 @@ public class StreamXConsoleAspect {
     }
 
     @Around(value = "restResponse()")
-    @Order(2)
     public RestResponse restResponse(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.info("[StreamX] restResponse aspect, method:{}", methodSignature.getName());
