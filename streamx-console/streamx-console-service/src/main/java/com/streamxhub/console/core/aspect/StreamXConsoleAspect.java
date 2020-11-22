@@ -44,7 +44,7 @@ public class StreamXConsoleAspect {
     }
 
     @Pointcut("execution(public com.streamxhub.console.base.domain.RestResponse com.streamxhub.console.core.controller.*.*(..))")
-    public void restResponse() {
+    public void response() {
     }
 
 
@@ -60,8 +60,8 @@ public class StreamXConsoleAspect {
         return result;
     }
 
-    @Around(value = "restResponse()")
-    public RestResponse restResponse(ProceedingJoinPoint joinPoint) throws Throwable {
+    @Around(value = "response()")
+    public RestResponse response(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.info("[StreamX] restResponse aspect, method:{}", methodSignature.getName());
         RestResponse response;

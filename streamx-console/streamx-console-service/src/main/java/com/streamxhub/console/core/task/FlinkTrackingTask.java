@@ -56,9 +56,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 @Component
 public class FlinkTrackingTask {
-    /**
-     * 存放所有需要跟踪检查的应用,value为是否通过addTracking方法手动添加的,true表示初始化的时候自动添加的,value为false表示手动添加的...
-     */
+
     private static Cache<Long, Byte> trackingAppId = null;
 
     private static Cache<Long, Application> trackingAppCache = null;
