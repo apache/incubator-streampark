@@ -345,7 +345,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkUserJar = String.format("%s/%s", classPath, application.getJar());
                 break;
             default:
-                throw new IllegalArgumentException("[StreamX] ApplicationType must be (STREAMX_FLINK|APACHE_FLINK)... ");
+                throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
         }
 
         String savePointDir = null;
