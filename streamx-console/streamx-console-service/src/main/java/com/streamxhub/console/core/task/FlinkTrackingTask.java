@@ -57,9 +57,9 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class FlinkTrackingTask {
     /**
-     * 存放所有需要跟踪检查的应用,value用Byte...
+     * 存放所有需要跟踪检查的应用,value为是否通过addTracking方法手动添加的,true表示初始化的时候自动添加的,value为false表示手动添加的...
      */
-    private static Cache<Long, Byte> trackingAppId = null;
+    private static Cache<Long, Boolean> trackingAppId = null;
 
     private static Cache<Long, Application> trackingAppCache = null;
 
@@ -75,8 +75,6 @@ public class FlinkTrackingTask {
             new LinkedBlockingQueue<>(),
             ThreadUtils.threadFactory("flink-monitor-executor")
     );
-
-    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
 
     private static ApplicationService applicationService;
 
@@ -101,7 +99,7 @@ public class FlinkTrackingTask {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
-            trackingAppId.put(app.getId(), Byte.valueOf("0"));
+            trackingAppId.put(app.getId(), true);
             trackingAppCache.put(app.getId(), app);
         });
     }
@@ -117,9 +115,9 @@ public class FlinkTrackingTask {
     @Scheduled(fixedDelay = 1000 * 2)
     public void tracking() {
         Long index = atomicIndex.incrementAndGet();
-        Map<Long, Byte> trackingIds = trackingAppId.asMap();
+        Map<Long, Boolean> trackingIds = trackingAppId.asMap();
         log.info("[StreamX] flinkTrackingTask tracking app size:{}", trackingIds.size());
-        trackingIds.forEach((k, v) -> executor.execute(() -> {
+        trackingIds.forEach((k, from) -> executor.execute(() -> {
             Application application = trackingAppCache.get(k, appId -> applicationService.getById(appId));
             StopFrom stopFrom = stopAppMap.getOrDefault(k, StopFrom.NONE);
             try {
@@ -146,7 +144,7 @@ public class FlinkTrackingTask {
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
                     this.updateAndClean(application);
-                } else {
+                } else if (from) {
                     log.info("[StreamX] flinkTrackingTask previous state was not \"canceling\".");
                     try {
                         /**
@@ -183,7 +181,7 @@ public class FlinkTrackingTask {
                     }
                 }
             } catch (IOException exception) {
-                if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                if (from && application.getState() != FlinkAppState.MAPPING.getValue()) {
                     log.error("[StreamX] flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
                     stopAppMap.remove(application.getId());
                     if (StopFrom.NONE.equals(stopFrom)) {
@@ -301,19 +299,7 @@ public class FlinkTrackingTask {
 
     public static void addTracking(Long appId) {
         log.info("[StreamX] flinkTrackingTask add app to tracking,appId:{}", appId);
-        trackingAppId.put(appId, Byte.valueOf("0"));
-
-        /**
-
-         防止添加的需要监控的app被后面的cancel动作给删除掉
-
-         final ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-         if (trackingAppId.getIfPresent(appId) == null) {
-         trackingAppId.put(appId, Byte.valueOf("0"));
-         }
-         }, 1, 1, TimeUnit.SECONDS);
-         scheduler.schedule(() -> scheduledFuture.cancel(true), 5, TimeUnit.SECONDS);
-         **/
+        trackingAppId.put(appId, false);
     }
 
     public static void addStopping(Long appId) {
