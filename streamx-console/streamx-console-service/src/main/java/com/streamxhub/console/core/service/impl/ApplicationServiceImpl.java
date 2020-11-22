@@ -394,11 +394,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
-            application.setAppId(appId.toString());
             /**
              * 一定要在flink job提交完毕才置状态...
              */
             application.setState(FlinkAppState.STARTING.getValue());
+            application.setAppId(appId.toString());
             application.setEndTime(null);
             //加入到跟踪监控中...
             FlinkTrackingTask.addTracking(application.getId());
