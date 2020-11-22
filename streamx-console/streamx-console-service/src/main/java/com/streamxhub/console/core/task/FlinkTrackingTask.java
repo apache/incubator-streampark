@@ -40,6 +40,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
@@ -93,14 +94,12 @@ public class FlinkTrackingTask {
     @PostConstruct
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        trackingAppCache = Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
+        trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
                 .removalListener((RemovalListener<Long, Application>) (key, value, cause) -> {
                     log.info("[StreamX] flinkTrackingTask app {} will be expire,will be persistent.", value.getId());
                     applicationService.updateMonitor(value);
                 })
                 .build(key -> applicationService.getById(key));
-
 
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
@@ -108,6 +107,12 @@ public class FlinkTrackingTask {
             trackingAppId.put(app.getId(), Byte.valueOf("0"));
             trackingAppCache.put(app.getId(), app);
         });
+    }
+
+    @PreDestroy
+    public void ending() {
+        log.info("[StreamX] flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
+        trackingAppCache.asMap().forEach((k, v) -> applicationService.updateMonitor(v));
     }
 
     private AtomicLong atomicIndex = new AtomicLong(0);
@@ -203,6 +208,7 @@ public class FlinkTrackingTask {
     /**
      * 1分钟往数据库同步一次状态.
      * 注意:该操作可能会导致当程序挂了,所监控的状态没及时往数据库同步的情况,造成被监控的实际的application和数控库状态不一致的情况
+     * 但是这种操作也仅在每次程序挂和升级手动停止的情况,但是带的是减少了对数据库读写的巨大提升,大大减小了数据的压力.
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
@@ -302,16 +308,15 @@ public class FlinkTrackingTask {
 
         /**
 
-        防止添加的需要监控的app被后面的cancel动作给删除掉
+         防止添加的需要监控的app被后面的cancel动作给删除掉
 
-        final ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
-            if (trackingAppId.getIfPresent(appId) == null) {
-                trackingAppId.put(appId, Byte.valueOf("0"));
-            }
-        }, 1, 1, TimeUnit.SECONDS);
-        scheduler.schedule(() -> scheduledFuture.cancel(true), 5, TimeUnit.SECONDS);
-
-        **/
+         final ScheduledFuture<?> scheduledFuture = scheduler.scheduleAtFixedRate(() -> {
+         if (trackingAppId.getIfPresent(appId) == null) {
+         trackingAppId.put(appId, Byte.valueOf("0"));
+         }
+         }, 1, 1, TimeUnit.SECONDS);
+         scheduler.schedule(() -> scheduledFuture.cancel(true), 5, TimeUnit.SECONDS);
+         **/
     }
 
     public static void addStopping(Long appId) {
