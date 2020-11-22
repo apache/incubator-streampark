@@ -317,12 +317,12 @@ fi
 # 2): Streamx
 # 3): hadoop conf
 
-STREAMX_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
+APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
   echo_r "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
-  STREAMX_CLASSPATH+=":${HADOOP_CONF_DIR}"
+  APP_CLASSPATH+=":${HADOOP_CONF_DIR}"
 else
-  STREAMX_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
+  APP_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
 fi
 # StreamX main
 MAIN="com.streamxhub.console.StreamXConsole"
@@ -339,7 +339,7 @@ JAVA_OPTS="""-server
 
 eval "${RUNJAVA}" \
   $JAVA_OPTS \
-  -cp "${STREAMX_CLASSPATH}" \
+  -cp "${APP_CLASSPATH}" \
   -Dapp.home="${APP_HOME}" \
   -Dspring.config.location="${PROPER}" \
   $MAIN >> "${APP_OUT}" 2>&1 &
