@@ -56,32 +56,6 @@ import java.util.concurrent.atomic.AtomicLong;
 @Slf4j
 @Component
 public class FlinkTrackingTask {
-
-    private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
-
-    private static ApplicationService applicationService;
-
-    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    @Autowired
-    public void setApplicationService(ApplicationService appService) {
-        applicationService = appService;
-    }
-
-    @Autowired
-    private SavePointService savePointService;
-
-    private ThreadFactory threadFactory = ThreadUtils.threadFactory("flink-monitor-executor");
-
-    private ExecutorService executor = new ThreadPoolExecutor(
-            Math.max(Runtime.getRuntime().availableProcessors() / 4, 2),
-            Integer.MAX_VALUE,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(),
-            threadFactory
-    );
-
     /**
      * 存放所有需要跟踪检查的应用,value用Byte...
      */
@@ -90,6 +64,29 @@ public class FlinkTrackingTask {
     private static Cache<Long, Application> trackingAppCache = null;
 
     private static Map<Long, StopFrom> stopAppMap = new ConcurrentHashMap<>();
+
+    private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
+
+    private ExecutorService executor = new ThreadPoolExecutor(
+            Math.max(Runtime.getRuntime().availableProcessors() / 4, 2),
+            Integer.MAX_VALUE,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(),
+            ThreadUtils.threadFactory("flink-monitor-executor")
+    );
+
+    private static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private static ApplicationService applicationService;
+
+    @Autowired
+    private SavePointService savePointService;
+
+    @Autowired
+    public void setApplicationService(ApplicationService appService) {
+        applicationService = appService;
+    }
 
     @PostConstruct
     public void initialization() {
@@ -118,7 +115,7 @@ public class FlinkTrackingTask {
     private AtomicLong atomicIndex = new AtomicLong(0);
 
     @Scheduled(fixedDelay = 1000 * 2)
-    public void run() {
+    public void tracking() {
         Long index = atomicIndex.incrementAndGet();
         Map<Long, Byte> trackingIds = trackingAppId.asMap();
         log.info("[StreamX] flinkTrackingTask tracking app size:{}", trackingIds.size());
