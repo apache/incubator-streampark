@@ -89,11 +89,10 @@ public class FlinkTrackingTask {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
                 .removalListener((RemovalListener<Long, Application>) (key, value, cause) -> {
-                    log.info("[StreamX] flinkTrackingTask app {} will be expire,will be persistent.", value.getId());
+                    log.info("[StreamX] flinkTrackingTask app {} will be expire,persistent to database", value.getId());
                     applicationService.updateMonitor(value);
                 })
-                .build(key -> applicationService.getById(key));
-
+                .build(k -> applicationService.getById(k));
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
@@ -105,7 +104,7 @@ public class FlinkTrackingTask {
     @PreDestroy
     public void ending() {
         log.info("[StreamX] flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
-        trackingAppCache.asMap().forEach((k, v) -> applicationService.updateMonitor(v));
+        trackingAppCache.asMap().forEach((_k, v) -> applicationService.updateMonitor(v));
     }
 
     private AtomicLong atomicIndex = new AtomicLong(0);
@@ -115,7 +114,7 @@ public class FlinkTrackingTask {
         Long index = atomicIndex.incrementAndGet();
         Map<Long, Byte> trackingIds = trackingAppId.asMap();
         log.info("[StreamX] flinkTrackingTask tracking app size:{}", trackingIds.size());
-        trackingIds.forEach((k, v) -> executor.execute(() -> {
+        trackingIds.forEach((k, _v) -> executor.execute(() -> {
             Application application = trackingAppCache.get(k, appId -> applicationService.getById(appId));
             StopFrom stopFrom = stopAppMap.getOrDefault(k, StopFrom.NONE);
             try {
@@ -125,7 +124,7 @@ public class FlinkTrackingTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    callBack(application, optional.get(), stopFrom);
+                    restApiCallBack(application, optional.get(), stopFrom);
                 }
             } catch (ConnectException exp) {
                 /**
@@ -214,7 +213,7 @@ public class FlinkTrackingTask {
      * @param application
      * @param job
      */
-    private void callBack(Application application, JobsOverview.Job job, StopFrom stopFrom) {
+    private void restApiCallBack(Application application, JobsOverview.Job job, StopFrom stopFrom) {
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
         /**
          * 1) savePoint obsolete check and NEED_START check
