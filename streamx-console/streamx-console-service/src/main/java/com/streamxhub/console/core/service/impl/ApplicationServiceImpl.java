@@ -280,8 +280,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Tracking
     public boolean mapping(Application appParam) {
-        FlinkTrackingTask.addTracking(appParam.getId());
-        return this.baseMapper.mapping(appParam);
+        boolean mapping = this.baseMapper.mapping(appParam);
+        Application application = getById(appParam.getId());
+        FlinkTrackingTask.addTracking(application);
+        return mapping;
     }
 
     @Override
@@ -400,9 +402,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setState(FlinkAppState.STARTING.getValue());
             application.setAppId(appId.toString());
             application.setEndTime(null);
-            //加入到跟踪监控中...
-            FlinkTrackingTask.addTracking(application.getId());
             this.baseMapper.updateById(application);
+            //加入到跟踪监控中...
+            FlinkTrackingTask.addTracking(application);
             log.setYarnAppId(appId.toString());
             log.setSuccess(true);
             applicationLogService.save(log);
