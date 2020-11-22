@@ -325,7 +325,7 @@ else
   STREAMX_CLASSPATH+=":${HADOOP_HOME}/etc/hadoop"
 fi
 # StreamX main
-MAIN="com.streamxhub.console.StreamXConsoleBootStrap"
+MAIN="com.streamxhub.console.StreamXConsole"
 
 JAVA_OPTS="""-server
 -Xms1024m
