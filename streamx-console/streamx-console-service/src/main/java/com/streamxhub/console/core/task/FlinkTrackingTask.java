@@ -204,7 +204,7 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
-        trackingAppCache.asMap().forEach((k, v) -> applicationService.updateMonitor(v));
+        trackingAppCache.asMap().forEach((_k, v) -> applicationService.updateMonitor(v));
     }
 
     /**
