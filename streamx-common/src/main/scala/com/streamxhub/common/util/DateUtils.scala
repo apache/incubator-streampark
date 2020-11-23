@@ -20,14 +20,11 @@
  */
 package com.streamxhub.common.util
 
-import java.text.SimpleDateFormat
-import java.util.{Calendar, Date, TimeZone}
-
-
+import java.util._
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
-import scala.util.{Failure, Success, Try}
+import scala.util._
 
 
 object DateUtils {
@@ -44,13 +41,9 @@ object DateUtils {
     df.parse(date)
   }
 
-  def milliSecond2Date(time: Long) = {
-    new Date(time)
-  }
+  def milliSecond2Date(time: Long) = new Date(time)
 
-  def second2Date(time: Long) = {
-    milliSecond2Date(time * 1000)
-  }
+  def second2Date(time: Long) = milliSecond2Date(time * 1000)
 
   def now(dateFormat: String = dayFormat1, timeZone: TimeZone = TimeZone.getDefault) = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
