@@ -90,7 +90,7 @@ public class FlinkTrackingTask {
         trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
                 .removalListener((RemovalListener<Long, Application>) (key, value, cause) -> {
                     log.info("[StreamX] flinkTrackingTask app {} will be expire,persistent to database", value.getId());
-                    applicationService.updateMonitor(value);
+                    persistent(value);
                 })
                 .build(k -> applicationService.getById(k));
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
@@ -104,7 +104,7 @@ public class FlinkTrackingTask {
     @PreDestroy
     public void ending() {
         log.info("[StreamX] flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
-        trackingAppCache.asMap().forEach((_k, v) -> applicationService.updateMonitor(v));
+        trackingAppCache.asMap().forEach((_k, v) -> persistent(v));
     }
 
     private AtomicLong atomicIndex = new AtomicLong(0);
@@ -192,9 +192,17 @@ public class FlinkTrackingTask {
         }));
     }
 
-    private void updateAndClean(Application application) {
-        stopTracking(application.getId());
+    private static void persistent(Application application) {
+        //1) sync deploy from db
+        Application app = applicationService.getById(application.getId());
+        application.setDeploy(app.getDeploy());
+        //2) save to db
         applicationService.updateMonitor(application);
+    }
+
+    private void updateAndClean(Application application) {
+        persistent(application);
+        stopTracking(application.getId());
     }
 
     /**
@@ -204,7 +212,7 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
-        trackingAppCache.asMap().forEach((_k, v) -> applicationService.updateMonitor(v));
+        trackingAppCache.asMap().forEach((_k, v) -> persistent(v));
     }
 
     /**
@@ -323,7 +331,7 @@ public class FlinkTrackingTask {
         log.info("[StreamX] flinkTrackingTask sync app to database,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
-            applicationService.updateMonitor(application);
+            persistent(application);
         }
         return application;
     }
