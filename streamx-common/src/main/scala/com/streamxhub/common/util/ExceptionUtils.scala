@@ -402,7 +402,7 @@ object ExceptionUtils {
    * @return Unpacked cause or given Throwable if not packed
    */
   def stripException(throwableToStrip: Throwable, typeToStrip: Class[_ <: Throwable]): Throwable = {
-    var throwable: Throwable = null;
+    var throwable: Throwable = null
     while (typeToStrip.isAssignableFrom(throwableToStrip.getClass()) && throwableToStrip.getCause() != null) {
       throwable = throwableToStrip.getCause()
     }
