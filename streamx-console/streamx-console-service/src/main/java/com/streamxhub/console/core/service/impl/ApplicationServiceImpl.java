@@ -137,12 +137,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setUserId(serverUtil.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setCreateTime(new Date());
-        if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
-            configService.create(appParam);
-        }
-
         boolean saved = save(appParam);
         if (saved) {
+            if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+                configService.create(appParam);
+            }
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
                     appParam.setBackUp(false);
