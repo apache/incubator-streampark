@@ -20,6 +20,19 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--scala-->
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-library</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.scala-lang</groupId>
+            <artifactId>scala-compiler</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
         <!--flink base-->
         <dependency>
             <groupId>org.apache.flink</groupId>
