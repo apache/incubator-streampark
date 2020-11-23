@@ -114,13 +114,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             Executors.newSingleThreadExecutor().submit(() -> {
                 boolean build = ProjectServiceImpl.this.mavenBuild(project);
                 if (build) {
-                    ProjectServiceImpl.this.baseMapper.successBuild(project);
+                    this.baseMapper.successBuild(project);
                     //发布到apps下
-                    ProjectServiceImpl.this.deploy(project);
+                    this.deploy(project);
                     //更新application的发布状态.
                     this.baseMapper.deploy(project.getId());
                 } else {
-                    ProjectServiceImpl.this.baseMapper.failureBuild(project);
+                    this.baseMapper.failureBuild(project);
                 }
             });
             return RestResponse.create().message("[StreamX] git clone and pull success. begin maven install");
