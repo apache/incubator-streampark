@@ -121,9 +121,7 @@ function buildRouter (routes) {
 
 function resolveView (path) {
   return function (resolve) {
-    import(`@/views/${path}.vue`).then(mod => {
-      resolve(mod)
-    })
+    import(`@/views/${path}.vue`).then(x => resolve(x))
   }
 }
 
