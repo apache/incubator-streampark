@@ -197,7 +197,7 @@ public class FlinkTrackingTask {
         Application app = applicationService.getById(application.getId());
         application.setDeploy(app.getDeploy());
         //2) save to db
-        applicationService.updateMonitor(application);
+        applicationService.updateTracking(application);
     }
 
     private void updateAndClean(Application application) {

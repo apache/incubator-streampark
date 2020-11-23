@@ -58,7 +58,7 @@
         where t.id = #{application.id}
     </select>
 
-    <update id="updateMonitor" parameterType="application">
+    <update id="updateTracking" parameterType="application">
         update t_flink_app
         <set>
             <if test="application.jobId != null and application.jobId != ''">

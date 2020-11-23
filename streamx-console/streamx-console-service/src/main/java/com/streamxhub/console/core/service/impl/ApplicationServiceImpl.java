@@ -314,8 +314,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public void updateMonitor(Application appParam) {
-        this.baseMapper.updateMonitor(appParam);
+    public void updateTracking(Application appParam) {
+        this.baseMapper.updateTracking(appParam);
     }
 
     @Override
