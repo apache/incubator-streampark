@@ -62,7 +62,7 @@ public class StreamXConsoleAspect {
     }
 
     @Around(value = "response()")
-    public RestResponse response(ProceedingJoinPoint joinPoint) throws Throwable {
+    public RestResponse response(ProceedingJoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.info("[StreamX] restResponse aspect, method:{}", methodSignature.getName());
         RestResponse response;
