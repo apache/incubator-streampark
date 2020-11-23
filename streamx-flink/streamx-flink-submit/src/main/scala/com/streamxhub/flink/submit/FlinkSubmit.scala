@@ -24,10 +24,9 @@ import java.io.File
 import java.net.{MalformedURLException, URL}
 import java.util._
 import java.util.concurrent.{CompletableFuture, TimeUnit}
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
-import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
@@ -52,10 +51,10 @@ import org.apache.flink.yarn.configuration.YarnConfigOptions
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.flink.client.cli.CliArgsException
 import org.apache.flink.configuration.ConfigOptions
-import java.lang.{Boolean => JBool}
 
+import java.lang.{Boolean => JBool}
 import com.fasterxml.jackson.databind.ObjectMapper
-import org.apache.flink.util.{ExceptionUtils, FlinkException}
+import org.apache.flink.util.FlinkException
 
 object FlinkSubmit extends Logger {
 
@@ -119,7 +118,7 @@ object FlinkSubmit extends Logger {
         savepointPathFuture.get(clientTimeout.toMillis(), TimeUnit.MILLISECONDS)
       } catch {
         case e: Exception =>
-          val cause = ExceptionUtils.stripExecutionException(e)
+          val cause = ExceptionUtils.stringifyException(e)
           throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
       }
     }
