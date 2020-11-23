@@ -133,7 +133,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         File path = project.getAppSource();
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
-        findTarAndJar(apps, path);
+        findTarOrJar(apps, path);
         apps.forEach((app) -> {
             String appPath = app.getAbsolutePath();
             // 1). tar.gz文件....
@@ -166,7 +166,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         });
     }
 
-    private void findTarAndJar(List<File> list, File path) {
+    private void findTarOrJar(List<File> list, File path) {
         for (File file : Objects.requireNonNull(path.listFiles())) {
             //定位到target目录下:
             if (file.isDirectory() && file.getName().equals("target")) {
@@ -200,7 +200,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             }
 
             if (file.isDirectory()) {
-                findTarAndJar(list, file);
+                findTarOrJar(list, file);
             }
         }
     }
