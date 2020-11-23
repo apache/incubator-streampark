@@ -96,27 +96,13 @@ object DateUtils {
   }
 
 
-  //获取今天之前的n天
-  def +-(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault)(implicit format: String = dayFormat2): String = {
+  //日期加减...
+  def +-(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
     cal.add(Calendar.DATE, i)
-    val sdf = new SimpleDateFormat(format)
-    sdf.setTimeZone(timeZone)
-    val statTime = sdf.format(cal.getTime)
-    statTime
-  }
-
-  //获取今天之前的n天
-  def option(format: String, i: Int, date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): String = {
-    val cal = Calendar.getInstance
-    cal.setTimeZone(timeZone)
-    cal.setTime(date)
-    cal.add(Calendar.DATE, i)
-    val sdf = new SimpleDateFormat(format)
-    sdf.setTimeZone(timeZone)
-    sdf.format(cal.getTime)
+    cal.getTime
   }
 
   def localToUTC(localTime: String, format: String = fullFormat): Date = {
@@ -133,8 +119,10 @@ object DateUtils {
     val zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET)
     /** 取得夏令时差 */
     val dstOffset = calendar.get(java.util.Calendar.DST_OFFSET)
+
     /** 从本地时间里扣除这些差量，即可以取得UTC时间 */
     calendar.add(java.util.Calendar.MILLISECOND, -(zoneOffset + dstOffset))
+
     /** 取得的时间就是UTC标准时间 */
     new Date(calendar.getTimeInMillis)
   }
@@ -158,8 +146,7 @@ object DateUtils {
   }
 
   def main(args: Array[String]): Unit = {
-    val time = "2020-03-10 00:00:00"
-    println(localToUTC(time))
+    println(DateUtils.+-(-1))
   }
 
 }
