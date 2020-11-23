@@ -321,15 +321,16 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable[T <: Throwable](throwable: Throwable, searchType: Class[T]): Optional[T] = {
-    if (throwable == null || searchType == null) return Optional.empty[T]
-    var t = throwable
-    var r: Optional[T] = null
-    while (t != null && r == null) {
-      if (searchType.isAssignableFrom(t.getClass)) {
-        r = Optional.of(searchType.cast(t))
-      } else t = t.getCause
+    if (throwable == null || searchType == null) Optional.empty[T] else {
+      var t = throwable
+      var r: Optional[T] = null
+      while (t != null && r == null) {
+        if (searchType.isAssignableFrom(t.getClass)) {
+          r = Optional.of(searchType.cast(t))
+        } else t = t.getCause
+      }
+      r
     }
-    r
   }
 
 
@@ -341,15 +342,16 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable(throwable: Throwable, predicate: Predicate[Throwable]): Optional[Throwable] = {
-    if (throwable == null || predicate == null) return Optional.empty[Throwable]
-    var t = throwable
-    var r: Optional[Throwable] = null
-    while (t != null && r == null) {
-      if (predicate.test(t)) {
-        r = Optional.of(t)
-      } else t = t.getCause
+    if (throwable == null || predicate == null) Optional.empty[Throwable] else {
+      var t = throwable
+      var r: Optional[Throwable] = null
+      while (t != null && r == null) {
+        if (predicate.test(t)) {
+          r = Optional.of(t)
+        } else t = t.getCause
+      }
+      r
     }
-    r
   }
 
   /**
@@ -360,16 +362,17 @@ object ExceptionUtils {
    * @return Optional throwable containing the search message if available, otherwise empty
    */
   def findThrowableWithMessage(throwable: Throwable, searchMessage: String): Optional[Throwable] = {
-    if (throwable == null || searchMessage == null) return Optional.empty[Throwable]
-    var t = throwable
-    var r: Optional[Throwable] = null
-    while (t != null && r == null) {
-      if (t.getMessage != null && t.getMessage.contains(searchMessage)) {
-        r = Optional.of(t)
+    if (throwable == null || searchMessage == null) Optional.empty[Throwable] else {
+      var t = throwable
+      var r: Optional[Throwable] = null
+      while (t != null && r == null) {
+        if (t.getMessage != null && t.getMessage.contains(searchMessage)) {
+          r = Optional.of(t)
+        }
+        else t = t.getCause
       }
-      else t = t.getCause
+      r
     }
-    r
   }
 
   /**
