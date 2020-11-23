@@ -56,8 +56,7 @@ object ExceptionUtils {
       wrt.close()
       stm.toString
     } catch {
-      case t: Throwable =>
-        e.getClass.getName + " (error while printing stack trace)"
+      case _: Throwable => e.getClass.getName + " (error while printing stack trace)"
     }
   }
 
@@ -324,10 +323,11 @@ object ExceptionUtils {
   def findThrowable[T <: Throwable](throwable: Throwable, searchType: Class[T]): Optional[T] = {
     if (throwable == null || searchType == null) return Optional.empty
     var t = throwable
-    while ( {
-      t != null
-    }) if (searchType.isAssignableFrom(t.getClass)) return Optional.of(searchType.cast(t))
-    else t = t.getCause
+    while (t != null) {
+      if (searchType.isAssignableFrom(t.getClass)) {
+        return Optional.of(searchType.cast(t))
+      } else t = t.getCause
+    }
     Optional.empty
   }
 
@@ -342,10 +342,11 @@ object ExceptionUtils {
   def findThrowable(throwable: Throwable, predicate: Predicate[Throwable]): Optional[Throwable] = {
     if (throwable == null || predicate == null) return Optional.empty
     var t = throwable
-    while ( {
-      t != null
-    }) if (predicate.test(t)) return Optional.of(t)
-    else t = t.getCause
+    while (t != null) {
+      if (predicate.test(t)) {
+        return Optional.of(t)
+      } else t = t.getCause
+    }
     Optional.empty
   }
 
@@ -359,10 +360,12 @@ object ExceptionUtils {
   def findThrowableWithMessage(throwable: Throwable, searchMessage: String): Optional[Throwable] = {
     if (throwable == null || searchMessage == null) return Optional.empty
     var t = throwable
-    while ( {
-      t != null
-    }) if (t.getMessage != null && t.getMessage.contains(searchMessage)) return Optional.of(t)
-    else t = t.getCause
+    while (t != null) {
+      if (t.getMessage != null && t.getMessage.contains(searchMessage)) {
+        return Optional.of(t)
+      }
+      else t = t.getCause
+    }
     Optional.empty
   }
 
@@ -395,7 +398,7 @@ object ExceptionUtils {
   def stripException(throwableToStrip: Throwable, typeToStrip: Class[_ <: Throwable]): Throwable = {
     var throwable: Throwable = null;
     while (typeToStrip.isAssignableFrom(throwableToStrip.getClass()) && throwableToStrip.getCause() != null) {
-      throwable = throwableToStrip.getCause();
+      throwable = throwableToStrip.getCause()
     }
     throwable
   }
