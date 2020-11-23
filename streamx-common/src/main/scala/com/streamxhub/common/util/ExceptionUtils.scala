@@ -321,14 +321,15 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable[T <: Throwable](throwable: Throwable, searchType: Class[T]): Optional[T] = {
-    if (throwable == null || searchType == null) return Optional.empty
+    if (throwable == null || searchType == null) return Optional.empty[T]
     var t = throwable
-    while (t != null) {
+    var r: Optional[T] = null
+    while (t != null && r == null) {
       if (searchType.isAssignableFrom(t.getClass)) {
-        return Optional.of(searchType.cast(t))
+        r = Optional.of(searchType.cast(t))
       } else t = t.getCause
     }
-    Optional.empty
+    r
   }
 
 
@@ -340,14 +341,15 @@ object ExceptionUtils {
    * @return Optional throwable of the requested type if available, otherwise empty
    */
   def findThrowable(throwable: Throwable, predicate: Predicate[Throwable]): Optional[Throwable] = {
-    if (throwable == null || predicate == null) return Optional.empty
+    if (throwable == null || predicate == null) return Optional.empty[Throwable]
     var t = throwable
-    while (t != null) {
+    var r: Optional[Throwable] = null
+    while (t != null && r == null) {
       if (predicate.test(t)) {
-        return Optional.of(t)
+        r = Optional.of(t)
       } else t = t.getCause
     }
-    Optional.empty
+    r
   }
 
   /**
@@ -358,15 +360,16 @@ object ExceptionUtils {
    * @return Optional throwable containing the search message if available, otherwise empty
    */
   def findThrowableWithMessage(throwable: Throwable, searchMessage: String): Optional[Throwable] = {
-    if (throwable == null || searchMessage == null) return Optional.empty
+    if (throwable == null || searchMessage == null) return Optional.empty[Throwable]
     var t = throwable
-    while (t != null) {
+    var r: Optional[Throwable] = null
+    while (t != null && r == null) {
       if (t.getMessage != null && t.getMessage.contains(searchMessage)) {
-        return Optional.of(t)
+        r = Optional.of(t)
       }
       else t = t.getCause
     }
-    Optional.empty
+    r
   }
 
   /**
