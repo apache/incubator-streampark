@@ -1117,7 +1117,7 @@ export default {
         if (resp.status === 'error') {
           this.$notification.open({
             message: 'cancel application failed',
-            description: resp.message,
+            description: resp.exception,
             icon: <a-icon type="error" style="color: #f5222d" />
           })
         }

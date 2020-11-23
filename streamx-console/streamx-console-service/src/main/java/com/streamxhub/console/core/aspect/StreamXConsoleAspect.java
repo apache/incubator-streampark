@@ -20,6 +20,7 @@
  */
 package com.streamxhub.console.core.aspect;
 
+import com.streamxhub.common.util.ExceptionUtils;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.task.FlinkTrackingTask;
@@ -69,7 +70,7 @@ public class StreamXConsoleAspect {
             response = (RestResponse) joinPoint.proceed();
             response.put("status", "success");
         } catch (Exception e) {
-            response = RestResponse.create().put("status", "error").message(e.getMessage());
+            response = RestResponse.create().put("status", "error").put("exception", ExceptionUtils.stringifyException(e));
         }
         return response;
     }
