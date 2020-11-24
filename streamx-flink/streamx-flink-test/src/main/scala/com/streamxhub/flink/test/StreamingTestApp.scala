@@ -1,6 +1,6 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.common.functions.ReduceFunction
 import org.apache.flink.api.scala._
 

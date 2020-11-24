@@ -20,9 +20,8 @@
  */
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.sink.scala.HttpSink
-import com.streamxhub.flink.core.sink.scala.ClickHouseSink
+import com.streamxhub.flink.core.scala.sink.{ClickHouseSink, HttpSink}
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {
@@ -40,7 +39,7 @@ object ClickHouseSinkApp extends FlinkStreaming {
         |quantity UInt8,
         |timestamp UInt16
         |)ENGINE = TinyLog;
-        |""".stripMargin.toString
+        |""".stripMargin
 
     println(createTable)
 

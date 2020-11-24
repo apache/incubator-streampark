@@ -1,10 +1,10 @@
 package com.streamxhub.flink.test
 
-import com.streamxhub.flink.core.{StreamingContext, FlinkStreaming}
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.api.scala._
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.util.Random
 
 /**

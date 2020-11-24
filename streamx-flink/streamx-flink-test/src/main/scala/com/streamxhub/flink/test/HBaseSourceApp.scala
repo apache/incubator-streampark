@@ -21,12 +21,11 @@
 package com.streamxhub.flink.test
 
 import java.util
-
 import com.streamxhub.common.util.ConfigUtils
-import com.streamxhub.flink.core.request.HBaseRequest
-import com.streamxhub.flink.core.source.scala.HBaseSource
-import com.streamxhub.flink.core.wrapper.HBaseQuery
-import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.java.wrapper.HBaseQuery
+import com.streamxhub.flink.core.scala.request.HBaseRequest
+import com.streamxhub.flink.core.scala.source.HBaseSource
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.util.Bytes
 import org.apache.flink.api.scala._
