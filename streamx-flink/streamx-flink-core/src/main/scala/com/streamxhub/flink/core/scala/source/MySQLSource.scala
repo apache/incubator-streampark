@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.core.scala.source
 
-import com.streamxhub.common.util.{JdbcUtils, Logger}
+import com.streamxhub.common.util.{JdbcUtils, Logger, Utils}
 import com.streamxhub.flink.core.java.function.{GetSQLFunction, ResultSetFunction}
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
@@ -38,11 +38,11 @@ import scala.collection.Map
 
 object MySQLSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): MySQLSource = new MySQLSource(ctx, overrideParams)
+  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): MySQLSource = new MySQLSource(ctx, property)
 
 }
 
-class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
+class MySQLSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
   /**
    *
@@ -52,8 +52,8 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: () => String, fun: Iterable[Map[String, _]] => Iterable[R])(implicit jdbc: Properties): DataStream[R] = {
-    overrideParams.foreach(x => jdbc.put(x._1, x._2))
+  def getDataStream[R: TypeInformation](sqlFun: () => String, fun: Iterable[Map[String, _]] => Iterable[R])(implicit jdbc: Properties = new Properties()): DataStream[R] = {
+    Utils.copyProperties(property, jdbc)
     val mysqlFun = new MySQLSourceFunction[R](jdbc, sqlFun, fun)
     ctx.addSource(mysqlFun)
   }
