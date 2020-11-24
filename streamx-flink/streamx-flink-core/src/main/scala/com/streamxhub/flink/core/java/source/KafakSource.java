@@ -29,10 +29,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
-import static scala.collection.JavaConversions.*;
-
-import java.util.Collections;
-import java.util.Map;
+import java.util.Properties;
 
 /**
  * @author benjobs
@@ -44,16 +41,16 @@ public class KafakSource<T> {
     private String alias = "";
     private KafkaDeserializationSchema<T> deserializer;
     private WatermarkStrategy<KafkaRecord<T>> strategy;
-    private Map<String, String> param = Collections.emptyMap();
+    private Properties property = new Properties();
 
     public KafakSource(StreamingContext ctx) {
         this.ctx = ctx;
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
-    public KafakSource<T> param(Map<String, String> param) {
-        if (param != null) {
-            this.param = param;
+    public KafakSource<T> property(Properties property) {
+        if (property != null) {
+            this.property = property;
         }
         return this;
     }
@@ -87,7 +84,7 @@ public class KafakSource<T> {
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(this.ctx, mapAsScalaMap(this.param), this.topics, this.alias, this.deserializer, this.strategy, null);
+        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
         return ctx.getJavaEnv().addSource(consumer);
     }
 
