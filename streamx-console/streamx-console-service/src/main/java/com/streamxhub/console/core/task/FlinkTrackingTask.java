@@ -193,14 +193,14 @@ public class FlinkTrackingTask {
     }
 
     private static void persistent(Application application) {
-        //1) sync deploy from db
-        Application app = applicationService.getById(application.getId());
-        application.setDeploy(app.getDeploy());
-        //2) save to db
         applicationService.updateTracking(application);
     }
 
     private void updateAndClean(Application application) {
+        //1) sync deploy from db
+        Application app = applicationService.getById(application.getId());
+        application.setDeploy(app.getDeploy());
+        //2) save to db
         persistent(application);
         stopTracking(application.getId());
     }
