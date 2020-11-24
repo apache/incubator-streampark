@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.scala.request
 
 import java.util.Properties
 import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
-
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
 import io.vertx.core.{AsyncResult, Handler, Vertx, VertxOptions}
@@ -37,23 +36,23 @@ import io.vertx.ext.jdbc.JDBCClient
 import io.vertx.ext.sql.SQLClient
 import io.vertx.ext.sql.SQLConnection
 import io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME
+
 import java.util.Collections
 import java.util.function.{Consumer, Supplier}
-
 import com.streamxhub.common.conf.ConfigConst.KEY_INSTANCE
-import com.streamxhub.common.util.{JdbcUtils, Logger}
+import com.streamxhub.common.util.{JdbcUtils, Logger, Utils}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
-import javax.sql.DataSource
 
+import javax.sql.DataSource
 import scala.annotation.meta.param
 
 object MySQLRequest {
 
-  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]): MySQLRequest[T] = new MySQLRequest[T](stream, overrideParams)
+  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], property: Properties = new Properties()): MySQLRequest[T] = new MySQLRequest[T](stream, property)
 
 }
 
-class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]) {
+class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], property: Properties = new Properties()) {
 
   /**
    *
@@ -63,11 +62,13 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @return
    */
   def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    Utils.copyProperties(property, jdbc)
     val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+    Utils.copyProperties(property, jdbc)
     val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }

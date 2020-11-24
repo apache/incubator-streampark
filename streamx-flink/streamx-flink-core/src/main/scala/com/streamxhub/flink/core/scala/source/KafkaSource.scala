@@ -144,7 +144,7 @@ object KafkaSource {
 
 /*
  * @param ctx
- * @param overrideParams
+ * @param property
  */
 class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
   /**

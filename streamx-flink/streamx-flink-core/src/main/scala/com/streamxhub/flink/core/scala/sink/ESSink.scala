@@ -63,7 +63,7 @@ class ESSink(@(transient@param) context: StreamingContext,
 
     //TODO....
     null
-    //new sink5(context, overrideParams, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
+    //new sink5(context, property, parallelism, uidHash).sink[T](stream, suffix, failureHandler)(f)
   }
 
   /**
