@@ -22,10 +22,11 @@ package com.streamxhub.common.util
 
 import java.io.{File, IOException}
 import java.net.URL
-import java.util.UUID
+import java.util.{Properties, UUID}
 import java.util.jar.JarFile
 import java.io.BufferedInputStream
 import java.io.FileInputStream
+import java.util.function.BiConsumer
 import java.util.jar.JarInputStream
 import scala.util.{Failure, Success, Try}
 
@@ -53,6 +54,12 @@ object Utils {
   def getJarManifest(jarFile: File) = {
     checkJarFile(jarFile.toURL)
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
+  }
+
+  def copyProperties(original: Properties, target: Properties): Unit = {
+    original.forEach(new BiConsumer[Object, Object] {
+      override def accept(k: Object, v: Object): Unit = target.put(k, v)
+    })
   }
 
   def main(args: Array[String]): Unit = {

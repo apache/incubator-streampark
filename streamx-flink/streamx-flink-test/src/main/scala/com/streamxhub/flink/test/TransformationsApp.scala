@@ -1,7 +1,7 @@
 package com.streamxhub.flink.test
 
 
-import com.streamxhub.flink.core.{DataSetContext, FlinkDataSet}
+import com.streamxhub.flink.core.scala.{DataSetContext, FlinkDataSet}
 import org.apache.flink.api.common.accumulators.LongCounter
 import org.apache.flink.api.common.functions.{GroupCombineFunction, GroupReduceFunction, RichMapFunction}
 import org.apache.flink.api.common.operators.Order

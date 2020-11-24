@@ -2,10 +2,9 @@ package com.streamxhub.flink.test
 
 
 import java.util.Properties
-
 import com.streamxhub.common.util.ConfigUtils
-import com.streamxhub.flink.core.source.scala.MySQLSource
-import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.scala.source.MySQLSource
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
 
 object MySQLSourceApp extends FlinkStreaming {
