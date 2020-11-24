@@ -45,7 +45,7 @@ object HBaseSource {
 }
 
 /**
- * 支持断到端的精准一次,可回放...
+ * 支持端到端的精准一次,可回放...
  *
  * @param ctx
  * @param property
