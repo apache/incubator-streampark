@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.core.scala.source
 
-import com.streamxhub.common.util.Logger
+import com.streamxhub.common.util.{Logger, Utils}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
@@ -52,15 +52,16 @@ object HBaseSource {
  */
 class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
-  def getDataStream[R: TypeInformation](query: HBaseQuery => HBaseQuery, func: Result => R): DataStream[R] = {
-    val hBaseFunc = new HBaseSourceFunction[R](query, func, property)
+  def getDataStream[R: TypeInformation](query: HBaseQuery => HBaseQuery, func: Result => R)(implicit prop: Properties = new Properties()): DataStream[R] = {
+    Utils.copyProperties(property,prop)
+    val hBaseFunc = new HBaseSourceFunction[R](query, func)
     ctx.addSource(hBaseFunc)
   }
 
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](queryFunc: HBaseQuery => HBaseQuery, func: Result => R, property: Properties = new Properties()) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
+class HBaseSourceFunction[R: TypeInformation](queryFunc: HBaseQuery => HBaseQuery, func: Result => R)(implicit prop: Properties = new Properties()) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
 
@@ -83,7 +84,7 @@ class HBaseSourceFunction[R: TypeInformation](queryFunc: HBaseQuery => HBaseQuer
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = queryFunc(query)
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
-        table = query.getTable(property)
+        table = query.getTable(prop)
         table.getScanner(query).foreach(x => ctx.collect(func(x)))
       }
     }
