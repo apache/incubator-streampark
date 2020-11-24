@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.common.util.{ConfigUtils, Utils}
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -36,15 +36,14 @@ import java.util.Properties
 import java.util.regex.Pattern
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.Map
 import scala.util.{Failure, Success, Try}
 
 object KafkaSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): KafkaSource = new KafkaSource(ctx, overrideParams)
+  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): KafkaSource = new KafkaSource(ctx, property)
 
   def getSource[T: TypeInformation](ctx: StreamingContext,
-                                    overrideParam: Map[String, String],
+                                    property: Properties = new Properties(),
                                     topic: io.Serializable,
                                     alias: String,
                                     deserializer: KafkaDeserializationSchema[T],
@@ -52,7 +51,7 @@ object KafkaSource {
                                    ): FlinkKafkaConsumer[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
-    overrideParam.foreach { case (k, v) => prop.put(k, v) }
+    Utils.copyProperties(property,prop)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
     //start.form parameter...
@@ -147,7 +146,7 @@ object KafkaSource {
  * @param ctx
  * @param overrideParams
  */
-class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, overrideParam: Map[String, String] = Map.empty[String, String]) {
+class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, property: Properties = new Properties()) {
   /**
    *
    * commit offset 方式:<br/>
@@ -174,7 +173,7 @@ class KafkaSource(@(transient@param) private[this] val ctx: StreamingContext, ov
                                         strategy: WatermarkStrategy[KafkaRecord[T]] = null
                                        ): DataStream[KafkaRecord[T]] = {
 
-    val consumer = KafkaSource.getSource[T](this.ctx, overrideParam, topic, alias, deserializer, strategy)
+    val consumer = KafkaSource.getSource[T](this.ctx, property, topic, alias, deserializer, strategy)
     ctx.addSource(consumer)
   }
 

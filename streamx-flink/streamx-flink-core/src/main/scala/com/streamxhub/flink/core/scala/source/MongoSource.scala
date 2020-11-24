@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.scala.source
 
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCursor, MongoDatabase}
-import com.streamxhub.common.util.{Logger, MongoConfig}
+import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -32,16 +32,15 @@ import org.bson.Document
 
 import java.util.Properties
 import scala.annotation.meta.param
-import scala.collection.Map
 
 
 object MongoSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]): MongoSource = new MongoSource(ctx, overrideParams)
+  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): MongoSource = new MongoSource(ctx, property)
 
 }
 
-class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: Map[String, String] = Map.empty[String, String]) {
+class MongoSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
   /**
    *
@@ -51,8 +50,8 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit config: Properties): DataStream[R] = {
-    overrideParams.foreach(x => config.setProperty(x._1, x._2))
+  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
+    Utils.copyProperties(property, prop)
     val mongoFun = new MongoSourceFunction[R](queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
@@ -67,7 +66,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, overrideParams: 
  * @param config
  * @tparam R
  */
-private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit config: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
 
@@ -78,8 +77,8 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   override def cancel(): Unit = this.isRunning = false
 
   override def open(parameters: Configuration): Unit = {
-    client = MongoConfig.getClient(config)
-    val db = MongoConfig.getProperty(config, MongoConfig.database)
+    client = MongoConfig.getClient(prop)
+    val db = MongoConfig.getProperty(prop, MongoConfig.database)
     database = client.getDatabase(db)
   }
 
