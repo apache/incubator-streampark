@@ -198,7 +198,7 @@ object RedisContainer extends Logger {
       redisContainer
     } catch {
       case e: Exception =>
-        logger.error("[Streamx] RedisSink:Redis has not been properly initialized: ", e)
+        logger.error("[StreamX] RedisSink:Redis has not been properly initialized: ", e)
         throw e
     }
   }
