@@ -119,9 +119,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
                   event.result().getRows().foreach(x => {
                     resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala.toMap)))
                   })
-                } else {
-                  throw event.cause()
-                }
+                } else throw event.cause()
               }
             }).close()
         } else {
