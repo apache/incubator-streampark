@@ -130,7 +130,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[Streamx] MySQLASyncClient request timeout. retrying... ")
+    logger.warn("[StreamX] MySQLASyncClient request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 
@@ -174,7 +174,7 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[Streamx] MySQLASync request timeout. retrying... ")
+    logger.warn("[StreamX] MySQLASync request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 }
