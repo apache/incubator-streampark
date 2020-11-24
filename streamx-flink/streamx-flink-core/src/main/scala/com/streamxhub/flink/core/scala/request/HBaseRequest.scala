@@ -22,10 +22,9 @@ package com.streamxhub.flink.core.scala.request
 
 
 import java.util.Properties
-import java.util.concurrent.{CompletableFuture, ExecutorService, TimeUnit, Executors}
+import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
 import java.util.function.{Consumer, Supplier}
-
-import com.streamxhub.common.util.Logger
+import com.streamxhub.common.util.{Logger, Utils}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -38,12 +37,12 @@ import scala.annotation.meta.param
 
 object HBaseRequest {
 
-  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]): HBaseRequest[T] = new HBaseRequest[T](stream, overrideParams)
+  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], property: Properties = new Properties()): HBaseRequest[T] = new HBaseRequest[T](stream, property)
 
 }
 
 
-class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], overrideParams: Map[String, String] = Map.empty[String, String]) {
+class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], property: Properties = new Properties()) {
 
   /**
    *
@@ -56,6 +55,7 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @return
    */
   def requestOrdered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
+    Utils.copyProperties(property, prop)
     val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
@@ -71,6 +71,7 @@ class HBaseRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @return
    */
   def requestUnordered[R: TypeInformation](queryFunc: T => HBaseQuery, resultFunc: Result => R, timeout: Long = 1000, capacity: Int = 10)(implicit prop: Properties): DataStream[R] = {
+    Utils.copyProperties(property, prop)
     val async = new HBaseAsyncFunction[T, R](prop, queryFunc, resultFunc, capacity)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }

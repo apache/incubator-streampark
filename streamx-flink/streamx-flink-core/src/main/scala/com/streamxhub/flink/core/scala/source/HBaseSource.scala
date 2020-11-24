@@ -48,7 +48,7 @@ object HBaseSource {
  * 支持断到端的精准一次,可回放...
  *
  * @param ctx
- * @param overrideParams
+ * @param property
  */
 class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
