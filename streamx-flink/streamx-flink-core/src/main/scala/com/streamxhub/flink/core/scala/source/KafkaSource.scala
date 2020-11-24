@@ -51,7 +51,7 @@ object KafkaSource {
                                    ): FlinkKafkaConsumer[KafkaRecord[T]] = {
 
     val prop = ConfigUtils.getConf(ctx.parameter.toMap, KAFKA_SOURCE_PREFIX + alias)
-    Utils.copyProperties(property,prop)
+    Utils.copyProperties(property, prop)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC || x._1 == KEY_KAFKA_PATTERN))
 
     //start.form parameter...
@@ -102,11 +102,10 @@ object KafkaSource {
     }
 
     (timestamp, startFrom) match {
-      case (Some(t), _) =>
-        //全局设定Timestamp,对所有的topic生效.
-        consumer.setStartFromTimestamp(t)
+      //全局设定Timestamp,对所有的topic生效.
+      case (Some(t), _) => consumer.setStartFromTimestamp(t)
+      //精确为每个topic,partition指定offset
       case _ =>
-        //精确为每个topic,partition指定offset
         val startFroms = (topicOpt, regexOpt) match {
           //topic方式...
           case (Some(top), _) =>
