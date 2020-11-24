@@ -1,10 +1,9 @@
 package com.streamxhub.flink.test
 
 import java.util.Date
-
-import com.streamxhub.flink.core.sink.scala.ESSink
-import com.streamxhub.flink.core.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.util.EsIndexUtils
+import com.streamxhub.flink.core.scala.sink.ESSink
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.flink.core.scala.util.EsIndexUtils
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization

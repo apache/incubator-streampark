@@ -21,7 +21,7 @@
 package com.streamxhub.flink.javacase;
 
 import com.streamxhub.flink.core.StreamEnvConfig;
-import com.streamxhub.flink.core.StreamingContext;
+import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.sink.KafkaJavaSink;
 import com.streamxhub.flink.core.source.KafakJavaSource;
 import com.streamxhub.flink.core.source.KafkaRecord;
