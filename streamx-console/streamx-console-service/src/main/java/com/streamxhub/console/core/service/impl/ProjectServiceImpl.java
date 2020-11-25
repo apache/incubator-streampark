@@ -32,6 +32,7 @@ import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.dao.ProjectMapper;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.Project;
+import com.streamxhub.console.core.enums.DeployState;
 import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -124,13 +125,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //发布到apps下
                     this.deploy(project);
                     //更新application的发布状态.
-                    this.baseMapper.deploy(project.getId());
-
                     List<Application> applications = getApplications(project);
-
                     //更新部署状态
                     if (!applications.isEmpty()) {
-                        applications.forEach((app) -> FlinkTrackingTask.persistentCallback(app.getId(), () -> applicationMapper.updateDeploy(app)));
+                        applications.forEach((app) -> {
+                            app.setDeploy(DeployState.APP_UPDATED.get());
+                            FlinkTrackingTask.persistentCallback(
+                                    app.getId(),
+                                    () -> applicationMapper.updateDeploy(app)
+                            );
+                        });
                     }
                 } else {
                     this.baseMapper.failureBuild(project);
