@@ -6,7 +6,7 @@ import java.util.Date
 import com.streamxhub.flink.core.scala.sink.ESSink
 import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.scala.util.EsIndexUtils
+import com.streamxhub.flink.core.scala.util.ElasticSearchUtils
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
@@ -38,7 +38,7 @@ object PolestarDashboardApp extends FlinkStreaming {
       .reduce(_ + _)
 
     implicit def indexReq(x: OrderEntity): IndexRequest =
-      EsIndexUtils.indexRequest(
+      ElasticSearchUtils.indexRequest(
         s"polestar_dash_${x.ymd}",
         "_doc",
         s"${x.timestamp}",
