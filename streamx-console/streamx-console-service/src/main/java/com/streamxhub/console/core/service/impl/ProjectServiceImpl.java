@@ -128,13 +128,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     List<Application> applications = getApplications(project);
                     //更新部署状态
                     if (!applications.isEmpty()) {
-                        applications.forEach((app) -> {
+                        applications.forEach((app) -> FlinkTrackingTask.persistentCallback(app.getId(), () -> {
                             app.setDeploy(DeployState.APP_UPDATED.get());
-                            FlinkTrackingTask.persistentCallback(
-                                    app.getId(),
-                                    () -> applicationMapper.updateDeploy(app)
-                            );
-                        });
+                            applicationMapper.updateDeploy(app);
+                        }));
                     }
                 } else {
                     this.baseMapper.failureBuild(project);
