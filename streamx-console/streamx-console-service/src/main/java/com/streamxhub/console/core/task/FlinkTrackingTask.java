@@ -322,6 +322,7 @@ public class FlinkTrackingTask {
             persistent(application);
         }
         runnable.run();
+        flushTracking(appId);
     }
 
     public static void stopTracking(Long appId) {
