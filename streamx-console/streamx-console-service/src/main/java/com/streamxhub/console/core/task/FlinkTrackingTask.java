@@ -124,7 +124,7 @@ public class FlinkTrackingTask {
                 JobsOverview jobsOverview = application.getJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
-                    restApiCallBack(application, optional.get(), stopFrom);
+                    restApiCallback(application, optional.get(), stopFrom);
                 }
             } catch (ConnectException exp) {
                 /**
@@ -140,7 +140,7 @@ public class FlinkTrackingTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
-                    this.updateAndClean(application);
+                    this.persistentAndClean(application);
                 } else {
                     log.info("[StreamX] flinkTrackingTask previous state was not \"canceling\".");
                     try {
@@ -160,7 +160,7 @@ public class FlinkTrackingTask {
                             application.setEndTime(new Date());
                         }
                         application.setState(flinkAppState.getValue());
-                        this.updateAndClean(application);
+                        this.persistentAndClean(application);
                     } catch (Exception e) {
                         /**s
                          * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
@@ -174,7 +174,7 @@ public class FlinkTrackingTask {
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
-                        this.updateAndClean(application);
+                        this.persistentAndClean(application);
                     }
                 }
             } catch (IOException exception) {
@@ -186,7 +186,7 @@ public class FlinkTrackingTask {
                     }
                     application.setState(FlinkAppState.FAILED.getValue());
                     application.setEndTime(new Date());
-                    this.updateAndClean(application);
+                    this.persistentAndClean(application);
                 }
             }
         }));
@@ -196,11 +196,7 @@ public class FlinkTrackingTask {
         applicationService.updateTracking(application);
     }
 
-    private void updateAndClean(Application application) {
-        //1) sync deploy from db
-        Application app = applicationService.getById(application.getId());
-        application.setDeploy(app.getDeploy());
-        //2) save to db
+    private void persistentAndClean(Application application) {
         persistent(application);
         stopTracking(application.getId());
     }
@@ -221,7 +217,7 @@ public class FlinkTrackingTask {
      * @param application
      * @param job
      */
-    private void restApiCallBack(Application application, JobsOverview.Job job, StopFrom stopFrom) {
+    private void restApiCallback(Application application, JobsOverview.Job job, StopFrom stopFrom) {
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
         /**
          * 1) savePoint obsolete check and NEED_START check
@@ -315,6 +311,17 @@ public class FlinkTrackingTask {
     public static void flushTracking(Long appId) {
         log.info("[StreamX] flinkTrackingTask flushing app,appId:{}", appId);
         trackingAppCache.invalidate(appId);
+    }
+
+    /**
+     * @param appId
+     */
+    public static void persistentCallback(Long appId, Runnable runnable) {
+        Application application = trackingAppCache.getIfPresent(appId);
+        if (application != null) {
+            persistent(application);
+        }
+        runnable.run();
     }
 
     public static void stopTracking(Long appId) {

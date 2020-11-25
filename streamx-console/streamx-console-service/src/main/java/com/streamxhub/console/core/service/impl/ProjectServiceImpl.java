@@ -28,12 +28,15 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.utils.GZipUtil;
 import com.streamxhub.console.base.utils.SortUtil;
+import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.dao.ProjectMapper;
+import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.Project;
 import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
@@ -63,6 +66,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
     private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
+
+    @Autowired
+    private ApplicationMapper applicationMapper;
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -119,6 +125,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     this.deploy(project);
                     //更新application的发布状态.
                     this.baseMapper.deploy(project.getId());
+
+                    List<Application> applications = getApplications(project);
+
+                    //更新部署状态
+                    if (!applications.isEmpty()) {
+                        applications.forEach((app) -> FlinkTrackingTask.persistentCallback(app.getId(), () -> applicationMapper.updateDeploy(app)));
+                    }
                 } else {
                     this.baseMapper.failureBuild(project);
                 }
@@ -238,9 +251,16 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     }
 
     @Override
+    public List<Application> getApplications(Project project) {
+        QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("PROJECT_ID", project.getId());
+        return this.applicationMapper.selectList(queryWrapper);
+    }
+
+    @Override
     public List<Map<String, Object>> listConf(Project project) {
         try {
-            File file = new File(project.getAppBase(),project.getModule());
+            File file = new File(project.getAppBase(), project.getModule());
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
                 GZipUtil.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());

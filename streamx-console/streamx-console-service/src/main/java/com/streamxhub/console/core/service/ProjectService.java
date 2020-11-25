@@ -22,6 +22,7 @@ package com.streamxhub.console.core.service;
 
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.Project;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -51,4 +52,6 @@ public interface ProjectService extends IService<Project> {
     List<Map<String,Object>> listConf(Project project);
 
     String getAppConfPath(Long id,String module);
+
+    List<Application> getApplications(Project project);
 }
