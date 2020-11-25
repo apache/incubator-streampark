@@ -3,7 +3,7 @@ package com.streamxhub.flink.test
 import java.util.Date
 import com.streamxhub.flink.core.scala.sink.ESSink
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
-import com.streamxhub.flink.core.scala.util.EsIndexUtils
+import com.streamxhub.flink.core.scala.util.ElasticSearchUtils
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
@@ -28,7 +28,7 @@ object ConnectorApp extends FlinkStreaming {
     // es sink.........
 
     //1)定义 Index的写入规则
-    implicit def indexReq(x: OrderEntity): IndexRequest = EsIndexUtils.indexRequest(
+    implicit def indexReq(x: OrderEntity): IndexRequest = ElasticSearchUtils.indexRequest(
       "flink_order",
       "_doc",
       s"${x.id}_${x.time.getTime}",
