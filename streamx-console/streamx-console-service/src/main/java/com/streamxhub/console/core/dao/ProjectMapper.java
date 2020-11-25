@@ -43,7 +43,4 @@ public interface ProjectMapper extends BaseMapper<Project> {
     @Update("update t_flink_project set BUILDSTATE=0 where id=#{project.id}")
     void startBuild(@Param("project") Project project);
 
-    @Update("update t_flink_app set deploy=1 where project_id=#{id}")
-    void deploy(@Param("id") Long id);
-
 }
