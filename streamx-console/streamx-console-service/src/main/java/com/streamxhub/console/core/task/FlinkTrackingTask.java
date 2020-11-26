@@ -312,14 +312,25 @@ public class FlinkTrackingTask {
      * @param appId
      * @param runnable
      */
-    public static void persistentAfterCallback(Long appId, Runnable runnable) {
-        log.info("[StreamX] flinkTrackingTask persistentAfterCallback,appId:{}", appId);
+    public static void persistentAfterRunnable(Long appId, Runnable runnable) {
+        log.info("[StreamX] flinkTrackingTask persistentAfterRunnable,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
             persistent(application);
         }
         runnable.run();
         flushTracking(appId);
+    }
+
+    public static <T> T persistentAfterCallable(Long appId, Callable<T> runnable) throws Exception {
+        log.info("[StreamX] flinkTrackingTask persistentAfterCallable,appId:{}", appId);
+        Application application = trackingAppCache.getIfPresent(appId);
+        if (application != null) {
+            persistent(application);
+        }
+        T t = runnable.call();
+        flushTracking(appId);
+        return t;
     }
 
     public static void stopTracking(Long appId) {
