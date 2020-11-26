@@ -308,7 +308,6 @@ public class FlinkTrackingTask {
     }
 
     /**
-     * 特地预留一个方法,在runnable方法之前持久化到数据库,然后执行runnable,最后执行更新tracking.手动编码实现@Tracking的功能.
      *
      * @param appId
      * @param runnable
