@@ -315,6 +315,7 @@ public class FlinkTrackingTask {
      * @param runnable
      */
     public static void persistentAfterCallback(Long appId, Runnable runnable) {
+        log.info("[StreamX] flinkTrackingTask persistentAfterCallback,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
             persistent(application);
