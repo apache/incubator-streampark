@@ -305,6 +305,7 @@ public class FlinkTrackingTask {
     public static void flushTracking(Long appId) {
         log.info("[StreamX] flinkTrackingTask flushing app,appId:{}", appId);
         trackingAppCache.invalidate(appId);
+        trackingAppCache.put(appId, applicationService.getById(appId));
     }
 
     /**
@@ -314,8 +315,12 @@ public class FlinkTrackingTask {
      * @param runnable
      */
     public static void persistentAfterCallback(Long appId, Runnable runnable) {
-        flushTracking(appId);
+        Application application = trackingAppCache.getIfPresent(appId);
+        if (application != null) {
+            persistent(application);
+        }
         runnable.run();
+        flushTracking(appId);
     }
 
     public static void stopTracking(Long appId) {
