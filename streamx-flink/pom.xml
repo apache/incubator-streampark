@@ -10,7 +10,7 @@
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>streamx-flink-parent</artifactId>
+    <artifactId>streamx-flink</artifactId>
     <name>streamx-flink</name>
     <packaging>pom</packaging>
 
