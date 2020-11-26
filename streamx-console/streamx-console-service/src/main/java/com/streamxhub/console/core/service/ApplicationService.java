@@ -49,8 +49,6 @@ public interface ApplicationService extends IService<Application> {
 
     void deploy(Application app) throws Exception;
 
-    void updateDeploy(Application app);
-
     void updateState(Application app);
 
     void cancel(Application app);

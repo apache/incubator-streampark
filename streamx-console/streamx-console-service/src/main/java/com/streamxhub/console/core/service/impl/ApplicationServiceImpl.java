@@ -219,22 +219,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //重新启动.
             start(appParam);
             //将"需要重新发布"状态清空...
-            application.setDeploy(DeployState.NONE.get());
-            updateDeploy(application);
+            FlinkTrackingTask.persistentAfterCallback(appParam.getId(), () -> {
+                application.setDeploy(DeployState.NONE.get());
+                this.baseMapper.updateDeploy(appParam);
+            });
         } else {
-            application.setDeploy(DeployState.NEED_START.get());
-            updateDeploy(application);
+            FlinkTrackingTask.persistentAfterCallback(appParam.getId(), () -> {
+                application.setDeploy(DeployState.NEED_START.get());
+                this.baseMapper.updateDeploy(appParam);
+            });
             if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
                 updateState(application);
             }
         }
-    }
-
-    @Override
-    @Tracking
-    public void updateDeploy(Application appParam) {
-        this.baseMapper.updateDeploy(appParam);
     }
 
     @Override
