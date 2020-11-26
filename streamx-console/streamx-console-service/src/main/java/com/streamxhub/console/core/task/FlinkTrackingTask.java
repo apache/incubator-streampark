@@ -23,7 +23,6 @@ package com.streamxhub.console.core.task;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.RemovalListener;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.enums.DeployState;
