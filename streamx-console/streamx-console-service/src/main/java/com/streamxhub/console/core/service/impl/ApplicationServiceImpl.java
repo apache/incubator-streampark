@@ -238,9 +238,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Tracking
     public void clean(Application appParam) {
         appParam.setDeploy(DeployState.NONE.get());
-        this.updateDeploy(appParam);
+        this.baseMapper.updateDeploy(appParam);
     }
 
     @Override
