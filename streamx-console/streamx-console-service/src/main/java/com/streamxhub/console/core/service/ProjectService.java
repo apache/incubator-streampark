@@ -55,5 +55,4 @@ public interface ProjectService extends IService<Project> {
 
     List<Application> getApplications(Project project);
 
-    void updateDeploy(Application app);
 }

@@ -28,7 +28,6 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.utils.GZipUtil;
 import com.streamxhub.console.base.utils.SortUtil;
-import com.streamxhub.console.core.annotation.Tracking;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.dao.ProjectMapper;
 import com.streamxhub.console.core.entity.Application;
@@ -38,6 +37,7 @@ import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
@@ -128,9 +128,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     List<Application> applications = getApplications(project);
                     //更新部署状态
                     applications.forEach((app) -> {
-                        log.info("[StreamX] update deploy by project:{},appName:{}", project.getId(), app.getJobName());
-                        app.setDeploy(DeployState.APP_UPDATED.get());
-                        this.updateDeploy(app);
+                        FlinkTrackingTask.persistentAfterCallback(app.getId(), () -> {
+                            log.info("[StreamX] update deploy by project:{},appName:{}", project.getId(), app.getJobName());
+                            app.setDeploy(DeployState.APP_UPDATED.get());
+                            this.applicationMapper.updateDeploy(app);
+                        });
                     });
                 } else {
                     this.baseMapper.failureBuild(project);
@@ -255,11 +257,6 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         return this.applicationMapper.getByProject(project);
     }
 
-    @Override
-    @Tracking
-    public void updateDeploy(Application app) {
-        this.applicationMapper.updateDeploy(app);
-    }
 
     @Override
     public List<Map<String, Object>> listConf(Project project) {
