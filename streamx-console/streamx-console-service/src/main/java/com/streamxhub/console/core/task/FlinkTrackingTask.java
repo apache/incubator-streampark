@@ -33,6 +33,7 @@ import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.Getter;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -322,7 +323,8 @@ public class FlinkTrackingTask {
         flushTracking(appId);
     }
 
-    public static <T> T persistentAfterCallable(Long appId, Callable<T> runnable) throws Exception {
+    @SneakyThrows
+    public static <T> T persistentAfterCallable(Long appId, Callable<T> runnable) {
         log.info("[StreamX] flinkTrackingTask persistentAfterCallable,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {

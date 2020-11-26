@@ -31,7 +31,6 @@ import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
-import com.streamxhub.console.core.annotation.Tracking;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.enums.*;
@@ -156,30 +155,36 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         return saved;
     }
 
+
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    @Tracking
     public boolean update(Application appParam) {
         //update other...
-        Application application = getById(appParam.getId());
-        application.setJobName(appParam.getJobName());
-        application.setArgs(appParam.getArgs());
-        application.setOptions(appParam.getOptions());
-        application.setDynamicOptions(appParam.getDynamicOptions());
-        application.setDescription(appParam.getDescription());
-        //update config...
-        if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
-            configService.update(appParam);
-        } else {
-            application.setJar(appParam.getJar());
-            application.setMainClass(appParam.getMainClass());
-        }
-        /**
-         * 配置文件已更新
-         */
-        application.setDeploy(DeployState.CONF_UPDATED.get());
-        this.baseMapper.updateById(application);
-        return true;
+        return FlinkTrackingTask.persistentAfterCallable(appParam.getId(), () -> {
+            try {
+                Application application = getById(appParam.getId());
+                application.setJobName(appParam.getJobName());
+                application.setArgs(appParam.getArgs());
+                application.setOptions(appParam.getOptions());
+                application.setDynamicOptions(appParam.getDynamicOptions());
+                application.setDescription(appParam.getDescription());
+                //update config...
+                if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+                    configService.update(appParam);
+                } else {
+                    application.setJar(appParam.getJar());
+                    application.setMainClass(appParam.getMainClass());
+                }
+                /**
+                 * 配置文件已更新
+                 */
+                application.setDeploy(DeployState.CONF_UPDATED.get());
+                baseMapper.updateById(application);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -272,45 +277,45 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Tracking
     public boolean mapping(Application appParam) {
-        boolean mapping = this.baseMapper.mapping(appParam);
-        Application application = getById(appParam.getId());
-        FlinkTrackingTask.addTracking(application);
-        return mapping;
+        return FlinkTrackingTask.persistentAfterCallable(appParam.getId(), () -> {
+            boolean mapping = this.baseMapper.mapping(appParam);
+            Application application = getById(appParam.getId());
+            FlinkTrackingTask.addTracking(application);
+            return mapping;
+        });
     }
 
     @Override
-    @Tracking
     public void updateState(Application appParam) {
-        this.baseMapper.updateState(appParam);
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> this.baseMapper.updateState(appParam));
     }
 
-    @Tracking
     public void updateDeploy(Application appParam) {
-        this.baseMapper.updateDeploy(appParam);
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> this.baseMapper.updateDeploy(appParam));
     }
 
     @Override
-    @Tracking
     @Transactional(rollbackFor = Exception.class)
     public void cancel(Application appParam) {
-        Application application = getById(appParam.getId());
-        application.setState(FlinkAppState.CANCELLING.getValue());
-        this.baseMapper.updateById(application);
-        //准备停止...
-        FlinkTrackingTask.addStopping(appParam.getId());
-        String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
-        if (appParam.getSavePointed()) {
-            SavePoint savePoint = new SavePoint();
-            savePoint.setAppId(application.getId());
-            savePoint.setLastest(true);
-            savePoint.setSavePoint(savePointDir);
-            savePoint.setCreateTime(new Date());
-            //之前的配置设置为已过期
-            this.savePointService.obsolete(application.getId());
-            this.savePointService.save(savePoint);
-        }
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
+            Application application = getById(appParam.getId());
+            application.setState(FlinkAppState.CANCELLING.getValue());
+            this.baseMapper.updateById(application);
+            //准备停止...
+            FlinkTrackingTask.addStopping(appParam.getId());
+            String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+            if (appParam.getSavePointed()) {
+                SavePoint savePoint = new SavePoint();
+                savePoint.setAppId(application.getId());
+                savePoint.setLastest(true);
+                savePoint.setSavePoint(savePointDir);
+                savePoint.setCreateTime(new Date());
+                //之前的配置设置为已过期
+                this.savePointService.obsolete(application.getId());
+                this.savePointService.save(savePoint);
+            }
+        });
     }
 
     @Override

@@ -22,8 +22,6 @@ package com.streamxhub.console.core.aspect;
 
 import com.streamxhub.common.util.ExceptionUtils;
 import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.core.entity.Application;
-import com.streamxhub.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -40,24 +38,8 @@ import org.springframework.stereotype.Component;
 @Aspect
 public class StreamXConsoleAspect {
 
-    @Pointcut("@annotation(com.streamxhub.console.core.annotation.Tracking)")
-    public void tracking() {
-    }
-
     @Pointcut("execution(public com.streamxhub.console.base.domain.RestResponse com.streamxhub.console.core.controller.*.*(..))")
     public void response() {
-    }
-
-
-    @Around(value = "tracking()")
-    public Object tracking(ProceedingJoinPoint joinPoint) throws Throwable {
-        Object[] args = joinPoint.getArgs();
-        Application application = (Application) args[0];
-        MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.info("[StreamX] tracking aspect, method:{},applicationId:{}", methodSignature.getName(), application.getId());
-        FlinkTrackingTask.flushTracking(application.getId());
-        Object result = joinPoint.proceed(args);
-        return result;
     }
 
     @Around(value = "response()")
