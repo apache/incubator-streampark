@@ -87,12 +87,7 @@ public class FlinkTrackingTask {
     @PostConstruct
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
-        trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES)
-                .removalListener((RemovalListener<Long, Application>) (key, value, cause) -> {
-                    log.info("[StreamX] flinkTrackingTask app {} will be expire,persistent to database", value.getId());
-                    persistent(value);
-                })
-                .build(k -> applicationService.getById(k));
+        trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(k -> applicationService.getById(k));
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
