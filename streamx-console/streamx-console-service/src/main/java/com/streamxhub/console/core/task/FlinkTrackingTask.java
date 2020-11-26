@@ -316,7 +316,7 @@ public class FlinkTrackingTask {
     /**
      * @param appId
      */
-    public static void persistenAftertCallback(Long appId, Runnable runnable) {
+    public static void persistentAfterCallback(Long appId, Runnable runnable) {
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
             persistent(application);

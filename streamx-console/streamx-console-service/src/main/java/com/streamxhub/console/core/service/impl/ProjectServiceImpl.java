@@ -127,7 +127,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //更新application的发布状态.
                     List<Application> applications = getApplications(project);
                     //更新部署状态
-                    applications.forEach((app) -> FlinkTrackingTask.persistenAftertCallback(app.getId(), () -> {
+                    applications.forEach((app) -> FlinkTrackingTask.persistentAfterCallback(app.getId(), () -> {
                         app.setDeploy(DeployState.APP_UPDATED.get());
                         applicationMapper.updateDeploy(app);
                     }));
