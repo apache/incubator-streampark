@@ -310,7 +310,6 @@ public class FlinkTrackingTask {
     public static void flushTracking(Long appId) {
         log.info("[StreamX] flinkTrackingTask flushing app,appId:{}", appId);
         trackingAppCache.invalidate(appId);
-        trackingAppCache.put(appId, applicationService.getById(appId));
     }
 
     /**
