@@ -150,7 +150,7 @@
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer:record.state === 5}"
+              :class="{pointer: record.state === 4 || record.state === 5 }"
               @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
@@ -285,7 +285,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer:record.state === 5}"
+              :class="{pointer: record.state === 4 || record.state === 5 }"
               @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
@@ -1221,7 +1221,7 @@ export default {
     },
 
     handleView (params) {
-      if (params.state === 5) {
+      if (params.state === 4 || params.state === 5) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }
