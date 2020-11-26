@@ -3,7 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <groupId>com.streamxhub</groupId>
-        <artifactId>streamx-flink-parent</artifactId>
+        <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
