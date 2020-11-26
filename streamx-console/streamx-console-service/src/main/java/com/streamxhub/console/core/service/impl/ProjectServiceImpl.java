@@ -127,12 +127,10 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //更新application的发布状态.
                     List<Application> applications = getApplications(project);
                     //更新部署状态
-                    if (!applications.isEmpty()) {
-                        applications.forEach((app) -> FlinkTrackingTask.persistentCallback(app.getId(), () -> {
-                            app.setDeploy(DeployState.APP_UPDATED.get());
-                            applicationMapper.updateDeploy(app);
-                        }));
-                    }
+                    applications.forEach((app) -> FlinkTrackingTask.persistenAftertCallback(app.getId(), () -> {
+                        app.setDeploy(DeployState.APP_UPDATED.get());
+                        applicationMapper.updateDeploy(app);
+                    }));
                 } else {
                     this.baseMapper.failureBuild(project);
                 }
@@ -253,9 +251,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
 
     @Override
     public List<Application> getApplications(Project project) {
-        QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("PROJECT_ID", project.getId());
-        return this.applicationMapper.selectList(queryWrapper);
+        return this.applicationMapper.getByProject(project);
     }
 
     @Override

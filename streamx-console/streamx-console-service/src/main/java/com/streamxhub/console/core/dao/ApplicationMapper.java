@@ -24,8 +24,12 @@ import com.streamxhub.console.core.entity.Application;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.streamxhub.console.core.entity.Project;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
+
+import java.util.List;
 
 /**
  * @author benjobs
@@ -36,6 +40,9 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     Application getApp(@Param("application") Application application);
 
     void updateTracking(@Param("application") Application application);
+
+    @Select("select * from t_flink_app where project_id=#{project.id}")
+    List<Application> getByProject(@Param("project") Project project);
 
     @Update("update t_flink_app set deploy=#{application.deploy} where id=#{application.id}")
     void updateDeploy(@Param("application") Application application);
