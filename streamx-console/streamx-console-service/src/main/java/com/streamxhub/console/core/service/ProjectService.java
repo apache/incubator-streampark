@@ -54,4 +54,6 @@ public interface ProjectService extends IService<Project> {
     String getAppConfPath(Long id,String module);
 
     List<Application> getApplications(Project project);
+
+    void updateDeploy(Application app);
 }

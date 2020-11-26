@@ -28,6 +28,7 @@ import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.base.utils.GZipUtil;
 import com.streamxhub.console.base.utils.SortUtil;
+import com.streamxhub.console.core.annotation.Tracking;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.dao.ProjectMapper;
 import com.streamxhub.console.core.entity.Application;
@@ -37,7 +38,6 @@ import com.streamxhub.console.core.service.ProjectService;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.PullResult;
@@ -127,10 +127,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //更新application的发布状态.
                     List<Application> applications = getApplications(project);
                     //更新部署状态
-                    applications.forEach((app) -> FlinkTrackingTask.persistentAfterCallback(app.getId(), () -> {
+                    applications.forEach((app) -> {
                         app.setDeploy(DeployState.APP_UPDATED.get());
-                        applicationMapper.updateDeploy(app);
-                    }));
+                        //走切面...
+                        this.updateDeploy(app);
+                    });
                 } else {
                     this.baseMapper.failureBuild(project);
                 }
@@ -252,6 +253,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     @Override
     public List<Application> getApplications(Project project) {
         return this.applicationMapper.getByProject(project);
+    }
+
+    @Override
+    @Tracking
+    public void updateDeploy(Application app) {
+        this.applicationMapper.updateDeploy(app);
     }
 
     @Override
