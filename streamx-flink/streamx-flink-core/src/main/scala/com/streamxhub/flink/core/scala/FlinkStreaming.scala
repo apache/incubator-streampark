@@ -96,6 +96,8 @@ trait FlinkStreaming extends Logger {
 
   private var context: StreamingContext = _
 
+  var jobExecutionResult: JobExecutionResult = _
+
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     //init......
@@ -106,7 +108,7 @@ trait FlinkStreaming extends Logger {
     //
     beforeStart(context)
     handler(context)
-    context.start()
+    jobExecutionResult = context.start()
   }
 
   /**
