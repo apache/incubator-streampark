@@ -113,7 +113,6 @@ public class FlinkTrackingTask {
     public void tracking() {
         Long index = atomicIndex.incrementAndGet();
         Map<Long, Byte> trackingIds = trackingAppId.asMap();
-        log.info("[StreamX] flinkTrackingTask tracking app size:{}", trackingIds.size());
         trackingIds.forEach((k, _v) -> executor.execute(() -> {
             Application application = trackingAppCache.get(k, appId -> applicationService.getById(appId));
             StopFrom stopFrom = stopAppMap.getOrDefault(k, StopFrom.NONE);
