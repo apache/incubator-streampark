@@ -232,10 +232,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Tracking
     public void clean(Application appParam) {
-        appParam.setDeploy(DeployState.NONE.get());
-        this.baseMapper.updateDeploy(appParam);
+        FlinkTrackingTask.persistentAfterCallback(appParam.getId(), () -> {
+            appParam.setDeploy(DeployState.NONE.get());
+            this.baseMapper.updateDeploy(appParam);
+        });
     }
 
     @Override
