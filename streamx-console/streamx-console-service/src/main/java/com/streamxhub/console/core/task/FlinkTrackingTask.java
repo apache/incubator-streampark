@@ -304,7 +304,7 @@ public class FlinkTrackingTask {
     }
 
     public static void addStopping(Long appId) {
-        log.info("[StreamX] flinkTracking add app to stopping,appId:{}", appId);
+        log.info("[StreamX] flinkTrackingTask add app to stopping,appId:{}", appId);
         stopAppMap.put(appId, StopFrom.STREAMX);
     }
 
