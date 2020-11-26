@@ -129,6 +129,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //更新部署状态
                     applications.forEach((app) -> {
                         app.setDeploy(DeployState.APP_UPDATED.get());
+                        log.info("[StreamX] update deploy by project:{},appName:{}", project.getId(), app.getJobName());
                         //走切面...
                         this.updateDeploy(app);
                     });
