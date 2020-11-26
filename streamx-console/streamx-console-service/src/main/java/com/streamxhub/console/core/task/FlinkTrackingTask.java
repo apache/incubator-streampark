@@ -104,7 +104,7 @@ public class FlinkTrackingTask {
 
     private AtomicLong atomicIndex = new AtomicLong(0);
 
-    @Scheduled(fixedDelay = 1000 * 2)
+    @Scheduled(fixedDelay = 1000 * 3)
     public void tracking() {
         Long index = atomicIndex.incrementAndGet();
         Map<Long, Byte> trackingIds = trackingAppId.asMap();
