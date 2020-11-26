@@ -55,9 +55,8 @@ public class StreamXConsoleAspect {
         Application application = (Application) args[0];
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
         log.info("[StreamX] tracking aspect, method:{},applicationId:{}", methodSignature.getName(), application.getId());
-        FlinkTrackingTask.syncTracking(application.getId());
-        Object result = joinPoint.proceed(args);
         FlinkTrackingTask.flushTracking(application.getId());
+        Object result = joinPoint.proceed(args);
         return result;
     }
 

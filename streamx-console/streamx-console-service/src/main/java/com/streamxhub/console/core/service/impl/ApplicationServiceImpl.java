@@ -253,7 +253,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public Application getApp(Application appParam) {
-        FlinkTrackingTask.syncTracking(appParam.getId());
+        FlinkTrackingTask.flushTracking(appParam.getId());
         Application application = this.baseMapper.getApp(appParam);
         if (application.getConfig() != null) {
             String unzipString = DeflaterUtils.unzipString(application.getConfig());

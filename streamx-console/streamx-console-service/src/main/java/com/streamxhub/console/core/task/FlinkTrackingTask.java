@@ -319,12 +319,8 @@ public class FlinkTrackingTask {
      * @param runnable
      */
     public static void persistentAfterCallback(Long appId, Runnable runnable) {
-        Application application = trackingAppCache.getIfPresent(appId);
-        if (application != null) {
-            persistent(application);
-        }
-        runnable.run();
         flushTracking(appId);
+        runnable.run();
     }
 
     public static void stopTracking(Long appId) {
@@ -337,12 +333,4 @@ public class FlinkTrackingTask {
         return trackingAppCache.getIfPresent(appId);
     }
 
-    public static Application syncTracking(Long appId) {
-        log.info("[StreamX] flinkTrackingTask sync app to database,appId:{}", appId);
-        Application application = trackingAppCache.getIfPresent(appId);
-        if (application != null) {
-            persistent(application);
-        }
-        return application;
-    }
 }
