@@ -1,7 +1,7 @@
 package com.streamxhub.console.base.domain;
 
 /**
- * WEBX常量
+ * 常量
  */
 public class Constant {
 
