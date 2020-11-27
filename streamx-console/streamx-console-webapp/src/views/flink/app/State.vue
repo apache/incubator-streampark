@@ -30,21 +30,21 @@
    COMPLETED: '#1890ff',
    RESTARTING: '#13c2c2'
  -->
-    <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
+    <a-tag color="#2f54eb" v-if="state === 0 || action === 0">CREATED</a-tag>
     <a-tag color="#1ABBDC" v-if="state === 1 || action === 1" class="status-processing-deploying">DEPLOYING</a-tag>
-    <a-tag color="#108ee9" v-if="state === 2">DEPLOYED</a-tag>
+    <a-tag color="#108ee9" v-if="state === 2 || action === 0">DEPLOYED</a-tag>
     <a-tag color="#1AB58E" v-if="state === 3 || action === 3 " class="status-processing-starting">STARTING</a-tag>
-    <a-tag color="#13c2c2" v-if="state === 4" class="status-processing-restarting">RESTARTING</a-tag>
-    <a-tag color="#52c41a" v-if="state === 5" class="status-processing-running">RUNNING</a-tag>
-    <a-tag color="#fa541c" v-if="state === 6" class="status-processing-failing">FAILING</a-tag>
-    <a-tag color="#f5222d" v-if="state === 7">FAILED</a-tag>
+    <a-tag color="#13c2c2" v-if="state === 4 || action === 0" class="status-processing-restarting">RESTARTING</a-tag>
+    <a-tag color="#52c41a" v-if="state === 5 || action === 0" class="status-processing-running">RUNNING</a-tag>
+    <a-tag color="#fa541c" v-if="state === 6 || action === 0" class="status-processing-failing">FAILING</a-tag>
+    <a-tag color="#f5222d" v-if="state === 7 || action === 0">FAILED</a-tag>
     <a-tag color="#faad14" v-if="state === 8 || action === 2" class="status-processing-cancelling">CANCELLING</a-tag>
-    <a-tag color="#fa8c16" v-if="state === 9">CANCELED</a-tag>
-    <a-tag color="#1890ff" v-if="state === 10">FINISHED</a-tag>
-    <a-tag color="#722ed1" v-if="state === 11">SUSPENDED</a-tag>
-    <a-tag color="#eb2f96" v-if="state === 12" class="status-processing-reconciling">RECONCILING</a-tag>
-    <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
-    <a-tag color="#13c2c2" v-if="state === 14" class="status-processing-restarting">MAPPING</a-tag>
+    <a-tag color="#fa8c16" v-if="state === 9 || action === 0">CANCELED</a-tag>
+    <a-tag color="#1890ff" v-if="state === 10 || action === 0">FINISHED</a-tag>
+    <a-tag color="#722ed1" v-if="state === 11 || action === 0">SUSPENDED</a-tag>
+    <a-tag color="#eb2f96" v-if="state === 12 || action === 0" class="status-processing-reconciling">RECONCILING</a-tag>
+    <a-tag color="#000000" v-if="state === 13 || action === 0">LOST</a-tag>
+    <a-tag color="#13c2c2" v-if="state === 14 || action === 0" class="status-processing-restarting">MAPPING</a-tag>
   </div>
 </template>
 <script>
