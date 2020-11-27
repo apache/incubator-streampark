@@ -953,7 +953,7 @@ export default {
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
           )
-          this.optionApps.deploy.set(id, id)
+          this.handleMapSet('deploy', id)
           deploy({
             id: id,
             restart: restart,
@@ -962,7 +962,7 @@ export default {
             backUpDescription: description
           }).then((resp) => {
             if (!restart) {
-              this.optionApps.deploy.delete(id)
+              this.handleMapRemove('deploy', id)
             }
             console.log(resp)
           })
@@ -1047,7 +1047,7 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
-          this.optionApps.starting.set(id, id)
+          this.handleMapSet('starting', id)
           this.handleStartCancel()
           start({
             id: id,
@@ -1082,7 +1082,6 @@ export default {
         this.application = null
       }, 1000)
     },
-
     handleStopOk () {
       this.$message.info(
         '已发送停止请求,该应用正在停止',
@@ -1091,7 +1090,7 @@ export default {
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
-      this.optionApps.stoping.set(id, id)
+      this.handleMapSet('stoping', id)
       this.handleStopCancel()
       cancel({
         id: id,
@@ -1165,13 +1164,13 @@ export default {
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) != null) {
-              this.optionApps.starting.delete(x.id)
+              this.handleMapRemove('starting', x.id)
             }
             if (this.optionApps.stoping.get(x.id) != null) {
-              this.optionApps.stoping.delete(x.id)
+              this.handleMapRemove('stoping', x.id)
             }
             if (this.optionApps.deploy.get(x.id) != null) {
-              this.optionApps.deploy.delete(x.id)
+              this.handleMapRemove('deploy', x.id)
             }
           }
         })
@@ -1210,8 +1209,21 @@ export default {
         id: app.id
       }).then((resp) => {
       })
-    }
+    },
 
+    handleMapSet (type, id) {
+      const map = this.optionApps[type]
+      map.set(id, id)
+      this.optionApps[type] = new Map()
+      Object.assign(map, this.optionApps[type])
+    },
+
+    handleMapRemove (type, id) {
+      const map = this.optionApps[type]
+      map.delete(id)
+      this.optionApps[type] = new Map()
+      Object.assign(map, this.optionApps[type])
+    }
   }
 }
 </script>
