@@ -335,7 +335,7 @@
         </template>
 
         <template slot="state" slot-scope="text, record">
-          <State :state="record.state" :action="record.action"></State>
+          <State :state="record.state" :option="record.optionState"></State>
         </template>
 
         <template slot="customOperation">
@@ -356,7 +356,7 @@
               && optionApps.deploy.get(record.id) == null
               && optionApps.stoping.get(record.id) == null
               && optionApps.starting.get(record.id) == null
-              && record.action ===0"
+              && record.optionState ===0"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
@@ -364,7 +364,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="optionApps.deploy.get(record.id) == null || record.action === 0"
+            v-show="optionApps.deploy.get(record.id) == null || record.optionState === 0"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -387,14 +387,14 @@
               || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="(optionApps.starting.get(record.id) == null || record.action === 0)?'#4a9ff5':'gray'"
+            :twoToneColor="(optionApps.starting.get(record.id) == null || record.optionState === 0)?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': (optionApps.stoping.get(record.id) == null || record.action === 0)?'#4a9ff5':'gray'}"
+            :style="{'color': (optionApps.stoping.get(record.id) == null || record.optionState === 0)?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -923,7 +923,7 @@ export default {
     ...mapActions(['SetAppId']),
 
     handleDeploy (app) {
-      if (this.optionApps.deploy.get(app.id) == null || app.action === 0) {
+      if (this.optionApps.deploy.get(app.id) == null || app.optionState === 0) {
         this.deployVisible = true
         this.application = app
       }
@@ -1006,7 +1006,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.get(app.id) == null || app.action === 0) {
+      if (this.optionApps.starting.get(app.id) == null || app.optionState === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1067,7 +1067,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.get(app.id) == null || app.action === 0) {
+      if (this.optionApps.stoping.get(app.id) == null || app.optionState === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1163,7 +1163,7 @@ export default {
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         this.dataSource.forEach(x => {
-          if (x.action === 0) {
+          if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) != null) {
               this.optionApps.starting.delete(x.id)
             }

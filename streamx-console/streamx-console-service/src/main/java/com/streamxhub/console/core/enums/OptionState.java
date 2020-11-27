@@ -29,7 +29,7 @@ import java.util.Arrays;
  */
 
 @Getter
-public enum CurrentAction {
+public enum OptionState {
 
     /**
      * Application which is currently action: none.
@@ -56,11 +56,11 @@ public enum CurrentAction {
 
     int value;
 
-    CurrentAction(int value) {
+    OptionState(int value) {
         this.value = value;
     }
 
-    public static CurrentAction of(Integer state) {
+    public static OptionState of(Integer state) {
         return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

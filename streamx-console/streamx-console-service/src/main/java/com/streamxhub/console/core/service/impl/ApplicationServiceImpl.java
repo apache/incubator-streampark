@@ -85,8 +85,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @PostConstruct
-    public void resetAction() {
-        this.baseMapper.resetAction();
+    public void resetOptionState() {
+        this.baseMapper.resetOptionState();
     }
 
     @Override
@@ -204,7 +204,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
-            application.setAction(CurrentAction.DEPLOYING.getValue());
+            application.setOptionState(OptionState.DEPLOYING.getValue());
             updateState(application);
         }
 
@@ -239,7 +239,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.updateDeploy(application);
             if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
-                application.setAction(CurrentAction.NONE.getValue());
+                application.setOptionState(OptionState.NONE.getValue());
                 updateState(application);
             }
         }
@@ -310,7 +310,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
             Application application = getById(appParam.getId());
             application.setState(FlinkAppState.CANCELLING.getValue());
-            application.setAction(CurrentAction.CANCELLING.getValue());
+            application.setOptionState(OptionState.CANCELLING.getValue());
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
@@ -337,7 +337,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean start(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
         assert application != null;
-        application.setAction(CurrentAction.STARTING.getValue());
+        application.setOptionState(OptionState.STARTING.getValue());
         this.baseMapper.updateById(application);
 
         Project project = projectService.getById(application.getProjectId());
@@ -432,7 +432,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.setSuccess(false);
             applicationLogService.save(log);
             application = getById(appParam.getId());
-            application.setAction(CurrentAction.NONE.getValue());
+            application.setOptionState(OptionState.NONE.getValue());
             this.baseMapper.updateById(application);
             return false;
         }

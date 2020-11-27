@@ -72,7 +72,7 @@ public class Application implements Serializable {
      */
     private Integer deploy;
 
-    private Integer action;
+    private Integer optionState;
 
     private String args;
     /**
