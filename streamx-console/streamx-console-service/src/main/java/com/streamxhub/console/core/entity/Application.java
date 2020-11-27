@@ -71,6 +71,9 @@ public class Application implements Serializable {
      * 是否需要重新发布(针对项目已更新,具体影响需要手动发布.)
      */
     private Integer deploy;
+
+    private Integer action;
+
     private String args;
     /**
      * 应用程序模块

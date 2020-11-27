@@ -197,6 +197,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
+            application.setAction(CurrentAction.DEPLOYING.getValue());
             updateState(application);
         }
 
@@ -231,6 +232,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.updateDeploy(application);
             if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
+                application.setAction(CurrentAction.NONE.getValue());
                 updateState(application);
             }
         }
@@ -301,6 +303,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
             Application application = getById(appParam.getId());
             application.setState(FlinkAppState.CANCELLING.getValue());
+            application.setAction(CurrentAction.CANCELLING.getValue());
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
@@ -325,8 +328,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean start(Application appParam) throws Exception {
-        final Application application = getById(appParam.getId());
+        Application application = getById(appParam.getId());
         assert application != null;
+        application.setAction(CurrentAction.STARTING.getValue());
+        this.baseMapper.updateById(application);
+
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
@@ -418,6 +424,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.setException(exception);
             log.setSuccess(false);
             applicationLogService.save(log);
+            application = getById(appParam.getId());
+            application.setAction(CurrentAction.NONE.getValue());
+            this.baseMapper.updateById(application);
             return false;
         }
 

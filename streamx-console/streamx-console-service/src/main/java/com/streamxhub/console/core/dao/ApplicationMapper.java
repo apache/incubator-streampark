@@ -47,7 +47,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     @Update("update t_flink_app set deploy=#{application.deploy} where id=#{application.id}")
     void updateDeploy(@Param("application") Application application);
 
-    @Update("update t_flink_app set state=#{application.state} where id=#{application.id}")
+    @Update("update t_flink_app set state=#{application.state},action=#{application.action} where id=#{application.id}")
     void updateState(@Param("application") Application application);
 
     @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")

@@ -25,6 +25,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.common.util.ThreadUtils;
 import com.streamxhub.console.core.entity.Application;
+import com.streamxhub.console.core.enums.CurrentAction;
 import com.streamxhub.console.core.enums.DeployState;
 import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.enums.StopFrom;
@@ -134,6 +135,7 @@ public class FlinkTrackingTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.CANCELED.getValue());
+                    application.setAction(CurrentAction.NONE.getValue());
                     this.persistentAndClean(application);
                 } else {
                     log.info("[StreamX] flinkTrackingTask previous state was not \"canceling\".");
@@ -152,6 +154,7 @@ public class FlinkTrackingTask {
                             }
                             flinkAppState = FlinkAppState.CANCELED;
                             application.setEndTime(new Date());
+                            application.setAction(CurrentAction.NONE.getValue());
                         }
                         application.setState(flinkAppState.getValue());
                         this.persistentAndClean(application);
@@ -168,6 +171,7 @@ public class FlinkTrackingTask {
                         } else {
                             application.setState(FlinkAppState.CANCELED.getValue());
                         }
+                        application.setAction(CurrentAction.NONE.getValue());
                         this.persistentAndClean(application);
                     }
                 }
@@ -179,6 +183,7 @@ public class FlinkTrackingTask {
                         savePointService.obsolete(application.getId());
                     }
                     application.setState(FlinkAppState.FAILED.getValue());
+                    application.setAction(CurrentAction.NONE.getValue());
                     application.setEndTime(new Date());
                     this.persistentAndClean(application);
                 }
@@ -228,6 +233,7 @@ public class FlinkTrackingTask {
                     log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
                 }
+                application.setAction(CurrentAction.NONE.getValue());
                 break;
             case RUNNING:
                 FlinkAppState previousState = FlinkAppState.of(application.getState());
@@ -238,7 +244,9 @@ public class FlinkTrackingTask {
                     if (DeployState.NEED_START.get() == application.getDeploy()) {
                         application.setDeploy(DeployState.NONE.get());
                     }
+
                 }
+                application.setAction(CurrentAction.NONE.getValue());
                 break;
             default:
                 break;
@@ -308,7 +316,6 @@ public class FlinkTrackingTask {
     }
 
     /**
-     *
      * @param appId
      * @param runnable
      */
