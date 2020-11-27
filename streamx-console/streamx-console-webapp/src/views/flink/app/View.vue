@@ -363,7 +363,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="record.deploy === 1 && record.state !== 1 && optionApps.deploy.findIndex((x) => x == record.id) == -1 "
+            v-show="optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action !== 1"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -383,17 +383,17 @@
               || record.state === 9
               || record.state === 10
               || record.state === 11
-              || record.state === 13) && optionApps.deploy.findIndex((x) => x == record.id) == -1"
+              || record.state === 13) && (optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action !== 3)"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="optionApps.starting.findIndex((x) => x == record.id) == -1?'#4a9ff5':'gray'"
+            :twoToneColor="(optionApps.starting.findIndex((x) => x == record.id) == -1 || record.action !== 3)?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': optionApps.stoping.findIndex((x) => x == record.id) == -1?'#4a9ff5':'gray'}"
+            :style="{'color': (optionApps.stoping.findIndex((x) => x == record.id) == -1 || record.action !== 2)?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
