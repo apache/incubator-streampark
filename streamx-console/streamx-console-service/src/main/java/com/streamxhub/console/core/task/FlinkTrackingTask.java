@@ -217,7 +217,6 @@ public class FlinkTrackingTask {
      * @param job
      */
     private void restApiCallback(Application application, JobsOverview.Job job, StopFrom stopFrom) {
-        Integer currentAction = application.getAction() == null ? 0 : application.getAction();
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
         /**
          * 1) savePoint obsolete check and NEED_START check
@@ -280,12 +279,7 @@ public class FlinkTrackingTask {
          */
         application.setJobId(job.getId());
 
-        if (application.getAction() != null && !application.getAction().equals(currentAction)) {
-            persistent(application);
-            flushTracking(application.getId());
-        } else {
-            trackingAppCache.put(application.getId(), application);
-        }
+        trackingAppCache.put(application.getId(), application);
     }
 
     @Getter
