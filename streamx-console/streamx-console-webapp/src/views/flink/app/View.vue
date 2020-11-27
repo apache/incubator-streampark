@@ -1213,20 +1213,20 @@ export default {
 
     handleMapSet (type, id) {
       const map = this.optionApps[type]
-      console.log('handleMapSet before:' + map)
+      console.log('handleMapSet before:' + map.size)
       map.set(id, id)
       this.optionApps[type] = new Map()
       Object.assign(map, this.optionApps[type])
-      console.log('handleMapSet after:' + this.optionApps[type])
+      console.log('handleMapSet after:' + this.optionApps[type].size)
     },
 
     handleMapRemove (type, id) {
       const map = this.optionApps[type]
-      console.log('handleMapRemove before:' + map)
+      console.log('handleMapRemove before:' + map.size)
       map.delete(id)
       this.optionApps[type] = new Map()
       Object.assign(map, this.optionApps[type])
-      console.log('handleMapRemove after:' + this.optionApps[type])
+      console.log('handleMapRemove after:' + this.optionApps[type].size)
     }
   }
 }
