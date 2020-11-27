@@ -75,7 +75,7 @@
                 deploy=#{application.deploy},
             </if>
             <if test="application.action != null">
-                action=#{action},
+                action=#{application.action},
             </if>
             <if test="application.startTime != null">
                 start_time=#{application.startTime},
