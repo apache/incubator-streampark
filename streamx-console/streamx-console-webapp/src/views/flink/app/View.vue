@@ -1216,7 +1216,7 @@ export default {
       console.log('handleMapSet before:' + map.size)
       map.set(id, id)
       this.optionApps[type] = new Map()
-      Object.assign(map, this.optionApps[type])
+      this.optionApps[type] = map
       console.log('handleMapSet after:' + this.optionApps[type].size)
     },
 
@@ -1225,7 +1225,7 @@ export default {
       console.log('handleMapRemove before:' + map.size)
       map.delete(id)
       this.optionApps[type] = new Map()
-      Object.assign(map, this.optionApps[type])
+      this.optionApps[type] = map
       console.log('handleMapRemove after:' + this.optionApps[type].size)
     }
   }
