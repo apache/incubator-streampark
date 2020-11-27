@@ -65,4 +65,6 @@ public interface ApplicationService extends IService<Application> {
 
     boolean mapping(Application app);
 
+    void resetAction();
+
 }

@@ -50,6 +50,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -81,6 +82,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ServerUtil serverUtil;
+
+    @Override
+    @PostConstruct
+    public void resetAction() {
+        this.baseMapper.resetAction();
+    }
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {

@@ -52,4 +52,7 @@ public interface ApplicationMapper extends BaseMapper<Application> {
 
     @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")
     boolean mapping(@Param("application")Application appParam);
+
+    @Update("update t_flink_app set action=0")
+    void resetAction();
 }
