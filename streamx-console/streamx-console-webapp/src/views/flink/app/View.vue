@@ -363,7 +363,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action !== 1"
+            v-show="optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action === 0"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -377,23 +377,23 @@
           </a-icon>
           <a-icon
             type="play-circle"
-            v-if="(record.state === 0
+            v-if="record.state === 0
               || record.state === 2
               || record.state === 7
               || record.state === 9
               || record.state === 10
               || record.state === 11
-              || record.state === 13) && (optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action !== 3)"
+              || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="(optionApps.starting.findIndex((x) => x == record.id) == -1 || record.action !== 3)?'#4a9ff5':'gray'"
+            :twoToneColor="(optionApps.starting.findIndex((x) => x == record.id) == -1 || record.action === 0)?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': (optionApps.stoping.findIndex((x) => x == record.id) == -1 || record.action !== 2)?'#4a9ff5':'gray'}"
+            :style="{'color': (optionApps.stoping.findIndex((x) => x == record.id) == -1 || record.action === 0)?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -1011,7 +1011,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.findIndex((x) => x === app.id) === -1) {
+      if (this.optionApps.starting.findIndex((x) => x === app.id) === -1 && app.action === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1072,7 +1072,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.findIndex((x) => x === app.id) === -1) {
+      if (this.optionApps.stoping.findIndex((x) => x === app.id) === -1 && app.action === 0) {
         this.stopVisible = true
         this.application = app
       }
