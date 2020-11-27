@@ -334,8 +334,8 @@
           <span v-else> - </span>
         </template>
 
-        <template slot="state" slot-scope="state">
-          <State :state="state"></State>
+        <template slot="state" slot-scope="text, record">
+          <State :state="record.state" :action="record.action"></State>
         </template>
 
         <template slot="customOperation">
@@ -353,9 +353,10 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon
             v-if="record.state !== 5
-              && optionApps.deploy.findIndex((x) => x == record.id) == -1
-              && optionApps.stoping.findIndex((x) => x == record.id) == -1
-              && optionApps.starting.findIndex((x) => x == record.id) == -1"
+              && optionApps.deploy.get(record.id) == null
+              && optionApps.stoping.get(record.id) == null
+              && optionApps.starting.get(record.id) == null
+              && record.action ===0"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
@@ -363,7 +364,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="optionApps.deploy.findIndex((x) => x == record.id) == -1 || record.action === 0"
+            v-show="optionApps.deploy.get(record.id) == null || record.action === 0"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -386,14 +387,14 @@
               || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="(optionApps.starting.findIndex((x) => x == record.id) == -1 || record.action === 0)?'#4a9ff5':'gray'"
+            :twoToneColor="(optionApps.starting.get(record.id) == null || record.action === 0)?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': (optionApps.stoping.findIndex((x) => x == record.id) == -1 || record.action === 0)?'#4a9ff5':'gray'}"
+            :style="{'color': (optionApps.stoping.get(record.id) == null || record.action === 0)?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -688,9 +689,9 @@ export default {
       searchText: '',
       searchInput: null,
       optionApps: {
-        'starting': [],
-        'stoping': [],
-        'deploy': []
+        'starting': new Map(),
+        'stoping': new Map(),
+        'deploy': new Map()
       },
       searchedColumn: '',
       paginationInfo: null,
@@ -922,7 +923,7 @@ export default {
     ...mapActions(['SetAppId']),
 
     handleDeploy (app) {
-      if (this.optionApps.deploy.findIndex((x) => x === app.id) === -1) {
+      if (this.optionApps.deploy.get(app.id) == null || app.action === 0) {
         this.deployVisible = true
         this.application = app
       }
@@ -952,7 +953,7 @@ export default {
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
           )
-          this.optionApps.deploy.push(id)
+          this.optionApps.deploy.set(id, id)
           deploy({
             id: id,
             restart: restart,
@@ -961,13 +962,7 @@ export default {
             backUpDescription: description
           }).then((resp) => {
             if (!restart) {
-              for (let i = 0; i < this.optionApps.deploy.length; i++) {
-                const s = this.optionApps.deploy[i]
-                if (id === s) {
-                  this.optionApps.deploy.splice(i, 1)
-                  break
-                }
-              }
+              this.optionApps.deploy.delete(id)
             }
             console.log(resp)
           })
@@ -1011,7 +1006,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.findIndex((x) => x === app.id) === -1 && app.action === 0) {
+      if (this.optionApps.starting.get(app.id) == null || app.action === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1052,7 +1047,7 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
-          this.optionApps.starting.push(id)
+          this.optionApps.starting.set(id, id)
           this.handleStartCancel()
           start({
             id: id,
@@ -1072,7 +1067,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.findIndex((x) => x === app.id) === -1 && app.action === 0) {
+      if (this.optionApps.stoping.get(app.id) == null || app.action === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1093,10 +1088,10 @@ export default {
         '已发送停止请求,该应用正在停止',
         3
       )
-      this.optionApps.stoping.push(this.application.id)
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
+      this.optionApps.stoping.set(id, id)
       this.handleStopCancel()
       cancel({
         id: id,
@@ -1167,31 +1162,19 @@ export default {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
-        if (this.optionApps.stoping.length > 0 || this.optionApps.starting.length > 0 || this.optionApps.deploy.length > 0) {
-          this.dataSource.forEach(x => {
-            for (let i = 0; i < this.optionApps.stoping.length; i++) {
-              const s = this.optionApps.stoping[i]
-              if (x.id === s && x.action === 0) {
-                this.optionApps.stoping.splice(i, 1)
-                break
-              }
+        this.dataSource.forEach(x => {
+          if (x.action === 0) {
+            if (this.optionApps.starting.get(x.id) != null) {
+              this.optionApps.starting.delete(x.id)
             }
-            for (let i = 0; i < this.optionApps.starting.length; i++) {
-              const s = this.optionApps.starting[i]
-              if (x.id === s && x.action === 0) {
-                this.optionApps.starting.splice(i, 1)
-                break
-              }
+            if (this.optionApps.stoping.get(x.id) != null) {
+              this.optionApps.stoping.delete(x.id)
             }
-            for (let i = 0; i < this.optionApps.deploy.length; i++) {
-              const s = this.optionApps.deploy[i]
-              if (x.id === s && x.action === 0) {
-                this.optionApps.deploy.splice(i, 1)
-                break
-              }
+            if (this.optionApps.deploy.get(x.id) != null) {
+              this.optionApps.deploy.delete(x.id)
             }
-          })
-        }
+          }
+        })
         this.pagination = pagination
       })
     },
