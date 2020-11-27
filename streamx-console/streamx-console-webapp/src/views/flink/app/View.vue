@@ -1167,8 +1167,8 @@ export default {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
-        this.dataSource.forEach(x => {
-          if (this.optionApps.stoping.length > 0) {
+        if (this.optionApps.stoping.length > 0 || this.optionApps.starting.length > 0 || this.optionApps.deploy.length > 0) {
+          this.dataSource.forEach(x => {
             for (let i = 0; i < this.optionApps.stoping.length; i++) {
               const s = this.optionApps.stoping[i]
               if (x.id === s && x.action === 0) {
@@ -1176,8 +1176,6 @@ export default {
                 break
               }
             }
-          }
-          if (this.optionApps.starting.length > 0) {
             for (let i = 0; i < this.optionApps.starting.length; i++) {
               const s = this.optionApps.starting[i]
               if (x.id === s && x.action === 0) {
@@ -1185,8 +1183,6 @@ export default {
                 break
               }
             }
-          }
-          if (this.optionApps.deploy.length > 0) {
             for (let i = 0; i < this.optionApps.deploy.length; i++) {
               const s = this.optionApps.deploy[i]
               if (x.id === s && x.action === 0) {
@@ -1194,8 +1190,8 @@ export default {
                 break
               }
             }
-          }
-        })
+          })
+        }
         this.pagination = pagination
       })
     },
