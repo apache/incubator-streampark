@@ -315,6 +315,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
+            /**
+             * 此步骤可能会比较耗时,重新开启一个线程去执行..
+             */
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
                     String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
