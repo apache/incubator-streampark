@@ -320,12 +320,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
              */
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
-                    String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
                     if (appParam.getSavePointed()) {
+                        FlinkTrackingTask.addSavepoint(application.getId());
                         SavePoint savePoint = new SavePoint();
+                        String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+                        savePoint.setSavePoint(savePointDir);
                         savePoint.setAppId(application.getId());
                         savePoint.setLastest(true);
-                        savePoint.setSavePoint(savePointDir);
                         savePoint.setCreateTime(new Date());
                         //之前的配置设置为已过期
                         savePointService.obsolete(application.getId());
