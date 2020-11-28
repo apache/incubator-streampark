@@ -1186,7 +1186,7 @@ export default {
               }
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
-              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval * 2) {
+              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
                 console.log('update deploy before:' + this.optionApps.deploy.size)
                 this.optionApps.deploy.delete(x.id)
                 this.handleMapUpdate('deploy')
