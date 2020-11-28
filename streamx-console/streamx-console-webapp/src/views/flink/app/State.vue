@@ -28,6 +28,7 @@
  SCHEDULED: '#722ed1',
  COMPLETED: '#1890ff',
  RESTARTING: '#13c2c2'
+ SAVEPOINT: #FAAD14
   -->
   <div class="app_state" v-if="option === 0">
     <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
@@ -49,6 +50,7 @@
   <div class="app_state" v-else>
     <a-tag color="#1ABBDC" v-if="state === 1 || option === 1" class="status-processing-deploying">DEPLOYING</a-tag>
     <a-tag color="#faad14" v-if="state === 8 || option === 2" class="status-processing-cancelling">CANCELLING</a-tag>
+    <a-tag color="#faad14" v-if="state === 8 || option === 4" class="status-processing-savepointing">SAVEPOINTING</a-tag>
     <a-tag color="#1AB58E" v-if="state === 3 || option === 3 " class="status-processing-starting">STARTING</a-tag>
   </div>
 </template>
@@ -109,6 +111,10 @@ export default {
 
 .status-processing-reconciling {
   animation: reconciling 800ms ease-out infinite alternate;
+}
+
+.status-processing-savepointing {
+  animation: cancelling 800ms ease-out infinite alternate;
 }
 
 @keyframes deploying {
@@ -185,6 +191,17 @@ export default {
   100% {
     border-color: #eb2f96;
     box-shadow: 0 0 10px #eb2f96, inset 0 0 5px #eb2f96;
+  }
+}
+
+@keyframes savepointing {
+  0% {
+    border-color: #faad14;
+    box-shadow: 0 0 1px #faad14, inset 0 0 2px #faad14;
+  }
+  100% {
+    border-color: #faad14;
+    box-shadow: 0 0 10px #faad14, inset 0 0 5px #faad14;
   }
 }
 </style>
