@@ -77,10 +77,10 @@ public class FlinkTrackingTask {
             ThreadUtils.threadFactory("flink-monitor-executor")
     );
 
-    private static ApplicationService applicationService;
-
     @Autowired
     private SavePointService savePointService;
+
+    private static ApplicationService applicationService;
 
     @Autowired
     public void setApplicationService(ApplicationService appService) {
