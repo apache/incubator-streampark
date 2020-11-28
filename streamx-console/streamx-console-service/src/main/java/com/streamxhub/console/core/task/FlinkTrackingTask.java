@@ -224,52 +224,58 @@ public class FlinkTrackingTask {
         /**
          * 1) savePoint obsolete check and NEED_START check
          */
-        switch (currentState) {
-            case CANCELLING:
-                canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
+        // Why is FlinkAppState.RUNNING not judged together with the following? Don't ask me why.
+        if (currentState.equals(FlinkAppState.RUNNING)) {
+            FlinkAppState previousState = FlinkAppState.of(application.getState());
+            if (FlinkAppState.STARTING.equals(previousState)) {
                 /**
-                 * savepoint已完毕.清空状态.
+                 * 发布完重新启动后将"需重启"状态清空
                  */
-                if (savePointCache.getIfPresent(application.getId()) != null) {
+                if (DeployState.NEED_START.get() == application.getDeploy()) {
+                    application.setDeploy(DeployState.NONE.get());
+                }
+            }
+            /**
+             * 保留一分钟的savepoint状态...
+             */
+            if (savePointCache.getIfPresent(application.getId()) != null) {
+                application.setState(FlinkAppState.CANCELLING.getValue());
+            } else {
+                application.setState(currentState.getValue());
+                application.setOptionState(OptionState.NONE.getValue());
+            }
+        } else {
+            switch (currentState) {
+                case CANCELLING:
+                    canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
+                    /**
+                     * savepoint已完毕.清空状态.
+                     */
+                    if (savePointCache.getIfPresent(application.getId()) != null) {
+                        savePointCache.invalidate(application.getId());
+                        application.setOptionState(OptionState.NONE.getValue());
+                    }
+                    application.setState(currentState.getValue());
+                    break;
+                case CANCELED:
+                    log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
+                    stopTracking(application.getId());
+                    stopAppMap.remove(application.getId());
+                    if (StopFrom.NONE.equals(stopFrom)) {
+                        log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
+                        savePointService.obsolete(application.getId());
+                    }
                     savePointCache.invalidate(application.getId());
                     application.setOptionState(OptionState.NONE.getValue());
-                }
-                application.setState(currentState.getValue());
-                break;
-            case CANCELED:
-                log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
-                stopTracking(application.getId());
-                stopAppMap.remove(application.getId());
-                if (StopFrom.NONE.equals(stopFrom)) {
-                    log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
-                    savePointService.obsolete(application.getId());
-                }
-                savePointCache.invalidate(application.getId());
-                application.setOptionState(OptionState.NONE.getValue());
-                application.setState(currentState.getValue());
-                break;
-            case RUNNING:
-                FlinkAppState previousState = FlinkAppState.of(application.getState());
-                if (FlinkAppState.STARTING.equals(previousState)) {
-                    /**
-                     * 发布完重新启动后将"需重启"状态清空
-                     */
-                    if (DeployState.NEED_START.get() == application.getDeploy()) {
-                        application.setDeploy(DeployState.NONE.get());
-                    }
-                }
-                /**
-                 * 保留一分钟的savepoint状态...
-                 */
-                if (savePointCache.getIfPresent(application.getId()) != null) {
-                    application.setState(FlinkAppState.CANCELLING.getValue());
-                } else {
                     application.setState(currentState.getValue());
+                    break;
+                case FAILED:
+                    application.setState(FlinkAppState.FAILED.getValue());
                     application.setOptionState(OptionState.NONE.getValue());
-                }
-                break;
-            default:
-                break;
+                    break;
+                default:
+                    break;
+            }
         }
 
         /**

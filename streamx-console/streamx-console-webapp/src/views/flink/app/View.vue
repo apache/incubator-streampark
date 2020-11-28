@@ -1170,18 +1170,18 @@ export default {
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
-              this.optionApps.starting.delete(x.id)
               console.log('update starting before:' + this.optionApps.starting.size)
+              this.optionApps.starting.delete(x.id)
               this.handleMapUpdate('starting')
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
-              this.optionApps.stoping.delete(x.id)
               console.log('update stoping before:' + this.optionApps.stoping.size)
+              this.optionApps.stoping.delete(x.id)
               this.handleMapUpdate('stoping')
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
-              this.optionApps.deploy.delete(x.id)
               console.log('update deploy before:' + this.optionApps.deploy.size)
+              this.optionApps.deploy.delete(x.id)
               this.handleMapUpdate('deploy')
             }
           }
