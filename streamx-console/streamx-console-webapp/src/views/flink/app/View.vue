@@ -954,7 +954,7 @@ export default {
             3
           )
           this.optionApps.deploy.set(id, id)
-          this.$forceUpdate()
+          this.handleMapUpdate('deploy')
           deploy({
             id: id,
             restart: restart,
@@ -964,7 +964,7 @@ export default {
           }).then((resp) => {
             if (!restart) {
               this.optionApps.deploy.delete(id)
-              this.$forceUpdate()
+              this.handleMapUpdate('deploy')
             }
             console.log(resp)
           })
@@ -1050,7 +1050,7 @@ export default {
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.optionApps.starting.set(id, id)
-          this.$forceUpdate()
+          this.handleMapUpdate('starting')
           this.handleStartCancel()
           start({
             id: id,
@@ -1094,7 +1094,7 @@ export default {
       const drain = this.drain
       const id = this.application.id
       this.optionApps.stoping.set(id, id)
-      this.$forceUpdate()
+      this.handleMapUpdate('stoping')
       this.handleStopCancel()
       cancel({
         id: id,
@@ -1169,15 +1169,15 @@ export default {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) != null) {
               this.optionApps.starting.delete(x.id)
-              this.$forceUpdate()
+              this.handleMapUpdate('starting')
             }
             if (this.optionApps.stoping.get(x.id) != null) {
               this.optionApps.stoping.delete(x.id)
-              this.$forceUpdate()
+              this.handleMapUpdate('delete')
             }
             if (this.optionApps.deploy.get(x.id) != null) {
               this.optionApps.deploy.delete(x.id)
-              this.$forceUpdate()
+              this.handleMapUpdate('deploy')
             }
           }
         })
@@ -1216,6 +1216,23 @@ export default {
         id: app.id
       }).then((resp) => {
       })
+    },
+
+    handleMapUpdate (type) {
+      switch (type) {
+        case 'starting':
+          const startingMap = this.optionApps.starting
+          this.optionApps.starting = new Map(startingMap)
+          break
+        case 'delete':
+          const deleteMap = this.optionApps.delete
+          this.optionApps.delete = new Map(deleteMap)
+          break
+        case 'deploy':
+          const deployMap = this.optionApps.deploy
+          this.optionApps.deploy = new Map(deployMap)
+          break
+      }
     }
   }
 }
