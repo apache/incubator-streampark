@@ -398,7 +398,6 @@
             v-show="record.state === 5 || (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)"
             @click="handleCancel(record)">
           </a-icon>
-
           <a-icon
             type="eye"
             v-permit="'app:detail'"
@@ -407,7 +406,6 @@
             @click="handleDetail(record)"
             title="查看">
           </a-icon>
-
         </template>
 
       </a-table>
