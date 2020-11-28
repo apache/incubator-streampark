@@ -952,7 +952,7 @@ export default {
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
           )
-          this.optionApps.deploy.set(id, id)
+          this.optionApps.deploy.set(id, new Date().getTime())
           this.handleMapUpdate('deploy')
           deploy({
             id: id,
@@ -1049,7 +1049,7 @@ export default {
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           console.log('update starting before:' + this.optionApps.starting.size)
-          this.optionApps.starting.set(id, id)
+          this.optionApps.starting.set(id, new Date().getTime())
           this.handleMapUpdate('starting')
           this.handleStartCancel()
           start({
@@ -1095,7 +1095,7 @@ export default {
       const drain = this.drain
       const id = this.application.id
       console.log('update stoping before:' + this.optionApps.stoping.size)
-      this.optionApps.stoping.set(id, id)
+      this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
       cancel({
@@ -1107,7 +1107,7 @@ export default {
           this.$notification.open({
             message: 'cancel application failed',
             description: resp.exception,
-            icon: <a-icon type="error" style="color: #f5222d" />
+            icon: <a-icon type="error" style="color: #f5222d"/>
           })
         }
       })
@@ -1167,22 +1167,30 @@ export default {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
+        const timestamp = new Date().getTime()
+        const interval = 2000
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
-              console.log('update starting before:' + this.optionApps.starting.size)
-              this.optionApps.starting.delete(x.id)
-              this.handleMapUpdate('starting')
+              if (timestamp - this.optionApps.starting.get(x.id) >= interval) {
+                console.log('update starting before:' + this.optionApps.starting.size)
+                this.optionApps.starting.delete(x.id)
+                this.handleMapUpdate('starting')
+              }
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
-              console.log('update stoping before:' + this.optionApps.stoping.size)
-              this.optionApps.stoping.delete(x.id)
-              this.handleMapUpdate('stoping')
+              if (timestamp - this.optionApps.stoping.get(x.id) >= interval) {
+                console.log('update stoping before:' + this.optionApps.stoping.size)
+                this.optionApps.stoping.delete(x.id)
+                this.handleMapUpdate('stoping')
+              }
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
-              console.log('update deploy before:' + this.optionApps.deploy.size)
-              this.optionApps.deploy.delete(x.id)
-              this.handleMapUpdate('deploy')
+              if (timestamp - this.optionApps.deploy.get(x.id) >= interval) {
+                console.log('update deploy before:' + this.optionApps.deploy.size)
+                this.optionApps.deploy.delete(x.id)
+                this.handleMapUpdate('deploy')
+              }
             }
           }
         })
