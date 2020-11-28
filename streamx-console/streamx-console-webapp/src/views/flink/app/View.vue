@@ -395,6 +395,7 @@
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
+            style="color:#4a9ff5"
             v-show="record.state === 5 || (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)"
             @click="handleCancel(record)">
           </a-icon>
