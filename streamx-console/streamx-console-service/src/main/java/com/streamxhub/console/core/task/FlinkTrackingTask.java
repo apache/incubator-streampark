@@ -62,6 +62,8 @@ public class FlinkTrackingTask {
 
     private static Cache<Long, Application> trackingAppCache = null;
 
+    private static Cache<Long, Byte> savePointCache = null;
+
     private static Map<Long, StopFrom> stopAppMap = new ConcurrentHashMap<>();
 
     private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
@@ -89,6 +91,7 @@ public class FlinkTrackingTask {
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(k -> applicationService.getById(k));
+        savePointCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
         applicationService.list(queryWrapper).forEach((app) -> {
@@ -224,6 +227,13 @@ public class FlinkTrackingTask {
         switch (currentState) {
             case CANCELLING:
                 canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
+                /**
+                 * savepoint已完毕.清空状态.
+                 */
+                if (savePointCache.getIfPresent(application.getId()) != null) {
+                    application.setOptionState(OptionState.NONE.getValue());
+                }
+                application.setState(currentState.getValue());
                 break;
             case CANCELED:
                 log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
@@ -234,6 +244,7 @@ public class FlinkTrackingTask {
                     savePointService.obsolete(application.getId());
                 }
                 application.setOptionState(OptionState.NONE.getValue());
+                application.setState(currentState.getValue());
                 break;
             case RUNNING:
                 FlinkAppState previousState = FlinkAppState.of(application.getState());
@@ -244,9 +255,16 @@ public class FlinkTrackingTask {
                     if (DeployState.NEED_START.get() == application.getDeploy()) {
                         application.setDeploy(DeployState.NONE.get());
                     }
-
                 }
-                application.setOptionState(OptionState.NONE.getValue());
+                /**
+                 * 保留一分钟的savepoint状态...
+                 */
+                if (savePointCache.getIfPresent(application.getId()) != null) {
+                    application.setState(FlinkAppState.CANCELLING.getValue());
+                } else {
+                    application.setState(currentState.getValue());
+                    application.setOptionState(OptionState.NONE.getValue());
+                }
                 break;
             default:
                 break;
@@ -270,12 +288,7 @@ public class FlinkTrackingTask {
         application.setDuration(job.getDuration());
 
         /**
-         * 3) application状态以restapi返回的状态为准
-         */
-        application.setState(currentState.getValue());
-
-        /**
-         * 4) jobId以restapi返回的状态为准
+         * 3) jobId以restapi返回的状态为准
          */
         application.setJobId(job.getId());
 
@@ -308,6 +321,11 @@ public class FlinkTrackingTask {
     public static void addStopping(Long appId) {
         log.info("[StreamX] flinkTrackingTask add app to stopping,appId:{}", appId);
         stopAppMap.put(appId, StopFrom.STREAMX);
+    }
+
+    public static void addSavepoint(Long appId) {
+        log.info("[StreamX] flinkTrackingTask add app to savepoint,appId:{}", appId);
+        savePointCache.put(appId, Byte.valueOf("0"));
     }
 
     public static void flushTracking(Long appId) {
