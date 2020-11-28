@@ -51,7 +51,7 @@
     <a-tag color="#1ABBDC" v-if="option === 1" class="status-processing-deploying">DEPLOYING</a-tag>
     <a-tag color="#faad14" v-if="option === 2" class="status-processing-cancelling">CANCELLING</a-tag>
     <a-tag color="#1AB58E" v-if="option === 3 " class="status-processing-starting">STARTING</a-tag>
-    <a-tag color="#faad14" v-if="option === 4" class="status-processing-cancelling">SAVEPOINTING</a-tag>
+    <a-tag color="#faad14" v-if="option === 4" class="status-processing-cancelling">SAVEPOINT</a-tag>
   </div>
 </template>
 <script>
