@@ -1174,7 +1174,7 @@ export default {
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
               this.optionApps.stoping.delete(x.id)
-              this.handleMapUpdate('delete')
+              this.handleMapUpdate('stoping')
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
               this.optionApps.deploy.delete(x.id)
@@ -1225,9 +1225,9 @@ export default {
           const startingMap = this.optionApps.starting
           this.optionApps.starting = new Map(startingMap)
           break
-        case 'delete':
-          const deleteMap = this.optionApps.delete
-          this.optionApps.delete = new Map(deleteMap)
+        case 'stoping':
+          const stopMap = this.optionApps.stoping
+          this.optionApps.stoping = new Map(stopMap)
           break
         case 'deploy':
           const deployMap = this.optionApps.deploy
