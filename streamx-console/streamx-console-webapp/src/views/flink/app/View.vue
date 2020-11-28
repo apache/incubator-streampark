@@ -1168,7 +1168,7 @@ export default {
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) != null) {
-              this.optionApps.stoping.starting(x.id)
+              this.optionApps.starting.delete(x.id)
               this.$forceUpdate()
             }
             if (this.optionApps.stoping.get(x.id) != null) {

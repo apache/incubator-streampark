@@ -310,7 +310,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
             Application application = getById(appParam.getId());
             application.setState(FlinkAppState.CANCELLING.getValue());
-            application.setOptionState(OptionState.CANCELLING.getValue());
+            if (appParam.getSavePointed()) {
+                //正在执行savepoint...
+                application.setOptionState(OptionState.SAVEPOINTING.getValue());
+            } else {
+                application.setOptionState(OptionState.CANCELLING.getValue());
+            }
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
