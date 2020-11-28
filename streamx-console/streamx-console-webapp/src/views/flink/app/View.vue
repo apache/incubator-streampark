@@ -364,7 +364,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="optionApps.deploy.get(record.id) == null || record.optionState === 0"
+            v-show="record.deploy === 1 &&  record.state !== 1 && (optionApps.deploy.get(record.id) == null || record.optionState === 0)"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
