@@ -1048,7 +1048,7 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
-          console.log('update starting before:' + this.optionApps.starting)
+          console.log('update starting before:' + this.optionApps.starting.size)
           this.optionApps.starting.set(id, id)
           this.handleMapUpdate('starting')
           this.handleStartCancel()
@@ -1094,7 +1094,7 @@ export default {
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
-      console.log('update stoping before:' + this.optionApps.stoping)
+      console.log('update stoping before:' + this.optionApps.stoping.size)
       this.optionApps.stoping.set(id, id)
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
@@ -1171,17 +1171,17 @@ export default {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               this.optionApps.starting.delete(x.id)
-              console.log('update starting before:' + this.optionApps.starting)
+              console.log('update starting before:' + this.optionApps.starting.size)
               this.handleMapUpdate('starting')
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
               this.optionApps.stoping.delete(x.id)
-              console.log('update stoping before:' + this.optionApps.stoping)
+              console.log('update stoping before:' + this.optionApps.stoping.size)
               this.handleMapUpdate('stoping')
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
               this.optionApps.deploy.delete(x.id)
-              console.log('update deploy before:' + this.optionApps.deploy)
+              console.log('update deploy before:' + this.optionApps.deploy.size)
               this.handleMapUpdate('deploy')
             }
           }
@@ -1228,17 +1228,17 @@ export default {
         case 'starting':
           const startingMap = this.optionApps.starting
           this.optionApps.starting = new Map(startingMap)
-          console.log('update starting after:' + this.optionApps.starting)
+          console.log('update starting after:' + this.optionApps.starting.size)
           break
         case 'stoping':
           const stopMap = this.optionApps.stoping
           this.optionApps.stoping = new Map(stopMap)
-          console.log('update stoping after:' + this.optionApps.stoping)
+          console.log('update stoping after:' + this.optionApps.stoping.size)
           break
         case 'deploy':
           const deployMap = this.optionApps.deploy
           this.optionApps.deploy = new Map(deployMap)
-          console.log('update deploy after:' + this.optionApps.deploy)
+          console.log('update deploy after:' + this.optionApps.deploy.size)
           break
       }
     }
