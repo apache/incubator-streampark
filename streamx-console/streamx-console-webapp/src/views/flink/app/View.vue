@@ -1232,23 +1232,9 @@ export default {
     },
 
     handleMapUpdate (type) {
-      switch (type) {
-        case 'starting':
-          const startingMap = this.optionApps.starting
-          this.optionApps.starting = new Map(startingMap)
-          console.log('update starting after:' + this.optionApps.starting.size)
-          break
-        case 'stoping':
-          const stopMap = this.optionApps.stoping
-          this.optionApps.stoping = new Map(stopMap)
-          console.log('update stoping after:' + this.optionApps.stoping.size)
-          break
-        case 'deploy':
-          const deployMap = this.optionApps.deploy
-          this.optionApps.deploy = new Map(deployMap)
-          console.log('update deploy after:' + this.optionApps.deploy.size)
-          break
-      }
+      const map = this.optionApps[type]
+      this.optionApps[type] = new Map(map)
+      console.log('update '.concat(type).concat(' after:' + this.optionApps[type].size))
     }
   }
 }
