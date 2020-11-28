@@ -378,24 +378,24 @@
           </a-icon>
           <a-icon
             type="play-circle"
-            v-if="record.state === 0
+            v-show="(record.state === 0
               || record.state === 2
               || record.state === 7
               || record.state === 9
               || record.state === 10
               || record.state === 11
-              || record.state === 13"
+              || record.state === 13)
+              && (optionApps.starting.get(record.id) === undefined || record.optionState === 0)"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="(optionApps.starting.get(record.id) === undefined || record.optionState === 0)?'#4a9ff5':'gray'"
+            twoToneColor="#4a9ff5"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)?'#4a9ff5':'gray'}"
-            v-show="record.state === 5"
+            v-show="record.state === 5 || (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)"
             @click="handleCancel(record)">
           </a-icon>
 
