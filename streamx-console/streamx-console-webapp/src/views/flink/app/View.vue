@@ -1085,6 +1085,7 @@ export default {
         this.application = null
       }, 1000)
     },
+
     handleStopOk () {
       this.$message.info(
         '已发送停止请求,该应用正在停止',

@@ -305,7 +305,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void cancel(Application appParam) {
         FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
             Application application = getById(appParam.getId());
@@ -319,17 +318,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
-            String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
-            if (appParam.getSavePointed()) {
-                SavePoint savePoint = new SavePoint();
-                savePoint.setAppId(application.getId());
-                savePoint.setLastest(true);
-                savePoint.setSavePoint(savePointDir);
-                savePoint.setCreateTime(new Date());
-                //之前的配置设置为已过期
-                this.savePointService.obsolete(application.getId());
-                this.savePointService.save(savePoint);
-            }
+            Executors.newSingleThreadExecutor().submit(() -> {
+                String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+                if (appParam.getSavePointed()) {
+                    SavePoint savePoint = new SavePoint();
+                    savePoint.setAppId(application.getId());
+                    savePoint.setLastest(true);
+                    savePoint.setSavePoint(savePointDir);
+                    savePoint.setCreateTime(new Date());
+                    //之前的配置设置为已过期
+                    savePointService.obsolete(application.getId());
+                    savePointService.save(savePoint);
+                }
+            });
         });
     }
 
