@@ -669,6 +669,7 @@ export default {
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
+      queryInterval: 2000,
       yarn: null,
       deployVisible: false,
       stopVisible: false,
@@ -905,7 +906,7 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
-    const timer = window.setInterval(() => this.handleFetch(false), 2000)
+    const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
@@ -1168,25 +1169,24 @@ export default {
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
-        const interval = 2000
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
-              if (timestamp - this.optionApps.starting.get(x.id) >= interval) {
+              if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
                 console.log('update starting before:' + this.optionApps.starting.size)
                 this.optionApps.starting.delete(x.id)
                 this.handleMapUpdate('starting')
               }
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
-              if (timestamp - this.optionApps.stoping.get(x.id) >= interval) {
+              if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
                 console.log('update stoping before:' + this.optionApps.stoping.size)
                 this.optionApps.stoping.delete(x.id)
                 this.handleMapUpdate('stoping')
               }
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
-              if (timestamp - this.optionApps.deploy.get(x.id) >= interval) {
+              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval * 2) {
                 console.log('update deploy before:' + this.optionApps.deploy.size)
                 this.optionApps.deploy.delete(x.id)
                 this.handleMapUpdate('deploy')
