@@ -316,16 +316,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
             Executors.newSingleThreadExecutor().submit(() -> {
-                String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
-                if (appParam.getSavePointed()) {
-                    SavePoint savePoint = new SavePoint();
-                    savePoint.setAppId(application.getId());
-                    savePoint.setLastest(true);
-                    savePoint.setSavePoint(savePointDir);
-                    savePoint.setCreateTime(new Date());
-                    //之前的配置设置为已过期
+                try {
+                    String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+                    if (appParam.getSavePointed()) {
+                        SavePoint savePoint = new SavePoint();
+                        savePoint.setAppId(application.getId());
+                        savePoint.setLastest(true);
+                        savePoint.setSavePoint(savePointDir);
+                        savePoint.setCreateTime(new Date());
+                        //之前的配置设置为已过期
+                        savePointService.obsolete(application.getId());
+                        savePointService.save(savePoint);
+                    }
+                } catch (Exception e) {
+                    //保持savepoint失败.则将之前的统统设置为过期
                     savePointService.obsolete(application.getId());
-                    savePointService.save(savePoint);
                 }
             });
         });
