@@ -20,6 +20,8 @@
  */
 package com.streamxhub.console.core.enums;
 
+import java.util.Arrays;
+
 /**
  * @author benjobs
  */
@@ -34,17 +36,17 @@ public enum DeployState {
     /**
      * 程序更新需要重新发布
      */
-    APP_UPDATED(1),
+    NEED_DEPLOY_AFTER_BUILD(1),
 
     /**
      * 配置文件更新需要重新启动
      */
-    CONF_UPDATED(2),
+    NEED_START_AFTER_UPDATE(2),
 
     /**
      * 程序发布完,需要重新启动.
      */
-    NEED_START(3);
+    NEED_START_AFTER_DEPLOY(3);
 
     int value;
 
@@ -54,5 +56,9 @@ public enum DeployState {
 
     public int get() {
         return this.value;
+    }
+
+    public static DeployState of(Integer state) {
+        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

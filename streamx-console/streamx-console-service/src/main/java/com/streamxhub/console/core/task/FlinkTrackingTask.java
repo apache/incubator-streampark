@@ -180,9 +180,10 @@ public class FlinkTrackingTask {
             FlinkAppState previousState = FlinkAppState.of(application.getState());
             if (FlinkAppState.STARTING.equals(previousState)) {
                 /**
-                 * 发布完重新启动后将"需重启"状态清空
+                 * 发布完需重启和更新完匹配需重新的状态清空...
                  */
-                if (DeployState.NEED_START.get() == application.getDeploy()) {
+                DeployState deployState = DeployState.of(application.getDeploy());
+                if (DeployState.NEED_START_AFTER_UPDATE.equals(deployState) || DeployState.NEED_START_AFTER_DEPLOY.equals(deployState)) {
                     application.setDeploy(DeployState.NONE.get());
                 }
             }

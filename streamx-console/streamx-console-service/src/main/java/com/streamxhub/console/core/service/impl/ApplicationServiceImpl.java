@@ -182,7 +182,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 /**
                  * 配置文件已更新
                  */
-                application.setDeploy(DeployState.CONF_UPDATED.get());
+                application.setDeploy(DeployState.NEED_START_AFTER_UPDATE.get());
                 baseMapper.updateById(application);
                 return true;
             } catch (Exception e) {
@@ -232,7 +232,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setDeploy(DeployState.NONE.get());
             this.updateDeploy(application);
         } else {
-            application.setDeploy(DeployState.NEED_START.get());
+            application.setDeploy(DeployState.NEED_START_AFTER_DEPLOY.get());
             this.updateDeploy(application);
             if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
