@@ -356,7 +356,7 @@
               && optionApps.deploy.get(record.id) == null
               && optionApps.stoping.get(record.id) == null
               && optionApps.starting.get(record.id) == null
-              && record.optionState ===0"
+              && record.optionState === 0"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
