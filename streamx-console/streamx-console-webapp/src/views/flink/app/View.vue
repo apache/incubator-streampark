@@ -353,9 +353,9 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon
             v-if="record.state !== 5
-              && optionApps.deploy.get(record.id) == null
-              && optionApps.stoping.get(record.id) == null
-              && optionApps.starting.get(record.id) == null
+              && optionApps.deploy.get(record.id) === undefined
+              && optionApps.stoping.get(record.id) === undefined
+              && optionApps.starting.get(record.id) === undefined
               && record.optionState === 0"
             v-permit="'app:mapping'"
             type="deployment-unit"
@@ -364,7 +364,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="record.deploy === 1 &&  record.state !== 1 && (optionApps.deploy.get(record.id) == null || record.optionState === 0)"
+            v-show="record.deploy === 1 && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record.optionState === 0)"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -387,14 +387,14 @@
               || record.state === 13"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="(optionApps.starting.get(record.id) == null || record.optionState === 0)?'#4a9ff5':'gray'"
+            :twoToneColor="(optionApps.starting.get(record.id) === undefined || record.optionState === 0)?'#4a9ff5':'gray'"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': (optionApps.stoping.get(record.id) == null || record.optionState === 0)?'#4a9ff5':'gray'}"
+            :style="{'color': (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)?'#4a9ff5':'gray'}"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
@@ -923,7 +923,7 @@ export default {
     ...mapActions(['SetAppId']),
 
     handleDeploy (app) {
-      if (this.optionApps.deploy.get(app.id) == null || app.optionState === 0) {
+      if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
         this.deployVisible = true
         this.application = app
       }
@@ -1008,7 +1008,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.get(app.id) == null || app.optionState === 0) {
+      if (this.optionApps.starting.get(app.id) === undefined || app.optionState === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1070,7 +1070,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.get(app.id) == null || app.optionState === 0) {
+      if (this.optionApps.stoping.get(app.id) === undefined || app.optionState === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1168,15 +1168,15 @@ export default {
         this.dataSource = resp.data.records
         this.dataSource.forEach(x => {
           if (x.optionState === 0) {
-            if (this.optionApps.starting.get(x.id) != null) {
+            if (this.optionApps.starting.get(x.id) !== undefined) {
               this.optionApps.starting.delete(x.id)
               this.handleMapUpdate('starting')
             }
-            if (this.optionApps.stoping.get(x.id) != null) {
+            if (this.optionApps.stoping.get(x.id) !== undefined) {
               this.optionApps.stoping.delete(x.id)
               this.handleMapUpdate('delete')
             }
-            if (this.optionApps.deploy.get(x.id) != null) {
+            if (this.optionApps.deploy.get(x.id) !== undefined) {
               this.optionApps.deploy.delete(x.id)
               this.handleMapUpdate('deploy')
             }
