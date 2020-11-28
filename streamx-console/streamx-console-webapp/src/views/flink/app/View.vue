@@ -396,7 +396,7 @@
             title="停止应用"
             v-permit="'app:cancel'"
             style="color:#4a9ff5"
-            v-show="record.state === 5 || (optionApps.stoping.get(record.id) === undefined || record.optionState === 0)"
+            v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
           <a-icon
