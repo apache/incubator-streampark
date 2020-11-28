@@ -231,6 +231,7 @@ public class FlinkTrackingTask {
                  * savepoint已完毕.清空状态.
                  */
                 if (savePointCache.getIfPresent(application.getId()) != null) {
+                    savePointCache.invalidate(application.getId());
                     application.setOptionState(OptionState.NONE.getValue());
                 }
                 application.setState(currentState.getValue());
@@ -243,6 +244,7 @@ public class FlinkTrackingTask {
                     log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
                 }
+                savePointCache.invalidate(application.getId());
                 application.setOptionState(OptionState.NONE.getValue());
                 application.setState(currentState.getValue());
                 break;
