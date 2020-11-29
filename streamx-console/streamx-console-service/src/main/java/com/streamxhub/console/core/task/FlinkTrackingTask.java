@@ -205,7 +205,7 @@ public class FlinkTrackingTask {
                  * 发布完需重启和更新完匹配需重新的状态清空...
                  */
                 DeployState deployState = DeployState.of(application.getDeploy());
-                if (DeployState.NEED_START_AFTER_UPDATE.equals(deployState) || DeployState.NEED_START_AFTER_DEPLOY.equals(deployState)) {
+                if (DeployState.NEED_RESTART_AFTER_UPDATE.equals(deployState) || DeployState.NEED_RESTART_AFTER_DEPLOY.equals(deployState)) {
                     application.setDeploy(DeployState.NONE.get());
                 }
             }

@@ -41,12 +41,12 @@ public enum DeployState {
     /**
      * 配置文件更新需要重新启动
      */
-    NEED_START_AFTER_UPDATE(2),
+    NEED_RESTART_AFTER_UPDATE(2),
 
     /**
      * 程序发布完,需要重新启动.
      */
-    NEED_START_AFTER_DEPLOY(3);
+    NEED_RESTART_AFTER_DEPLOY(3);
 
     int value;
 
