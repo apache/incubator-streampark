@@ -132,7 +132,6 @@ public class FlinkTrackingTask {
             } catch (IOException exception) {
                 if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                     log.error("[StreamX] flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
-                    stopAppMap.remove(application.getId());
                     if (StopFrom.NONE.equals(stopFrom)) {
                         savePointService.obsolete(application.getId());
                     }
@@ -172,8 +171,31 @@ public class FlinkTrackingTask {
      */
     private void restApiCallback(Application application, JobsOverview.Job job, StopFrom stopFrom) {
         FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
+
         /**
-         * 1) savePoint obsolete check and NEED_START check
+         * 1) jobId以restapi返回的状态为准
+         */
+        application.setJobId(job.getId());
+
+        /**
+         * 2) duration
+         */
+        long startTime = job.getStartTime();
+        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
+        if (application.getStartTime() == null) {
+            application.setStartTime(new Date(startTime));
+        } else if (startTime != application.getStartTime().getTime()) {
+            application.setStartTime(new Date(startTime));
+        }
+        if (endTime != -1) {
+            if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
+                application.setEndTime(new Date(endTime));
+            }
+        }
+        application.setDuration(job.getDuration());
+
+        /**
+         * 3) savePoint obsolete check and NEED_START check
          */
         // Why is FlinkAppState.RUNNING not judged together with the following? Don't ask me why.
         if (currentState.equals(FlinkAppState.RUNNING)) {
@@ -196,6 +218,7 @@ public class FlinkTrackingTask {
                 application.setState(currentState.getValue());
                 application.setOptionState(OptionState.NONE.getValue());
             }
+            trackingAppCache.put(application.getId(), application);
         } else {
             switch (currentState) {
                 case CANCELLING:
@@ -208,51 +231,28 @@ public class FlinkTrackingTask {
                         application.setOptionState(OptionState.NONE.getValue());
                     }
                     application.setState(currentState.getValue());
+                    trackingAppCache.put(application.getId(), application);
                     break;
                 case CANCELED:
                     log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
-                    stopTracking(application.getId());
-                    stopAppMap.remove(application.getId());
+                    application.setOptionState(OptionState.NONE.getValue());
+                    application.setState(currentState.getValue());
                     if (StopFrom.NONE.equals(stopFrom)) {
                         log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                         savePointService.obsolete(application.getId());
                     }
                     savePointCache.invalidate(application.getId());
-                    application.setOptionState(OptionState.NONE.getValue());
-                    application.setState(currentState.getValue());
+                    persistentAndClean(application);
                     break;
                 case FAILED:
                     application.setState(FlinkAppState.FAILED.getValue());
                     application.setOptionState(OptionState.NONE.getValue());
+                    persistentAndClean(application);
                     break;
                 default:
                     break;
             }
         }
-
-        /**
-         * 2) duration
-         */
-        long startTime = job.getStartTime();
-        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
-        if (application.getStartTime() == null) {
-            application.setStartTime(new Date(startTime));
-        } else if (startTime != application.getStartTime().getTime()) {
-            application.setStartTime(new Date(startTime));
-        }
-        if (endTime != -1) {
-            if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-                application.setEndTime(new Date(endTime));
-            }
-        }
-        application.setDuration(job.getDuration());
-
-        /**
-         * 3) jobId以restapi返回的状态为准
-         */
-        application.setJobId(job.getId());
-
-        trackingAppCache.put(application.getId(), application);
     }
 
     /**
@@ -270,7 +270,6 @@ public class FlinkTrackingTask {
             log.info("[StreamX] flinkTrackingTask previous state was canceling.");
             if (StopFrom.NONE.equals(stopFrom)) {
                 log.error("[StreamX] flinkTrackingTask query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
-                stopAppMap.remove(application.getId());
                 savePointService.obsolete(application.getId());
             }
             application.setState(FlinkAppState.CANCELED.getValue());
@@ -286,7 +285,6 @@ public class FlinkTrackingTask {
                 String state = appInfo.getApp().getFinalStatus();
                 FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                 if (FlinkAppState.KILLED.equals(flinkAppState)) {
-                    stopAppMap.remove(application.getId());
                     if (StopFrom.NONE.equals(stopFrom)) {
                         log.error("[StreamX] flinkTrackingTask query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
                         savePointService.obsolete(application.getId());
@@ -301,7 +299,6 @@ public class FlinkTrackingTask {
                 /**s
                  * 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                  */
-                stopAppMap.remove(application.getId());
                 if (StopFrom.NONE.equals(stopFrom)) {
                     log.error("[StreamX] flinkTrackingTask query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
@@ -311,6 +308,7 @@ public class FlinkTrackingTask {
                     application.setState(FlinkAppState.CANCELED.getValue());
                 }
                 application.setOptionState(OptionState.NONE.getValue());
+                application.setEndTime(new Date());
                 this.persistentAndClean(application);
             }
         }
@@ -382,6 +380,7 @@ public class FlinkTrackingTask {
 
     public static void stopTracking(Long appId) {
         log.info("[StreamX] flinkTrackingTask stop app,appId:{}", appId);
+        stopAppMap.remove(appId);
         trackingAppId.invalidate(appId);
         trackingAppCache.invalidate(appId);
     }
