@@ -181,7 +181,7 @@ public class FlinkTrackingTask {
          * 2) duration
          */
         long startTime = job.getStartTime();
-        long endTime = job.getEndTime() == -1 ? -1 : job.getEndTime();
+        long endTime = job.getEndTime();
         if (application.getStartTime() == null) {
             application.setStartTime(new Date(startTime));
         } else if (startTime != application.getStartTime().getTime()) {
@@ -197,7 +197,6 @@ public class FlinkTrackingTask {
         /**
          * 3) savePoint obsolete check and NEED_START check
          */
-        // Why is FlinkAppState.RUNNING not judged together with the following? Don't ask me why.
         if (currentState.equals(FlinkAppState.RUNNING)) {
             FlinkAppState previousState = FlinkAppState.of(application.getState());
             if (FlinkAppState.STARTING.equals(previousState)) {
@@ -219,39 +218,31 @@ public class FlinkTrackingTask {
                 application.setOptionState(OptionState.NONE.getValue());
             }
             trackingAppCache.put(application.getId(), application);
-        } else {
-            switch (currentState) {
-                case CANCELLING:
-                    canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
-                    /**
-                     * savepoint已完毕.清空状态.
-                     */
-                    if (savePointCache.getIfPresent(application.getId()) != null) {
-                        savePointCache.invalidate(application.getId());
-                        application.setOptionState(OptionState.NONE.getValue());
-                    }
-                    application.setState(currentState.getValue());
-                    trackingAppCache.put(application.getId(), application);
-                    break;
-                case CANCELED:
-                    log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
-                    application.setOptionState(OptionState.NONE.getValue());
-                    application.setState(currentState.getValue());
-                    if (StopFrom.NONE.equals(stopFrom)) {
-                        log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
-                        savePointService.obsolete(application.getId());
-                    }
-                    savePointCache.invalidate(application.getId());
-                    persistentAndClean(application);
-                    break;
-                case FAILED:
-                    application.setState(FlinkAppState.FAILED.getValue());
-                    application.setOptionState(OptionState.NONE.getValue());
-                    persistentAndClean(application);
-                    break;
-                default:
-                    break;
+        } else if (currentState.equals(FlinkAppState.CANCELLING)) {
+            canceling.put(application.getId(), new Tracker(atomicIndex.get(), application.getId()));
+            /**
+             * savepoint已完毕.清空状态.
+             */
+            if (savePointCache.getIfPresent(application.getId()) != null) {
+                savePointCache.invalidate(application.getId());
+                application.setOptionState(OptionState.NONE.getValue());
             }
+            application.setState(currentState.getValue());
+            trackingAppCache.put(application.getId(), application);
+        } else if (currentState.equals(FlinkAppState.CANCELED)) {
+            log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
+            application.setOptionState(OptionState.NONE.getValue());
+            application.setState(currentState.getValue());
+            if (StopFrom.NONE.equals(stopFrom)) {
+                log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
+                savePointService.obsolete(application.getId());
+            }
+            savePointCache.invalidate(application.getId());
+            persistentAndClean(application);
+        } else if (currentState.equals(FlinkAppState.FAILED)) {
+            application.setState(FlinkAppState.FAILED.getValue());
+            application.setOptionState(OptionState.NONE.getValue());
+            persistentAndClean(application);
         }
     }
 
