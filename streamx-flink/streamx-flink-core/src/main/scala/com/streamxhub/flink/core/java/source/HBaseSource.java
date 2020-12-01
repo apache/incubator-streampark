@@ -33,7 +33,7 @@ import java.util.Properties;
  */
 public class HBaseSource<T> {
     private StreamingContext ctx;
-    private Properties property = new Properties();
+    private Properties property;
 
     public HBaseSource(StreamingContext ctx,Properties property) {
         this.ctx = ctx;
