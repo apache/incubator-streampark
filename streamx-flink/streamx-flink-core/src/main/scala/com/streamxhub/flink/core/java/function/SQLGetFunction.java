@@ -20,11 +20,28 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import org.apache.hadoop.hbase.client.Result;
 
 import java.io.Serializable;
+import java.util.Map;
 
-@FunctionalInterface
-public interface HBaseResultFunction<T> extends Serializable {
-    T result(Result result);
+/**
+ * @author benjobs
+ */
+//@FunctionalInterface
+public interface SQLGetFunction<T> extends Serializable {
+    /**
+     * 获取要查询的SQL
+     *
+     * @return
+     * @throws Exception
+     */
+    String getQuery() throws Exception;
+
+    /**
+     * 将查下结果以Map的方式返回,用户去实现转成对象.
+     * @param map
+     * @return
+     */
+    Iterable<T> doResult(Iterable<Map<String,?>> map);
+
 }

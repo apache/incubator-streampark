@@ -20,8 +20,7 @@
  */
 package com.streamxhub.flink.core.java.source;
 
-import com.streamxhub.flink.core.java.function.HBaseQueryFunction;
-import com.streamxhub.flink.core.java.function.HBaseResultFunction;
+import com.streamxhub.flink.core.java.function.HBaseFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.source.HBaseSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -41,8 +40,8 @@ public class HBaseSource<T> {
         this.property = property;
     }
 
-    public DataStreamSource<T> getDataStream(HBaseQueryFunction queryFunc, HBaseResultFunction<T> resultFunc) {
-        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, queryFunc, resultFunc,null);
+    public DataStreamSource<T> getDataStream(HBaseFunction func) {
+        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, func,null);
         return ctx.getJavaEnv().addSource(sourceFunction);
     }
 }

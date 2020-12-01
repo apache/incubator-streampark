@@ -42,14 +42,16 @@ object MongoSource {
 
 class MongoSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
+
   /**
    *
    * @param queryFun
    * @param resultFun
-   * @param config
+   * @param prop
    * @tparam R
    * @return
    */
+
   def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val mongoFun = new MongoSourceFunction[R](queryFun, resultFun)
@@ -63,7 +65,7 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
  * @param queryFun
  * @param resultFun
  * @param typeInformation$R$0
- * @param config
+ * @param prop
  * @tparam R
  */
 private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {

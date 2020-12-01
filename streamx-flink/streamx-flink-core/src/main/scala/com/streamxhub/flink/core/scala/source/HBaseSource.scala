@@ -34,7 +34,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.client._
 import java.util.Properties
 
-import com.streamxhub.flink.core.java.function.{HBaseQueryFunction, HBaseResultFunction}
+import com.streamxhub.flink.core.java.function.HBaseFunction
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 
@@ -73,8 +73,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, 
 
   @volatile var query: HBaseQuery = _
 
-  private[this] var javaQueryFunc:HBaseQueryFunction = _
-  private[this] var javaResultFunc:HBaseResultFunction[R] = _
+  private[this] var hbaseFunc:HBaseFunction[R] = _
   private[this] var scalaQueryFunc:HBaseQuery => HBaseQuery = _
   private[this] var scalaResultFunc:Result => R = _
   @transient private var state: ListState[HBaseQuery] = _
@@ -88,10 +87,9 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, 
   }
 
   //for JAVA
-  def this(prop: Properties, javaQueryFunc: HBaseQueryFunction, javaResultFunc: HBaseResultFunction[R]) {
+  def this(prop: Properties, hbaseFunc: HBaseFunction[R]) {
     this(ApiType.JAVA, prop)
-    this.javaQueryFunc = javaQueryFunc
-    this.javaResultFunc = javaResultFunc
+    this.hbaseFunc = hbaseFunc
   }
 
   @throws[Exception]
@@ -105,14 +103,14 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, 
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = apiType match {
           case ApiType.SCALA => scalaQueryFunc(query)
-          case ApiType.JAVA => javaQueryFunc.query(query)
+          case ApiType.JAVA => hbaseFunc.getQuery(query)
         }
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
         table.getScanner(query).foreach(x => {
           apiType match {
             case ApiType.SCALA =>  ctx.collect(scalaResultFunc(x))
-            case ApiType.JAVA => ctx.collect(javaResultFunc.result(x))
+            case ApiType.JAVA => ctx.collect(hbaseFunc.doResult(x))
           }
         })
       }
