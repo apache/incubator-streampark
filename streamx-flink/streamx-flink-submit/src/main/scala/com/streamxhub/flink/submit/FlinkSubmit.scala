@@ -71,8 +71,7 @@ object FlinkSubmit extends Logger {
       throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
     }
     val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
-    val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.retrieve(applicationId).getClusterClient
-    clusterClient
+    clusterDescriptor.retrieve(applicationId).getClusterClient
   }
 
   private[this] def getJobID(jobId: String): JobID = {
