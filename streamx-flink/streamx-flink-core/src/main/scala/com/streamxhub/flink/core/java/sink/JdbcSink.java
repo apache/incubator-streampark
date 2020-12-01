@@ -21,8 +21,8 @@
 package com.streamxhub.flink.core.java.sink;
 
 import com.streamxhub.common.util.ConfigUtils;
+import com.streamxhub.flink.core.java.function.SQLToFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.java.function.ToSQLFunction;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.sink.Jdbc2PCSinkFunction;
 import com.streamxhub.flink.core.scala.sink.JdbcSinkFunction;
@@ -39,7 +39,7 @@ public class JdbcSink<T> {
 
     private StreamingContext context;
     private Properties jdbc;
-    private ToSQLFunction<T> toSQLFunc;
+    private SQLToFunction<T> sqlFunc;
     private String dialect = Dialect.MYSQL().toString().toLowerCase();
     private String alias = "";
 
@@ -64,18 +64,18 @@ public class JdbcSink<T> {
         return this;
     }
 
-    public JdbcSink<T> sql(ToSQLFunction<T> func) {
-        this.toSQLFunc = func;
+    public JdbcSink<T> sql(SQLToFunction<T> func) {
+        this.sqlFunc = func;
         return this;
     }
 
     public DataStreamSink<T> sink(DataStream<T> dataStream) {
-        JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.toSQLFunc);
+        JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
         return dataStream.addSink(sinkFun);
     }
 
     public DataStreamSink<T> towPCSink(DataStream<T> dataStream) {
-        Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.toSQLFunc);
+        Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.sqlFunc);
         return dataStream.addSink(sinkFun);
     }
 

@@ -171,7 +171,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     checkpoint()
 
     apiType match {
-      case ApiType.JAVA if javaEnvConf != null => javaEnvConf.envConfig(this.streamEnv.getJavaEnv, this.parameter)
+      case ApiType.JAVA if javaEnvConf != null => javaEnvConf.doConfig(this.streamEnv.getJavaEnv, this.parameter)
       case ApiType.SCALA if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
       case _ =>
     }

@@ -20,17 +20,17 @@
  */
 package com.streamxhub.flink.core.java.function;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
-import java.io.Serializable;
+import java.util.List;
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface ToSQLFunction<T> extends Serializable {
-    /**
-     * @param bean
-     * @return
-     */
-    String toSQL(T bean);
+public interface MongoFunction<T> {
+
+    FindIterable<Document> getQuery(MongoDatabase database);
+
+    List<T> doResult(MongoCursor<Document> cursor);
+
 }
