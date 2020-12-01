@@ -20,45 +20,47 @@
  */
 package com.streamxhub.console.core.enums;
 
+import lombok.Getter;
+
 import java.util.Arrays;
 
 /**
  * @author benjobs
  */
 
-public enum DeployState {
+@Getter
+public enum OptionState {
 
     /**
-     * 不需要重新发布
+     * Application which is currently action: none.
      */
     NONE(0),
+    /**
+     * Application which is currently action: deploying.
+     */
+    DEPLOYING(1),
+    /**
+     * Application which is currently action: cancelling.
+     */
+    CANCELLING(2),
 
     /**
-     * 程序更新需要重新发布
+     * Application which is currently action: starting.
      */
-    NEED_DEPLOY_AFTER_BUILD(1),
+    STARTING(3),
 
     /**
-     * 配置文件更新需要重新启动
+     * Application which is currently action: savepointing.
      */
-    NEED_RESTART_AFTER_UPDATE(2),
-
-    /**
-     * 程序发布完,需要重新启动.
-     */
-    NEED_RESTART_AFTER_DEPLOY(3);
+    SAVEPOINTING(4);
 
     int value;
 
-    DeployState(int value) {
+    OptionState(int value) {
         this.value = value;
     }
 
-    public int get() {
-        return this.value;
-    }
-
-    public static DeployState of(Integer state) {
+    public static OptionState of(Integer state) {
         return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
     }
 }

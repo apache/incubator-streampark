@@ -21,6 +21,7 @@
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>
@@ -72,6 +73,9 @@
             </if>
             <if test="application.deploy != null">
                 deploy=#{application.deploy},
+            </if>
+            <if test="application.optionState != null">
+                option_state=#{application.optionState},
             </if>
             <if test="application.startTime != null">
                 start_time=#{application.startTime},

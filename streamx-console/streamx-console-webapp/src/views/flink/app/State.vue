@@ -1,35 +1,36 @@
 <template>
-  <div class="app_state">
-    <!--
+  <!--
    CREATED(0),
-   DEPLOYING(1),
-   DEPLOYED(2),
-   STARTING(3),
-   RESTARTING(4),
-   RUNNING(5),
-   FAILING(6),
-   FAILED(7),
-   CANCELLING(8),
-   CANCELED(9),
-   FINISHED(10),
-   SUSPENDED(11),
-   RECONCILING(12),
-   LOST(13);
+  DEPLOYING(1),
+  DEPLOYED(2),
+  STARTING(3),
+  RESTARTING(4),
+  RUNNING(5),
+  FAILING(6),
+  FAILED(7),
+  CANCELLING(8),
+  CANCELED(9),
+  FINISHED(10),
+  SUSPENDED(11),
+  RECONCILING(12),
+  LOST(13);
 
-  TOTAL: '#112641',
-   RUNNING: '#52c41a',
-   FAILED: '#f5222d',
-   FINISHED: '#1890ff',
-   CANCELED: '#fa8c16',
-   CANCELING: '#faad14',
-   CREATED: '#2f54eb',
-   DEPLOYING: '#13c2c2',
-   RECONCILING: '#eb2f96',
-   IN_PROGRESS: '#faad14',
-   SCHEDULED: '#722ed1',
-   COMPLETED: '#1890ff',
-   RESTARTING: '#13c2c2'
- -->
+ TOTAL: '#112641',
+ RUNNING: '#52c41a',
+ FAILED: '#f5222d',
+ FINISHED: '#1890ff',
+ CANCELED: '#fa8c16',
+ CANCELING: '#faad14',
+ CREATED: '#2f54eb',
+ DEPLOYING: '#13c2c2',
+ RECONCILING: '#eb2f96',
+ IN_PROGRESS: '#faad14',
+ SCHEDULED: '#722ed1',
+ COMPLETED: '#1890ff',
+ RESTARTING: '#13c2c2'
+ SAVEPOINT: #FAAD14
+  -->
+  <div class="app_state" v-if="option === 0">
     <a-tag color="#2f54eb" v-if="state === 0">CREATED</a-tag>
     <a-tag color="#1ABBDC" v-if="state === 1" class="status-processing-deploying">DEPLOYING</a-tag>
     <a-tag color="#108ee9" v-if="state === 2">DEPLOYED</a-tag>
@@ -46,12 +47,22 @@
     <a-tag color="#000000" v-if="state === 13">LOST</a-tag>
     <a-tag color="#13c2c2" v-if="state === 14" class="status-processing-restarting">MAPPING</a-tag>
   </div>
+  <div class="app_state" v-else>
+    <a-tag color="#1ABBDC" v-if="option === 1" class="status-processing-deploying">DEPLOYING</a-tag>
+    <a-tag color="#faad14" v-if="option === 2" class="status-processing-cancelling">CANCELLING</a-tag>
+    <a-tag color="#1AB58E" v-if="option === 3 " class="status-processing-starting">STARTING</a-tag>
+    <a-tag color="#faad14" v-if="option === 4" class="status-processing-cancelling">SAVEPOINT</a-tag>
+  </div>
 </template>
 <script>
 export default {
   name: 'State',
   props: {
     state: {
+      type: Number,
+      default: null
+    },
+    option: {
       type: Number,
       default: null
     }

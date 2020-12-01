@@ -334,8 +334,8 @@
           <span v-else> - </span>
         </template>
 
-        <template slot="state" slot-scope="state">
-          <State :state="state"></State>
+        <template slot="state" slot-scope="text, record">
+          <State :state="record.state" :option="record.optionState"></State>
         </template>
 
         <template slot="customOperation">
@@ -353,9 +353,10 @@
         <template slot="operation" slot-scope="text, record">
           <a-icon
             v-if="record.state !== 5
-              && optionApps.deploy.findIndex((x) => x.id == record.id) == -1
-              && optionApps.stoping.findIndex((x) => x.id == record.id) == -1
-              && optionApps.starting.findIndex((x) => x.id == record.id) == -1"
+              && optionApps.deploy.get(record.id) === undefined
+              && optionApps.stoping.get(record.id) === undefined
+              && optionApps.starting.get(record.id) === undefined
+              && record.optionState === 0"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
@@ -363,7 +364,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="record.deploy === 1 && record.state !== 1 && optionApps.deploy.findIndex((x) => x.id == record.id) == -1 "
+            v-show="record.deploy === 1 && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record.optionState === 0)"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -377,27 +378,27 @@
           </a-icon>
           <a-icon
             type="play-circle"
-            v-if="(record.state === 0
+            v-show="(record.state === 0
               || record.state === 2
               || record.state === 7
               || record.state === 9
               || record.state === 10
               || record.state === 11
-              || record.state === 13) && optionApps.deploy.findIndex((x) => x.id == record.id) == -1"
+              || record.state === 13)
+              && (optionApps.starting.get(record.id) === undefined || record.optionState === 0)"
             v-permit="'app:start'"
             theme="twoTone"
-            :twoToneColor="optionApps.starting.findIndex((x) => x.id == record.id) == -1?'#4a9ff5':'gray'"
+            twoToneColor="#4a9ff5"
             @click="handleStart(record)">
           </a-icon>
           <a-icon
             type="poweroff"
             title="停止应用"
             v-permit="'app:cancel'"
-            :style="{'color': optionApps.stoping.findIndex((x) => x.id == record.id) == -1?'#4a9ff5':'gray'}"
+            style="color:#4a9ff5"
             v-show="record.state === 5"
             @click="handleCancel(record)">
           </a-icon>
-
           <a-icon
             type="eye"
             v-permit="'app:detail'"
@@ -406,7 +407,6 @@
             @click="handleDetail(record)"
             title="查看">
           </a-icon>
-
         </template>
 
       </a-table>
@@ -669,6 +669,7 @@ export default {
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
+      queryInterval: 2000,
       yarn: null,
       deployVisible: false,
       stopVisible: false,
@@ -688,9 +689,9 @@ export default {
       searchText: '',
       searchInput: null,
       optionApps: {
-        'starting': [],
-        'stoping': [],
-        'deploy': []
+        'starting': new Map(),
+        'stoping': new Map(),
+        'deploy': new Map()
       },
       searchedColumn: '',
       paginationInfo: null,
@@ -905,7 +906,7 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
-    const timer = window.setInterval(() => this.handleFetch(false), 2000)
+    const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
@@ -922,7 +923,7 @@ export default {
     ...mapActions(['SetAppId']),
 
     handleDeploy (app) {
-      if (this.optionApps.deploy.findIndex((x) => x.id === app.id) === -1) {
+      if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
         this.deployVisible = true
         this.application = app
       }
@@ -952,11 +953,8 @@ export default {
             '已发送部署请求,后台正在执行部署,请耐心等待',
             3
           )
-          this.optionApps.deploy.push({
-            'id': id,
-            'timestamp': new Date().getTime(),
-            'state': this.application.state
-          })
+          this.optionApps.deploy.set(id, new Date().getTime())
+          this.handleMapUpdate('deploy')
           deploy({
             id: id,
             restart: restart,
@@ -965,13 +963,8 @@ export default {
             backUpDescription: description
           }).then((resp) => {
             if (!restart) {
-              for (let i = 0; i < this.optionApps.deploy.length; i++) {
-                const s = this.optionApps.deploy[i]
-                if (id === s.id) {
-                  this.optionApps.deploy.splice(i, 1)
-                  break
-                }
-              }
+              this.optionApps.deploy.delete(id)
+              this.handleMapUpdate('deploy')
             }
             console.log(resp)
           })
@@ -1015,7 +1008,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.findIndex((x) => x.id === app.id) === -1) {
+      if (this.optionApps.starting.get(app.id) === undefined || app.optionState === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1056,11 +1049,9 @@ export default {
           const savePointed = this.savePoint
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
-          this.optionApps.starting.push({
-            'id': id,
-            'timestamp': new Date().getTime(),
-            'state': this.application.state // 记录当前的状态
-          })
+          console.log('update starting before:' + this.optionApps.starting.size)
+          this.optionApps.starting.set(id, new Date().getTime())
+          this.handleMapUpdate('starting')
           this.handleStartCancel()
           start({
             id: id,
@@ -1080,7 +1071,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.findIndex((x) => x.id === app.id) === -1) {
+      if (this.optionApps.stoping.get(app.id) === undefined || app.optionState === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1101,13 +1092,12 @@ export default {
         '已发送停止请求,该应用正在停止',
         3
       )
-      this.optionApps.stoping.push({
-        'id': this.application.id,
-        'timestamp': new Date().getTime()
-      })
       const savePoint = this.savePoint
       const drain = this.drain
       const id = this.application.id
+      console.log('update stoping before:' + this.optionApps.stoping.size)
+      this.optionApps.stoping.set(id, new Date().getTime())
+      this.handleMapUpdate('stoping')
       this.handleStopCancel()
       cancel({
         id: id,
@@ -1118,7 +1108,7 @@ export default {
           this.$notification.open({
             message: 'cancel application failed',
             description: resp.exception,
-            icon: <a-icon type="error" style="color: #f5222d" />
+            icon: <a-icon type="error" style="color: #f5222d"/>
           })
         }
       })
@@ -1178,34 +1168,28 @@ export default {
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
         this.dataSource = resp.data.records
-        const now = new Date().getTime()
+        const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
-          if (this.optionApps.stoping.length > 0) {
-            for (let i = 0; i < this.optionApps.stoping.length; i++) {
-              const s = this.optionApps.stoping[i]
-              if (x.id === s.id && s.state !== 5 && (now - s.timestamp) > 2000) {
-                this.optionApps.stoping.splice(i, 1)
-                break
+          if (x.optionState === 0) {
+            if (this.optionApps.starting.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
+                console.log('update starting before:' + this.optionApps.starting.size)
+                this.optionApps.starting.delete(x.id)
+                this.handleMapUpdate('starting')
               }
             }
-          }
-          if (this.optionApps.starting.length > 0) {
-            for (let i = 0; i < this.optionApps.starting.length; i++) {
-              const s = this.optionApps.starting[i]
-              if (x.id === s.id && x.state !== s.state && (now - s.timestamp) > 2000) {
-                this.optionApps.starting.splice(i, 1)
-                break
+            if (this.optionApps.stoping.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
+                console.log('update stoping before:' + this.optionApps.stoping.size)
+                this.optionApps.stoping.delete(x.id)
+                this.handleMapUpdate('stoping')
               }
             }
-          }
-          if (this.optionApps.deploy.length > 0) {
-            for (let i = 0; i < this.optionApps.deploy.length; i++) {
-              const s = this.optionApps.deploy[i]
-              if (x.id === s.id && (now - s.timestamp) > 2000) {
-                if (x.state === 5 || x.state === 6 || x.state === 7) {
-                  this.optionApps.deploy.splice(i, 1)
-                  break
-                }
+            if (this.optionApps.deploy.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
+                console.log('update deploy before:' + this.optionApps.deploy.size)
+                this.optionApps.deploy.delete(x.id)
+                this.handleMapUpdate('deploy')
               }
             }
           }
@@ -1245,8 +1229,13 @@ export default {
         id: app.id
       }).then((resp) => {
       })
-    }
+    },
 
+    handleMapUpdate (type) {
+      const map = this.optionApps[type]
+      this.optionApps[type] = new Map(map)
+      console.log('update '.concat(type).concat(' after:' + this.optionApps[type].size))
+    }
   }
 }
 </script>

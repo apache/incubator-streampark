@@ -18,47 +18,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.console.core.enums;
+package com.streamxhub.flink.core.java.function;
 
-import java.util.Arrays;
+import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
+import org.apache.hadoop.hbase.client.Result;
 
-/**
- * @author benjobs
- */
+import java.io.Serializable;
 
-public enum DeployState {
+//@FunctionalInterface
+public interface HBaseFunction<T> extends Serializable {
+    /**
+     * 获取一个查询条件
+     * @param query
+     * @return
+     */
+    HBaseQuery getQuery(HBaseQuery query);
 
     /**
-     * 不需要重新发布
+     * 返回结合处理
+     * @param result
+     * @return
      */
-    NONE(0),
-
-    /**
-     * 程序更新需要重新发布
-     */
-    NEED_DEPLOY_AFTER_BUILD(1),
-
-    /**
-     * 配置文件更新需要重新启动
-     */
-    NEED_RESTART_AFTER_UPDATE(2),
-
-    /**
-     * 程序发布完,需要重新启动.
-     */
-    NEED_RESTART_AFTER_DEPLOY(3);
-
-    int value;
-
-    DeployState(int value) {
-        this.value = value;
-    }
-
-    public int get() {
-        return this.value;
-    }
-
-    public static DeployState of(Integer state) {
-        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
-    }
+    T doResult(Result result);
 }

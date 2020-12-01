@@ -18,47 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.console.core.enums;
+package com.streamxhub.flink.core.java.source;
 
-import java.util.Arrays;
+import com.streamxhub.flink.core.java.function.HBaseFunction;
+import com.streamxhub.flink.core.scala.StreamingContext;
+import com.streamxhub.flink.core.scala.source.HBaseSourceFunction;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+
+import java.util.Properties;
 
 /**
- * @author benjobs
+ *
+ * @param <T>
  */
+public class HBaseSource<T> {
+    private StreamingContext ctx;
+    private Properties property;
 
-public enum DeployState {
-
-    /**
-     * 不需要重新发布
-     */
-    NONE(0),
-
-    /**
-     * 程序更新需要重新发布
-     */
-    NEED_DEPLOY_AFTER_BUILD(1),
-
-    /**
-     * 配置文件更新需要重新启动
-     */
-    NEED_RESTART_AFTER_UPDATE(2),
-
-    /**
-     * 程序发布完,需要重新启动.
-     */
-    NEED_RESTART_AFTER_DEPLOY(3);
-
-    int value;
-
-    DeployState(int value) {
-        this.value = value;
+    public HBaseSource(StreamingContext ctx,Properties property) {
+        this.ctx = ctx;
+        this.property = property;
     }
 
-    public int get() {
-        return this.value;
-    }
-
-    public static DeployState of(Integer state) {
-        return Arrays.stream(values()).filter((x) -> x.value == state).findFirst().orElse(null);
+    public DataStreamSource<T> getDataStream(HBaseFunction func) {
+        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, func,null);
+        return ctx.getJavaEnv().addSource(sourceFunction);
     }
 }

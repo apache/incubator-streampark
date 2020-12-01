@@ -129,7 +129,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     //更新部署状态
                     applications.forEach((app) -> FlinkTrackingTask.persistentAfterRunnable(app.getId(), () -> {
                         log.info("[StreamX] update deploy by project:{},appName:{}", project.getId(), app.getJobName());
-                        app.setDeploy(DeployState.APP_UPDATED.get());
+                        app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
                         this.applicationMapper.updateDeploy(app);
                     }));
                 } else {

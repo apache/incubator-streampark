@@ -23,10 +23,7 @@ package com.streamxhub.console.core.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.conf.ParameterCli;
-import com.streamxhub.common.util.DeflaterUtils;
-import com.streamxhub.common.util.HdfsUtils;
-import com.streamxhub.common.util.Utils;
-import com.streamxhub.common.util.YarnUtils;
+import com.streamxhub.common.util.*;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.utils.CommonUtil;
@@ -50,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -81,6 +79,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ServerUtil serverUtil;
+
+    @Override
+    @PostConstruct
+    public void resetOptionState() {
+        this.baseMapper.resetOptionState();
+    }
 
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
@@ -178,7 +182,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 /**
                  * 配置文件已更新
                  */
-                application.setDeploy(DeployState.CONF_UPDATED.get());
+                application.setDeploy(DeployState.NEED_RESTART_AFTER_UPDATE.get());
                 baseMapper.updateById(application);
                 return true;
             } catch (Exception e) {
@@ -197,6 +201,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         } else if (!isRunning) {
             //不需要重启的并且未正在运行的,则更改状态为发布中....
             application.setState(FlinkAppState.DEPLOYING.getValue());
+            application.setOptionState(OptionState.DEPLOYING.getValue());
             updateState(application);
         }
 
@@ -227,10 +232,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setDeploy(DeployState.NONE.get());
             this.updateDeploy(application);
         } else {
-            application.setDeploy(DeployState.NEED_START.get());
+            application.setDeploy(DeployState.NEED_RESTART_AFTER_DEPLOY.get());
             this.updateDeploy(application);
             if (!isRunning) {
                 application.setState(FlinkAppState.DEPLOYED.getValue());
+                application.setOptionState(OptionState.NONE.getValue());
                 updateState(application);
             }
         }
@@ -296,25 +302,39 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public void cancel(Application appParam) {
         FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
             Application application = getById(appParam.getId());
             application.setState(FlinkAppState.CANCELLING.getValue());
+            if (appParam.getSavePointed()) {
+                //正在执行savepoint...
+                application.setOptionState(OptionState.SAVEPOINTING.getValue());
+            } else {
+                application.setOptionState(OptionState.CANCELLING.getValue());
+            }
             this.baseMapper.updateById(application);
             //准备停止...
             FlinkTrackingTask.addStopping(appParam.getId());
-            String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
-            if (appParam.getSavePointed()) {
-                SavePoint savePoint = new SavePoint();
-                savePoint.setAppId(application.getId());
-                savePoint.setLastest(true);
-                savePoint.setSavePoint(savePointDir);
-                savePoint.setCreateTime(new Date());
-                //之前的配置设置为已过期
-                this.savePointService.obsolete(application.getId());
-                this.savePointService.save(savePoint);
-            }
+            /**
+             * 此步骤可能会比较耗时,重新开启一个线程去执行..
+             */
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    FlinkTrackingTask.addSavepoint(application.getId());
+                    SavePoint savePoint = new SavePoint();
+                    String savePointDir = FlinkSubmit.stop(application.getAppId(), application.getJobId(), appParam.getSavePointed(), appParam.getDrain());
+                    savePoint.setSavePoint(savePointDir);
+                    savePoint.setAppId(application.getId());
+                    savePoint.setLastest(true);
+                    savePoint.setCreateTime(new Date());
+                    //之前的配置设置为已过期
+                    savePointService.obsolete(application.getId());
+                    savePointService.save(savePoint);
+                } catch (Exception e) {
+                    //保持savepoint失败.则将之前的统统设置为过期
+                    savePointService.obsolete(application.getId());
+                }
+            });
         });
     }
 
@@ -325,8 +345,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean start(Application appParam) throws Exception {
-        final Application application = getById(appParam.getId());
+        Application application = getById(appParam.getId());
         assert application != null;
+        application.setOptionState(OptionState.STARTING.getValue());
+        this.baseMapper.updateById(application);
+
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
@@ -418,6 +441,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.setException(exception);
             log.setSuccess(false);
             applicationLogService.save(log);
+            application = getById(appParam.getId());
+            application.setOptionState(OptionState.NONE.getValue());
+            this.baseMapper.updateById(application);
             return false;
         }
 
