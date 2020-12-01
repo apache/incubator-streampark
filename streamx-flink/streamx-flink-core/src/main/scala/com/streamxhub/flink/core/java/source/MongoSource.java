@@ -18,21 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.flink.core.java.source;
 
+import com.streamxhub.flink.core.java.function.MongoFunction;
+import com.streamxhub.flink.core.scala.StreamingContext;
+import com.streamxhub.flink.core.scala.source.MongoSourceFunction;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
-import java.io.Serializable;
+import java.util.Properties;
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface GetSQLFunction extends Serializable {
-    /**
-     * 获取要查询的SQL
-     *
-     * @return
-     * @throws Exception
-     */
-    String getSQL() throws Exception;
+public class MongoSource<T> {
+    private StreamingContext ctx;
+    private Properties prop;
+
+    public MongoSource(StreamingContext ctx,Properties prop) {
+        this.ctx = ctx;
+        this.prop = prop;
+    }
+
+    public DataStreamSource<T> getDataStream(MongoFunction<T> mongoFunction) {
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(prop, mongoFunction, null);
+        return ctx.getJavaEnv().addSource(sourceFunction);
+    }
+
 }

@@ -18,20 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.flink.core.java.source;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.streamxhub.flink.core.java.function.HBaseFunction;
+import com.streamxhub.flink.core.scala.StreamingContext;
+import com.streamxhub.flink.core.scala.source.HBaseSourceFunction;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+
+import java.util.Properties;
 
 /**
- * @author benjobs
+ *
+ * @param <T>
  */
-@FunctionalInterface
-public interface StreamEnvConfigFunction {
-    /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     * @param environment
-     * @param parameterTool
-     */
-    void doConfig(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+public class HBaseSource<T> {
+    private StreamingContext ctx;
+    private Properties property;
+
+    public HBaseSource(StreamingContext ctx,Properties property) {
+        this.ctx = ctx;
+        this.property = property;
+    }
+
+    public DataStreamSource<T> getDataStream(HBaseFunction func) {
+        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, func,null);
+        return ctx.getJavaEnv().addSource(sourceFunction);
+    }
 }

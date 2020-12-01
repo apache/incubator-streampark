@@ -20,20 +20,17 @@
  */
 package com.streamxhub.flink.core.java.function;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCursor;
+import com.mongodb.client.MongoDatabase;
+import org.bson.Document;
 
-import java.io.Serializable;
-import java.util.Map;
+import java.util.List;
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface ResultSetFunction<T> extends Serializable {
-    /**
-     * 将查下结果以Map的方式返回,用户去实现转成对象.
-     * @param map
-     * @return
-     */
-    Iterable<T> result(Iterable<Map<String,?>> map);
+public interface MongoFunction<T> {
+
+    FindIterable<Document> getQuery(MongoDatabase database);
+
+    List<T> doResult(MongoCursor<Document> cursor);
+
 }
-
