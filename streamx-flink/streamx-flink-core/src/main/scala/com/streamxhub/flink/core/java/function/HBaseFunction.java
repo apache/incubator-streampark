@@ -21,10 +21,23 @@
 package com.streamxhub.flink.core.java.function;
 
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
+import org.apache.hadoop.hbase.client.Result;
 
 import java.io.Serializable;
 
-@FunctionalInterface
-public interface HBaseQueryFunction extends Serializable {
-    HBaseQuery query(HBaseQuery query);
+//@FunctionalInterface
+public interface HBaseFunction<T> extends Serializable {
+    /**
+     * 获取一个查询条件
+     * @param query
+     * @return
+     */
+    HBaseQuery getQuery(HBaseQuery query);
+
+    /**
+     * 返回结合处理
+     * @param result
+     * @return
+     */
+    T doResult(Result result);
 }

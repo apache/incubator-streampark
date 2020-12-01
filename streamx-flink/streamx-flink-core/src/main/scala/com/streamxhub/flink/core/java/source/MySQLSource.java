@@ -22,8 +22,7 @@ package com.streamxhub.flink.core.java.source;
 
 import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.java.function.ResultSetFunction;
-import com.streamxhub.flink.core.java.function.GetSQLFunction;
+import com.streamxhub.flink.core.java.function.SQLGetFunction;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.source.MySQLSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -37,8 +36,7 @@ public class MySQLSource<T> {
 
     private StreamingContext context;
     private Properties jdbc;
-    private GetSQLFunction sqlFunc;
-    private ResultSetFunction<T> resultSetFunc;
+    private SQLGetFunction sqlFunc;
 
     public MySQLSource(StreamingContext context) {
         this(context, (String) null);
@@ -55,21 +53,17 @@ public class MySQLSource<T> {
     }
 
     public DataStreamSource<T> getDataStream() {
-        return getDataStream(this.sqlFunc, this.resultSetFunc);
+        return getDataStream(this.sqlFunc);
     }
 
-    public DataStreamSource<T> getDataStream(GetSQLFunction sqlFun, ResultSetFunction<T> resultSetFunc) {
-        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction(jdbc, sqlFun, resultSetFunc, null);
+    public DataStreamSource<T> getDataStream(SQLGetFunction sqlFunc) {
+        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction(jdbc, sqlFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 
-    public MySQLSource<T> sql(GetSQLFunction func) {
+    public MySQLSource<T> function(SQLGetFunction func) {
         this.sqlFunc = func;
         return this;
     }
 
-    public MySQLSource<T> result(ResultSetFunction<T> func) {
-        this.resultSetFunc = func;
-        return this;
-    }
 }
