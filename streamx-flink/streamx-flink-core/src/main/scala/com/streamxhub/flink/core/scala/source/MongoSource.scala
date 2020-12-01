@@ -29,9 +29,14 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
-
 import java.util.Properties
+
+import com.streamxhub.flink.core.java.function.MongoFunction
+import com.streamxhub.flink.core.scala.enums.ApiType
+import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
+
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 
 
 object MongoSource {
@@ -54,27 +59,35 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
 
   def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](queryFun, resultFun)
+    val mongoFun = new MongoSourceFunction[R](prop,queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
 
 }
 
-/**
- *
- * @param queryFun
- * @param resultFun
- * @param typeInformation$R$0
- * @param prop
- * @tparam R
- */
-private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
+
+private[this] class MongoSourceFunction[R: TypeInformation](apiType:ApiType, prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
-
   var client: MongoClient = _
-
   var database: MongoDatabase = _
+
+  private[this] var mongoFunc: MongoFunction[R] = _
+  private[this] var queryFunc: MongoDatabase => FindIterable[Document] = _
+  private[this] var resultFunc: MongoCursor[Document] => List[R] = _
+
+  //for Scala
+  def this(prop: Properties, queryFunc: MongoDatabase => FindIterable[Document], resultFunc: MongoCursor[Document] => List[R]) = {
+    this(ApiType.SCALA, prop)
+    this.queryFunc = queryFunc
+    this.resultFunc = resultFunc
+  }
+
+  //for JAVA
+  def this(prop: Properties, mongoFunc: MongoFunction[R]) {
+    this(ApiType.JAVA, prop)
+    this.mongoFunc = mongoFunc
+  }
 
   override def cancel(): Unit = this.isRunning = false
 
@@ -87,9 +100,18 @@ private[this] class MongoSourceFunction[R: TypeInformation](queryFun: MongoDatab
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (isRunning) {
-      val find = queryFun(database)
-      if (find != null) {
-        resultFun(find.iterator).foreach(ctx.collect)
+
+      apiType match {
+        case ApiType.SCALA =>
+          val find = queryFunc(database)
+          if (find != null) {
+            resultFunc(find.iterator).foreach(ctx.collect)
+          }
+        case ApiType.JAVA =>
+          val find = mongoFunc.getQuery(database)
+          if (find != null) {
+            mongoFunc.doResult(find.iterator).foreach(ctx.collect)
+          }
       }
     }
   }
