@@ -20,18 +20,24 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
+import org.apache.hadoop.hbase.client.Result;
 
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface StreamEnvConfigFunction {
+import java.io.Serializable;
+
+//@FunctionalInterface
+public interface HBaseFunction<T> extends Serializable {
     /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     * @param environment
-     * @param parameterTool
+     * 获取一个查询条件
+     * @param query
+     * @return
      */
-    void doConfig(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    HBaseQuery getQuery(HBaseQuery query);
+
+    /**
+     * 返回结合处理
+     * @param result
+     * @return
+     */
+    T doResult(Result result);
 }

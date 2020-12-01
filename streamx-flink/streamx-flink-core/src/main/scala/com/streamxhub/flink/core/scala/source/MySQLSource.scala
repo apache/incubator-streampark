@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.streamxhub.common.util.{JdbcUtils, Logger, Utils}
-import com.streamxhub.flink.core.java.function.{GetSQLFunction, ResultSetFunction}
+import com.streamxhub.flink.core.java.function.SQLGetFunction
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
@@ -69,8 +69,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   @volatile private[this] var running = true
   private[this] var scalaSqlFunc: () => String = _
   private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
-  private[this] var javaSqlFunc: GetSQLFunction = _
-  private[this] var javaResultFunc: ResultSetFunction[R] = _
+  private[this] var sqlFunc: SQLGetFunction[R] = _
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: () => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
@@ -80,10 +79,9 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   }
 
   //for JAVA
-  def this(jdbc: Properties, javaSqlFunc: GetSQLFunction, javaResultFunc: ResultSetFunction[R]) {
+  def this(jdbc: Properties, javaSqlFunc: SQLGetFunction[R]) {
     this(ApiType.JAVA, jdbc)
-    this.javaSqlFunc = javaSqlFunc
-    this.javaResultFunc = javaResultFunc
+    this.sqlFunc = javaSqlFunc
   }
 
   @throws[Exception]
@@ -92,7 +90,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
           case ApiType.SCALA => scalaSqlFunc()
-          case ApiType.JAVA => javaSqlFunc.getSQL
+          case ApiType.JAVA => sqlFunc.getQuery
         }
         val result: List[Map[String, _]] = apiType match {
           case ApiType.SCALA => JdbcUtils.select(sql)(jdbc)
@@ -100,7 +98,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
         }
         apiType match {
           case ApiType.SCALA => scalaResultFunc(result).foreach(ctx.collect)
-          case ApiType.JAVA => javaResultFunc.result(result.map(_.asJava)).foreach(ctx.collect)
+          case ApiType.JAVA => sqlFunc.doResult(result.map(_.asJava)).foreach(ctx.collect)
         }
       }
     }
