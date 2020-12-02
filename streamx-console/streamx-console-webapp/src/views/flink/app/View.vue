@@ -813,7 +813,7 @@ export default {
   computed: {
     innerColumns() {
       return [
-          { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 220 },
+          { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 250 },
           { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
           { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
           { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
