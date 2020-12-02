@@ -678,7 +678,7 @@ export default {
     return {
       loading: false,
       dataSource: [],
-      expandedRow: ['appId','jmMemory','tmMemory','totalTM','totalSlot','availableSlot','flinkCommit'],
+      expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
@@ -813,16 +813,16 @@ export default {
   },
 
   computed: {
-    innerColumns() {
+    innerColumns () {
       return [
-          { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 250 },
-          { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
-          { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
-          { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
-          { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
-          { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
-          { title: 'Flink Commit', dataIndex: 'flinkCommit', key: 'flinkCommit' }
-        ]
+        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 255 },
+        { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
+        { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
+        { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
+        { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
+        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
+        { title: 'Flink Commit', dataIndex: 'flinkCommit', key: 'flinkCommit' }
+      ]
     },
     columns () {
       let { sortedInfo, filteredInfo } = this
@@ -1129,7 +1129,7 @@ export default {
             message: 'cancel application failed',
             description: resp.exception,
             icon: <a-icon type="error" style="color: #f5222d"/>
-        })
+          })
         }
       })
     },
@@ -1228,11 +1228,11 @@ export default {
     handleExpandIcon (props) {
       if (props.record.state === 5) {
         if (props.expanded) {
-          return <a class='expand-icon-open' onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
+          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='down'/></a>
         } else {
-          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
+          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='right' /></a>
         }
-      }else {
+      } else {
         return ''
       }
     },
@@ -1360,7 +1360,6 @@ export default {
 .expand-icon-open {
   font-size: 10px;
 }
-
 
 .expand-icon-close {
   font-size: 10px;
