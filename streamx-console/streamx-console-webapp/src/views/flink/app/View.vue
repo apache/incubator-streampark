@@ -1336,5 +1336,7 @@ export default {
 
 .expanded-table >>> .ant-table-tbody>tr>td {
   border-bottom: none !important;
+  padding: 11px 9px !important;
 }
+
 </style>
