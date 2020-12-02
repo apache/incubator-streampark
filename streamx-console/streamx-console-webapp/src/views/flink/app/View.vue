@@ -1228,10 +1228,10 @@ export default {
     handleExpandIcon (props) {
       console.log(props)
       if (props.record.state === 5) {
-        if (props.expanded) {//有数据-展开时候图标
-          return <a class='expand-icon-close' onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
-        } else {//有数据-未展开时候图标
-          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
+        if (props.expanded) {
+          return <a class='expand-icon-open' onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
+        } else {
+          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
         }
       }else {
         return ''
