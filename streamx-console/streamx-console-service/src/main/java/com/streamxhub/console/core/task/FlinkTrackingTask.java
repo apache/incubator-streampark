@@ -204,6 +204,7 @@ public class FlinkTrackingTask {
         if (startingCache.getIfPresent(application.getId()) != null) {
             try {
                 Overview override = application.getOverview();
+                log.info("Overview:{}",override);
                 if (override != null) {
                     startingCache.invalidate(application.getId());
                     application.setTotalTM(override.getTaskmanagers());
