@@ -654,606 +654,606 @@
 
     </a-card>
   </div>
-  <script>
-    import Ellipsis from '@/components/Ellipsis'
-    import RangeDate from '@comp/DateTime/RangeDate'
-    import State from './State'
+</template>
+<script>
+import Ellipsis from '@/components/Ellipsis'
+import RangeDate from '@comp/DateTime/RangeDate'
+import State from './State'
 
-    import { mapActions } from 'vuex'
-    import { list, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
-    import { lastest, history } from '@api/savepoint'
-    import { Icon } from 'ant-design-vue'
+import { mapActions } from 'vuex'
+import { list, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
+import { lastest, history } from '@api/savepoint'
+import { Icon } from 'ant-design-vue'
 
-    const IconFont = Icon.createFromIconfontCN({
-      scriptUrl: '//at.alicdn.com/t/font_2006309_wqixwmes1xi.js'
-    })
-    export default {
-      components: { RangeDate, Ellipsis, State, IconFont },
-      data () {
-        return {
-          loading: false,
-          dataSource: [],
-          innerDataSource: [],
-          queryParams: {},
-          sortedInfo: null,
-          filteredInfo: null,
-          queryInterval: 2000,
-          yarn: null,
-          deployVisible: false,
-          stopVisible: false,
-          startVisible: false,
-          mappingVisible: false,
-          formDeploy: null,
-          formStopSavePoint: null,
-          formStartCheckPoint: null,
-          formMapping: null,
-          drain: false,
-          savePoint: true,
-          restart: false,
-          application: null,
-          lastestSavePoint: null,
-          historySavePoint: null,
-          allowNonRestoredState: false,
-          searchText: '',
-          searchInput: null,
-          optionApps: {
-            'starting': new Map(),
-            'stoping': new Map(),
-            'deploy': new Map()
-          },
-          searchedColumn: '',
-          paginationInfo: null,
-          pagination: {
-            pageSizeOptions: ['10', '20', '30', '40', '100'],
-            defaultCurrent: 1,
-            defaultPageSize: 10,
-            showQuickJumper: true,
-            showSizeChanger: true,
-            showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
-          },
-          seriesSpark3: [{
-            data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
+const IconFont = Icon.createFromIconfontCN({
+  scriptUrl: '//at.alicdn.com/t/font_2006309_wqixwmes1xi.js'
+})
+export default {
+  components: { RangeDate, Ellipsis, State, IconFont },
+  data () {
+    return {
+      loading: false,
+      dataSource: [],
+      innerDataSource: [],
+      queryParams: {},
+      sortedInfo: null,
+      filteredInfo: null,
+      queryInterval: 2000,
+      yarn: null,
+      deployVisible: false,
+      stopVisible: false,
+      startVisible: false,
+      mappingVisible: false,
+      formDeploy: null,
+      formStopSavePoint: null,
+      formStartCheckPoint: null,
+      formMapping: null,
+      drain: false,
+      savePoint: true,
+      restart: false,
+      application: null,
+      lastestSavePoint: null,
+      historySavePoint: null,
+      allowNonRestoredState: false,
+      searchText: '',
+      searchInput: null,
+      optionApps: {
+        'starting': new Map(),
+        'stoping': new Map(),
+        'deploy': new Map()
+      },
+      searchedColumn: '',
+      paginationInfo: null,
+      pagination: {
+        pageSizeOptions: ['10', '20', '30', '40', '100'],
+        defaultCurrent: 1,
+        defaultPageSize: 10,
+        showQuickJumper: true,
+        showSizeChanger: true,
+        showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+      },
+      seriesSpark3: [{
+        data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
+      }],
+
+      chartOptionsSpark3: {
+        chart: {
+          type: 'area',
+          height: 140,
+          sparkline: {
+            enabled: true
+          }
+        },
+        stroke: {
+          curve: 'straight'
+        },
+        fill: {
+          opacity: 0.3
+        },
+        xaxis: {
+          crosshairs: {
+            width: 1
+          }
+        },
+        yaxis: {
+          min: 0
+        },
+        title: {
+          text: '13,965',
+          offsetX: 0,
+          style: {
+            fontSize: '24px'
+          }
+        },
+        subtitle: {
+          text: 'Total Project',
+          offsetX: 0,
+          style: {
+            fontSize: '14px'
+          }
+        }
+      },
+
+      chart: {
+        state: {
+          series: [{
+            data: [400, 430, 448, 470, 540]
           }],
-
-          chartOptionsSpark3: {
+          chartOptions: {
             chart: {
-              type: 'area',
-              height: 140,
-              sparkline: {
-                enabled: true
+              type: 'bar',
+              height: 350
+            },
+            plotOptions: {
+              bar: {
+                horizontal: true
               }
             },
-            stroke: {
-              curve: 'straight'
-            },
-            fill: {
-              opacity: 0.3
+            dataLabels: {
+              enabled: false
             },
             xaxis: {
-              crosshairs: {
-                width: 1
-              }
-            },
-            yaxis: {
-              min: 0
-            },
-            title: {
-              text: '13,965',
-              offsetX: 0,
-              style: {
-                fontSize: '24px'
-              }
-            },
-            subtitle: {
-              text: 'Total Project',
-              offsetX: 0,
-              style: {
-                fontSize: '14px'
-              }
+              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
             }
-          },
-
-          chart: {
-            state: {
-              series: [{
-                data: [400, 430, 448, 470, 540]
-              }],
-              chartOptions: {
+          }
+        },
+        type: {
+          series: [44, 55],
+          chartOptions: {
+            chart: {
+              width: 240,
+              type: 'donut'
+            },
+            dataLabels: {
+              enabled: false
+            },
+            fill: {
+              type: 'gradient'
+            },
+            labels: ['Flink', 'Spark'],
+            responsive: [{
+              breakpoint: 240,
+              options: {
                 chart: {
-                  type: 'bar',
-                  height: 350
+                  width: 240
                 },
-                plotOptions: {
-                  bar: {
-                    horizontal: true
-                  }
-                },
-                dataLabels: {
-                  enabled: false
-                },
-                xaxis: {
-                  categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
+                legend: {
+                  position: 'bottom'
                 }
               }
-            },
-            type: {
-              series: [44, 55],
-              chartOptions: {
-                chart: {
-                  width: 240,
-                  type: 'donut'
-                },
-                dataLabels: {
-                  enabled: false
-                },
-                fill: {
-                  type: 'gradient'
-                },
-                labels: ['Flink', 'Spark'],
-                responsive: [{
-                  breakpoint: 240,
-                  options: {
-                    chart: {
-                      width: 240
-                    },
-                    legend: {
-                      position: 'bottom'
-                    }
-                  }
-                }]
-              }
-            }
+            }]
           }
-        }
-      },
-
-      computed: {
-        innerColumns() {
-          return [
-              { title: 'Application Id', dataIndex: 'appId', key: 'appId' },
-              { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
-              { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
-              { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
-              { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
-              { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
-              { title: 'Flink Commit', dataIndex: 'flinkCommit', key: 'flinkCommit' }
-            ]
-        },
-        columns () {
-          let { sortedInfo, filteredInfo } = this
-          sortedInfo = sortedInfo || {}
-          filteredInfo = filteredInfo || {}
-          return [{
-            title: 'Job Name',
-            dataIndex: 'jobName',
-            width: 250,
-            fixed: 'left',
-            scopedSlots: {
-              filterDropdown: 'filterDropdown',
-              filterIcon: 'filterIcon',
-              customRender: 'filterRender'
-            },
-            onFilter: (value, record) =>
-              record.jobName
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-            onFilterDropdownVisibleChange: visible => {
-              if (visible) {
-                setTimeout(() => {
-                  this.searchInput.focus()
-                })
-              }
-            }
-          }, {
-            title: 'Project',
-            dataIndex: 'projectName',
-            width: 200,
-            scopedSlots: {
-              filterDropdown: 'filterDropdown',
-              filterIcon: 'filterIcon',
-              customRender: 'filterRender'
-            },
-            onFilter: (value, record) =>
-              record['projectName']
-                .toString()
-                .toLowerCase()
-                .includes(value.toLowerCase()),
-            onFilterDropdownVisibleChange: visible => {
-              if (visible) {
-                setTimeout(() => {
-                  this.searchInput.focus()
-                })
-              }
-            }
-          }, {
-            title: 'Start Time',
-            dataIndex: 'startTime',
-            sorter: true,
-            sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-            width: 180
-          }, {
-            title: 'Duration',
-            dataIndex: 'duration',
-            sorter: true,
-            sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-            scopedSlots: { customRender: 'duration' },
-            width: 150
-          }, {
-            title: 'End Time',
-            dataIndex: 'endTime',
-            sorter: true,
-            sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
-            scopedSlots: { customRender: 'endTime' },
-            width: 180
-          }, {
-            title: 'Status',
-            dataIndex: 'state',
-            width: 120,
-            scopedSlots: { customRender: 'state' },
-            filters: [
-              { text: 'CREATED', value: 0 },
-              { text: 'DEPLOYING', value: 1 },
-              { text: 'DEPLOYED', value: 2 },
-              { text: 'STARTING', value: 3 },
-              { text: 'RESTARTING', value: 4 },
-              { text: 'RUNNING', value: 5 },
-              { text: 'FAILING', value: 6 },
-              { text: 'FAILED', value: 7 },
-              { text: 'CANCELED', value: 9 },
-              { text: 'FINISHED', value: 10 },
-              { text: 'LOST', value: 13 }
-            ],
-            fixed: 'right',
-            filteredValue: filteredInfo.state || null,
-            onFilter: (value, record) => {
-              return record.state === value
-            },
-            sorter: (a, b) => a.state - b.state,
-            sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
-          }, {
-            dataIndex: 'operation',
-            key: 'operation',
-            scopedSlots: { customRender: 'operation' },
-            slots: { title: 'customOperation' },
-            fixed: 'right',
-            width: 150
-          }]
-        }
-      },
-
-      mounted () {
-        this.handleYarn()
-        this.handleFetch(true)
-        const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
-        this.$once('hook:beforeDestroy', () => {
-          clearInterval(timer)
-        })
-      },
-
-      beforeMount () {
-        this.formDeploy = this.$form.createForm(this)
-        this.formStopSavePoint = this.$form.createForm(this)
-        this.formStartCheckPoint = this.$form.createForm(this)
-        this.formMapping = this.$form.createForm(this)
-      },
-
-      methods: {
-        ...mapActions(['SetAppId']),
-
-        handleDeploy (app) {
-          if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
-            this.deployVisible = true
-            this.application = app
-          }
-        },
-
-        handleDeployCancel () {
-          this.deployVisible = false
-          setTimeout(() => {
-            this.application = null
-            this.restart = false
-            this.allowNonRestoredState = false
-            this.savePoint = true
-            this.formDeploy.resetFields()
-          }, 1000)
-        },
-
-        handleDeployOk () {
-          this.formDeploy.validateFields((err, values) => {
-            if (!err) {
-              const id = this.application.id
-              const savePoint = this.savePoint
-              const description = values.description
-              const restart = this.restart
-              const allowNonRestoredState = this.allowNonRestoredState
-              this.handleDeployCancel()
-              this.$message.info(
-                '已发送部署请求,后台正在执行部署,请耐心等待',
-                3
-              )
-              this.optionApps.deploy.set(id, new Date().getTime())
-              this.handleMapUpdate('deploy')
-              deploy({
-                id: id,
-                restart: restart,
-                savePointed: savePoint,
-                allowNonRestored: allowNonRestoredState,
-                backUpDescription: description
-              }).then((resp) => {
-                if (!restart) {
-                  this.optionApps.deploy.delete(id)
-                  this.handleMapUpdate('deploy')
-                }
-              })
-            }
-          })
-        },
-
-        handleMapping (app) {
-          this.mappingVisible = true
-          this.application = app
-        },
-
-        handleMappingOk () {
-          this.formMapping.validateFields((err, values) => {
-            if (!err) {
-              this.$message.info(
-                '已发送手动映射请求,请稍后',
-                3
-              )
-              const appId = values.appId
-              const jobId = values.jobId
-              const id = this.application.id
-              this.handleMappingCancel()
-              mapping({
-                id: id,
-                appId: appId,
-                jobId: jobId
-              }).then((resp) => {
-                console.log(resp)
-              })
-            }
-          })
-        },
-
-        handleMappingCancel () {
-          this.mappingVisible = false
-          setTimeout(() => {
-            this.application = null
-            this.formMapping.resetFields()
-          }, 1000)
-        },
-
-        handleStart (app) {
-          if (this.optionApps.starting.get(app.id) === undefined || app.optionState === 0) {
-            this.application = app
-            lastest({
-              appId: this.application.id
-            }).then((resp) => {
-              this.lastestSavePoint = resp.data || null
-              this.startVisible = true
-              if (!this.lastestSavePoint) {
-                history({
-                  appId: this.application.id,
-                  pageNum: 1,
-                  pageSize: 9999
-                }).then((resp) => {
-                  this.historySavePoint = resp.data.records || []
-                })
-              }
-            })
-          }
-        },
-
-        handleStartCancel () {
-          this.startVisible = false
-          setTimeout(() => {
-            this.allowNonRestoredState = false
-            this.formStartCheckPoint.resetFields()
-            this.application = null
-            this.savePoint = true
-          }, 1000)
-        },
-
-        handleStartOk () {
-          this.formStartCheckPoint.validateFields((err, values) => {
-            if (!err) {
-              this.$message.info(
-                '已发送启动请求,该应用正在启动中',
-                3
-              )
-              const id = this.application.id
-              const savePointed = this.savePoint
-              const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
-              const allowNonRestoredState = this.allowNonRestoredState
-              console.log('update starting before:' + this.optionApps.starting.size)
-              this.optionApps.starting.set(id, new Date().getTime())
-              this.handleMapUpdate('starting')
-              this.handleStartCancel()
-              start({
-                id: id,
-                savePointed: savePointed,
-                savePoint: savePoint,
-                allowNonRestored: allowNonRestoredState
-              }).then((resp) => {
-                if (!resp.data) {
-                  this.$message.error(
-                    '应用启动失败,请查看启动日志',
-                    3
-                  )
-                }
-              })
-            }
-          })
-        },
-
-        handleCancel (app) {
-          if (this.optionApps.stoping.get(app.id) === undefined || app.optionState === 0) {
-            this.stopVisible = true
-            this.application = app
-          }
-        },
-
-        handleStopCancel () {
-          this.stopVisible = false
-          setTimeout(() => {
-            this.formStopSavePoint.resetFields()
-            this.drain = false
-            this.savePoint = true
-            this.application = null
-          }, 1000)
-        },
-
-        handleStopOk () {
-          this.$message.info(
-            '已发送停止请求,该应用正在停止',
-            3
-          )
-          const savePoint = this.savePoint
-          const drain = this.drain
-          const id = this.application.id
-          console.log('update stoping before:' + this.optionApps.stoping.size)
-          this.optionApps.stoping.set(id, new Date().getTime())
-          this.handleMapUpdate('stoping')
-          this.handleStopCancel()
-          cancel({
-            id: id,
-            savePointed: savePoint,
-            drain: drain
-          }).then((resp) => {
-            if (resp.status === 'error') {
-              this.$notification.open({
-                message: 'cancel application failed',
-                description: resp.exception,
-                icon: <a-icon type="error" style="color: #f5222d"/>
-            })
-            }
-          })
-        },
-
-        handleDetail (app) {
-          this.SetAppId(app.id)
-          this.$router.push({ 'path': '/flink/app/detail' })
-        },
-
-        handleSearch (selectedKeys, confirm, dataIndex) {
-          confirm()
-          this.searchText = selectedKeys[0]
-          this.searchedColumn = dataIndex
-          this.queryParams[this.searchedColumn] = this.searchText
-          const { sortedInfo } = this
-          // 获取当前列的排序和列的过滤规则
-          if (sortedInfo) {
-            this.queryParams['sortField'] = sortedInfo.field
-            this.queryParams['sortOrder'] = sortedInfo.order
-          }
-        },
-
-        handleReset (clearFilters) {
-          clearFilters()
-          this.searchText = ''
-          // 重置列排序规则
-          this.sortedInfo = null
-          // 重置查询参数
-          this.queryParams = {}
-        },
-
-        handleTableChange (pagination, filters, sorter) {
-          this.sortedInfo = sorter
-          this.paginationInfo = pagination
-          this.queryParams['sortField'] = sorter.field
-          this.queryParams['sortOrder'] = sorter.order
-          this.handleFetch(true)
-        },
-
-        handleFetch (loading) {
-          if (loading) this.loading = true
-          const params = Object.assign(this.queryParams, {})
-          if (this.paginationInfo) {
-            // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
-            this.$refs.TableInfo.pagination.current = this.paginationInfo.current
-            this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
-            params.pageSize = this.paginationInfo.pageSize
-            params.pageNum = this.paginationInfo.current
-          } else {
-            // 如果分页信息为空，则设置为默认值
-            params.pageSize = this.pagination.defaultPageSize
-            params.pageNum = this.pagination.defaultCurrent
-          }
-          list({ ...params }).then((resp) => {
-            this.loading = false
-            const pagination = { ...this.pagination }
-            pagination.total = parseInt(resp.data.total)
-            this.dataSource = resp.data.records
-            const timestamp = new Date().getTime()
-            this.dataSource.forEach(x => {
-              if (x.optionState === 0) {
-                if (this.optionApps.starting.get(x.id) !== undefined) {
-                  if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
-                    this.optionApps.starting.delete(x.id)
-                    this.handleMapUpdate('starting')
-                  }
-                }
-                if (this.optionApps.stoping.get(x.id) !== undefined) {
-                  if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
-                    this.optionApps.stoping.delete(x.id)
-                    this.handleMapUpdate('stoping')
-                  }
-                }
-                if (this.optionApps.deploy.get(x.id) !== undefined) {
-                  if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
-                    this.optionApps.deploy.delete(x.id)
-                    this.handleMapUpdate('deploy')
-                  }
-                }
-              }
-            })
-            this.pagination = pagination
-          })
-        },
-
-        handleYarn (params = {}) {
-          yarn({}).then((resp) => {
-            this.yarn = resp.data
-          })
-        },
-
-        handleView (params) {
-          if (params.state === 4 || params.state === 5) {
-            const url = this.yarn + '/proxy/' + params['appId'] + '/'
-            window.open(url)
-          }
-        },
-
-        handleAdd () {
-          this.$router.push({ 'path': '/flink/app/add' })
-        },
-
-        handleEdit (app) {
-          this.SetAppId(app.id)
-          if (app.appType === 1) {
-            this.$router.push({ 'path': '/flink/app/edit_streamx' })
-          } else {
-            this.$router.push({ 'path': '/flink/app/edit_flink' })
-          }
-        },
-
-        handleCleanDeploy (app) {
-          clean({
-            id: app.id
-          }).then((resp) => {
-          })
-        },
-
-        handleMapUpdate (type) {
-          const map = this.optionApps[type]
-          this.optionApps[type] = new Map(map)
         }
       }
     }
-  </script>
-</template>
+  },
+
+  computed: {
+    innerColumns() {
+      return [
+          { title: 'Application Id', dataIndex: 'appId', key: 'appId' },
+          { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
+          { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
+          { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
+          { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
+          { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
+          { title: 'Flink Commit', dataIndex: 'flinkCommit', key: 'flinkCommit' }
+        ]
+    },
+    columns () {
+      let { sortedInfo, filteredInfo } = this
+      sortedInfo = sortedInfo || {}
+      filteredInfo = filteredInfo || {}
+      return [{
+        title: 'Job Name',
+        dataIndex: 'jobName',
+        width: 250,
+        fixed: 'left',
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'filterRender'
+        },
+        onFilter: (value, record) =>
+          record.jobName
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus()
+            })
+          }
+        }
+      }, {
+        title: 'Project',
+        dataIndex: 'projectName',
+        width: 200,
+        scopedSlots: {
+          filterDropdown: 'filterDropdown',
+          filterIcon: 'filterIcon',
+          customRender: 'filterRender'
+        },
+        onFilter: (value, record) =>
+          record['projectName']
+            .toString()
+            .toLowerCase()
+            .includes(value.toLowerCase()),
+        onFilterDropdownVisibleChange: visible => {
+          if (visible) {
+            setTimeout(() => {
+              this.searchInput.focus()
+            })
+          }
+        }
+      }, {
+        title: 'Start Time',
+        dataIndex: 'startTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+        width: 180
+      }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: { customRender: 'duration' },
+        width: 150
+      }, {
+        title: 'End Time',
+        dataIndex: 'endTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
+        scopedSlots: { customRender: 'endTime' },
+        width: 180
+      }, {
+        title: 'Status',
+        dataIndex: 'state',
+        width: 120,
+        scopedSlots: { customRender: 'state' },
+        filters: [
+          { text: 'CREATED', value: 0 },
+          { text: 'DEPLOYING', value: 1 },
+          { text: 'DEPLOYED', value: 2 },
+          { text: 'STARTING', value: 3 },
+          { text: 'RESTARTING', value: 4 },
+          { text: 'RUNNING', value: 5 },
+          { text: 'FAILING', value: 6 },
+          { text: 'FAILED', value: 7 },
+          { text: 'CANCELED', value: 9 },
+          { text: 'FINISHED', value: 10 },
+          { text: 'LOST', value: 13 }
+        ],
+        fixed: 'right',
+        filteredValue: filteredInfo.state || null,
+        onFilter: (value, record) => {
+          return record.state === value
+        },
+        sorter: (a, b) => a.state - b.state,
+        sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
+      }, {
+        dataIndex: 'operation',
+        key: 'operation',
+        scopedSlots: { customRender: 'operation' },
+        slots: { title: 'customOperation' },
+        fixed: 'right',
+        width: 150
+      }]
+    }
+  },
+
+  mounted () {
+    this.handleYarn()
+    this.handleFetch(true)
+    const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
+    this.$once('hook:beforeDestroy', () => {
+      clearInterval(timer)
+    })
+  },
+
+  beforeMount () {
+    this.formDeploy = this.$form.createForm(this)
+    this.formStopSavePoint = this.$form.createForm(this)
+    this.formStartCheckPoint = this.$form.createForm(this)
+    this.formMapping = this.$form.createForm(this)
+  },
+
+  methods: {
+    ...mapActions(['SetAppId']),
+
+    handleDeploy (app) {
+      if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
+        this.deployVisible = true
+        this.application = app
+      }
+    },
+
+    handleDeployCancel () {
+      this.deployVisible = false
+      setTimeout(() => {
+        this.application = null
+        this.restart = false
+        this.allowNonRestoredState = false
+        this.savePoint = true
+        this.formDeploy.resetFields()
+      }, 1000)
+    },
+
+    handleDeployOk () {
+      this.formDeploy.validateFields((err, values) => {
+        if (!err) {
+          const id = this.application.id
+          const savePoint = this.savePoint
+          const description = values.description
+          const restart = this.restart
+          const allowNonRestoredState = this.allowNonRestoredState
+          this.handleDeployCancel()
+          this.$message.info(
+            '已发送部署请求,后台正在执行部署,请耐心等待',
+            3
+          )
+          this.optionApps.deploy.set(id, new Date().getTime())
+          this.handleMapUpdate('deploy')
+          deploy({
+            id: id,
+            restart: restart,
+            savePointed: savePoint,
+            allowNonRestored: allowNonRestoredState,
+            backUpDescription: description
+          }).then((resp) => {
+            if (!restart) {
+              this.optionApps.deploy.delete(id)
+              this.handleMapUpdate('deploy')
+            }
+          })
+        }
+      })
+    },
+
+    handleMapping (app) {
+      this.mappingVisible = true
+      this.application = app
+    },
+
+    handleMappingOk () {
+      this.formMapping.validateFields((err, values) => {
+        if (!err) {
+          this.$message.info(
+            '已发送手动映射请求,请稍后',
+            3
+          )
+          const appId = values.appId
+          const jobId = values.jobId
+          const id = this.application.id
+          this.handleMappingCancel()
+          mapping({
+            id: id,
+            appId: appId,
+            jobId: jobId
+          }).then((resp) => {
+            console.log(resp)
+          })
+        }
+      })
+    },
+
+    handleMappingCancel () {
+      this.mappingVisible = false
+      setTimeout(() => {
+        this.application = null
+        this.formMapping.resetFields()
+      }, 1000)
+    },
+
+    handleStart (app) {
+      if (this.optionApps.starting.get(app.id) === undefined || app.optionState === 0) {
+        this.application = app
+        lastest({
+          appId: this.application.id
+        }).then((resp) => {
+          this.lastestSavePoint = resp.data || null
+          this.startVisible = true
+          if (!this.lastestSavePoint) {
+            history({
+              appId: this.application.id,
+              pageNum: 1,
+              pageSize: 9999
+            }).then((resp) => {
+              this.historySavePoint = resp.data.records || []
+            })
+          }
+        })
+      }
+    },
+
+    handleStartCancel () {
+      this.startVisible = false
+      setTimeout(() => {
+        this.allowNonRestoredState = false
+        this.formStartCheckPoint.resetFields()
+        this.application = null
+        this.savePoint = true
+      }, 1000)
+    },
+
+    handleStartOk () {
+      this.formStartCheckPoint.validateFields((err, values) => {
+        if (!err) {
+          this.$message.info(
+            '已发送启动请求,该应用正在启动中',
+            3
+          )
+          const id = this.application.id
+          const savePointed = this.savePoint
+          const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
+          const allowNonRestoredState = this.allowNonRestoredState
+          console.log('update starting before:' + this.optionApps.starting.size)
+          this.optionApps.starting.set(id, new Date().getTime())
+          this.handleMapUpdate('starting')
+          this.handleStartCancel()
+          start({
+            id: id,
+            savePointed: savePointed,
+            savePoint: savePoint,
+            allowNonRestored: allowNonRestoredState
+          }).then((resp) => {
+            if (!resp.data) {
+              this.$message.error(
+                '应用启动失败,请查看启动日志',
+                3
+              )
+            }
+          })
+        }
+      })
+    },
+
+    handleCancel (app) {
+      if (this.optionApps.stoping.get(app.id) === undefined || app.optionState === 0) {
+        this.stopVisible = true
+        this.application = app
+      }
+    },
+
+    handleStopCancel () {
+      this.stopVisible = false
+      setTimeout(() => {
+        this.formStopSavePoint.resetFields()
+        this.drain = false
+        this.savePoint = true
+        this.application = null
+      }, 1000)
+    },
+
+    handleStopOk () {
+      this.$message.info(
+        '已发送停止请求,该应用正在停止',
+        3
+      )
+      const savePoint = this.savePoint
+      const drain = this.drain
+      const id = this.application.id
+      console.log('update stoping before:' + this.optionApps.stoping.size)
+      this.optionApps.stoping.set(id, new Date().getTime())
+      this.handleMapUpdate('stoping')
+      this.handleStopCancel()
+      cancel({
+        id: id,
+        savePointed: savePoint,
+        drain: drain
+      }).then((resp) => {
+        if (resp.status === 'error') {
+          this.$notification.open({
+            message: 'cancel application failed',
+            description: resp.exception,
+            icon: <a-icon type="error" style="color: #f5222d"/>
+        })
+        }
+      })
+    },
+
+    handleDetail (app) {
+      this.SetAppId(app.id)
+      this.$router.push({ 'path': '/flink/app/detail' })
+    },
+
+    handleSearch (selectedKeys, confirm, dataIndex) {
+      confirm()
+      this.searchText = selectedKeys[0]
+      this.searchedColumn = dataIndex
+      this.queryParams[this.searchedColumn] = this.searchText
+      const { sortedInfo } = this
+      // 获取当前列的排序和列的过滤规则
+      if (sortedInfo) {
+        this.queryParams['sortField'] = sortedInfo.field
+        this.queryParams['sortOrder'] = sortedInfo.order
+      }
+    },
+
+    handleReset (clearFilters) {
+      clearFilters()
+      this.searchText = ''
+      // 重置列排序规则
+      this.sortedInfo = null
+      // 重置查询参数
+      this.queryParams = {}
+    },
+
+    handleTableChange (pagination, filters, sorter) {
+      this.sortedInfo = sorter
+      this.paginationInfo = pagination
+      this.queryParams['sortField'] = sorter.field
+      this.queryParams['sortOrder'] = sorter.order
+      this.handleFetch(true)
+    },
+
+    handleFetch (loading) {
+      if (loading) this.loading = true
+      const params = Object.assign(this.queryParams, {})
+      if (this.paginationInfo) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableInfo.pagination.current = this.paginationInfo.current
+        this.$refs.TableInfo.pagination.pageSize = this.paginationInfo.pageSize
+        params.pageSize = this.paginationInfo.pageSize
+        params.pageNum = this.paginationInfo.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.defaultPageSize
+        params.pageNum = this.pagination.defaultCurrent
+      }
+      list({ ...params }).then((resp) => {
+        this.loading = false
+        const pagination = { ...this.pagination }
+        pagination.total = parseInt(resp.data.total)
+        this.dataSource = resp.data.records
+        const timestamp = new Date().getTime()
+        this.dataSource.forEach(x => {
+          if (x.optionState === 0) {
+            if (this.optionApps.starting.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
+                this.optionApps.starting.delete(x.id)
+                this.handleMapUpdate('starting')
+              }
+            }
+            if (this.optionApps.stoping.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
+                this.optionApps.stoping.delete(x.id)
+                this.handleMapUpdate('stoping')
+              }
+            }
+            if (this.optionApps.deploy.get(x.id) !== undefined) {
+              if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
+                this.optionApps.deploy.delete(x.id)
+                this.handleMapUpdate('deploy')
+              }
+            }
+          }
+        })
+        this.pagination = pagination
+      })
+    },
+
+    handleYarn (params = {}) {
+      yarn({}).then((resp) => {
+        this.yarn = resp.data
+      })
+    },
+
+    handleView (params) {
+      if (params.state === 4 || params.state === 5) {
+        const url = this.yarn + '/proxy/' + params['appId'] + '/'
+        window.open(url)
+      }
+    },
+
+    handleAdd () {
+      this.$router.push({ 'path': '/flink/app/add' })
+    },
+
+    handleEdit (app) {
+      this.SetAppId(app.id)
+      if (app.appType === 1) {
+        this.$router.push({ 'path': '/flink/app/edit_streamx' })
+      } else {
+        this.$router.push({ 'path': '/flink/app/edit_flink' })
+      }
+    },
+
+    handleCleanDeploy (app) {
+      clean({
+        id: app.id
+      }).then((resp) => {
+      })
+    },
+
+    handleMapUpdate (type) {
+      const map = this.optionApps[type]
+      this.optionApps[type] = new Map(map)
+    }
+  }
+}
+</script>
 
 <style scoped>
 
