@@ -410,7 +410,6 @@
         </template>
 
         <a-table
-          v-if="record.state === 5"
           slot="expandedRowRender"
           slot-scope="text"
           :columns="innerColumns"
