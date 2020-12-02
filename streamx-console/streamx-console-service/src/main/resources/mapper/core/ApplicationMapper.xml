@@ -92,14 +92,20 @@
             <if test="application.duration != null">
                 duration=#{application.duration},
             </if>
-            <if test="application.taskmanagers != null">
-                task_managers=#{application.taskmanagers},
+            <if test="application.totalTM != null">
+                total_tm=#{application.totalTM},
             </if>
-            <if test="application.slotsTotal != null">
-                slots_Total=#{application.slotsTotal},
+            <if test="application.totalSlot != null">
+                total_slot=#{application.totalSlot},
             </if>
-            <if test="application.slotsAvailable != null">
-                slots_Available=#{application.slotsAvailable},
+            <if test="application.availableSlot != null">
+                available_slot=#{application.availableSlot},
+            </if>
+            <if test="application.jmMemory != null">
+                jm_memory=#{application.jmMemory},
+            </if>
+            <if test="application.tmMemory != null">
+                tm_memory=#{application.tmMemory},
             </if>
             <if test="application.flinkCommit != null">
                 flink_Commit=#{application.flinkCommit},
