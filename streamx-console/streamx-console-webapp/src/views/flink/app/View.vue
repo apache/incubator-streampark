@@ -120,7 +120,7 @@
           slot-scope="text, record"
           rowKey="id"
           :columns="innerColumns"
-          :data-source="record.innerData"
+          :data-source="record.expanded"
           :pagination="false">
         </a-table>
 
@@ -1187,7 +1187,7 @@ export default {
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
-          x.innerData = [{
+          x.expanded = [{
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
