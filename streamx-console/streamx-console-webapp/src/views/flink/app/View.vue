@@ -116,6 +116,15 @@
         :scroll="{ x: 700 }"
         @change="handleTableChange">
 
+        <a-table
+          slot="expandedRowRender"
+          slot-scope="record"
+          rowKey="id"
+          :columns="innerColumns"
+          :data-source="record.innerData"
+          :pagination="false">
+        </a-table>
+
         <div
           slot="filterDropdown"
           slot-scope="{ setSelectedKeys, selectedKeys, confirm, clearFilters, column }"
@@ -410,14 +419,6 @@
           </a-icon>
         </template>
 
-        <a-table
-          slot="expandedRowRender"
-          slot-scope="record, index, indent, expanded"
-          rowKey="id"
-          :columns="innerColumns"
-          :data-source="record.innerDataSource"
-          :pagination="false">
-        </a-table>
       </a-table>
 
       <a-modal v-model="deployVisible" on-ok="handleDeployOk">
@@ -1188,6 +1189,15 @@ export default {
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
+          x.innerData = {
+            'appId': x.appId,
+            'jmMemory': x.jmMemory,
+            'tmMemory': x.tmMemory,
+            'totalTM': x.totalTM,
+            'totalSlot': x.totalSlot,
+            'availableSlot': x.availableSlot,
+            'flinkCommit': x.flinkCommit
+          }
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
