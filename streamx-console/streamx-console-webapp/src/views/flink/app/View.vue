@@ -110,6 +110,7 @@
         class="app_list"
         style="margin-top: -24px"
         :dataSource="dataSource"
+        :expandedRowKeys="expandedRow"
         :pagination="pagination"
         :loading="loading"
         :scroll="{ x: 700 }"
@@ -674,6 +675,7 @@ export default {
     return {
       loading: false,
       dataSource: [],
+      expandedRow: ['appId','jmMemory','tmMemory','totalTM','totalSlot','availableSlot','flinkCommit'],
       innerDataSource: [],
       queryParams: {},
       sortedInfo: null,
