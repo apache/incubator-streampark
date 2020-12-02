@@ -826,7 +826,7 @@ export default {
         title: 'Job Name',
         dataIndex: 'jobName',
         width: 250,
-        fixed: 'left',
+        //fixed: 'left',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -903,7 +903,7 @@ export default {
           { text: 'FINISHED', value: 10 },
           { text: 'LOST', value: 13 }
         ],
-        fixed: 'right',
+        //fixed: 'right',
         filteredValue: filteredInfo.state || null,
         onFilter: (value, record) => {
           return record.state === value
@@ -915,7 +915,7 @@ export default {
         key: 'operation',
         scopedSlots: { customRender: 'operation' },
         slots: { title: 'customOperation' },
-        fixed: 'right',
+        //fixed: 'right',
         width: 150
       }]
     }
