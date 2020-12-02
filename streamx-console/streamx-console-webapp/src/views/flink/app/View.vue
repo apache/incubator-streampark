@@ -1363,7 +1363,7 @@ export default {
 
 .expand-icon-close {
   font-size: 10px;
-  color: #444444;
+  color: darkgray;
 }
 
 </style>
