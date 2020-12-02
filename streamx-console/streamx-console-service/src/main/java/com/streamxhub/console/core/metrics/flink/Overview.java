@@ -37,6 +37,21 @@ public class Overview {
     @JsonProperty("slots-available")
     private Integer slotsAvailable;
 
+    @JsonProperty("jobs-running")
+    private Integer jobsRunning;
+
+    @JsonProperty("jobs-finished")
+    private Integer jobsFinished;
+
+    @JsonProperty("jobs-cancelled")
+    private Integer jobsCancelled;
+
+    @JsonProperty("jobs-failed")
+    private Integer jobsFailed;
+
+    @JsonProperty("flink-version")
+    private Integer flinkVersion;
+
     @JsonProperty("flink-commit")
     private String flinkCommit;
 
