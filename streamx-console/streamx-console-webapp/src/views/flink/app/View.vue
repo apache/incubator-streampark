@@ -1229,9 +1229,9 @@ export default {
       console.log(props)
       if (props.record.state === 5) {
         if (props.expanded) {//有数据-展开时候图标
-          return <a onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
+          return <a class='expand-icon-close' onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
         } else {//有数据-未展开时候图标
-          return <a style='color:black' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
+          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
         }
       }else {
         return ''
@@ -1356,6 +1356,16 @@ export default {
 .expanded-table >>> .ant-table-tbody>tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
+}
+
+.expand-icon-open {
+  font-size: 10px;
+}
+
+
+.expand-icon-close {
+  font-size: 10px;
+  color: #444444;
 }
 
 </style>
