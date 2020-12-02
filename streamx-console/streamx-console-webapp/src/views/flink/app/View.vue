@@ -1195,7 +1195,8 @@ export default {
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot,
             'flinkCommit': x.flinkCommit
-          },
+          }
+
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
