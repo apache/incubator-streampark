@@ -117,6 +117,7 @@
 
         <a-table
           slot="expandedRowRender"
+          :expandIcon="handleExpandIcon"
           class="expanded-table"
           slot-scope="record, index, indent, expande"
           v-if="record.state === 5"
@@ -1224,6 +1225,19 @@ export default {
       })
     },
 
+    handleExpandIcon (props) {
+      console.log(props)
+      if (props.record.statue === 5) {
+        if (props.expanded) {//有数据-展开时候图标
+          return <a onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
+        } else {//有数据-未展开时候图标
+          return <a onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
+        }
+      }else {
+        return ''
+      }
+    },
+
     handleYarn (params = {}) {
       yarn({}).then((resp) => {
         this.yarn = resp.data
@@ -1335,6 +1349,11 @@ export default {
 }
 
 .expanded-table >>> .ant-table-tbody>tr>td {
+  border-bottom: none !important;
+  padding: 11px 9px !important;
+}
+
+.expanded-table >>> .ant-table-tbody>tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
