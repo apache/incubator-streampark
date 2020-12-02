@@ -117,6 +117,7 @@
 
         <a-table
           slot="expandedRowRender"
+          class="expanded-table"
           slot-scope="record, index, indent, expande"
           v-if="record.state === 5"
           rowKey="id"
@@ -1331,5 +1332,9 @@ export default {
 
 .pointer {
   cursor: pointer;
+}
+
+.expanded-table >>> .ant-table-tbody>tr>td {
+  border-bottom: none !important;
 }
 </style>
