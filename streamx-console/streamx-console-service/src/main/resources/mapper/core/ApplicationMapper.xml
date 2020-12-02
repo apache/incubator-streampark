@@ -21,6 +21,12 @@
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
+        <result column="TOTAL_SLOT" jdbcType="INTEGER" property="totalSlot"/>
+        <result column="AVAILABLE_SLOT" jdbcType="INTEGER" property="availableSlot"/>
+        <result column="FLINK_COMMIT" jdbcType="VARCHAR" property="flinkCommit"/>
+        <result column="JM_MEMORY" jdbcType="VARCHAR" property="jmMemory"/>
+        <result column="TM_MEMORY" jdbcType="VARCHAR" property="tmMemory"/>
         <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
@@ -86,8 +92,19 @@
             <if test="application.duration != null">
                 duration=#{application.duration},
             </if>
+            <if test="application.taskmanagers != null">
+                task_managers=#{application.taskmanagers},
+            </if>
+            <if test="application.slotsTotal != null">
+                slots_Total=#{application.slotsTotal},
+            </if>
+            <if test="application.slotsAvailable != null">
+                slots_Available=#{application.slotsAvailable},
+            </if>
+            <if test="application.flinkCommit != null">
+                flink_Commit=#{application.flinkCommit},
+            </if>
         </set>
         where id=#{application.id}
     </update>
-
 </mapper>

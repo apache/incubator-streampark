@@ -30,6 +30,7 @@ import com.streamxhub.console.core.enums.DeployState;
 import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.enums.StopFrom;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
+import com.streamxhub.console.core.metrics.flink.Overview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.console.core.service.ApplicationService;
 import com.streamxhub.console.core.service.SavePointService;
@@ -64,6 +65,8 @@ public class FlinkTrackingTask {
 
     private static Cache<Long, Byte> savePointCache = null;
 
+    private static Cache<Long, Byte> startingCache = null;
+
     private static Map<Long, StopFrom> stopAppMap = new ConcurrentHashMap<>();
 
     private final Map<Long, Tracker> canceling = new ConcurrentHashMap<>();
@@ -91,6 +94,7 @@ public class FlinkTrackingTask {
     public void initialization() {
         trackingAppId = Caffeine.newBuilder().maximumSize(Long.MAX_VALUE).build();
         trackingAppCache = Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).build(k -> applicationService.getById(k));
+        startingCache = Caffeine.newBuilder().expireAfterWrite(3, TimeUnit.MINUTES).build();
         savePointCache = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("tracking", 1);
@@ -167,21 +171,21 @@ public class FlinkTrackingTask {
      * 从flink restapi成功拿到当前任务的运行状态信息...
      *
      * @param application
-     * @param job
+     * @param jobOverview
      */
-    private void restApiCallback(Application application, JobsOverview.Job job, StopFrom stopFrom) {
-        FlinkAppState currentState = FlinkAppState.valueOf(job.getState());
+    private void restApiCallback(Application application, JobsOverview.Job jobOverview, StopFrom stopFrom) {
+        FlinkAppState currentState = FlinkAppState.valueOf(jobOverview.getState());
 
         /**
          * 1) jobId以restapi返回的状态为准
          */
-        application.setJobId(job.getId());
+        application.setJobId(jobOverview.getId());
 
         /**
          * 2) duration
          */
-        long startTime = job.getStartTime();
-        long endTime = job.getEndTime();
+        long startTime = jobOverview.getStartTime();
+        long endTime = jobOverview.getEndTime();
         if (application.getStartTime() == null) {
             application.setStartTime(new Date(startTime));
         } else if (startTime != application.getStartTime().getTime()) {
@@ -192,10 +196,28 @@ public class FlinkTrackingTask {
                 application.setEndTime(new Date(endTime));
             }
         }
-        application.setDuration(job.getDuration());
+        application.setDuration(jobOverview.getDuration());
 
         /**
-         * 3) savePoint obsolete check and NEED_START check
+         * 3) overview
+         */
+        if (startingCache.getIfPresent(application.getId()) != null) {
+            try {
+                Overview override = application.getOverview();
+                if (override!=null) {
+                    startingCache.invalidate(application.getId());
+                    application.setTotalTM(override.getTaskmanagers());
+                    application.setTotalSlot(override.getSlotsTotal());
+                    application.setAvailableSlot(override.getSlotsAvailable());
+                    application.setFlinkCommit(override.getFlinkCommit());
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        /**
+         * 4) savePoint obsolete check and NEED_START check
          */
         if (currentState.equals(FlinkAppState.RUNNING)) {
             FlinkAppState previousState = FlinkAppState.of(application.getState());

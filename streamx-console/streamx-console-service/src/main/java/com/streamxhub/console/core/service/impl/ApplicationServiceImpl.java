@@ -22,6 +22,7 @@ package com.streamxhub.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
+import com.streamxhub.common.conf.FlinkRunOption;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.*;
 import com.streamxhub.console.base.domain.Constant;
@@ -41,6 +42,7 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.flink.configuration.Configuration;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -423,6 +425,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
+            Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
+            if(configuration!=null) {
+                String jmMemory = configuration.toMap().get(FlinkRunOption.YARN_JMMEMORY_OPTION().getArgName());
+                String tmMemory = configuration.toMap().get(FlinkRunOption.YARN_TMMEMORY_OPTION().getArgName());
+                application.setJmMemory(jmMemory);
+                application.setTmMemory(tmMemory);
+            }
             /**
              * 一定要在flink job提交完毕才置状态...
              */

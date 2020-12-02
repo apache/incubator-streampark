@@ -33,6 +33,7 @@ import com.streamxhub.console.base.utils.SpringContextUtil;
 import com.streamxhub.console.core.enums.ApplicationType;
 import com.streamxhub.console.core.enums.FlinkAppState;
 import com.streamxhub.console.core.metrics.flink.JobsOverview;
+import com.streamxhub.console.core.metrics.flink.Overview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
@@ -98,8 +99,14 @@ public class Application implements Serializable {
 
     private Long duration;
 
+    // overview...
+    private Integer totalTM;
+    private Integer totalSlot;
+    private Integer availableSlot;
+    private String flinkCommit;
+    private String jmMemory;
+    private String tmMemory;
     private String description;
-
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
@@ -176,6 +183,22 @@ public class Application implements Serializable {
             if (result != null) {
                 ObjectMapper mapper = new ObjectMapper();
                 return mapper.readValue(new StringReader(result), JobsOverview.class);
+            }
+        } catch (IOException e) {
+            throw e;
+        }
+        return null;
+    }
+
+    @JsonIgnore
+    public Overview getOverview() throws IOException {
+        String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
+        String url = yarn.concat("/proxy/").concat(appId).concat("/overview");
+        try {
+            String result = HttpClientUtils.httpGetRequest(url);
+            if (result != null) {
+                ObjectMapper mapper = new ObjectMapper();
+                return mapper.readValue(new StringReader(result), Overview.class);
             }
         } catch (IOException e) {
             throw e;
