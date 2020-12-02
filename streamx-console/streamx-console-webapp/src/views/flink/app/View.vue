@@ -1191,6 +1191,7 @@ export default {
         const timestamp = new Date().getTime()
         dataSource.forEach(x => {
           x.expanded = [{
+            'state': x.state,
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
