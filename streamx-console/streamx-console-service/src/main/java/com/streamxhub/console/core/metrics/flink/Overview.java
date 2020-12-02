@@ -50,7 +50,7 @@ public class Overview {
     private Integer jobsFailed;
 
     @JsonProperty("flink-version")
-    private Integer flinkVersion;
+    private String flinkVersion;
 
     @JsonProperty("flink-commit")
     private String flinkCommit;
