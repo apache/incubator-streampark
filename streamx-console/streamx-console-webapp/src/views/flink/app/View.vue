@@ -1218,7 +1218,6 @@ export default {
             }
           }
         })
-        console.log(dataSource)
         this.dataSource = dataSource
         this.pagination = pagination
       })
