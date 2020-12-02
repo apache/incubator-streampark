@@ -100,6 +100,7 @@ public class Application implements Serializable {
     private Long duration;
 
     // overview...
+    @TableField("TOTAL_TM")
     private Integer totalTM;
     private Integer totalSlot;
     private Integer availableSlot;
