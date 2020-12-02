@@ -105,6 +105,7 @@
       <a-table
         ref="TableInfo"
         :columns="columns"
+        :expandIcon="handleExpandIcon"
         size="middle"
         rowKey="id"
         class="app_list"
@@ -117,7 +118,6 @@
 
         <a-table
           slot="expandedRowRender"
-          :expandIcon="handleExpandIcon"
           class="expanded-table"
           slot-scope="record, index, indent, expande"
           v-if="record.state === 5"
@@ -1191,7 +1191,6 @@ export default {
         const timestamp = new Date().getTime()
         dataSource.forEach(x => {
           x.expanded = [{
-            'state': x.state,
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
