@@ -110,7 +110,6 @@
         class="app_list"
         style="margin-top: -24px"
         :dataSource="dataSource"
-        :expandedRowKeys="expandedRow"
         :pagination="pagination"
         :loading="loading"
         :scroll="{ x: 700 }"
