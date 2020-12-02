@@ -117,7 +117,7 @@
 
         <a-table
           slot="expandedRowRender"
-          slot-scope="record"
+          slot-scope="text, record"
           rowKey="id"
           :columns="innerColumns"
           :data-source="record.innerData"
