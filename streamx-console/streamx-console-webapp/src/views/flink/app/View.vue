@@ -676,7 +676,6 @@ export default {
       loading: false,
       dataSource: [],
       expandedRow: ['appId','jmMemory','tmMemory','totalTM','totalSlot','availableSlot','flinkCommit'],
-      innerDataSource: [],
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
@@ -1188,7 +1187,7 @@ export default {
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
-          x.innerData = {
+          x.innerData = [{
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
@@ -1196,7 +1195,7 @@ export default {
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot,
             'flinkCommit': x.flinkCommit
-          }
+          }]
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
