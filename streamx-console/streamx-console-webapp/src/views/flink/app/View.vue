@@ -411,8 +411,9 @@
 
         <a-table
           slot="expandedRowRender"
+          rowKey="id"
           :columns="innerColumns"
-          :data-source="dataSource.innerData"
+          :data-source="dataSource"
           :pagination="false">
         </a-table>
       </a-table>
@@ -826,7 +827,6 @@ export default {
         title: 'Job Name',
         dataIndex: 'jobName',
         width: 250,
-        //fixed: 'left',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -903,7 +903,6 @@ export default {
           { text: 'FINISHED', value: 10 },
           { text: 'LOST', value: 13 }
         ],
-        //fixed: 'right',
         filteredValue: filteredInfo.state || null,
         onFilter: (value, record) => {
           return record.state === value
@@ -915,7 +914,6 @@ export default {
         key: 'operation',
         scopedSlots: { customRender: 'operation' },
         slots: { title: 'customOperation' },
-        //fixed: 'right',
         width: 150
       }]
     }
@@ -1187,16 +1185,6 @@ export default {
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
-          x.innerData = {
-            'appId': x.appId,
-            'jmMemory': x.jmMemory,
-            'tmMemory': x.tmMemory,
-            'totalTM': x.totalTM,
-            'totalSlot': x.totalSlot,
-            'availableSlot': x.availableSlot,
-            'flinkCommit': x.flinkCommit
-          }
-
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
