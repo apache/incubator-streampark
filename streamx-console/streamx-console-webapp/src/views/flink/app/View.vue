@@ -411,9 +411,8 @@
 
         <a-table
           slot="expandedRowRender"
-          slot-scope="text"
           :columns="innerColumns"
-          :data-source="dataSource"
+          :data-source="dataSource.innerData"
           :pagination="false">
         </a-table>
       </a-table>
@@ -1188,6 +1187,15 @@ export default {
         this.dataSource = resp.data.records
         const timestamp = new Date().getTime()
         this.dataSource.forEach(x => {
+          x.innerData = {
+            'appId': x.appId,
+            'jmMemory': x.jmMemory,
+            'tmMemory': x.tmMemory,
+            'totalTM': x.totalTM,
+            'totalSlot': x.totalSlot,
+            'availableSlot': x.availableSlot,
+            'flinkCommit': x.flinkCommit
+          },
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
