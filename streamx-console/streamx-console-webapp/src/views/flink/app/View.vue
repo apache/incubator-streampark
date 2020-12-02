@@ -411,6 +411,7 @@
 
         <a-table
           slot="expandedRowRender"
+          slot-scope="text"
           rowKey="id"
           :columns="innerColumns"
           :data-source="dataSource"
