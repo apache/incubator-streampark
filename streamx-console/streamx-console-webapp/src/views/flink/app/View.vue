@@ -1231,7 +1231,7 @@ export default {
         if (props.expanded) {//有数据-展开时候图标
           return <a onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
         } else {//有数据-未展开时候图标
-          return <a onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
+          return <a style='color:black' onClick={(e) => { props.onExpand(props.record, e)}}><a-icon type='right' /></a>
         }
       }else {
         return ''
