@@ -1184,9 +1184,9 @@ export default {
         this.loading = false
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
-        this.dataSource = resp.data.records
+        const dataSource = resp.data.records
         const timestamp = new Date().getTime()
-        this.dataSource.forEach(x => {
+        dataSource.forEach(x => {
           x.expanded = [{
             'appId': x.appId,
             'jmMemory': x.jmMemory,
@@ -1217,6 +1217,7 @@ export default {
             }
           }
         })
+        this.dataSource = dataSource
         this.pagination = pagination
       })
     },
