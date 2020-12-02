@@ -22,7 +22,6 @@ package com.streamxhub.console.core.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.common.conf.ConfigConst;
-import com.streamxhub.common.conf.FlinkRunOption;
 import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.*;
 import com.streamxhub.console.base.domain.Constant;
@@ -43,6 +42,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -427,8 +428,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
             Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
             if(configuration!=null) {
-                String jmMemory = configuration.toMap().get(FlinkRunOption.YARN_JMMEMORY_OPTION().getArgName());
-                String tmMemory = configuration.toMap().get(FlinkRunOption.YARN_TMMEMORY_OPTION().getArgName());
+                String jmMemory = configuration.toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                String tmMemory = configuration.toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 application.setJmMemory(jmMemory);
                 application.setTmMemory(tmMemory);
             }

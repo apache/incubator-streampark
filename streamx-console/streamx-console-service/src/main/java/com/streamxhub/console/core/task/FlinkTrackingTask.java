@@ -347,6 +347,7 @@ public class FlinkTrackingTask {
     public static void addTracking(Application application) {
         log.info("[StreamX] flinkTrackingTask add app to tracking,appId:{}", application.getId());
         trackingAppId.put(application.getId(), Byte.valueOf("0"));
+        startingCache.put(application.getId(), Byte.valueOf("0"));
         trackingAppCache.put(application.getId(), application);
     }
 
