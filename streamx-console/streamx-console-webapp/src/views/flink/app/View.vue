@@ -411,10 +411,10 @@
 
         <a-table
           slot="expandedRowRender"
-          slot-scope="text"
+          slot-scope="record, index, indent, expanded"
           rowKey="id"
           :columns="innerColumns"
-          :data-source="dataSource"
+          :data-source="record.innerDataSource"
           :pagination="false">
         </a-table>
       </a-table>
