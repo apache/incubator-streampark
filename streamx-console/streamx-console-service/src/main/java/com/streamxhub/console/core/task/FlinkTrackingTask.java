@@ -204,7 +204,7 @@ public class FlinkTrackingTask {
         if (startingCache.getIfPresent(application.getId()) != null) {
             try {
                 Overview override = application.getOverview();
-                log.info("Overview:{}",override);
+                log.info("Overview:{}", override);
                 if (override != null) {
                     startingCache.invalidate(application.getId());
                     application.setTotalTM(override.getTaskmanagers());
@@ -226,6 +226,7 @@ public class FlinkTrackingTask {
                 /**
                  * 发布完需重启和更新完匹配需重新的状态清空...
                  */
+                startingCache.put(application.getId(), Byte.valueOf("0"));
                 DeployState deployState = DeployState.of(application.getDeploy());
                 if (DeployState.NEED_RESTART_AFTER_UPDATE.equals(deployState) || DeployState.NEED_RESTART_AFTER_DEPLOY.equals(deployState)) {
                     application.setDeploy(DeployState.NONE.get());
@@ -266,6 +267,9 @@ public class FlinkTrackingTask {
             application.setState(FlinkAppState.FAILED.getValue());
             application.setOptionState(OptionState.NONE.getValue());
             persistentAndClean(application);
+        } else if (currentState.equals(FlinkAppState.RESTARTING)) {
+            log.info("[StreamX] flinkTrackingTask application state {},add to starting", currentState.name());
+            startingCache.put(application.getId(), Byte.valueOf("0"));
         }
     }
 
