@@ -1226,7 +1226,6 @@ export default {
     },
 
     handleExpandIcon (props) {
-      console.log(props)
       if (props.record.state === 5) {
         if (props.expanded) {
           return <a class='expand-icon-open' onClick={(e) => {props.onExpand(props.record, e)}}><a-icon type='down'/></a>
