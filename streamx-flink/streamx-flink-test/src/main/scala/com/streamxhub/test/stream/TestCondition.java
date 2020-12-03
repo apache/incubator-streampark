@@ -1,4 +1,4 @@
-package com.streamxhub.stream.test;
+package com.streamxhub.test.stream;
 
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
