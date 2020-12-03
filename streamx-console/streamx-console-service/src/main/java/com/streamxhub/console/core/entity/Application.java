@@ -99,14 +99,17 @@ public class Application implements Serializable {
 
     private Long duration;
 
-    // overview...
+    /**
+     * overview
+     */
     @TableField("TOTAL_TM")
     private Integer totalTM;
     private Integer totalSlot;
     private Integer availableSlot;
-    private String flinkCommit;
     private String jmMemory;
     private String tmMemory;
+    private Integer totalTask;
+
     private String description;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")

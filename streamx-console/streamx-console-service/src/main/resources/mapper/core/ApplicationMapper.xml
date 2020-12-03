@@ -24,7 +24,7 @@
         <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
         <result column="TOTAL_SLOT" jdbcType="INTEGER" property="totalSlot"/>
         <result column="AVAILABLE_SLOT" jdbcType="INTEGER" property="availableSlot"/>
-        <result column="FLINK_COMMIT" jdbcType="VARCHAR" property="flinkCommit"/>
+        <result column="TOTAL_TASK" jdbcType="INTEGER" property="totalTask"/>
         <result column="JM_MEMORY" jdbcType="VARCHAR" property="jmMemory"/>
         <result column="TM_MEMORY" jdbcType="VARCHAR" property="tmMemory"/>
         <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
@@ -98,6 +98,9 @@
             <if test="application.totalSlot != null">
                 total_slot=#{application.totalSlot},
             </if>
+            <if test="application.totalTask != null">
+                total_task=#{application.totalTask},
+            </if>
             <if test="application.availableSlot != null">
                 available_slot=#{application.availableSlot},
             </if>
@@ -106,9 +109,6 @@
             </if>
             <if test="application.tmMemory != null">
                 tm_memory=#{application.tmMemory},
-            </if>
-            <if test="application.flinkCommit != null">
-                flink_Commit=#{application.flinkCommit},
             </if>
         </set>
         where id=#{application.id}

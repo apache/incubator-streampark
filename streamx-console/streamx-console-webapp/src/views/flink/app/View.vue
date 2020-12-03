@@ -819,9 +819,9 @@ export default {
         { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
         { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
+        { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
         { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
-        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
-        { title: 'Flink Commit', dataIndex: 'flinkCommit', key: 'flinkCommit' }
+        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
       ]
     },
     columns () {
@@ -1194,10 +1194,10 @@ export default {
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
+            'totalTask': x.totalTask,
             'totalTM': x.totalTM,
             'totalSlot': x.totalSlot,
-            'availableSlot': x.availableSlot,
-            'flinkCommit': x.flinkCommit
+            'availableSlot': x.availableSlot
           }]
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {

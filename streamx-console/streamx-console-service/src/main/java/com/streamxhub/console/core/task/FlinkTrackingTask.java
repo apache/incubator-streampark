@@ -180,6 +180,7 @@ public class FlinkTrackingTask {
          * 1) jobId以restapi返回的状态为准
          */
         application.setJobId(jobOverview.getId());
+        application.setTotalTask(jobOverview.getTasks().getTotal());
 
         /**
          * 2) duration
@@ -209,7 +210,6 @@ public class FlinkTrackingTask {
                     application.setTotalTM(override.getTaskmanagers());
                     application.setTotalSlot(override.getSlotsTotal());
                     application.setAvailableSlot(override.getSlotsAvailable());
-                    application.setFlinkCommit(override.getFlinkCommit());
                 }
             } catch (IOException e) {
                 e.printStackTrace();
