@@ -223,7 +223,7 @@ trait FlinkTableSQL extends Logger {
   var jobExecutionResult: JobExecutionResult = _
 
   def main(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTableSQL])
 
     //init......
     val initializer = new FlinkInitializer(args, config)

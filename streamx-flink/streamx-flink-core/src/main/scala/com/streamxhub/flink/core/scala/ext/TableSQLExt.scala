@@ -34,6 +34,12 @@ object TableSQLExt {
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
 
+    def $d[T: TypeInformation]: DataSet[T] = toDataSet
+
+    def >>[T: TypeInformation]: DataStream[T] = toAppendStream
+
+    def ><[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
+
     def $dataSet[T: TypeInformation]: DataSet[T] = toDataSet
 
     def $append[T: TypeInformation]: DataStream[T] = toAppendStream
