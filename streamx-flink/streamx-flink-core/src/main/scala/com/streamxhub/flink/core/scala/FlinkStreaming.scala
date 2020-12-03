@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.ext.OperatorExt
+import com.streamxhub.flink.core.scala.ext.DataStreamExt
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -85,16 +85,9 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
 
 trait FlinkStreaming extends Logger {
 
-  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): OperatorExt.DataStream[T] = new OperatorExt.DataStream[T](dataStream)
+  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
 
-  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): OperatorExt.ProcessFunction[IN, OUT] = new OperatorExt.ProcessFunction[IN, OUT](ctx)
-
-  @transient
-  private var env: StreamExecutionEnvironment = _
-
-  private var parameter: ParameterTool = _
-
-  private var context: StreamingContext = _
+  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] = new DataStreamExt.ProcessFunction[IN, OUT](ctx)
 
   var jobExecutionResult: JobExecutionResult = _
 
@@ -102,9 +95,9 @@ trait FlinkStreaming extends Logger {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     //init......
     val initializer = new FlinkInitializer(args, config)
-    parameter = initializer.parameter
-    env = initializer.streamEnvironment
-    context = new StreamingContext(parameter, env)
+    val parameter = initializer.parameter
+    val env = initializer.streamEnvironment
+    val context = new StreamingContext(parameter, env)
     //
     beforeStart(context)
     handler(context)

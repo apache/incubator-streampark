@@ -39,6 +39,8 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.table.api.EnvironmentSettings
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -72,11 +74,11 @@ object FlinkInitializer {
 }
 
 
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction) {
+class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
 
-}
 
 class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
+
 
   def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
     this(args, ApiType.SCALA)
@@ -97,6 +99,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   val parameter: ParameterTool = initParameter()
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
+
+  private[this] var tableEnv: StreamTableEnvironment = _
 
   def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
@@ -147,6 +151,26 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       }
     }
     streamEnv
+  }
+
+  def tableEnvironment: StreamTableEnvironment = {
+    if (tableEnv == null) {
+      this.synchronized {
+        if (tableEnv == null) {
+          initTableEnv()
+        }
+      }
+    }
+    tableEnv
+  }
+
+  def initTableEnv() = {
+    val setting = EnvironmentSettings
+      .newInstance()
+      .useBlinkPlanner()
+      .inStreamingMode()
+      .build()
+    this.tableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
   }
 
   private[this] def initStreamEnv() = {
@@ -370,5 +394,6 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       }
     }
   }
+
 
 }
