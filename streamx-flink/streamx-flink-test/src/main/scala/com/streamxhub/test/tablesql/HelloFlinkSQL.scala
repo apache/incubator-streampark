@@ -1,4 +1,4 @@
-package com.streamxhub.tablesql.test
+package com.streamxhub.test.tablesql
 
 import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
 

@@ -1,10 +1,8 @@
-package com.streamxhub.tablesql.test
+package com.streamxhub.test.tablesql
 
 import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
-import org.apache.flink.table.api.{DataTypes, FieldExpression, Table}
+import org.apache.flink.table.api.{DataTypes, Table}
 import org.apache.flink.table.descriptors.{Csv, Kafka, Schema}
-import org.apache.flink.api.scala._
-import org.apache.flink.table.api._
 
 object KafkaTableApp extends FlinkTableSQL {
 

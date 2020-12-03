@@ -1,5 +1,4 @@
-package com.streamxhub.stream.test
-
+package com.streamxhub.test.stream
 
 import com.streamxhub.flink.core.scala.sink.{RedisMapper, RedisSink}
 import com.streamxhub.flink.core.scala.source.KafkaSource

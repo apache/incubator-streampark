@@ -1,13 +1,11 @@
-package com.streamxhub.stream.test
+package com.streamxhub.test.stream
 
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.locks.{Condition, ReentrantLock}
-
-
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.util.{Random, Try}
-import scala.collection.JavaConversions._
 
 object ThreadTestApp {
 
