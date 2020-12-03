@@ -1,4 +1,4 @@
-package com.streamxhub.stream.test
+package com.streamxhub.test.stream
 
 import org.apache.flink.streaming.api.scala._
 

@@ -1,11 +1,11 @@
-package com.streamxhub.stream.test
+package com.streamxhub.test.stream
 
-import java.sql.PreparedStatement
-import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder, JdbcSink => JSink}
 import com.streamxhub.flink.core.scala.sink.JdbcSink
 import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder}
+
+import java.sql.PreparedStatement
 
 object JdbcSinkApp extends FlinkStreaming {
 
@@ -59,5 +59,3 @@ object JdbcSinkApp extends FlinkStreaming {
   }
 
 }
-
-

@@ -1,13 +1,12 @@
-package com.streamxhub.stream.test
+package com.streamxhub.test.stream
 
+import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.util.Bytes
 
 import java.util.{Collections, Random}
-import org.apache.flink.streaming.api.scala._
-import com.streamxhub.common.util.ConfigUtils
-import com.streamxhub.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
-import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 
 object HBaseSinkApp extends FlinkStreaming {
 

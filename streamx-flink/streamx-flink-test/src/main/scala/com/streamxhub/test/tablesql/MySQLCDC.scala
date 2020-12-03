@@ -1,9 +1,9 @@
-package com.streamxhub.tablesql.test
+package com.streamxhub.test.tablesql
 
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
-import com.alibaba.ververica.cdc.debezium.StringDebeziumDeserializationSchema
 import com.alibaba.ververica.cdc.connectors.mysql.MySQLSource
+import com.alibaba.ververica.cdc.debezium.StringDebeziumDeserializationSchema
 import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object MySQLCDC extends FlinkTableSQL {
 
