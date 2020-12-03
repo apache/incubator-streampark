@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, LOGO}
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.ext.TableSQLExt
+import com.streamxhub.flink.core.scala.ext.TableExt
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -41,7 +41,7 @@ import org.apache.flink.table.types.AbstractDataType
 import java.lang
 import java.util.Optional
 
-class TableSQLContext(val parameter: ParameterTool, private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
    * for scala...
@@ -216,9 +216,9 @@ class TableSQLContext(val parameter: ParameterTool, private val tableEnv: Stream
 
 trait FlinkTableSQL extends Logger {
 
-  final implicit def tableExt(table: Table): TableSQLExt.Table = new TableSQLExt.Table(table)
+  final implicit def tableExt(table: Table): TableExt.Table = new TableExt.Table(table)
 
-  final implicit def tableConversions(table: Table) = new TableSQLExt.TableConversions(table)
+  final implicit def tableConversions(table: Table) = new TableExt.TableConversions(table)
 
   var jobExecutionResult: JobExecutionResult = _
 
@@ -229,7 +229,7 @@ trait FlinkTableSQL extends Logger {
     val initializer = new FlinkInitializer(args, config)
     val parameter = initializer.parameter
     val env = initializer.tableEnvironment
-    val context = new TableSQLContext(parameter, env)
+    val context = new TableContext(parameter, env)
     //
     beforeStart(context)
     handler(context)
@@ -240,10 +240,10 @@ trait FlinkTableSQL extends Logger {
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(context: TableSQLContext): Unit = {}
+  def beforeStart(context: TableContext): Unit = {}
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handler(context: TableSQLContext): Unit
+  def handler(context: TableContext): Unit
 
 }
