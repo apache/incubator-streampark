@@ -41,7 +41,10 @@ import org.apache.flink.table.types.AbstractDataType
 import java.lang
 import java.util.Optional
 
-class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+class TableContext(val parameter: ParameterTool,
+                   private val env: StreamExecutionEnvironment,
+                   private val tableEnv: StreamTableEnvironment
+                  ) extends StreamTableEnvironment {
 
   /**
    * for scala...
@@ -50,7 +53,11 @@ class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTab
    * @param config
    */
   def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
-    this(FlinkInitializer.get(array, config).parameter, FlinkInitializer.get(array, config).tableEnvironment)
+    this(
+      FlinkInitializer.get(array, config).parameter,
+      FlinkInitializer.get(array, config).streamEnvironment,
+      FlinkInitializer.get(array, config).tableEnvironment
+    )
   }
 
   /**
@@ -59,7 +66,11 @@ class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTab
    * @param args
    */
   def this(args: StreamEnvConfig) = {
-    this(FlinkInitializer.get(args).parameter, FlinkInitializer.get(args).tableEnvironment)
+    this(
+      FlinkInitializer.get(args).parameter,
+      FlinkInitializer.get(args).streamEnvironment,
+      FlinkInitializer.get(args).tableEnvironment
+    )
   }
 
   /**
@@ -79,7 +90,7 @@ class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTab
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkTable $jobName Starting...")
-    tableEnv.execute(jobName)
+    env.execute(jobName)
   }
 
   override def registerFunction[T](name: String, tf: TableFunction[T])(implicit info: TypeInformation[T]): Unit = tableEnv.registerFunction(name, tf)
@@ -181,6 +192,7 @@ class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTab
 
   /**
    * deprecated!!! what are you fucking for??? don't call this method
+   *
    * @param name
    * @param dataStream
    * @tparam T
@@ -234,8 +246,9 @@ trait FlinkTable extends Logger {
     //init......
     val initializer = new FlinkInitializer(args, config)
     val parameter = initializer.parameter
-    val env = initializer.tableEnvironment
-    val context = new TableContext(parameter, env)
+    val env = initializer.streamEnvironment
+    val tableEnv = initializer.tableEnvironment
+    val context = new TableContext(parameter, env, tableEnv)
     //
     beforeStart(context)
     handler(context)
