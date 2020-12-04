@@ -14,7 +14,7 @@ import java.util
 
 object HBaseSourceApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
 
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
 

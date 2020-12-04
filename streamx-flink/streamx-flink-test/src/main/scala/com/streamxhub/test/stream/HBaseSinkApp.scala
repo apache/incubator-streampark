@@ -11,7 +11,7 @@ import java.util.{Collections, Random}
 
 object HBaseSinkApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     val source = context.addSource(new TestSource)
     val random = new Random()
 

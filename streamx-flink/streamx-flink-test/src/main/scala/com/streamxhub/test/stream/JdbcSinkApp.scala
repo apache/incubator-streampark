@@ -10,7 +10,7 @@ import java.sql.PreparedStatement
 
 object JdbcSinkApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
 
     /**
      * 从kafka里读数据.这里的数据是数字或者字母,每次读取1条
