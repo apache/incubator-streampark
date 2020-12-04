@@ -3,7 +3,7 @@ package com.streamxhub.test.stream
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction
-import org.apache.flink.streaming.api.scala.{OutputTag, _}
+import org.apache.flink.streaming.api.scala._
 import org.apache.flink.util.Collector
 
 import scala.util.Random

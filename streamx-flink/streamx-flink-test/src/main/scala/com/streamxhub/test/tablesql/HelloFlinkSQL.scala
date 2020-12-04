@@ -1,10 +1,12 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
+import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+import org.apache.flink.api.scala._
+import org.apache.flink.table.api._
 
-object HelloFlinkSQL extends FlinkTableSQL {
+object HelloFlinkSQL extends FlinkTable {
 
-  override def handler(context: TableSQLContext): Unit = {
+  override def handler(context: TableContext): Unit = {
     val sourceDDL =
       """
         |create table kafka_source (

@@ -4,9 +4,11 @@ import com.streamxhub.flink.core.scala.{DataSetContext, FlinkDataSet}
 import org.apache.flink.api.common.accumulators.LongCounter
 import org.apache.flink.api.common.functions.{GroupCombineFunction, GroupReduceFunction, RichMapFunction}
 import org.apache.flink.api.common.operators.Order
-import org.apache.flink.api.scala.DataSet
+import org.apache.flink.api.scala._
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.util.Collector
+
+import scala.collection.JavaConversions._
 
 /**
  * 学习flink的各类算子的流转操作......

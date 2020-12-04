@@ -1,12 +1,13 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
-import org.apache.flink.table.api.DataTypes
+import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
 import org.apache.flink.table.descriptors.{FileSystem, OldCsv, Schema}
+import org.apache.flink.api.scala._
+import org.apache.flink.table.api._
 
-object FileTableApp extends FlinkTableSQL {
+object FileTableApp extends FlinkTable {
 
-  override def handler(context: TableSQLContext): Unit = {
+  override def handler(context: TableContext): Unit = {
     context.connect(new FileSystem().path("data/in/order.txt"))
       .withFormat(new OldCsv())
       .withSchema(new Schema()
@@ -16,7 +17,7 @@ object FileTableApp extends FlinkTableSQL {
       )
       .createTemporaryTable("orders")
     val orders = context.from("orders")
-    orders.$append[(String, Int, String)].print()
+    orders.>>[(String, Int, String)].print()
   }
 
 }
