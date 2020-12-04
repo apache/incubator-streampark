@@ -15,12 +15,13 @@ object KafkaTableApp extends FlinkTable {
         .topic("hello")
         .property("zookeeper.connect", "localhost:2181")
         .property("bootstrap.servers", "localhost:9092")
-    ).withFormat(new Csv)
+    )
+      .withFormat(new Csv)
       .withSchema(
         new Schema()
           .field("id", DataTypes.STRING())
-          .field("name", DataTypes.STRING())
-      ).createTemporaryTable("kafka2Table")
+          .field("name", DataTypes.STRING()))
+      .createTemporaryTable("kafka2Table")
 
     //kafka to table
     val table: Table = context.from("kafka2Table")
