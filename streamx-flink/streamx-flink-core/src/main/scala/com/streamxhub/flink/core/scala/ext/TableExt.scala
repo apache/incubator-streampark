@@ -18,18 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.flink.core.scala.ext
 
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.scala.DataSet
+import org.apache.flink.streaming.api.scala.DataStream
+import org.apache.flink.table.api.{Table => FlinkTable}
+import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
 
-import java.io.Serializable;
+object TableExt {
 
-/**
- * @author benjobs
- */
-public interface SQLToFunction<T> extends Serializable {
-    /**
-     * @param bean
-     * @return
-     */
-    String toSQL(T bean);
+  class Table(val table: FlinkTable) {
+    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
+  }
+
+  class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
+
+    def \\[T: TypeInformation]: DataSet[T] = toDataSet
+
+    def >>[T: TypeInformation]: DataStream[T] = toAppendStream
+
+    def <<[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
+  }
+
 }

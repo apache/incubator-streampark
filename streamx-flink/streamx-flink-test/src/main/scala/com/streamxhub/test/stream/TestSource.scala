@@ -1,4 +1,4 @@
-package com.streamxhub.flink.test
+package com.streamxhub.test.stream
 
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 
