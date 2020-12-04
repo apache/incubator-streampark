@@ -8,7 +8,7 @@ import scala.util.Try
 
 object StreamingTestApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     val host = context.parameter.get("host")
     val port = Try(context.parameter.get("port").toInt).getOrElse(7070)
 

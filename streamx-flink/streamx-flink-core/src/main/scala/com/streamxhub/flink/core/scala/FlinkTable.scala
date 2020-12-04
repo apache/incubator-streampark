@@ -250,7 +250,7 @@ trait FlinkTable extends Logger {
     val context = new TableContext(parameter, env, tableEnv)
     //
     beforeStart(context)
-    handler(context)
+    handle(context)
     jobExecutionResult = context.start()
   }
 
@@ -262,6 +262,6 @@ trait FlinkTable extends Logger {
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handler(context: TableContext): Unit
+  def handle(context: TableContext): Unit
 
 }
