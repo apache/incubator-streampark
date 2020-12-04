@@ -1,13 +1,13 @@
-package com.streamxhub.flink.test
+package com.streamxhub.test.stream
 
-import java.util.Date
 import com.streamxhub.flink.core.scala.sink.ESSink
-import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.scala.util.ElasticSearchUtils
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.api.scala._
+import java.util.Date
 
 object ConnectorApp extends FlinkStreaming {
 

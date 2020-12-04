@@ -25,12 +25,11 @@ import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
-import java.util.List;
 
 public interface MongoFunction<T> {
 
     FindIterable<Document> getQuery(MongoDatabase database);
 
-    List<T> doResult(MongoCursor<Document> cursor);
+    Iterable<T> doResult(MongoCursor<Document> cursor);
 
 }

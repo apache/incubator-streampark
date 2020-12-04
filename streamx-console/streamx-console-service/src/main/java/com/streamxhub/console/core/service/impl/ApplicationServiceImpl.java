@@ -41,6 +41,9 @@ import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.flink.configuration.Configuration;
+import org.apache.flink.configuration.JobManagerOptions;
+import org.apache.flink.configuration.TaskManagerOptions;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -423,6 +426,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
+            Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
+            if(configuration!=null) {
+                String jmMemory = configuration.toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                String tmMemory = configuration.toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                application.setJmMemory(jmMemory);
+                application.setTmMemory(tmMemory);
+            }
             /**
              * 一定要在flink job提交完毕才置状态...
              */

@@ -105,6 +105,7 @@
       <a-table
         ref="TableInfo"
         :columns="columns"
+        :expandIcon="handleExpandIcon"
         size="middle"
         rowKey="id"
         class="app_list"
@@ -114,6 +115,17 @@
         :loading="loading"
         :scroll="{ x: 700 }"
         @change="handleTableChange">
+
+        <a-table
+          slot="expandedRowRender"
+          class="expanded-table"
+          slot-scope="record, index, indent, expande"
+          v-if="record.state === 5"
+          rowKey="id"
+          :columns="innerColumns"
+          :data-source="record.expanded"
+          :pagination="false">
+        </a-table>
 
         <div
           slot="filterDropdown"
@@ -666,6 +678,7 @@ export default {
     return {
       loading: false,
       dataSource: [],
+      expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
       filteredInfo: null,
@@ -800,6 +813,17 @@ export default {
   },
 
   computed: {
+    innerColumns () {
+      return [
+        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 255 },
+        { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
+        { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
+        { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
+        { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
+        { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
+        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
+      ]
+    },
     columns () {
       let { sortedInfo, filteredInfo } = this
       sortedInfo = sortedInfo || {}
@@ -808,7 +832,6 @@ export default {
         title: 'Job Name',
         dataIndex: 'jobName',
         width: 250,
-        fixed: 'left',
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -885,7 +908,6 @@ export default {
           { text: 'FINISHED', value: 10 },
           { text: 'LOST', value: 13 }
         ],
-        fixed: 'right',
         filteredValue: filteredInfo.state || null,
         onFilter: (value, record) => {
           return record.state === value
@@ -897,7 +919,6 @@ export default {
         key: 'operation',
         scopedSlots: { customRender: 'operation' },
         slots: { title: 'customOperation' },
-        fixed: 'right',
         width: 150
       }]
     }
@@ -966,7 +987,6 @@ export default {
               this.optionApps.deploy.delete(id)
               this.handleMapUpdate('deploy')
             }
-            console.log(resp)
           })
         }
       })
@@ -1167,35 +1187,54 @@ export default {
         this.loading = false
         const pagination = { ...this.pagination }
         pagination.total = parseInt(resp.data.total)
-        this.dataSource = resp.data.records
+        const dataSource = resp.data.records
         const timestamp = new Date().getTime()
-        this.dataSource.forEach(x => {
+        dataSource.forEach(x => {
+          x.expanded = [{
+            'appId': x.appId,
+            'jmMemory': x.jmMemory,
+            'tmMemory': x.tmMemory,
+            'totalTask': x.totalTask,
+            'totalTM': x.totalTM,
+            'totalSlot': x.totalSlot,
+            'availableSlot': x.availableSlot
+          }]
           if (x.optionState === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
-                console.log('update starting before:' + this.optionApps.starting.size)
                 this.optionApps.starting.delete(x.id)
                 this.handleMapUpdate('starting')
               }
             }
             if (this.optionApps.stoping.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.stoping.get(x.id) > this.queryInterval) {
-                console.log('update stoping before:' + this.optionApps.stoping.size)
                 this.optionApps.stoping.delete(x.id)
                 this.handleMapUpdate('stoping')
               }
             }
             if (this.optionApps.deploy.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.deploy.get(x.id) > this.queryInterval) {
-                console.log('update deploy before:' + this.optionApps.deploy.size)
                 this.optionApps.deploy.delete(x.id)
                 this.handleMapUpdate('deploy')
               }
             }
           }
         })
+        this.dataSource = dataSource
         this.pagination = pagination
       })
+    },
+
+    handleExpandIcon (props) {
+      if (props.record.state === 5) {
+        if (props.expanded) {
+          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='down'/></a>
+        } else {
+          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='right' /></a>
+        }
+      } else {
+        return ''
+      }
     },
 
     handleYarn (params = {}) {
@@ -1234,7 +1273,6 @@ export default {
     handleMapUpdate (type) {
       const map = this.optionApps[type]
       this.optionApps[type] = new Map(map)
-      console.log('update '.concat(type).concat(' after:' + this.optionApps[type].size))
     }
   }
 }
@@ -1308,4 +1346,24 @@ export default {
 .pointer {
   cursor: pointer;
 }
+
+.expanded-table >>> .ant-table-tbody>tr>td {
+  border-bottom: none !important;
+  padding: 11px 9px !important;
+}
+
+.expanded-table >>> .ant-table-tbody>tr {
+  border-bottom: none !important;
+  padding: 11px 9px !important;
+}
+
+.expand-icon-open {
+  font-size: 10px;
+}
+
+.expand-icon-close {
+  font-size: 10px;
+  color: darkgray;
+}
+
 </style>

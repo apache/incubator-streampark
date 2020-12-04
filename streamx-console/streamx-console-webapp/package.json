@@ -62,7 +62,7 @@
     "babel-plugin-import": "^1.11.0",
     "codemirror": "^5.57.0",
     "element-ui": "^2.13.2",
-    "eslint": "^5.8.0",
+    "eslint": "^5.16.0",
     "eslint-plugin-html": "^5.0.0",
     "eslint-plugin-vue": "^5.0.0",
     "less": "^3.8.1",

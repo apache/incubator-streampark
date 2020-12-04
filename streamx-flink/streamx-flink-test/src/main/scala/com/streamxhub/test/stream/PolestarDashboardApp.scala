@@ -1,13 +1,11 @@
-package com.streamxhub.flink.test
+package com.streamxhub.test.stream
 
-import java.text.SimpleDateFormat
-import java.time.Duration
-import java.util.Date
 import com.streamxhub.flink.core.scala.sink.ESSink
 import com.streamxhub.flink.core.scala.source.KafkaSource
-import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.scala.util.ElasticSearchUtils
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
+
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s
@@ -15,6 +13,9 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.Serialization
 
+import java.text.SimpleDateFormat
+import java.time.Duration
+import java.util.Date
 import scala.util.Try
 
 object PolestarDashboardApp extends FlinkStreaming {

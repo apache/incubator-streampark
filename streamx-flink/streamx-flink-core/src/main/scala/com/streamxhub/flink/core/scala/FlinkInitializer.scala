@@ -27,7 +27,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
-import com.streamxhub.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
+import com.streamxhub.flink.core.scala.enums.{ApiType, PlannerType, RestartStrategy, TableMode, StateBackend => XStateBackend}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
@@ -39,6 +39,8 @@ import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.table.api.EnvironmentSettings
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -72,20 +74,20 @@ object FlinkInitializer {
 }
 
 
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction) {
+class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
 
-}
 
 class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
 
+
   def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
-    this(args, ApiType.SCALA)
+    this(args, ApiType.scala)
     streamConfFunc = func
     initStreamEnv()
   }
 
   def this(streamEnvConfig: StreamEnvConfig) = {
-    this(streamEnvConfig.args, ApiType.JAVA)
+    this(streamEnvConfig.args, ApiType.java)
     javaEnvConf = streamEnvConfig.conf
     initStreamEnv()
   }
@@ -97,6 +99,8 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
   val parameter: ParameterTool = initParameter()
 
   private[this] var streamEnv: StreamExecutionEnvironment = _
+
+  private[this] var tableEnv: StreamTableEnvironment = _
 
   def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
@@ -149,7 +153,70 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     streamEnv
   }
 
-  private[this] def initStreamEnv() = {
+  def tableEnvironment: StreamTableEnvironment = {
+    if (tableEnv == null) {
+      this.synchronized {
+        if (tableEnv == null) {
+          initTableEnv()
+        }
+      }
+    }
+    tableEnv
+  }
+
+  def initTableEnv(): Unit = {
+    val builder = EnvironmentSettings.newInstance()
+    val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse {
+      logger.warn(s"[StreamX] $KEY_FLINK_TABLE_PLANNER undefined,use default by: blinkPlanner")
+      PlannerType.blink
+    }
+
+    plannerType match {
+      case PlannerType.blink =>
+        logger.info("[StreamX] blinkPlanner will be use.")
+        builder.useBlinkPlanner()
+      case PlannerType.old =>
+        logger.info("[StreamX] oldPlanner will be use.")
+        builder.useOldPlanner()
+      case PlannerType.any =>
+        logger.info("[StreamX] anyPlanner will be use.")
+        builder.useAnyPlanner()
+    }
+
+    val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse {
+      logger.warn(s"[StreamX] $KEY_FLINK_TABLE_MODE undefined,use default by: streaming mode")
+      TableMode.batch
+    }
+
+    mode match {
+      case TableMode.batch =>
+        logger.info("[StreamX] components should work in batch mode")
+        builder.inBatchMode()
+      case TableMode.streaming =>
+        logger.info("[StreamX] components should work in streaming mode")
+        builder.inStreamingMode()
+    }
+
+    val buildWith = (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
+    buildWith match {
+      case (null, null) =>
+      case (x:String, y:String) if x != null && y != null =>
+        logger.info(s"[StreamX] with built in catalog: $x")
+        logger.info(s"[StreamX] with built in database: $y")
+        builder.withBuiltInCatalogName(x)
+        builder.withBuiltInDatabaseName(y)
+      case (x:String, _) if x != null =>
+        logger.info(s"[StreamX] with built in catalog: $x")
+        builder.withBuiltInCatalogName(x)
+      case (_, y:String) if y != null =>
+        logger.info(s"[StreamX] with built in database: $y")
+        builder.withBuiltInDatabaseName(y)
+    }
+    val setting = builder.build()
+    this.tableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
+  }
+
+  private[this] def initStreamEnv(): Unit = {
     this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
     Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse {
@@ -171,14 +238,11 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     checkpoint()
 
     apiType match {
-      case ApiType.JAVA if javaEnvConf != null => javaEnvConf.doConfig(this.streamEnv.getJavaEnv, this.parameter)
-      case ApiType.SCALA if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
+      case ApiType.java if javaEnvConf != null => javaEnvConf.doConfig(this.streamEnv.getJavaEnv, this.parameter)
+      case ApiType.scala if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
       case _ =>
     }
-
     this.streamEnv.getConfig.setGlobalJobParameters(parameter)
-
-    this.streamEnv
   }
 
   private[this] def restartStrategy(): Unit = {
@@ -370,5 +434,6 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       }
     }
   }
+
 
 }

@@ -18,18 +18,41 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.console.core.metrics.flink;
 
-
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * @author benjobs
  */
-public interface SQLToFunction<T> extends Serializable {
-    /**
-     * @param bean
-     * @return
-     */
-    String toSQL(T bean);
+@Data
+public class Overview {
+
+    private Integer taskmanagers;
+
+    @JsonProperty("slots-total")
+    private Integer slotsTotal;
+
+    @JsonProperty("slots-available")
+    private Integer slotsAvailable;
+
+    @JsonProperty("jobs-running")
+    private Integer jobsRunning;
+
+    @JsonProperty("jobs-finished")
+    private Integer jobsFinished;
+
+    @JsonProperty("jobs-cancelled")
+    private Integer jobsCancelled;
+
+    @JsonProperty("jobs-failed")
+    private Integer jobsFailed;
+
+    @JsonProperty("flink-version")
+    private String flinkVersion;
+
+    @JsonProperty("flink-commit")
+    private String flinkCommit;
+
 }
