@@ -5,6 +5,7 @@ import com.streamxhub.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.flink.api.scala._
 
 import java.util.{Collections, Random}
 

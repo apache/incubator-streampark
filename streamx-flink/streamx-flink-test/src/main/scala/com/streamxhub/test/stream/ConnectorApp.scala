@@ -6,7 +6,7 @@ import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats
 import org.json4s.jackson.Serialization
-
+import org.apache.flink.api.scala._
 import java.util.Date
 
 object ConnectorApp extends FlinkStreaming {
