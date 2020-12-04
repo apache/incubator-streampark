@@ -1,4 +1,4 @@
-package com.streamxhub.flink.test
+package com.streamxhub.test.stream
 
 import com.streamxhub.flink.core.scala.sink.KafkaSink
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}

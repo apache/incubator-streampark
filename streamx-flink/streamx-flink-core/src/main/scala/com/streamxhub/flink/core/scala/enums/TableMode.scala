@@ -18,18 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.flink.core.scala.enums
 
-
-import java.io.Serializable;
-
-/**
- * @author benjobs
- */
-public interface SQLToFunction<T> extends Serializable {
-    /**
-     * @param bean
-     * @return
-     */
-    String toSQL(T bean);
+object TableMode extends Enumeration {
+  type TableMode = Value
+  val batch, streaming = Value
 }

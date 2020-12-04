@@ -169,14 +169,10 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                 if (!Lock.initialized) {
                   Lock.initialized = true
                   fileSystem = (Option(properties("namenode")), Option(properties("user"))) match {
-                    case (None, None) =>
-                      FileSystem.get(new HConf())
-                    case (Some(nn), Some(u)) =>
-                      FileSystem.get(new URI(nn), new HConf(), u)
-                    case (Some(nn), _) =>
-                      FileSystem.get(new URI(nn), new HConf())
-                    case _ =>
-                      throw new IllegalArgumentException("[StreamX] usage error..")
+                    case (None, None) => FileSystem.get(new HConf())
+                    case (Some(nn), Some(u)) => FileSystem.get(new URI(nn), new HConf(), u)
+                    case (Some(nn), _) => FileSystem.get(new URI(nn), new HConf())
+                    case _ => throw new IllegalArgumentException("[StreamX] usage error..")
                   }
                 }
               } finally {
@@ -184,7 +180,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
               }
             }
             val uuid = UUID.randomUUID().toString.replace("-", "")
-            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_${uuid}")
+            val filePath = new Path(s"$rootPath/${System.currentTimeMillis()}_$uuid")
             var outStream = fileSystem.create(filePath)
             var record = new StringBuilder
             request.records.foreach(x => record.append(x).append("\n"))
@@ -197,7 +193,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           } catch {
             case e: Exception => e.printStackTrace()
           }
-        case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:${failoverStorage}")
+        case _ => throw new UnsupportedOperationException(s"[StreamX] unsupported failover storageType:$failoverStorage")
       }
     }
   }

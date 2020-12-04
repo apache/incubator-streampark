@@ -1,4 +1,4 @@
-package com.streamxhub.flink.test
+package com.streamxhub.test.stream
 
 object LogoTestApp {
 

@@ -27,7 +27,6 @@ import java.util.Map;
 /**
  * @author benjobs
  */
-//@FunctionalInterface
 public interface SQLGetFunction<T> extends Serializable {
     /**
      * 获取要查询的SQL
