@@ -7,7 +7,7 @@ import org.apache.flink.table.api._
 
 object KafkaTableApp extends FlinkTable {
 
-  override def handler(context: TableContext): Unit = {
+  override def handle(context: TableContext): Unit = {
     //connect kafka data
     context.connect(
       new Kafka()

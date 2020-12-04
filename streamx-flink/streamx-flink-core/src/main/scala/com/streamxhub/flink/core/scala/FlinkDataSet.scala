@@ -39,7 +39,7 @@ trait FlinkDataSet extends Logger {
 
   private var context: DataSetContext = _
 
-  def handler(context: DataSetContext): Unit
+  def handle(context: DataSetContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
     this.parameter = FlinkInitializer.get(args,null).parameter
@@ -65,7 +65,7 @@ trait FlinkDataSet extends Logger {
     beforeStart(env)
     createContext()
     doStart()
-    handler(context)
+    handle(context)
   }
 
   private[this] def doStart(): Unit = {

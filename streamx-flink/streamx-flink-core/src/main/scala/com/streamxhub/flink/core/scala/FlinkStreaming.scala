@@ -100,7 +100,7 @@ trait FlinkStreaming extends Logger {
     val context = new StreamingContext(parameter, env)
     //
     beforeStart(context)
-    handler(context)
+    handle(context)
     jobExecutionResult = context.start()
   }
 
@@ -112,7 +112,7 @@ trait FlinkStreaming extends Logger {
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handler(context: StreamingContext): Unit
+  def handle(context: StreamingContext): Unit
 
 }
 

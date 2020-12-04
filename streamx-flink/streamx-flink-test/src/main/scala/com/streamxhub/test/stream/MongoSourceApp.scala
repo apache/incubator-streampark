@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 
 object MongoSourceApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     implicit val prop = context.parameter.getProperties
     val source = new MongoSource(context)
     source.getDataStream[String](x => {
