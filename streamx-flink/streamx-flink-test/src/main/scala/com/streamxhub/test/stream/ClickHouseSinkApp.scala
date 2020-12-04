@@ -6,7 +6,7 @@ import org.apache.flink.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     val createTable =
       """
         |create TABLE test.orders(

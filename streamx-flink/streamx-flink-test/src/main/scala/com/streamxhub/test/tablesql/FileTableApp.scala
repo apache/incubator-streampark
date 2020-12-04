@@ -7,7 +7,7 @@ import org.apache.flink.table.api._
 
 object FileTableApp extends FlinkTable {
 
-  override def handler(context: TableContext): Unit = {
+  override def handle(context: TableContext): Unit = {
     context.connect(new FileSystem().path("data/in/order.txt"))
       .withFormat(new OldCsv())
       .withSchema(new Schema()

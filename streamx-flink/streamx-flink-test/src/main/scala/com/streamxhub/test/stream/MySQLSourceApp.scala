@@ -9,7 +9,7 @@ import java.util.Properties
 
 object MySQLSourceApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     implicit val prop: Properties = ConfigUtils.getMySQLConf(context.parameter.toMap)
     val mysqlSource = new MySQLSource(context)
     mysqlSource.getDataStream[Orders](() => {
