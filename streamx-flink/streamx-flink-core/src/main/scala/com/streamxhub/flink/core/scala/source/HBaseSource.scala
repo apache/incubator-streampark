@@ -65,7 +65,7 @@ class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Proper
 }
 
 
-class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
+class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
 
@@ -81,14 +81,14 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, 
 
   //for Scala
   def this(prop: Properties, queryFunc: HBaseQuery => HBaseQuery, resultFunc: Result => R) = {
-    this(ApiType.SCALA, prop)
+    this(ApiType.scala, prop)
     this.scalaQueryFunc = queryFunc
     this.scalaResultFunc = resultFunc
   }
 
   //for JAVA
   def this(prop: Properties, hbaseFunc: HBaseFunction[R]) {
-    this(ApiType.JAVA, prop)
+    this(ApiType.java, prop)
     this.hbaseFunc = hbaseFunc
   }
 
@@ -102,15 +102,15 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, 
       ctx.getCheckpointLock.synchronized {
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = apiType match {
-          case ApiType.SCALA => scalaQueryFunc(query)
-          case ApiType.JAVA => hbaseFunc.getQuery(query)
+          case ApiType.scala => scalaQueryFunc(query)
+          case ApiType.java => hbaseFunc.getQuery(query)
         }
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
         table.getScanner(query).foreach(x => {
           apiType match {
-            case ApiType.SCALA =>  ctx.collect(scalaResultFunc(x))
-            case ApiType.JAVA => ctx.collect(hbaseFunc.doResult(x))
+            case ApiType.scala =>  ctx.collect(scalaResultFunc(x))
+            case ApiType.java => ctx.collect(hbaseFunc.doResult(x))
           }
         })
       }
