@@ -9,7 +9,7 @@ import scala.util.Random
 
 object KafkaSinkApp extends FlinkStreaming {
 
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     val source = new BehaviorSource()
     val ds = context.addSource[Behavior](source).map(_.toString)
     KafkaSink(context).sink(ds)
