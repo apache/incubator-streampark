@@ -25,8 +25,9 @@ import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.table.api.{Table => FlinkTable}
 import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
+import org.apache.flink.api.scala._
 
-object TableSQLExt {
+object TableExt {
 
   class Table(val table: FlinkTable) {
     def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
@@ -34,17 +35,11 @@ object TableSQLExt {
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
 
-    def $d[T: TypeInformation]: DataSet[T] = toDataSet
+    def \\ [T: TypeInformation]: DataSet[T] = toDataSet
 
-    def >>[T: TypeInformation]: DataStream[T] = toAppendStream
+    def >> [T: TypeInformation]: DataStream[T] = toAppendStream
 
-    def ><[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
-
-    def $dataSet[T: TypeInformation]: DataSet[T] = toDataSet
-
-    def $append[T: TypeInformation]: DataStream[T] = toAppendStream
-
-    def $retract[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
+    def << [T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
   }
 
 }

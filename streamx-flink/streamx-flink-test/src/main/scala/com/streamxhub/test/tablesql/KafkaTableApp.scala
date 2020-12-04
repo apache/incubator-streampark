@@ -1,12 +1,13 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkTableSQL, TableSQLContext}
-import org.apache.flink.table.api.{DataTypes, Table}
+import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
 import org.apache.flink.table.descriptors.{Csv, Kafka, Schema}
+import org.apache.flink.api.scala._
+import org.apache.flink.table.api._
 
-object KafkaTableApp extends FlinkTableSQL {
+object KafkaTableApp extends FlinkTable {
 
-  override def handler(context: TableSQLContext): Unit = {
+  override def handler(context: TableContext): Unit = {
     //connect kafka data
     context.connect(
       new Kafka()
@@ -32,8 +33,8 @@ object KafkaTableApp extends FlinkTableSQL {
      */
     // select  where
     table.
-      select($"id", $"name").
-      where($"id" === "flink")
+      select($"id", $"name")
+      .where($"id" === "flink")
       .>>[(String, String)].print("simple where==>")
 
     /**

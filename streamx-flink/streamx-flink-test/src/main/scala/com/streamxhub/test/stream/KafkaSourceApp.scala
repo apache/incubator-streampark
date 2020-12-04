@@ -2,6 +2,7 @@ package com.streamxhub.test.stream
 
 import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
+import org.apache.flink.api.scala._
 
 object KafkaSourceApp extends FlinkStreaming {
 

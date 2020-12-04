@@ -2,6 +2,7 @@ package com.streamxhub.test.stream
 
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.common.functions.ReduceFunction
+import org.apache.flink.api.scala._
 
 import scala.util.Try
 

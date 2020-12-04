@@ -3,7 +3,7 @@ package com.streamxhub.test.stream
 import com.streamxhub.flink.core.scala.sink.{RedisMapper, RedisSink}
 import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
-import org.apache.flink.streaming.api.scala._
+import org.apache.flink.api.scala._
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
 
