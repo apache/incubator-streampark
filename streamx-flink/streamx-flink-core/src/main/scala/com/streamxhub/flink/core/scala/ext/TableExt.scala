@@ -34,11 +34,11 @@ object TableExt {
 
   class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
 
-    def \\ [T: TypeInformation]: DataSet[T] = toDataSet
+    def \\[T: TypeInformation]: DataSet[T] = toDataSet
 
-    def >> [T: TypeInformation]: DataStream[T] = toAppendStream
+    def >>[T: TypeInformation]: DataStream[T] = toAppendStream
 
-    def << [T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
+    def <<[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
   }
 
 }
