@@ -43,8 +43,7 @@ import java.util.Optional
 
 class TableContext(val parameter: ParameterTool,
                    private val env: StreamExecutionEnvironment,
-                   private val tableEnv: StreamTableEnvironment
-                  ) extends StreamTableEnvironment {
+                   private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
    * for scala...
