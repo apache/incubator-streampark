@@ -15,7 +15,7 @@ import scala.collection.JavaConversions._
  */
 object TransformationsApp extends FlinkDataSet {
 
-  override def handler(context: DataSetContext): Unit = {
+  override def handle(context: DataSetContext): Unit = {
 
     /**
      * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html

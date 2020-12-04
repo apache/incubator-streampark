@@ -23,7 +23,7 @@ object PolestarDashboardApp extends FlinkStreaming {
   /**
    * @param context
    */
-  override def handler(context: StreamingContext): Unit = {
+  override def handle(context: StreamingContext): Unit = {
     val data = new KafkaSource(context)
 
     val ds = data.getDataStream[String]()
