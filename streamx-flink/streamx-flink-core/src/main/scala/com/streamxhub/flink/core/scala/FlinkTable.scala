@@ -179,6 +179,12 @@ class TableContext(val parameter: ParameterTool, private val tableEnv: StreamTab
   override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
 
 
+  /**
+   * deprecated!!! what are you fucking for??? don't call this method
+   * @param name
+   * @param dataStream
+   * @tparam T
+   */
   override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit = tableEnv.registerDataStream(name, dataStream)
 
   override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.registerDataStream(name, dataStream, fields: _*)

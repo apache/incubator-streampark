@@ -64,7 +64,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, property: Proper
  *
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.SCALA, jdbc: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R] with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaSqlFunc: () => String = _
@@ -73,14 +73,14 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: () => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
-    this(ApiType.SCALA, jdbc)
+    this(ApiType.scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
   }
 
   //for JAVA
   def this(jdbc: Properties, javaSqlFunc: SQLGetFunction[R]) {
-    this(ApiType.JAVA, jdbc)
+    this(ApiType.java, jdbc)
     this.sqlFunc = javaSqlFunc
   }
 
@@ -89,16 +89,16 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
-          case ApiType.SCALA => scalaSqlFunc()
-          case ApiType.JAVA => sqlFunc.getQuery
+          case ApiType.scala => scalaSqlFunc()
+          case ApiType.java => sqlFunc.getQuery
         }
         val result: List[Map[String, _]] = apiType match {
-          case ApiType.SCALA => JdbcUtils.select(sql)(jdbc)
-          case ApiType.JAVA => JdbcUtils.select(sql)(jdbc)
+          case ApiType.scala => JdbcUtils.select(sql)(jdbc)
+          case ApiType.java => JdbcUtils.select(sql)(jdbc)
         }
         apiType match {
-          case ApiType.SCALA => scalaResultFunc(result).foreach(ctx.collect)
-          case ApiType.JAVA => sqlFunc.doResult(result.map(_.asJava)).foreach(ctx.collect)
+          case ApiType.scala => scalaResultFunc(result).foreach(ctx.collect)
+          case ApiType.java => sqlFunc.doResult(result.map(_.asJava)).foreach(ctx.collect)
         }
       }
     }

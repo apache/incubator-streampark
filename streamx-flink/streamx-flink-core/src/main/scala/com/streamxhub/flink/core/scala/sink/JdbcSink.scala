@@ -91,7 +91,7 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
 
 }
 
-class JdbcSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties) extends RichSinkFunction[T] with Logger {
+class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
@@ -105,12 +105,12 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties) ex
   }
 
   def this(jdbc: Properties, toSQLFn: T => String) {
-    this(ApiType.SCALA, jdbc)
+    this(ApiType.scala, jdbc)
     this.scalaToSQLFn = toSQLFn
   }
 
   def this(jdbc: Properties, toSQLFn: SQLToFunction[T]) {
-    this(ApiType.JAVA, jdbc)
+    this(ApiType.java, jdbc)
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
   }
@@ -129,8 +129,8 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties) ex
   override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
     require(connection != null)
     val sql = apiType match {
-      case ApiType.SCALA => scalaToSQLFn(value)
-      case ApiType.JAVA => javaToSQLFunc.toSQL(value)
+      case ApiType.scala => scalaToSQLFn(value)
+      case ApiType.java => javaToSQLFunc.toSQL(value)
     }
     batchSize match {
       case 1 =>
@@ -210,7 +210,7 @@ object Dialect extends Enumeration {
  * @param jdbc
  * @tparam T
  */
-class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties)
+class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
 
@@ -220,12 +220,12 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties)
   private var javaToSQLFunc: SQLToFunction[T] = _
 
   def this(jdbc: Properties, toSQLFn: T => String) {
-    this(ApiType.SCALA, jdbc)
+    this(ApiType.scala, jdbc)
     this.scalaToSQLFn = toSQLFn
   }
 
   def this(jdbc: Properties, toSQLFn: SQLToFunction[T]) {
-    this(ApiType.JAVA, jdbc)
+    this(ApiType.java, jdbc)
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
   }
@@ -239,8 +239,8 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.SCALA, jdbc: Properties)
 
   override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context[_]): Unit = {
     val sql = apiType match {
-      case ApiType.SCALA => scalaToSQLFn(value)
-      case ApiType.JAVA => javaToSQLFunc.toSQL(value)
+      case ApiType.scala => scalaToSQLFn(value)
+      case ApiType.java => javaToSQLFunc.toSQL(value)
     }
     if (!sql.toUpperCase.trim.startsWith("INSERT")) {
       transaction.insertMode = false

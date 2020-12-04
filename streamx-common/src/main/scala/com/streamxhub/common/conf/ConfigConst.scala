@@ -117,6 +117,14 @@ object ConfigConst {
 
   val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
 
+  // ---table---
+  val KEY_FLINK_TABLE_PLANNER = "flink.table.planner"
+
+  val KEY_FLINK_TABLE_MODE = "flink.table.mode"
+
+  val KEY_FLINK_TABLE_CATALOG = "flink.table.catalog"
+
+  val KEY_FLINK_TABLE_DATABASE = "flink.table.database"
 
   /**
    * about config Kafka

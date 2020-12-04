@@ -18,27 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.scala.ext
+package com.streamxhub.flink.core.scala.enums
 
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.api.scala.DataSet
-import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.table.api.{Table => FlinkTable}
-import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
-
-object TableExt {
-
-  class Table(val table: FlinkTable) {
-    def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
-  }
-
-  class TableConversions(table: FlinkTable) extends FlinkTableConversions(table) {
-
-    def \\ [T: TypeInformation]: DataSet[T] = toDataSet
-
-    def >> [T: TypeInformation]: DataStream[T] = toAppendStream
-
-    def << [T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
-  }
-
+object PlannerType extends Enumeration {
+  type PlannerType = Value
+  val blink, old, any = Value
 }

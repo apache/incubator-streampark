@@ -78,14 +78,14 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType:ApiType, pro
 
   //for Scala
   def this(prop: Properties, queryFunc: MongoDatabase => FindIterable[Document], resultFunc: MongoCursor[Document] => List[R]) = {
-    this(ApiType.SCALA, prop)
+    this(ApiType.scala, prop)
     this.queryFunc = queryFunc
     this.resultFunc = resultFunc
   }
 
   //for JAVA
   def this(prop: Properties, mongoFunc: MongoFunction[R]) {
-    this(ApiType.JAVA, prop)
+    this(ApiType.java, prop)
     this.mongoFunc = mongoFunc
   }
 
@@ -102,12 +102,12 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType:ApiType, pro
     while (isRunning) {
 
       apiType match {
-        case ApiType.SCALA =>
+        case ApiType.scala =>
           val find = queryFunc(database)
           if (find != null) {
             resultFunc(find.iterator).foreach(ctx.collect)
           }
-        case ApiType.JAVA =>
+        case ApiType.java =>
           val find = mongoFunc.getQuery(database)
           if (find != null) {
             mongoFunc.doResult(find.iterator).foreach(ctx.collect)
