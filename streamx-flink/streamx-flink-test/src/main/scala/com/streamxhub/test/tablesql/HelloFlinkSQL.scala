@@ -1,8 +1,6 @@
 package com.streamxhub.test.tablesql
 
 import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
-import org.apache.flink.api.scala._
-import org.apache.flink.table.api._
 
 object HelloFlinkSQL extends FlinkTable {
 
