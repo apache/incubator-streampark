@@ -125,13 +125,6 @@
           :columns="innerColumns"
           :data-source="record.expanded"
           :pagination="false">
-
-          <template slot="endTime" slot-scope="text, record">
-            <span v-if="record.endTime">
-              {{ record.endTime }}
-            </span>
-            <span v-else> - </span>
-          </template>
         </a-table>
 
         <div
@@ -820,8 +813,7 @@ export default {
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
         { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
         { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
-        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
-        { title: 'End Time', dataIndex: 'endTime', key: 'endTime' }
+        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
       ]
     },
     columns () {
@@ -1187,7 +1179,6 @@ export default {
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
-            'endTime': x.endTime,
             'totalTask': x.totalTask,
             'totalTM': x.totalTM,
             'totalSlot': x.totalSlot,
