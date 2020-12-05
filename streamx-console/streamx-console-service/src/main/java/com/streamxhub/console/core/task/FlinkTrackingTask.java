@@ -181,6 +181,7 @@ public class FlinkTrackingTask {
          */
         application.setJobId(jobOverview.getId());
         application.setTotalTask(jobOverview.getTasks().getTotal());
+        application.setRunning(jobOverview.getTasks().getRunning());
 
         /**
          * 2) duration

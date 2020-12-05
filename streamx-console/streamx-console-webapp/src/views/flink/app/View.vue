@@ -339,6 +339,11 @@
           {{ record.duration | duration }}
         </template>
 
+        <template slot="task" slot-scope="text, record">
+          <a-tag color="#102541">{{record.totalTask}}</a-tag>
+          <a-tag color="#52c41a">{{record.running}}</a-tag>
+        </template>
+
         <template slot="state" slot-scope="text, record">
           <State :state="record.state" :option="record.optionState"></State>
         </template>
@@ -808,10 +813,10 @@ export default {
   computed: {
     innerColumns () {
       return [
+        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 155 },
         { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
         { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
-        { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
         { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
         { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
       ]
@@ -875,6 +880,11 @@ export default {
         sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
         scopedSlots: { customRender: 'duration' },
         width: 150
+      }, {
+        title: 'Task',
+        dataIndex: 'task',
+        scopedSlots: { customRender: 'task' },
+        width: 100
       }, {
         title: 'Status',
         dataIndex: 'state',
@@ -1179,7 +1189,6 @@ export default {
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
-            'totalTask': x.totalTask,
             'totalTM': x.totalTM,
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot
