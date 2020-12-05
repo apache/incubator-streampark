@@ -162,7 +162,7 @@
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
               @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
@@ -297,7 +297,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
               @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
@@ -340,8 +340,21 @@
         </template>
 
         <template slot="task" slot-scope="text, record">
-          <a-tag color="#102541">{{record.totalTask}}</a-tag>
-          <a-tag color="#52c41a">{{record.running}}</a-tag>
+          <div class="task-tag" v-if="record.state === 4 || record.state === 5 || record.state === 8 || record.optionState === 4">
+            <a-tooltip>
+              <template slot="title">
+                TOTAL
+              </template>
+              <a-tag color="#102541">{{record.totalTask}}</a-tag>
+            </a-tooltip>
+            <a-tooltip>
+              <template slot="title">
+                RUNNING
+              </template>
+              <a-tag color="#52c41a">{{record.running}}</a-tag>
+            </a-tooltip>
+          </div>
+          <div v-else>-</div>
         </template>
 
         <template slot="state" slot-scope="text, record">
@@ -813,7 +826,7 @@ export default {
   computed: {
     innerColumns () {
       return [
-        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 155 },
+        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280 },
         { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
         { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
@@ -1238,7 +1251,7 @@ export default {
     },
 
     handleView (params) {
-      if (params.state === 4 || params.state === 5) {
+      if (params.state === 4 || params.state === 5 || params.optionState === 4) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }
@@ -1360,4 +1373,13 @@ export default {
   color: darkgray;
 }
 
+.task-tag > .ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  margin-right: 0px;
+  cursor: default;
+}
 </style>
