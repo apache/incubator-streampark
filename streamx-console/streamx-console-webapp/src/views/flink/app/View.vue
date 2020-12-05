@@ -125,6 +125,13 @@
           :columns="innerColumns"
           :data-source="record.expanded"
           :pagination="false">
+
+          <template slot="endTime" slot-scope="text, record">
+            <span v-if="record.endTime">
+              {{ record.endTime }}
+            </span>
+            <span v-else> - </span>
+          </template>
         </a-table>
 
         <div
@@ -337,13 +344,6 @@
 
         <template slot="duration" slot-scope="text, record">
           {{ record.duration | duration }}
-        </template>
-
-        <template slot="endTime" slot-scope="text, record">
-          <span v-if="record.endTime">
-            {{ record.endTime }}
-          </span>
-          <span v-else> - </span>
         </template>
 
         <template slot="state" slot-scope="text, record">
@@ -815,13 +815,13 @@ export default {
   computed: {
     innerColumns () {
       return [
-        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 255 },
         { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
         { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
         { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
         { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
-        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
+        { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' },
+        { title: 'End Time', dataIndex: 'endTime', key: 'endTime' }
       ]
     },
     columns () {
@@ -883,13 +883,6 @@ export default {
         sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
         scopedSlots: { customRender: 'duration' },
         width: 150
-      }, {
-        title: 'End Time',
-        dataIndex: 'endTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
-        scopedSlots: { customRender: 'endTime' },
-        width: 180
       }, {
         title: 'Status',
         dataIndex: 'state',
@@ -1194,6 +1187,7 @@ export default {
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
+            'endTime': x.endTime,
             'totalTask': x.totalTask,
             'totalTM': x.totalTM,
             'totalSlot': x.totalSlot,
