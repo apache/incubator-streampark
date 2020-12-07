@@ -1203,42 +1203,45 @@ export default {
 
     handleDashboard () {
       dashboard({}).then((resp) => {
-        this.metrics = resp.data || {}
-        const task = this.metrics.task || {}
-        const labels = []
-        const series = []
-        for (const k in task) {
-          const v = task[k] || 0
-          if (v) {
-            labels.push(k.toUpperCase())
-            series.push(parseInt(task[k]))
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.metrics = resp.data || {}
+          const task = this.metrics.task || {}
+          const labels = []
+          const series = []
+          for (const k in task) {
+            const v = task[k] || 0
+            if (v) {
+              labels.push(k.toUpperCase())
+              series.push(parseInt(task[k]))
+            }
           }
-        }
-        this.taskCounts = {
-          series: series,
-          options: {
-            chart: {
-              width: 240,
-              type: 'donut'
-            },
-            dataLabels: {
-              enabled: false
-            },
-            fill: {
-              type: 'gradient'
-            },
-            labels: labels,
-            responsive: [{
-              breakpoint: 240,
-              options: {
-                chart: {
-                  width: 240
-                },
-                legend: {
-                  position: 'bottom'
+          this.taskCounts = {
+            series: series,
+            options: {
+              chart: {
+                width: 240,
+                type: 'donut'
+              },
+              dataLabels: {
+                enabled: false
+              },
+              fill: {
+                type: 'gradient'
+              },
+              labels: labels,
+              responsive: [{
+                breakpoint: 240,
+                options: {
+                  chart: {
+                    width: 240
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
                 }
-              }
-            }]
+              }]
+            }
           }
         }
       })
