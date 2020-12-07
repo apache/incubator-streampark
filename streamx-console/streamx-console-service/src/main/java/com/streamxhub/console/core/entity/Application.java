@@ -118,7 +118,7 @@ public class Application implements Serializable {
     /**
      * running job
      */
-    private transient Integer running;
+    private transient JobsOverview.Task overview;
     private transient Boolean backUp;
     private transient Boolean restart;
     private transient String userName;

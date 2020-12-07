@@ -340,25 +340,11 @@
         </template>
 
         <template slot="task" slot-scope="text, record">
-          <div class="task-tag" v-if="record.state === 4 || record.state === 5 || record.state === 8 || record.optionState === 4">
-            <a-tooltip>
-              <template slot="title">
-                TOTAL
-              </template>
-              <a-tag color="#102541">{{ record.totalTask }}</a-tag>
-            </a-tooltip>
-            <a-tooltip>
-              <template slot="title">
-                RUNNING
-              </template>
-              <a-tag color="#52c41a">{{ record.running }}</a-tag>
-            </a-tooltip>
-          </div>
-          <div v-else>-</div>
+          <State option="task" :data="record"></State>
         </template>
 
         <template slot="state" slot-scope="text, record">
-          <State :state="record.state" :option="record.optionState"></State>
+          <State option="state" :data="record"></State>
         </template>
 
         <template slot="customOperation">

@@ -33,7 +33,7 @@
         </span>
       </a-descriptions-item>
       <a-descriptions-item label="Status">
-        <State :state="app.state" :option="app.optionState"></State>
+        <State option="state" :data="app"></State>
       </a-descriptions-item>
       <a-descriptions-item label="Start Time">
         <template v-if="app.startTime">
