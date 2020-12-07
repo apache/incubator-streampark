@@ -345,13 +345,13 @@
               <template slot="title">
                 TOTAL
               </template>
-              <a-tag color="#102541">{{record.totalTask}}</a-tag>
+              <a-tag color="#102541">{{ record.totalTask }}</a-tag>
             </a-tooltip>
             <a-tooltip>
               <template slot="title">
                 RUNNING
               </template>
-              <a-tag color="#52c41a">{{record.running}}</a-tag>
+              <a-tag color="#52c41a">{{ record.running }}</a-tag>
             </a-tooltip>
           </div>
           <div v-else>-</div>
