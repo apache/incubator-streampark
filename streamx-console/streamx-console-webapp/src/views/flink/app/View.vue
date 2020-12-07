@@ -1205,17 +1205,17 @@ export default {
       dashboard({}).then((resp) => {
         this.metrics = resp.data || {}
         const task = this.metrics.task || {}
-        const labels = []
-        const series = []
+        const labelArray = []
+        const seriesArray = []
         for (const k in task) {
           const v = task[k] || 0
           if (v) {
-            labels.push(k.toUpperCase())
-            series.push(task[k])
+            labelArray.push(k.toUpperCase())
+            seriesArray.push(parseInt(task[k]))
           }
         }
         this.taskCounts = {
-          series: series,
+          series: seriesArray,
           options: {
             chart: {
               width: 240,
@@ -1227,7 +1227,7 @@ export default {
             fill: {
               type: 'gradient'
             },
-            labels: labels,
+            labels: labelArray,
             responsive: [{
               breakpoint: 240,
               options: {
