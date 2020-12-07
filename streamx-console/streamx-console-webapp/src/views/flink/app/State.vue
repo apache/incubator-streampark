@@ -57,13 +57,13 @@
   </template>
   <template v-else>
     <div class="task-tag" v-if="data['state'] === 4 || data['state'] === 5 || data['state'] === 8 || data['optionState'] === 4">
-      <a-tooltip>
+      <a-tooltip v-if="data['totalTask']">
         <template slot="title">
           TOTAL
         </template>
-        <a-tag color="#102541">{{ data.overview['totalTask'] }}</a-tag>
+        <a-tag color="#102541">{{ data['totalTask'] }}</a-tag>
       </a-tooltip>
-      <a-tooltip>
+      <a-tooltip v-if="data.overview['running']">
         <template slot="title">
           RUNNING
         </template>
