@@ -171,7 +171,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public AppInfo getYarnAppInfo() throws Exception {
+    public AppInfo httpYarnAppInfo() throws Exception {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
         String result = HttpClientUtils.httpGetRequest(url);
@@ -183,7 +183,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JobsOverview getJobsOverview() throws IOException {
+    public JobsOverview httpJobsOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         try {
@@ -199,7 +199,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Overview getOverview() throws IOException {
+    public Overview httpOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/overview");
         try {

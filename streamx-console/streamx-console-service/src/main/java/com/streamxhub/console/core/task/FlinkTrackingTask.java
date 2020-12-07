@@ -123,7 +123,7 @@ public class FlinkTrackingTask {
                 /**
                  * 1)到flink的restApi中查询状态
                  */
-                JobsOverview jobsOverview = application.getJobsOverview();
+                JobsOverview jobsOverview = application.httpJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
                     restApiCallback(application, optional.get(), stopFrom);
@@ -204,7 +204,7 @@ public class FlinkTrackingTask {
          */
         if (startingCache.getIfPresent(application.getId()) != null) {
             try {
-                Overview override = application.getOverview();
+                Overview override = application.httpOverview();
                 if (override != null && override.getSlotsTotal() > 0) {
                     startingCache.invalidate(application.getId());
                     application.setTotalTM(override.getTaskmanagers());
@@ -298,7 +298,7 @@ public class FlinkTrackingTask {
                 /**
                  * 2)到yarn的restApi中查询状态
                  */
-                AppInfo appInfo = application.getYarnAppInfo();
+                AppInfo appInfo = application.httpYarnAppInfo();
                 String state = appInfo.getApp().getFinalStatus();
                 FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                 if (FlinkAppState.KILLED.equals(flinkAppState)) {
