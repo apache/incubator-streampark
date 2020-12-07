@@ -32,8 +32,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="chart.type.chartOptions"
-            :series="chart.type.series"></apexchart>
+            :options="chart.taskCounts.chartOptions"
+            :series="chart.taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
