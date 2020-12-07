@@ -1,36 +1,5 @@
 <template>
-  <!--
-  CREATED(0),
-  DEPLOYING(1),
-  DEPLOYED(2),
-  STARTING(3),
-  RESTARTING(4),
-  RUNNING(5),
-  FAILING(6),
-  FAILED(7),
-  CANCELLING(8),
-  CANCELED(9),
-  FINISHED(10),
-  SUSPENDED(11),
-  RECONCILING(12),
-  LOST(13);
-
- TOTAL: '#112641',
- RUNNING: '#52c41a',
- FAILED: '#f5222d',
- FINISHED: '#1890ff',
- CANCELED: '#fa8c16',
- CANCELING: '#faad14',
- CREATED: '#2f54eb',
- DEPLOYING: '#13c2c2',
- RECONCILING: '#eb2f96',
- IN_PROGRESS: '#faad14',
- SCHEDULED: '#722ed1',
- COMPLETED: '#1890ff',
- RESTARTING: '#13c2c2'
- SAVEPOINT: #FAAD14
-  -->
-  <template v-if="option === 'state'">
+  <span v-if="option === 'state'">
     <div class="app_state" v-if="data['optionState'] === 0">
       <a-tag color="#2f54eb" v-if="data['state'] === 0">CREATED</a-tag>
       <a-tag color="#1ABBDC" v-if="data['state'] === 1" class="status-processing-deploying">DEPLOYING</a-tag>
@@ -54,8 +23,8 @@
       <a-tag color="#1AB58E" v-if="data['optionState'] === 3 " class="status-processing-starting">STARTING</a-tag>
       <a-tag color="#faad14" v-if="data['optionState'] === 4" class="status-processing-cancelling">SAVEPOINT</a-tag>
     </div>
-  </template>
-  <template v-else>
+  </span>
+  <span v-else>
     <div class="task-tag" v-if="data['state'] === 4 || data['state'] === 5 || data['state'] === 8 || data['optionState'] === 4">
       <a-tooltip v-if="data['totalTask']">
         <template slot="title">
@@ -119,7 +88,7 @@
       </a-tooltip>
     </div>
     <div v-else>-</div>
-  </template>
+  </span>
 </template>
 <script>
 export default {

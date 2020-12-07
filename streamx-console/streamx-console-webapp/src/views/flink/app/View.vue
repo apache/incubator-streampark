@@ -6,8 +6,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="chart.type.chartOptions"
-            :series="chart.type.series"></apexchart>
+            :options="chart.taskCounts.chartOptions"
+            :series="chart.taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -1231,7 +1231,7 @@ export default {
         for (const k in task) {
           const v = task[k] || 0
           if (v) {
-            labels.push(k)
+            labels.push(k.toUpperCase())
             series.push(task[k])
           }
         }
