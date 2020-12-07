@@ -30,6 +30,7 @@
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <apexchart
+            v-if="taskChartSeries.length>0"
             type="donut"
             width="200"
             :options="taskChartOptions"
