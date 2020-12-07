@@ -103,6 +103,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Application app = FlinkTrackingTask.getTracking(x.getId());
             if (app != null) {
                 app.setProjectName(x.getProjectName());
+                app.setOverview(x.getOverview());
             }
             newRecords.add(app == null ? x : app);
         });
