@@ -6,8 +6,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="taskCounts.options"
-            :series="taskCounts.series"></apexchart>
+            :options="taskCountsOptions"
+            :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -32,8 +32,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="taskCounts.options"
-            :series="taskCounts.series"></apexchart>
+            :options="taskCountsOptions"
+            :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -780,12 +780,8 @@ export default {
           }
         }
       },
-
-      taskCounts: {
-        series: [],
-        options: {}
-      }
-
+      taskCountsSeries: [],
+      taskCountsOptions: {}
     }
   },
 
@@ -1208,40 +1204,39 @@ export default {
           this.metrics = resp.data || {}
           const task = this.metrics.task || {}
           const labels = []
-          const series = []
+          while (this.taskCountsSeries.length > 0) {
+            this.taskCountsSeries.pop()
+          }
           for (const k in task) {
             const v = task[k] || 0
             if (v) {
               labels.push(k.toUpperCase())
-              series.push(parseInt(task[k]))
+              this.taskCountsSeries.push(task[k])
             }
           }
-          this.taskCounts = {
-            series: series,
-            options: {
-              chart: {
-                width: 240,
-                type: 'donut'
-              },
-              dataLabels: {
-                enabled: false
-              },
-              fill: {
-                type: 'gradient'
-              },
-              labels: labels,
-              responsive: [{
-                breakpoint: 240,
-                options: {
-                  chart: {
-                    width: 240
-                  },
-                  legend: {
-                    position: 'bottom'
-                  }
+          this.taskCountsOptions = {
+            chart: {
+              width: 240,
+              type: 'donut'
+            },
+            dataLabels: {
+              enabled: false
+            },
+            fill: {
+              type: 'gradient'
+            },
+            labels: labels,
+            responsive: [{
+              breakpoint: 240,
+              options: {
+                chart: {
+                  width: 240
+                },
+                legend: {
+                  position: 'bottom'
                 }
-              }]
-            }
+              }
+            }]
           }
         }
       })
