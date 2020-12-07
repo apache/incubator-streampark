@@ -901,8 +901,8 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
-    this.handleDashboard()
     const timer = window.setInterval(() => {
+      this.handleDashboard()
       this.handleFetch(false)
     }, this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
