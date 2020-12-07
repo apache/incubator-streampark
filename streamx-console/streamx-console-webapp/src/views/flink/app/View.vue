@@ -6,8 +6,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="taskCounts.options"
-            :series="taskCounts.series"></apexchart>
+            :options="taskChartOptions"
+            :series="taskChartSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -32,8 +32,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="taskCounts.options"
-            :series="taskCounts.series"></apexchart>
+            :options="taskChartOptions"
+            :series="taskChartSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -781,34 +781,31 @@ export default {
         }
       },
 
-      taskCounts: {
-        series: [],
-        options: {
-          chart: {
-            width: 240,
-            type: 'donut'
-          },
-          dataLabels: {
-            enabled: false
-          },
-          fill: {
-            type: 'gradient'
-          },
-          labels: [],
-          responsive: [{
-            breakpoint: 240,
-            options: {
-              chart: {
-                width: 240
-              },
-              legend: {
-                position: 'bottom'
-              }
+      taskChartSeries: [],
+      taskChartOptions: {
+        chart: {
+          width: 240,
+          type: 'donut'
+        },
+        dataLabels: {
+          enabled: false
+        },
+        fill: {
+          type: 'gradient'
+        },
+        labels: [],
+        responsive: [{
+          breakpoint: 240,
+          options: {
+            chart: {
+              width: 240
+            },
+            legend: {
+              position: 'bottom'
             }
-          }]
-        }
+          }
+        }]
       }
-
     }
   },
 
@@ -1238,8 +1235,8 @@ export default {
           }
         }
         console.log(labels)
-        this.taskCounts.series = series
-        this.taskCounts.options.labels = labels
+        this.taskChartSeries = series
+        this.taskChartOptions = labels
       })
     },
 
