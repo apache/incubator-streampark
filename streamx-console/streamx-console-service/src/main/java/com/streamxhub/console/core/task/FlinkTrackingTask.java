@@ -47,10 +47,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -404,6 +406,10 @@ public class FlinkTrackingTask {
         stopAppMap.remove(appId);
         trackingAppId.invalidate(appId);
         trackingAppCache.invalidate(appId);
+    }
+
+    public static ConcurrentMap<Long,Application> getAllTrackingApp() {
+        return trackingAppCache.asMap();
     }
 
     public static Application getTracking(Long appId) {

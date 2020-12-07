@@ -27,6 +27,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.core.enums.AppExistsState;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -65,4 +67,5 @@ public interface ApplicationService extends IService<Application> {
 
     void resetOptionState();
 
+    Map<String, Serializable> dashboard();
 }

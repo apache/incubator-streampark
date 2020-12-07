@@ -1,5 +1,5 @@
 /**
-s * Copyright (c) 2019 The StreamX Project
+ * s * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -42,6 +42,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 import java.util.concurrent.*;
 
 /**
@@ -77,6 +79,12 @@ public class ApplicationController extends BaseController {
     public RestResponse get(Application app) {
         Application application = applicationService.getApp(app);
         return RestResponse.create().data(application);
+    }
+
+    @PostMapping("dashboard")
+    public RestResponse dashboard() {
+        Map<String, Serializable> map = applicationService.dashboard();
+        return RestResponse.create().data(map);
     }
 
     @PostMapping("list")
@@ -170,7 +178,7 @@ public class ApplicationController extends BaseController {
 
     @PostMapping("backups")
     public RestResponse backups(ApplicationBackUp backUp, RestRequest request) {
-        IPage<ApplicationBackUp> backups = backUpService.page(backUp,request);
+        IPage<ApplicationBackUp> backups = backUpService.page(backUp, request);
         return RestResponse.create().data(backups);
     }
 

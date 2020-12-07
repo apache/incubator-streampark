@@ -662,7 +662,7 @@ import RangeDate from '@comp/DateTime/RangeDate'
 import State from './State'
 
 import { mapActions } from 'vuex'
-import { list, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
+import { list, dashboard, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
 import { Icon } from 'ant-design-vue'
 
@@ -675,6 +675,7 @@ export default {
     return {
       loading: false,
       dataSource: [],
+      metrics: {},
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
@@ -778,8 +779,8 @@ export default {
             }
           }
         },
-        type: {
-          series: [44, 55],
+        taskCounts: {
+          series: [],
           chartOptions: {
             chart: {
               width: 240,
@@ -791,7 +792,7 @@ export default {
             fill: {
               type: 'gradient'
             },
-            labels: ['Flink', 'Spark'],
+            labels: [],
             responsive: [{
               breakpoint: 240,
               options: {
@@ -921,7 +922,10 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
-    const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
+    const timer = window.setInterval(() => {
+      this.handleDashboard()
+      this.handleFetch(false)
+    }, this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
@@ -1215,6 +1219,24 @@ export default {
         })
         this.dataSource = dataSource
         this.pagination = pagination
+      })
+    },
+
+    handleDashboard () {
+      dashboard({}).then((resp) => {
+        this.metrics = resp.data || {}
+        const task = this.metrics.task || {}
+        const labels = []
+        const series = []
+        for (const k in task) {
+          const v = task[k] || 0
+          if (v) {
+            labels.push(k)
+            series.push(task[k])
+          }
+        }
+        this.chart.taskCounts.series = series
+        this.chart.taskCounts.chartOptions.labels = labels
       })
     },
 

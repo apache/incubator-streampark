@@ -38,6 +38,7 @@ export default {
     YARN: '/flink/app/yarn',
     LIST: '/flink/app/list',
     GET: '/flink/app/get',
+    DASHBOARD: '/flink/app/dashboard',
     MAIN: '/flink/app/main',
     NAME: '/flink/app/name',
     EXISTS: '/flink/app/exists',
