@@ -119,7 +119,7 @@
         <a-table
           slot="expandedRowRender"
           class="expanded-table"
-          slot-scope="record, index, indent, expande"
+          slot-scope="record"
           v-if="record.state === 5"
           rowKey="id"
           :columns="innerColumns"
