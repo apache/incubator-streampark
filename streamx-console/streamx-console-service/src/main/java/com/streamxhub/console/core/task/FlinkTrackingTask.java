@@ -269,6 +269,9 @@ public class FlinkTrackingTask {
         } else if (currentState.equals(FlinkAppState.RESTARTING)) {
             log.info("[StreamX] flinkTrackingTask application state {},add to starting", currentState.name());
             startingCache.put(application.getId(), Byte.valueOf("0"));
+        } else {
+            application.setState(currentState.getValue());
+            trackingAppCache.put(application.getId(), application);
         }
     }
 
