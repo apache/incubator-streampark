@@ -924,8 +924,8 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
+    this.handleDashboard()
     const timer = window.setInterval(() => {
-      this.handleDashboard()
       this.handleFetch(false)
     }, this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
@@ -1237,6 +1237,7 @@ export default {
             series.push(task[k])
           }
         }
+        console.log(labels)
         this.taskCounts.series = series
         this.taskCounts.options.labels = labels
       })
