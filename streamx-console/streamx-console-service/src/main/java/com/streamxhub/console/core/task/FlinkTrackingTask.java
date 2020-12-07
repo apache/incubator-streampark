@@ -132,7 +132,7 @@ public class FlinkTrackingTask {
                 /**
                  * 2) 到 yarn api中查询状态
                  */
-                failoverRestApi(application, index, stopFrom);
+                failoverFromYarn(application, index, stopFrom);
             } catch (IOException exception) {
                 if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                     log.error("[StreamX] flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
@@ -280,7 +280,7 @@ public class FlinkTrackingTask {
      * @param index
      * @param stopFrom
      */
-    private void failoverRestApi(Application application, Long index, StopFrom stopFrom) {
+    private void failoverFromYarn(Application application, Long index, StopFrom stopFrom) {
         log.info("[StreamX] flinkTrackingTask failoverRestApi starting...");
         /**
          * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
