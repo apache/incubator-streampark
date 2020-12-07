@@ -6,8 +6,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="taskChartOptions"
-            :series="taskChartSeries"></apexchart>
+            :options="taskCounts.options"
+            :series="taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -30,11 +30,10 @@
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
           <apexchart
-            v-if="taskChartSeries.length>0"
             type="donut"
             width="200"
-            :options="taskChartOptions"
-            :series="taskChartSeries"></apexchart>
+            :options="taskCounts.options"
+            :series="taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -782,31 +781,11 @@ export default {
         }
       },
 
-      taskChartSeries: [],
-      taskChartOptions: {
-        chart: {
-          width: 240,
-          type: 'donut'
-        },
-        dataLabels: {
-          enabled: false
-        },
-        fill: {
-          type: 'gradient'
-        },
-        labels: [],
-        responsive: [{
-          breakpoint: 240,
-          options: {
-            chart: {
-              width: 240
-            },
-            legend: {
-              position: 'bottom'
-            }
-          }
-        }]
+      taskCounts: {
+        series: [],
+        options: {}
       }
+
     }
   },
 
@@ -1235,9 +1214,33 @@ export default {
             series.push(task[k])
           }
         }
-        console.log(labels)
-        this.taskChartSeries = series
-        this.taskChartOptions = labels
+        this.taskCounts = {
+          series: series,
+          options: {
+            chart: {
+              width: 240,
+              type: 'donut'
+            },
+            dataLabels: {
+              enabled: false
+            },
+            fill: {
+              type: 'gradient'
+            },
+            labels: labels,
+            responsive: [{
+              breakpoint: 240,
+              options: {
+                chart: {
+                  width: 240
+                },
+                legend: {
+                  position: 'bottom'
+                }
+              }
+            }]
+          }
+        }
       })
     },
 
