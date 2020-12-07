@@ -6,8 +6,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="chart.taskCounts.chartOptions"
-            :series="chart.taskCounts.series"></apexchart>
+            :options="taskCounts.options"
+            :series="taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -32,8 +32,8 @@
           <apexchart
             type="donut"
             width="200"
-            :options="chart.taskCounts.chartOptions"
-            :series="chart.taskCounts.series"></apexchart>
+            :options="taskCounts.options"
+            :series="taskCounts.series"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
@@ -778,35 +778,37 @@ export default {
               categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
             }
           }
-        },
-        taskCounts: {
-          series: [],
-          chartOptions: {
-            chart: {
-              width: 240,
-              type: 'donut'
-            },
-            dataLabels: {
-              enabled: false
-            },
-            fill: {
-              type: 'gradient'
-            },
-            labels: [],
-            responsive: [{
-              breakpoint: 240,
-              options: {
-                chart: {
-                  width: 240
-                },
-                legend: {
-                  position: 'bottom'
-                }
+        }
+      },
+
+      taskCounts: {
+        series: [],
+        options: {
+          chart: {
+            width: 240,
+            type: 'donut'
+          },
+          dataLabels: {
+            enabled: false
+          },
+          fill: {
+            type: 'gradient'
+          },
+          labels: [],
+          responsive: [{
+            breakpoint: 240,
+            options: {
+              chart: {
+                width: 240
+              },
+              legend: {
+                position: 'bottom'
               }
-            }]
-          }
+            }
+          }]
         }
       }
+
     }
   },
 
@@ -1235,8 +1237,8 @@ export default {
             series.push(task[k])
           }
         }
-        this.chart.taskCounts.series = series
-        this.chart.taskCounts.chartOptions.labels = labels
+        this.taskCounts.series = series
+        this.taskCounts.options.labels = labels
       })
     },
 
