@@ -1268,8 +1268,7 @@ export default {
                 }
               },
               fill: {
-                colors: colors,
-                type: 'gradient'
+                colors: colors
               },
               legend: {
                 show: true,
