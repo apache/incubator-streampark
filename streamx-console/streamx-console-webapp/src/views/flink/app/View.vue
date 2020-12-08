@@ -713,75 +713,7 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
-      },
-      seriesSpark3: [{
-        data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
-      }],
-
-      chartOptionsSpark3: {
-        chart: {
-          type: 'area',
-          height: 140,
-          sparkline: {
-            enabled: true
-          }
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        fill: {
-          opacity: 0.3
-        },
-        xaxis: {
-          crosshairs: {
-            width: 1
-          }
-        },
-        yaxis: {
-          min: 0
-        },
-        title: {
-          text: '13,965',
-          offsetX: 0,
-          style: {
-            fontSize: '24px'
-          }
-        },
-        subtitle: {
-          text: 'Total Project',
-          offsetX: 0,
-          style: {
-            fontSize: '14px'
-          }
-        }
-      },
-
-      chart: {
-        state: {
-          series: [{
-            data: [400, 430, 448, 470, 540]
-          }],
-          chartOptions: {
-            chart: {
-              type: 'bar',
-              height: 350
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true
-              }
-            },
-            dataLabels: {
-              enabled: false
-            },
-            xaxis: {
-              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
-            }
-          }
-        }
-      },
-      taskCountsSeries: [],
-      taskCountsOptions: {}
+      }
     }
   },
 
