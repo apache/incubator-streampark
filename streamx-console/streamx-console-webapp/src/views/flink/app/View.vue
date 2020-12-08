@@ -37,12 +37,12 @@
           <div>
             <span>
               Total Task
-              <strong>{{metrics.totalTM}}</strong>
+              <strong>{{metrics.task.total}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
               Running Task
-              <strong>{{metrics.task.total}}</strong>
+              <strong>{{metrics.task.running}}</strong>
             </span>
           </div>
         </div>
