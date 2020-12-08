@@ -676,6 +676,7 @@ export default {
       loading: false,
       dataSource: [],
       metrics: {},
+      taskCountsMap: null,
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
@@ -1204,39 +1205,58 @@ export default {
           this.metrics = resp.data || {}
           const task = this.metrics.task || {}
           const labels = []
-          while (this.taskCountsSeries.length > 0) {
-            this.taskCountsSeries.pop()
-          }
+          const series = []
+          const map = new Map()
           for (const k in task) {
             const v = task[k] || 0
             if (v) {
+              map.set(k.toUpperCase(), task[k])
               labels.push(k.toUpperCase())
-              this.taskCountsSeries.push(task[k])
+              series.push(task[k])
             }
           }
-          this.taskCountsOptions = {
-            chart: {
-              width: 240,
-              type: 'donut'
-            },
-            dataLabels: {
-              enabled: false
-            },
-            fill: {
-              type: 'gradient'
-            },
-            labels: labels,
-            responsive: [{
-              breakpoint: 240,
-              options: {
-                chart: {
-                  width: 240
-                },
-                legend: {
-                  position: 'bottom'
+
+          let diffFlag = false
+          if (this.taskCountsMap == null) {
+            this.taskCountsMap = map
+          } else if (this.taskCountsMap.size !== map.size) {
+            this.taskCountsMap = map
+            diffFlag = true
+          } else {
+            diffFlag = this.taskCountsMap.filter((k) => {
+              return map.get(k) !== this.taskCountsMap.get(k)
+            }).length > 0
+          }
+
+          if (diffFlag) {
+            while (this.taskCountsSeries.length > 0) {
+              this.taskCountsSeries.pop()
+            }
+            series.forEach((x) => { this.taskCountsSeries.push(x) })
+            this.taskCountsOptions = {
+              chart: {
+                width: 240,
+                type: 'donut'
+              },
+              dataLabels: {
+                enabled: false
+              },
+              fill: {
+                type: 'gradient'
+              },
+              labels: labels,
+              responsive: [{
+                breakpoint: 240,
+                options: {
+                  chart: {
+                    width: 240
+                  },
+                  legend: {
+                    position: 'bottom'
+                  }
                 }
-              }
-            }]
+              }]
+            }
           }
         }
       })
@@ -1245,9 +1265,17 @@ export default {
     handleExpandIcon (props) {
       if (props.record.state === 5) {
         if (props.expanded) {
-          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='down'/></a>
+          return <a class='expand-icon-open' onClick={(e) => {
+            props.onExpand(props.record, e)
+          }}>
+            <a-icon type='down'/>
+          </a>
         } else {
-          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='right' /></a>
+          return <a class='expand-icon-close' onClick={(e) => {
+            props.onExpand(props.record, e)
+          }}>
+            <a-icon type='right'/>
+          </a>
         }
       } else {
         return ''
@@ -1364,12 +1392,12 @@ export default {
   cursor: pointer;
 }
 
-.expanded-table >>> .ant-table-tbody>tr>td {
+.expanded-table >>> .ant-table-tbody > tr > td {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
 
-.expanded-table >>> .ant-table-tbody>tr {
+.expanded-table >>> .ant-table-tbody > tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
