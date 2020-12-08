@@ -55,44 +55,43 @@
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-card :bordered="false">
+            <a-statistic
+              title="JobManager Memory"
+              :value="11.28"
+              :precision="2"
+              suffix="%"
+              :value-style="{ color: '#3f8600' }"
+              style="margin-right: 50px">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Total JobManager Memory
+              <strong>512.00 MB</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-card :bordered="false">
+            <a-statistic
+              title="TaskManager Memory"
+              :value="9.3"
+              :precision="2"
+              suffix="%"
+              class="demo-class"
+              :value-style="{ color: '#cf1322' }"
+            >
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Total TaskManager Memory
+              <strong>512.00 MB</strong>
             </span>
           </div>
         </div>
