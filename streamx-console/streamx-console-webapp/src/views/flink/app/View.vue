@@ -1206,8 +1206,7 @@ export default {
       dashboard({}).then((resp) => {
         const status = resp.status || 'error'
         if (status === 'success') {
-          this.metrics = resp.data || {}
-          this.metricsInfo = this.metrics.task || {}
+          this.metricsInfo = resp.data || {}
         }
       })
     },
