@@ -5,6 +5,7 @@
         <div class="gutter-box">
           <apexchart
             type="donut"
+            width="280"
             :options="taskCountsOptions"
             :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
@@ -30,6 +31,7 @@
         <div class="gutter-box">
           <apexchart
             type="donut"
+            width="280"
             :options="taskCountsOptions"
             :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
@@ -785,6 +787,23 @@ export default {
   },
 
   computed: {
+    colorsMap () {
+      const map = new Map()
+      map.set('CREATED', '#2f54eb')
+      map.set('DEPLOYING', '#1ABBDC')
+      map.set('DEPLOYED', '#108ee9')
+      map.set('STARTING', '#1AB58E')
+      map.set('RESTARTING', '#13c2c2')
+      map.set('RUNNING', '#52c41a')
+      map.set('FAILING', '#fa541c')
+      map.set('FAILED', '#f5222d')
+      map.set('CANCELLING', '#faad14')
+      map.set('CANCELED', '#fa8c16')
+      map.set('FINISHED', '#1890ff')
+      map.set('SUSPENDED', '#722ed1')
+      map.set('RECONCILING', '#eb2f96')
+      return map
+    },
     innerColumns () {
       return [
         { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280 },
@@ -1204,12 +1223,14 @@ export default {
           const task = this.metrics.task || {}
           const labels = []
           const series = []
+          const colors = []
           const map = new Map()
           for (const k in task) {
             const v = task[k] || 0
             if (v) {
               map.set(k.toUpperCase(), task[k])
               labels.push(k.toUpperCase())
+              colors.push(this.colorsMap.get(k.toUpperCase()))
               series.push(task[k])
             }
           }
@@ -1241,7 +1262,6 @@ export default {
             series.forEach((x) => { this.taskCountsSeries.push(x) })
             this.taskCountsOptions = {
               chart: {
-                width: 300,
                 type: 'donut'
               },
               plotOptions: {
@@ -1250,21 +1270,17 @@ export default {
                   endAngle: 270
                 }
               },
+              fill: {
+                colors: colors,
+                type: 'gradient'
+              },
+              legend: {
+                show: true
+              },
               dataLabels: {
                 enabled: false
               },
-              labels: labels,
-              responsive: [{
-                breakpoint: 400,
-                options: {
-                  chart: {
-                    width: 200
-                  },
-                  legend: {
-                    position: 'bottom'
-                  }
-                }
-              }]
+              labels: labels
             }
             this.taskCountsMap = map
           }
