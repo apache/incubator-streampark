@@ -1222,7 +1222,20 @@ export default {
           } else if (this.taskCountsMap.size !== map.size) {
             diffFlag = true
           } else {
-            diffFlag = this.taskCountsMap.some((v, k, _map) => { return v !== map.get(k) })
+            const entries = this.taskCountsMap.entries
+            while (true) {
+              const current = entries.next()
+              if (current.key) {
+                const k = current.key
+                const v = current.value
+                if (map.get(k) !== v) {
+                  diffFlag = true
+                  break
+                }
+              } else {
+                break
+              }
+            }
           }
 
           if (diffFlag) {
