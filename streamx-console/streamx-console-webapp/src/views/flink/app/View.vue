@@ -847,6 +847,7 @@ export default {
 
   mounted () {
     this.handleYarn()
+    this.handleDashboard()
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
