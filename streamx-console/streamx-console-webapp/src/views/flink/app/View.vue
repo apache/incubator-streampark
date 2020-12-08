@@ -1272,7 +1272,10 @@ export default {
                 type: 'gradient'
               },
               legend: {
-                show: true
+                show: true,
+                labels: {
+                  useSeriesColors: true
+                }
               },
               dataLabels: {
                 enabled: false
