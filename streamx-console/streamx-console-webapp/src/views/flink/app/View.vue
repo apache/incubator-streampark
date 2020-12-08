@@ -58,10 +58,9 @@
           <a-card :bordered="false">
             <a-statistic
               title="JobManager Memory"
-              :value="11.28"
-              :precision="2"
-              suffix="%"
-              :value-style="{ color: '#3f8600' }"
+              :value="4567"
+              suffix="MB"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
               style="margin-right: 50px">
             </a-statistic>
           </a-card>
@@ -83,8 +82,7 @@
               :precision="2"
               suffix="%"
               class="demo-class"
-              :value-style="{ color: '#cf1322' }"
-            >
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
