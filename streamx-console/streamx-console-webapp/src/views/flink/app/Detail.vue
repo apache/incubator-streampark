@@ -33,7 +33,7 @@
         </span>
       </a-descriptions-item>
       <a-descriptions-item label="Status">
-        <State :state="app.state" :option="app.optionState"></State>
+        <State option="state" :data="app"></State>
       </a-descriptions-item>
       <a-descriptions-item label="Start Time">
         <template v-if="app.startTime">
@@ -536,7 +536,7 @@ export default {
             width: '40%'
           },
           {
-            title: 'Start Statue',
+            title: 'Start Status',
             dataIndex: 'success',
             scopedSlots: { customRender: 'success' }
           },

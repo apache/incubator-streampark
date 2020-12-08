@@ -115,6 +115,10 @@ public class Application implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date createTime;
 
+    /**
+     * running job
+     */
+    private transient JobsOverview.Task overview;
     private transient Boolean backUp;
     private transient Boolean restart;
     private transient String userName;
@@ -167,7 +171,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public AppInfo getYarnAppInfo() throws Exception {
+    public AppInfo httpYarnAppInfo() throws Exception {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/ws/v1/cluster/apps/").concat(appId);
         String result = HttpClientUtils.httpGetRequest(url);
@@ -179,7 +183,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public JobsOverview getJobsOverview() throws IOException {
+    public JobsOverview httpJobsOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/jobs/overview");
         try {
@@ -195,7 +199,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Overview getOverview() throws IOException {
+    public Overview httpOverview() throws IOException {
         String yarn = SpringContextUtil.getBean(StreamXProperties.class).getYarn();
         String url = yarn.concat("/proxy/").concat(appId).concat("/overview");
         try {

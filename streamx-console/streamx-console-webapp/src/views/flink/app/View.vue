@@ -3,96 +3,86 @@
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart
-            type="donut"
-            width="200"
-            :options="chart.type.chartOptions"
-            :series="chart.type.series"></apexchart>
+          <a-card :bordered="false"  class="dash-statistic">
+            <a-statistic
+              title="Available Task Slots"
+              :value="metrics.availableSlot"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
-            <span>
-              Total
-              <strong>100</strong>
+             <span>
+              Total Task Slots
+              <strong>{{metrics.totalSlot}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Task Managers
+              <strong>{{metrics.totalTM}}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart
-            type="donut"
-            width="200"
-            :options="chart.type.chartOptions"
-            :series="chart.type.series"></apexchart>
+          <a-card :bordered="false" class="dash-statistic">
+            <a-statistic
+              title="Running Jobs"
+              :value="metrics.runningJob"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
+              Total Task
+              <strong>{{metrics.task.total}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Running Task
+              <strong>{{metrics.task.running}}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-card :bordered="false" class="dash-statistic">
+            <a-statistic
+              title="JobManager Memory"
+              :value="metrics.jmMemory"
+              :precision="0"
+              suffix="MB"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Total TaskManager Mem
+              <strong>{{metrics.jmMemory}} MB</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart type="area" height="100" :options="chartOptionsSpark3" :series="seriesSpark3"></apexchart>
+          <a-card :bordered="false" class="dash-statistic">
+            <a-statistic
+              title="TaskManager Memory"
+              :value="metrics.tmMemory"
+              :precision="0"
+              suffix="MB"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Total TaskManager Mem
+              <strong>{{metrics.tmMemory}} MB</strong>
             </span>
           </div>
         </div>
@@ -119,7 +109,7 @@
         <a-table
           slot="expandedRowRender"
           class="expanded-table"
-          slot-scope="record, index, indent, expande"
+          slot-scope="record"
           v-if="record.state === 5"
           rowKey="id"
           :columns="innerColumns"
@@ -162,7 +152,7 @@
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
               @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
@@ -297,7 +287,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
               @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
@@ -339,15 +329,12 @@
           {{ record.duration | duration }}
         </template>
 
-        <template slot="endTime" slot-scope="text, record">
-          <span v-if="record.endTime">
-            {{ record.endTime }}
-          </span>
-          <span v-else> - </span>
+        <template slot="task" slot-scope="text, record">
+          <State option="task" :data="record"></State>
         </template>
 
         <template slot="state" slot-scope="text, record">
-          <State :state="record.state" :option="record.optionState"></State>
+          <State option="state" :data="record"></State>
         </template>
 
         <template slot="customOperation">
@@ -665,7 +652,7 @@ import RangeDate from '@comp/DateTime/RangeDate'
 import State from './State'
 
 import { mapActions } from 'vuex'
-import { list, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
+import { list, dashboard, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
 import { Icon } from 'ant-design-vue'
 
@@ -678,6 +665,17 @@ export default {
     return {
       loading: false,
       dataSource: [],
+      metrics: {
+        availableSlot: 0,
+        totalSlot: 0,
+        totalTM: 0,
+        jmMemory: 0,
+        tmMemory: 0,
+        task: {
+          total: 0,
+          running: 0
+        }
+      },
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
@@ -715,111 +713,31 @@ export default {
         showQuickJumper: true,
         showSizeChanger: true,
         showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
-      },
-      seriesSpark3: [{
-        data: [400, 12, 400, 243, 404, 433, 145, 210, 321, 100, 213, 89, 254]
-      }],
-
-      chartOptionsSpark3: {
-        chart: {
-          type: 'area',
-          height: 140,
-          sparkline: {
-            enabled: true
-          }
-        },
-        stroke: {
-          curve: 'straight'
-        },
-        fill: {
-          opacity: 0.3
-        },
-        xaxis: {
-          crosshairs: {
-            width: 1
-          }
-        },
-        yaxis: {
-          min: 0
-        },
-        title: {
-          text: '13,965',
-          offsetX: 0,
-          style: {
-            fontSize: '24px'
-          }
-        },
-        subtitle: {
-          text: 'Total Project',
-          offsetX: 0,
-          style: {
-            fontSize: '14px'
-          }
-        }
-      },
-
-      chart: {
-        state: {
-          series: [{
-            data: [400, 430, 448, 470, 540]
-          }],
-          chartOptions: {
-            chart: {
-              type: 'bar',
-              height: 350
-            },
-            plotOptions: {
-              bar: {
-                horizontal: true
-              }
-            },
-            dataLabels: {
-              enabled: false
-            },
-            xaxis: {
-              categories: ['South Korea', 'Canada', 'United Kingdom', 'Netherlands', 'Italy']
-            }
-          }
-        },
-        type: {
-          series: [44, 55],
-          chartOptions: {
-            chart: {
-              width: 240,
-              type: 'donut'
-            },
-            dataLabels: {
-              enabled: false
-            },
-            fill: {
-              type: 'gradient'
-            },
-            labels: ['Flink', 'Spark'],
-            responsive: [{
-              breakpoint: 240,
-              options: {
-                chart: {
-                  width: 240
-                },
-                legend: {
-                  position: 'bottom'
-                }
-              }
-            }]
-          }
-        }
       }
     }
   },
 
   computed: {
+    colorsMap () {
+      const map = new Map()
+      map.set('TOTAL', '#102541')
+      map.set('CREATED', '#2f54eb')
+      map.set('SCHEDULED', '#722ed1')
+      map.set('DEPLOYING', '#13c2c2')
+      map.set('RUNNING', '#52c41a')
+      map.set('FINISHED', '#1890ff')
+      map.set('CANCELING', '#faad14')
+      map.set('CANCELED', '#fa8c16')
+      map.set('FAILED', '#f5222d')
+      map.set('RECONCILING', '#eb2f96')
+      return map
+    },
     innerColumns () {
       return [
-        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 255 },
+        { title: 'Application Id', dataIndex: 'appId', key: 'appId', width: 280 },
         { title: 'JobManager Memory', dataIndex: 'jmMemory', key: 'jmMemory' },
         { title: 'TaskManager Memory', dataIndex: 'tmMemory', key: 'tmMemory' },
         { title: 'Total TaskManager', dataIndex: 'totalTM', key: 'totalTM' },
-        { title: 'Total Task', dataIndex: 'totalTask', key: 'totalTask' },
         { title: 'Total Slots', dataIndex: 'totalSlot', key: 'totalSlot' },
         { title: 'Available Slots', dataIndex: 'availableSlot', key: 'availableSlot' }
       ]
@@ -884,12 +802,10 @@ export default {
         scopedSlots: { customRender: 'duration' },
         width: 150
       }, {
-        title: 'End Time',
-        dataIndex: 'endTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
-        scopedSlots: { customRender: 'endTime' },
-        width: 180
+        title: 'Task',
+        dataIndex: 'task',
+        scopedSlots: { customRender: 'task' },
+        width: 100
       }, {
         title: 'Status',
         dataIndex: 'state',
@@ -927,7 +843,10 @@ export default {
   mounted () {
     this.handleYarn()
     this.handleFetch(true)
-    const timer = window.setInterval(() => this.handleFetch(false), this.queryInterval)
+    const timer = window.setInterval(() => {
+      this.handleDashboard()
+      this.handleFetch(false)
+    }, this.queryInterval)
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
@@ -1194,7 +1113,6 @@ export default {
             'appId': x.appId,
             'jmMemory': x.jmMemory,
             'tmMemory': x.tmMemory,
-            'totalTask': x.totalTask,
             'totalTM': x.totalTM,
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot
@@ -1225,12 +1143,29 @@ export default {
       })
     },
 
+    handleDashboard () {
+      dashboard({}).then((resp) => {
+        const status = resp.status || 'error'
+        if (status === 'success') {
+          this.metrics = resp.data || {}
+        }
+      })
+    },
+
     handleExpandIcon (props) {
       if (props.record.state === 5) {
         if (props.expanded) {
-          return <a class='expand-icon-open' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='down'/></a>
+          return <a class='expand-icon-open' onClick={(e) => {
+            props.onExpand(props.record, e)
+          }}>
+            <a-icon type='down'/>
+          </a>
         } else {
-          return <a class='expand-icon-close' onClick={(e) => { props.onExpand(props.record, e) }}><a-icon type='right' /></a>
+          return <a class='expand-icon-close' onClick={(e) => {
+            props.onExpand(props.record, e)
+          }}>
+            <a-icon type='right'/>
+          </a>
         }
       } else {
         return ''
@@ -1244,7 +1179,7 @@ export default {
     },
 
     handleView (params) {
-      if (params.state === 4 || params.state === 5) {
+      if (params.state === 4 || params.state === 5 || params.optionState === 4) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }
@@ -1321,7 +1256,7 @@ export default {
 }
 
 .gutter-box {
-  padding: 10px 20px;
+  padding: 10px 15px;
   background: #fff;
   color: rgba(0, 0, 0, 0.65);
   font-size: 14px;
@@ -1333,6 +1268,14 @@ export default {
   position: relative;
   border-radius: 2px;
   transition: all 0.3s;
+}
+
+.gutter-box >>> .ant-divider-horizontal {
+  margin: 10px 0;
+}
+
+.dash-statistic >>> .ant-card-body {
+  padding: 5px !important;
 }
 
 .operation {
@@ -1347,12 +1290,12 @@ export default {
   cursor: pointer;
 }
 
-.expanded-table >>> .ant-table-tbody>tr>td {
+.expanded-table >>> .ant-table-tbody > tr > td {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
 
-.expanded-table >>> .ant-table-tbody>tr {
+.expanded-table >>> .ant-table-tbody > tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
@@ -1366,4 +1309,13 @@ export default {
   color: darkgray;
 }
 
+.task-tag > .ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  margin-right: 0px;
+  cursor: default;
+}
 </style>

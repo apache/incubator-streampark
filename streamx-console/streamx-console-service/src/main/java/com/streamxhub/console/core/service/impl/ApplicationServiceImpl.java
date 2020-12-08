@@ -31,6 +31,7 @@ import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.enums.*;
+import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.service.*;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -40,6 +41,7 @@ import com.streamxhub.console.system.authentication.ServerUtil;
 import com.streamxhub.flink.submit.FlinkSubmit;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.JobManagerOptions;
@@ -53,8 +55,11 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.Manifest;
 
 /**
@@ -87,6 +92,72 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @PostConstruct
     public void resetOptionState() {
         this.baseMapper.resetOptionState();
+    }
+
+    @Override
+    public Map<String, Serializable> dashboard() {
+        JobsOverview.Task overview = new JobsOverview.Task();
+        AtomicLong totalJmMemory = new AtomicLong(0L);
+        AtomicLong totalTmMemory = new AtomicLong(0L);
+        AtomicInteger totalTm = new AtomicInteger(0);
+        AtomicInteger totalSlot = new AtomicInteger(0);
+        AtomicInteger availableSlot = new AtomicInteger(0);
+        AtomicInteger runningJob = new AtomicInteger(0);
+
+        FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
+
+            if (v.getJmMemory() != null) {
+                String jmMem = v.getJmMemory().replaceAll("M", "");
+                if (StringUtils.isNotEmpty(jmMem)) {
+                    totalJmMemory.addAndGet(Long.parseLong(jmMem));
+                }
+            }
+
+            if (v.getTmMemory() != null) {
+                String tmMem = v.getTmMemory().replaceAll("M", "");
+                if (StringUtils.isNotEmpty(tmMem)) {
+                    totalTmMemory.addAndGet(Long.parseLong(tmMem));
+                }
+            }
+
+            if (v.getTotalTM() != null) {
+                totalTm.addAndGet(v.getTotalTM());
+            }
+
+            if (v.getTotalSlot() != null) {
+                totalSlot.addAndGet(v.getTotalSlot());
+            }
+
+            if (v.getAvailableSlot() != null) {
+                availableSlot.addAndGet(v.getAvailableSlot());
+            }
+
+            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
+                runningJob.incrementAndGet();
+            }
+
+            JobsOverview.Task task = v.getOverview();
+            overview.setTotal(overview.getTotal() + task.getTotal());
+            overview.setCreated(overview.getCreated() + task.getCreated());
+            overview.setScheduled(overview.getScheduled() + task.getScheduled());
+            overview.setDeploying(overview.getDeploying() + task.getDeploying());
+            overview.setRunning(overview.getRunning() + task.getRunning());
+            overview.setFinished(overview.getFinished() + task.getFinished());
+            overview.setCanceling(overview.getCanceling() + task.getCanceling());
+            overview.setCanceled(overview.getCanceled() + task.getCanceled());
+            overview.setFailed(overview.getFailed() + task.getFailed());
+            overview.setReconciling(overview.getReconciling() + task.getReconciling());
+        });
+        Map map = new HashMap<String, Serializable>();
+        map.put("task", overview);
+        map.put("jmMemory", totalJmMemory.get());
+        map.put("tmMemory", totalTmMemory.get());
+        map.put("totalTM", totalTm.get());
+        map.put("availableSlot", availableSlot.get());
+        map.put("totalSlot", totalSlot.get());
+        map.put("runningJob", runningJob.get());
+
+        return map;
     }
 
     @Override
@@ -427,7 +498,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
             Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
-            if(configuration!=null) {
+            if (configuration != null) {
                 String jmMemory = configuration.toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 String tmMemory = configuration.toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 application.setJmMemory(jmMemory);

@@ -47,10 +47,12 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.ConnectException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -112,7 +114,7 @@ public class FlinkTrackingTask {
 
     private AtomicLong atomicIndex = new AtomicLong(0);
 
-    @Scheduled(fixedDelay = 1000 * 3)
+    @Scheduled(fixedDelay = 1000 * 2)
     public void tracking() {
         Long index = atomicIndex.incrementAndGet();
         Map<Long, Byte> trackingIds = trackingAppId.asMap();
@@ -123,7 +125,7 @@ public class FlinkTrackingTask {
                 /**
                  * 1)到flink的restApi中查询状态
                  */
-                JobsOverview jobsOverview = application.getJobsOverview();
+                JobsOverview jobsOverview = application.httpJobsOverview();
                 Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
                 if (optional.isPresent()) {
                     restApiCallback(application, optional.get(), stopFrom);
@@ -132,7 +134,7 @@ public class FlinkTrackingTask {
                 /**
                  * 2) 到 yarn api中查询状态
                  */
-                failoverRestApi(application, index, stopFrom);
+                failoverFromYarn(application, index, stopFrom);
             } catch (IOException exception) {
                 if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                     log.error("[StreamX] flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
@@ -181,7 +183,7 @@ public class FlinkTrackingTask {
          */
         application.setJobId(jobOverview.getId());
         application.setTotalTask(jobOverview.getTasks().getTotal());
-
+        application.setOverview(jobOverview.getTasks());
         /**
          * 2) duration
          */
@@ -204,7 +206,7 @@ public class FlinkTrackingTask {
          */
         if (startingCache.getIfPresent(application.getId()) != null) {
             try {
-                Overview override = application.getOverview();
+                Overview override = application.httpOverview();
                 if (override != null && override.getSlotsTotal() > 0) {
                     startingCache.invalidate(application.getId());
                     application.setTotalTM(override.getTaskmanagers());
@@ -269,6 +271,9 @@ public class FlinkTrackingTask {
         } else if (currentState.equals(FlinkAppState.RESTARTING)) {
             log.info("[StreamX] flinkTrackingTask application state {},add to starting", currentState.name());
             startingCache.put(application.getId(), Byte.valueOf("0"));
+        } else {
+            application.setState(currentState.getValue());
+            trackingAppCache.put(application.getId(), application);
         }
     }
 
@@ -277,7 +282,7 @@ public class FlinkTrackingTask {
      * @param index
      * @param stopFrom
      */
-    private void failoverRestApi(Application application, Long index, StopFrom stopFrom) {
+    private void failoverFromYarn(Application application, Long index, StopFrom stopFrom) {
         log.info("[StreamX] flinkTrackingTask failoverRestApi starting...");
         /**
          * 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
@@ -298,7 +303,7 @@ public class FlinkTrackingTask {
                 /**
                  * 2)到yarn的restApi中查询状态
                  */
-                AppInfo appInfo = application.getYarnAppInfo();
+                AppInfo appInfo = application.httpYarnAppInfo();
                 String state = appInfo.getApp().getFinalStatus();
                 FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                 if (FlinkAppState.KILLED.equals(flinkAppState)) {
@@ -401,6 +406,10 @@ public class FlinkTrackingTask {
         stopAppMap.remove(appId);
         trackingAppId.invalidate(appId);
         trackingAppCache.invalidate(appId);
+    }
+
+    public static ConcurrentMap<Long,Application> getAllTrackingApp() {
+        return trackingAppCache.asMap();
     }
 
     public static Application getTracking(Long appId) {

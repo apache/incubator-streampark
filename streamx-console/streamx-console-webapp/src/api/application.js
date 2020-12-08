@@ -13,6 +13,10 @@ export function get (params) {
   return http.post(api.Application.GET, params)
 }
 
+export function dashboard (params) {
+  return http.post(api.Application.DASHBOARD, params)
+}
+
 export function main (params) {
   return http.post(api.Application.MAIN, params)
 }
