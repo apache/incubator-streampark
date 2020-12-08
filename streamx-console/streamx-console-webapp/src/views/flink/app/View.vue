@@ -3,93 +3,86 @@
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart
-            type="donut"
-            width="280"
-            :options="taskCountsOptions"
-            :series="taskCountsSeries"></apexchart>
+          <a-card :bordered="false"  class="dash-statistic">
+            <a-statistic
+              title="Available Task Slots"
+              :value="metricsInfo.availableSlot"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
-            <span>
-              Total
-              <strong>100</strong>
+             <span>
+              Total Task Slots
+              <strong>{{metricsInfo.totalSlot}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Task Managers
+              <strong>{{metricsInfo.totalTm}}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <apexchart
-            type="donut"
-            width="280"
-            :options="taskCountsOptions"
-            :series="taskCountsSeries"></apexchart>
+          <a-card :bordered="false" class="dash-statistic">
+            <a-statistic
+              title="Running Jobs"
+              :value="metricsInfo.task.running"
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+            </a-statistic>
+          </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total
-              <strong>100</strong>
+              Total Task
+              <strong>{{metricsInfo.totalTM}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
-              Flink
-              <strong>67</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Spark
-              <strong>33</strong>
+              Running Task
+              <strong>{{metricsInfo.task.total}}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <a-card :bordered="false">
+          <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="JobManager Memory"
-              :value="4567"
+              :value="metricsInfo.jmMemory"
+              :precision="0"
               suffix="MB"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-              style="margin-right: 50px">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total JobManager Memory
-              <strong>512.00 MB</strong>
+              Total TaskManager Mem
+              <strong>{{metricsInfo.jmMemory}} MB</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
         <div class="gutter-box">
-          <a-card :bordered="false">
+          <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="TaskManager Memory"
-              :value="9.3"
-              :precision="2"
-              suffix="%"
-              class="demo-class"
+              :value="metricsInfo.tmMemory"
+              :precision="0"
+              suffix="MB"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
             <span>
-              Total TaskManager Memory
-              <strong>512.00 MB</strong>
+              Total TaskManager Mem
+              <strong>{{metricsInfo.tmMemory}} MB</strong>
             </span>
           </div>
         </div>
@@ -673,7 +666,7 @@ export default {
       loading: false,
       dataSource: [],
       metrics: {},
-      taskCountsMap: null,
+      metricsInfo: null,
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
@@ -1214,72 +1207,7 @@ export default {
         const status = resp.status || 'error'
         if (status === 'success') {
           this.metrics = resp.data || {}
-          const task = this.metrics.task || {}
-          const labels = []
-          const series = []
-          const colors = []
-          const map = new Map()
-          for (const k in task) {
-            const v = task[k] || 0
-            if (v) {
-              map.set(k.toUpperCase(), task[k])
-              labels.push(k.toUpperCase())
-              colors.push(this.colorsMap.get(k.toUpperCase()))
-              series.push(task[k])
-            }
-          }
-
-          let diffFlag = false
-          if (this.taskCountsMap == null) {
-            diffFlag = true
-          } else if (this.taskCountsMap.size !== map.size) {
-            diffFlag = true
-          } else {
-            const entries = this.taskCountsMap.entries()
-            while (true) {
-              const current = entries.next()
-              if (current.key) {
-                const k = current.key
-                const v = current.value
-                if (map.get(k) !== v) {
-                  diffFlag = true
-                  break
-                }
-              } else {
-                break
-              }
-            }
-          }
-
-          if (diffFlag) {
-            while (this.taskCountsSeries.length > 0) { this.taskCountsSeries.pop() }
-            series.forEach((x) => { this.taskCountsSeries.push(x) })
-            this.taskCountsOptions = {
-              chart: {
-                type: 'donut'
-              },
-              plotOptions: {
-                pie: {
-                  startAngle: -90,
-                  endAngle: 270
-                }
-              },
-              fill: {
-                colors: colors
-              },
-              legend: {
-                show: true,
-                labels: {
-                  colors: colors
-                }
-              },
-              dataLabels: {
-                enabled: false
-              },
-              labels: labels
-            }
-            this.taskCountsMap = map
-          }
+          this.metricsInfo = this.metrics.task || {}
         }
       })
     },
@@ -1388,7 +1316,7 @@ export default {
 }
 
 .gutter-box {
-  padding: 10px 20px;
+  padding: 10px 15px;
   background: #fff;
   color: rgba(0, 0, 0, 0.65);
   font-size: 14px;
@@ -1400,6 +1328,14 @@ export default {
   position: relative;
   border-radius: 2px;
   transition: all 0.3s;
+}
+
+.gutter-box >>> .ant-divider-horizontal {
+  margin: 10px 0;
+}
+
+.dash-statistic >>> .ant-card-body {
+  padding: 5px !important;
 }
 
 .operation {

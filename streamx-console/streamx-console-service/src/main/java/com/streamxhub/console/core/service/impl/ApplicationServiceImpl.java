@@ -101,8 +101,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AtomicLong totalTmMemory = new AtomicLong(0L);
         AtomicInteger totalTm = new AtomicInteger(0);
         AtomicInteger totalSlot = new AtomicInteger(0);
+        AtomicInteger availableSlot = new AtomicInteger(0);
 
         FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
+
             if (v.getJmMemory() != null) {
                 String jmMem = v.getJmMemory().replaceAll("M", "");
                 if (StringUtils.isNotEmpty(jmMem)) {
@@ -124,6 +126,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (v.getTotalSlot() != null) {
                 totalSlot.addAndGet(v.getTotalSlot());
             }
+
+            if (v.getAvailableSlot() != null) {
+                availableSlot.addAndGet(v.getAvailableSlot());
+            }
+
             JobsOverview.Task task = v.getOverview();
             overview.setTotal(overview.getTotal() + task.getTotal());
             overview.setCreated(overview.getCreated() + task.getCreated());
@@ -141,7 +148,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         map.put("jmMemory", totalJmMemory.get());
         map.put("tmMemory", totalTmMemory.get());
         map.put("totalTm", totalTm.get());
+        map.put("availableSlot", availableSlot.get());
         map.put("totalSlot", totalTm.get());
+
         return map;
     }
 
