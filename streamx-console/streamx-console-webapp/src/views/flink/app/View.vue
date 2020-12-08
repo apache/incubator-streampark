@@ -1223,16 +1223,20 @@ export default {
             this.taskCountsMap = map
             diffFlag = true
           } else {
-            diffFlag = this.taskCountsMap.filter((k) => {
-              return map.get(k) !== this.taskCountsMap.get(k)
-            }).length > 0
+            this.taskCountsMap.forEach((item, key, _map) => {
+              if (_map.get(key) !== map.get(key)) {
+                diffFlag = true
+              }
+            })
           }
 
           if (diffFlag) {
             while (this.taskCountsSeries.length > 0) {
               this.taskCountsSeries.pop()
             }
-            series.forEach((x) => { this.taskCountsSeries.push(x) })
+            series.forEach((x) => {
+              this.taskCountsSeries.push(x)
+            })
             this.taskCountsOptions = {
               chart: {
                 width: 240,
