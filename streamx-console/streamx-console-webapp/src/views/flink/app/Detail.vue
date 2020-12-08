@@ -536,7 +536,7 @@ export default {
             width: '40%'
           },
           {
-            title: 'Start Statue',
+            title: 'Start State',
             dataIndex: 'success',
             scopedSlots: { customRender: 'success' }
           },

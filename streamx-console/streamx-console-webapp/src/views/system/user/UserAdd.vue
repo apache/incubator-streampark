@@ -56,9 +56,9 @@
           <a-select-option v-for="r in roleData" :key="r.roleId">{{ r.roleName }}</a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="Statue" v-bind="formItemLayout">
+      <a-form-item label="State" v-bind="formItemLayout">
         <a-radio-group
-          v-decorator="['status',{rules: [{ required: true, message: 'please select statue'}]}]">
+          v-decorator="['status',{rules: [{ required: true, message: 'please select status'}]}]">
           <a-radio value="0">locked</a-radio>
           <a-radio value="1">effective</a-radio>
         </a-radio-group>
