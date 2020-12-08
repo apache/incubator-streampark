@@ -5,7 +5,6 @@
         <div class="gutter-box">
           <apexchart
             type="donut"
-            width="200"
             :options="taskCountsOptions"
             :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
@@ -31,7 +30,6 @@
         <div class="gutter-box">
           <apexchart
             type="donut"
-            width="200"
             :options="taskCountsOptions"
             :series="taskCountsSeries"></apexchart>
           <a-divider style="margin-bottom: 10px"/>
