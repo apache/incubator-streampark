@@ -149,7 +149,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         map.put("tmMemory", totalTmMemory.get());
         map.put("totalTM", totalTm.get());
         map.put("availableSlot", availableSlot.get());
-        map.put("totalSlot", totalTm.get());
+        map.put("totalSlot", totalSlot.get());
 
         return map;
     }
