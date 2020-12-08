@@ -147,7 +147,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         map.put("task", overview);
         map.put("jmMemory", totalJmMemory.get());
         map.put("tmMemory", totalTmMemory.get());
-        map.put("totalTm", totalTm.get());
+        map.put("totalTM", totalTm.get());
         map.put("availableSlot", availableSlot.get());
         map.put("totalSlot", totalTm.get());
 

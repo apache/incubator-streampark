@@ -6,7 +6,7 @@
           <a-card :bordered="false"  class="dash-statistic">
             <a-statistic
               title="Available Task Slots"
-              :value="metricsInfo.availableSlot"
+              :value="metrics.availableSlot"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
@@ -14,12 +14,12 @@
           <div>
              <span>
               Total Task Slots
-              <strong>{{metricsInfo.totalSlot}}</strong>
+              <strong>{{metrics.totalSlot}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
               Task Managers
-              <strong>{{metricsInfo.totalTm}}</strong>
+              <strong>{{metrics.totalTM}}</strong>
             </span>
           </div>
         </div>
@@ -29,7 +29,7 @@
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Running Jobs"
-              :value="metricsInfo.task.running"
+              :value="metrics.task.running"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
@@ -37,12 +37,12 @@
           <div>
             <span>
               Total Task
-              <strong>{{metricsInfo.totalTM}}</strong>
+              <strong>{{metrics.totalTM}}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
               Running Task
-              <strong>{{metricsInfo.task.total}}</strong>
+              <strong>{{metrics.task.total}}</strong>
             </span>
           </div>
         </div>
@@ -52,7 +52,7 @@
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="JobManager Memory"
-              :value="metricsInfo.jmMemory"
+              :value="metrics.jmMemory"
               :precision="0"
               suffix="MB"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
@@ -62,7 +62,7 @@
           <div>
             <span>
               Total TaskManager Mem
-              <strong>{{metricsInfo.jmMemory}} MB</strong>
+              <strong>{{metrics.jmMemory}} MB</strong>
             </span>
           </div>
         </div>
@@ -72,7 +72,7 @@
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="TaskManager Memory"
-              :value="metricsInfo.tmMemory"
+              :value="metrics.tmMemory"
               :precision="0"
               suffix="MB"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
@@ -82,7 +82,7 @@
           <div>
             <span>
               Total TaskManager Mem
-              <strong>{{metricsInfo.tmMemory}} MB</strong>
+              <strong>{{metrics.tmMemory}} MB</strong>
             </span>
           </div>
         </div>
@@ -665,8 +665,17 @@ export default {
     return {
       loading: false,
       dataSource: [],
-      metrics: {},
-      metricsInfo: null,
+      metrics: {
+        availableSlot: 0,
+        totalSlot: 0,
+        totalTM: 0,
+        jmMemory: 0,
+        tmMemory: 0,
+        task: {
+          total: 0,
+          running: 0
+        }
+      },
       expandedRow: ['appId', 'jmMemory', 'tmMemory', 'totalTM', 'totalSlot', 'availableSlot', 'flinkCommit'],
       queryParams: {},
       sortedInfo: null,
@@ -1206,7 +1215,7 @@ export default {
       dashboard({}).then((resp) => {
         const status = resp.status || 'error'
         if (status === 'success') {
-          this.metricsInfo = resp.data || {}
+          this.metrics = resp.data || {}
         }
       })
     },
