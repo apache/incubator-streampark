@@ -1216,7 +1216,7 @@ export default {
             }
           }
 
-          let diffFlag
+          let diffFlag = false
           if (this.taskCountsMap == null) {
             diffFlag = true
           } else if (this.taskCountsMap.size !== map.size) {
