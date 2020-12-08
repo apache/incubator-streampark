@@ -1260,10 +1260,10 @@ export default {
               },
               labels: labels,
               responsive: [{
-                breakpoint: 380,
+                breakpoint: 400,
                 options: {
                   chart: {
-                    width: 300
+                    width: 200
                   },
                   legend: {
                     position: 'bottom'
