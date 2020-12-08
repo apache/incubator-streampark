@@ -1277,7 +1277,7 @@ export default {
 }
 
 .gutter-box >>> .ant-divider-horizontal {
-  margin: 15px 0;
+  margin: 16px 0;
 }
 
 .dash-statistic >>> .ant-card-body {
