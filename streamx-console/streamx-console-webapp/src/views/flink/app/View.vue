@@ -1222,7 +1222,7 @@ export default {
           } else if (this.taskCountsMap.size !== map.size) {
             diffFlag = true
           } else {
-            const entries = this.taskCountsMap.entries
+            const entries = this.taskCountsMap.entries()
             while (true) {
               const current = entries.next()
               if (current.key) {
@@ -1239,12 +1239,8 @@ export default {
           }
 
           if (diffFlag) {
-            while (this.taskCountsSeries.length > 0) {
-              this.taskCountsSeries.pop()
-            }
-            series.forEach((x) => {
-              this.taskCountsSeries.push(x)
-            })
+            while (this.taskCountsSeries.length > 0) { this.taskCountsSeries.pop() }
+            series.forEach((x) => { this.taskCountsSeries.push(x) })
             this.taskCountsOptions = {
               chart: {
                 width: 240,
