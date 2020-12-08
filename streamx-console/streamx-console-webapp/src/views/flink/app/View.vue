@@ -2,8 +2,9 @@
   <div>
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
-          <a-card :bordered="false"  class="dash-statistic">
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+        <div class="gutter-box" v-if="!dashLoading">
+          <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Available Task Slots"
               :value="metrics.availableSlot"
@@ -12,20 +13,21 @@
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
           <div>
-             <span>
+            <span>
               Total Task Slots
-              <strong>{{metrics.totalSlot}}</strong>
+              <strong>{{ metrics.totalSlot }}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
               Task Managers
-              <strong>{{metrics.totalTM}}</strong>
+              <strong>{{ metrics.totalTM }}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+        <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Running Jobs"
@@ -37,18 +39,19 @@
           <div>
             <span>
               Total Task
-              <strong>{{metrics.task.total}}</strong>
+              <strong>{{ metrics.task.total }}</strong>
             </span>
             <a-divider type="vertical"/>
             <span>
               Running Task
-              <strong>{{metrics.task.running}}</strong>
+              <strong>{{ metrics.task.running }}</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+        <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="JobManager Memory"
@@ -62,13 +65,14 @@
           <div>
             <span>
               Total TaskManager Mem
-              <strong>{{metrics.jmMemory}} MB</strong>
+              <strong>{{ metrics.jmMemory }} MB</strong>
             </span>
           </div>
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <div class="gutter-box">
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+        <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="TaskManager Memory"
@@ -82,7 +86,7 @@
           <div>
             <span>
               Total TaskManager Mem
-              <strong>{{metrics.tmMemory}} MB</strong>
+              <strong>{{ metrics.tmMemory }} MB</strong>
             </span>
           </div>
         </div>
@@ -664,6 +668,7 @@ export default {
   data () {
     return {
       loading: false,
+      dashLoading: true,
       dataSource: [],
       metrics: {
         availableSlot: 0,
@@ -842,6 +847,7 @@ export default {
 
   mounted () {
     this.handleYarn()
+    this.handleDashboard()
     this.handleFetch(true)
     const timer = window.setInterval(() => {
       this.handleDashboard()
@@ -1147,6 +1153,7 @@ export default {
       dashboard({}).then((resp) => {
         const status = resp.status || 'error'
         if (status === 'success') {
+          this.dashLoading = false
           this.metrics = resp.data || {}
         }
       })
@@ -1271,7 +1278,7 @@ export default {
 }
 
 .gutter-box >>> .ant-divider-horizontal {
-  margin: 10px 0;
+  margin: 16px 0;
 }
 
 .dash-statistic >>> .ant-card-body {
@@ -1290,14 +1297,18 @@ export default {
   cursor: pointer;
 }
 
-.expanded-table >>> .ant-table-tbody > tr > td {
+.expanded-table >>> .ant-table-tbody>tr> td {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
 
-.expanded-table >>> .ant-table-tbody > tr {
+.expanded-table >>> .ant-table-tbody>tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
+}
+
+.expanded-table >>> .ant-table-thead>tr>th {
+  font-size: 13px;
 }
 
 .expand-icon-open {
