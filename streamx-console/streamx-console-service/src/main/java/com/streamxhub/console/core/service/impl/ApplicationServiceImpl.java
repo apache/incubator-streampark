@@ -102,6 +102,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AtomicInteger totalTm = new AtomicInteger(0);
         AtomicInteger totalSlot = new AtomicInteger(0);
         AtomicInteger availableSlot = new AtomicInteger(0);
+        AtomicInteger runningJob = new AtomicInteger(0);
 
         FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
 
@@ -131,6 +132,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 availableSlot.addAndGet(v.getAvailableSlot());
             }
 
+            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
+                runningJob.incrementAndGet();
+            }
+
             JobsOverview.Task task = v.getOverview();
             overview.setTotal(overview.getTotal() + task.getTotal());
             overview.setCreated(overview.getCreated() + task.getCreated());
@@ -150,6 +155,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         map.put("totalTM", totalTm.get());
         map.put("availableSlot", availableSlot.get());
         map.put("totalSlot", totalSlot.get());
+        map.put("runningJob", runningJob.get());
 
         return map;
     }

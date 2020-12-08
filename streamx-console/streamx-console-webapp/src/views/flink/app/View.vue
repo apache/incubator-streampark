@@ -29,7 +29,7 @@
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Running Jobs"
-              :value="metrics.task.running"
+              :value="metrics.runningJob"
               :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
