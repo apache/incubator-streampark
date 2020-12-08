@@ -1243,7 +1243,7 @@ export default {
             series.forEach((x) => { this.taskCountsSeries.push(x) })
             this.taskCountsOptions = {
               chart: {
-                width: 240,
+                width: 300,
                 type: 'donut'
               },
               plotOptions: {
