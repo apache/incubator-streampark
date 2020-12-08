@@ -1246,6 +1246,12 @@ export default {
                 width: 240,
                 type: 'donut'
               },
+              plotOptions: {
+                pie: {
+                  startAngle: -90,
+                  endAngle: 270
+                }
+              },
               dataLabels: {
                 enabled: false
               },
@@ -1254,10 +1260,10 @@ export default {
               },
               labels: labels,
               responsive: [{
-                breakpoint: 240,
+                breakpoint: 380,
                 options: {
                   chart: {
-                    width: 240
+                    width: 300
                   },
                   legend: {
                     position: 'bottom'
