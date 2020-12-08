@@ -1216,18 +1216,13 @@ export default {
             }
           }
 
-          let diffFlag = false
+          let diffFlag
           if (this.taskCountsMap == null) {
-            this.taskCountsMap = map
+            diffFlag = true
           } else if (this.taskCountsMap.size !== map.size) {
-            this.taskCountsMap = map
             diffFlag = true
           } else {
-            this.taskCountsMap.forEach((item, key, _map) => {
-              if (_map.get(key) !== map.get(key)) {
-                diffFlag = true
-              }
-            })
+            diffFlag = this.taskCountsMap.some((v, k, _map) => { return v !== map.get(k) })
           }
 
           if (diffFlag) {
@@ -1261,6 +1256,7 @@ export default {
                 }
               }]
             }
+            this.taskCountsMap = map
           }
         }
       })
