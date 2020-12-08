@@ -1273,7 +1273,7 @@ export default {
               legend: {
                 show: true,
                 labels: {
-                  useSeriesColors: true
+                  colors: colors
                 }
               },
               dataLabels: {
