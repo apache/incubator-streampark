@@ -7,7 +7,7 @@
             <a-statistic
               title="Available Task Slots"
               :value="metrics.availableSlot"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -30,7 +30,7 @@
             <a-statistic
               title="Running Jobs"
               :value="metrics.task.running"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -55,7 +55,7 @@
               :value="metrics.jmMemory"
               :precision="0"
               suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -75,7 +75,7 @@
               :value="metrics.tmMemory"
               :precision="0"
               suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 700, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
