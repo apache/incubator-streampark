@@ -789,6 +789,7 @@ export default {
   computed: {
     colorsMap () {
       const map = new Map()
+      map.set('TOTAL', '#102541')
       map.set('CREATED', '#2f54eb')
       map.set('DEPLOYING', '#1ABBDC')
       map.set('DEPLOYED', '#108ee9')
