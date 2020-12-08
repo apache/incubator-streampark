@@ -1241,7 +1241,7 @@ export default {
             series.forEach((x) => { this.taskCountsSeries.push(x) })
             this.taskCountsOptions = {
               chart: {
-                width: 380,
+                width: 300,
                 type: 'donut'
               },
               plotOptions: {
@@ -1255,7 +1255,7 @@ export default {
               },
               labels: labels,
               responsive: [{
-                breakpoint: 480,
+                breakpoint: 400,
                 options: {
                   chart: {
                     width: 200
