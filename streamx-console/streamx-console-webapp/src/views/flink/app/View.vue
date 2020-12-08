@@ -2,13 +2,13 @@
   <div>
     <a-row :gutter="24">
       <a-col class="gutter-row" :span="6">
-        <a-skeleton class="gutter-box" :loading="dashLoading" active/>
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
         <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Available Task Slots"
               :value="metrics.availableSlot"
-              :value-style="{color: '#79A75F', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -26,13 +26,13 @@
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <a-skeleton class="gutter-box" :loading="dashLoading" active/>
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
         <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
               title="Running Jobs"
               :value="metrics.runningJob"
-              :value-style="{color: '#79A75F', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -50,7 +50,7 @@
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <a-skeleton class="gutter-box" :loading="dashLoading" active/>
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
         <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
@@ -58,7 +58,7 @@
               :value="metrics.jmMemory"
               :precision="0"
               suffix="MB"
-              :value-style="{color: '#79A75F', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
@@ -71,7 +71,7 @@
         </div>
       </a-col>
       <a-col class="gutter-row" :span="6">
-        <a-skeleton class="gutter-box" :loading="dashLoading" active/>
+        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
         <div class="gutter-box" v-if="!dashLoading">
           <a-card :bordered="false" class="dash-statistic">
             <a-statistic
@@ -79,7 +79,7 @@
               :value="metrics.tmMemory"
               :precision="0"
               suffix="MB"
-              :value-style="{color: '#79A75F', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
             </a-statistic>
           </a-card>
           <a-divider style="margin-bottom: 10px"/>
