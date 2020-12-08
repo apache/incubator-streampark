@@ -1243,14 +1243,21 @@ export default {
             series.forEach((x) => { this.taskCountsSeries.push(x) })
             this.taskCountsOptions = {
               chart: {
+                width: 380,
                 type: 'donut'
+              },
+              plotOptions: {
+                pie: {
+                  startAngle: -90,
+                  endAngle: 270
+                }
               },
               dataLabels: {
                 enabled: false
               },
               labels: labels,
               responsive: [{
-                breakpoint: 400,
+                breakpoint: 480,
                 options: {
                   chart: {
                     width: 200
