@@ -1297,14 +1297,18 @@ export default {
   cursor: pointer;
 }
 
-.expanded-table >>> .ant-table-tbody > tr > td {
+.expanded-table >>> .ant-table-tbody>tr> td {
   border-bottom: none !important;
   padding: 11px 9px !important;
 }
 
-.expanded-table >>> .ant-table-tbody > tr {
+.expanded-table >>> .ant-table-tbody>tr {
   border-bottom: none !important;
   padding: 11px 9px !important;
+}
+
+.expanded-table >>> .ant-table-thead>tr>th {
+  font-size: 13px;
 }
 
 .expand-icon-open {
