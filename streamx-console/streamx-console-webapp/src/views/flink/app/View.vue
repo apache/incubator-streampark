@@ -130,7 +130,7 @@
               </span>
               <a-divider type="vertical"/>
               <span>
-                Total Task Slots
+                Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
               </span>
               <a-divider type="vertical"/>
