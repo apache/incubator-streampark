@@ -960,13 +960,8 @@ export default {
       this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
       const $this = this
       window.onresize = () => {
-        const dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
-        $this.handleChangeDash(dashBigScreen)
+        $this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
       }
-    },
-
-    handleChangeDash (flag) {
-      this.dashBigScreen = flag
     },
 
     handleDeploy (app) {
