@@ -1,96 +1,145 @@
 <template>
   <div>
-    <a-row :gutter="24">
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="Available Task Slots"
-              :value="metrics.availableSlot"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total Task Slots
-              <strong>{{ metrics.totalSlot }}</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Task Managers
-              <strong>{{ metrics.totalTM }}</strong>
-            </span>
+    <a-row :gutter="24" class="dashboard">
+      <template v-if="dashBigScreen">
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="Available Task Slots"
+                :value="metrics.availableSlot"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total Task Slots
+                <strong>{{ metrics.totalSlot }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Task Managers
+                <strong>{{ metrics.totalTM }}</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="Running Jobs"
-              :value="metrics.runningJob"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total Task
-              <strong>{{ metrics.task.total }}</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Running Task
-              <strong>{{ metrics.task.running }}</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="Running Jobs"
+                :value="metrics.runningJob"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total Task
+                <strong>{{ metrics.task.total }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Running Task
+                <strong>{{ metrics.task.running }}</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="JobManager Memory"
-              :value="metrics.jmMemory"
-              :precision="0"
-              suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total TaskManager Mem
-              <strong>{{ metrics.jmMemory }} MB</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="JobManager Memory"
+                :value="metrics.jmMemory"
+                :precision="0"
+                suffix="MB"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.jmMemory }} MB</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="TaskManager Memory"
-              :value="metrics.tmMemory"
-              :precision="0"
-              suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total TaskManager Mem
-              <strong>{{ metrics.tmMemory }} MB</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="TaskManager Memory"
+                :value="metrics.tmMemory"
+                :precision="0"
+                suffix="MB"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.tmMemory }} MB</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
+        </a-col>
+      </template>
+      <template v-else>
+        <a-col class="gutter-row" :span="12">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="Available Task Slots"
+                :value="metrics.availableSlot"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total Task Slots
+                <strong>{{ metrics.totalSlot }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Task Managers
+                <strong>{{ metrics.totalTM }}</strong>
+              </span>
+            </div>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="12">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="JobManager Memory"
+                :value="metrics.jmMemory"
+                :precision="0"
+                suffix="MB"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.jmMemory }} MB</strong>
+              </span>
+            </div>
+          </div>
+        </a-col>
+      </template>
     </a-row>
 
     <a-card :bordered="false" style="margin-top: 20px">
@@ -669,6 +718,7 @@ export default {
     return {
       loading: false,
       dashLoading: true,
+      dashBigScreen: true,
       dataSource: [],
       metrics: {
         availableSlot: 0,
@@ -856,6 +906,7 @@ export default {
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
+    this.handleResize()
   },
 
   beforeMount () {
@@ -867,6 +918,19 @@ export default {
 
   methods: {
     ...mapActions(['SetAppId']),
+
+    handleResize () {
+      this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
+      const $this = this
+      window.onresize = () => {
+        const dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
+        $this.handleChangeDash(dashBigScreen)
+      }
+    },
+
+    handleChangeDash (flag) {
+      this.dashBigScreen = flag
+    },
 
     handleDeploy (app) {
       if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
