@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-row :gutter="24" class="dashboard">
-      <template v-if="false">
+      <template v-if="dashBigScreen">
         <a-col class="gutter-row" :span="6">
           <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
           <div class="gutter-box" v-if="!dashLoading">
@@ -93,7 +93,7 @@
           </div>
         </a-col>
       </template>
-      <template>
+      <template v-else>
         <a-col class="gutter-row" :span="12">
           <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
           <div class="gutter-box" v-if="!dashLoading">
