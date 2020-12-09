@@ -1,7 +1,7 @@
 <template>
   <div>
     <a-row :gutter="24" class="dashboard">
-      <template v-if="dashBigScreen">
+      <template v-if="false">
         <a-col class="gutter-row" :span="6">
           <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
           <div class="gutter-box" v-if="!dashLoading">
@@ -93,19 +93,42 @@
           </div>
         </a-col>
       </template>
-      <template v-else>
+      <template>
         <a-col class="gutter-row" :span="12">
           <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
           <div class="gutter-box" v-if="!dashLoading">
-            <a-card :bordered="false" class="dash-statistic">
-              <a-statistic
-                title="Available Task Slots"
-                :value="metrics.availableSlot"
-                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-              </a-statistic>
-            </a-card>
+            <a-row :gutter="24">
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic">
+                  <a-statistic
+                    title="Available Task Slots"
+                    :value="metrics.availableSlot"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic stat-right">
+                  <a-statistic
+                    title="Running Jobs"
+                    :value="metrics.runningJob"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+            </a-row>
             <a-divider style="margin-bottom: 10px"/>
             <div>
+              <span>
+                Total Task
+                <strong>{{ metrics.task.total }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Running Task
+                <strong>{{ metrics.task.running }}</strong>
+              </span>
+              <a-divider type="vertical"/>
               <span>
                 Total Task Slots
                 <strong>{{ metrics.totalSlot }}</strong>
@@ -121,29 +144,47 @@
         <a-col class="gutter-row" :span="12">
           <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
           <div class="gutter-box" v-if="!dashLoading">
-            <a-card :bordered="false" class="dash-statistic">
-              <a-statistic
-                title="JobManager Memory"
-                :value="metrics.jmMemory"
-                :precision="0"
-                suffix="MB"
-                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-              </a-statistic>
-            </a-card>
+            <a-row :gutter="24">
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic">
+                  <a-statistic
+                    title="JobManager Memory"
+                    :value="metrics.jmMemory"
+                    :precision="0"
+                    suffix="MB"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic stat-right">
+                  <a-statistic
+                    title="TaskManager Memory"
+                    :value="metrics.tmMemory"
+                    :precision="0"
+                    suffix="MB"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+            </a-row>
             <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
-                Total TaskManager Mem
+                Total JobManager Mem
                 <strong>{{ metrics.jmMemory }} MB</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.tmMemory }} MB</strong>
               </span>
             </div>
           </div>
         </a-col>
       </template>
     </a-row>
-
     <a-card :bordered="false" style="margin-top: 20px">
-
       <!-- 表格区域 -->
       <a-table
         ref="TableInfo"
@@ -462,7 +503,6 @@
         </template>
 
       </a-table>
-
       <a-modal v-model="deployVisible" on-ok="handleDeployOk">
         <template slot="title">
           <a-icon slot="icon" type="upload" style="color: green"/>
@@ -532,7 +572,6 @@
           </a-form-item>
         </a-form>
       </a-modal>
-
       <a-modal v-model="startVisible" on-ok="handleStartOk">
         <template slot="title">
           <a-icon slot="icon" type="play-circle" style="color: green"/>
@@ -651,7 +690,6 @@
           </a-button>
         </template>
       </a-modal>
-
       <a-modal v-model="mappingVisible" on-ok="handleMappingOk">
         <template slot="title">
           <a-icon slot="icon" type="deployment-unit" style="color: green"/>
@@ -695,7 +733,6 @@
           </a-button>
         </template>
       </a-modal>
-
     </a-card>
   </div>
 </template>
@@ -1342,11 +1379,19 @@ export default {
 }
 
 .gutter-box >>> .ant-divider-horizontal {
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .dash-statistic >>> .ant-card-body {
-  padding: 5px !important;
+  padding: 8px !important;
+}
+
+.stat-right {
+  float: right;
+}
+
+.stat-right >>> .ant-card-body {
+  float: right;
 }
 
 .operation {
