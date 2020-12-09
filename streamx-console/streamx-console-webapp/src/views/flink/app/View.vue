@@ -65,7 +65,7 @@
             <a-divider style="margin-bottom: 10px"/>
             <div>
               <span>
-                Total TaskManager Mem
+                Total JobManager Mem
                 <strong>{{ metrics.jmMemory }} MB</strong>
               </span>
             </div>
