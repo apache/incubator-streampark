@@ -1,100 +1,190 @@
 <template>
   <div>
-    <a-row :gutter="24">
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="Available Task Slots"
-              :value="metrics.availableSlot"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total Task Slots
-              <strong>{{ metrics.totalSlot }}</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Task Managers
-              <strong>{{ metrics.totalTM }}</strong>
-            </span>
+    <a-row :gutter="24" class="dashboard">
+      <template v-if="dashBigScreen">
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="Available Task Slots"
+                :value="metrics.availableSlot"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Task Slots
+                <strong>{{ metrics.totalSlot }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Task Managers
+                <strong>{{ metrics.totalTM }}</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="Running Jobs"
-              :value="metrics.runningJob"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total Task
-              <strong>{{ metrics.task.total }}</strong>
-            </span>
-            <a-divider type="vertical"/>
-            <span>
-              Running Task
-              <strong>{{ metrics.task.running }}</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="Running Jobs"
+                :value="metrics.runningJob"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total Task
+                <strong>{{ metrics.task.total }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Running Task
+                <strong>{{ metrics.task.running }}</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="JobManager Memory"
-              :value="metrics.jmMemory"
-              :precision="0"
-              suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total TaskManager Mem
-              <strong>{{ metrics.jmMemory }} MB</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="JobManager Memory"
+                :value="metrics.jmMemory"
+                :precision="0"
+                suffix="MB"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total JobManager Mem
+                <strong>{{ metrics.jmMemory }} MB</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
-      <a-col class="gutter-row" :span="6">
-        <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
-        <div class="gutter-box" v-if="!dashLoading">
-          <a-card :bordered="false" class="dash-statistic">
-            <a-statistic
-              title="TaskManager Memory"
-              :value="metrics.tmMemory"
-              :precision="0"
-              suffix="MB"
-              :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
-            </a-statistic>
-          </a-card>
-          <a-divider style="margin-bottom: 10px"/>
-          <div>
-            <span>
-              Total TaskManager Mem
-              <strong>{{ metrics.tmMemory }} MB</strong>
-            </span>
+        </a-col>
+        <a-col class="gutter-row" :span="6">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-card :bordered="false" class="dash-statistic">
+              <a-statistic
+                title="TaskManager Memory"
+                :value="metrics.tmMemory"
+                :precision="0"
+                suffix="MB"
+                :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+              </a-statistic>
+            </a-card>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.tmMemory }} MB</strong>
+              </span>
+            </div>
           </div>
-        </div>
-      </a-col>
+        </a-col>
+      </template>
+      <template v-else>
+        <a-col class="gutter-row" :span="12">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-row :gutter="24">
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic">
+                  <a-statistic
+                    title="Available Task Slots"
+                    :value="metrics.availableSlot"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic stat-right">
+                  <a-statistic
+                    title="Running Jobs"
+                    :value="metrics.runningJob"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+            </a-row>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total Task
+                <strong>{{ metrics.task.total }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Running Task
+                <strong>{{ metrics.task.running }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Task Slots
+                <strong>{{ metrics.totalSlot }}</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Task Managers
+                <strong>{{ metrics.totalTM }}</strong>
+              </span>
+            </div>
+          </div>
+        </a-col>
+        <a-col class="gutter-row" :span="12">
+          <a-skeleton v-if="dashLoading" class="gutter-box" :loading="dashLoading" active/>
+          <div class="gutter-box" v-if="!dashLoading">
+            <a-row :gutter="24">
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic">
+                  <a-statistic
+                    title="JobManager Memory"
+                    :value="metrics.jmMemory"
+                    :precision="0"
+                    suffix="MB"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+              <a-col class="gutter-row" :span="12">
+                <a-card :bordered="false" class="dash-statistic stat-right">
+                  <a-statistic
+                    title="TaskManager Memory"
+                    :value="metrics.tmMemory"
+                    :precision="0"
+                    suffix="MB"
+                    :value-style="{color: '#3f8600', fontSize: '45px', fontWeight: 500, textShadow: '1px 1px 0 rgba(0,0,0,0.2)'}">
+                  </a-statistic>
+                </a-card>
+              </a-col>
+            </a-row>
+            <a-divider style="margin-bottom: 10px"/>
+            <div>
+              <span>
+                Total JobManager Mem
+                <strong>{{ metrics.jmMemory }} MB</strong>
+              </span>
+              <a-divider type="vertical"/>
+              <span>
+                Total TaskManager Mem
+                <strong>{{ metrics.tmMemory }} MB</strong>
+              </span>
+            </div>
+          </div>
+        </a-col>
+      </template>
     </a-row>
-
     <a-card :bordered="false" style="margin-top: 20px">
-
       <!-- 表格区域 -->
       <a-table
         ref="TableInfo"
@@ -413,7 +503,6 @@
         </template>
 
       </a-table>
-
       <a-modal v-model="deployVisible" on-ok="handleDeployOk">
         <template slot="title">
           <a-icon slot="icon" type="upload" style="color: green"/>
@@ -483,7 +572,6 @@
           </a-form-item>
         </a-form>
       </a-modal>
-
       <a-modal v-model="startVisible" on-ok="handleStartOk">
         <template slot="title">
           <a-icon slot="icon" type="play-circle" style="color: green"/>
@@ -491,6 +579,20 @@
         </template>
 
         <a-form @submit="handleStartOk" :form="formStartCheckPoint">
+
+          <a-form-item
+            label="flame  Graph"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="flameGraph"
+              v-decorator="['flameGraph']"/>
+            <span class="conf-switch" style="color:darkgrey"> flame Graph support</span>
+          </a-form-item>
           <a-form-item
             label="from savepoint"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -602,7 +704,6 @@
           </a-button>
         </template>
       </a-modal>
-
       <a-modal v-model="mappingVisible" on-ok="handleMappingOk">
         <template slot="title">
           <a-icon slot="icon" type="deployment-unit" style="color: green"/>
@@ -646,7 +747,6 @@
           </a-button>
         </template>
       </a-modal>
-
     </a-card>
   </div>
 </template>
@@ -669,6 +769,7 @@ export default {
     return {
       loading: false,
       dashLoading: true,
+      dashBigScreen: true,
       dataSource: [],
       metrics: {
         availableSlot: 0,
@@ -697,6 +798,7 @@ export default {
       formMapping: null,
       drain: false,
       savePoint: true,
+      flameGraph: true,
       restart: false,
       application: null,
       lastestSavePoint: null,
@@ -856,6 +958,7 @@ export default {
     this.$once('hook:beforeDestroy', () => {
       clearInterval(timer)
     })
+    this.handleResize()
   },
 
   beforeMount () {
@@ -863,10 +966,18 @@ export default {
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
     this.formMapping = this.$form.createForm(this)
+    this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
   },
 
   methods: {
     ...mapActions(['SetAppId']),
+
+    handleResize () {
+      const $this = this
+      window.onresize = () => {
+        $this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
+      }
+    },
 
     handleDeploy (app) {
       if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
@@ -980,6 +1091,7 @@ export default {
         this.formStartCheckPoint.resetFields()
         this.application = null
         this.savePoint = true
+        this.flameGraph = true
       }, 1000)
     },
 
@@ -992,6 +1104,7 @@ export default {
           )
           const id = this.application.id
           const savePointed = this.savePoint
+          const flameGraph = this.flameGraph
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           console.log('update starting before:' + this.optionApps.starting.size)
@@ -1002,6 +1115,7 @@ export default {
             id: id,
             savePointed: savePointed,
             savePoint: savePoint,
+            flameGraph: flameGraph,
             allowNonRestored: allowNonRestoredState
           }).then((resp) => {
             if (!resp.data) {
@@ -1278,11 +1392,19 @@ export default {
 }
 
 .gutter-box >>> .ant-divider-horizontal {
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .dash-statistic >>> .ant-card-body {
-  padding: 5px !important;
+  padding: 8px !important;
+}
+
+.stat-right {
+  float: right;
+}
+
+.stat-right >>> .ant-card-body {
+  float: right;
 }
 
 .operation {

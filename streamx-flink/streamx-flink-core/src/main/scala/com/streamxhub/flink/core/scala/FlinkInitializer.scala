@@ -409,7 +409,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
           val fs = new FsStateBackend(cpDir, async)
           streamEnv.setStateBackend(fs)
         case XStateBackend.rocksdb =>
-          logInfo(s"[StreamX] stat.backend Type: rocksdb...")
+          logInfo("[StreamX] stat.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
           val rs = new RocksDBStateBackend(cpDir, incremental)

@@ -137,16 +137,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             JobsOverview.Task task = v.getOverview();
-            overview.setTotal(overview.getTotal() + task.getTotal());
-            overview.setCreated(overview.getCreated() + task.getCreated());
-            overview.setScheduled(overview.getScheduled() + task.getScheduled());
-            overview.setDeploying(overview.getDeploying() + task.getDeploying());
-            overview.setRunning(overview.getRunning() + task.getRunning());
-            overview.setFinished(overview.getFinished() + task.getFinished());
-            overview.setCanceling(overview.getCanceling() + task.getCanceling());
-            overview.setCanceled(overview.getCanceled() + task.getCanceled());
-            overview.setFailed(overview.getFailed() + task.getFailed());
-            overview.setReconciling(overview.getReconciling() + task.getReconciling());
+            if (task != null) {
+                overview.setTotal(overview.getTotal() + task.getTotal());
+                overview.setCreated(overview.getCreated() + task.getCreated());
+                overview.setScheduled(overview.getScheduled() + task.getScheduled());
+                overview.setDeploying(overview.getDeploying() + task.getDeploying());
+                overview.setRunning(overview.getRunning() + task.getRunning());
+                overview.setFinished(overview.getFinished() + task.getFinished());
+                overview.setCanceling(overview.getCanceling() + task.getCanceling());
+                overview.setCanceled(overview.getCanceled() + task.getCanceled());
+                overview.setFailed(overview.getFailed() + task.getFailed());
+                overview.setReconciling(overview.getReconciling() + task.getReconciling());
+            }
         });
         Map map = new HashMap<String, Serializable>();
         map.put("task", overview);
@@ -486,6 +488,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 appConf,
                 application.getApplicationType().getName(),
                 savePointDir,
+                appParam.getFlameGraph(),
                 overrideOption,
                 dynamicOption,
                 application.getArgs()
