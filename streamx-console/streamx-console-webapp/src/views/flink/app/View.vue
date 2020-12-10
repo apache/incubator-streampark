@@ -951,8 +951,7 @@ export default {
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
     this.formMapping = this.$form.createForm(this)
-    const width = document.documentElement.offsetWidth || document.body.offsetWidth
-    this.dashBigScreen = width >= 1500
+    this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
   },
 
   methods: {
@@ -961,7 +960,7 @@ export default {
     handleResize () {
       const $this = this
       window.onresize = () => {
-        $this.dashBigScreen = document.documentElement.offsetWidth || document.body.offsetWidth >= 1500
+        $this.dashBigScreen = (document.documentElement.offsetWidth || document.body.offsetWidth) >= 1500
       }
     },
 
