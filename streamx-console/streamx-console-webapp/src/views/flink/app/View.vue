@@ -961,7 +961,7 @@ export default {
     handleResize () {
       const $this = this
       window.onresize = () => {
-        $this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
+        $this.dashBigScreen = document.documentElement.offsetWidth || document.body.offsetWidth >= 1500
       }
     },
 
