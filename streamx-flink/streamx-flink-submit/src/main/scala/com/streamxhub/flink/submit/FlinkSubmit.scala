@@ -294,6 +294,7 @@ object FlinkSubmit extends Logger {
 
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+
         //-jvm profile support,what fuck......
         array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler-1.0.0.jar=sampleInterval=50"
 
