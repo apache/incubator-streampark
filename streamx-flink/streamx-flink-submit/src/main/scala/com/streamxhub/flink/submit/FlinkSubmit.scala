@@ -249,9 +249,9 @@ object FlinkSubmit extends Logger {
         .set(YarnConfigOptions.APPLICATION_NAME, appName)
         //yarn application Type
         .set(YarnConfigOptions.APPLICATION_TYPE, submitInfo.applicationType)
-        //设置启动主类
+        //main class
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
-        //设置启动参数
+        //arguments...
         .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
 
       loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
@@ -313,11 +313,8 @@ object FlinkSubmit extends Logger {
 
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-        //-jvm profile support
-        array +=
-          s"""
-             |-Denv.java.opts.jobmanager=-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50
-             |""".stripMargin.trim
+        //-jvm profile support,what fuck......
+        //array +="-Denv.java.opts.jobmanager=-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50"
 
         array.toArray
 
