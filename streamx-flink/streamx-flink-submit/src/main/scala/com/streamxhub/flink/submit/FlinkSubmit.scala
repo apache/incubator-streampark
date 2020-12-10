@@ -62,7 +62,9 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
-  private[this] val configurationMap = new mutable.HashMap[String,Configuration]()
+  private[this] val extPlugins = Seq("jvm-profiler-1.0.0.jar")
+
+  private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
     val flinkConfiguration = new Configuration
@@ -94,7 +96,7 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  def getSubmitedConfiguration(appId:ApplicationId):Configuration =  configurationMap.remove(appId.toString).getOrElse(null)
+  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).getOrElse(null)
 
   private[this] def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
@@ -127,23 +129,6 @@ object FlinkSubmit extends Logger {
     }
   }
 
-  /**
-   * 加载streamx的plugins到flink下的plugins下.
-   *
-   * @param pluginPath
-   */
-  private[this] def loadPlugins(pluginPath: String) = {
-    logInfo("[StreamX] loadPlugins starting...")
-    val appHome = System.getProperty("app.home")
-    val streamXPlugins = new File(appHome, "plugins")
-    streamXPlugins.listFiles().foreach(x => {
-      if (!HdfsUtils.exists(s"$pluginPath/${x.getName}")) {
-        logInfo(s"[StreamX] load plugin:${x.getName} to $pluginPath")
-        HdfsUtils.upload(x.getAbsolutePath, pluginPath)
-      }
-    })
-  }
-
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
@@ -152,6 +137,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
+         |      "flameGraph": ${submitInfo.flameGraph}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
@@ -206,8 +192,8 @@ object FlinkSubmit extends Logger {
     //存放flink集群相关的jar包目录
     val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
-    //加载streamx下的plugins到$FLINK_HOME/plugins下
-    loadPlugins(flinkHdfsPlugins.toString)
+    //extension...
+    val hdfsExtension = new Path(s"${HdfsUtils.getDefaultFS}$APP_EXTENSION")
 
     val customCommandLines = {
 
@@ -238,7 +224,7 @@ object FlinkSubmit extends Logger {
         //从flink-conf.yaml中加载默认配置文件...
         .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
-        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, hdfsExtension.toString))
         //设置flinkDistJar
         .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
         //设置用户的jar
@@ -249,9 +235,9 @@ object FlinkSubmit extends Logger {
         .set(YarnConfigOptions.APPLICATION_NAME, appName)
         //yarn application Type
         .set(YarnConfigOptions.APPLICATION_TYPE, submitInfo.applicationType)
-        //设置启动主类
+        //main class
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
-        //设置启动参数
+        //arguments...
         .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
 
       loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
@@ -315,7 +301,9 @@ object FlinkSubmit extends Logger {
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
         //-jvm profile support
-        //array += s"-Denv.java.opts.taskmanager=-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50"
+        if (submitInfo.flameGraph) {
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        }
 
         array.toArray
 
@@ -358,7 +346,7 @@ object FlinkSubmit extends Logger {
       println()
       println("------------------------------------")
     } finally if (clusterDescriptor != null) clusterDescriptor.close()
-    configurationMap.put(applicationId.toString,effectiveConfiguration)
+    configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
 
@@ -464,6 +452,7 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
+                        flameGraph: JBool,
                         overrideOption: java.util.Map[String, Any],
                         dynamicOption: Array[String],
                         args: String)
