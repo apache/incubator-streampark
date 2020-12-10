@@ -1091,7 +1091,7 @@ export default {
         this.formStartCheckPoint.resetFields()
         this.application = null
         this.savePoint = true
-        this.flameGraph = false
+        this.flameGraph = true
       }, 1000)
     },
 
