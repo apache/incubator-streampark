@@ -62,6 +62,8 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
+  private[this] val extPlugins = Seq("jvm-profiler-1.0.0.jar")
+
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
@@ -189,6 +191,8 @@ object FlinkSubmit extends Logger {
     //存放flink集群相关的jar包目录
     val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
+    //extension...
+    val hdfsExtension = new Path(s"${HdfsUtils.getDefaultFS}$APP_EXTENSION")
 
     val customCommandLines = {
 
@@ -219,7 +223,7 @@ object FlinkSubmit extends Logger {
         //从flink-conf.yaml中加载默认配置文件...
         .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
-        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, hdfsExtension.toString))
         //设置flinkDistJar
         .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
         //设置用户的jar
@@ -295,8 +299,8 @@ object FlinkSubmit extends Logger {
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
-        //-jvm profile support,what fuck......
-        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        //-jvm profile support
+        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
 
         array.toArray
 
