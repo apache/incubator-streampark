@@ -253,6 +253,8 @@ object FlinkSubmit extends Logger {
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
         //设置启动参数
         .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
+        //classpath
+        .set(PipelineOptions.CLASSPATHS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
 
       loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
     }
