@@ -315,8 +315,8 @@ object FlinkSubmit extends Logger {
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
         //-jvm profile support
         array +=
-          s"""
-             |-Denv.java.opts.taskmanager=-javaagent:${Path.CUR_DIR}/jvm-profiler-1.0.0.jar=sampleInterval=50
+          """
+             |-Denv.java.opts.taskmanager=-javaagent:$CLASSPATH/jvm-profiler-1.0.0.jar=sampleInterval=50
              |""".stripMargin.trim
 
         array.toArray
