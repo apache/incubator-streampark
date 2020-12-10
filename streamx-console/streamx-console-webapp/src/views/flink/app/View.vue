@@ -581,7 +581,7 @@
         <a-form @submit="handleStartOk" :form="formStartCheckPoint">
 
           <a-form-item
-            label="flame Graph"
+            label="flame  Graph"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
@@ -591,7 +591,7 @@
               un-checked-children="false"
               v-model="flameGraph"
               v-decorator="['flameGraph']"/>
-            <span class="conf-switch" style="color:darkgrey">flame Graph support</span>
+            <span class="conf-switch" style="color:darkgrey"> flame Graph support</span>
           </a-form-item>
           <a-form-item
             label="from savepoint"
