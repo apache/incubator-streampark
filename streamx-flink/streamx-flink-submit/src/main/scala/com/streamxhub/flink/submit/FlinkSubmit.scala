@@ -452,7 +452,7 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
-                        flameGraph: java.lang.Boolean,
+                        flameGraph: JBool,
                         overrideOption: java.util.Map[String, Any],
                         dynamicOption: Array[String],
                         args: String)
