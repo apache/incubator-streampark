@@ -316,7 +316,7 @@ object FlinkSubmit extends Logger {
         //-jvm profile support
         array +=
           s"""
-             |-Denv.java.opts.taskmanager="-javaagent:${Path.CUR_DIR}/jvm-profiler-1.0.0.jar=sampleInterval=50"
+             |-Denv.java.opts.taskmanager=-javaagent:${Path.CUR_DIR}/jvm-profiler-1.0.0.jar=sampleInterval=50
              |""".stripMargin.trim
 
         array.toArray
