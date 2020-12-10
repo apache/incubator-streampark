@@ -253,8 +253,6 @@ object FlinkSubmit extends Logger {
         .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
         //设置启动参数
         .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
-        //classpath
-        .set(PipelineOptions.CLASSPATHS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
 
       loadCustomCommandLines(runConfiguration, flinkLocalConfDir)
     }
@@ -318,7 +316,7 @@ object FlinkSubmit extends Logger {
         //-jvm profile support
         array +=
           """
-             |-Denv.java.opts.taskmanager="-javaagent:$APP_CLASSPATH/jvm-profiler-1.0.0.jar=sampleInterval=50"
+             |-Denv.java.opts.taskmanager=-javaagent:$APP_CLASSPATH/jvm-profiler-1.0.0.jar=sampleInterval=50
              |""".stripMargin.trim
 
         array.toArray
