@@ -62,7 +62,7 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
-  private[this] val configurationMap = new mutable.HashMap[String,Configuration]()
+  private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
     val flinkConfiguration = new Configuration
@@ -94,7 +94,7 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  def getSubmitedConfiguration(appId:ApplicationId):Configuration =  configurationMap.remove(appId.toString).getOrElse(null)
+  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).getOrElse(null)
 
   private[this] def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
@@ -314,7 +314,8 @@ object FlinkSubmit extends Logger {
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
         //-jvm profile support
-        //array += "-Denv.java.opts.jobmanager=\"-javaagent:jvm-profiler-1.0.0.jar=sampleInterval=50\""
+        array += s"-Denv.java.opts.taskmanager=\"-javaagent:${Path.CUR_DIR}/jvm-profiler-1.0.0.jar=sampleInterval=50\""
+
         array.toArray
 
       }
@@ -356,7 +357,7 @@ object FlinkSubmit extends Logger {
       println()
       println("------------------------------------")
     } finally if (clusterDescriptor != null) clusterDescriptor.close()
-    configurationMap.put(applicationId.toString,effectiveConfiguration)
+    configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
 
