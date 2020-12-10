@@ -951,13 +951,14 @@ export default {
     this.formStopSavePoint = this.$form.createForm(this)
     this.formStartCheckPoint = this.$form.createForm(this)
     this.formMapping = this.$form.createForm(this)
+    const width = document.documentElement.offsetWidth || document.body.offsetWidth
+    this.dashBigScreen = width >= 1500
   },
 
   methods: {
     ...mapActions(['SetAppId']),
 
     handleResize () {
-      this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
       const $this = this
       window.onresize = () => {
         $this.dashBigScreen = document.querySelector('.dashboard').clientWidth >= 1260
