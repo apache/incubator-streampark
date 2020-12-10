@@ -488,6 +488,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 appConf,
                 application.getApplicationType().getName(),
                 savePointDir,
+                application.getFlameGraph(),
                 overrideOption,
                 dynamicOption,
                 application.getArgs()

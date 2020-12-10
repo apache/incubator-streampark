@@ -137,6 +137,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
+         |      "flameGraph": ${submitInfo.flameGraph}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
@@ -300,7 +301,9 @@ object FlinkSubmit extends Logger {
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
         //-jvm profile support
-        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        if (submitInfo.flameGraph) {
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        }
 
         array.toArray
 
@@ -449,6 +452,7 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
+                        flameGraph: java.lang.Boolean,
                         overrideOption: java.util.Map[String, Any],
                         dynamicOption: Array[String],
                         args: String)

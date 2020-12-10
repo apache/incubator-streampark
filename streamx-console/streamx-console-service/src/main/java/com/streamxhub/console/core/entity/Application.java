@@ -121,6 +121,7 @@ public class Application implements Serializable {
     private transient JobsOverview.Task overview;
     private transient Boolean backUp;
     private transient Boolean restart;
+    private transient Boolean flameGraph;
     private transient String userName;
     private transient String config;
     private transient Long configId;

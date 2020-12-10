@@ -579,6 +579,20 @@
         </template>
 
         <a-form @submit="handleStartOk" :form="formStartCheckPoint">
+
+          <a-form-item
+            label="flame Graph"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="flameGraph"
+              v-decorator="['flameGraph']"/>
+            <span class="conf-switch" style="color:darkgrey">flame Graph support</span>
+          </a-form-item>
           <a-form-item
             label="from savepoint"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -784,6 +798,7 @@ export default {
       formMapping: null,
       drain: false,
       savePoint: true,
+      flameGraph: true,
       restart: false,
       application: null,
       lastestSavePoint: null,
@@ -1076,6 +1091,7 @@ export default {
         this.formStartCheckPoint.resetFields()
         this.application = null
         this.savePoint = true
+        this.flameGraph = false
       }, 1000)
     },
 
@@ -1088,6 +1104,7 @@ export default {
           )
           const id = this.application.id
           const savePointed = this.savePoint
+          const flameGraph = this.flameGraph
           const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           console.log('update starting before:' + this.optionApps.starting.size)
@@ -1098,6 +1115,7 @@ export default {
             id: id,
             savePointed: savePointed,
             savePoint: savePoint,
+            flameGraph: flameGraph,
             allowNonRestored: allowNonRestoredState
           }).then((resp) => {
             if (!resp.data) {
