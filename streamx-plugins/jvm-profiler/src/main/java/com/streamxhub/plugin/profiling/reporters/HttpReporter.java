@@ -64,6 +64,7 @@ public class HttpReporter implements Reporter {
             metrics.put("token", token);
             metrics.put("type", type);
             String json = JsonUtils.serialize(metrics);
+            System.out.println(json);
             Map<String, Object> params = new HashMap<>(1);
             params.put("text", IOUtils.zipString(json));
             try {
