@@ -50,8 +50,8 @@ public class AgentITCase {
                 javaBin,
                 "-cp",
                 agentJar,
-                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporters.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-                "com.streamxhub.plugin.profiling.examples.HelloWorldApplication",
+                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+                "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
                 "2000"
         );
 
@@ -113,8 +113,8 @@ public class AgentITCase {
                 javaBin,
                 "-cp",
                 agentJar,
-                "-javaagent:" + agentJar + "=noop=true,configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporters.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-                "com.streamxhub.plugin.profiling.examples.HelloWorldApplication",
+                "-javaagent:" + agentJar + "=noop=true,configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+                "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
                 "2000"
         );
 
@@ -142,8 +142,8 @@ public class AgentITCase {
                 javaBin,
                 "-cp",
                 agentJar,
-                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.NoopConfigProvider,reporter=com.streamxhub.plugin.profiling.reporters.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-                "com.streamxhub.plugin.profiling.examples.HelloWorldApplication",
+                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.NoopConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+                "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
                 "2000"
         );
 
@@ -171,8 +171,8 @@ public class AgentITCase {
                 javaBin,
                 "-cp",
                 agentJar,
-                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporters.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.0",
-                "com.streamxhub.plugin.profiling.examples.HelloWorldApplication",
+                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.0",
+                "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
                 "2000"
         );
 
@@ -227,8 +227,8 @@ public class AgentITCase {
                 javaBin,
                 "-cp",
                 agentJar,
-                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporters.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,appIdVariable=APP_ID",
-                "com.streamxhub.plugin.profiling.examples.HelloWorldApplication",
+                "-javaagent:" + agentJar + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir=" + outputDir + ",tag=mytag,appIdVariable=APP_ID",
+                "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
                 "2000"
         );
 

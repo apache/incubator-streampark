@@ -41,7 +41,7 @@ Following command will start the example application with the profiler agent att
 console output:
 
 ```
-java -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter,tag=mytag,metricInterval=5000,durationProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.1,sampleInterval=100 -cp target/jvm-profiler-1.0.0.jar com.streamxhub.plugin.profiling.examples.HelloWorldApplication
+java -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,tag=mytag,metricInterval=5000,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,sampleInterval=100 -cp target/jvm-profiler-1.0.0.jar com.streamxhub.plugin.profiling.example.HelloWorldApplication
 ```
 
 ## Example to Run with Executable Jar
@@ -49,7 +49,7 @@ java -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.pro
 Use following command to run jvm profiler with executable jar application.
 
 ```
-java -javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooAppication.barMethod,sampleInterval=5000 -jar foo-application.jar
+java -javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooAppication.barMethod,sampleInterval=5000 -jar foo-application.jar
 ```
 
 ## Example to Run with Tomcat
@@ -57,7 +57,7 @@ java -javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.str
 Set the jvm profiler in CATALINA_OPTS before starting the tomcat server. Check logs/catalina.out file for metrics.
 
 ```
-export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooController.barMethod,sampleInterval=5000"
+export CATALINA_OPTS="$CATALINA_OPTS -javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooController.barMethod,sampleInterval=5000"
 ```
 
 ## Example to Run with Spring Boot Maven Plugin
@@ -66,7 +66,7 @@ Use following command to use jvm profiler with Spring Boot 2.x. For Spring Boot 
 of `-Dspring-boot.run.jvmArguments` in following command.
 
 ```
-mvn spring-boot:run -Dspring-boot.run.jvmArguments="-javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooController.barMethod,sampleInterval=5000"
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="-javaagent:/opt/jvm-profiler/target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,metricInterval=5000,durationProfiling=foo.bar.FooController.barMethod,sampleInterval=5000"
 ```
 
 ## Send Metrics to Kafka
@@ -74,7 +74,7 @@ mvn spring-boot:run -Dspring-boot.run.jvmArguments="-javaagent:/opt/jvm-profiler
 Uber JVM Profiler supports sending metrics to Kafka. For example,
 
 ```
-java -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporters.KafkaOutputReporter,metricInterval=5000,brokerList=localhost:9092,topicPrefix=profiler_ -cp target/jvm-profiler-1.0.0.jar com.streamxhub.plugin.profiling.examples.HelloWorldApplication
+java -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.KafkaOutputReporter,metricInterval=5000,brokerList=localhost:9092,topicPrefix=profiler_ -cp target/jvm-profiler-1.0.0.jar com.streamxhub.plugin.profiling.example.HelloWorldApplication
 ```
 
 It will send metrics to Kafka topic profiler_CpuAndMemory. See bottom of this document for an example of the metrics.
@@ -108,8 +108,8 @@ Uber JVM Profiler supports following features:
 The java agent supports following parameters, which could be used in Java command line like "-javaagent:
 agent_jar_file.jar=param1=value1,param2=value2":
 
-- reporter: class name for the reporter, e.g. com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter, or
-  com.streamxhub.plugin.profiling.reporters.KafkaOutputReporter, which are already implemented in the code. You could
+- reporter: class name for the reporter, e.g. com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter, or
+  com.streamxhub.plugin.profiling.reporter.KafkaOutputReporter, which are already implemented in the code. You could
   implement your own reporter and set the name here.
 
 - configProvider: class name for the config provider, e.g. com.streamxhub.plugin.profiling.YamlConfigProvider, which are
@@ -123,11 +123,11 @@ agent_jar_file.jar=param1=value1,param2=value2":
 - metricInterval: how frequent to collect and report the metrics, in milliseconds.
 
 - durationProfiling: configure to profile specific class and method, e.g.
-  com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod. It also support wildcard (\*) for
-  method name, e.g. com.streamxhub.plugin.profiling.examples.HelloWorldApplication.*.
+  com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod. It also support wildcard (\*) for
+  method name, e.g. com.streamxhub.plugin.profiling.example.HelloWorldApplication.*.
 
 - argumentProfiling: configure to profile specific method argument, e.g.
-  com.streamxhub.plugin.profiling.examples.HelloWorldApplication.publicSleepMethod.1 (".1" means getting value for the
+  com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1 (".1" means getting value for the
   first argument and sending out in the reporter).
 
 - sampleInterval: frequency (milliseconds) to do stacktrace sampling, if this value is not set or zero, the profiler
@@ -135,12 +135,12 @@ agent_jar_file.jar=param1=value1,param2=value2":
 
 - ioProfiling: whether to profile IO metrics, could be true or false.
 
-- brokerList: broker list if using com.streamxhub.plugin.profiling.reporters.KafkaOutputReporter.
+- brokerList: broker list if using com.streamxhub.plugin.profiling.reporter.KafkaOutputReporter.
 
-- topicPrefix: topic prefix if using com.streamxhub.plugin.profiling.reporters.KafkaOutputReporter. KafkaOutputReporter
+- topicPrefix: topic prefix if using com.streamxhub.plugin.profiling.reporter.KafkaOutputReporter. KafkaOutputReporter
   will send metrics to multiple topics with this value as the prefix for topic names.
 
-- outputDir: output directory if using com.streamxhub.plugin.profiling.reporters.FileOutputReporter. FileOutputReporter
+- outputDir: output directory if using com.streamxhub.plugin.profiling.reporter.FileOutputReporter. FileOutputReporter
   will write metrics into this directory.
 
 ## YAML Config File
@@ -149,7 +149,7 @@ The parameters could be provided as arguments in java command, or in a YAML conf
 configProvider=com.streamxhub.plugin.profiling.YamlConfigProvider. Following is an example of the YAML config file:
 
 ```
-reporter: com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter
+reporter: com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter
 metricInterval: 5000
 ```
 
