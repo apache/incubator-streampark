@@ -21,18 +21,18 @@
 
 package com.streamxhub.plugin.profiling;
 
-import com.streamxhub.plugin.profiling.profilers.CpuAndMemoryProfiler;
-import com.streamxhub.plugin.profiling.profilers.IOProfiler;
-import com.streamxhub.plugin.profiling.profilers.MethodArgumentCollector;
-import com.streamxhub.plugin.profiling.profilers.MethodArgumentProfiler;
-import com.streamxhub.plugin.profiling.profilers.MethodDurationCollector;
-import com.streamxhub.plugin.profiling.profilers.MethodDurationProfiler;
-import com.streamxhub.plugin.profiling.profilers.ProcessInfoProfiler;
-import com.streamxhub.plugin.profiling.profilers.ThreadInfoProfiler;
-import com.streamxhub.plugin.profiling.profilers.StacktraceCollectorProfiler;
-import com.streamxhub.plugin.profiling.profilers.StacktraceReporterProfiler;
-import com.streamxhub.plugin.profiling.transformers.JavaAgentFileTransformer;
-import com.streamxhub.plugin.profiling.transformers.MethodProfilerStaticProxy;
+import com.streamxhub.plugin.profiling.profiler.CpuAndMemoryProfiler;
+import com.streamxhub.plugin.profiling.profiler.IOProfiler;
+import com.streamxhub.plugin.profiling.profiler.MethodArgumentCollector;
+import com.streamxhub.plugin.profiling.profiler.MethodArgumentProfiler;
+import com.streamxhub.plugin.profiling.profiler.MethodDurationCollector;
+import com.streamxhub.plugin.profiling.profiler.MethodDurationProfiler;
+import com.streamxhub.plugin.profiling.profiler.ProcessInfoProfiler;
+import com.streamxhub.plugin.profiling.profiler.ThreadInfoProfiler;
+import com.streamxhub.plugin.profiling.profiler.StacktraceCollectorProfiler;
+import com.streamxhub.plugin.profiling.profiler.StacktraceReporterProfiler;
+import com.streamxhub.plugin.profiling.transformer.JavaAgentFileTransformer;
+import com.streamxhub.plugin.profiling.transformer.MethodProfilerStaticProxy;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;

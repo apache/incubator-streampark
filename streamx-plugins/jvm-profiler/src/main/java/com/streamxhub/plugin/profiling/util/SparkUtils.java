@@ -21,7 +21,7 @@
 
 package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.profilers.Constants;
+import com.streamxhub.plugin.profiling.profiler.Constants;
 
 import java.util.List;
 
