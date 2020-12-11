@@ -63,7 +63,7 @@ public class KafkaOutputReporter implements Reporter {
     }
 
     @Override
-    public void updateArguments(Map<String, List<String>> parsedArgs) {
+    public void doArguments(Map<String, List<String>> parsedArgs) {
         String argValue = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_BROKER_LIST);
         if (ArgumentUtils.needToUpdateArg(argValue)) {
             setBrokerList(argValue);

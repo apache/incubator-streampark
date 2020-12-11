@@ -40,11 +40,11 @@ public class ProcFileUtilsTest {
         file.deleteOnExit();
 
         String content = "Name:\tcat\t\n"
-            + "VmSize:	     776 kB \r\n"
-            + "VmPeak:	     876 kB \r\n"
-            + "VmRSS:	     676 kB \r\n"
-            + "\t  Pid \t  : \t 66646 \t\n\r"
-            + "Threads: \t 1 \t\n"
+                + "VmSize:	     776 kB \r\n"
+                + "VmPeak:	     876 kB \r\n"
+                + "VmRSS:	     676 kB \r\n"
+                + "\t  Pid \t  : \t 66646 \t\n\r"
+                + "Threads: \t 1 \t\n"
                 + "";
         Files.write(file.toPath(), content.getBytes(), StandardOpenOption.CREATE);
 

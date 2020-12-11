@@ -76,20 +76,20 @@ public class StacktraceReporterProfilerTest {
 
         Map<String, Object> map = metricList.get(0);
 
-        Assert.assertTrue((long)map.get("startEpoch") >= epochMillis1);
-        Assert.assertTrue((long)map.get("startEpoch") <= epochMillis2);
-        Assert.assertTrue((long)map.get("endEpoch") >= epochMillis1);
-        Assert.assertTrue((long)map.get("endEpoch") <= epochMillis2);
-        Assert.assertTrue((long)map.get("endEpoch") >= (long)map.get("startEpoch"));
-        Assert.assertEquals(1L, (long)map.get("count"));
+        Assert.assertTrue((long) map.get("startEpoch") >= epochMillis1);
+        Assert.assertTrue((long) map.get("startEpoch") <= epochMillis2);
+        Assert.assertTrue((long) map.get("endEpoch") >= epochMillis1);
+        Assert.assertTrue((long) map.get("endEpoch") <= epochMillis2);
+        Assert.assertTrue((long) map.get("endEpoch") >= (long) map.get("startEpoch"));
+        Assert.assertEquals(1L, (long) map.get("count"));
         Assert.assertNull(map.get("threadName"));
         Assert.assertNull(map.get("threadState"));
-        Assert.assertArrayEquals(new String[0], ((ArrayList<String>)map.get("stacktrace")).toArray(new String[0]));
+        Assert.assertArrayEquals(new String[0], ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));
 
         stacktrace = new Stacktrace();
         stacktrace.setThreadName("thread1");
         stacktrace.setThreadState("RUNNING");
-        stacktrace.setStack(new ClassAndMethod[] {new ClassAndMethod("class1", "method1"), new ClassAndMethod("class2", "method2")});
+        stacktrace.setStack(new ClassAndMethod[]{new ClassAndMethod("class1", "method1"), new ClassAndMethod("class2", "method2")});
 
         buffer.appendValue(stacktrace);
         buffer.appendValue(stacktrace);
@@ -104,7 +104,7 @@ public class StacktraceReporterProfilerTest {
 
         map = metricList.get(1);
 
-        Assert.assertEquals(2L, (long)map.get("count"));
+        Assert.assertEquals(2L, (long) map.get("count"));
         Assert.assertEquals("thread1", map.get("threadName"));
         Assert.assertEquals("RUNNING", map.get("threadState"));
         Assert.assertArrayEquals(new String[]{"class1.method1", "class2.method2"}, ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));

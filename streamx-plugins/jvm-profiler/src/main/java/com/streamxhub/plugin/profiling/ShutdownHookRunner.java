@@ -71,7 +71,7 @@ public class ShutdownHookRunner implements Runnable {
             try {
                 logShutdownMessage("Closing object " + closeable);
                 closeable.close();
-                logShutdownMessage("Closed object " + closeable );
+                logShutdownMessage("Closed object " + closeable);
             } catch (Throwable ex) {
                 logShutdownMessage("Failed to close object " + closeable);
                 ex.printStackTrace();

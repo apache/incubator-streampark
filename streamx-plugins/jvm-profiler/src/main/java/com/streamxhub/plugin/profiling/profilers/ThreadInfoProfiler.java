@@ -50,8 +50,7 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     private void init() {
         try {
             this.threadMXBean = ManagementFactory.getThreadMXBean();
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             logger.warn("Failed to get Thread MXBean", ex);
         }
 
@@ -80,7 +79,7 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
         long newThreadCount = 0; // Number of new thread created since last time time the metrics was created.
         // This is a Derived metrics from previous data point.
         if (threadMXBean != null) {
-            liveThreadCount =  threadMXBean.getThreadCount();
+            liveThreadCount = threadMXBean.getThreadCount();
             peakThreadCount = threadMXBean.getPeakThreadCount();
             totalStartedThreadCount = threadMXBean.getTotalStartedThreadCount();
             newThreadCount = totalStartedThreadCount - this.previousTotalStartedThreadCount;

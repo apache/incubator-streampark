@@ -107,7 +107,7 @@ public class YamlConfigProvider implements ConfigProvider {
                     return result;
                 }
 
-                Map yamlMap = (Map)yamlObj;
+                Map yamlMap = (Map) yamlObj;
 
                 Map overrideMap = null;
 
@@ -120,7 +120,7 @@ public class YamlConfigProvider implements ConfigProvider {
 
                     if (configKey.equals(OVERRIDE_KEY)) {
                         if (valueObj instanceof Map) {
-                            overrideMap = (Map)valueObj;
+                            overrideMap = (Map) valueObj;
                         } else {
                             logger.warn("Invalid override property: " + valueObj);
                         }
@@ -142,7 +142,7 @@ public class YamlConfigProvider implements ConfigProvider {
                             continue;
                         }
 
-                        Map<Object, Object> overrideValues = (Map<Object, Object>)valueObj;
+                        Map<Object, Object> overrideValues = (Map<Object, Object>) valueObj;
                         for (Map.Entry<Object, Object> entry : overrideValues.entrySet()) {
                             if (entry.getValue() == null) {
                                 continue;
@@ -166,21 +166,21 @@ public class YamlConfigProvider implements ConfigProvider {
 
         if (value instanceof List) {
             List<String> configValueList = configMap.computeIfAbsent(key, k -> new ArrayList<>());
-            for (Object entry : (List)value) {
+            for (Object entry : (List) value) {
                 configValueList.add(entry.toString());
             }
         } else if (value instanceof Object[]) {
             List<String> configValueList = configMap.computeIfAbsent(key, k -> new ArrayList<>());
-            for (Object entry : (Object[])value) {
+            for (Object entry : (Object[]) value) {
                 configValueList.add(entry.toString());
             }
-         } else if (value instanceof Map) {
-            for (Object mapKey : ((Map)value).keySet()) {
+        } else if (value instanceof Map) {
+            for (Object mapKey : ((Map) value).keySet()) {
                 String propKey = mapKey.toString();
-                Object propValue = ((Map)value).get(propKey);
+                Object propValue = ((Map) value).get(propKey);
                 if (propValue != null) {
                     addConfig(config, override, key + "." + propKey, propValue);
-                 }
+                }
             }
         } else {
             List<String> configValueList = configMap.computeIfAbsent(key, k -> new ArrayList<>());
@@ -202,8 +202,7 @@ public class YamlConfigProvider implements ConfigProvider {
                     return IOUtils.toByteArray(httpResponse.getEntity().getContent());
                 }
             }
-        }
-        catch (Throwable ex) {
+        } catch (Throwable ex) {
             throw new RuntimeException("Failed getting url: " + url, ex);
         }
     }

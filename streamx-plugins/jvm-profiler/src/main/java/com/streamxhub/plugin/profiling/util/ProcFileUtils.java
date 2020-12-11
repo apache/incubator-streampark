@@ -46,7 +46,7 @@ public class ProcFileUtils {
         return getProcFileAsMap(PROC_SELF_STATUS_FILE);
     }
 
-    public static Map<String, String>  getProcIO() {
+    public static Map<String, String> getProcIO() {
         return getProcFileAsMap(PROC_SELF_IO_FILE);
     }
 
@@ -167,7 +167,7 @@ public class ProcFileUtils {
             }
 
             String cmdline = new String(Files.readAllBytes(Paths.get(file.getPath())));
-            cmdline = cmdline.replace((char)0, ' ');
+            cmdline = cmdline.replace((char) 0, ' ');
             return cmdline;
         } catch (Throwable ex) {
             logger.warn("Failed to read file " + PROC_SELF_CMDLINE_FILE, ex);

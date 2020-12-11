@@ -22,7 +22,6 @@
 package com.streamxhub.plugin.profiling;
 
 import com.streamxhub.plugin.profiling.reporters.ConsoleOutputReporter;
-import com.streamxhub.plugin.profiling.reporters.HttpReporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgument;
@@ -80,7 +79,7 @@ public class Arguments {
     private List<ClassMethodArgument> argumentProfiling = new ArrayList<>();
 
     private Arguments(Map<String, List<String>> parsedArgs) {
-        updateArguments(parsedArgs);
+        doArguments(parsedArgs);
     }
 
     public static Arguments parseArgs(String args) {
@@ -116,7 +115,7 @@ public class Arguments {
         return new Arguments(map);
     }
 
-    public void updateArguments(Map<String, List<String>> parsedArgs) {
+    public void doArguments(Map<String, List<String>> parsedArgs) {
         rawArgValues.putAll(parsedArgs);
 
         String argValue = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_NOOP);
@@ -243,7 +242,7 @@ public class Arguments {
                 // Get root level config (use empty string as key in the config map)
                 Map<String, List<String>> rootConfig = extraConfig.get("");
                 if (rootConfig != null) {
-                    updateArguments(rootConfig);
+                    doArguments(rootConfig);
                     logger.info("Updated arguments based on config: " + JsonUtils.serialize(rootConfig));
                 }
 
@@ -251,7 +250,7 @@ public class Arguments {
                 if (getTag() != null && !getTag().isEmpty()) {
                     Map<String, List<String>> overrideConfig = extraConfig.get(getTag());
                     if (overrideConfig != null) {
-                        updateArguments(overrideConfig);
+                        doArguments(overrideConfig);
                         logger.info("Updated arguments based on config override: " + JsonUtils.serialize(overrideConfig));
                     }
                 }
@@ -271,7 +270,7 @@ public class Arguments {
         } else {
             try {
                 Reporter reporter = reporterConstructor.newInstance();
-                reporter.updateArguments(getRawArgValues());
+                reporter.doArguments(getRawArgValues());
                 return reporter;
             } catch (Throwable e) {
                 throw new RuntimeException(String.format("Failed to create reporter instance %s", reporterConstructor.getDeclaringClass()), e);

@@ -120,12 +120,12 @@ public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
             MemoryUsage memoryUsage = memoryMXBean.getHeapMemoryUsage();
             heapMemoryTotalUsed = new Double(memoryUsage.getUsed());
             heapMemoryCommitted = new Double(memoryUsage.getCommitted());
-            heapMemoryMax =  new Double(memoryUsage.getMax());
+            heapMemoryMax = new Double(memoryUsage.getMax());
 
             memoryUsage = memoryMXBean.getNonHeapMemoryUsage();
             nonHeapMemoryTotalUsed = new Double(memoryUsage.getUsed());
             nonHeapMemoryCommitted = new Double(memoryUsage.getCommitted());
-            nonHeapMemoryMax =  new Double(memoryUsage.getMax());
+            nonHeapMemoryMax = new Double(memoryUsage.getMax());
 
         }
 
