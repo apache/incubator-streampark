@@ -490,10 +490,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (appParam.getFlameGraph()) {
             flameGraph = new HashMap<>();
             flameGraph.put("reporter", "com.streamxhub.plugin.profiling.reporters.HttpReporter");
-            flameGraph.put("type", ApplicationType.STREAMX_FLINK.getType());
-            flameGraph.put("id", application.getId());
+            flameGraph.put("$type", ApplicationType.STREAMX_FLINK.getType());
+            flameGraph.put("$id", application.getId());
+            flameGraph.put("$token", Utils.uuid());
             flameGraph.put("url", properties.getConsoleUrl().concat("/metrics/report"));
-            flameGraph.put("token", Utils.uuid());
             flameGraph.put("sampleInterval", 1000 * 60);
             flameGraph.put("metricInterval",1000 * 60);
         }
