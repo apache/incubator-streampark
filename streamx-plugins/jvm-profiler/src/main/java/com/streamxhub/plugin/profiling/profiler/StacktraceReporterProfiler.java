@@ -52,7 +52,7 @@ public class StacktraceReporterProfiler extends ProfilerBase implements Profiler
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return intervalMillis;
     }
 
@@ -60,6 +60,7 @@ public class StacktraceReporterProfiler extends ProfilerBase implements Profiler
         this.intervalMillis = intervalMillis;
     }
 
+    @Override
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
     }

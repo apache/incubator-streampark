@@ -27,6 +27,9 @@ import java.io.InputStream;
 import java.util.zip.Deflater;
 import java.util.Base64;
 
+/**
+ * @author benjobs
+ */
 public class IOUtils {
 
     public static byte[] toByteArray(InputStream input) {

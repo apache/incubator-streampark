@@ -24,6 +24,9 @@ package com.streamxhub.plugin.profiling;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public interface Reporter {
 
     default void doArguments(Map<String, List<String>> parsedArgs) {

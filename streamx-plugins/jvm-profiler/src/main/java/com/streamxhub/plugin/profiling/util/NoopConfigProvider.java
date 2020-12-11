@@ -28,6 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class NoopConfigProvider implements ConfigProvider {
     @Override
     public Map<String, Map<String, List<String>>> getConfig() {

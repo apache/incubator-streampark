@@ -25,6 +25,9 @@ import com.streamxhub.plugin.profiling.util.AgentLogger;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author benjobs
+ */
 public class ProfilerRunner implements Runnable {
     private static final AgentLogger logger = AgentLogger.getLogger(ProfilerRunner.class.getName());
 

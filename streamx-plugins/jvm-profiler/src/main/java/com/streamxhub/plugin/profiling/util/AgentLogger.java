@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling.util;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+/**
+ * @author benjobs
+ */
 public class AgentLogger {
     private static boolean debug = false;
     private static ErrorLogReporter errorLogReporter;

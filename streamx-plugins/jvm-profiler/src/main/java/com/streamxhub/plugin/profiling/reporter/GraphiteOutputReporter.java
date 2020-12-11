@@ -50,6 +50,7 @@ import java.util.Set;
  * <p>
  * reporter=com.streamxhub.plugin.profiling.reporter.GraphiteOutputReporter,configProvider=com.streamxhub.plugin.profiling
  * .YamlConfigProvider,configFile=/opt/graphite.yaml
+ * @author benjobs
  */
 public class GraphiteOutputReporter implements Reporter {
 

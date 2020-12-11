@@ -24,6 +24,9 @@ package com.streamxhub.plugin.profiling.transformer;
 import com.streamxhub.plugin.profiling.profiler.MethodArgumentCollector;
 import com.streamxhub.plugin.profiling.profiler.MethodDurationCollector;
 
+/**
+ * @author benjobs
+ */
 public class MethodProfilerStaticProxy {
     private static MethodDurationCollector collectorSingleton;
     private static MethodArgumentCollector argumentCollectorSingleton;

@@ -25,6 +25,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * @author benjobs
+ */
 public class ReflectionUtils {
     private static final AgentLogger logger = AgentLogger.getLogger(ReflectionUtils.class.getName());
 

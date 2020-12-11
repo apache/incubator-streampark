@@ -33,7 +33,7 @@ public class ProfilerRunnableTest {
 
         ProfilerRunner profilerRunnable = new ProfilerRunner(new Profiler() {
             @Override
-            public long getIntervalMillis() {
+            public long getInterval() {
                 return 0;
             }
 

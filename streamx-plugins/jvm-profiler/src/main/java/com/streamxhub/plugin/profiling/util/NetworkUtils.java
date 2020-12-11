@@ -24,16 +24,20 @@ package com.streamxhub.plugin.profiling.util;
 import java.net.InetAddress;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class NetworkUtils {
     public static String getLocalHostName() {
         try {
             Map<String, String> env = System.getenv();
-            if (env.containsKey("COMPUTERNAME"))
+            if (env.containsKey("COMPUTERNAME")) {
                 return env.get("COMPUTERNAME");
-            else if (env.containsKey("HOSTNAME"))
+            } else if (env.containsKey("HOSTNAME")) {
                 return env.get("HOSTNAME");
-            else
+            } else {
                 return InetAddress.getLocalHost().getHostName();
+            }
         } catch (Throwable e) {
             return "unknown_localhost_name";
         }

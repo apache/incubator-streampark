@@ -32,7 +32,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-// See http://man7.org/linux/man-pages/man5/proc.5.html for /proc file details
+/**
+ * @author benjobs
+ */ // See http://man7.org/linux/man-pages/man5/proc.5.html for /proc file details
 public class ProcFileUtils {
     private static final AgentLogger logger = AgentLogger.getLogger(ProcFileUtils.class.getName());
 

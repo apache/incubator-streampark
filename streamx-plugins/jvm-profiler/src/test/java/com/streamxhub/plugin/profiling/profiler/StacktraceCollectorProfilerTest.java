@@ -40,7 +40,7 @@ public class StacktraceCollectorProfilerTest {
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null);
 
         profiler.setIntervalMillis(123);
-        Assert.assertEquals(123L, profiler.getIntervalMillis());
+        Assert.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);
@@ -126,7 +126,7 @@ public class StacktraceCollectorProfilerTest {
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, "testDummy");
 
         profiler.setIntervalMillis(123);
-        Assert.assertEquals(123L, profiler.getIntervalMillis());
+        Assert.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);
@@ -202,7 +202,7 @@ public class StacktraceCollectorProfilerTest {
         StacktraceCollectorProfiler profiler = new StacktraceCollectorProfiler(buffer, null, 20000);
 
         profiler.setIntervalMillis(123);
-        Assert.assertEquals(123L, profiler.getIntervalMillis());
+        Assert.assertEquals(123L, profiler.getInterval());
 
         // Use a semaphore to make sure the test thread runs before profile method
         final Semaphore semaphore = new Semaphore(1);

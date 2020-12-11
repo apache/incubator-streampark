@@ -37,6 +37,9 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
+/**
+ * @author benjobs
+ */
 public class KafkaOutputReporter implements Reporter {
     public final static String ARG_BROKER_LIST = "brokerList";
     public final static String ARG_SYNC_MODE = "syncMode";

@@ -24,6 +24,9 @@ package com.streamxhub.plugin.profiling.util;
 import java.util.Random;
 import java.util.concurrent.Callable;
 
+/**
+ * @author benjobs
+ */
 public class ExponentialBackoffRetryPolicy<T> {
     private static final AgentLogger logger = AgentLogger.getLogger(ExponentialBackoffRetryPolicy.class.getName());
 

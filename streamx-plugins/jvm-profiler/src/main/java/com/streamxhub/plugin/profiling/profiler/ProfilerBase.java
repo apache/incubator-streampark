@@ -28,6 +28,9 @@ import com.streamxhub.plugin.profiling.util.SparkUtils;
 
 import java.util.UUID;
 
+/**
+ * @author benjobs
+ */
 public class ProfilerBase {
     private String tag = null;
     private String cluster = null;

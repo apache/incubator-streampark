@@ -31,6 +31,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author benjobs
+ */
 public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "MethodArgument";
 
@@ -46,7 +49,7 @@ public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return intervalMillis;
     }
 
@@ -54,6 +57,7 @@ public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
         this.intervalMillis = intervalMillis;
     }
 
+    @Override
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
     }

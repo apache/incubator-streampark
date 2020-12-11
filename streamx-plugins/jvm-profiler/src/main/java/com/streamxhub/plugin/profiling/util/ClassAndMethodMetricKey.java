@@ -21,6 +21,9 @@
 
 package com.streamxhub.plugin.profiling.util;
 
+/**
+ * @author benjobs
+ */
 public class ClassAndMethodMetricKey {
     private final String className;
     private final String methodName;
@@ -46,13 +49,21 @@ public class ClassAndMethodMetricKey {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ClassAndMethodMetricKey that = (ClassAndMethodMetricKey) o;
 
-        if (className != null ? !className.equals(that.className) : that.className != null) return false;
-        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) return false;
+        if (className != null ? !className.equals(that.className) : that.className != null) {
+            return false;
+        }
+        if (methodName != null ? !methodName.equals(that.methodName) : that.methodName != null) {
+            return false;
+        }
         return metricName != null ? metricName.equals(that.metricName) : that.metricName == null;
     }
 
