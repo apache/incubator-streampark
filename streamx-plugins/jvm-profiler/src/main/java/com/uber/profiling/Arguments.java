@@ -17,6 +17,7 @@
 package com.uber.profiling;
 
 import com.uber.profiling.reporters.ConsoleOutputReporter;
+import com.uber.profiling.reporters.HttpReporter;
 import com.uber.profiling.util.AgentLogger;
 import com.uber.profiling.util.ClassAndMethod;
 import com.uber.profiling.util.ClassMethodArgument;
@@ -47,7 +48,7 @@ public class Arguments {
     public final static String ARG_APP_ID_REGEX = "appIdRegex";
     public final static String ARG_DURATION_PROFILING = "durationProfiling";
     public final static String ARG_ARGUMENT_PROFILING = "argumentProfiling";
-    
+
     public final static String ARG_IO_PROFILING = "ioProfiling";
 
     public static final long MIN_INTERVAL_MILLIS = 50;
@@ -57,7 +58,7 @@ public class Arguments {
     private Map<String, List<String>> rawArgValues = new HashMap<>();
 
     private boolean noop = false;
-    
+
     private Constructor<Reporter> reporterConstructor;
     private Constructor<ConfigProvider> configProviderConstructor;
     private String configFile;
@@ -118,7 +119,7 @@ public class Arguments {
             noop = Boolean.parseBoolean(argValue);
             logger.info("Got argument value for noop: " + noop);
         }
-        
+
         argValue = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_REPORTER);
         if (ArgumentUtils.needToUpdateArg(argValue)) {
             reporterConstructor = ReflectionUtils.getConstructor(argValue, Reporter.class);
@@ -136,7 +137,7 @@ public class Arguments {
             configFile = argValue;
             logger.info("Got argument value for configFile: " + configFile);
         }
-        
+
         argValue = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_METRIC_INTERVAL);
         if (ArgumentUtils.needToUpdateArg(argValue)) {
             metricInterval = Long.parseLong(argValue);
@@ -174,7 +175,7 @@ public class Arguments {
             appIdVariable = argValue;
             logger.info("Got argument value for appIdVariable: " + appIdVariable);
         }
-        
+
         argValue = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_APP_ID_REGEX);
         if (ArgumentUtils.needToUpdateArg(argValue)) {
             appIdRegex = argValue;
@@ -227,7 +228,7 @@ public class Arguments {
             logger.info("Got argument value for ioProfiling: " + ioProfiling);
         }
     }
-    
+
     public void runConfigProvider() {
         try {
             ConfigProvider configProvider = getConfigProvider();
@@ -254,14 +255,14 @@ public class Arguments {
             logger.warn("Failed to update arguments with config provider", ex);
         }
     }
-    
+
     public Map<String, List<String>> getRawArgValues() {
         return rawArgValues;
     }
 
     public Reporter getReporter() {
         if (reporterConstructor == null) {
-            return new ConsoleOutputReporter();
+            return new HttpReporter();
         } else {
             try {
                 Reporter reporter = reporterConstructor.newInstance();
@@ -283,7 +284,7 @@ public class Arguments {
                     if (configFile == null || configFile.isEmpty()) {
                         throw new RuntimeException("Argument configFile is empty, cannot use " + configProvider.getClass());
                     }
-                    ((YamlConfigProvider)configProvider).setFilePath(configFile);
+                    ((YamlConfigProvider) configProvider).setFilePath(configFile);
                     return configProvider;
                 }
                 return configProvider;
@@ -304,7 +305,7 @@ public class Arguments {
     public void setConfigProvider(String className) {
         configProviderConstructor = ReflectionUtils.getConstructor(className, ConfigProvider.class);
     }
-    
+
     public long getMetricInterval() {
         return metricInterval;
     }
@@ -312,7 +313,7 @@ public class Arguments {
     public long getSampleInterval() {
         return sampleInterval;
     }
-    
+
     public String getTag() {
         return tag;
     }
