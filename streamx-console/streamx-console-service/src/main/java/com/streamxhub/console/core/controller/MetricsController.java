@@ -37,21 +37,24 @@ import java.util.Map;
 @RequestMapping("metrics")
 public class MetricsController {
 
+    private ObjectMapper mapper = new ObjectMapper();
+
     @PostMapping("report")
     public RestResponse report(String text) {
-        String content = DeflaterUtils.unzipString(text);
-        if (content != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            try {
+        try {
+            String content = DeflaterUtils.unzipString(text);
+            if (content != null) {
                 Map<String, Object> map = mapper.readValue(content, Map.class);
-                String id = map.remove("$id").toString();
-                String token = map.remove("$token").toString();
-                String type = map.remove("$type").toString();
-                System.out.println("id:" + id + ",token:" + token + ",type:" + type);
-                map.forEach((k, v) -> System.out.println(k + "=====>" + v));
-            } catch (Exception e) {
-                e.printStackTrace();
+                if (map != null) {
+                    String id = map.remove("$id").toString();
+                    String token = map.remove("$token").toString();
+                    String type = map.remove("$type").toString();
+                    System.out.println("id:" + id + ",token:" + token + ",type:" + type);
+                    map.forEach((k, v) -> System.out.println(k + "=====>" + v));
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return RestResponse.create();
     }
