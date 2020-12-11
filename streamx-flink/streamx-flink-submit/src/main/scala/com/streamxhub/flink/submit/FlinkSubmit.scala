@@ -137,7 +137,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
-         |      "flameGraph": ${submitInfo.flameGraph.mkString(",")}, "
+         |      "flameGraph": ${submitInfo.flameGraph}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
