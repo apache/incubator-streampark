@@ -59,17 +59,19 @@ public class HttpReporter implements Reporter {
 
     @Override
     public void report(String profilerName, Map<String, Object> metrics) {
-        metrics.put("id", id);
-        metrics.put("token", token);
-        metrics.put("type", type);
-        String json = JsonUtils.serialize(metrics);
-        Map<String, Object> params = new HashMap<>(1);
-        params.put("text", IOUtils.zipString(json));
-        try {
-            HttpClientUtils.httpPostRequest(url, params);
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        new Thread(() -> {
+            metrics.put("id", id);
+            metrics.put("token", token);
+            metrics.put("type", type);
+            String json = JsonUtils.serialize(metrics);
+            Map<String, Object> params = new HashMap<>(1);
+            params.put("text", IOUtils.zipString(json));
+            try {
+                HttpClientUtils.httpPostRequest(url, params);
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+        }).start();
     }
 
     @Override
