@@ -36,7 +36,7 @@ import java.util.Map;
 public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     public final static String PROFILER_NAME = "ThreadInfo";
     public final static AgentLogger logger = AgentLogger.getLogger(ThreadInfoProfiler.class.getName());
-    private long intervalMillis = Constants.DEFAULT_METRIC_INTERVAL;
+    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
     private ThreadMXBean threadMXBean;
     private long previousTotalStartedThreadCount = 0L; // to keep track of Total Thread.
@@ -57,13 +57,13 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
 
     }
 
-    public void setIntervalMillis(long intervalMillis) {
-        this.intervalMillis = intervalMillis;
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     @Override
     public long getInterval() {
-        return intervalMillis;
+        return interval;
     }
 
     @Override

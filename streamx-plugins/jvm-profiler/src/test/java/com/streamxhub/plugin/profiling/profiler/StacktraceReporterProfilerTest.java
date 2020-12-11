@@ -55,7 +55,7 @@ public class StacktraceReporterProfilerTest {
         StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
         StacktraceReporterProfiler profiler = new StacktraceReporterProfiler(buffer, reporter);
 
-        profiler.setIntervalMillis(123);
+        profiler.setInterval(123);
         Assert.assertEquals(123L, profiler.getInterval());
 
         profiler.profile();

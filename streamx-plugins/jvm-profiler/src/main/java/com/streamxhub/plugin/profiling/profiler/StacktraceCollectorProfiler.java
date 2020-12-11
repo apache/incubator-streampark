@@ -38,7 +38,7 @@ import java.util.List;
  * @author benjobs
  */
 public class StacktraceCollectorProfiler implements Profiler {
-    private long intervalMillis;
+    private long interval;
     private StacktraceMetricBuffer buffer;
     private String ignoreThreadNamePrefix = "";
     private int maxStringLength = Constants.MAX_STRING_LENGTH;
@@ -54,13 +54,13 @@ public class StacktraceCollectorProfiler implements Profiler {
         this.maxStringLength = maxStringLength;
     }
 
-    public void setIntervalMillis(long intervalMillis) {
-        this.intervalMillis = intervalMillis;
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     @Override
     public long getInterval() {
-        return this.intervalMillis;
+        return this.interval;
     }
 
     @Override

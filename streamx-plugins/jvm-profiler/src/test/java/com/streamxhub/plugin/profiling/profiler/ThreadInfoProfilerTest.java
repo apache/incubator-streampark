@@ -28,7 +28,7 @@ public class ThreadInfoProfilerTest {
             }
         });
         // Set interval
-        profiler.setIntervalMillis(150);
+        profiler.setInterval(150);
         Assert.assertEquals(150L, profiler.getInterval());
 
         // run 2 cycles on the profile.

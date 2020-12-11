@@ -41,7 +41,7 @@ public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
 
     private Reporter reporter = new ConsoleOutputReporter();
 
-    private long intervalMillis = Constants.DEFAULT_METRIC_INTERVAL;
+    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
     public MethodArgumentProfiler(ClassMethodArgumentMetricBuffer buffer, Reporter reporter) {
         this.buffer = buffer;
@@ -50,11 +50,11 @@ public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
 
     @Override
     public long getInterval() {
-        return intervalMillis;
+        return interval;
     }
 
-    public void setIntervalMillis(long intervalMillis) {
-        this.intervalMillis = intervalMillis;
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     @Override

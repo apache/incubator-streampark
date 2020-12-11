@@ -55,7 +55,7 @@ public class MethodArgumentProfilerTest {
 
         MethodArgumentProfiler profiler = new MethodArgumentProfiler(buffer, reporter);
 
-        profiler.setIntervalMillis(123);
+        profiler.setInterval(123);
         Assert.assertEquals(123L, profiler.getInterval());
 
         collector.collectMetric("class1", "method1", "arg1");
