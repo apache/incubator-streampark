@@ -49,6 +49,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * @author benjobs
+ */
 public class AgentImpl {
     public static final String VERSION = "1.0.0";
 
@@ -102,12 +105,12 @@ public class AgentImpl {
         List<Profiler> periodicProfilers = new ArrayList<>();
 
         for (Profiler profiler : profilers) {
-            if (profiler.getIntervalMillis() == 0) {
+            if (profiler.getInterval() == 0) {
                 oneTimeProfilers.add(profiler);
-            } else if (profiler.getIntervalMillis() > 0) {
+            } else if (profiler.getInterval() > 0) {
                 periodicProfilers.add(profiler);
             } else {
-                logger.log(String.format("Ignored profiler %s due to its invalid interval %s", profiler, profiler.getIntervalMillis()));
+                logger.log(String.format("Ignored profiler %s due to its invalid interval %s", profiler, profiler.getInterval()));
             }
         }
 
@@ -236,13 +239,13 @@ public class AgentImpl {
         ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize, new AgentThreadFactory());
 
         for (Profiler profiler : profilers) {
-            if (profiler.getIntervalMillis() < Arguments.MIN_INTERVAL_MILLIS) {
+            if (profiler.getInterval() < Arguments.MIN_INTERVAL_MILLIS) {
                 throw new RuntimeException("Interval too short for profiler: " + profiler + ", must be at least " + Arguments.MIN_INTERVAL_MILLIS);
             }
 
             ProfilerRunner worker = new ProfilerRunner(profiler);
-            scheduledExecutorService.scheduleAtFixedRate(worker, 0, profiler.getIntervalMillis(), TimeUnit.MILLISECONDS);
-            logger.info(String.format("Scheduled profiler %s with interval %s millis", profiler, profiler.getIntervalMillis()));
+            scheduledExecutorService.scheduleAtFixedRate(worker, 0, profiler.getInterval(), TimeUnit.MILLISECONDS);
+            logger.info(String.format("Scheduled profiler %s with interval %s millis", profiler, profiler.getInterval()));
         }
     }
 }

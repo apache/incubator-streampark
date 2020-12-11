@@ -20,6 +20,9 @@
  */
 package com.streamxhub.plugin.profiling.profiler;
 
+/**
+ * @author benjobs
+ */
 public class Constants {
     public final static long DEFAULT_METRIC_INTERVAL = 60000;
 

@@ -49,7 +49,7 @@ public class ProcessInfoProfilerTest {
             }
         });
 
-        Assert.assertEquals(0L, profiler.getIntervalMillis());
+        Assert.assertEquals(0L, profiler.getInterval());
 
         profiler.profile();
         profiler.profile();

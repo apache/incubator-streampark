@@ -35,6 +35,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class ProcessInfoProfiler extends ProfilerBase implements Profiler {
     public final static String PROFILER_NAME = "ProcessInfo";
 
@@ -54,7 +57,7 @@ public class ProcessInfoProfiler extends ProfilerBase implements Profiler {
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return 0;
     }
 

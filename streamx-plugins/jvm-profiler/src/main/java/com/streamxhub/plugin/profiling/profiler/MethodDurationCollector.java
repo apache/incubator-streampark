@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 
+/**
+ * @author benjobs
+ */
 public class MethodDurationCollector {
     private ClassAndMethodLongMetricBuffer buffer;
 

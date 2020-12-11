@@ -56,7 +56,7 @@ public class MethodDurationProfilerTest {
         MethodDurationProfiler profiler = new MethodDurationProfiler(buffer, reporter);
 
         profiler.setIntervalMillis(123);
-        Assert.assertEquals(123L, profiler.getIntervalMillis());
+        Assert.assertEquals(123L, profiler.getInterval());
 
         collector.collectLongMetric("class1", "method1", "metric1", 111);
         collector.collectLongMetric("class1", "method1", "metric1", 333);

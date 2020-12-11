@@ -30,6 +30,9 @@ import com.streamxhub.plugin.profiling.util.Histogram;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class MethodDurationProfiler extends ProfilerBase implements Profiler {
     public static final String PROFILER_NAME = "MethodDuration";
 
@@ -45,7 +48,7 @@ public class MethodDurationProfiler extends ProfilerBase implements Profiler {
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return intervalMillis;
     }
 
@@ -53,6 +56,7 @@ public class MethodDurationProfiler extends ProfilerBase implements Profiler {
         this.intervalMillis = intervalMillis;
     }
 
+    @Override
     public void setReporter(Reporter reporter) {
         this.reporter = reporter;
     }

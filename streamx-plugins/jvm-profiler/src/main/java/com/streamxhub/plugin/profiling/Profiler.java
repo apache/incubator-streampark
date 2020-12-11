@@ -21,10 +21,24 @@
 
 package com.streamxhub.plugin.profiling;
 
+/**
+ * @author benjobs
+ */
 public interface Profiler {
-    long getIntervalMillis();
+    /**
+     *
+     * @return
+     */
+    long getInterval();
 
+    /**
+     *
+     * @param reporter
+     */
     void setReporter(Reporter reporter);
 
+    /**
+     *
+     */
     void profile();
 }

@@ -35,6 +35,7 @@ import java.util.List;
 
 /**
  * This class collects stacktraces by getting thread dump via JMX, and stores the stacktraces into the given buffer.
+ * @author benjobs
  */
 public class StacktraceCollectorProfiler implements Profiler {
     private long intervalMillis;
@@ -58,7 +59,7 @@ public class StacktraceCollectorProfiler implements Profiler {
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return this.intervalMillis;
     }
 
@@ -95,8 +96,8 @@ public class StacktraceCollectorProfiler implements Profiler {
             List<ClassAndMethod> stack = new ArrayList<>(stackTraceElements.length);
             for (int i = stackTraceElements.length - 1; i >= 0; i--) {
                 StackTraceElement stackTraceElement = stackTraceElements[i];
-                String className = String.valueOf(stackTraceElement.getClassName());
-                String methodName = String.valueOf(stackTraceElement.getMethodName());
+                String className = stackTraceElement.getClassName();
+                String methodName = stackTraceElement.getMethodName();
                 stack.add(new ClassAndMethod(className, methodName));
 
                 totalLength += className.length() + methodName.length();

@@ -31,6 +31,7 @@ import java.util.Map;
 
 /**
  * ThreadInfoProfiler is used to Collects the Thread Related Metrics.
+ * @author benjobs
  */
 public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     public final static String PROFILER_NAME = "ThreadInfo";
@@ -61,7 +62,7 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     }
 
     @Override
-    public long getIntervalMillis() {
+    public long getInterval() {
         return intervalMillis;
     }
 
@@ -72,7 +73,6 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
 
     @Override
     public void profile() {
-
         long totalStartedThreadCount = 0L; // total Thread created so far since JVm Launch.
         int liveThreadCount = 0; // Number of thread which are currently active.
         int peakThreadCount = 0; // the peak live thread count since the Java virtual machine started or peak was reset

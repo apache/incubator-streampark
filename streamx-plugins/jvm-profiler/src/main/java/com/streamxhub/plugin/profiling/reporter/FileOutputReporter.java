@@ -35,6 +35,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * @author benjobs
+ */
 public class FileOutputReporter implements Reporter {
     public final static String ARG_OUTPUT_DIR = "outputDir";
 

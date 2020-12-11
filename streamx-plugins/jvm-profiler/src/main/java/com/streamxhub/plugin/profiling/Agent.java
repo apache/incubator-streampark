@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling;
 
 import java.lang.instrument.Instrumentation;
 
+/**
+ * @author benjobs
+ */
 public final class Agent {
 
     private static AgentImpl agentImpl = new AgentImpl();

@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling.util;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author benjobs
+ */
 public class Histogram {
 
     private AtomicLong count = new AtomicLong(0);

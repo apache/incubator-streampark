@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling.util;
 
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
 public class Stacktrace {
     private String threadName;
     private String threadState;

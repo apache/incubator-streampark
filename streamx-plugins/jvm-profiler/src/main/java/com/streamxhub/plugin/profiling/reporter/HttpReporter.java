@@ -33,6 +33,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author benjobs
+ */
 public class HttpReporter implements Reporter {
 
     private static final AgentLogger logger = AgentLogger.getLogger(HttpReporter.class.getName());

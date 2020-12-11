@@ -48,7 +48,7 @@ public class CpuAndMemoryProfilerTest {
         });
 
         profiler.setIntervalMillis(123);
-        Assert.assertEquals(123L, profiler.getIntervalMillis());
+        Assert.assertEquals(123L, profiler.getInterval());
 
         profiler.profile();
         profiler.profile();

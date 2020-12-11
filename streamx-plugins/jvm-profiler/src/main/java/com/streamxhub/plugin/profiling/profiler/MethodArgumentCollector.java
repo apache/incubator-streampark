@@ -23,6 +23,9 @@ package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
+/**
+ * @author benjobs
+ */
 public class MethodArgumentCollector {
     private ClassMethodArgumentMetricBuffer buffer;
 
