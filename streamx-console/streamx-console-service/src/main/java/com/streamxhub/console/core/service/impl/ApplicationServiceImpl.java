@@ -490,7 +490,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (appParam.getFlameGraph()) {
             flameGraph.put("id", application.getId());
             flameGraph.put("url", properties.getConsoleUrl().concat("/flink/app/report"));
-            //flameGraph.put("token", "xxxyyy");
+            flameGraph.put("token", Utils.uuid());
             flameGraph.put("sampleInterval", 50);
         }
 
