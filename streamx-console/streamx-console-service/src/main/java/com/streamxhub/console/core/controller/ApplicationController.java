@@ -20,8 +20,6 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
@@ -194,22 +192,6 @@ public class ApplicationController extends BaseController {
     public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
         Boolean deleted = backUpService.delete(backUp.getId());
         return RestResponse.create().data(deleted);
-    }
-
-    @PostMapping("report")
-    public RestResponse report(String text) {
-        String content = DeflaterUtils.unzipString(text);
-        if (content != null) {
-            System.out.println(content);
-            ObjectMapper mapper = new ObjectMapper();
-            try {
-                Map<String, Object> map = mapper.readValue(content, Map.class);
-                map.forEach((k, v) -> System.out.println(k + "=====>" + v));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return RestResponse.create();
     }
 
 }

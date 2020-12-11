@@ -36,12 +36,14 @@ public class HttpReporter implements Reporter {
 
     private static final AgentLogger logger = AgentLogger.getLogger(HttpReporter.class.getName());
 
-    public final static String ARG_ID = "id";
-    public final static String ARG_TOKEN = "token";
-    public final static String ARG_URL = "url";
+    private final static String ARG_ID = "id";
+    private final static String ARG_TOKEN = "token";
+    private final static String ARG_URL = "url";
+    private final static String ARG_TYPE = "type";
     private String id;
     private String token;
     private String url;
+    private String type;
 
     public HttpReporter() {
     }
@@ -51,12 +53,14 @@ public class HttpReporter implements Reporter {
         id = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID);
         token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
         url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);
+        type = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TYPE);
     }
 
     @Override
     public void report(String profilerName, Map<String, Object> metrics) {
         metrics.put("id", id);
         metrics.put("token", token);
+        metrics.put("type", type);
         String json = JsonUtils.serialize(metrics);
         try {
             HttpClientUtils.httpPostRequest(url, IOUtils.zipString(json));

@@ -56,7 +56,7 @@ streamx:
   max.batch.insert.num: 1000
   shiro:
     # 后端免认证接口 url
-    anonUrl: /passport/**,/systemName,/user/check/**,/websocket/**
+    anonUrl: /passport/**,/systemName,/user/check/**,/websocket/**,/metrics/**
     # token有效期，单位秒
     jwtTimeOut: 86400
   app-home: /home/hst/workspace/deploy
