@@ -41,10 +41,13 @@ public class MetricsController {
     public RestResponse report(String text) {
         String content = DeflaterUtils.unzipString(text);
         if (content != null) {
-            System.out.println(content);
             ObjectMapper mapper = new ObjectMapper();
             try {
                 Map<String, Object> map = mapper.readValue(content, Map.class);
+                String id = map.remove("$id").toString();
+                String token = map.remove("$token").toString();
+                String type = map.remove("$type").toString();
+                System.out.println("id:" + id + ",token:" + token + ",type:" + type);
                 map.forEach((k, v) -> System.out.println(k + "=====>" + v));
             } catch (Exception e) {
                 e.printStackTrace();
