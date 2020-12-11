@@ -492,7 +492,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flameGraph.put("reporter", "com.streamxhub.plugin.profiling.reporters.HttpReporter");
             flameGraph.put("type", ApplicationType.STREAMX_FLINK.getType());
             flameGraph.put("id", application.getId());
-            flameGraph.put("url", properties.getConsoleUrl().concat("/flink/app/report"));
+            flameGraph.put("url", properties.getConsoleUrl().concat("/metrics/report"));
             flameGraph.put("token", Utils.uuid());
             flameGraph.put("sampleInterval", 50);
         }
