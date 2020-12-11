@@ -86,7 +86,8 @@ public class StringUtils {
             if (str.endsWith("kb")) {
                 str = str.substring(0, str.length() - 2).trim();
                 scale = KB_SIZE;
-            } if (str.endsWith("k")) {
+            }
+            if (str.endsWith("k")) {
                 str = str.substring(0, str.length() - 1).trim();
                 scale = KB_SIZE;
             } else if (str.endsWith("mb")) {
@@ -113,7 +114,7 @@ public class StringUtils {
             }
 
             double doubleValue = Double.parseDouble(str);
-            return (long)(doubleValue * scale);
+            return (long) (doubleValue * scale);
         } catch (Throwable ex) {
             return null;
         }

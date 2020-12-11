@@ -50,7 +50,7 @@ public class HttpReporter implements Reporter {
     }
 
     @Override
-    public void updateArguments(Map<String, List<String>> parsedArgs) {
+    public void doArguments(Map<String, List<String>> parsedArgs) {
         id = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID);
         token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
         url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);

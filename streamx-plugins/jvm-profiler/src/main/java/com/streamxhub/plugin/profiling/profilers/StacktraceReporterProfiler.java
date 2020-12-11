@@ -109,7 +109,7 @@ public class StacktraceReporterProfiler extends ProfilerBase implements Profiler
             map.put("threadState", stacktrace.getThreadState());
 
             ClassAndMethod[] classAndMethodArray = stacktrace.getStack();
-            if (classAndMethodArray!= null) {
+            if (classAndMethodArray != null) {
                 List<String> stackArray = new ArrayList<>(classAndMethodArray.length);
                 for (int i = 0; i < classAndMethodArray.length; i++) {
                     ClassAndMethod classAndMethod = classAndMethodArray[i];

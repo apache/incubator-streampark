@@ -64,7 +64,7 @@ public class AgentITCase {
         File[] files = new File(outputDir).listFiles();
         Assert.assertEquals(5, files.length);
 
-        List<String> fileNames = Arrays.asList(files).stream().map(t->t.getName()).sorted().collect(Collectors.toList());
+        List<String> fileNames = Arrays.asList(files).stream().map(t -> t.getName()).sorted().collect(Collectors.toList());
 
         Assert.assertEquals("CpuAndMemory.json", fileNames.get(0));
         String jsonCpuAndMemory = new String(Files.readAllBytes(Paths.get(outputDir, fileNames.get(0))));
@@ -185,7 +185,7 @@ public class AgentITCase {
         File[] files = new File(outputDir).listFiles();
         Assert.assertEquals(4, files.length);
 
-        List<String> fileNames = Arrays.asList(files).stream().map(t->t.getName()).sorted().collect(Collectors.toList());
+        List<String> fileNames = Arrays.asList(files).stream().map(t -> t.getName()).sorted().collect(Collectors.toList());
 
         Assert.assertEquals("CpuAndMemory.json", fileNames.get(0));
         String jsonCpuAndMemory = new String(Files.readAllBytes(Paths.get(outputDir, fileNames.get(0))));
@@ -243,7 +243,7 @@ public class AgentITCase {
         File[] files = new File(outputDir).listFiles();
         Assert.assertEquals(2, files.length);
 
-        List<String> fileNames = Arrays.asList(files).stream().map(t->t.getName()).sorted().collect(Collectors.toList());
+        List<String> fileNames = Arrays.asList(files).stream().map(t -> t.getName()).sorted().collect(Collectors.toList());
 
         Assert.assertEquals("CpuAndMemory.json", fileNames.get(0));
         String jsonCpuAndMemory = new String(Files.readAllBytes(Paths.get(outputDir, fileNames.get(0))));
@@ -268,8 +268,8 @@ public class AgentITCase {
                         throw new RuntimeException(e);
                     }
                 }))
-                .map(t->t.toString())
-                .filter(t->t.endsWith(".jar"))
+                .map(t -> t.toString())
+                .filter(t -> t.endsWith(".jar"))
                 .get();
         System.out.println("agentJar: " + agentJar);
         return agentJar;
