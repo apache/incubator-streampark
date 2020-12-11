@@ -262,7 +262,9 @@ public class Arguments {
 
     public Reporter getReporter() {
         if (reporterConstructor == null) {
-            return new HttpReporter();
+            Reporter reporter = new HttpReporter();
+            reporter.updateArguments(getRawArgValues());
+            return reporter;
         } else {
             try {
                 Reporter reporter = reporterConstructor.newInstance();
