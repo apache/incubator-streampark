@@ -29,6 +29,7 @@ import com.streamxhub.plugin.profiling.util.IOUtils;
 import com.streamxhub.plugin.profiling.util.JsonUtils;
 
 import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -62,8 +63,10 @@ public class HttpReporter implements Reporter {
         metrics.put("token", token);
         metrics.put("type", type);
         String json = JsonUtils.serialize(metrics);
+        Map<String, Object> params = new HashMap<>(1);
+        params.put("text", IOUtils.zipString(json));
         try {
-            HttpClientUtils.httpPostRequest(url, IOUtils.zipString(json));
+            HttpClientUtils.httpPostRequest(url, params);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
