@@ -4,7 +4,6 @@
 
     <groupId>com.streamxhub</groupId>
     <artifactId>jvm-profiler</artifactId>
-    <!-- Please update AgentImpl.VERSION as well for same version -->
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
@@ -108,8 +107,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Agent-Class>com.uber.profiling.Agent</Agent-Class>
-                            <Premain-Class>com.uber.profiling.Agent</Premain-Class>
+                            <Agent-Class>com.streamxhub.plugin.profiling.Agent</Agent-Class>
+                            <Premain-Class>com.streamxhub.plugin.profiling.Agent</Premain-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -198,22 +197,6 @@
                                     <shadedPattern>ujagent_shaded.net</shadedPattern>
                                 </relocation>
                                 <relocation>
-                                    <pattern>com.uber.data</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.data</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.m3</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.m3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.stream</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.stream</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.elk</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.elk</shadedPattern>
-                                </relocation>
-                                <relocation>
                                     <pattern>com.shade</pattern>
                                     <shadedPattern>ujagent_shaded.com.shade</shadedPattern>
                                 </relocation>
@@ -287,107 +270,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>redis</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_redis</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>redis.clients</groupId>
-                    <artifactId>jedis</artifactId>
-                    <version>2.9.0</version>
-                </dependency>
-            </dependencies>
-        </profile>
-		<profile>
-            <id>influxdb</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_influxdb</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.influxdb</groupId>
-                    <artifactId>influxdb-java</artifactId>
-                    <version>2.14</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>datadog</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_datadog</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>com.datadoghq</groupId>
-                    <artifactId>java-dogstatsd-client</artifactId>
-                    <version>2.7</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-    </profiles>
 </project>
