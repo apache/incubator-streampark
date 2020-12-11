@@ -494,7 +494,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flameGraph.put("id", application.getId());
             flameGraph.put("url", properties.getConsoleUrl().concat("/metrics/report"));
             flameGraph.put("token", Utils.uuid());
-            flameGraph.put("sampleInterval", 50);
+            flameGraph.put("sampleInterval", 1000 * 60);
+            flameGraph.put("metricInterval",1000 * 60);
         }
 
         FlinkSubmit.SubmitInfo submitInfo = new FlinkSubmit.SubmitInfo(
