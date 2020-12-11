@@ -58,7 +58,7 @@ public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
     private static final String ATTRIBUTE_NAME_ProcessCpuTime = "ProcessCpuTime";
     private static final int ATTRIBUTE_INDEX_ProcessCpuTime = 2;
 
-    private long intervalMillis = Constants.DEFAULT_METRIC_INTERVAL;
+    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
     private MBeanServer platformMBeanServer;
     private ObjectName operatingSystemObjectName;
@@ -75,11 +75,11 @@ public class CpuAndMemoryProfiler extends ProfilerBase implements Profiler {
 
     @Override
     public long getInterval() {
-        return intervalMillis;
+        return interval;
     }
 
-    public void setIntervalMillis(long intervalMillis) {
-        this.intervalMillis = intervalMillis;
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     @Override

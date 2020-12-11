@@ -35,7 +35,7 @@ import java.util.Map;
 public class IOProfiler extends ProfilerBase implements Profiler {
     public final static String PROFILER_NAME = "IO";
 
-    private long intervalMillis = Constants.DEFAULT_METRIC_INTERVAL;
+    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
     private Reporter reporter;
 
@@ -45,11 +45,11 @@ public class IOProfiler extends ProfilerBase implements Profiler {
 
     @Override
     public long getInterval() {
-        return intervalMillis;
+        return interval;
     }
 
-    public void setIntervalMillis(long intervalMillis) {
-        this.intervalMillis = intervalMillis;
+    public void setInterval(long interval) {
+        this.interval = interval;
     }
 
     @Override
