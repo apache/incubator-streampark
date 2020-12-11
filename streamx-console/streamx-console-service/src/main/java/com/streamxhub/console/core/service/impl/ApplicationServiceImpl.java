@@ -26,6 +26,7 @@ import com.streamxhub.common.conf.ParameterCli;
 import com.streamxhub.common.util.*;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationMapper;
@@ -84,6 +85,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private ApplicationLogService applicationLogService;
+
+    @Autowired
+    private StreamXProperties properties;
 
     @Autowired
     private ServerUtil serverUtil;
@@ -482,13 +486,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 ? application.getDynamicOptions().split("\\s+")
                 : new String[0];
 
+        Map<String, Serializable> flameGraph = null;
+        if (appParam.getFlameGraph()) {
+            flameGraph.put("id", application.getId());
+            flameGraph.put("url", properties.getConsoleUrl().concat("/flink/app/report"));
+            //flameGraph.put("token", "xxxyyy");
+            flameGraph.put("sampleInterval", 50);
+        }
+
         FlinkSubmit.SubmitInfo submitInfo = new FlinkSubmit.SubmitInfo(
                 flinkUserJar,
                 application.getJobName(),
                 appConf,
                 application.getApplicationType().getName(),
                 savePointDir,
-                appParam.getFlameGraph(),
+                flameGraph,
                 overrideOption,
                 dynamicOption,
                 application.getArgs()

@@ -58,6 +58,7 @@ streamx:
     # token有效期，单位秒
     jwtTimeOut: 86400
   app-home: /Users/benjobs/Workspace/deploy/workspace
-  yarn: http://test-hadoop-2:8088
+  yarn-url: http://test-hadoop-2:8088
+  console-url: http://test-hadoop-2:10001
 
 

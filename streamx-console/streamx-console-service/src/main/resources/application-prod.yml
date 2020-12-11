@@ -60,4 +60,5 @@ streamx:
     # token有效期，单位秒
     jwtTimeOut: 86400
   app-home: /home/hst/workspace/deploy
-  yarn: http://pro-hadoop-2:8088
+  yarn-url: http://pro-hadoop-2:8088
+  console-url: http://pro-hadoop-2:10001

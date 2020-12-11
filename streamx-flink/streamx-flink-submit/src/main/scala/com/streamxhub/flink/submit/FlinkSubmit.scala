@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.submit
 
-import java.io.File
+import java.io.{File, Serializable}
 import java.net.{MalformedURLException, URL}
 import java.util._
 import java.util.concurrent.{CompletableFuture, TimeUnit}
@@ -137,7 +137,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
-         |      "flameGraph": ${submitInfo.flameGraph}, "
+         |      "flameGraph": ${submitInfo.flameGraph.mkString(",")}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
@@ -301,8 +301,11 @@ object FlinkSubmit extends Logger {
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
         //-jvm profile support
-        if (submitInfo.flameGraph) {
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        if (submitInfo.flameGraph != null) {
+          val buffer = new StringBuffer()
+          submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
+          val param = buffer.toString.dropRight(1)
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=".concat(param)
         }
 
         array.toArray
@@ -452,7 +455,7 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
-                        flameGraph: JBool,
+                        flameGraph: java.util.Map[String, Serializable],
                         overrideOption: java.util.Map[String, Any],
                         dynamicOption: Array[String],
                         args: String)

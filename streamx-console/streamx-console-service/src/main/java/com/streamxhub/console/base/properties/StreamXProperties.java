@@ -35,6 +35,8 @@ public class StreamXProperties {
 
     private String appHome;
 
-    private String yarn;
+    private String yarnUrl;
+
+    private String consoleUrl;
 
 }
