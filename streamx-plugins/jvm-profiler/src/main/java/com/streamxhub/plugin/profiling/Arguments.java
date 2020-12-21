@@ -26,8 +26,8 @@ import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgument;
 import com.streamxhub.plugin.profiling.util.DummyConfigProvider;
-import com.streamxhub.plugin.profiling.util.JsonUtils;
 import com.streamxhub.plugin.profiling.util.ReflectionUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -246,7 +246,7 @@ public class Arguments {
                 Map<String, List<String>> rootConfig = extraConfig.get("");
                 if (rootConfig != null) {
                     doArguments(rootConfig);
-                    logger.info("Updated arguments based on config: " + JsonUtils.serialize(rootConfig));
+                    logger.info("Updated arguments based on config: " + Utils.toJsonString(rootConfig));
                 }
 
                 // Get tag level config (use tag value to find config values in the config map)
@@ -254,7 +254,7 @@ public class Arguments {
                     Map<String, List<String>> overrideConfig = extraConfig.get(getTag());
                     if (overrideConfig != null) {
                         doArguments(overrideConfig);
-                        logger.info("Updated arguments based on config override: " + JsonUtils.serialize(overrideConfig));
+                        logger.info("Updated arguments based on config override: " + Utils.toJsonString(overrideConfig));
                     }
                 }
             }

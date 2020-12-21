@@ -1,36 +1,45 @@
-/**
- * Copyright (c) 2019 The StreamX Project
- * <p>
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements. See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership. The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License. You may obtain a copy of the License at
- * <p>
- * http://www.apache.org/licenses/LICENSE-2.0
- * <p>
- * Unless required by applicable law or agreed to in writing,
- * software distributed under the License is distributed on an
- * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
- * KIND, either express or implied. See the License for the
- * specific language governing permissions and limitations
- * under the License.
- */
-
 package com.streamxhub.plugin.profiling.util;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.Deflater;
 import java.util.Base64;
+import java.util.zip.Deflater;
 
-/**
- * @author benjobs
- */
-public class IOUtils {
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import java.net.InetAddress;
+import java.util.Map;
+
+
+public class Utils {
+
+    protected static ObjectMapper mapper = new ObjectMapper();
+
+    static {
+        mapper.configure(JsonParser.Feature.ALLOW_UNQUOTED_FIELD_NAMES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
+        mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    }
+
+    public static ObjectMapper getMapper() {
+        return mapper;
+    }
+
+    public static String toJsonString(Object obj) {
+        if (obj == null) {
+            return "";
+        }
+        try {
+            return mapper.writeValueAsString(obj);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(String.format("Failed to serialize %s (%s)", obj, obj.getClass()), e);
+        }
+    }
 
     public static byte[] toByteArray(InputStream input) {
         try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream()) {
@@ -64,6 +73,21 @@ public class IOUtils {
         //关闭压缩器并丢弃任何未处理的输入。
         deflater.end();
         return Base64.getEncoder().encodeToString(outputStream.toByteArray());
+    }
+
+    public static String getLocalHostName() {
+        try {
+            Map<String, String> env = System.getenv();
+            if (env.containsKey("COMPUTERNAME")) {
+                return env.get("COMPUTERNAME");
+            } else if (env.containsKey("HOSTNAME")) {
+                return env.get("HOSTNAME");
+            } else {
+                return InetAddress.getLocalHost().getHostName();
+            }
+        } catch (Throwable e) {
+            return "unknown_localhost_name";
+        }
     }
 
 }

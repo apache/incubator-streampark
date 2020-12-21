@@ -23,7 +23,7 @@ package com.streamxhub.plugin.profiling.reporter;
 import com.streamxhub.plugin.profiling.ArgumentUtils;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
-import com.streamxhub.plugin.profiling.util.JsonUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
@@ -92,7 +92,7 @@ public class KafkaOutputReporter implements Reporter {
 
         String topicName = getTopic(profilerName);
 
-        String str = JsonUtils.serialize(metrics);
+        String str = Utils.toJsonString(metrics);
         byte[] message = str.getBytes(StandardCharsets.UTF_8);
 
         Future<RecordMetadata> future = producer.send(

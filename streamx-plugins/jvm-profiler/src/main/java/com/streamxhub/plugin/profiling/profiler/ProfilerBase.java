@@ -21,10 +21,10 @@
 
 package com.streamxhub.plugin.profiling.profiler;
 
-import com.streamxhub.plugin.profiling.util.NetworkUtils;
 import com.streamxhub.plugin.profiling.util.ProcFileUtils;
 import com.streamxhub.plugin.profiling.util.ProcessUtils;
 import com.streamxhub.plugin.profiling.util.SparkUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 
 import java.util.UUID;
 
@@ -44,7 +44,7 @@ public class ProfilerBase {
     private String role = null;
 
     public ProfilerBase() {
-        setHostName(NetworkUtils.getLocalHostName());
+        setHostName(Utils.getLocalHostName());
         setProcessName(ProcessUtils.getCurrentProcessName());
     }
 

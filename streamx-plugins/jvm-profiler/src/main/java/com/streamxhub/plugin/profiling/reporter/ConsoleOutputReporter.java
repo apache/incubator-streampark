@@ -22,14 +22,14 @@
 package com.streamxhub.plugin.profiling.reporter;
 
 import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.util.JsonUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 
 import java.util.Map;
 
 public class ConsoleOutputReporter implements Reporter {
     @Override
     public void report(String profilerName, Map<String, Object> metrics) {
-        System.out.println(String.format("ConsoleOutputReporter - %s: %s", profilerName, JsonUtils.serialize(metrics)));
+        System.out.println(String.format("ConsoleOutputReporter - %s: %s", profilerName, Utils.toJsonString(metrics)));
     }
 
     @Override

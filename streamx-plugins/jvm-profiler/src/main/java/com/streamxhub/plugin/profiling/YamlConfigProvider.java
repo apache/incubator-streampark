@@ -23,7 +23,7 @@ package com.streamxhub.plugin.profiling;
 
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.ExponentialBackoffRetryPolicy;
-import com.streamxhub.plugin.profiling.util.IOUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -202,7 +202,7 @@ public class YamlConfigProvider implements ConfigProvider {
                         throw new RuntimeException("Failed response from url: " + url + ", response code: " + statusCode);
                     }
                     // TODO handle charset encoding
-                    return IOUtils.toByteArray(httpResponse.getEntity().getContent());
+                    return Utils.toByteArray(httpResponse.getEntity().getContent());
                 }
             }
         } catch (Throwable ex) {
