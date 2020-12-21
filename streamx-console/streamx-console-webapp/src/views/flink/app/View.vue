@@ -633,9 +633,9 @@
               allowClear
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
               <a-select-option
+                v-if="historySavePoint.length>0"
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
-                v-if="k.savePoint"
                 :value="k.savePoint">
                 <template>
                   <span style="color:#108ee9">
@@ -646,6 +646,7 @@
                   </span>
                 </template>
               </a-select-option>
+              <a-select-option v-else></a-select-option>
             </a-select>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
           </a-form-item>
@@ -1078,7 +1079,12 @@ export default {
               pageNum: 1,
               pageSize: 9999
             }).then((resp) => {
-              this.historySavePoint = resp.data.records || []
+              this.historySavePoint = []
+              resp.data.records.foreach(x => {
+                if (x.savePoint) {
+                  this.historySavePoint.push(x)
+                }
+              })
             })
           }
         })
