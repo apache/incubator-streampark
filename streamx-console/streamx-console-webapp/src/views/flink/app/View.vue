@@ -635,6 +635,7 @@
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
+                v-if="k.savePoint"
                 :value="k.savePoint">
                 <template>
                   <span style="color:#108ee9">
