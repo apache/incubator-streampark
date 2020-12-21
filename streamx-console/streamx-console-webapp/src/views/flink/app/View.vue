@@ -609,21 +609,6 @@
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint"
-            label="ignore restored"
-            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
-            <a-switch
-              checkedChildren="开"
-              unCheckedChildren="关"
-              checked-children="true"
-              un-checked-children="false"
-              v-model="allowNonRestoredState"
-              v-decorator="['allowNonRestoredState']"/>
-            <span class="conf-switch" style="color:darkgrey"> ignore savepoint then cannot be restored </span>
-          </a-form-item>
-
-          <a-form-item
             v-if="savePoint && !lastestSavePoint "
             label="savepoint"
             style="margin-bottom: 10px"
@@ -654,6 +639,21 @@
               placeholder="请手动输入 savepoint"
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
+          </a-form-item>
+
+          <a-form-item
+            v-if="savePoint"
+            label="ignore restored"
+            :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
+            <a-switch
+              checkedChildren="开"
+              unCheckedChildren="关"
+              checked-children="true"
+              un-checked-children="false"
+              v-model="allowNonRestoredState"
+              v-decorator="['allowNonRestoredState']"/>
+            <span class="conf-switch" style="color:darkgrey"> ignore savepoint then cannot be restored </span>
           </a-form-item>
         </a-form>
 
