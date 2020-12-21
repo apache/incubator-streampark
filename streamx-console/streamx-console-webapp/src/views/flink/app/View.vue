@@ -630,7 +630,7 @@
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
-              v-if="historySavePoint.length>0"
+              v-if="historySavePoint && historySavePoint.length>0"
               mode="combobox"
               allowClear
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
