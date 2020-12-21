@@ -581,7 +581,7 @@
         <a-form @submit="handleStartOk" :form="formStartCheckPoint">
 
           <a-form-item
-            label="flame  Graph"
+            label="flame Graph"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
@@ -593,6 +593,7 @@
               v-decorator="['flameGraph']"/>
             <span class="conf-switch" style="color:darkgrey"> flame Graph support</span>
           </a-form-item>
+
           <a-form-item
             label="from savepoint"
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -629,11 +630,11 @@
             :labelCol="{lg: {span: 7}, sm: {span: 7}}"
             :wrapperCol="{lg: {span: 16}, sm: {span: 4} }">
             <a-select
+              v-if="historySavePoint.length>0"
               mode="combobox"
               allowClear
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]">
               <a-select-option
-                v-if="historySavePoint.length>0"
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
                 :value="k.savePoint">
@@ -646,8 +647,12 @@
                   </span>
                 </template>
               </a-select-option>
-              <a-select-option v-else></a-select-option>
             </a-select>
+            <a-input
+              v-else
+              type="text"
+              placeholder="请手动输入 savepoint"
+              v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
             <span class="conf-switch" style="color:darkgrey"> restore the job from savepoint</span>
           </a-form-item>
         </a-form>
