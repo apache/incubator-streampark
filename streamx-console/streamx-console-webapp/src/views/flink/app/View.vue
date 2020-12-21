@@ -649,7 +649,7 @@
               </a-select-option>
             </a-select>
             <a-input
-              v-else
+              v-if="!historySavePoint || (historySavePoint && historySavePoint.length === 0)"
               type="text"
               placeholder="请手动输入 savepoint"
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
