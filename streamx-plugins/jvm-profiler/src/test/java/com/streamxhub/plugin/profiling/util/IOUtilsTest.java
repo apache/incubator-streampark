@@ -31,7 +31,7 @@ public class IOUtilsTest {
     public void toByteArray() {
         byte[] bytes = new byte[]{1, 2, 3};
         ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        byte[] result = IOUtils.toByteArray(byteArrayInputStream);
+        byte[] result = Utils.toByteArray(byteArrayInputStream);
         Assert.assertEquals(3, result.length);
         Assert.assertEquals(1, result[0]);
         Assert.assertEquals(3, result[result.length - 1]);

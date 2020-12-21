@@ -23,7 +23,7 @@ package com.streamxhub.plugin.profiling.reporter;
 import com.streamxhub.plugin.profiling.ArgumentUtils;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
-import com.streamxhub.plugin.profiling.util.JsonUtils;
+import com.streamxhub.plugin.profiling.util.Utils;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class FileOutputReporter implements Reporter {
 
         FileWriter writer = ensureFile(profilerName);
         try {
-            writer.write(JsonUtils.serialize(metrics));
+            writer.write(Utils.toJsonString(metrics));
             writer.write(System.lineSeparator());
             writer.flush();
         } catch (IOException e) {
