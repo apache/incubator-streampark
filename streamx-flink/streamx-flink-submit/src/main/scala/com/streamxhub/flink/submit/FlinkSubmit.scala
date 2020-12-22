@@ -292,8 +292,9 @@ object FlinkSubmit extends Logger {
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
           array += x._1
-          if (x._2.isInstanceOf[String]) {
-            array += x._2.toString
+          x._2 match {
+            case v: String => array += v
+            case _ =>
           }
         })
 
