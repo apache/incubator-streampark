@@ -33,6 +33,7 @@ import com.streamxhub.console.core.dao.SavePointMapper;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (HdfsUtils.exists(savePoint.getSavePoint())) {
+            if (StringUtils.isNotEmpty(savePoint.getSavePoint()) && HdfsUtils.exists(savePoint.getSavePoint())) {
                 HdfsUtils.deleteFile(savePoint.getSavePoint());
             }
             removeById(id);
