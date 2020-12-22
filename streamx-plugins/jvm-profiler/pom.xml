@@ -26,7 +26,6 @@
         <encoding>UTF-8</encoding>
     </properties>
 
-
     <dependencies>
         <dependency>
             <groupId>org.apache.kafka</groupId>
@@ -76,14 +75,6 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.6</version>
-        </dependency>
-
-        <!--Test-->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
         </dependency>
 
     </dependencies>
