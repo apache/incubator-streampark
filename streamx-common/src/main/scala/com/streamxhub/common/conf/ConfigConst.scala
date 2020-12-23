@@ -246,8 +246,6 @@ object ConfigConst {
 
   val APP_SAVEPOINTS = "/streamx/savepoints"
 
-  val APP_EXTENSION = "/streamx/extension"
-
   val LOGO =
     s"""
        |
