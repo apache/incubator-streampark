@@ -55,16 +55,14 @@ public class EnvInitializeRunner implements ApplicationRunner {
             if (flinkLocalHome == null) {
                 throw new InitializationError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
             }
-
             String flinkName = new File(flinkLocalHome).getName();
-            String flinkHdfsHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
-
-            if (!HdfsUtils.exists(flinkHdfsHome)) {
-                log.info("[StreamX] {} is not exists,upload beginning....", flinkHdfsHome);
-                HdfsUtils.upload(flinkLocalHome, flinkHdfsHome);
+            String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
+            if (!HdfsUtils.exists(flinkHome)) {
+                log.info("[StreamX] {} is not exists,upload beginning....", flinkHome);
+                HdfsUtils.upload(flinkLocalHome, flinkHome);
             }
-            String flinkHdfsHomeWithNameService = HdfsUtils.getDefaultFS().concat(flinkHdfsHome);
-            String flinkHdfsPlugins = flinkHdfsHomeWithNameService.concat("/plugins");
+            String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
+            String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins");
             //加载streamx下的plugins到$FLINK_HOME/plugins下
             loadPlugins(flinkHdfsPlugins);
         } else {
