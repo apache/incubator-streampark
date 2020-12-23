@@ -20,12 +20,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.streamxhub</groupId>
-            <artifactId>jvm-profiler</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
         <!--scala-->
         <dependency>
             <groupId>org.scala-lang</groupId>
