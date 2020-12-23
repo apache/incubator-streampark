@@ -70,8 +70,6 @@ public class HttpReporter implements Reporter {
 
         HttpResponse response = Http.apply(url)
                 .timeout(1000,5000)
-                .header("Content-Type", "application/json")
-                .header("Charset", "UTF-8")
                 .postData(Utils.toJsonString(param))
                 .asString();
         logger.log("[StreamX] jvm-profiler report:" + response.body());
