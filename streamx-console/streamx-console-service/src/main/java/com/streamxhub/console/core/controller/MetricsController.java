@@ -40,9 +40,9 @@ public class MetricsController {
     private ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping("report")
-    public RestResponse report(String text) {
+    public RestResponse report(String metric) {
         try {
-            String content = DeflaterUtils.unzipString(text);
+            String content = DeflaterUtils.unzipString(metric);
             if (content != null) {
                 Map<String, Object> map = mapper.readValue(content, Map.class);
                 if (map != null) {

@@ -21,14 +21,24 @@
 
 package com.streamxhub.plugin.profiling.reporter;
 
-import scalaj.http.Http;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.message.BasicNameValuePair;
 import com.streamxhub.plugin.profiling.ArgumentUtils;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.Utils;
 
+import java.net.HttpURLConnection;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.http.Consts.UTF_8;
 
 /**
  * @author benjobs
@@ -63,8 +73,27 @@ public class HttpReporter implements Reporter {
         metrics.put("$token", token);
         metrics.put("$type", type);
         String json = Utils.toJsonString(metrics);
-        String params = "text=" + json;
-        Http.apply(url).postData(params.getBytes());
+        try {
+            logger.debug(String.format("Getting url: %s", url));
+            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+                HttpPost httpPost = new HttpPost(url);
+                List<NameValuePair> pairs = new ArrayList<>(1);
+                pairs.add(new BasicNameValuePair("content", json));
+                httpPost.setEntity(new UrlEncodedFormEntity(pairs, UTF_8));
+                try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
+                    int statusCode = httpResponse.getStatusLine().getStatusCode();
+                    if (statusCode != HttpURLConnection.HTTP_OK) {
+                        throw new RuntimeException("Failed response from url: " + url + ", response code: " + statusCode);
+                    }
+                    byte[] bytes = Utils.toByteArray(httpResponse.getEntity().getContent());
+                    String result = new String(bytes, UTF_8.name());
+                    logger.log("[StreamX] jvm-profiler report:" + result);
+                }
+            }
+        } catch (Throwable ex) {
+            throw new RuntimeException("Failed getting url: " + url, ex);
+        }
+
     }
 
     @Override
