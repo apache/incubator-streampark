@@ -19,9 +19,8 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.util;
+package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.util.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -19,11 +19,8 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.util;
+package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.util.ClassAndMethod;
-import com.streamxhub.plugin.profiling.util.Stacktrace;
-import com.streamxhub.plugin.profiling.util.StacktraceMetricBuffer;
 import org.junit.Assert;
 import org.junit.Test;
 

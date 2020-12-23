@@ -19,11 +19,10 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.transformer;
+package com.streamxhub.plugin.profiling.transformer;
 
 import com.streamxhub.plugin.profiling.profiler.Constants;
 import com.streamxhub.plugin.profiling.profiler.MethodArgumentCollector;
-import com.streamxhub.plugin.profiling.transformer.MethodProfilerStaticProxy;
 import com.streamxhub.plugin.profiling.util.ClassAndMethodMetricKey;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 import junit.framework.Assert;

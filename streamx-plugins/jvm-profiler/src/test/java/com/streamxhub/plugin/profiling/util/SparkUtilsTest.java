@@ -19,30 +19,30 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.util;
+package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.util.ReflectionUtils;
+import com.streamxhub.plugin.profiling.Arguments;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 
-public class ReflectionUtilsTest {
-    static class ClassA {
-        public String method1() {
-            return "hello";
-        }
-    }
-
-    static class ClassB {
-        public static ClassA getClassA() {
-            return new ClassA();
-        }
+public class SparkUtilsTest {
+    @Test
+    public void probeAppId() {
+        Assert.assertNull(SparkUtils.probeAppId(Arguments.ARG_APP_ID_REGEX));
+        Assert.assertEquals("jar", SparkUtils.probeAppId("jar"));
     }
 
     @Test
-    public void executeStaticMethods() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Object result = ReflectionUtils.executeStaticMethods("com.streamxhub.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
-        Assert.assertEquals("hello", result);
+    public void getAppId() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Assert.assertNull(SparkUtils.getSparkEnvAppId());
+    }
+
+    @Test
+    public void probeRole() {
+        Assert.assertEquals("executor", SparkUtils.probeRole("java org.apache.spark.executor.CoarseGrainedExecutorBackend"));
+        Assert.assertEquals("driver", SparkUtils.probeRole("java org.apache.spark.MockDriver"));
+        Assert.assertEquals(null, SparkUtils.probeRole("java foo"));
     }
 }

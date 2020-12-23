@@ -19,11 +19,8 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.util;
+package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
-import com.streamxhub.plugin.profiling.util.ClassAndMethodMetricKey;
-import com.streamxhub.plugin.profiling.util.Histogram;
 import org.junit.Assert;
 import org.junit.Test;
 

@@ -19,38 +19,28 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test;
+package com.streamxhub.plugin.profiling;
 
-import com.streamxhub.plugin.profiling.Profiler;
-import com.streamxhub.plugin.profiling.ProfilerRunner;
-import com.streamxhub.plugin.profiling.Reporter;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class ProfilerRunnableTest {
+public class AgentThreadFactoryTest {
     @Test
-    public void invokeRunnable() {
+    public void newThread() throws InterruptedException {
         final AtomicInteger i = new AtomicInteger(10);
 
-        ProfilerRunner profilerRunnable = new ProfilerRunner(new Profiler() {
+        AgentThreadFactory threadFactory = new AgentThreadFactory();
+        Thread thread = threadFactory.newThread(new Runnable() {
             @Override
-            public long getInterval() {
-                return 0;
-            }
-
-            @Override
-            public void setReporter(Reporter reporter) {
-            }
-
-            @Override
-            public void profile() {
+            public void run() {
                 i.incrementAndGet();
             }
         });
 
-        profilerRunnable.run();
+        thread.start();
+        thread.join();
 
         Assert.assertEquals(11, i.get());
     }
