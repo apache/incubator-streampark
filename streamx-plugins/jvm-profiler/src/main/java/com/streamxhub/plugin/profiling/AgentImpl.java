@@ -132,7 +132,9 @@ public class AgentImpl {
             }
         }
 
-        scheduleProfilers(periodicProfilers);
+        int threadPoolSize = Math.min(profilers.size(), MAX_THREAD_POOL_SIZE);
+        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize, new AgentThreadFactory());
+        scheduledExecutorService.schedule(() -> scheduleProfilers(periodicProfilers), 1, TimeUnit.MINUTES);
         started = true;
 
         return new ProfilerGroup(oneTimeProfilers, periodicProfilers);
@@ -242,7 +244,7 @@ public class AgentImpl {
                 throw new RuntimeException("Interval too short for profiler: " + profiler + ", must be at least " + Arguments.MIN_INTERVAL_MILLIS);
             }
             ProfilerRunner worker = new ProfilerRunner(profiler);
-            scheduledExecutorService.scheduleAtFixedRate(worker, 1000 * 60, profiler.getInterval(), TimeUnit.MILLISECONDS);
+            scheduledExecutorService.scheduleAtFixedRate(worker, 0, profiler.getInterval(), TimeUnit.MILLISECONDS);
             logger.info(String.format("Scheduled profiler %s with interval %s millis", profiler, profiler.getInterval()));
         }
     }
