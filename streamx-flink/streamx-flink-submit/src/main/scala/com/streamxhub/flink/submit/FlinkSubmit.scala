@@ -62,8 +62,6 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
-  private[this] val extPlugins = Seq("jvm-profiler-1.0.0.jar")
-
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
@@ -129,6 +127,23 @@ object FlinkSubmit extends Logger {
     }
   }
 
+  /**
+   * 加载streamx的plugins到flink下的plugins下.
+   *
+   * @param pluginPath
+   */
+  private[this] def loadPlugins(pluginPath: String) = {
+    logInfo("[StreamX] loadPlugins starting...")
+    val appHome = System.getProperty("app.home")
+    val streamXPlugins = new File(appHome, "plugins")
+    streamXPlugins.listFiles().foreach(x => {
+      if (!HdfsUtils.exists(s"$pluginPath/${x.getName}")) {
+        logInfo(s"[StreamX] load plugin:${x.getName} to $pluginPath")
+        HdfsUtils.upload(x.getAbsolutePath, pluginPath)
+      }
+    })
+  }
+
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
@@ -192,8 +207,9 @@ object FlinkSubmit extends Logger {
     //存放flink集群相关的jar包目录
     val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
-    //extension...
-    val hdfsExtension = new Path(s"${HdfsUtils.getDefaultFS}$APP_EXTENSION")
+
+    //加载streamx下的plugins到$FLINK_HOME/plugins下
+    loadPlugins(flinkHdfsPlugins.toString)
 
     val customCommandLines = {
 
@@ -224,7 +240,7 @@ object FlinkSubmit extends Logger {
         //从flink-conf.yaml中加载默认配置文件...
         .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
-        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, hdfsExtension.toString))
+        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
         //设置flinkDistJar
         .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
         //设置用户的jar
@@ -300,13 +316,24 @@ object FlinkSubmit extends Logger {
 
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-
         //-jvm profile support
         if (submitInfo.flameGraph != null) {
+          //find jvm-profiler
+          val appHome = System.getProperty("app.home")
+          val streamXPlugins = new File(appHome, "plugins")
+          val jvmProfiler = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
+            case array if array.length == 1 => array.head
+            case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/lib,[${more.mkString(",")}]")
+          }
+
           val buffer = new StringBuffer()
           submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
           val param = buffer.toString.dropRight(1)
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=".concat(param)
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/"
+            .concat(jvmProfiler)
+            .concat("=")
+            .concat(param)
         }
 
         array.toArray
@@ -353,6 +380,7 @@ object FlinkSubmit extends Logger {
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
+
 
   /**
    *
