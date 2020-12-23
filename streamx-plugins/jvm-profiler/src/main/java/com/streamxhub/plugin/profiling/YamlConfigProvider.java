@@ -24,14 +24,12 @@ package com.streamxhub.plugin.profiling;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.ExponentialBackoffRetryPolicy;
 import com.streamxhub.plugin.profiling.util.Utils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
 import org.yaml.snakeyaml.Yaml;
+import scalaj.http.Http;
+import scalaj.http.HttpResponse;
 
 import java.io.ByteArrayInputStream;
-import java.net.HttpURLConnection;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -194,17 +192,11 @@ public class YamlConfigProvider implements ConfigProvider {
     private static byte[] getHttp(String url) {
         try {
             logger.debug(String.format("Getting url: %s", url));
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                HttpGet httpGet = new HttpGet(url);
-                try (CloseableHttpResponse httpResponse = httpClient.execute(httpGet)) {
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-                    if (statusCode != HttpURLConnection.HTTP_OK) {
-                        throw new RuntimeException("Failed response from url: " + url + ", response code: " + statusCode);
-                    }
-                    // TODO handle charset encoding
-                    return Utils.toByteArray(httpResponse.getEntity().getContent());
-                }
+            HttpResponse response = Http.apply(url).timeout(1000, 5000).asString();
+            if (response.isError()) {
+                throw new RuntimeException("Failed response from url: " + url + ", response code: " + response.code());
             }
+            return Utils.toByteArray((InputStream) response.body());
         } catch (Throwable ex) {
             throw new RuntimeException("Failed getting url: " + url, ex);
         }

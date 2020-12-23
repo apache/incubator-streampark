@@ -73,12 +73,6 @@
             <version>1.18</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.6</version>
-        </dependency>
-
         <!--Test-->
         <dependency>
             <groupId>junit</groupId>
