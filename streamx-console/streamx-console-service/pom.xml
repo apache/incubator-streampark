@@ -47,12 +47,6 @@
 
         <dependency>
             <groupId>com.streamxhub</groupId>
-            <artifactId>jvm-profiler</artifactId>
-            <version>1.0.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.streamxhub</groupId>
             <artifactId>streamx-flink-repl</artifactId>
             <version>${project.version}</version>
             <exclusions>
@@ -93,6 +87,12 @@
                     <artifactId>slf4j-api</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub</groupId>
+            <artifactId>jvm-profiler</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <dependency>

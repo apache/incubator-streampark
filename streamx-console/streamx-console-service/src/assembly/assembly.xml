@@ -3,6 +3,7 @@
     <formats>
         <format>tar.gz</format>
     </formats>
+
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>true</useProjectArtifact>

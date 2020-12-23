@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.submit
 
-import java.io.File
+import java.io.{File, Serializable}
 import java.net.{MalformedURLException, URL}
 import java.util._
 import java.util.concurrent.{CompletableFuture, TimeUnit}
@@ -62,7 +62,7 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
-  private[this] val extPlugins = Seq("jvm-profiler-1.0.0.jar")
+  private[this] var jvmProfilerJar: String = null
 
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
@@ -129,6 +129,7 @@ object FlinkSubmit extends Logger {
     }
   }
 
+
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
@@ -137,7 +138,7 @@ object FlinkSubmit extends Logger {
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
-         |      "flameGraph": ${submitInfo.flameGraph}, "
+         |      "flameGraph": ${submitInfo.flameGraph != null}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
          |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
@@ -172,34 +173,21 @@ object FlinkSubmit extends Logger {
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
     /**
-     * init config....
+     * config....
      */
     val flinkLocalHome = System.getenv("FLINK_HOME")
-    require(flinkLocalHome != null)
     logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
-
     val flinkName = new File(flinkLocalHome).getName
-    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
-
-    if (!HdfsUtils.exists(flinkHdfsHome)) {
-      logInfo(s"[StreamX] $flinkHdfsHome is not exists,upload beginning....")
-      HdfsUtils.upload(flinkLocalHome, flinkHdfsHome)
-    }
-
-    val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
     val flinkLocalConfDir = s"$flinkLocalHome/conf"
-
-    //存放flink集群相关的jar包目录
-    val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
-    //extension...
-    val hdfsExtension = new Path(s"${HdfsUtils.getDefaultFS}$APP_EXTENSION")
+    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
+    val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
+    val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
     val customCommandLines = {
 
       val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-        case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
       }
 
@@ -209,7 +197,7 @@ object FlinkSubmit extends Logger {
         array += KEY_FLINK_APP_CONF("--")
         array += submitInfo.appConf
         array += KEY_FLINK_HOME("--")
-        array += flinkHdfsHomeWithNameService
+        array += flinkHdfsHome
         array += KEY_APP_NAME("--")
         array += appName
       }
@@ -224,7 +212,7 @@ object FlinkSubmit extends Logger {
         //从flink-conf.yaml中加载默认配置文件...
         .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
-        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, hdfsExtension.toString))
+        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
         //设置flinkDistJar
         .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
         //设置用户的jar
@@ -292,17 +280,34 @@ object FlinkSubmit extends Logger {
         val array = new ArrayBuffer[String]()
         optionMap.foreach(x => {
           array += x._1
-          if (x._2.isInstanceOf[String]) {
-            array += x._2.toString
+          x._2 match {
+            case v: String => array += v
+            case _ =>
           }
         })
 
         //-D 动态参数配置....
         submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-
         //-jvm profile support
-        if (submitInfo.flameGraph) {
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/extension/jvm-profiler-1.0.0.jar=sampleInterval=50"
+        if (submitInfo.flameGraph != null) {
+          //find jvm-profiler
+          if (jvmProfilerJar == null) {
+            val appHome = System.getProperty("app.home")
+            val streamXPlugins = new File(appHome, "plugins")
+            jvmProfilerJar = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
+              case array if array.length == 1 => array.head
+              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/plugins,[${more.mkString(",")}]")
+            }
+          }
+
+          val buffer = new StringBuffer()
+          submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
+          val param = buffer.toString.dropRight(1)
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/"
+            .concat(jvmProfilerJar)
+            .concat("=")
+            .concat(param)
         }
 
         array.toArray
@@ -349,6 +354,7 @@ object FlinkSubmit extends Logger {
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
+
 
   /**
    *
@@ -452,7 +458,7 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
-                        flameGraph: JBool,
+                        flameGraph: java.util.Map[String, Serializable],
                         overrideOption: java.util.Map[String, Any],
                         dynamicOption: Array[String],
                         args: String)

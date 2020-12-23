@@ -4,7 +4,6 @@
 
     <groupId>com.streamxhub</groupId>
     <artifactId>jvm-profiler</artifactId>
-    <!-- Please update AgentImpl.VERSION as well for same version -->
     <version>1.0.0</version>
     <packaging>jar</packaging>
 
@@ -39,6 +38,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.scalaj</groupId>
+            <artifactId>scalaj-http_2.11</artifactId>
+            <version>2.4.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.5</version>
@@ -66,12 +71,6 @@
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.18</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <version>4.3.6</version>
         </dependency>
 
         <!--Test-->
@@ -108,8 +107,8 @@
                 <configuration>
                     <archive>
                         <manifestEntries>
-                            <Agent-Class>com.uber.profiling.Agent</Agent-Class>
-                            <Premain-Class>com.uber.profiling.Agent</Premain-Class>
+                            <Agent-Class>com.streamxhub.plugin.profiling.Agent</Agent-Class>
+                            <Premain-Class>com.streamxhub.plugin.profiling.Agent</Premain-Class>
                         </manifestEntries>
                     </archive>
                 </configuration>
@@ -131,91 +130,75 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.apache</pattern>
-                                    <shadedPattern>ujagent_shaded.org.apache</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.apache</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.fasterxml</pattern>
-                                    <shadedPattern>ujagent_shaded.com.fasterxml</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.fasterxml</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.codehaus</pattern>
-                                    <shadedPattern>ujagent_shaded.org.codehaus</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.codehaus</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.thoughtworks</pattern>
-                                    <shadedPattern>ujagent_shaded.com.thoughtworks</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.thoughtworks</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.xerial</pattern>
-                                    <shadedPattern>ujagent_shaded.org.xerial</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.xerial</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.tukaani</pattern>
-                                    <shadedPattern>ujagent_shaded.org.tukaani</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.tukaani</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.slf4j</pattern>
-                                    <shadedPattern>ujagent_shaded.org.slf4j</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.slf4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.alibaba</pattern>
-                                    <shadedPattern>ujagent_shaded.com.alibaba</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.alibaba</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>net.logstash</pattern>
-                                    <shadedPattern>ujagent_shaded.net.logstash</shadedPattern>
+                                    <shadedPattern>jagent.shaded.net.logstash</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.timgroup</pattern>
-                                    <shadedPattern>ujagent_shaded.com.timgroup</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.timgroup</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.amazonaws</pattern>
-                                    <shadedPattern>ujagent_shaded.com.amazonaws</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.amazonaws</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.javassist</pattern>
-                                    <shadedPattern>ujagent_shaded.org.javassist</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.javassist</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.joda</pattern>
-                                    <shadedPattern>ujagent_shaded.org.joda</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.joda</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>avro</pattern>
-                                    <shadedPattern>ujagent_shaded.avro</shadedPattern>
+                                    <shadedPattern>jagent.shaded.avro</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>edu</pattern>
-                                    <shadedPattern>ujagent_shaded.edu</shadedPattern>
+                                    <shadedPattern>jagent.shaded.edu</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javassist</pattern>
-                                    <shadedPattern>ujagent_shaded.javassist</shadedPattern>
+                                    <shadedPattern>jagent.shaded.javassist</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>net</pattern>
-                                    <shadedPattern>ujagent_shaded.net</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.data</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.data</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.m3</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.m3</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.stream</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.stream</shadedPattern>
-                                </relocation>
-                                <relocation>
-                                    <pattern>com.uber.elk</pattern>
-                                    <shadedPattern>ujagent_shaded.com.uber.elk</shadedPattern>
+                                    <shadedPattern>jagent.shaded.net</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.shade</pattern>
-                                    <shadedPattern>ujagent_shaded.com.shade</shadedPattern>
+                                    <shadedPattern>jagent.shaded.com.shade</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.yaml</pattern>
@@ -223,19 +206,19 @@
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients</pattern>
-                                    <shadedPattern>ujagent_shaded.redis.clients</shadedPattern>
+                                    <shadedPattern>jagent.shaded.redis.clients</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.influxdb</pattern>
-                                    <shadedPattern>ujagent_shaded.org.influxdb</shadedPattern>
+                                    <shadedPattern>jagent.shaded.org.influxdb</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>ch</pattern>
-                                    <shadedPattern>ujagent_shaded.ch</shadedPattern>
+                                    <shadedPattern>jagent.shaded.ch</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
-                                    <shadedPattern>ujagent_shaded.okio</shadedPattern>
+                                    <shadedPattern>jagent.shaded.okio</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
@@ -287,107 +270,4 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>redis</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_redis</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>redis.clients</groupId>
-                    <artifactId>jedis</artifactId>
-                    <version>2.9.0</version>
-                </dependency>
-            </dependencies>
-        </profile>
-		<profile>
-            <id>influxdb</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_influxdb</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>org.influxdb</groupId>
-                    <artifactId>influxdb-java</artifactId>
-                    <version>2.14</version>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
-            <id>datadog</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.codehaus.mojo</groupId>
-                        <artifactId>build-helper-maven-plugin</artifactId>
-                        <version>3.0.0</version>
-                        <executions>
-                            <execution>
-                                <id>add-source</id>
-                                <phase>generate-sources</phase>
-                                <goals>
-                                    <goal>add-source</goal>
-                                </goals>
-                                <configuration>
-                                    <sources>
-                                        <source>src/main/java_datadog</source>
-                                    </sources>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-            <dependencies>
-                <dependency>
-                    <groupId>com.datadoghq</groupId>
-                    <artifactId>java-dogstatsd-client</artifactId>
-                    <version>2.7</version>
-                </dependency>
-            </dependencies>
-        </profile>
-
-    </profiles>
 </project>

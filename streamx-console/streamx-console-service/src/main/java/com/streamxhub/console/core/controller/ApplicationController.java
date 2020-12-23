@@ -149,7 +149,7 @@ public class ApplicationController extends BaseController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(properties.getYarn());
+        return RestResponse.create().data(properties.getYarnUrl());
     }
 
     @PostMapping("name")
