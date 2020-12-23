@@ -126,75 +126,75 @@
                             <relocations>
                                 <relocation>
                                     <pattern>org.apache</pattern>
-                                    <shadedPattern>ujagent_shaded.org.apache</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.apache</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.fasterxml</pattern>
-                                    <shadedPattern>ujagent_shaded.com.fasterxml</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.fasterxml</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.codehaus</pattern>
-                                    <shadedPattern>ujagent_shaded.org.codehaus</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.codehaus</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.thoughtworks</pattern>
-                                    <shadedPattern>ujagent_shaded.com.thoughtworks</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.thoughtworks</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.xerial</pattern>
-                                    <shadedPattern>ujagent_shaded.org.xerial</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.xerial</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.tukaani</pattern>
-                                    <shadedPattern>ujagent_shaded.org.tukaani</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.tukaani</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.slf4j</pattern>
-                                    <shadedPattern>ujagent_shaded.org.slf4j</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.slf4j</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.alibaba</pattern>
-                                    <shadedPattern>ujagent_shaded.com.alibaba</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.alibaba</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>net.logstash</pattern>
-                                    <shadedPattern>ujagent_shaded.net.logstash</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.net.logstash</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.timgroup</pattern>
-                                    <shadedPattern>ujagent_shaded.com.timgroup</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.timgroup</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.amazonaws</pattern>
-                                    <shadedPattern>ujagent_shaded.com.amazonaws</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.amazonaws</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.javassist</pattern>
-                                    <shadedPattern>ujagent_shaded.org.javassist</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.javassist</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.joda</pattern>
-                                    <shadedPattern>ujagent_shaded.org.joda</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.joda</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>avro</pattern>
-                                    <shadedPattern>ujagent_shaded.avro</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.avro</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>edu</pattern>
-                                    <shadedPattern>ujagent_shaded.edu</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.edu</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>javassist</pattern>
-                                    <shadedPattern>ujagent_shaded.javassist</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.javassist</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>net</pattern>
-                                    <shadedPattern>ujagent_shaded.net</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.net</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>com.shade</pattern>
-                                    <shadedPattern>ujagent_shaded.com.shade</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.com.shade</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.yaml</pattern>
@@ -202,19 +202,19 @@
                                 </relocation>
                                 <relocation>
                                     <pattern>redis.clients</pattern>
-                                    <shadedPattern>ujagent_shaded.redis.clients</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.redis.clients</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>org.influxdb</pattern>
-                                    <shadedPattern>ujagent_shaded.org.influxdb</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.org.influxdb</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>ch</pattern>
-                                    <shadedPattern>ujagent_shaded.ch</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.ch</shadedPattern>
                                 </relocation>
                                 <relocation>
                                     <pattern>okio</pattern>
-                                    <shadedPattern>ujagent_shaded.okio</shadedPattern>
+                                    <shadedPattern>com.streamxhub.plugin.shaded.okio</shadedPattern>
                                 </relocation>
                             </relocations>
                             <filters>
