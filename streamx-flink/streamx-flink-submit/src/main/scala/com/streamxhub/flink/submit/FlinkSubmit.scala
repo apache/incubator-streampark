@@ -297,7 +297,7 @@ object FlinkSubmit extends Logger {
             jvmProfilerJar = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
               case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
               case array if array.length == 1 => array.head
-              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/lib,[${more.mkString(",")}]")
+              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/plugins,[${more.mkString(",")}]")
             }
           }
 
