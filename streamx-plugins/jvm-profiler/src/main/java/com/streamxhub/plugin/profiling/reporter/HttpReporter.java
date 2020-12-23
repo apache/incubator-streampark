@@ -69,33 +69,11 @@ public class HttpReporter implements Reporter {
         param.put("metric", Utils.zipString(json));
 
         HttpResponse response = Http.apply(url)
-                .timeout(1000,5000)
-                .header("content-type","application/json;charset=UTF-8")
+                .timeout(1000, 5000)
+                .header("content-type", "application/json;charset=UTF-8")
                 .postData(Utils.toJsonString(param))
                 .asString();
         logger.log("[StreamX] jvm-profiler report:" + response.body());
-
-        /*try {
-            logger.debug(String.format("Getting url: %s", url));
-            try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
-                HttpPost httpPost = new HttpPost(url);
-                List<NameValuePair> pairs = new ArrayList<>(1);
-                pairs.add(new BasicNameValuePair("metric", Utils.zipString(json)));
-                httpPost.setEntity(new UrlEncodedFormEntity(pairs, UTF_8));
-                try (CloseableHttpResponse httpResponse = httpClient.execute(httpPost)) {
-                    int statusCode = httpResponse.getStatusLine().getStatusCode();
-                    if (statusCode != HttpURLConnection.HTTP_OK) {
-                        throw new RuntimeException("Failed response from url: " + url + ", response code: " + statusCode);
-                    }
-                    byte[] bytes = Utils.toByteArray(httpResponse.getEntity().getContent());
-                    String result = new String(bytes, UTF_8.name());
-                    logger.log("[StreamX] jvm-profiler report:" + result);
-                }
-            }
-        } catch (Throwable ex) {
-            throw new RuntimeException("Failed getting url: " + url, ex);
-        }*/
-
     }
 
     @Override
