@@ -41,6 +41,8 @@ public class FlameGraph {
 
     private Long appId;
 
+    private String profiler;
+
     private Date timeline;
 
     private String content;

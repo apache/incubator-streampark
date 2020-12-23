@@ -5,6 +5,7 @@
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
         <result column="TIMELINE" jdbcType="VARCHAR" property="timeline"/>
+        <result column="PROFILER" jdbcType="VARCHAR" property="profiler"/>
         <result column="CONTENT" jdbcType="VARCHAR" property="content"/>
     </resultMap>
 </mapper>

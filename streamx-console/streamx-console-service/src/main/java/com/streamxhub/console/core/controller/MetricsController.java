@@ -53,6 +53,7 @@ public class MetricsController {
                 String json = jvmProfiler.getMetrics();
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());
+                flameGraph.setProfiler(jvmProfiler.getProfiler());
                 flameGraph.setTimeline(new Date());
                 flameGraph.setContent(json);
                 flameGraphService.save(flameGraph);
