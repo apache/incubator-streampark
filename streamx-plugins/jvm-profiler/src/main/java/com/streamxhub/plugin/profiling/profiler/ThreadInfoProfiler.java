@@ -39,7 +39,10 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
     private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
     private ThreadMXBean threadMXBean;
-    private long previousTotalStartedThreadCount = 0L; // to keep track of Total Thread.
+    /**
+     * to keep track of Total Thread.
+     */
+    private long previousTotalStartedThreadCount = 0L;
 
     private Reporter reporter;
 
@@ -73,11 +76,25 @@ public class ThreadInfoProfiler extends ProfilerBase implements Profiler {
 
     @Override
     public void profile() {
-        long totalStartedThreadCount = 0L; // total Thread created so far since JVm Launch.
-        int liveThreadCount = 0; // Number of thread which are currently active.
-        int peakThreadCount = 0; // the peak live thread count since the Java virtual machine started or peak was reset
-        long newThreadCount = 0; // Number of new thread created since last time time the metrics was created.
-        // This is a Derived metrics from previous data point.
+        /**
+         * total Thread created so far since JVm Launch.
+         */
+        long totalStartedThreadCount = 0L;
+        /**
+         * Number of thread which are currently active.
+         */
+        int liveThreadCount = 0;
+        /**
+         * the peak live thread count since the Java virtual machine started or peak was reset
+         */
+        int peakThreadCount = 0;
+        /**
+         * Number of new thread created since last time time the metrics was created.
+         */
+        long newThreadCount = 0;
+        /**
+         * This is a Derived metrics from previous data point.
+         */
         if (threadMXBean != null) {
             liveThreadCount = threadMXBean.getThreadCount();
             peakThreadCount = threadMXBean.getPeakThreadCount();
