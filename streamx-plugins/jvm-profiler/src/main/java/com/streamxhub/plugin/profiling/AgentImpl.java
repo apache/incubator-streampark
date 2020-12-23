@@ -131,12 +131,8 @@ public class AgentImpl {
                 logger.warn("Failed to run periodic profiler (first run): " + profiler, ex);
             }
         }
-
-        int threadPoolSize = Math.min(profilers.size(), MAX_THREAD_POOL_SIZE);
-        ScheduledExecutorService scheduledExecutorService = Executors.newScheduledThreadPool(threadPoolSize, new AgentThreadFactory());
-        scheduledExecutorService.schedule(() -> scheduleProfilers(periodicProfilers), 1, TimeUnit.MINUTES);
+        scheduleProfilers(periodicProfilers);
         started = true;
-
         return new ProfilerGroup(oneTimeProfilers, periodicProfilers);
     }
 
