@@ -32,12 +32,15 @@ import com.streamxhub.plugin.profiling.ArgumentUtils;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.Utils;
+import scala.Tuple2;
+import scala.collection.Seq;
 import scalaj.http.Http;
 import scalaj.http.HttpRequest;
 import scalaj.http.HttpResponse;
 
 import java.net.HttpURLConnection;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -76,8 +79,14 @@ public class HttpReporter implements Reporter {
         metrics.put("$token", token);
         metrics.put("$type", type);
         String json = Utils.toJsonString(metrics);
-        String params = "metric=" + Utils.zipString(json);
-        HttpResponse response = Http.apply(url).postData(params).asString();
+
+        Map<String,String> params = new HashMap<>();
+        params.put("metric",Utils.zipString(json));
+
+        HttpResponse response = Http.apply(url)
+                .header("Content-Type", "application/json")
+                .header("Charset", "UTF-8")
+                .postData(Utils.toJsonString(params)).asString();
         logger.log("[StreamX] jvm-profiler report:" + response.body());
 
         /*try {
