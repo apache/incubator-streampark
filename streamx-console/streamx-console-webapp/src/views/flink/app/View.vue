@@ -500,6 +500,14 @@
             @click="handleDetail(record)"
             title="查看">
           </a-icon>
+          <a-icon
+            v-if="record.flameGraph"
+            type="picture"
+            v-permit="'app:flameGraph'"
+            style="color:#4a9ff5"
+            @click="handleFlameGraph(record)"
+            title="查看">
+          </a-icon>
         </template>
 
       </a-table>
@@ -1188,6 +1196,10 @@ export default {
     handleDetail (app) {
       this.SetAppId(app.id)
       this.$router.push({ 'path': '/flink/app/detail' })
+    },
+
+    handleFlameGraph (app) {
+      console.log('handleFlameGraph:' + app.id)
     },
 
     handleSearch (selectedKeys, confirm, dataIndex) {
