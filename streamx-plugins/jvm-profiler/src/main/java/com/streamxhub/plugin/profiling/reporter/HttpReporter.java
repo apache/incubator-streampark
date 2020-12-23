@@ -72,8 +72,8 @@ public class HttpReporter implements Reporter {
         metrics.put("$id", id);
         metrics.put("$token", token);
         metrics.put("$type", type);
-        String json = Utils.toJsonString(metrics);
-        try {
+        System.out.println(String.format("HttpReporter - %s: %s", profilerName, Utils.toJsonString(metrics)));
+        /*try {
             logger.debug(String.format("Getting url: %s", url));
             try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
                 HttpPost httpPost = new HttpPost(url);
@@ -92,7 +92,7 @@ public class HttpReporter implements Reporter {
             }
         } catch (Throwable ex) {
             throw new RuntimeException("Failed getting url: " + url, ex);
-        }
+        }*/
 
     }
 
