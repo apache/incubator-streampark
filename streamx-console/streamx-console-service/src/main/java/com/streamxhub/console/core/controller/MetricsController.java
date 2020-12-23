@@ -20,12 +20,12 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.streamxhub.common.util.DeflaterUtils;
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.metrics.flink.JvmProfiler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -37,19 +37,14 @@ import java.util.Map;
 @RequestMapping("metrics")
 public class MetricsController {
 
-    private ObjectMapper mapper = new ObjectMapper();
 
     @PostMapping("report")
-    public RestResponse report(String metric) {
+    public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
-            String content = DeflaterUtils.unzipString(metric);
-            if (content != null) {
-                Map<String, Object> map = mapper.readValue(content, Map.class);
+            if (jvmProfiler != null) {
+                System.out.println("id:" + jvmProfiler.getId() + ",token:" + jvmProfiler.getToken() + ",type:" + jvmProfiler.getType());
+                Map<String, Object> map = jvmProfiler.getMetrics();
                 if (map != null) {
-                    String id = map.remove("$id").toString();
-                    String token = map.remove("$token").toString();
-                    String type = map.remove("$type").toString();
-                    System.out.println("id:" + id + ",token:" + token + ",type:" + type);
                     map.forEach((k, v) -> System.out.println(k + "=====>" + v));
                 }
             }
