@@ -21,30 +21,16 @@
 
 package com.streamxhub.plugin.profiling.reporter;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import com.streamxhub.plugin.profiling.ArgumentUtils;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.util.AgentLogger;
 import com.streamxhub.plugin.profiling.util.Utils;
-import scala.Tuple2;
-import scala.collection.Seq;
 import scalaj.http.Http;
-import scalaj.http.HttpRequest;
 import scalaj.http.HttpResponse;
 
-import java.net.HttpURLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static org.apache.http.Consts.UTF_8;
 
 /**
  * @author benjobs
@@ -75,18 +61,19 @@ public class HttpReporter implements Reporter {
 
     @Override
     public void report(String profilerName, Map<String, Object> metrics) {
-        metrics.put("$id", id);
-        metrics.put("$token", token);
-        metrics.put("$type", type);
         String json = Utils.toJsonString(metrics);
-
-        Map<String,String> params = new HashMap<>();
-        params.put("metric",Utils.zipString(json));
+        Map<String, String> param = new HashMap<>();
+        param.put("id", id);
+        param.put("type", type);
+        param.put("token", token);
+        param.put("metric", Utils.zipString(json));
 
         HttpResponse response = Http.apply(url)
+                .timeout(1000,5000)
                 .header("Content-Type", "application/json")
                 .header("Charset", "UTF-8")
-                .postData(Utils.toJsonString(params)).asString();
+                .postData(Utils.toJsonString(param))
+                .asString();
         logger.log("[StreamX] jvm-profiler report:" + response.body());
 
         /*try {
