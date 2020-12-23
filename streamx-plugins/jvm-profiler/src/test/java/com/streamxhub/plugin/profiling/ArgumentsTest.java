@@ -19,11 +19,8 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test;
+package com.streamxhub.plugin.profiling;
 
-import com.streamxhub.plugin.profiling.Arguments;
-import com.streamxhub.plugin.profiling.ConfigProvider;
-import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter;
 import com.streamxhub.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgument;

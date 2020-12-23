@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test;
+package com.streamxhub.plugin.profiling;
 
 import org.junit.Assert;
 import org.junit.Test;

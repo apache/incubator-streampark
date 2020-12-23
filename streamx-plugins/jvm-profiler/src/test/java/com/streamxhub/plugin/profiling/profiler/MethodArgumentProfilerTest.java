@@ -19,11 +19,9 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.profiler;
+package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.profiler.MethodArgumentCollector;
-import com.streamxhub.plugin.profiling.profiler.MethodArgumentProfiler;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 import org.junit.Assert;
 import org.junit.Test;

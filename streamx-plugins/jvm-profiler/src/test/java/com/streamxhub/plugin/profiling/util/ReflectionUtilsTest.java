@@ -19,17 +19,29 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.reporter;
+package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter;
+import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashMap;
+import java.lang.reflect.InvocationTargetException;
 
-public class ConsoleOutputReporterTest {
+public class ReflectionUtilsTest {
+    static class ClassA {
+        public String method1() {
+            return "hello";
+        }
+    }
+
+    static class ClassB {
+        public static ClassA getClassA() {
+            return new ClassA();
+        }
+    }
+
     @Test
-    public void report() {
-        ConsoleOutputReporter reporter = new ConsoleOutputReporter();
-        reporter.report("Test", new HashMap<String, Object>());
+    public void executeStaticMethods() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
+        Object result = ReflectionUtils.executeStaticMethods("com.streamxhub.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
+        Assert.assertEquals("hello", result);
     }
 }

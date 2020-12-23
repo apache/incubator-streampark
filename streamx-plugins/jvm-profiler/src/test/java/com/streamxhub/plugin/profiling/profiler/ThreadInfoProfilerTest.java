@@ -1,7 +1,6 @@
-package com.streamxhub.plugin.profiling.test.profiler;
+package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.profiler.ThreadInfoProfiler;
 import org.junit.Assert;
 import org.junit.Test;
 

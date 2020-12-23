@@ -19,10 +19,9 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.profiler;
+package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.profiler.ProcessInfoProfiler;
 import com.streamxhub.plugin.profiling.util.ProcFileUtils;
 import com.streamxhub.plugin.profiling.util.ProcessUtils;
 import org.junit.Assert;

@@ -19,11 +19,10 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.test.reporter;
+package com.streamxhub.plugin.profiling.reporter;
 
 import static org.junit.Assert.assertEquals;
 
-import com.streamxhub.plugin.profiling.reporter.GraphiteOutputReporter;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
