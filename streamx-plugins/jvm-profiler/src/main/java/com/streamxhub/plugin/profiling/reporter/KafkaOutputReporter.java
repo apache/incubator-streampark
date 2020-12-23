@@ -95,8 +95,7 @@ public class KafkaOutputReporter implements Reporter {
         String str = Utils.toJsonString(metrics);
         byte[] message = str.getBytes(StandardCharsets.UTF_8);
 
-        Future<RecordMetadata> future = producer.send(
-                new ProducerRecord<String, byte[]>(topicName, message));
+        Future<RecordMetadata> future = producer.send(new ProducerRecord<String, byte[]>(topicName, message));
 
         if (syncMode) {
             producer.flush();

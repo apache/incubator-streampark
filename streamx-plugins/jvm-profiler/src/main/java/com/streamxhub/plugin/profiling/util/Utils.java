@@ -15,6 +15,9 @@ import java.net.InetAddress;
 import java.util.Map;
 
 
+/**
+ * @author benjobs
+ */
 public class Utils {
 
     protected static ObjectMapper mapper = new ObjectMapper();

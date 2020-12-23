@@ -21,6 +21,9 @@
 
 package com.streamxhub.plugin.profiling;
 
+import com.streamxhub.plugin.profiling.Profiler;
+import com.streamxhub.plugin.profiling.ProfilerRunner;
+import com.streamxhub.plugin.profiling.Reporter;
 import org.junit.Assert;
 import org.junit.Test;
 
