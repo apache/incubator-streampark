@@ -77,7 +77,7 @@ public class HttpReporter implements Reporter {
         metrics.put("$type", type);
         String json = Utils.toJsonString(metrics);
         String params = "metric=" + Utils.zipString(json);
-        HttpResponse response = Http.apply(url).postData(params.getBytes()).asString();
+        HttpResponse response = Http.apply(url).postData(params).asString();
         logger.log("[StreamX] jvm-profiler report:" + response.body());
 
         /*try {
