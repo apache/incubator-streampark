@@ -173,24 +173,21 @@ object FlinkSubmit extends Logger {
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
     /**
-     * init config....
+     * config....
      */
     val flinkLocalHome = System.getenv("FLINK_HOME")
     logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
     val flinkName = new File(flinkLocalHome).getName
-    val flinkHdfsHome = s"$APP_FLINK/$flinkName"
-    val flinkHdfsHomeWithNameService = s"${HdfsUtils.getDefaultFS}$flinkHdfsHome"
     val flinkLocalConfDir = s"$flinkLocalHome/conf"
-
-    //存放flink集群相关的jar包目录
-    val flinkHdfsLibs = new Path(s"$flinkHdfsHomeWithNameService/lib")
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsHomeWithNameService/plugins")
+    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
+    val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
+    val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
     val customCommandLines = {
 
       val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-        case array if array.length == 1 => s"$flinkHdfsHomeWithNameService/lib/${array.head}"
+        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
       }
 
@@ -200,7 +197,7 @@ object FlinkSubmit extends Logger {
         array += KEY_FLINK_APP_CONF("--")
         array += submitInfo.appConf
         array += KEY_FLINK_HOME("--")
-        array += flinkHdfsHomeWithNameService
+        array += flinkHdfsHome
         array += KEY_APP_NAME("--")
         array += appName
       }
