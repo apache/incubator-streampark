@@ -21,15 +21,18 @@
 package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.FlameGraph;
 import com.streamxhub.console.core.metrics.flink.JvmProfiler;
+import com.streamxhub.console.core.service.FlameGraphService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Map;
+import java.util.Date;
 
 @Slf4j
 @Validated
@@ -37,16 +40,22 @@ import java.util.Map;
 @RequestMapping("metrics")
 public class MetricsController {
 
+    private final String STACKTRACE_PROFILER_NAME = "Stacktrace";
+
+    @Autowired
+    private FlameGraphService flameGraphService;
 
     @PostMapping("report")
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
-            if (jvmProfiler != null) {
+            if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
                 System.out.println("id:" + jvmProfiler.getId() + ",token:" + jvmProfiler.getToken() + ",type:" + jvmProfiler.getType());
-                Map<String, Object> map = jvmProfiler.getMetrics();
-                if (map != null) {
-                    map.forEach((k, v) -> System.out.println(k + "=====>" + v));
-                }
+                String json = jvmProfiler.getMetrics();
+                FlameGraph flameGraph = new FlameGraph();
+                flameGraph.setAppId(jvmProfiler.getId());
+                flameGraph.setTimeline(new Date());
+                flameGraph.setContent(json);
+                flameGraphService.save(flameGraph);
             }
         } catch (Exception e) {
             e.printStackTrace();

@@ -83,6 +83,7 @@ public class Application implements Serializable {
     private String options;
     private String dynamicOptions;
     private Integer appType;
+    private Boolean flameGraph;
     /**
      * 是否需要跟踪监控状态
      */
@@ -121,7 +122,6 @@ public class Application implements Serializable {
     private transient JobsOverview.Task overview;
     private transient Boolean backUp;
     private transient Boolean restart;
-    private transient Boolean flameGraph;
     private transient String userName;
     private transient String config;
     private transient Long configId;

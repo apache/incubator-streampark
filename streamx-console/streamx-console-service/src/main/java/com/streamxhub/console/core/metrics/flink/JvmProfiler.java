@@ -21,17 +21,25 @@ public class JvmProfiler implements Serializable {
     private ObjectMapper mapper = new ObjectMapper();
 
     private String metric;
-    private String id;
+    private Long id;
     private String token;
     private String type;
     private String profiler;
 
     @JsonIgnore
-    public Map<String, Object> getMetrics() throws IOException {
+    public Map<String, Object> getMetricsAsMap() throws IOException {
         if (CommonUtil.notEmpty(metric)) {
             String content = DeflaterUtils.unzipString(metric);
             return mapper.readValue(content, Map.class);
         }
         return Collections.EMPTY_MAP;
+    }
+
+    @JsonIgnore
+    public String getMetrics() {
+        if (CommonUtil.notEmpty(metric)) {
+            return DeflaterUtils.unzipString(metric);
+        }
+        return null;
     }
 }

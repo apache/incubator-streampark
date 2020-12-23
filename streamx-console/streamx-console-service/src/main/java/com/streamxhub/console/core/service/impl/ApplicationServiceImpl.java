@@ -428,6 +428,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Application application = getById(appParam.getId());
         assert application != null;
         application.setOptionState(OptionState.STARTING.getValue());
+        application.setFlameGraph(appParam.getFlameGraph());
         this.baseMapper.updateById(application);
 
         Project project = projectService.getById(application.getProjectId());
