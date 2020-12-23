@@ -5,14 +5,16 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Data;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * @author benjobs
  */
 @Data
-public class JvmProfiler {
+public class JvmProfiler implements Serializable {
 
+    @JsonIgnore
     private ObjectMapper mapper = new ObjectMapper();
 
     private String metric;
