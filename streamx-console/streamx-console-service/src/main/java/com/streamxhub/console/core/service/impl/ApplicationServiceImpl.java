@@ -489,7 +489,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         Map<String, Serializable> flameGraph = null;
         if (appParam.getFlameGraph()) {
             flameGraph = new HashMap<>();
-            flameGraph.put("reporter", "com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter");
+            flameGraph.put("reporter", "com.streamxhub.plugin.profiling.reporter.HttpReporter");
             flameGraph.put("type", ApplicationType.STREAMX_FLINK.getType());
             flameGraph.put("id", application.getId());
             flameGraph.put("url", properties.getConsoleUrl().concat("/metrics/report"));
