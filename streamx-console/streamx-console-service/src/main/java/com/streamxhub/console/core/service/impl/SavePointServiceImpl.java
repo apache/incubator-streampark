@@ -28,6 +28,7 @@ import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.console.base.domain.Constant;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.SavePointMapper;
 import com.streamxhub.console.core.entity.SavePoint;
@@ -61,7 +62,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (StringUtils.isNotEmpty(savePoint.getSavePoint()) && HdfsUtils.exists(savePoint.getSavePoint())) {
+            if (CommonUtil.notEmpty(savePoint.getSavePoint()) && HdfsUtils.exists(savePoint.getSavePoint())) {
                 HdfsUtils.deleteFile(savePoint.getSavePoint());
             }
             removeById(id);
