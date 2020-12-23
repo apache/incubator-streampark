@@ -66,8 +66,8 @@ public class HttpReporter implements Reporter {
         param.put("id", id);
         param.put("type", type);
         param.put("token", token);
+        param.put("profiler",profilerName);
         param.put("metric", Utils.zipString(json));
-
         HttpResponse response = Http.apply(url)
                 .timeout(1000, 5000)
                 .header("content-type", "application/json;charset=UTF-8")

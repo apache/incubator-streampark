@@ -24,6 +24,7 @@ public class JvmProfiler implements Serializable {
     private String id;
     private String token;
     private String type;
+    private String profiler;
 
     @JsonIgnore
     public Map<String, Object> getMetrics() throws IOException {
