@@ -62,6 +62,8 @@ object FlinkSubmit extends Logger {
 
   private[this] var flinkDefaultConfiguration: Configuration = null
 
+  private[this] var jvmProfilerJar: String = null
+
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
@@ -126,7 +128,6 @@ object FlinkSubmit extends Logger {
       }
     }
   }
-
 
 
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
@@ -293,19 +294,21 @@ object FlinkSubmit extends Logger {
         //-jvm profile support
         if (submitInfo.flameGraph != null) {
           //find jvm-profiler
-          val appHome = System.getProperty("app.home")
-          val streamXPlugins = new File(appHome, "plugins")
-          val jvmProfiler = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
-            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
-            case array if array.length == 1 => array.head
-            case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/lib,[${more.mkString(",")}]")
+          if (jvmProfilerJar == null) {
+            val appHome = System.getProperty("app.home")
+            val streamXPlugins = new File(appHome, "plugins")
+            jvmProfilerJar = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
+              case array if array.length == 1 => array.head
+              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/lib,[${more.mkString(",")}]")
+            }
           }
 
           val buffer = new StringBuffer()
           submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
           val param = buffer.toString.dropRight(1)
           array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/"
-            .concat(jvmProfiler)
+            .concat(jvmProfilerJar)
             .concat("=")
             .concat(param)
         }
