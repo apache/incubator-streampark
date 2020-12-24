@@ -292,12 +292,12 @@ object FlinkSubmit extends Logger {
         if (submitInfo.flameGraph != null) {
           //find jvm-profiler
           if (jvmProfilerJar == null) {
-            val appHome = System.getProperty("app.home")
-            val streamXPlugins = new File(appHome, "plugins")
-            jvmProfilerJar = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
-              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
+            val pluginsPath = System.getProperty("app.home").concat("/plugins")
+            val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
+            jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
               case array if array.length == 1 => array.head
-              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/plugins,[${more.mkString(",")}]")
+              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
             }
           }
 
