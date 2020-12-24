@@ -78,8 +78,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
      */
     private void loadPlugins(String pluginPath) throws Exception {
         log.info("[StreamX] loadPlugins starting...");
-        String appHome = WebUtil.getAppHome();
-        File streamXPlugins = new File(appHome, "plugins");
+        File streamXPlugins = new File(WebUtil.getAppDir("plugins"));
         for (File file : streamXPlugins.listFiles()) {
             String plugin = pluginPath.concat("/").concat(file.getName());
             if (!HdfsUtils.exists(plugin)) {
