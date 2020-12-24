@@ -67,7 +67,8 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             List<String> commands = Arrays.asList(
                     String.format("cd %s", flameGraphPath),
                     String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                    String.format("./flamegraph.pl %s > %s ", foldedPath, svgPath)
+                    String.format("./flamegraph.pl %s > %s ", foldedPath, svgPath),
+                    "exit"
             );
 
             try {
