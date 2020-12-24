@@ -31,6 +31,11 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
+            <directory>src/assembly/temp</directory>
+            <outputDirectory>temp</outputDirectory>
+            <fileMode>0777</fileMode>
+        </fileSet>
+        <fileSet>
             <directory>src/assembly/plugins</directory>
             <outputDirectory>plugins</outputDirectory>
             <fileMode>0755</fileMode>
