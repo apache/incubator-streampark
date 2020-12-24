@@ -1205,11 +1205,10 @@ export default {
       },
       (resp) => {
         if (resp != null) {
-          const url = 'data:image/png;base64,' + btoa(
-            new Uint8Array(resp).reduce((data, byte) => data + String.fromCharCode(byte), '')
-          )
-          console.log(url)
-          window.open(url)
+          const blob = new Blob([resp], { type: 'image/svg+xml' })
+          const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+          console.log(imageUrl)
+          window.open(imageUrl)
         }
       },
       { loading: '正在生成flameGraph...', error: 'flameGraph生成失败.' }
