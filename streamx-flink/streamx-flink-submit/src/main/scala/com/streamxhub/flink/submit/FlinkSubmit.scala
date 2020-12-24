@@ -292,19 +292,19 @@ object FlinkSubmit extends Logger {
         if (submitInfo.flameGraph != null) {
           //find jvm-profiler
           if (jvmProfilerJar == null) {
-            val appHome = System.getProperty("app.home")
-            val streamXPlugins = new File(appHome, "plugins")
-            jvmProfilerJar = streamXPlugins.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
-              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $appHome/plugins")
+            val pluginsPath = System.getProperty("app.home").concat("/plugins")
+            val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
+            jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
               case array if array.length == 1 => array.head
-              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $appHome/plugins,[${more.mkString(",")}]")
+              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
             }
           }
 
           val buffer = new StringBuffer()
           submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
           val param = buffer.toString.dropRight(1)
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/"
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
             .concat(jvmProfilerJar)
             .concat("=")
             .concat(param)

@@ -43,7 +43,7 @@ public class HttpReporter implements Reporter {
     private final static String ARG_TOKEN = "token";
     private final static String ARG_URL = "url";
     private final static String ARG_TYPE = "type";
-    private String id;
+    private Long id;
     private String token;
     private String url;
     private String type;
@@ -53,7 +53,7 @@ public class HttpReporter implements Reporter {
 
     @Override
     public void doArguments(Map<String, List<String>> parsedArgs) {
-        id = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID);
+        id = Long.parseLong(ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID).trim());
         token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
         url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);
         type = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TYPE);
@@ -62,18 +62,18 @@ public class HttpReporter implements Reporter {
     @Override
     public void report(String profilerName, Map<String, Object> metrics) {
         String json = Utils.toJsonString(metrics);
-        Map<String, String> param = new HashMap<>();
+        Map<String, Object> param = new HashMap<>();
         param.put("id", id);
         param.put("type", type);
         param.put("token", token);
+        param.put("profiler", profilerName);
         param.put("metric", Utils.zipString(json));
-
         HttpResponse response = Http.apply(url)
                 .timeout(1000, 5000)
                 .header("content-type", "application/json;charset=UTF-8")
                 .postData(Utils.toJsonString(param))
                 .asString();
-        logger.log("[StreamX] jvm-profiler report:" + response.body());
+        logger.log("[StreamX] jvm-profiler profiler:" + profilerName + ",report result:" + response.body());
     }
 
     @Override

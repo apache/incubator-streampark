@@ -149,7 +149,6 @@ public class AgentImpl {
         cpuAndMemoryProfiler.setInterval(metricInterval);
         cpuAndMemoryProfiler.setProcessUuid(processUuid);
         cpuAndMemoryProfiler.setAppId(appId);
-
         profilers.add(cpuAndMemoryProfiler);
 
         ThreadInfoProfiler threadInfoProfiler = new ThreadInfoProfiler(reporter);
@@ -158,7 +157,6 @@ public class AgentImpl {
         threadInfoProfiler.setInterval(metricInterval);
         threadInfoProfiler.setProcessUuid(processUuid);
         threadInfoProfiler.setAppId(appId);
-
         profilers.add(threadInfoProfiler);
 
         ProcessInfoProfiler processInfoProfiler = new ProcessInfoProfiler(reporter);
@@ -166,7 +164,6 @@ public class AgentImpl {
         processInfoProfiler.setCluster(cluster);
         processInfoProfiler.setProcessUuid(processUuid);
         processInfoProfiler.setAppId(appId);
-
         profilers.add(processInfoProfiler);
 
         if (!arguments.getDurationProfiling().isEmpty()) {
