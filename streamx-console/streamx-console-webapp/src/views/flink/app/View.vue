@@ -1208,7 +1208,6 @@ export default {
         if (resp != null) {
           const blob = new Blob([resp], { type: 'image/svg+xml' })
           const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-          console.log(imageUrl)
           window.open(imageUrl)
         }
       },
