@@ -21,12 +21,17 @@
 package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.FlameGraph;
 import com.streamxhub.console.core.metrics.flink.JvmProfiler;
 import com.streamxhub.console.core.service.FlameGraphService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ContentDisposition;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -35,7 +40,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Validated
@@ -69,8 +73,20 @@ public class MetricsController {
 
 
     @PostMapping("flamegraph")
-    public RestResponse flameGraph(FlameGraph flameGraph) throws IOException {
-        return flameGraphService.generateFlameGraph(flameGraph);
+    public ResponseEntity<Resource> flameGraph(FlameGraph flameGraph) throws IOException {
+        String file = flameGraphService.generateFlameGraph(flameGraph);
+        if (file != null) {
+            String contentDisposition = ContentDisposition
+                    .builder("attachment")
+                    .filename(file)
+                    .build().toString();
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
+                    .contentType(MediaType.parseMediaType("image/svg+xml"))
+                    .body(new FileSystemResource(file));
+        } else {
+            return null;
+        }
     }
 
 }

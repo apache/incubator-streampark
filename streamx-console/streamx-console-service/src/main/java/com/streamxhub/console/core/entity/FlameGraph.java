@@ -69,8 +69,4 @@ public class FlameGraph {
         return cal.getTime();
     }
 
-    public String getFlameGraphJsonName() {
-        return String.format("%d_%d_%d.json", this.appId, start.getTime(), getEnd().getTime());
-    }
-
 }
