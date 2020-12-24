@@ -773,6 +773,7 @@ import State from './State'
 import { mapActions } from 'vuex'
 import { list, dashboard, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
+import { flamegraph } from '@api/metrics'
 import { Icon } from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
@@ -1199,10 +1200,18 @@ export default {
     },
 
     handleFlameGraph (app) {
-
-      this.$http
-
-      console.log('handleFlameGraph:' + app.id)
+      flamegraph({
+          appId: app.id
+        },
+        (resp) => {
+          const url = 'data:image/png;base64,' + btoa(
+            new Uint8Array(resp).reduce((data, byte) => data + String.fromCharCode(byte), '')
+          )
+          console.log(url)
+          window.open(url)
+        },
+        {loading: '正在生成flameGraph...', error: 'flameGraph生成失败.'}
+      )
     },
 
     handleSearch (selectedKeys, confirm, dataIndex) {
