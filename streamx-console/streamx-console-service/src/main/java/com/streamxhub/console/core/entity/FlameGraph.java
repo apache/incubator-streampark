@@ -70,7 +70,7 @@ public class FlameGraph {
     }
 
     @JsonIgnore
-    public String getContent() {
+    public String getUnzipContent() {
         if (this.content != null) {
             return DeflaterUtils.unzipString(this.content);
         }
