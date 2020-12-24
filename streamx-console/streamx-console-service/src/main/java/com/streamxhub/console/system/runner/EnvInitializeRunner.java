@@ -77,6 +77,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
      */
     private void loadPlugins(String pluginPath) throws Exception {
         log.info("[StreamX] loadPlugins starting...");
+        
         String appHome = System.getProperty("app.home");
         File streamXPlugins = new File(appHome, "plugins");
         for (File file : streamXPlugins.listFiles()) {
