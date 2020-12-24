@@ -25,7 +25,7 @@ export default {
     SUBMIT: '/flink/notebook/submit'
   },
   Metrics: {
-    FLAMEGRAPH: '/flink/metrics/flamegraph'
+    FLAMEGRAPH: '/metrics/flamegraph'
   },
   SavePoint: {
     LASTEST: '/flink/savepoint/lastest',
