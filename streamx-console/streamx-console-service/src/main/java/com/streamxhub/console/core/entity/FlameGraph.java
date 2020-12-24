@@ -50,22 +50,21 @@ public class FlameGraph {
 
     private String content;
 
-    private transient Date start = new Date();
+    private transient Date end = new Date();
 
-    private transient Integer duration = 60 * 4;
+    private transient Integer duration = 60;
 
-    private final transient Integer DAY_OF_MINUTE_DURATION = 60 * 24;
-
+    private final transient Integer DAY_OF_MINUTE_DURATION = 60 * 12;
 
     @JsonIgnore
-    public Date getEnd() {
+    public Date getStart() {
         if (this.duration > DAY_OF_MINUTE_DURATION) {
-            throw new IllegalArgumentException("[StreamX] flameGraph duration cannot be greater than 24 hours");
+            throw new IllegalArgumentException("[StreamX] flameGraph duration cannot be greater than 12 hours");
         }
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getDefault());
-        cal.setTime(this.getStart());
-        cal.add(Calendar.MINUTE, duration);
+        cal.setTime(this.getEnd());
+        cal.add(Calendar.MINUTE, 0 - duration);
         return cal.getTime();
     }
 
