@@ -25,10 +25,13 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.WebUtil;
 import com.streamxhub.console.core.dao.FlameGraphMapper;
+import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.FlameGraph;
+import com.streamxhub.console.core.service.ApplicationService;
 import com.streamxhub.console.core.service.FlameGraphService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,6 +49,9 @@ import java.util.Scanner;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGraph> implements FlameGraphService {
 
+    @Autowired
+    private ApplicationService applicationService;
+
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
         List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd());
@@ -53,6 +59,7 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             StringBuffer jsonBuffer = new StringBuffer();
             flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
+            Application application = applicationService.getById(flameGraph.getAppId());
             String jsonName = String.format("%d_%d_%d.json", flameGraph.getAppId(), flameGraph.getStart().getTime(), flameGraph.getEnd().getTime());
             String jsonPath = WebUtil.getAppDir("temp").concat(File.separator).concat(jsonName);
             String foldedPath = jsonPath.replace(".json", ".folded");
@@ -63,11 +70,13 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             FileOutputStream fileOutputStream = new FileOutputStream(jsonPath);
             IOUtils.write(jsonBuffer.toString().getBytes(), fileOutputStream);
 
+            String title = application.getJobName().concat(" ___ FlameGraph");
+
             //generate...
             List<String> commands = Arrays.asList(
                     String.format("cd %s", flameGraphPath),
                     String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                    String.format("./flamegraph.pl %s > %s ", foldedPath, svgPath),
+                    String.format("./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ", title, flameGraph.getWidth(), foldedPath, svgPath),
                     "exit"
             );
 
