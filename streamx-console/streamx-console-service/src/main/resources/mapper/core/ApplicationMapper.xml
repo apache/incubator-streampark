@@ -21,6 +21,7 @@
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
+        <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="TOTAL_TM" jdbcType="INTEGER" property="totalTM"/>
         <result column="TOTAL_SLOT" jdbcType="INTEGER" property="totalSlot"/>
         <result column="AVAILABLE_SLOT" jdbcType="INTEGER" property="availableSlot"/>

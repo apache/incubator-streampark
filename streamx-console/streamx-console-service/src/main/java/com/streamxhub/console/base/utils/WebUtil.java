@@ -24,6 +24,8 @@ import com.streamxhub.console.base.domain.Constant;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.File;
 import java.util.stream.IntStream;
 
 /**
@@ -88,4 +90,13 @@ public class WebUtil {
         });
         return StringUtils.lowerCase(result.toString());
     }
+
+    public static String getAppHome() {
+        return System.getProperty("app.home");
+    }
+
+    public static String getAppDir(String dir) {
+        return getAppHome().concat(File.separator).concat(dir);
+    }
+
 }

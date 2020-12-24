@@ -246,7 +246,7 @@
           <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <!--start: record.deploy === 0-->
               <template
@@ -381,7 +381,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 4 || record.state === 5 || record.optionState === 4 }"
+              :class="{pointer: record.state === 4 || record.state === 5 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <a-badge dot title="应用已更新,需重新发布" v-if="record.deploy === 1">
                 <ellipsis :length="45" tooltip>
@@ -449,7 +449,7 @@
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
-              && record.optionState === 0"
+              && record['optionState'] === 0"
             v-permit="'app:mapping'"
             type="deployment-unit"
             style="color:#4a9ff5"
@@ -457,7 +457,7 @@
           </a-icon>
           <icon-font
             type="icon-deploy"
-            v-show="record.deploy === 1 && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record.optionState === 0)"
+            v-show="record.deploy === 1 && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
             v-permit="'app:deploy'"
             @click="handleDeploy(record)">
           </icon-font>
@@ -478,7 +478,7 @@
               || record.state === 10
               || record.state === 11
               || record.state === 13)
-              && (optionApps.starting.get(record.id) === undefined || record.optionState === 0)"
+              && (optionApps.starting.get(record.id) === undefined || record['optionState'] === 0)"
             v-permit="'app:start'"
             theme="twoTone"
             twoToneColor="#4a9ff5"
@@ -498,6 +498,14 @@
             theme="twoTone"
             twoToneColor="#4a9ff5"
             @click="handleDetail(record)"
+            title="查看">
+          </a-icon>
+          <a-icon
+            v-if="record.flameGraph"
+            type="picture"
+            v-permit="'app:flameGraph'"
+            style="color:#4a9ff5"
+            @click="handleFlameGraph(record)"
             title="查看">
           </a-icon>
         </template>
@@ -765,6 +773,7 @@ import State from './State'
 import { mapActions } from 'vuex'
 import { list, dashboard, cancel, deploy, mapping, start, clean, yarn } from '@api/application'
 import { lastest, history } from '@api/savepoint'
+import { flamegraph } from '@api/metrics'
 import { Icon } from 'ant-design-vue'
 
 const IconFont = Icon.createFromIconfontCN({
@@ -987,7 +996,7 @@ export default {
     },
 
     handleDeploy (app) {
-      if (this.optionApps.deploy.get(app.id) === undefined || app.optionState === 0) {
+      if (this.optionApps.deploy.get(app.id) === undefined || app['optionState'] === 0) {
         this.deployVisible = true
         this.application = app
       }
@@ -1071,7 +1080,7 @@ export default {
     },
 
     handleStart (app) {
-      if (this.optionApps.starting.get(app.id) === undefined || app.optionState === 0) {
+      if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
         this.application = app
         lastest({
           appId: this.application.id
@@ -1142,7 +1151,7 @@ export default {
     },
 
     handleCancel (app) {
-      if (this.optionApps.stoping.get(app.id) === undefined || app.optionState === 0) {
+      if (this.optionApps.stoping.get(app.id) === undefined || app['optionState'] === 0) {
         this.stopVisible = true
         this.application = app
       }
@@ -1188,6 +1197,22 @@ export default {
     handleDetail (app) {
       this.SetAppId(app.id)
       this.$router.push({ 'path': '/flink/app/detail' })
+    },
+
+    handleFlameGraph (app) {
+      flamegraph({
+        appId: app.id,
+        width: document.documentElement.offsetWidth || document.body.offsetWidth
+      },
+      (resp) => {
+        if (resp != null) {
+          const blob = new Blob([resp], { type: 'image/svg+xml' })
+          const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+          window.open(imageUrl)
+        }
+      },
+      { loading: '正在生成flameGraph...', error: 'flameGraph生成失败.' }
+      )
     },
 
     handleSearch (selectedKeys, confirm, dataIndex) {
@@ -1249,7 +1274,7 @@ export default {
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot
           }]
-          if (x.optionState === 0) {
+          if (x['optionState'] === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
                 this.optionApps.starting.delete(x.id)
@@ -1312,7 +1337,7 @@ export default {
     },
 
     handleView (params) {
-      if (params.state === 4 || params.state === 5 || params.optionState === 4) {
+      if (params.state === 4 || params.state === 5 || params['optionState'] === 4) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }

@@ -1,7 +1,7 @@
 const path = require('path')
 const webpack = require('webpack')
 
-function resolve(dir) {
+function resolve (dir) {
   return path.join(__dirname, dir)
 }
 
@@ -26,9 +26,9 @@ module.exports = {
   configureWebpack: {
     resolve: {
       alias: {
-        'mergely':		path.join(__dirname, 'node_modules', 'mergely'),
+        'mergely':	path.join(__dirname, 'node_modules', 'mergely'),
         'CodeMirror':	path.join(__dirname, 'node_modules', 'codemirror'),
-        'jQuery':		path.join(__dirname, 'node_modules', 'jquery'),
+        'jQuery':	path.join(__dirname, 'node_modules', 'jquery')
       }
     },
     plugins: [

@@ -13,7 +13,7 @@
             </excludes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>plugins</outputDirectory>
+            <outputDirectory>plugins/jvm-profiler</outputDirectory>
             <includes>
                 <include>com.streamxhub:jvm-profiler</include>
             </includes>
@@ -29,6 +29,11 @@
             <directory>src/assembly/logs</directory>
             <outputDirectory>logs</outputDirectory>
             <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>src/assembly/temp</directory>
+            <outputDirectory>temp</outputDirectory>
+            <fileMode>0777</fileMode>
         </fileSet>
         <fileSet>
             <directory>src/assembly/plugins</directory>

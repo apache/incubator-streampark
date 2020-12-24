@@ -62,7 +62,7 @@
     "element-ui": "^2.13.2",
     "eslint": "^5.16.0",
     "eslint-plugin-html": "^5.0.0",
-    "eslint-plugin-vue": "^5.0.0",
+    "eslint-plugin-vue": "^5.2.3",
     "less": "^3.8.1",
     "less-loader": "^4.1.0",
     "opencollective": "^1.0.3",
