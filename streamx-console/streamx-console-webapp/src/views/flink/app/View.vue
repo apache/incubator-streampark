@@ -1204,11 +1204,13 @@ export default {
         appId: app.id
       },
       (resp) => {
-        const url = 'data:image/png;base64,' + btoa(
-          new Uint8Array(resp).reduce((data, byte) => data + String.fromCharCode(byte), '')
-        )
-        console.log(url)
-        window.open(url)
+        if (resp != null) {
+          const url = 'data:image/png;base64,' + btoa(
+            new Uint8Array(resp).reduce((data, byte) => data + String.fromCharCode(byte), '')
+          )
+          console.log(url)
+          window.open(url)
+        }
       },
       { loading: '正在生成flameGraph...', error: 'flameGraph生成失败.' }
       )
