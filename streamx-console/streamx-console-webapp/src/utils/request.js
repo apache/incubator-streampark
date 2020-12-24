@@ -149,7 +149,7 @@ export default {
       blobCallback = respBlob
     }
     msg = msg == null ? {} : msg
-    message.loading(msg.loading | '导入文件中...')
+    message.loading(msg.loading || '导入文件中...')
     return http.post(url, params, {
       transformRequest: [(params) => {
         return $qs.stringify(params)
@@ -159,7 +159,7 @@ export default {
       blobCallback(resp)
     }).catch((r) => {
       console.error(r)
-      message.error(msg.error | '导出文件失败!')
+      message.error(msg.error || '导出文件失败!')
     })
   },
   download (url, params, filename) {
