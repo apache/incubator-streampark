@@ -23,6 +23,7 @@ package com.streamxhub.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.streamxhub.common.util.DeflaterUtils;
 import com.wuwenze.poi.annotation.Excel;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +67,14 @@ public class FlameGraph {
         cal.setTime(this.getEnd());
         cal.add(Calendar.MINUTE, 0 - duration);
         return cal.getTime();
+    }
+
+    @JsonIgnore
+    public String getContent() {
+        if (this.content != null) {
+            return DeflaterUtils.unzipString(this.content);
+        }
+        return null;
     }
 
 }

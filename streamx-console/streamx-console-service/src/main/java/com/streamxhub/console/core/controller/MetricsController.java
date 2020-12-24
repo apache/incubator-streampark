@@ -57,12 +57,11 @@ public class MetricsController {
         try {
             if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
                 System.out.println("id:" + jvmProfiler.getId() + ",token:" + jvmProfiler.getToken() + ",type:" + jvmProfiler.getType());
-                String json = jvmProfiler.getMetrics();
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());
                 flameGraph.setProfiler(jvmProfiler.getProfiler());
                 flameGraph.setTimeline(new Date());
-                flameGraph.setContent(json);
+                flameGraph.setContent(jvmProfiler.getMetric());
                 flameGraphService.save(flameGraph);
             }
         } catch (Exception e) {

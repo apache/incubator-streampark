@@ -34,12 +34,4 @@ public class JvmProfiler implements Serializable {
         }
         return Collections.EMPTY_MAP;
     }
-
-    @JsonIgnore
-    public String getMetrics() {
-        if (CommonUtil.notEmpty(metric)) {
-            return DeflaterUtils.unzipString(metric);
-        }
-        return null;
-    }
 }
