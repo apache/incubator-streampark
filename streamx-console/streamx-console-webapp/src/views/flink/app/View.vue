@@ -1199,6 +1199,9 @@ export default {
     },
 
     handleFlameGraph (app) {
+
+      this.$http
+
       console.log('handleFlameGraph:' + app.id)
     },
 
@@ -1261,7 +1264,7 @@ export default {
             'totalSlot': x.totalSlot,
             'availableSlot': x.availableSlot
           }]
-          if (x.optionState === 0) {
+          if (x['optionState'] === 0) {
             if (this.optionApps.starting.get(x.id) !== undefined) {
               if (timestamp - this.optionApps.starting.get(x.id) > this.queryInterval * 2) {
                 this.optionApps.starting.delete(x.id)
