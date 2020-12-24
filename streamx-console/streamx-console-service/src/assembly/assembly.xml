@@ -13,7 +13,7 @@
             </excludes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>plugins/flame-graph</outputDirectory>
+            <outputDirectory>plugins/jvm-profiler</outputDirectory>
             <includes>
                 <include>com.streamxhub:jvm-profiler</include>
             </includes>

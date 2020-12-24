@@ -304,7 +304,7 @@ object FlinkSubmit extends Logger {
           val buffer = new StringBuffer()
           submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
           val param = buffer.toString.dropRight(1)
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/flame-graph/"
+          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
             .concat(jvmProfilerJar)
             .concat("=")
             .concat(param)
