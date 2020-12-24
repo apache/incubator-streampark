@@ -71,7 +71,6 @@ public class MetricsController {
         return RestResponse.create();
     }
 
-
     @PostMapping("flamegraph")
     public ResponseEntity<Resource> flameGraph(FlameGraph flameGraph) throws IOException {
         String file = flameGraphService.generateFlameGraph(flameGraph);
