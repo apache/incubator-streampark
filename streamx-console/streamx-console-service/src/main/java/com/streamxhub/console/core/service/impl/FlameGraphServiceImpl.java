@@ -51,7 +51,7 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
         List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd());
         if (CommonUtil.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
-            flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()));
+            flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
             String jsonName = String.format("%d_%d_%d.json", flameGraph.getAppId(), flameGraph.getStart().getTime(), flameGraph.getEnd().getTime());
             String jsonPath = WebUtil.getAppDir("temp").concat(File.separator).concat(jsonName);
