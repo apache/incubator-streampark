@@ -91,23 +91,6 @@ http.interceptors.response.use((response) => {
   return Promise.reject(error)
 })
 
-const resp = (content, fileName) => {
-  const blob = new Blob([content])
-  fileName = fileName || `${new Date().getTime()}_导出结果.xlsx`
-  if ('download' in document.createElement('a')) {
-    const link = document.createElement('a')
-    link.download = fileName
-    link.style.display = 'none'
-    link.href = URL.createObjectURL(blob)
-    document.body.appendChild(link)
-    link.click()
-    URL.revokeObjectURL(link.href)
-    document.body.removeChild(link)
-  } else {
-    navigator.msSaveBlob(blob, fileName)
-  }
-}
-
 const respBlob = (content, fileName) => {
   const blob = new Blob([content])
   fileName = fileName || `${new Date().getTime()}_导出结果.xlsx`
