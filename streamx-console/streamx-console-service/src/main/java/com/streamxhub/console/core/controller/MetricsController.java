@@ -21,6 +21,7 @@
 package com.streamxhub.console.core.controller;
 
 import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.FlameGraph;
 import com.streamxhub.console.core.metrics.flink.JvmProfiler;
 import com.streamxhub.console.core.service.FlameGraphService;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Validated
@@ -63,4 +65,11 @@ public class MetricsController {
         }
         return RestResponse.create();
     }
+
+
+    @PostMapping("flamegraph")
+    public RestResponse flameGraph(FlameGraph flameGraph) {
+        return flameGraphService.generateFlameGraph(flameGraph);
+    }
+
 }

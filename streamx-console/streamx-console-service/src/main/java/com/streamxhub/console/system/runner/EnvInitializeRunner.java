@@ -22,6 +22,7 @@ package com.streamxhub.console.system.runner;
 
 import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.console.base.utils.WebUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.runners.model.InitializationError;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,8 +78,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
      */
     private void loadPlugins(String pluginPath) throws Exception {
         log.info("[StreamX] loadPlugins starting...");
-        
-        String appHome = System.getProperty("app.home");
+        String appHome = WebUtil.getAppHome();
         File streamXPlugins = new File(appHome, "plugins");
         for (File file : streamXPlugins.listFiles()) {
             String plugin = pluginPath.concat("/").concat(file.getName());
