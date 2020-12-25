@@ -18,28 +18,37 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.console.core.dao;
+package com.streamxhub.console.core.task;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.streamxhub.console.core.entity.FlameGraph;
-import org.apache.ibatis.annotations.Delete;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
+import com.streamxhub.console.core.service.FlameGraphService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.Calendar;
 import java.util.Date;
-import java.util.List;
+import java.util.TimeZone;
 
-/**
- * @author benjobs
- */
-public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
+@Slf4j
+@Component
+public class MetricsTask {
+
+    @Autowired
+    private FlameGraphService flameGraphService;
+
     /**
-     * @param appId
-     * @return
+     * hour.
      */
-    @Select("select * from t_flame_graph where app_id=#{appId} order by timeline asc")
-    List<FlameGraph> getFlameGraph(@Param("appId") Long appId);
-
-    @Delete("delete from t_flame_graph where timeline < #{end}")
-    void clean(Date end);
+    @Scheduled(cron = "0 0 * * * ?")
+    public void cleanFlameGraph() {
+        Date start = new Date();
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeZone(TimeZone.getDefault());
+        cal.setTime(start);
+        cal.add(Calendar.HOUR_OF_DAY, -24);
+        Date end = cal.getTime();
+        flameGraphService.clean(end);
+    }
 }
