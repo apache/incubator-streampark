@@ -55,13 +55,13 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
-        List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(flameGraph.getAppId());
+        List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd());
         if (CommonUtil.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
             flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
             Application application = applicationService.getById(flameGraph.getAppId());
-            String jsonName = String.format("%d_%d.json", flameGraph.getAppId(), flameGraph.getEnd().getTime());
+            String jsonName = String.format("%d_%d_%d.json", flameGraph.getAppId(), flameGraph.getStart().getTime(), flameGraph.getEnd().getTime());
             String jsonPath = WebUtil.getAppDir("temp").concat(File.separator).concat(jsonName);
             String foldedPath = jsonPath.replace(".json", ".folded");
             String svgPath = jsonPath.replace(".json", ".svg");
