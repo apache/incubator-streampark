@@ -53,7 +53,7 @@ public class FlameGraph {
 
     private transient Date end = new Date();
 
-    private transient Integer duration = 60;
+    private transient Integer duration = 60 * 2;
 
     private transient Integer width = 1280;
 
