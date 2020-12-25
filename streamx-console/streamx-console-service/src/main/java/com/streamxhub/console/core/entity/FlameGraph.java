@@ -57,12 +57,12 @@ public class FlameGraph {
 
     private transient Integer width = 1280;
 
-    private final transient Integer DAY_OF_MINUTE_DURATION = 60 * 12;
+    private final transient Integer QUERY_MINUTE_DURATION = 2 * 12;
 
     @JsonIgnore
     public Date getStart() {
-        if (this.duration > DAY_OF_MINUTE_DURATION) {
-            throw new IllegalArgumentException("[StreamX] flameGraph duration cannot be greater than 12 hours");
+        if (this.duration > QUERY_MINUTE_DURATION) {
+            throw new IllegalArgumentException("[StreamX] flameGraph query duration cannot be greater than 2 hours");
         }
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getDefault());
