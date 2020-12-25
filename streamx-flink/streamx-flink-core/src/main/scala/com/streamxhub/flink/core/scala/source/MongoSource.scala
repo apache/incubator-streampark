@@ -59,14 +59,14 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
 
   def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](prop,queryFun, resultFun)
+    val mongoFun = new MongoSourceFunction[R](prop, queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
 
 }
 
 
-private[this] class MongoSourceFunction[R: TypeInformation](apiType:ApiType, prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
   var client: MongoClient = _

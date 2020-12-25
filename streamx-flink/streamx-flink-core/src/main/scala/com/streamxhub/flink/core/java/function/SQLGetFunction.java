@@ -38,9 +38,10 @@ public interface SQLGetFunction<T> extends Serializable {
 
     /**
      * 将查下结果以Map的方式返回,用户去实现转成对象.
+     *
      * @param map
      * @return
      */
-    Iterable<T> doResult(Iterable<Map<String,?>> map);
+    Iterable<T> doResult(Iterable<Map<String, ?>> map);
 
 }

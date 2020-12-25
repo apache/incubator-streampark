@@ -57,8 +57,8 @@ object HBaseSource {
 class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
   def getDataStream[R: TypeInformation](query: HBaseQuery => HBaseQuery, func: Result => R)(implicit prop: Properties = new Properties()): DataStream[R] = {
-    Utils.copyProperties(property,prop)
-    val hBaseFunc = new HBaseSourceFunction[R](prop,query,func)
+    Utils.copyProperties(property, prop)
+    val hBaseFunc = new HBaseSourceFunction[R](prop, query, func)
     ctx.addSource(hBaseFunc)
   }
 
@@ -73,9 +73,9 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
 
   @volatile var query: HBaseQuery = _
 
-  private[this] var hbaseFunc:HBaseFunction[R] = _
-  private[this] var scalaQueryFunc:HBaseQuery => HBaseQuery = _
-  private[this] var scalaResultFunc:Result => R = _
+  private[this] var hbaseFunc: HBaseFunction[R] = _
+  private[this] var scalaQueryFunc: HBaseQuery => HBaseQuery = _
+  private[this] var scalaResultFunc: Result => R = _
   @transient private var state: ListState[HBaseQuery] = _
   private val OFFSETS_STATE_NAME: String = "hbase-source-query-states"
 
@@ -109,7 +109,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
         table = query.getTable(prop)
         table.getScanner(query).foreach(x => {
           apiType match {
-            case ApiType.scala =>  ctx.collect(scalaResultFunc(x))
+            case ApiType.scala => ctx.collect(scalaResultFunc(x))
             case ApiType.java => ctx.collect(hbaseFunc.doResult(x))
           }
         })

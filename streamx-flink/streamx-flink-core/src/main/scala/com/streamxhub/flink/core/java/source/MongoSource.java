@@ -31,7 +31,7 @@ public class MongoSource<T> {
     private StreamingContext ctx;
     private Properties prop;
 
-    public MongoSource(StreamingContext ctx,Properties prop) {
+    public MongoSource(StreamingContext ctx, Properties prop) {
         this.ctx = ctx;
         this.prop = prop;
     }
