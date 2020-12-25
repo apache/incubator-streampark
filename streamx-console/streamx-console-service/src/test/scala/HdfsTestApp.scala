@@ -4,12 +4,13 @@ import java.util.{Calendar, Date, TimeZone}
 object HdfsTestApp {
 
   def main(args: Array[String]): Unit = {
-    val start = new Date
-    val cal = Calendar.getInstance
-    cal.setTimeZone(TimeZone.getDefault)
-    cal.setTime(start)
-    cal.add(Calendar.HOUR_OF_DAY, -24)
-    val end = cal.getTime
-    println(end)
+    //"\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg"
+
+    val name = "12434234_5454.svg"
+
+    if (name.matches("\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg")) {
+      println("rrrrr")
+    }
+
   }
 }
