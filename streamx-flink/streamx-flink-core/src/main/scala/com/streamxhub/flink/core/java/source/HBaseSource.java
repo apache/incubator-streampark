@@ -28,20 +28,19 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import java.util.Properties;
 
 /**
- *
  * @param <T>
  */
 public class HBaseSource<T> {
     private StreamingContext ctx;
     private Properties property;
 
-    public HBaseSource(StreamingContext ctx,Properties property) {
+    public HBaseSource(StreamingContext ctx, Properties property) {
         this.ctx = ctx;
         this.property = property;
     }
 
     public DataStreamSource<T> getDataStream(HBaseFunction func) {
-        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, func,null);
+        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, func, null);
         return ctx.getJavaEnv().addSource(sourceFunction);
     }
 }

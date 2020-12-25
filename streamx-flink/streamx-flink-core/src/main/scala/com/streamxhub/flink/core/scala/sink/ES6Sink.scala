@@ -132,8 +132,8 @@ class ES6Sink(@(transient@param) ctx: StreamingContext,
     //set value from properties
     shortConfig.filter(_._1.startsWith(KEY_ES_BULK_PREFIX)).foreach(doConfig)
     //set value from method parameter...
-    property.forEach(new BiConsumer[Object,Object] {
-      override def accept(k: Object, v: Object): Unit =  doConfig(k.toString,v.toString)
+    property.forEach(new BiConsumer[Object, Object] {
+      override def accept(k: Object, v: Object): Unit = doConfig(k.toString, v.toString)
     })
 
     val esSink = sinkBuilder.build()
