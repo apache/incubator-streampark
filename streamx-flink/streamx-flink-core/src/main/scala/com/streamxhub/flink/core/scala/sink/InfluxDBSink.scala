@@ -56,7 +56,7 @@ class InfluxDBSink(@(transient@param) ctx: StreamingContext,
 
   def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.parameter.toMap)(alias)
-    Utils.copyProperties(property,prop)
+    Utils.copyProperties(property, prop)
     val sinkFun = new InfluxDBFunction[T](prop)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
