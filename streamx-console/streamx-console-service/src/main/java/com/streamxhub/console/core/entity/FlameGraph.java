@@ -57,11 +57,11 @@ public class FlameGraph {
 
     private transient Integer width = 1280;
 
-    private final transient Integer QUERY_MINUTE_DURATION = 60 * 4;
+    private final transient Integer QUERY_DURATION = 60 * 4;
 
     @JsonIgnore
     public Date getStart() {
-        if (this.duration > QUERY_MINUTE_DURATION) {
+        if (this.duration > QUERY_DURATION) {
             throw new IllegalArgumentException("[StreamX] flameGraph query duration cannot be greater than 4 hours");
         }
         Calendar cal = Calendar.getInstance();
