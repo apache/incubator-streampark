@@ -28,6 +28,7 @@ import java.io.Serializable;
 public interface HBaseFunction<T> extends Serializable {
     /**
      * 获取一个查询条件
+     *
      * @param query
      * @return
      */
@@ -35,6 +36,7 @@ public interface HBaseFunction<T> extends Serializable {
 
     /**
      * 返回结合处理
+     *
      * @param result
      * @return
      */

@@ -200,15 +200,15 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
     val buildWith = (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
       case (null, null) =>
-      case (x:String, y:String) if x != null && y != null =>
+      case (x: String, y: String) if x != null && y != null =>
         logger.info(s"[StreamX] with built in catalog: $x")
         logger.info(s"[StreamX] with built in database: $y")
         builder.withBuiltInCatalogName(x)
         builder.withBuiltInDatabaseName(y)
-      case (x:String, _) if x != null =>
+      case (x: String, _) if x != null =>
         logger.info(s"[StreamX] with built in catalog: $x")
         builder.withBuiltInCatalogName(x)
-      case (_, y:String) if y != null =>
+      case (_, y: String) if y != null =>
         logger.info(s"[StreamX] with built in database: $y")
         builder.withBuiltInDatabaseName(y)
     }

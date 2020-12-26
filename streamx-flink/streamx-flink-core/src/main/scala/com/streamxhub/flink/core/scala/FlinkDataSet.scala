@@ -28,7 +28,7 @@ import org.apache.flink.api.scala._
 import scala.annotation.meta.getter
 
 
-class DataSetContext(val parameter: ParameterTool,private val env: ExecutionEnvironment) extends ExecutionEnvironment(env.getJavaEnv)
+class DataSetContext(val parameter: ParameterTool, private val env: ExecutionEnvironment) extends ExecutionEnvironment(env.getJavaEnv)
 
 trait FlinkDataSet extends Logger {
 
@@ -42,7 +42,7 @@ trait FlinkDataSet extends Logger {
   def handle(context: DataSetContext): Unit
 
   private def initialize(args: Array[String]): Unit = {
-    this.parameter = FlinkInitializer.get(args,null).parameter
+    this.parameter = FlinkInitializer.get(args, null).parameter
     env = ExecutionEnvironment.getExecutionEnvironment
     env.getConfig.setGlobalJobParameters(parameter)
   }
