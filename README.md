@@ -56,9 +56,7 @@ object HelloStreamXApp extends FlinkStreaming {
     val source = new KafkaSource(context).getDataStream[String](topic = "hello")
       .uid("kfk_source")
       .name("kfk_source")
-      .map(x => {
-        x.value
-      })
+      .map(_.value)
 
     //2) println
     source.print()
