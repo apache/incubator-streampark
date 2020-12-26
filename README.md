@@ -10,8 +10,8 @@ let't flink|spark easy
 #### 1. build project
 
 ```shell
-$git clone https://github.com/streamxhub/StreamX.git
-$cd StreamX
+$git clone https://github.com/streamxhub/streamx.git
+$cd streamx
 $mvn clean install -DskipTests
 ```
 
