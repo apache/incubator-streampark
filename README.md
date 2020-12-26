@@ -51,14 +51,7 @@ import org.apache.flink.api.scala._
 
 object HelloStreamXApp extends FlinkStreaming {
 
-  /**
-   * 用户可覆盖次方法...
-   *
-   */
-  override def beforeStart(context: StreamingContext): Unit = super.beforeStart(context)
-
   override def handle(context: StreamingContext): Unit = {
-
     //1) source
     val source = new KafkaSource(context).getDataStream[String](topic = "hello")
       .uid("kfk_source")
