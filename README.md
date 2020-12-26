@@ -3,24 +3,26 @@ let't flink|spark easy
 
  The flink & spark development scaffolding encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
 
+
+
 ### quick start
 
 #### 1. build project
 
 ```shell
-    $git clone https://github.com/streamxhub/StreamX.git
-    $cd StreamX
-    $mvn clean install -DskipTests
+$git clone https://github.com/streamxhub/StreamX.git
+$cd StreamX
+$mvn clean install -DskipTests
 ```
 
 After the build is completed, the project will be installed in the local maven warehouse and added to the pom.xml file of your own project when using it
 
 ```xml
-    <dependency>
-        <groupId>com.streamxhub</groupId>
-        <artifactId>streamx-flink-core</artifactId>
-    	<version>1.0.0</version>
-    </dependency>
+<dependency>
+    <groupId>com.streamxhub</groupId>
+    <artifactId>streamx-flink-core</artifactId>
+    <version>1.0.0</version>
+</dependency>
 ```
 
 #### 2. hello world
