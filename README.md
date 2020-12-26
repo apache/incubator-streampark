@@ -19,9 +19,9 @@ Streamx-console is an independent platform that complements streamx-core. It bet
 2. Run: `mvn clean install -DskipTests`
 
 ```shell
-$git clone https://github.com/streamxhub/streamx.git
-$cd streamx
-$mvn clean install -DskipTests
+git clone https://github.com/streamxhub/streamx.git
+cd streamx
+mvn clean install -DskipTests
 ```
 
 After the build is completed, the project will be installed in the local maven warehouse and added to the pom.xml file of your own project when using it
