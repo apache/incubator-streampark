@@ -1,9 +1,11 @@
-# StreamX
+## StreamX
 let't flink|spark easy
 
  The flink & spark development scaffolding encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
 
+![console dashboard](https://github.com/wolfboys/streamx/blob/master/images/console-dashboard.jpg)
 
+![job flameGraph](https://github.com/wolfboys/streamx/blob/master/images/job-flameGraph.png)
 
 ### quick start
 
