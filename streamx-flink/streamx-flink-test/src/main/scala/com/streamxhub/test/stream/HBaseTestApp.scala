@@ -1,24 +1,34 @@
 package com.streamxhub.test.stream
 
+import com.streamxhub.flink.core.scala.source.KafkaSource
+import com.streamxhub.flink.core.scala.{FlinkStreaming}
+
+import com.streamxhub.common.util.ConfigUtils
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
-import org.apache.hadoop.hbase.client.{Get, Scan}
+import com.streamxhub.flink.core.scala.StreamingContext
+import com.streamxhub.flink.core.scala.request.HBaseRequest
+import org.apache.hadoop.hbase.client.Get
+import org.apache.flink.api.scala._
 
-import scala.collection.JavaConversions._
-import java.util.Properties
+object HBaseTestApp extends FlinkStreaming {
 
-object HBaseTestApp extends App {
+  override def handle(context: StreamingContext): Unit = {
+    implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
+    //one topic
+    val kafkaGoodsOrder = new KafkaSource(context).getDataStream[String]()
+      .uid("kfkSource1")
+      .name("kfkSource1")
+      .map(_.value)
 
-  val prop:Properties = new Properties()
-  prop.put("hbase.zookeeper.quorum","test1,test2,test6")
-  prop.put("hbase.zookeeper.property.clientPort","2181")
+    kafkaGoodsOrder.print("source:>>>")
 
-  val query = new HBaseQuery("person", new Get("123322242".getBytes()))
+    HBaseRequest(kafkaGoodsOrder).requestOrdered(x => {
+      new HBaseQuery("person", new Get(x.getBytes()))
+    },timeout = 5000, resultFunc = (a, r) => {
+      a -> !r.advance()
+    }).print(" check.... ")
 
-  val table =  query.getTable(prop)
 
-  val scanner = table.getScanner(query)
-  if(scanner.isEmpty) {
-    println("null....")
   }
 
 }

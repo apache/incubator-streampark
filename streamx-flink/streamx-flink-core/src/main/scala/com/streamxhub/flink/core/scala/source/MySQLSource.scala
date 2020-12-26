@@ -29,7 +29,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 
-import java.util.Properties
+import java.util.{Date, Properties}
 import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
@@ -52,7 +52,7 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, property: Proper
    * @tparam R
    * @return
    */
-  def getDataStream[R: TypeInformation](sqlFun: () => String, fun: Iterable[Map[String, _]] => Iterable[R])(implicit jdbc: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](sqlFun: R => String, fun: Iterable[Map[String, _]] => Iterable[R])(implicit jdbc: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
     val mysqlFun = new MySQLSourceFunction[R](jdbc, sqlFun, fun)
     ctx.addSource(mysqlFun)
@@ -67,12 +67,13 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, property: Proper
 private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R] with Logger {
 
   @volatile private[this] var running = true
-  private[this] var scalaSqlFunc: () => String = _
+  private[this] var scalaSqlFunc: R => String = _
   private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
   private[this] var sqlFunc: SQLGetFunction[R] = _
+  private[this] var lastOne: R = _
 
   //for Scala
-  def this(jdbc: Properties, sqlFunc: () => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
+  def this(jdbc: Properties, sqlFunc: R => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
     this(ApiType.scala, jdbc)
     this.scalaSqlFunc = sqlFunc
     this.scalaResultFunc = resultFunc
@@ -89,16 +90,22 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
-          case ApiType.scala => scalaSqlFunc()
-          case ApiType.java => sqlFunc.getQuery
+          case ApiType.scala => scalaSqlFunc(lastOne)
+          case ApiType.java => sqlFunc.getQuery(lastOne)
         }
         val result: List[Map[String, _]] = apiType match {
           case ApiType.scala => JdbcUtils.select(sql)(jdbc)
           case ApiType.java => JdbcUtils.select(sql)(jdbc)
         }
         apiType match {
-          case ApiType.scala => scalaResultFunc(result).foreach(ctx.collect)
-          case ApiType.java => sqlFunc.doResult(result.map(_.asJava)).foreach(ctx.collect)
+          case ApiType.scala => scalaResultFunc(result).foreach(x => {
+            lastOne = x
+            ctx.collectWithTimestamp(lastOne, new Date().getTime)
+          })
+          case ApiType.java => sqlFunc.doResult(result.map(_.asJava)).foreach(x => {
+            lastOne = x
+            ctx.collectWithTimestamp(lastOne, new Date().getTime)
+          })
         }
       }
     }

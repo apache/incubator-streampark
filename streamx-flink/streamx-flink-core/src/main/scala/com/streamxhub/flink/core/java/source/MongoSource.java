@@ -36,8 +36,8 @@ public class MongoSource<T> {
         this.prop = prop;
     }
 
-    public DataStreamSource<T> getDataStream(MongoFunction<T> mongoFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(prop, mongoFunction, null);
+    public DataStreamSource<T> getDataStream(String collectionName,MongoFunction<T> mongoFunction) {
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(collectionName,prop, mongoFunction, null);
         return ctx.getJavaEnv().addSource(sourceFunction);
     }
 
