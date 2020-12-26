@@ -1,4 +1,4 @@
-## StreamX
+# StreamX
 let't flink|spark easy
 
  The flink & spark development scaffolding encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
@@ -7,9 +7,11 @@ let't flink|spark easy
 
 ![job flameGraph](https://raw.githubusercontent.com/wolfboys/mycdn/master/img/job-flameGraph.png)
 
-### quick start
 
-#### 1. build project
+## How to Build
+
+1. Make sure JDK 8+ and maven is installed on your machine.
+2. Run: `mvn clean package`
 
 ```shell
 $git clone https://github.com/streamxhub/streamx.git
@@ -27,7 +29,11 @@ After the build is completed, the project will be installed in the local maven w
 </dependency>
 ```
 
-#### 2. hello world
+## quick start
+
+### 1.Example application with StreamX
+
+1. Make sure flink 1.11.1+
 
 ```scala
 
@@ -68,7 +74,7 @@ object HelloStreamXApp extends FlinkStreaming {
 
 ```
 
-#### 3. config
+### 2. Define application.yml
 Define a series of startup information and source and sink information in the configuration file application.yml. The specific format is as follows:
 ```yaml
 
@@ -150,5 +156,5 @@ kafka.sink:
 
 ```
 
-#### 4. run
+### 3. Run Application
 Start main and with argument " --flink.conf $path/application.yml"
