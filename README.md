@@ -1,7 +1,12 @@
 # StreamX
 let't flink|spark easy
 
- The flink & spark development scaffolding encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
+The flink & spark development scaffolding encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
+
+StreamX consists of two parts, streamx-core and streamx-console,
+Streamx-core is a framework for development. Drawing on the idea of springBoot, the convention is better than the configuration. It provides developers with a list of sources and sinks out of the box, and expands related methods (only scala is effective), which greatly simplifies The development of flink greatly improves development efficiency and development experience
+
+Streamx-console is an independent platform that complements streamx-core. It better manages flink tasks, integrates project compilation, release, startup, savepoint, monitoring, operation and maintenance, etc., and is a development base for the flink platform
 
 ![console dashboard](https://raw.githubusercontent.com/wolfboys/mycdn/master/img/console-dashboard.jpg)
 
