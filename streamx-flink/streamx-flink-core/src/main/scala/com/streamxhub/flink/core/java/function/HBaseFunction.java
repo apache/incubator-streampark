@@ -29,10 +29,10 @@ public interface HBaseFunction<T> extends Serializable {
     /**
      * 获取一个查询条件
      *
-     * @param query
+     * @param lastOne
      * @return
      */
-    HBaseQuery getQuery(HBaseQuery query);
+    HBaseQuery getQuery(T lastOne);
 
     /**
      * 返回结合处理
