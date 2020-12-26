@@ -53,7 +53,7 @@ object HelloStreamXApp extends FlinkStreaming {
 
   override def handle(context: StreamingContext): Unit = {
     //1) source
-    val source = new KafkaSource(context).getDataStream[String](topic = "hello")
+    val source = KafkaSource(context).getDataStream[String](topic = "hello")
       .uid("kfk_source")
       .name("kfk_source")
       .map(_.value)
