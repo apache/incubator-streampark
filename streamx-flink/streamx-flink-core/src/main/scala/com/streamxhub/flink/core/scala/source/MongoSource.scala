@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.mongodb.MongoClient
-import com.mongodb.client.{FindIterable, MongoCursor, MongoDatabase}
+import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor, MongoDatabase}
 import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -29,8 +29,8 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
-import java.util.Properties
 
+import java.util.{Date, Properties}
 import com.streamxhub.flink.core.java.function.MongoFunction
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
@@ -57,35 +57,36 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
    * @return
    */
 
-  def getDataStream[R: TypeInformation](queryFun: MongoDatabase => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](collectionName: String, queryFun: (R, MongoCollection[Document]) => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](prop, queryFun, resultFun)
+    val mongoFun = new MongoSourceFunction[R](collectionName, prop, queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
 
 }
 
 
-private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties()) extends RichSourceFunction[R] with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collectionName: String) extends RichSourceFunction[R] with Logger {
 
   private[this] var isRunning = true
   var client: MongoClient = _
-  var database: MongoDatabase = _
+  var collection: MongoCollection[Document] = _
 
   private[this] var mongoFunc: MongoFunction[R] = _
-  private[this] var queryFunc: MongoDatabase => FindIterable[Document] = _
+  private[this] var queryFunc: (R, MongoCollection[Document]) => FindIterable[Document] = _
   private[this] var resultFunc: MongoCursor[Document] => List[R] = _
+  private[this] var lastOne: R = _
 
   //for Scala
-  def this(prop: Properties, queryFunc: MongoDatabase => FindIterable[Document], resultFunc: MongoCursor[Document] => List[R]) = {
-    this(ApiType.scala, prop)
+  def this(collectionName: String, prop: Properties, queryFunc: (R, MongoCollection[Document]) => FindIterable[Document], resultFunc: MongoCursor[Document] => List[R]) = {
+    this(ApiType.scala, prop, collectionName)
     this.queryFunc = queryFunc
     this.resultFunc = resultFunc
   }
 
   //for JAVA
-  def this(prop: Properties, mongoFunc: MongoFunction[R]) {
-    this(ApiType.java, prop)
+  def this(collectionName: String, prop: Properties, mongoFunc: MongoFunction[R]) {
+    this(ApiType.java, prop, collectionName)
     this.mongoFunc = mongoFunc
   }
 
@@ -94,23 +95,29 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   override def open(parameters: Configuration): Unit = {
     client = MongoConfig.getClient(prop)
     val db = MongoConfig.getProperty(prop, MongoConfig.database)
-    database = client.getDatabase(db)
+    val database = client.getDatabase(db)
+    collection = database.getCollection(collectionName)
   }
 
   @throws[Exception]
   override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
     while (isRunning) {
-
       apiType match {
         case ApiType.scala =>
-          val find = queryFunc(database)
+          val find = queryFunc(lastOne, collection)
           if (find != null) {
-            resultFunc(find.iterator).foreach(ctx.collect)
+            resultFunc(find.iterator).foreach(x => {
+              lastOne = x
+              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+            })
           }
         case ApiType.java =>
-          val find = mongoFunc.getQuery(database)
+          val find = mongoFunc.getQuery(lastOne, collection)
           if (find != null) {
-            mongoFunc.doResult(find.iterator).foreach(ctx.collect)
+            mongoFunc.doResult(find.iterator).foreach(x => {
+              lastOne = x
+              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+            })
           }
       }
     }
