@@ -928,7 +928,7 @@ export default {
         title: 'Task',
         dataIndex: 'task',
         scopedSlots: { customRender: 'task' },
-        width: 200
+        width: 120
       }, {
         title: 'Status',
         dataIndex: 'state',
