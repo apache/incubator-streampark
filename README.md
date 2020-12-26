@@ -34,7 +34,7 @@ After the build is completed, the project will be installed in the local maven w
 </dependency>
 ```
 
-## quick start
+## Quick Start
 
 ### 1.Example application with StreamX
 
