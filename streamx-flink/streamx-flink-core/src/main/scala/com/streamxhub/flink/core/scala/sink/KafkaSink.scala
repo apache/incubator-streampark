@@ -70,7 +70,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
 
     val producer = {
       val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
-      Utils.copyProperties(property,prop)
+      Utils.copyProperties(property, prop)
       val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
       /**
        * EXACTLY_ONCE语义下会使用到 kafkaProducersPoolSize

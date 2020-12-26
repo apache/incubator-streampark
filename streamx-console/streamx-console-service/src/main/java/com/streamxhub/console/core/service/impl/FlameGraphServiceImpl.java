@@ -38,6 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.*;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
 
@@ -101,5 +102,10 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             }
         }
         return null;
+    }
+
+    @Override
+    public void clean(Date end) {
+        baseMapper.clean(end);
     }
 }

@@ -22,6 +22,7 @@ package com.streamxhub.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.console.core.entity.FlameGraph;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -32,6 +33,7 @@ import java.util.List;
  * @author benjobs
  */
 public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
+
     /**
      *
      * @param appId
@@ -41,4 +43,7 @@ public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
      */
     @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
     List<FlameGraph> getFlameGraph(@Param("appId")Long appId,@Param("start") Date start,@Param("end") Date end);
+
+    @Delete("delete from t_flame_graph where timeline < #{end}")
+    void clean(Date end);
 }

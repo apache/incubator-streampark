@@ -872,7 +872,7 @@ export default {
       return [{
         title: 'Job Name',
         dataIndex: 'jobName',
-        width: 250,
+        width: 200,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
@@ -928,7 +928,7 @@ export default {
         title: 'Task',
         dataIndex: 'task',
         scopedSlots: { customRender: 'task' },
-        width: 100
+        width: 120
       }, {
         title: 'Status',
         dataIndex: 'state',
