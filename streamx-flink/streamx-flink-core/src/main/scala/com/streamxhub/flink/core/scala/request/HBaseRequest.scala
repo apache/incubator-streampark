@@ -98,7 +98,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
     }, executorService).thenAccept(new Consumer[ResultScanner] {
       override def accept(result: ResultScanner): Unit = {
         if (result.isEmpty) {
-          resultFuture.complete(List(resultFunc(input, null)))
+          resultFuture.complete(List(resultFunc(input, new Result())))
         } else {
           resultFuture.complete(result.map(r => resultFunc(input, r)))
         }

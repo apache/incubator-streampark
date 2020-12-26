@@ -170,7 +170,7 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
     }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
       override def accept(result: Iterable[Map[String, _]]): Unit = {
         if (result.isEmpty) {
-          resultFuture.complete(List(resultFun(input, null)))
+          resultFuture.complete(List(resultFun(input, Map.empty[String,_])))
         } else {
           resultFuture.complete(result.map(x => resultFun(input, x)))
         }
