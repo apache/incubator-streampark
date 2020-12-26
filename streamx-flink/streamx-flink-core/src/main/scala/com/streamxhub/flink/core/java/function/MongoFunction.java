@@ -21,14 +21,14 @@
 package com.streamxhub.flink.core.java.function;
 
 import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
-import com.mongodb.client.MongoDatabase;
 import org.bson.Document;
 
 
 public interface MongoFunction<T> {
 
-    FindIterable<Document> getQuery(MongoDatabase database);
+    FindIterable<Document> getQuery(T lastOne, MongoCollection<Document> collection);
 
     Iterable<T> doResult(MongoCursor<Document> cursor);
 
