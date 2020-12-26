@@ -16,7 +16,7 @@ Streamx-console is an independent platform that complements streamx-core. It bet
 ## How to Build
 
 1. Make sure JDK 8+ and maven is installed on your machine.
-2. Run: `mvn clean package`
+2. Run: `mvn clean install -DskipTests`
 
 ```shell
 $git clone https://github.com/streamxhub/streamx.git
