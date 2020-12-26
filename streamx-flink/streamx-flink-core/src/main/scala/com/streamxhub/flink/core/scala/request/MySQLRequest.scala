@@ -168,7 +168,13 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
     CompletableFuture.supplyAsync(new Supplier[Iterable[Map[String, _]]] {
       override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
     }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
-      override def accept(result: Iterable[Map[String, _]]): Unit = resultFuture.complete(result.map(x => resultFun(input, x)))
+      override def accept(result: Iterable[Map[String, _]]): Unit = {
+        if (result.isEmpty) {
+          resultFuture.complete(List(resultFun(input, null)))
+        } else {
+          resultFuture.complete(result.map(x => resultFun(input, x)))
+        }
+      }
     })
 
   }
