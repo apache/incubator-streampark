@@ -21,7 +21,6 @@
 package com.streamxhub.flink.core.scala.enums
 
 
-
 object ApiType extends Enumeration {
   type ApiType = Value
   val java, scala = Value

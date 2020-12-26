@@ -63,7 +63,7 @@ class RedisSink(@(transient@param) ctx: StreamingContext,
 
   lazy val config: FlinkJedisConfigBase = {
     val redisConf = ConfigUtils.getConf(ctx.parameter.toMap, REDIS_PREFIX)
-    Utils.copyProperties(property,redisConf)
+    Utils.copyProperties(property, redisConf)
     val builder = new FlinkJedisPoolConfig.Builder()
     redisConf.map {
       case (KEY_HOST, host) => builder.setHost(host)
