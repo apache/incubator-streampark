@@ -61,13 +61,13 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
    * @tparam R
    * @return
    */
-  def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+  def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
     val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
-  def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: Map[String, _] => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
+  def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
     val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
@@ -85,7 +85,7 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
  * @tparam R
  */
 
-class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: Map[String, _] => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
+class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
 
   @transient private[this] var client: SQLClient = _
 
@@ -117,7 +117,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
               override def handle(event: AsyncResult[ResultSet]): Unit = {
                 if (event.succeeded) {
                   event.result().getRows().foreach(x => {
-                    resultFuture.complete(Collections.singleton(resultFun(x.getMap.asScala.toMap)))
+                    resultFuture.complete(Collections.singleton(resultFun(input, x.getMap.asScala.toMap)))
                   })
                 } else throw event.cause()
               }
