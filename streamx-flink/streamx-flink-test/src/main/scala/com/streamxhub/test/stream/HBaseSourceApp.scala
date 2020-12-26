@@ -30,7 +30,7 @@ object HBaseSourceApp extends FlinkStreaming {
 
     HBaseRequest(id).requestOrdered(x => {
       new HBaseQuery("person", new Get(x.getBytes()))
-    }, r => {
+    }, (a,r) => {
       val map = new util.HashMap[String, String]()
       val cellScanner = r.cellScanner()
       while (cellScanner.advance()) {
