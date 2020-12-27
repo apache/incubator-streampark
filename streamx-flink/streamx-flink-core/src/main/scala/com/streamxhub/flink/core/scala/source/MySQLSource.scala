@@ -25,8 +25,13 @@ import com.streamxhub.flink.core.java.function.SQLGetFunction
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
+import com.streamxhub.flink.core.scala.util.FlinkUtils
+import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.functions.source.{RichSourceFunction, SourceFunction}
+import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
+import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
+import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.scala.DataStream
 
 import java.util.{Date, Properties}
@@ -34,6 +39,7 @@ import scala.annotation.meta.param
 import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.collection.Map
+import scala.util.{Success, Try}
 
 
 object MySQLSource {
@@ -64,12 +70,14 @@ class MySQLSource(@(transient@param) val ctx: StreamingContext, property: Proper
  *
  * @tparam R
  */
-private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R] with Logger {
+private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
   private[this] var scalaSqlFunc: R => String = _
   private[this] var scalaResultFunc: Function[Iterable[Map[String, _]], Iterable[R]] = _
   private[this] var sqlFunc: SQLGetFunction[R] = _
+  @transient private var state: ListState[R] = _
+  private val OFFSETS_STATE_NAME: String = "mysql-source-query-states"
   private[this] var lastOne: R = _
 
   //for Scala
@@ -86,7 +94,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   }
 
   @throws[Exception]
-  override def run(@(transient@param) ctx: SourceFunction.SourceContext[R]): Unit = {
+  override def run(ctx: SourceContext[R]): Unit = {
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
@@ -113,5 +121,29 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
 
   override def cancel(): Unit = this.running = false
 
+  override def snapshotState(context: FunctionSnapshotContext): Unit = {
+    if (running) {
+      state.clear()
+      state.add(lastOne)
+    } else {
+      logger.error("[StreamX] MySQLSource snapshotState called on closed source")
+    }
+  }
+
+  override def initializeState(context: FunctionInitializationContext): Unit = {
+    //从checkpoint中恢复...
+    logger.info("[StreamX] MySQLSource snapshotState initialize")
+    val clazz = implicitly[TypeInformation[R]].getTypeClass
+    println(clazz)
+    state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
+    Try(state.get.head) match {
+      case Success(q) => lastOne = q
+      case _ =>
+    }
+  }
+
+  override def notifyCheckpointComplete(checkpointId: Long): Unit = {
+    logger.info(s"[StreamX] MySQLSource checkpointComplete: $checkpointId")
+  }
 }
 
