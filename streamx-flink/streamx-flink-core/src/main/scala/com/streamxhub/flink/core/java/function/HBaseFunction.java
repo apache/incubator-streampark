@@ -25,6 +25,9 @@ import org.apache.hadoop.hbase.client.Result;
 
 import java.io.Serializable;
 
+/**
+ * @author benjobs
+ */
 public interface HBaseFunction<T> extends Serializable {
     /**
      * 获取一个查询条件
