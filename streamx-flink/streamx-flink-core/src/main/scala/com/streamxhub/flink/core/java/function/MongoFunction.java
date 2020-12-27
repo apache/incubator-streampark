@@ -26,6 +26,9 @@ import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
 
+/**
+ * @author benjobs
+ */
 public interface MongoFunction<T> {
 
     FindIterable<Document> getQuery(T lastOne, MongoCollection<Document> collection);

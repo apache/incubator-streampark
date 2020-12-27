@@ -12,12 +12,13 @@ object MySQLSourceApp extends FlinkStreaming {
   override def handle(context: StreamingContext): Unit = {
     implicit val prop: Properties = ConfigUtils.getMySQLConf(context.parameter.toMap)
     val mysqlSource = new MySQLSource(context)
-    mysqlSource.getDataStream[Orders](() => {
-      "select * from tc_record where sync_time>'2020-07-20 23:00:00' limit 1000"
+    mysqlSource.getDataStream[Orders](x => {
+      val offset = if (x == null) "2020-10-10 23:00:00" else x.timestamp
+      s"select * from orders where create_time>'$offset' order by sync_time asc limit 1000 "
     },
       r => {
         r.map(x => {
-          new Orders(x("market_id").toString, x("sync_time").toString)
+          new Orders(x("market_id").toString, x("create_time").toString)
         })
       }
     ).map(x => {

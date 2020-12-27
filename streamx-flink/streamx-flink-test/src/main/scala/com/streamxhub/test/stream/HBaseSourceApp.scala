@@ -23,7 +23,8 @@ object HBaseSourceApp extends FlinkStreaming {
       if (query == null) {
         new HBaseQuery("person", new Scan())
       } else {
-        query
+        //TODO 从上一条记录中获取便宜量,决定下次查询的条件...
+        new HBaseQuery("person", new Scan())
       }
     }, r => new String(r.getRow))
 
