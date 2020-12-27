@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.mongodb.MongoClient
-import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor, MongoDatabase}
+import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
