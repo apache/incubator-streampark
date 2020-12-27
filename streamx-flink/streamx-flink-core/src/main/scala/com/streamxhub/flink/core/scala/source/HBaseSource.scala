@@ -23,7 +23,7 @@ package com.streamxhub.flink.core.scala.source
 import com.streamxhub.common.util.{Logger, Utils}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.StreamingContext
-import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
+import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
@@ -37,6 +37,7 @@ import java.util.{Date, Properties}
 import com.streamxhub.flink.core.java.function.HBaseFunction
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
+import com.streamxhub.flink.core.scala.util.FlinkUtils
 
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
@@ -76,7 +77,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   private[this] var hbaseFunc: HBaseFunction[R] = _
   private[this] var scalaQueryFunc: R => HBaseQuery = _
   private[this] var scalaResultFunc: Result => R = _
-  @transient private var state: ListState[HBaseQuery] = _
+  @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "hbase-source-query-states"
   private[this] var lastOne: R = _
 
@@ -134,7 +135,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      state.add(query)
+      state.add(lastOne)
     } else {
       logger.error("[StreamX] HBaseSource snapshotState called on closed source")
     }
@@ -142,9 +143,12 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
-    state = context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(OFFSETS_STATE_NAME, classOf[HBaseQuery]))
+    logger.info("[StreamX] HBaseSource snapshotState initialize")
+    val clazz = implicitly[TypeInformation[R]].getTypeClass
+    println(clazz)
+    state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
-      case Success(q) => query = q
+      case Success(q) => lastOne = q
       case _ =>
     }
   }
