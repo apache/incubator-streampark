@@ -13,7 +13,10 @@ object MySQLSourceApp extends FlinkStreaming {
     implicit val prop: Properties = ConfigUtils.getMySQLConf(context.parameter.toMap)
     val mysqlSource = new MySQLSource(context)
     mysqlSource.getDataStream[Orders](x => {
-      s"select * from tc_record where sync_time>'${x.timestamp}' limit 1000 order by sync_time asc"
+      val offset = if(x == null) {
+        "2020-12-20 23:00:00"
+      }else x.timestamp
+      s"select * from tc_record where sync_time>'$offset' limit 1000 order by sync_time asc"
     },
       r => {
         r.map(x => {
