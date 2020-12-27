@@ -124,7 +124,9 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      state.add(lastOne)
+      if (lastOne != null) {
+        state.add(lastOne)
+      }
     } else {
       logger.error("[StreamX] MySQLSource snapshotState called on closed source")
     }
@@ -133,8 +135,6 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
     logger.info("[StreamX] MySQLSource snapshotState initialize")
-    val clazz = implicitly[TypeInformation[R]].getTypeClass
-    println(clazz)
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => lastOne = q
