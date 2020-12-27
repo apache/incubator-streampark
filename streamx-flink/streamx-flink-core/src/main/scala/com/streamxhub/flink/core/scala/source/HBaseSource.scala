@@ -135,7 +135,9 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      state.add(lastOne)
+      if (lastOne != null) {
+        state.add(lastOne)
+      }
     } else {
       logger.error("[StreamX] HBaseSource snapshotState called on closed source")
     }
@@ -144,8 +146,6 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
     logger.info("[StreamX] HBaseSource snapshotState initialize")
-    val clazz = implicitly[TypeInformation[R]].getTypeClass
-    println(clazz)
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => lastOne = q
