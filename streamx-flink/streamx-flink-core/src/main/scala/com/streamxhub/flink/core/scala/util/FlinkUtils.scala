@@ -18,30 +18,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.java.function;
+package com.streamxhub.flink.core.scala.util
 
-import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
-import org.apache.hadoop.hbase.client.Result;
+import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.runtime.state.FunctionInitializationContext
 
-import java.io.Serializable;
+object FlinkUtils {
 
-/**
- * @author benjobs
- */
-public interface HBaseFunction<T> extends Serializable {
-    /**
-     * 获取一个查询条件
-     *
-     * @param lastOne
-     * @return
-     */
-    HBaseQuery getQuery(T lastOne);
+  def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
+    context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
+  }
 
-    /**
-     * 返回结合处理
-     *
-     * @param result
-     * @return
-     */
-    T doResult(Result result);
 }
