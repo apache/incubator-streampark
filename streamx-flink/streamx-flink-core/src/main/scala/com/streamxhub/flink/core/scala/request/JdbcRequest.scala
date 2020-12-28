@@ -46,13 +46,13 @@ import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import javax.sql.DataSource
 import scala.annotation.meta.param
 
-object MySQLRequest {
+object JdbcRequest {
 
-  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], property: Properties = new Properties()): MySQLRequest[T] = new MySQLRequest[T](stream, property)
+  def apply[T: TypeInformation](@(transient@param) stream: DataStream[T], property: Properties = new Properties()): JdbcRequest[T] = new JdbcRequest[T](stream, property)
 
 }
 
-class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], property: Properties = new Properties()) {
+class JdbcRequest[T: TypeInformation](@(transient@param) private val stream: DataStream[T], property: Properties = new Properties()) {
 
   /**
    *
@@ -63,13 +63,13 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
    */
   def requestOrdered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
-    val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new JdbcASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.orderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
   def requestUnordered[R: TypeInformation](@(transient@param) sqlFun: T => String, @(transient@param) resultFun: (T, Map[String, _]) => R, timeout: Long = 1000, capacity: Int = 10)(implicit jdbc: Properties): DataStream[R] = {
     Utils.copyProperties(property, jdbc)
-    val async = new MySQLASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
+    val async = new JdbcASyncClientFunction[T, R](sqlFun, resultFun, jdbc)
     AsyncDataStream.unorderedWait(stream, async, timeout, TimeUnit.MILLISECONDS, capacity)
   }
 
@@ -85,7 +85,7 @@ class MySQLRequest[T: TypeInformation](@(transient@param) private val stream: Da
  * @tparam R
  */
 
-class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
+class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
 
   @transient private[this] var client: SQLClient = _
 
@@ -130,7 +130,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[StreamX] MySQLASyncClient request timeout. retrying... ")
+    logger.warn("[StreamX] JdbcASyncClient request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 
@@ -146,7 +146,7 @@ class MySQLASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T
  * @tparam R
  */
 
-class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties, capacity: Int = 10) extends RichAsyncFunction[T, R] with Logger {
+class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties, capacity: Int = 10) extends RichAsyncFunction[T, R] with Logger {
 
   @transient private[this] var executorService: ExecutorService = _
 
@@ -181,7 +181,7 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[StreamX] MySQLASync request timeout. retrying... ")
+    logger.warn("[StreamX] JdbcASync request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 }
