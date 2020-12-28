@@ -24,12 +24,15 @@ package com.streamxhub.plugin.profiling.example;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author benjobs
+ */
 public class HelloWorldApplication {
 
     /**
      * This application could be used to test the java agent.
      * For example, you could run it with following argument:
-     * -javaagent:target/uber-java-agent-0.0.1-jar-with-dependencies.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,tag=tag1,metricInterval=10000,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.*
+     * -javaagent:target/jvm-profiler-1.0.0.jar=reporter=com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter,tag=tag1,metricInterval=10000,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.*
      */
     public static void main(String[] args) throws Throwable {
         long totalRunningMillis = 1 * 60 * 1000;
