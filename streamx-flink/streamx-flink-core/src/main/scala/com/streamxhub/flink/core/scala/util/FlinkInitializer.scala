@@ -18,13 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.scala
+package com.streamxhub.flink.core.scala.util
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
-
-import java.io.File
-import java.util.concurrent.TimeUnit
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.enums.{ApiType, PlannerType, RestartStrategy, TableMode, StateBackend => XStateBackend}
@@ -42,10 +39,12 @@ import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
+import java.io.File
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-object FlinkInitializer {
+private[scala] object FlinkInitializer {
 
   private var flinkInitializer: FlinkInitializer = _
 
@@ -73,11 +72,7 @@ object FlinkInitializer {
 
 }
 
-
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
-
-
-class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
+private[scala] class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
 
 
   def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
@@ -199,7 +194,6 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
     val buildWith = (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
-      case (null, null) =>
       case (x: String, y: String) if x != null && y != null =>
         logger.info(s"[StreamX] with built in catalog: $x")
         logger.info(s"[StreamX] with built in database: $y")
@@ -211,6 +205,7 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
       case (_, y: String) if y != null =>
         logger.info(s"[StreamX] with built in database: $y")
         builder.withBuiltInDatabaseName(y)
+      case _ =>
     }
     val setting = builder.build()
     this.tableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
@@ -339,17 +334,16 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
     val cpConfig = streamEnv.getCheckpointConfig
 
-    //默认:模式为exactly_one，精准一次语义
     cpConfig.setCheckpointingMode(cpMode)
-    //默认: 检查点之间的时间间隔为0s【checkpoint最小间隔】
+    //默认: 检查点之间的时间间隔【checkpoint最小间隔】
     cpConfig.setMinPauseBetweenCheckpoints(cpMinPauseBetween)
-    //默认:检查点必须在10分钟之内完成，或者被丢弃【checkpoint超时时间】
+    //默认:检查点必须在 $cpTimeout 分钟之内完成，或者被丢弃【checkpoint超时时间】
     cpConfig.setCheckpointTimeout(cpTimeout)
-    //默认:同一时间只允许进行一次检查点
+    //默认:同一时间允许进行?次检查点[默认一次]
     cpConfig.setMaxConcurrentCheckpoints(cpMaxConcurrent)
     //默认:被cancel会保留Checkpoint数据
     cpConfig.enableExternalizedCheckpoints(cpCleanUp)
-    //非对齐checkpoint
+    //非对齐checkpoint (flink 1.11.1 =+)
     cpConfig.enableUnalignedCheckpoints(unaligned)
 
     val stateBackend = XStateBackend.withName(parameter.get(KEY_FLINK_STATE_BACKEND, null))
@@ -437,3 +431,5 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
 
 }
+
+class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
