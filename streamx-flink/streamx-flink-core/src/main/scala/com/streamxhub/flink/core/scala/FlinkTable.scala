@@ -23,6 +23,7 @@ package com.streamxhub.flink.core.scala
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, LOGO}
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.ext.TableExt
+import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
