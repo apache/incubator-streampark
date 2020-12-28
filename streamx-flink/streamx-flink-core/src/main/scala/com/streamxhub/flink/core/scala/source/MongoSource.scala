@@ -23,6 +23,7 @@ package com.streamxhub.flink.core.scala.source
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
+import com.streamxhub.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -30,8 +31,7 @@ import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
 
-import java.util.{Date, Properties}
-import com.streamxhub.flink.core.java.function.MongoFunction
+import java.util.Properties
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.util.FlinkUtils
@@ -78,24 +78,28 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   var client: MongoClient = _
   var mongoCollection: MongoCollection[Document] = _
 
-  private[this] var mongoFunc: MongoFunction[R] = _
-  private[this] var queryFunc: (R, MongoCollection[Document]) => FindIterable[Document] = _
-  private[this] var resultFunc: MongoCursor[Document] => List[R] = _
+  private[this] var scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document] = _
+  private[this] var scalaResultFunc: MongoCursor[Document] => List[R] = _
+
+  private[this] var javaQueryFunc: MongoQueryFunction[R] = _
+  private[this] var javaResultFunc: MongoResultFunction[R] = _
+
   @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "mongo-source-query-states"
   private[this] var lastOne: R = _
 
   //for Scala
-  def this(collectionName: String, prop: Properties, queryFunc: (R, MongoCollection[Document]) => FindIterable[Document], resultFunc: MongoCursor[Document] => List[R]) = {
+  def this(collectionName: String, prop: Properties, scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document], scalaResultFunc: MongoCursor[Document] => List[R]) = {
     this(ApiType.scala, prop, collectionName)
-    this.queryFunc = queryFunc
-    this.resultFunc = resultFunc
+    this.scalaQueryFunc = scalaQueryFunc
+    this.scalaResultFunc = scalaResultFunc
   }
 
   //for JAVA
-  def this(collectionName: String, prop: Properties, mongoFunc: MongoFunction[R]) {
+  def this(collectionName: String, prop: Properties, queryFunc: MongoQueryFunction[R], resultFunc: MongoResultFunction[R]) {
     this(ApiType.java, prop, collectionName)
-    this.mongoFunc = mongoFunc
+    this.javaQueryFunc = queryFunc
+    this.javaResultFunc = resultFunc
   }
 
   override def cancel(): Unit = this.running = false
@@ -112,17 +116,17 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
     while (running) {
       apiType match {
         case ApiType.scala =>
-          val find = queryFunc(lastOne, mongoCollection)
+          val find = scalaQueryFunc(lastOne, mongoCollection)
           if (find != null) {
-            resultFunc(find.iterator).foreach(x => {
+            scalaResultFunc(find.iterator).foreach(x => {
               lastOne = x
               ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             })
           }
         case ApiType.java =>
-          val find = mongoFunc.getQuery(lastOne, mongoCollection)
+          val find = javaQueryFunc.getQuery(lastOne, mongoCollection)
           if (find != null) {
-            mongoFunc.doResult(find.iterator).foreach(x => {
+            javaResultFunc.doResult(find.iterator).foreach(x => {
               lastOne = x
               ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             })

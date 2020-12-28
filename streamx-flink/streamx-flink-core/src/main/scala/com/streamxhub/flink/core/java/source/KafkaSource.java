@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.java.source;
 
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.source.KafkaRecord;
-import com.streamxhub.flink.core.scala.source.KafkaSource;
 import com.streamxhub.flink.core.scala.source.KafkaStringDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -34,7 +33,7 @@ import java.util.Properties;
 /**
  * @author benjobs
  */
-public class KafakSource<T> {
+public class KafkaSource<T> {
 
     private StreamingContext ctx;
     private String[] topics;
@@ -43,40 +42,40 @@ public class KafakSource<T> {
     private WatermarkStrategy<KafkaRecord<T>> strategy;
     private Properties property = new Properties();
 
-    public KafakSource(StreamingContext ctx) {
+    public KafkaSource(StreamingContext ctx) {
         this.ctx = ctx;
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
-    public KafakSource<T> property(Properties property) {
+    public KafkaSource<T> property(Properties property) {
         if (property != null) {
             this.property = property;
         }
         return this;
     }
 
-    public KafakSource<T> topic(String... topic) {
+    public KafkaSource<T> topic(String... topic) {
         if (topic != null) {
             this.topics = topic;
         }
         return this;
     }
 
-    public KafakSource<T> alias(String alias) {
+    public KafkaSource<T> alias(String alias) {
         if (alias != null) {
             this.alias = alias;
         }
         return this;
     }
 
-    public KafakSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
+    public KafkaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
         if (deserializer != null) {
             this.deserializer = deserializer;
         }
         return this;
     }
 
-    public KafakSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
+    public KafkaSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
         if (strategy != null) {
             this.strategy = strategy;
         }
@@ -84,7 +83,7 @@ public class KafakSource<T> {
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
+        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
         return ctx.getJavaEnv().addSource(consumer);
     }
 
