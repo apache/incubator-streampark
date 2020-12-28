@@ -21,6 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.streamxhub.common.util.{Logger, Utils}
+import com.streamxhub.flink.core.java.function.{HBaseQueryFunction, HBaseResultFunction}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.state.ListState
@@ -34,7 +35,6 @@ import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.client._
 
 import java.util.{Date, Properties}
-import com.streamxhub.flink.core.java.function.HBaseFunction
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.util.FlinkUtils
@@ -74,9 +74,12 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
 
   @volatile var query: HBaseQuery = _
 
-  private[this] var hbaseFunc: HBaseFunction[R] = _
   private[this] var scalaQueryFunc: R => HBaseQuery = _
   private[this] var scalaResultFunc: Result => R = _
+
+  private[this] var javaQueryFunc: HBaseQueryFunction[R] = _
+  private[this] var javaResultFunc: HBaseResultFunction[R] = _
+
   @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "hbase-source-query-states"
   private[this] var lastOne: R = _
@@ -89,9 +92,10 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   }
 
   //for JAVA
-  def this(prop: Properties, hbaseFunc: HBaseFunction[R]) {
+  def this(prop: Properties, queryFunc: HBaseQueryFunction[R], resultFunc: HBaseResultFunction[R]) {
     this(ApiType.java, prop)
-    this.hbaseFunc = hbaseFunc
+    this.javaQueryFunc = queryFunc
+    this.javaResultFunc = resultFunc
   }
 
   @throws[Exception]
@@ -105,7 +109,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = apiType match {
           case ApiType.scala => scalaQueryFunc(lastOne)
-          case ApiType.java => hbaseFunc.getQuery(lastOne)
+          case ApiType.java => javaQueryFunc.getQuery(lastOne)
         }
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
@@ -115,7 +119,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
               lastOne = scalaResultFunc(x)
               ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             case ApiType.java =>
-              lastOne = hbaseFunc.doResult(x)
+              lastOne = javaResultFunc.doResult(x)
               ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
           }
         })

@@ -20,11 +20,11 @@
  */
 package com.streamxhub.flink.javacase;
 
-import com.streamxhub.flink.core.StreamEnvConfig;
+import com.streamxhub.flink.core.java.sink.KafkaSink;
+import com.streamxhub.flink.core.scala.source.KafkaRecord;
+import com.streamxhub.flink.core.scala.util.StreamEnvConfig;
 import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.sink.KafkaJavaSink;
-import com.streamxhub.flink.core.source.KafakJavaSource;
-import com.streamxhub.flink.core.source.KafkaRecord;
+import com.streamxhub.flink.core.java.source.KafkaSource;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -42,7 +42,7 @@ public class KafkaJavaApp {
 
         StreamingContext context = new StreamingContext(javaConfig);
 
-        DataStream<LogBean> source = new KafakJavaSource<LogBean>(context)
+        DataStream<LogBean> source = new KafkaSource<LogBean>(context)
                 .deserializer(new KafkaDeserializationSchema<LogBean>() {
                     @Override
                     public TypeInformation<LogBean> getProducedType() {
@@ -66,7 +66,7 @@ public class KafkaJavaApp {
                 .getDataStream()
                 .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
 
-        new KafkaJavaSink<LogBean>(context).sink(source);
+        new KafkaSink<LogBean>(context).sink(source);
 
         context.start();
     }

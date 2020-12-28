@@ -20,7 +20,8 @@
  */
 package com.streamxhub.flink.core.java.source;
 
-import com.streamxhub.flink.core.java.function.MongoFunction;
+import com.streamxhub.flink.core.java.function.MongoQueryFunction;
+import com.streamxhub.flink.core.java.function.MongoResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.source.MongoSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -36,8 +37,8 @@ public class MongoSource<T> {
         this.prop = prop;
     }
 
-    public DataStreamSource<T> getDataStream(String collectionName,MongoFunction<T> mongoFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(collectionName,prop, mongoFunction, null);
+    public DataStreamSource<T> getDataStream(String collectionName, MongoQueryFunction<T> queryFunction, MongoResultFunction<T> resultFunction) {
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(collectionName,prop, queryFunction,resultFunction, null);
         return ctx.getJavaEnv().addSource(sourceFunction);
     }
 

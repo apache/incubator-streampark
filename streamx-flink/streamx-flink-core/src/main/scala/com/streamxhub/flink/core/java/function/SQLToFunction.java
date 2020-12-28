@@ -26,6 +26,7 @@ import java.io.Serializable;
 /**
  * @author benjobs
  */
+@FunctionalInterface
 public interface SQLToFunction<T> extends Serializable {
     /**
      * @param bean
