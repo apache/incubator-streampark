@@ -169,10 +169,11 @@ class MySQLASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => St
       override def get(): Iterable[Map[String, _]] = JdbcUtils.select(sqlFun(input))(jdbc)
     }, executorService).thenAccept(new Consumer[Iterable[Map[String, _]]] {
       override def accept(result: Iterable[Map[String, _]]): Unit = {
-        if (result.isEmpty) {
+        val list = result.toList
+        if (list.isEmpty) {
           resultFuture.complete(List(resultFun(input, Map.empty[String, Any])))
         } else {
-          resultFuture.complete(result.map(x => resultFun(input, x)))
+          resultFuture.complete(list.map(x => resultFun(input, x)))
         }
       }
     })
