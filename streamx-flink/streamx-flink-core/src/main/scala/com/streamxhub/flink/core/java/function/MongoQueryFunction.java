@@ -20,19 +20,17 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import org.bson.Document;
+
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface StreamEnvConfigFunction {
-    /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     *
-     * @param environment
-     * @param parameterTool
-     */
-    void doConfig(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+public interface MongoQueryFunction<T> {
+
+    FindIterable<Document> getQuery(T lastOne, MongoCollection<Document> collection);
+
 }
