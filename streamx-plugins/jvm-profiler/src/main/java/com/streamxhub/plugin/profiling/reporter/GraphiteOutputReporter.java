@@ -50,12 +50,12 @@ import java.util.Set;
  * <p>
  * reporter=com.streamxhub.plugin.profiling.reporter.GraphiteOutputReporter,configProvider=com.streamxhub.plugin.profiling
  * .YamlConfigProvider,configFile=/opt/graphite.yaml
+ *
  * @author benjobs
  */
 public class GraphiteOutputReporter implements Reporter {
 
-    private static final AgentLogger logger = AgentLogger
-            .getLogger(GraphiteOutputReporter.class.getName());
+    private static final AgentLogger logger = AgentLogger.getLogger(GraphiteOutputReporter.class.getName());
     private String host = "127.0.0.1";
     private int port = 2003;
     private String prefix = "jvm";
