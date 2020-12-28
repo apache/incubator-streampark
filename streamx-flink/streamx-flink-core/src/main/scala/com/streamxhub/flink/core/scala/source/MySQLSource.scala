@@ -108,11 +108,11 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
         apiType match {
           case ApiType.scala => scalaResultFunc(result).foreach(x => {
             lastOne = x
-            ctx.collectWithTimestamp(lastOne, new Date().getTime)
+            ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
           })
           case ApiType.java => sqlFunc.doResult(result.map(_.asJava)).foreach(x => {
             lastOne = x
-            ctx.collectWithTimestamp(lastOne, new Date().getTime)
+            ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
           })
         }
       }

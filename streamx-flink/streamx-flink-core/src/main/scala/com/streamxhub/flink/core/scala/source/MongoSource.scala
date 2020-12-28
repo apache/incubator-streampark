@@ -116,7 +116,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
           if (find != null) {
             resultFunc(find.iterator).foreach(x => {
               lastOne = x
-              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             })
           }
         case ApiType.java =>
@@ -124,7 +124,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
           if (find != null) {
             mongoFunc.doResult(find.iterator).foreach(x => {
               lastOne = x
-              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             })
           }
       }

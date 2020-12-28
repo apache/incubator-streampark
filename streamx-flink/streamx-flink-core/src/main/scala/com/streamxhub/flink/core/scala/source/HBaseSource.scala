@@ -113,10 +113,10 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
           apiType match {
             case ApiType.scala =>
               lastOne = scalaResultFunc(x)
-              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
             case ApiType.java =>
               lastOne = hbaseFunc.doResult(x)
-              ctx.collectWithTimestamp(lastOne, new Date().getTime)
+              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
           }
         })
       }
