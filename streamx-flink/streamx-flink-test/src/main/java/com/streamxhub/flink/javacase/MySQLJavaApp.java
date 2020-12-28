@@ -1,10 +1,12 @@
 package com.streamxhub.flink.javacase;
 
-import com.streamxhub.flink.core.StreamEnvConfig;
+import com.streamxhub.flink.core.java.function.SQLQueryFunction;
+import com.streamxhub.flink.core.java.function.SQLResultFunction;
+import com.streamxhub.flink.core.java.sink.JdbcSink;
+import com.streamxhub.flink.core.java.source.MySQLSource;
 import com.streamxhub.flink.core.scala.StreamingContext;
 
-import com.streamxhub.flink.core.sink.JdbcJavaSink;
-import com.streamxhub.flink.core.source.MySQLJavaSource;
+import com.streamxhub.flink.core.scala.util.StreamEnvConfig;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 
@@ -35,22 +37,26 @@ public class MySQLJavaApp {
         prop.put("idleTimeout", "20000");
 
         //读取MySQL数据源
-        DataStream<LogBean> stream = new MySQLJavaSource<LogBean>(context, prop)
-                .sql(() -> {
-                    Thread.sleep(1000);
-                    return "select * from orders limit 10";
-                })
-                .result(map -> {
-                    LogBean logBean = new LogBean();
-                    logBean.setCard_type("123");
-                    logBean.setControlid("345");
-                    return Arrays.asList(logBean);
-                })
-                .getDataStream()
+        DataStream<LogBean> stream = new MySQLSource<LogBean>(context, prop)
+                .getDataStream(
+                        (SQLQueryFunction<LogBean>) lastOne -> {
+                            Thread.sleep(1000);
+                            if (lastOne == null) {
+                                return "select * from orders where out_time> 2020-10-10 00:00:00 limit 10 ";
+                            } else {
+                                return "select * from orders where out_time> " + lastOne.getOut_time() + " limit 10 ";
+                            }
+                        },
+                        (SQLResultFunction<LogBean>) map -> {
+                            LogBean logBean = new LogBean();
+                            logBean.setCard_type("123");
+                            logBean.setControlid("345");
+                            return Arrays.asList(logBean);
+                        })
                 .returns(TypeInformation.of(LogBean.class));
 
         //写入MySQL表...
-        new JdbcJavaSink<LogBean>(context)
+        new JdbcSink<LogBean>(context)
                 .jdbc(prop)
                 .sql(bean -> String.format("insert into sink(name,value)value('%s','%s')", bean.getCard_type(), bean.getControlid()))
                 .sink(stream);

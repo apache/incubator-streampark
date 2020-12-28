@@ -20,19 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+
+import java.io.Serializable;
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface StreamEnvConfigFunction {
+public interface SQLQueryFunction<T> extends Serializable {
     /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * 获取要查询的SQL
      *
-     * @param environment
-     * @param parameterTool
+     * @return
+     * @throws Exception
      */
-    void doConfig(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    String getQuery(T lastOne) throws Exception;
+
 }

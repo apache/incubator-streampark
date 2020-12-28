@@ -20,19 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoCursor;
-import org.bson.Document;
+import org.apache.hadoop.hbase.client.Result;
 
+import java.io.Serializable;
 
 /**
  * @author benjobs
  */
-public interface MongoFunction<T> {
-
-    FindIterable<Document> getQuery(T lastOne, MongoCollection<Document> collection);
-
-    Iterable<T> doResult(MongoCursor<Document> cursor);
-
+@FunctionalInterface
+public interface HBaseResultFunction<T> extends Serializable {
+    /**
+     * 返回结合处理
+     *
+     * @param result
+     * @return
+     */
+    T doResult(Result result);
 }

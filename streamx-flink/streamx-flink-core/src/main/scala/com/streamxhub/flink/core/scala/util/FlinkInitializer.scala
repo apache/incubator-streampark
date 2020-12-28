@@ -18,13 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.flink.core.scala
+package com.streamxhub.flink.core.scala.util
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
-
-import java.io.File
-import java.util.concurrent.TimeUnit
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.enums.{ApiType, PlannerType, RestartStrategy, TableMode, StateBackend => XStateBackend}
@@ -42,10 +39,12 @@ import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.EnvironmentSettings
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 
+import java.io.File
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 import scala.util.Try
 
-object FlinkInitializer {
+private[scala] object FlinkInitializer {
 
   private var flinkInitializer: FlinkInitializer = _
 
@@ -73,11 +72,7 @@ object FlinkInitializer {
 
 }
 
-
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
-
-
-class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
+private[scala] class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Logger {
 
 
   def this(args: Array[String], func: (StreamExecutionEnvironment, ParameterTool) => Unit) = {
@@ -436,3 +431,5 @@ class FlinkInitializer private(args: Array[String], apiType: ApiType) extends Lo
 
 
 }
+
+class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)

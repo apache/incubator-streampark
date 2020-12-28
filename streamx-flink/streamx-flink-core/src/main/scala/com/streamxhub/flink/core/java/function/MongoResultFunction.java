@@ -20,28 +20,15 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
-import org.apache.hadoop.hbase.client.Result;
-
-import java.io.Serializable;
+import com.mongodb.client.MongoCursor;
+import org.bson.Document;
 
 /**
  * @author benjobs
  */
-public interface HBaseFunction<T> extends Serializable {
-    /**
-     * 获取一个查询条件
-     *
-     * @param lastOne
-     * @return
-     */
-    HBaseQuery getQuery(T lastOne);
+@FunctionalInterface
+public interface MongoResultFunction<T> {
 
-    /**
-     * 返回结合处理
-     *
-     * @param result
-     * @return
-     */
-    T doResult(Result result);
+    Iterable<T> doResult(MongoCursor<Document> cursor);
+
 }

@@ -27,15 +27,8 @@ import java.util.Map;
 /**
  * @author benjobs
  */
-public interface SQLGetFunction<T> extends Serializable {
-    /**
-     * 获取要查询的SQL
-     *
-     * @return
-     * @throws Exception
-     */
-    String getQuery(T lastOne) throws Exception;
-
+@FunctionalInterface
+public interface SQLResultFunction<T> extends Serializable {
     /**
      * 将查下结果以Map的方式返回,用户去实现转成对象.
      *
@@ -43,5 +36,4 @@ public interface SQLGetFunction<T> extends Serializable {
      * @return
      */
     Iterable<T> doResult(Iterable<Map<String, ?>> map);
-
 }
