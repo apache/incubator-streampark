@@ -79,7 +79,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   private[this] var javaResultFunc: SQLResultFunction[R] = _
   @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "mysql-source-query-states"
-  private[this] var lastOne: R = _
+  private[this] var last: R = _
 
   //for Scala
   def this(jdbc: Properties, sqlFunc: R => String, resultFunc: Iterable[Map[String, _]] => Iterable[R]) = {
@@ -100,8 +100,8 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     while (this.running) {
       ctx.getCheckpointLock.synchronized {
         val sql = apiType match {
-          case ApiType.scala => scalaSqlFunc(lastOne)
-          case ApiType.java => javaSqlFunc.getQuery(lastOne)
+          case ApiType.scala => scalaSqlFunc(last)
+          case ApiType.java => javaSqlFunc.query(last)
         }
         val result: List[Map[String, _]] = apiType match {
           case ApiType.scala => JdbcUtils.select(sql)(jdbc)
@@ -109,12 +109,12 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
         }
         apiType match {
           case ApiType.scala => scalaResultFunc(result).foreach(x => {
-            lastOne = x
-            ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+            last = x
+            ctx.collectWithTimestamp(last, System.currentTimeMillis())
           })
-          case ApiType.java => javaResultFunc.doResult(result.map(_.asJava)).foreach(x => {
-            lastOne = x
-            ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+          case ApiType.java => javaResultFunc.result(result.map(_.asJava)).foreach(x => {
+            last = x
+            ctx.collectWithTimestamp(last, System.currentTimeMillis())
           })
         }
       }
@@ -126,8 +126,8 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      if (lastOne != null) {
-        state.add(lastOne)
+      if (last != null) {
+        state.add(last)
       }
     } else {
       logger.error("[StreamX] MySQLSource snapshotState called on closed source")
@@ -139,7 +139,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
     logger.info("[StreamX] MySQLSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
-      case Success(q) => lastOne = q
+      case Success(q) => last = q
       case _ =>
     }
   }
