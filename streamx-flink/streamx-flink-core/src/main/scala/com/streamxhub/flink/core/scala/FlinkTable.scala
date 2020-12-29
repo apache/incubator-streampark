@@ -94,7 +94,8 @@ class TableContext(val parameter: ParameterTool,
     env.execute(jobName)
   }
 
-  private[flink] def getSQL(): String = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))).getOrElse(new ExceptionInInitializerError("[StreamX] init sql error."))
+  private[flink] def getStatement(): List[String] = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL())).split("\r\n").toList)
+    .getOrElse(new ExceptionInInitializerError("[StreamX] init sql error."))
 
   override def registerFunction[T](name: String, tf: TableFunction[T])(implicit info: TypeInformation[T]): Unit = tableEnv.registerFunction(name, tf)
 
