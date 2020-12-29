@@ -233,7 +233,7 @@ private[scala] class FlinkInitializer private(args: Array[String], apiType: ApiT
     checkpoint()
 
     apiType match {
-      case ApiType.java if javaEnvConf != null => javaEnvConf.doConfig(this.streamEnv.getJavaEnv, this.parameter)
+      case ApiType.java if javaEnvConf != null => javaEnvConf.configuration(this.streamEnv.getJavaEnv, this.parameter)
       case ApiType.scala if streamConfFunc != null => streamConfFunc(this.streamEnv, this.parameter)
       case _ =>
     }

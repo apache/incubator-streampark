@@ -35,5 +35,5 @@ public interface HBaseResultFunction<T> extends Serializable {
      * @param result
      * @return
      */
-    T doResult(Result result);
+    T result(Result result);
 }
