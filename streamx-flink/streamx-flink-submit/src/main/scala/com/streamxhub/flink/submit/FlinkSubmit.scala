@@ -194,7 +194,7 @@ object FlinkSubmit extends Logger {
       val appArgs: ArrayBuffer[String] = {
         val array = new ArrayBuffer[String]
         Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
-        array += KEY_FLINK_APP_CONF("--")
+        array += KEY_FLINK_CONF("--")
         array += submitInfo.appConf
         array += KEY_FLINK_HOME("--")
         array += flinkHdfsHome
