@@ -35,5 +35,5 @@ public interface SQLResultFunction<T> extends Serializable {
      * @param map
      * @return
      */
-    Iterable<T> doResult(Iterable<Map<String, ?>> map);
+    Iterable<T> result(Iterable<Map<String, ?>> map);
 }

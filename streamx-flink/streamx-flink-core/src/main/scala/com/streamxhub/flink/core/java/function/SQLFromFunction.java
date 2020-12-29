@@ -27,10 +27,10 @@ import java.io.Serializable;
  * @author benjobs
  */
 @FunctionalInterface
-public interface SQLToFunction<T> extends Serializable {
+public interface SQLFromFunction<T> extends Serializable {
     /**
      * @param bean
      * @return
      */
-    String toSQL(T bean);
+    String from(T bean);
 }
