@@ -29,16 +29,14 @@ import scala.collection.JavaConversions._
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
-    val sql = context.getSQL()
-    val calls = sql.split("\r\n").toList
-    SQLCommandUtils.parseSQL(calls).foreach(call => {
+    SQLCommandUtils.parseSQL(context.getStatement()).foreach(call => {
       call.command.name() match {
         case SQLCommand.SET.name => {
           val key = call.operands(0)
           val value = call.operands(1)
           context.getConfig.getConfiguration.setString(key, value)
         }
-        case SQLCommand.CREATE_TABLE.name | SQLCommand.INSERT_INTO.name => {
+        case SQLCommand.CREATE_TABLE.name | SQLCommand.CREATE_VIEW.name | SQLCommand.INSERT_INTO.name => {
           val ddlDml = call.operands(0)
           Try(context.sqlUpdate(ddlDml)) match {
             case Success(_) =>

@@ -112,6 +112,15 @@ public final class SQLCommandUtils {
 
         CREATE_TABLE("(CREATE\\s+TABLE.*)", SINGLE_OPERAND),
 
+        CREATE_VIEW(
+                "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(.*)",
+                (operands) -> {
+                    if (operands.length < 2) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(new String[]{operands[0], operands[1]});
+                }),
+
         ;
 
         public final Pattern pattern;
