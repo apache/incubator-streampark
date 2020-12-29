@@ -20,12 +20,34 @@
  */
 package com.streamxhub.flink.cli
 
+import SQLCommandUtils.SQLCommand
 import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+
+import scala.util.{Failure, Success, Try}
+import scala.collection.JavaConversions._
 
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
-
+    val sql = context.getSQL()
+    val calls = sql.split("\r\n").toList
+    SQLCommandUtils.parseSQL(calls).foreach(call => {
+      call.command.name() match {
+        case SQLCommand.SET.name => {
+          val key = call.operands(0)
+          val value = call.operands(1)
+          context.getConfig.getConfiguration.setString(key, value)
+        }
+        case SQLCommand.CREATE_TABLE.name | SQLCommand.INSERT_INTO.name => {
+          val ddlDml = call.operands(0)
+          Try(context.sqlUpdate(ddlDml)) match {
+            case Success(_) =>
+            case Failure(e) => throw new RuntimeException("[StreamX] SQL parse failed:\n" + ddlDml + "\n", e)
+          }
+        }
+        case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
+      }
+    })
   }
 
 }
