@@ -28,7 +28,9 @@ import scala.collection.JavaConversions._
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
+
     val statement = context.getStatement()
+
     SQLCommandUtil.parseSQL(statement).foreach(call => {
       call.command match {
         case SQLCommand.SET =>
@@ -43,6 +45,7 @@ object FlinkTableCli extends FlinkTable {
         case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
       }
     })
+
     logInfo(s"[StreamX] tableSQL: ${statement.mkString("\n")}")
   }
 
