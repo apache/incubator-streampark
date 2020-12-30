@@ -43,6 +43,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.beachape</groupId>
+            <artifactId>enumeratum_${scala.binary.version}</artifactId>
+            <version>1.6.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.streamxhub</groupId>
             <artifactId>streamx-common</artifactId>
             <version>1.0.0</version>

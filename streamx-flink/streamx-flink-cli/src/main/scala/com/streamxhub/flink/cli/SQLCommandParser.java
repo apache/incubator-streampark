@@ -35,9 +35,9 @@ import java.util.regex.Pattern;
  *
  * @author benjobs
  */
-public final class SQLCommandParser2 {
+public final class SQLCommandParser {
 
-    private SQLCommandParser2() {
+    private SQLCommandParser() {
     }
 
     public static List<SQLCommandCall2> parse(TableEnvironmentInternal tableEnv, List<String> lines) {

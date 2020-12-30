@@ -41,7 +41,7 @@ import org.apache.flink.table.types.AbstractDataType
 
 import java.lang
 import java.util.Optional
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class TableContext(val parameter: ParameterTool,
                    private val env: StreamExecutionEnvironment,
@@ -94,8 +94,15 @@ class TableContext(val parameter: ParameterTool,
     env.execute(jobName)
   }
 
-  private[flink] def getStatement(): List[String] = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL())).split("\r\n").toList)
-    .getOrElse(new ExceptionInInitializerError("[StreamX] init sql error."))
+  private[flink] def getStatement(): List[String] = {
+    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL())).split("\r\n").toList) match {
+      case Success(value) => value
+      case Failure(exception) => {
+        new ExceptionInInitializerError(s"[StreamX] init sql error.${exception}")
+        null
+      }
+    }
+  }
 
   override def registerFunction[T](name: String, tf: TableFunction[T])(implicit info: TypeInformation[T]): Unit = tableEnv.registerFunction(name, tf)
 

@@ -20,7 +20,6 @@
  */
 package com.streamxhub.flink.cli
 
-import SQLCommandUtils.SQLCommand
 import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
 
 import scala.util.{Failure, Success, Try}
@@ -29,14 +28,13 @@ import scala.collection.JavaConversions._
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
-    SQLCommandUtils.parseSQL(context.getStatement()).foreach(call => {
-      call.command.name() match {
-        case SQLCommand.SET.name => {
+    SQLCommandUtil.parseSQL(context.getStatement()).foreach(call => {
+      call.command match {
+        case SQLType.SET =>
           val key = call.operands(0)
           val value = call.operands(1)
           context.getConfig.getConfiguration.setString(key, value)
-        }
-        case SQLCommand.CREATE_TABLE.name | SQLCommand.CREATE_VIEW.name | SQLCommand.INSERT_INTO.name => {
+        case SQLType.CREATE_TABLE | SQLType.CREATE_VIEW | SQLType.INSERT_INTO => {
           val ddlDml = call.operands(0)
           Try(context.sqlUpdate(ddlDml)) match {
             case Success(_) =>
