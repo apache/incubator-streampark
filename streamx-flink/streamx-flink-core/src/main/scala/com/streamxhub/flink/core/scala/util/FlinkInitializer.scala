@@ -47,9 +47,9 @@ import scala.util.Try
 
 private[scala] object FlinkInitializer {
 
-  private var flinkInitializer: FlinkInitializer = _
+  private[scala] var flinkInitializer: FlinkInitializer = _
 
-  def ofStreamEnv(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): FlinkInitializer = {
+  def ofStreamEnv(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -59,10 +59,10 @@ private[scala] object FlinkInitializer {
         }
       }
     }
-    flinkInitializer
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
   }
 
-  def ofJavaEnv(args: StreamEnvConfig): FlinkInitializer = {
+  def ofJavaStreamEnv(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -72,10 +72,11 @@ private[scala] object FlinkInitializer {
         }
       }
     }
-    flinkInitializer
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment)
   }
 
-  def ofTableEnv(args: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null): FlinkInitializer = {
+
+  def ofTableEnv(args: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null): (ParameterTool, TableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -85,10 +86,10 @@ private[scala] object FlinkInitializer {
         }
       }
     }
-    flinkInitializer
+    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
   }
 
-  def ofStreamTableEnv(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): FlinkInitializer = {
+  def ofStreamTableEnv(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -98,8 +99,22 @@ private[scala] object FlinkInitializer {
         }
       }
     }
-    flinkInitializer
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
+
+  def ofJavaStreamTableEnv(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+    if (flinkInitializer == null) {
+      this.synchronized {
+        if (flinkInitializer == null) {
+          flinkInitializer = new FlinkInitializer(args.args, ApiType.java)
+          flinkInitializer.javaEnvConfFunc = args.conf
+          flinkInitializer.initStreamEnv()
+        }
+      }
+    }
+    (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
+  }
+
 }
 
 
