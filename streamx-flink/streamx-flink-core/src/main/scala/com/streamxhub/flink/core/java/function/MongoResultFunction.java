@@ -29,6 +29,11 @@ import org.bson.Document;
 @FunctionalInterface
 public interface MongoResultFunction<T> {
 
-    Iterable<T> doResult(MongoCursor<Document> cursor);
+    /**
+     * 处理查询结果
+     * @param cursor
+     * @return
+     */
+    Iterable<T> result(MongoCursor<Document> cursor);
 
 }
