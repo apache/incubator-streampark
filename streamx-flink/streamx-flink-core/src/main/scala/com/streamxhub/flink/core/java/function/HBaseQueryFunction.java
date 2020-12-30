@@ -30,10 +30,10 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface HBaseQueryFunction<T> extends Serializable {
     /**
-     * 获取一个查询条件
+     * 获取一个查询对象.
      *
-     * @param lastOne
+     * @param last
      * @return
      */
-    HBaseQuery getQuery(T lastOne);
+    HBaseQuery query(T last);
 }

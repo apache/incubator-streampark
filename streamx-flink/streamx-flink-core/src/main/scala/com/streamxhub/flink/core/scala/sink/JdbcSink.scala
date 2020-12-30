@@ -22,6 +22,7 @@ package com.streamxhub.flink.core.scala.sink
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
+import com.streamxhub.flink.core.java.function.SQLFromFunction
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
@@ -35,12 +36,10 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
+
 import java.sql._
 import java.util.concurrent.atomic.AtomicLong
 import java.util.{Optional, Properties}
-
-import com.streamxhub.flink.core.java.function.SQLToFunction
-
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
@@ -95,7 +94,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
   private var connection: Connection = _
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
-  private var javaToSQLFunc: SQLToFunction[T] = _
+  private var javaToSQLFunc: SQLFromFunction[T] = _
   private val offset: AtomicLong = new AtomicLong(0L)
   private var timestamp: Long = 0L
 
@@ -109,7 +108,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
     this.scalaToSQLFn = toSQLFn
   }
 
-  def this(jdbc: Properties, toSQLFn: SQLToFunction[T]) {
+  def this(jdbc: Properties, toSQLFn: SQLFromFunction[T]) {
     this(ApiType.java, jdbc)
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
@@ -130,7 +129,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
     require(connection != null)
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
-      case ApiType.java => javaToSQLFunc.toSQL(value)
+      case ApiType.java => javaToSQLFunc.from(value)
     }
     batchSize match {
       case 1 =>
@@ -217,14 +216,14 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   private[this] val buffer: collection.mutable.Map[String, Transaction] = collection.mutable.Map.empty[String, Transaction]
 
   private var scalaToSQLFn: T => String = _
-  private var javaToSQLFunc: SQLToFunction[T] = _
+  private var javaToSQLFunc: SQLFromFunction[T] = _
 
   def this(jdbc: Properties, toSQLFn: T => String) {
     this(ApiType.scala, jdbc)
     this.scalaToSQLFn = toSQLFn
   }
 
-  def this(jdbc: Properties, toSQLFn: SQLToFunction[T]) {
+  def this(jdbc: Properties, toSQLFn: SQLFromFunction[T]) {
     this(ApiType.java, jdbc)
     require(toSQLFn != null, "[StreamX] ToSQLFunction can not be null")
     this.javaToSQLFunc = toSQLFn
@@ -240,7 +239,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context[_]): Unit = {
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
-      case ApiType.java => javaToSQLFunc.toSQL(value)
+      case ApiType.java => javaToSQLFunc.from(value)
     }
     if (!sql.toUpperCase.trim.startsWith("INSERT")) {
       transaction.insertMode = false

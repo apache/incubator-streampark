@@ -34,6 +34,6 @@ public interface SQLQueryFunction<T> extends Serializable {
      * @return
      * @throws Exception
      */
-    String getQuery(T lastOne) throws Exception;
+    String query(T last) throws Exception;
 
 }
