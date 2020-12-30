@@ -47,15 +47,12 @@ class StreamTableContext(val parameter: ParameterTool,
                          private val env: StreamExecutionEnvironment,
                          private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
-  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
-
   /**
-   * for scala...
+   * for scala
    *
-   * @param array
-   * @param config
+   * @param args
    */
-  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofStreamTableEnv(array, config))
+  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
 
   /**
    * for Java
