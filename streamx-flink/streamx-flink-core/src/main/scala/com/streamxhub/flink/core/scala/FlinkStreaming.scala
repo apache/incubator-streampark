@@ -38,15 +38,12 @@ import org.apache.flink.streaming.api.scala._
  */
 class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
-  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
-
   /**
-   * for scala...
+   * for scala
    *
-   * @param array
-   * @param config
+   * @param args
    */
-  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofStreamEnv(array, config))
+  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
 
   /**
    * for Java
