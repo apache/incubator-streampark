@@ -46,7 +46,7 @@ object SQLCommandUtil {
     calls
   }
 
-  def parseSQL(sqlLine: String): Option[SQLCommandCall] = { // normalize
+  def parseSQL(sqlLine: String): Option[SQLCommandCall] = {
     // remove ';' at the end
     val stmt = sqlLine.trim.replaceFirst(";$", "")
     // parse
@@ -81,27 +81,27 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
 
   case object SET extends SQLCommand(
     "(\\s+(\\S+)\\s*=(.*))?",
-    operands =>
-      operands match {
-        case x if x.length < 3 => None
-        case x if x(0) == null => Some(new Array[String](0))
-        case _ => Some(Array[String](operands(1), operands(2)))
+    x =>
+      x match {
+        case a if a.length < 3 => None
+        case a if a(0) == null => Some(new Array[String](0))
+        case _ => Some(Array[String](x(1), x(2)))
       }
   )
 
   case object INSERT_INTO extends SQLCommand(
     "(INSERT\\s+INTO.*)",
-    (operands: Array[String]) => Some(Array[String](operands(0)))
+    (x: Array[String]) => Some(Array[String](x(0)))
   )
 
   case object CREATE_TABLE extends SQLCommand(
     "(CREATE\\s+TABLE.*)",
-    (operands: Array[String]) => Some(Array[String](operands(0)))
+    (x: Array[String]) => Some(Array[String](x(0)))
   )
 
   case object CREATE_VIEW extends SQLCommand(
     "(CREATE\\s+VIEW.*)",
-    (operands: Array[String]) => Some(Array[String](operands(0)))
+    (x: Array[String]) => Some(Array[String](x(0)))
   )
 
 }
