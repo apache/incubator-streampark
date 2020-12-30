@@ -31,6 +31,9 @@ import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
+/**
+ * @author benjobs
+ */
 public class KafkaJavaApp {
 
     public static void main(String[] args) {
@@ -55,7 +58,7 @@ public class KafkaJavaApp {
                     }
 
                     @Override
-                    public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) throws Exception {
+                    public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) {
                         String value = new String(record.value());
                         LogBean logBean = new LogBean();
                         logBean.setControlid("benjobs");

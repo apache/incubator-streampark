@@ -1,13 +1,13 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 import org.apache.flink.table.descriptors.{Csv, Kafka, Schema}
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api._
 
-object KafkaTableApp extends FlinkTable {
+object KafkaTableApp extends FlinkStreamTable {
 
-  override def handle(context: TableContext): Unit = {
+  override def handle(context: StreamTableContext): Unit = {
     //connect kafka data
     context.connect(
       new Kafka()
