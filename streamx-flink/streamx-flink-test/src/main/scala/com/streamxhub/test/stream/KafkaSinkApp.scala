@@ -13,7 +13,7 @@ object KafkaSinkApp extends FlinkStreaming {
     val source = new BehaviorSource()
     val ds = context.addSource[Behavior](source).map(_.toString)
     ds.print()
-    //KafkaSink(context).sink(ds)
+    KafkaSink(context).sink(ds)
   }
 
 }
