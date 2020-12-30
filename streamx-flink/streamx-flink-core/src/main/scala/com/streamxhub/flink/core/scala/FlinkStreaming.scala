@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.ext.DataStreamExt
 import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
@@ -39,24 +38,22 @@ import org.apache.flink.streaming.api.scala._
  */
 class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
+  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
+
   /**
    * for scala...
    *
    * @param array
    * @param config
    */
-  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
-    this(FlinkInitializer.ofStreamEnv(array, config).parameter, FlinkInitializer.ofStreamEnv(array, config).streamEnvironment)
-  }
+  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofStreamEnv(array, config))
 
   /**
    * for Java
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = {
-    this(FlinkInitializer.ofJavaEnv(args).parameter, FlinkInitializer.ofJavaEnv(args).streamEnvironment)
-  }
+  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamEnv(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -95,14 +92,7 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val initializer = new FlinkInitializer(args, ApiType.scala)
-    initializer.streamEnvConfFunc = config
-    initializer.initStreamEnv()
-
-    val parameter = initializer.parameter
-    val env = initializer.streamEnvironment
-    val context = new StreamingContext(parameter, env)
-    //
+    val context = new StreamingContext(FlinkInitializer.ofStreamEnv(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
