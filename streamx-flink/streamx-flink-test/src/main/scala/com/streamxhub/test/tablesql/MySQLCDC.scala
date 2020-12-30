@@ -2,12 +2,12 @@ package com.streamxhub.test.tablesql
 
 import com.alibaba.ververica.cdc.connectors.mysql.MySQLSource
 import com.alibaba.ververica.cdc.debezium.StringDebeziumDeserializationSchema
-import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
-object MySQLCDC extends FlinkTable {
+object MySQLCDC extends FlinkStreamTable {
 
-  override def handle(context: TableContext): Unit = {
+  override def handle(context: StreamTableContext): Unit = {
 
     val sourceDDL =
       """

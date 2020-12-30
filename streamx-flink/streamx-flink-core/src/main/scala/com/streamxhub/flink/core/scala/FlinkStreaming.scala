@@ -22,6 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
+import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.ext.DataStreamExt
 import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
@@ -45,7 +46,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
    * @param config
    */
   def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
-    this(FlinkInitializer.get(array, config).parameter, FlinkInitializer.get(array, config).streamEnvironment)
+    this(FlinkInitializer.ofStreamEnv(array, config).parameter, FlinkInitializer.ofStreamEnv(array, config).streamEnvironment)
   }
 
   /**
@@ -54,7 +55,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
    * @param args
    */
   def this(args: StreamEnvConfig) = {
-    this(FlinkInitializer.get(args).parameter, FlinkInitializer.get(args).streamEnvironment)
+    this(FlinkInitializer.ofJavaEnv(args).parameter, FlinkInitializer.ofJavaEnv(args).streamEnvironment)
   }
 
   /**
@@ -94,8 +95,10 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    //init......
-    val initializer = new FlinkInitializer(args, config)
+    val initializer = new FlinkInitializer(args, ApiType.scala)
+    initializer.streamEnvConfFunc = config
+    initializer.initStreamEnv()
+
     val parameter = initializer.parameter
     val env = initializer.streamEnvironment
     val context = new StreamingContext(parameter, env)

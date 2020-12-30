@@ -1,13 +1,13 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, FlinkTable, StreamTableContext, TableContext}
 import org.apache.flink.table.descriptors.{FileSystem, OldCsv, Schema}
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api._
 
-object FileTableApp extends FlinkTable {
+object FileTableApp extends FlinkStreamTable {
 
-  override def handle(context: TableContext): Unit = {
+  override def handle(context: StreamTableContext): Unit = {
     context.connect(new FileSystem().path("data/in/order.txt"))
       .withFormat(new OldCsv())
       .withSchema(new Schema()
