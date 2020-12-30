@@ -34,5 +34,5 @@ public interface StreamEnvConfigFunction {
      * @param environment
      * @param parameterTool
      */
-    void doConfig(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
 }

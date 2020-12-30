@@ -86,7 +86,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
 
   @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "mongo-source-query-states"
-  private[this] var lastOne: R = _
+  private[this] var last: R = _
 
   //for Scala
   def this(collectionName: String, prop: Properties, scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document], scalaResultFunc: MongoCursor[Document] => List[R]) = {
@@ -116,19 +116,19 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
     while (running) {
       apiType match {
         case ApiType.scala =>
-          val find = scalaQueryFunc(lastOne, mongoCollection)
+          val find = scalaQueryFunc(last, mongoCollection)
           if (find != null) {
             scalaResultFunc(find.iterator).foreach(x => {
-              lastOne = x
-              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+              last = x
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
             })
           }
         case ApiType.java =>
-          val find = javaQueryFunc.getQuery(lastOne, mongoCollection)
+          val find = javaQueryFunc.query(last, mongoCollection)
           if (find != null) {
-            javaResultFunc.doResult(find.iterator).foreach(x => {
-              lastOne = x
-              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+            javaResultFunc.result(find.iterator).foreach(x => {
+              last = x
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
             })
           }
       }
@@ -142,8 +142,8 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      if (lastOne != null) {
-        state.add(lastOne)
+      if (last != null) {
+        state.add(last)
       }
     } else {
       logger.error("[StreamX] MongoSource snapshotState called on closed source")
@@ -155,7 +155,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
     logger.info("[StreamX] MongoSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
-      case Success(q) => lastOne = q
+      case Success(q) => last = q
       case _ =>
     }
   }

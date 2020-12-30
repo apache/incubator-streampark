@@ -82,7 +82,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
 
   @transient private var state: ListState[R] = _
   private val OFFSETS_STATE_NAME: String = "hbase-source-query-states"
-  private[this] var lastOne: R = _
+  private[this] var last: R = _
 
   //for Scala
   def this(prop: Properties, queryFunc: R => HBaseQuery, resultFunc: Result => R) = {
@@ -108,19 +108,19 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
       ctx.getCheckpointLock.synchronized {
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = apiType match {
-          case ApiType.scala => scalaQueryFunc(lastOne)
-          case ApiType.java => javaQueryFunc.getQuery(lastOne)
+          case ApiType.scala => scalaQueryFunc(last)
+          case ApiType.java => javaQueryFunc.query(last)
         }
         require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
         table.getScanner(query).foreach(x => {
           apiType match {
             case ApiType.scala =>
-              lastOne = scalaResultFunc(x)
-              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+              last = scalaResultFunc(x)
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
             case ApiType.java =>
-              lastOne = javaResultFunc.doResult(x)
-              ctx.collectWithTimestamp(lastOne, System.currentTimeMillis())
+              last = javaResultFunc.result(x)
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
           }
         })
       }
@@ -139,8 +139,8 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   override def snapshotState(context: FunctionSnapshotContext): Unit = {
     if (running) {
       state.clear()
-      if (lastOne != null) {
-        state.add(lastOne)
+      if (last != null) {
+        state.add(last)
       }
     } else {
       logger.error("[StreamX] HBaseSource snapshotState called on closed source")
@@ -152,7 +152,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
     logger.info("[StreamX] HBaseSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
-      case Success(q) => lastOne = q
+      case Success(q) => last = q
       case _ =>
     }
   }
