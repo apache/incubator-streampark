@@ -39,23 +39,18 @@ import org.apache.flink.streaming.api.scala._
 class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /**
-   * for scala...
+   * for scala
    *
-   * @param array
-   * @param config
+   * @param args
    */
-  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
-    this(FlinkInitializer.get(array, config).parameter, FlinkInitializer.get(array, config).streamEnvironment)
-  }
+  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
 
   /**
    * for Java
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = {
-    this(FlinkInitializer.get(args).parameter, FlinkInitializer.get(args).streamEnvironment)
-  }
+  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamEnv(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -94,12 +89,7 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    //init......
-    val initializer = new FlinkInitializer(args, config)
-    val parameter = initializer.parameter
-    val env = initializer.streamEnvironment
-    val context = new StreamingContext(parameter, env)
-    //
+    val context = new StreamingContext(FlinkInitializer.ofStreamEnv(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
