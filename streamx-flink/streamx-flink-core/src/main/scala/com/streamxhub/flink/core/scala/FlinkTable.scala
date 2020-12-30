@@ -22,7 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.util.FlinkInitializer
+import com.streamxhub.flink.core.scala.util.{FlinkInitializer}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -50,6 +50,12 @@ class TableContext(val parameter: ParameterTool,
    * @param args
    */
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
+
+  /**
+   *
+   * @param args
+   */
+  def this(args: Array[String]) = this(FlinkInitializer.ofTable(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -204,9 +210,10 @@ trait FlinkTable extends Logger {
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    val context = new TableContext(FlinkInitializer.ofTableEnv(args, config))
+    val context = new TableContext(FlinkInitializer.ofTable(args))
     beforeStart(context)
     handle(context)
+
     jobExecutionResult = context.start()
   }
 
@@ -215,8 +222,6 @@ trait FlinkTable extends Logger {
    *
    */
   def beforeStart(context: TableContext): Unit = {}
-
-  def config(env: TableEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(context: TableContext): Unit
 

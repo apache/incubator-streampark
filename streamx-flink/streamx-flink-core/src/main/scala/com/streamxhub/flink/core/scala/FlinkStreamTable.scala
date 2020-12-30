@@ -59,7 +59,7 @@ class StreamTableContext(val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamTableEnv(args))
+  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamTable(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -240,7 +240,7 @@ trait FlinkStreamTable extends Logger {
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    val context = new StreamTableContext(FlinkInitializer.ofStreamTableEnv(args, config))
+    val context = new StreamTableContext(FlinkInitializer.ofStreamTable(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
