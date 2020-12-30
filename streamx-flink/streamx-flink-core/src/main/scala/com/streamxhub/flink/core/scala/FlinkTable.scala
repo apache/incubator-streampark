@@ -44,15 +44,12 @@ class TableContext(val parameter: ParameterTool,
                    private val tableEnv: TableEnvironment) extends TableEnvironment {
 
 
-  def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
-
   /**
-   * for scala...
+   * for scala
    *
-   * @param array
-   * @param config
+   * @param args
    */
-  def this(array: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofTableEnv(array, config))
+  def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
   /**
    * 推荐使用该Api启动任务...
