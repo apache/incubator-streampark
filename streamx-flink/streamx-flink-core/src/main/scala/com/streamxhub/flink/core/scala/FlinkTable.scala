@@ -213,7 +213,6 @@ trait FlinkTable extends Logger {
     val context = new TableContext(FlinkInitializer.ofTable(args))
     beforeStart(context)
     handle(context)
-
     jobExecutionResult = context.start()
   }
 
