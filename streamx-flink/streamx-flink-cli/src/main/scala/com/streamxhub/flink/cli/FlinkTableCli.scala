@@ -28,15 +28,14 @@ import scala.collection.JavaConversions._
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
-    SQLCommandUtil.parseSQL(context.getStatement()).foreach(call => {
+    val statement = context.getStatement()
+    SQLCommandUtil.parseSQL(statement).foreach(call => {
       call.command match {
-        case SQLType.SET =>
-          val key = call.operands(0)
-          val value = call.operands(1)
-          context.getConfig.getConfiguration.setString(key, value)
-        case SQLType.CREATE_TABLE | SQLType.CREATE_VIEW | SQLType.INSERT_INTO => {
+        case SQLCommand.SET =>
+          context.getConfig.getConfiguration.setString(call.operands.head, call.operands(1))
+        case SQLCommand.CREATE_TABLE | SQLCommand.CREATE_VIEW | SQLCommand.INSERT_INTO => {
           val ddlDml = call.operands(0)
-          Try(context.sqlUpdate(ddlDml)) match {
+          Try(context.executeSql(ddlDml)) match {
             case Success(_) =>
             case Failure(e) => throw new RuntimeException("[StreamX] SQL parse failed:\n" + ddlDml + "\n", e)
           }
@@ -44,6 +43,7 @@ object FlinkTableCli extends FlinkTable {
         case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
       }
     })
+    logInfo(s"[StreamX] tableSQL: ${statement.mkString("\n")}")
   }
 
 }

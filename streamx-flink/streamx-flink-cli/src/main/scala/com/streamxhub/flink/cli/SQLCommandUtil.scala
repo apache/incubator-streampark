@@ -23,8 +23,9 @@ package com.streamxhub.flink.cli
 import java.util.List
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
-import scala.util.matching.Regex
 import enumeratum.EnumEntry
+
+import java.util.regex.{Matcher, Pattern}
 
 object SQLCommandUtil {
 
@@ -46,33 +47,40 @@ object SQLCommandUtil {
   }
 
   def parseSQL(sqlLine: String): Option[SQLCommandCall] = { // normalize
-    var stmt = sqlLine.trim
     // remove ';' at the end
-    if (stmt.endsWith(";")) stmt = stmt.dropRight(1)
+    val stmt = sqlLine.trim.replaceFirst(";$", "")
     // parse
-    val sqlType = SQLType.values.filter(_.regex.pattern.matcher(stmt).matches()).head
-    if (sqlType != null) {
-      val matcher = sqlType.regex.pattern.matcher(stmt)
+    val sqlCommands = SQLCommand.values.filter(_.matches(stmt))
+    if (sqlCommands.isEmpty) None else {
+      val sqlCommand = sqlCommands.head
+      val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- 0 until groups.length) {
         groups(i) = matcher.group(i + 1)
       }
-      return sqlType.converter(groups).map(operands => new SQLCommandCall(sqlType, operands))
+      sqlCommand.converter(groups).map(operands => SQLCommandCall(sqlCommand, operands))
     }
-    None
   }
 
 }
 
 
-sealed abstract class SQLType(val regex: Regex, val converter: Array[String] => Option[Array[String]]) extends EnumEntry
+sealed abstract class SQLCommand(private val regex: String, val converter: Array[String] => Option[Array[String]]) extends EnumEntry {
+  var matcher: Matcher = null
 
-object SQLType extends enumeratum.Enum[SQLType] {
+  def matches(input: String): Boolean = {
+    val pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+    matcher = pattern.matcher(input)
+    matcher.matches()
+  }
+}
+
+object SQLCommand extends enumeratum.Enum[SQLCommand] {
 
   val values = findValues
 
-  case object SET extends SQLType(
-    "(\\s+(\\S+)\\s*=(.*))?".r,
+  case object SET extends SQLCommand(
+    "(\\s+(\\S+)\\s*=(.*))?",
     operands =>
       operands match {
         case x if x.length < 3 => None
@@ -81,18 +89,18 @@ object SQLType extends enumeratum.Enum[SQLType] {
       }
   )
 
-  case object INSERT_INTO extends SQLType(
-    "(INSERT\\s+INTO.*)".r,
+  case object INSERT_INTO extends SQLCommand(
+    "(INSERT\\s+INTO.*)",
     (operands: Array[String]) => Some(Array[String](operands(0)))
   )
 
-  case object CREATE_TABLE extends SQLType(
-    "(CREATE\\s+TABLE.*)".r,
+  case object CREATE_TABLE extends SQLCommand(
+    "(CREATE\\s+TABLE.*)",
     (operands: Array[String]) => Some(Array[String](operands(0)))
   )
 
-  case object CREATE_VIEW extends SQLType(
-    "(CREATE\\s+VIEW.*)".r,
+  case object CREATE_VIEW extends SQLCommand(
+    "(CREATE\\s+VIEW.*)",
     (operands: Array[String]) => Some(Array[String](operands(0)))
   )
 
@@ -101,8 +109,8 @@ object SQLType extends enumeratum.Enum[SQLType] {
 /**
  * Call of SQL command with operands and command type.
  */
-class SQLCommandCall(val command: SQLType, val operands: Array[String]) {
-  def this(command: SQLType) {
+case class SQLCommandCall(command: SQLCommand, operands: Array[String]) {
+  def this(command: SQLCommand) {
     this(command, new Array[String](0))
   }
 }
