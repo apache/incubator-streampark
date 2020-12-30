@@ -12,7 +12,8 @@ object KafkaSinkApp extends FlinkStreaming {
   override def handle(context: StreamingContext): Unit = {
     val source = new BehaviorSource()
     val ds = context.addSource[Behavior](source).map(_.toString)
-    KafkaSink(context).sink(ds)
+    ds.print()
+    //KafkaSink(context).sink(ds)
   }
 
 }
