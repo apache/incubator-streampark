@@ -24,7 +24,7 @@ flink:
     mode: EXACTLY_ONCE
   table:
     planner: blink # (blink|old|any)
-    mode: streaming #(batch|streaming)
+    mode: batch #(batch|streaming)
 
 # 重启策略
 restart-strategy: fixed-delay #(fixed-delay|failure-rate|none共3个可配置的策略)
