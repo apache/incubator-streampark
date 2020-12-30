@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.enums.{ApiType, TableMode}
 import com.streamxhub.flink.core.scala.util.FlinkInitializer
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -44,18 +43,16 @@ import scala.util.{Failure, Success, Try}
 class TableContext(val parameter: ParameterTool,
                    private val tableEnv: TableEnvironment) extends TableEnvironment {
 
+
+  def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
+
   /**
    * for scala...
    *
    * @param array
    * @param config
    */
-  def this(array: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null) = {
-    this(
-      FlinkInitializer.ofTableEnv(array, config).parameter,
-      FlinkInitializer.ofTableEnv(array, config).tableEnvironment
-    )
-  }
+  def this(array: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofTableEnv(array, config))
 
   /**
    * 推荐使用该Api启动任务...
@@ -210,16 +207,7 @@ trait FlinkTable extends Logger {
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-
-    //init......
-    val initializer = new FlinkInitializer(args, ApiType.scala)
-    initializer.tableEnvConfFunc = config
-    initializer.initTableEnv(TableMode.batch)
-
-    val parameter = initializer.parameter
-    val tableEnv = initializer.tableEnvironment
-    val context = new TableContext(parameter, tableEnv)
-    //
+    val context = new TableContext(FlinkInitializer.ofTableEnv(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()

@@ -22,7 +22,6 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
-import com.streamxhub.flink.core.scala.enums.{ApiType, TableMode}
 import com.streamxhub.flink.core.scala.ext.TableExt
 import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
@@ -48,32 +47,22 @@ class StreamTableContext(val parameter: ParameterTool,
                          private val env: StreamExecutionEnvironment,
                          private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
+  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
+
   /**
    * for scala...
    *
    * @param array
    * @param config
    */
-  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
-    this(
-      FlinkInitializer.ofStreamTableEnv(array, config).parameter,
-      FlinkInitializer.ofStreamTableEnv(array, config).streamEnvironment,
-      FlinkInitializer.ofStreamTableEnv(array, config).streamTableEnvironment
-    )
-  }
+  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = this(FlinkInitializer.ofStreamTableEnv(array, config))
 
   /**
    * for Java
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = {
-    this(
-      FlinkInitializer.ofJavaEnv(args).parameter,
-      FlinkInitializer.ofJavaEnv(args).streamEnvironment,
-      FlinkInitializer.ofJavaEnv(args).streamTableEnvironment
-    )
-  }
+  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamTableEnv(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -254,17 +243,7 @@ trait FlinkStreamTable extends Logger {
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-
-    //init......
-    val initializer = new FlinkInitializer(args, ApiType.scala)
-    initializer.streamEnvConfFunc = config
-    initializer.initTableEnv(TableMode.streaming)
-
-    val parameter = initializer.parameter
-    val env = initializer.streamEnvironment
-    val streamTableEnv = initializer.streamTableEnvironment
-    val context = new StreamTableContext(parameter, env, streamTableEnv)
-    //
+    val context = new StreamTableContext(FlinkInitializer.ofStreamTableEnv(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
