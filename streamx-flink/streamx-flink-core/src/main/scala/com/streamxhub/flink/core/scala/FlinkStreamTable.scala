@@ -23,15 +23,18 @@ package com.streamxhub.flink.core.scala
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.enums.{ApiType, TableMode}
-import com.streamxhub.flink.core.scala.util.FlinkInitializer
+import com.streamxhub.flink.core.scala.ext.TableExt
+import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableEnvironment, TableResult}
+import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
+import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
+import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.Catalog
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
+import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.expressions.Expression
-import org.apache.flink.table.functions.{ScalarFunction, UserDefinedFunction}
+import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, TableAggregateFunction, TableFunction, UserDefinedFunction}
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.sinks.TableSink
 import org.apache.flink.table.sources.TableSource
@@ -41,8 +44,9 @@ import java.lang
 import java.util.Optional
 import scala.util.{Failure, Success, Try}
 
-class TableContext(val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment) extends TableEnvironment {
+class StreamTableContext(val parameter: ParameterTool,
+                         private val env: StreamExecutionEnvironment,
+                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
    * for scala...
@@ -50,10 +54,24 @@ class TableContext(val parameter: ParameterTool,
    * @param array
    * @param config
    */
-  def this(array: Array[String], config: (TableEnvironment, ParameterTool) => Unit = null) = {
+  def this(array: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null) = {
     this(
-      FlinkInitializer.ofTableEnv(array, config).parameter,
-      FlinkInitializer.ofTableEnv(array, config).tableEnvironment
+      FlinkInitializer.ofStreamTableEnv(array, config).parameter,
+      FlinkInitializer.ofStreamTableEnv(array, config).streamEnvironment,
+      FlinkInitializer.ofStreamTableEnv(array, config).streamTableEnvironment
+    )
+  }
+
+  /**
+   * for Java
+   *
+   * @param args
+   */
+  def this(args: StreamEnvConfig) = {
+    this(
+      FlinkInitializer.ofJavaEnv(args).parameter,
+      FlinkInitializer.ofJavaEnv(args).streamEnvironment,
+      FlinkInitializer.ofJavaEnv(args).streamTableEnvironment
     )
   }
 
@@ -74,7 +92,7 @@ class TableContext(val parameter: ParameterTool,
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkTable $jobName Starting...")
-    tableEnv.execute(jobName)
+    env.execute(jobName)
   }
 
   private[flink] def getStatement(): List[String] = {
@@ -86,6 +104,24 @@ class TableContext(val parameter: ParameterTool,
       }
     }
   }
+
+  override def registerFunction[T](name: String, tf: TableFunction[T])(implicit info: TypeInformation[T]): Unit = tableEnv.registerFunction(name, tf)
+
+  override def registerFunction[T, ACC](name: String, f: AggregateFunction[T, ACC])(implicit info1: TypeInformation[T], info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
+
+  override def registerFunction[T, ACC](name: String, f: TableAggregateFunction[T, ACC])(implicit info1: TypeInformation[T], info2: TypeInformation[ACC]): Unit = tableEnv.registerFunction(name, f)
+
+  override def fromDataStream[T](dataStream: DataStream[T]): Table = tableEnv.fromDataStream(dataStream)
+
+  override def fromDataStream[T](dataStream: DataStream[T], fields: Expression*): Table = tableEnv.fromDataStream(dataStream, fields: _*)
+
+  override def createTemporaryView[T](path: String, dataStream: DataStream[T]): Unit = tableEnv.createTemporaryView(path, dataStream)
+
+  override def createTemporaryView[T](path: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.createTemporaryView(path, dataStream, fields: _*)
+
+  override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = tableEnv.toAppendStream(table)
+
+  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = tableEnv.toRetractStream(table)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 
@@ -173,7 +209,13 @@ class TableContext(val parameter: ParameterTool,
    * @param dataStream
    * @tparam T
    */
+  override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit = tableEnv.registerDataStream(name, dataStream)
+
+  override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.registerDataStream(name, dataStream, fields: _*)
+
   override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+
+  override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
   override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
@@ -200,11 +242,13 @@ class TableContext(val parameter: ParameterTool,
   override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 
   override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
-
-  override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 }
 
-trait FlinkTable extends Logger {
+trait FlinkStreamTable extends Logger {
+
+  final implicit def tableExt(table: Table): TableExt.Table = new TableExt.Table(table)
+
+  final implicit def tableConversions(table: Table) = new TableExt.TableConversions(table)
 
   var jobExecutionResult: JobExecutionResult = _
 
@@ -213,12 +257,13 @@ trait FlinkTable extends Logger {
 
     //init......
     val initializer = new FlinkInitializer(args, ApiType.scala)
-    initializer.tableEnvConfFunc = config
-    initializer.initTableEnv(TableMode.batch)
+    initializer.streamEnvConfFunc = config
+    initializer.initTableEnv(TableMode.streaming)
 
     val parameter = initializer.parameter
-    val tableEnv = initializer.tableEnvironment
-    val context = new TableContext(parameter, tableEnv)
+    val env = initializer.streamEnvironment
+    val streamTableEnv = initializer.streamTableEnvironment
+    val context = new StreamTableContext(parameter, env, streamTableEnv)
     //
     beforeStart(context)
     handle(context)
@@ -229,10 +274,10 @@ trait FlinkTable extends Logger {
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(context: TableContext): Unit = {}
+  def beforeStart(context: StreamTableContext): Unit = {}
 
-  def config(env: TableEnvironment, parameter: ParameterTool): Unit = {}
+  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handle(context: TableContext): Unit
+  def handle(context: StreamTableContext): Unit
 
 }
