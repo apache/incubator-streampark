@@ -60,9 +60,9 @@ object FlinkSubmit extends Logger {
 
   private[this] val optionPrefix = "flink.deployment.option."
 
-  private[this] var flinkDefaultConfiguration: Configuration = null
+  private[this] var flinkDefaultConfiguration: Configuration = _
 
-  private[this] var jvmProfilerJar: String = null
+  private[this] var jvmProfilerJar: String = _
 
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
@@ -98,7 +98,7 @@ object FlinkSubmit extends Logger {
 
   def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).getOrElse(null)
 
-  private[this] def getSavePointDir(): String = getOptionFromDefaultFlinkConfig(
+  private[this] def getSavePointDir: String = getOptionFromDefaultFlinkConfig(
     ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
       .stringType()
       .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
@@ -354,7 +354,6 @@ object FlinkSubmit extends Logger {
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
-
 
   /**
    *
