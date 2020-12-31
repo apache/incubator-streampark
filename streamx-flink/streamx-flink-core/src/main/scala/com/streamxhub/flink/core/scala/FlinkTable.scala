@@ -81,7 +81,7 @@ class TableContext(val parameter: ParameterTool,
     Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
       case Success(value) => value
       case Failure(exception) => {
-        new ExceptionInInitializerError(s"[StreamX] init sql error.${exception}")
+        new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
         null
       }
     }
