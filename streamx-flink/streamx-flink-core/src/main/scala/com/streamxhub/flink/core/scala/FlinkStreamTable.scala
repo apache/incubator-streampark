@@ -77,15 +77,15 @@ class StreamTableContext(val parameter: ParameterTool,
 
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
-    println(s"[StreamX] FlinkTable $jobName Starting...")
+    println(s"[StreamX] FlinkStreamTable $jobName Starting...")
     env.execute(jobName)
   }
 
-  private[flink] def getStatement(): List[String] = {
-    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL())).split("\\n").toList) match {
+  private[flink] def getSQL(): String = {
+    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
       case Success(value) => value
       case Failure(exception) =>
-        new ExceptionInInitializerError(s"[StreamX] init sql error.${exception}")
+        new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
         null
     }
   }
@@ -238,7 +238,7 @@ trait FlinkStreamTable extends Logger {
   var jobExecutionResult: JobExecutionResult = _
 
   def main(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
     val context = new StreamTableContext(FlinkInitializer.ofStreamTable(args, config))
     beforeStart(context)
     handle(context)
