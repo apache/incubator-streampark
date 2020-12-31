@@ -28,9 +28,9 @@ import scala.collection.JavaConversions._
 object FlinkTableCli extends FlinkTable {
 
   override def handle(context: TableContext): Unit = {
-    val originalSQL = context.getSQL()
-    val statement = originalSQL.split("\\n").toList
-    SQLCommandUtil.parseSQL(statement).foreach(call => {
+    val sql = context.getSQL()
+    val segment = sql.split("\\n").toList
+    SQLCommandUtil.parseSQL(segment).foreach(call => {
       call.command match {
         case SQLCommand.SET =>
           context.getConfig.getConfiguration.setString(call.operands.head, call.operands(1))
@@ -45,7 +45,7 @@ object FlinkTableCli extends FlinkTable {
       }
     })
 
-    logInfo(s"[StreamX] tableSQL: $originalSQL")
+    logInfo(s"[StreamX] tableSQL: $sql")
   }
 
 }
