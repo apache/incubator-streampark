@@ -93,7 +93,6 @@ private[scala] object FlinkInitializer {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkInitializer(args, ApiType.scala)
           flinkInitializer.streamEnvConfFunc = config
-          flinkInitializer.initStreamEnv()
           flinkInitializer.initTableEnv(TableMode.streaming)
         }
       }
@@ -107,7 +106,6 @@ private[scala] object FlinkInitializer {
         if (flinkInitializer == null) {
           flinkInitializer = new FlinkInitializer(args.args, ApiType.java)
           flinkInitializer.javaStreamEnvConfFunc = args.conf
-          flinkInitializer.initStreamEnv()
           flinkInitializer.initTableEnv(TableMode.streaming)
         }
       }
@@ -126,13 +124,13 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
 
   val parameter: ParameterTool = initParameter()
 
-  private[this] var streamEnv: StreamExecutionEnvironment = _
+  private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  private[this] var streamTableEnv: StreamTableEnvironment = _
+  private[this] var localStreamTableEnv: StreamTableEnvironment = _
 
-  private[this] var tableEnv: TableEnvironment = _
+  private[this] var localTableEnv: TableEnvironment = _
 
-  def readFlinkConf(config: String): Map[String, String] = {
+  private[this] def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
     config match {
       case x if x.startsWith("yaml://") =>
@@ -173,53 +171,53 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
-    if (streamEnv == null) {
+    if (localStreamEnv == null) {
       this.synchronized {
-        if (streamEnv == null) {
+        if (localStreamEnv == null) {
           initStreamEnv()
         }
       }
     }
-    streamEnv
+    localStreamEnv
   }
 
   def streamTableEnvironment: StreamTableEnvironment = {
-    if (streamTableEnv == null) {
+    if (localStreamTableEnv == null) {
       this.synchronized {
-        if (streamTableEnv == null) {
+        if (localStreamTableEnv == null) {
           initTableEnv(TableMode.streaming)
         }
       }
     }
-    streamTableEnv
+    localStreamTableEnv
   }
 
   def tableEnvironment: TableEnvironment = {
-    if (tableEnv == null) {
+    if (localTableEnv == null) {
       this.synchronized {
-        if (tableEnv == null) {
+        if (localTableEnv == null) {
           initTableEnv(TableMode.batch)
         }
       }
     }
-    tableEnv
+    localTableEnv
   }
 
   def initStreamEnv(): Unit = {
-    this.streamEnv = StreamExecutionEnvironment.getExecutionEnvironment
+    localStreamEnv = StreamExecutionEnvironment.getExecutionEnvironment
     //init env...
     Try(parameter.get(KEY_FLINK_PARALLELISM).toInt).getOrElse {
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
     } match {
-      case p if p > 0 => streamEnv.setParallelism(p)
+      case p if p > 0 => localStreamEnv.setParallelism(p)
       case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
     }
     val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {
-      streamEnv.getConfig.setAutoWatermarkInterval(interval)
+      localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
     }
-    streamEnv.setStreamTimeCharacteristic(timeCharacteristic)
+    localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
     //重启策略.
     restartStrategy()
 
@@ -227,11 +225,11 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
     checkpoint()
 
     apiType match {
-      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(this.streamEnv.getJavaEnv, this.parameter)
-      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(this.streamEnv, this.parameter)
+      case ApiType.java if javaStreamEnvConfFunc != null => javaStreamEnvConfFunc.configuration(localStreamEnv.getJavaEnv, parameter)
+      case ApiType.scala if streamEnvConfFunc != null => streamEnvConfFunc(localStreamEnv, parameter)
       case _ =>
     }
-    this.streamEnv.getConfig.setGlobalJobParameters(parameter)
+    localStreamEnv.getConfig.setGlobalJobParameters(parameter)
   }
 
   def initTableEnv(tableMode: TableMode): Unit = {
@@ -284,18 +282,18 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
         builder.withBuiltInDatabaseName(y)
       case _ =>
     }
-
     val setting = builder.build()
     tableMode match {
-      case TableMode.batch => this.tableEnv = TableEnvironment.create(setting)
+      case TableMode.batch => localTableEnv = TableEnvironment.create(setting)
       case TableMode.streaming =>
+        initStreamEnv()
         if (streamEnvConfFunc != null) {
-          streamEnvConfFunc(this.streamEnvironment, this.parameter)
+          streamEnvConfFunc(streamEnvironment, parameter)
         }
         if (javaStreamEnvConfFunc != null) {
-          javaStreamEnvConfFunc.configuration(this.streamEnv.getJavaEnv, this.parameter)
+          javaStreamEnvConfFunc.configuration(streamEnvironment.getJavaEnv, parameter)
         }
-        this.streamTableEnv = StreamTableEnvironment.create(this.streamEnvironment, setting)
+        localTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
     }
 
   }
@@ -346,7 +344,7 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
 
         val delay = getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
 
-        streamEnv.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
+        streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
           Time.of(rateInterval._1, rateInterval._2),
           Time.of(delay._1, delay._2)
@@ -368,9 +366,9 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
          */
-        streamEnv.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(attempts, Time.of(delay._1, delay._2)))
+        streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.fixedDelayRestart(attempts, Time.of(delay._1, delay._2)))
 
-      case RestartStrategy.none => streamEnv.getConfig.setRestartStrategy(RestartStrategies.noRestart())
+      case RestartStrategy.none => streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.noRestart())
 
       case null => logger.info("[StreamX] RestartStrategy not set,use default from $flink_conf")
     }
@@ -390,9 +388,9 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
     val unaligned = Try(parameter.get(KEY_FLINK_CHECKPOINTS_UNALIGNED).toBoolean).getOrElse(false)
 
     //默认:开启检查点,1s进行启动一个检查点
-    streamEnv.enableCheckpointing(cpInterval)
+    streamEnvironment.enableCheckpointing(cpInterval)
 
-    val cpConfig = streamEnv.getCheckpointConfig
+    val cpConfig = streamEnvironment.getCheckpointConfig
 
     cpConfig.setCheckpointingMode(cpMode)
     //默认: 检查点之间的时间间隔【checkpoint最小间隔】
@@ -456,12 +454,12 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
           val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val ms = new MemoryStateBackend(maxMemorySize, async)
-          streamEnv.setStateBackend(ms)
+          streamEnvironment.setStateBackend(ms)
         case XStateBackend.filesystem =>
           logInfo(s"[StreamX] stat.backend Type: filesystem...")
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val fs = new FsStateBackend(cpDir, async)
-          streamEnv.setStateBackend(fs)
+          streamEnvironment.setStateBackend(fs)
         case XStateBackend.rocksdb =>
           logInfo("[StreamX] stat.backend Type: rocksdb...")
           // 默认开启增量.
@@ -482,13 +480,12 @@ private[core] class FlinkInitializer(args: Array[String], apiType: ApiType) exte
             optionsFactory.configure(config)
             rs.setRocksDBOptions(optionsFactory)
           }
-          streamEnv.setStateBackend(rs)
+          streamEnvironment.setStateBackend(rs)
         case _ =>
           logError("[StreamX] usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
       }
     }
   }
-
 
 }
 
