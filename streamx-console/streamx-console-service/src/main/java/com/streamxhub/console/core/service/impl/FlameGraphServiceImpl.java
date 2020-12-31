@@ -22,6 +22,7 @@ package com.streamxhub.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.common.util.CommandUtils;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.WebUtil;
 import com.streamxhub.console.core.dao.FlameGraphMapper;
@@ -35,6 +36,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import scala.Function1;
+import scala.runtime.BoxedUnit;
 
 import java.io.*;
 import java.util.Arrays;
@@ -72,34 +75,14 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
             IOUtils.write(jsonBuffer.toString().getBytes(), fileOutputStream);
 
             String title = application.getJobName().concat(" ___ FlameGraph");
-
             //generate...
             List<String> commands = Arrays.asList(
                     String.format("cd %s", flameGraphPath),
                     String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                    String.format("./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ", title, flameGraph.getWidth(), foldedPath, svgPath),
-                    "exit"
+                    String.format("./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ", title, flameGraph.getWidth(), foldedPath, svgPath)
             );
-
-            try {
-                Process process = Runtime.getRuntime().exec("/bin/bash", null, null);
-                PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream())), true);
-                commands.forEach(out::println);
-                Scanner scanner = new Scanner(process.getInputStream());
-                while (scanner.hasNextLine()) {
-                    String line = scanner.nextLine();
-                    log.info("[StreamX] flameGraph: {} ", line);
-                }
-                process.waitFor();
-                scanner.close();
-                process.getErrorStream().close();
-                process.getInputStream().close();
-                process.getOutputStream().close();
-                process.destroy();
-                return svgPath;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            CommandUtils.execute(commands, (line) -> log.info("[StreamX] flameGraph: {} ", line));
+            return svgPath;
         }
         return null;
     }
