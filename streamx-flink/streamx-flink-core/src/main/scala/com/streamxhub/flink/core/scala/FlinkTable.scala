@@ -77,8 +77,8 @@ class TableContext(val parameter: ParameterTool,
     tableEnv.execute(jobName)
   }
 
-  private[flink] def getStatement(): List[String] = {
-    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL())).split("\\n").toList) match {
+  private[flink] def getSQL(): String = {
+    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
       case Success(value) => value
       case Failure(exception) => {
         new ExceptionInInitializerError(s"[StreamX] init sql error.${exception}")
