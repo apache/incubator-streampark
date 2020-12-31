@@ -21,11 +21,12 @@
 package com.streamxhub.common.util
 
 import scala.util.control.Breaks._
-import java.io.BufferedReader
-import java.io.InputStreamReader
-
+import java.io.{BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, PrintWriter}
+import java.util.Scanner
+import java.util.function.Consumer
 import scala.util.{Failure, Success, Try}
-
+import java.lang.{Iterable => JavaIter}
+import scala.collection.JavaConversions._
 
 object CommandUtils {
 
@@ -54,10 +55,33 @@ object CommandUtils {
         reader.close()
       }
     } match {
-      case Success(value) =>
+      case Success(_) =>
       case Failure(e) => e.printStackTrace()
     }
     buffer.toString
+  }
+
+  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+    Try {
+      val withExitCommand = commands.last.trim match {
+        case "exit" => commands.toList
+        case _ => commands ++ "exit"
+      }
+      val process = Runtime.getRuntime.exec("/bin/bash", null, null)
+      val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+      withExitCommand.foreach(out.println)
+      val scanner = new Scanner(process.getInputStream)
+      while (scanner.hasNextLine) consumer.accept(scanner.nextLine)
+      process.waitFor
+      scanner.close()
+      process.getErrorStream.close()
+      process.getInputStream.close()
+      process.getOutputStream.close()
+      process.destroy()
+    } match {
+      case Success(_) =>
+      case Failure(e) => throw e
+    }
   }
 
 }
