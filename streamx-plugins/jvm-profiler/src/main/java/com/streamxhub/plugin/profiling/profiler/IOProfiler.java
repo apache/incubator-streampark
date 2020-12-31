@@ -68,7 +68,7 @@ public class IOProfiler extends ProfilerBase implements Profiler {
 
         List<Map<String, Object>> cpuTime = ProcFileUtils.getProcStatCpuTime();
 
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
 
         map.put("epochMillis", System.currentTimeMillis());
         map.put("name", getProcessName());
