@@ -154,7 +154,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 overview.setReconciling(overview.getReconciling() + task.getReconciling());
             }
         });
-        Map map = new HashMap<String, Serializable>();
+        Map<String, Serializable> map = new HashMap();
         map.put("task", overview);
         map.put("jmMemory", totalJmMemory.get());
         map.put("tmMemory", totalTmMemory.get());
@@ -176,7 +176,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
          */
         List<Application> records = page.getRecords();
         List<Application> newRecords = new ArrayList<>(records.size());
-        records.stream().forEach((x) -> {
+        records.forEach(x -> {
             Application app = FlinkTrackingTask.getTracking(x.getId());
             if (app != null) {
                 app.setProjectName(x.getProjectName());
@@ -358,8 +358,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String modulePath = project.getAppBase().getAbsolutePath().concat("/").concat(application.getModule());
         File jarFile = new File(modulePath, application.getJar());
         Manifest manifest = Utils.getJarManifest(jarFile);
-        String mainClass = manifest.getMainAttributes().getValue("Main-Class");
-        return mainClass;
+        return manifest.getMainAttributes().getValue("Main-Class");
     }
 
     @Override

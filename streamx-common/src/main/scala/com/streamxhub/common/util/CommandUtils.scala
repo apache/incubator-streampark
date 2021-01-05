@@ -21,13 +21,14 @@
 package com.streamxhub.common.util
 
 import scala.util.control.Breaks._
-import java.io.BufferedReader
-import java.io.InputStreamReader
-
+import java.io.{BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, PrintWriter}
+import java.util.Scanner
+import java.util.function.Consumer
 import scala.util.{Failure, Success, Try}
+import java.lang.{Iterable => JavaIter}
+import scala.collection.JavaConversions._
 
-
-object CommandUtils {
+object CommandUtils extends Logger {
 
   def execute(command: String): String = {
     val buffer = new StringBuffer()
@@ -54,10 +55,37 @@ object CommandUtils {
         reader.close()
       }
     } match {
-      case Success(value) =>
+      case Success(_) =>
       case Failure(e) => e.printStackTrace()
     }
     buffer.toString
+  }
+
+  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+    Try {
+      require(commands != null && commands.nonEmpty)
+      logInfo(s"[StreamX] Command execute:\n${commands.mkString("\n")} ")
+      val process = Runtime.getRuntime.exec("/bin/bash", null, null)
+      val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+      commands.foreach(out.println)
+      commands.last.toLowerCase.trim match {
+        case "exit" =>
+        case _ => out.println("exit")
+      }
+      val scanner = new Scanner(process.getInputStream)
+      while (scanner.hasNextLine) {
+        consumer.accept(scanner.nextLine)
+      }
+      process.waitFor
+      scanner.close()
+      process.getErrorStream.close()
+      process.getInputStream.close()
+      process.getOutputStream.close()
+      process.destroy()
+    } match {
+      case Success(_) =>
+      case Failure(e) => throw e
+    }
   }
 
 }

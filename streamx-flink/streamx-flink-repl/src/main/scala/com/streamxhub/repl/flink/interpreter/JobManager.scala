@@ -27,7 +27,7 @@ import com.mashape.unirest.http.{JsonNode, Unirest}
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.core.execution.JobClient
-import org.apache.zeppelin.interpreter.{InterpreterContext}
+import org.apache.zeppelin.interpreter.InterpreterContext
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 

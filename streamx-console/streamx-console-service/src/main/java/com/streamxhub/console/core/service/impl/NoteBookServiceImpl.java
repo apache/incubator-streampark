@@ -44,7 +44,7 @@ public class NoteBookServiceImpl implements NoteBookService {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
             try {
                 interpreter.open();
-                InterpreterOutput out = new InterpreterOutput(line -> log.info(line));
+                InterpreterOutput out = new InterpreterOutput(log::info);
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 log.info("[StreamX] repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {
@@ -56,12 +56,10 @@ public class NoteBookServiceImpl implements NoteBookService {
                 e.printStackTrace();
                 throw new RuntimeException(e);
             } finally {
-                if (interpreter != null) {
-                    try {
-                        interpreter.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                try {
+                    interpreter.close();
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });

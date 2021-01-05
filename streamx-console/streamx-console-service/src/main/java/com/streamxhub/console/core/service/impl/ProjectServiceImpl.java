@@ -286,7 +286,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 Git git = new Git(fileRepository);
                 git.reset().setMode(ResetCommand.ResetType.HARD).setRef(project.getBranches()).call();
 
-                log.info("[StreamX] pull starting...");
+                log.info("[StreamX] git pull starting...");
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 
@@ -396,32 +396,17 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         StringBuilder builder = tailBuffer.get(project.getId());
         builder.append(project.getLog4BuildStart());
         tailBuffer.put(project.getId(), builder);
-        try {
-            Process process = Runtime.getRuntime().exec("/bin/bash", null, null);
-            PrintWriter out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream())), true);
-            project.getMavenBuildCmd().forEach(out::println);
-            Scanner scanner = new Scanner(process.getInputStream());
-            while (scanner.hasNextLine()) {
-                String line = scanner.nextLine();
-                if (tailOutMap.containsKey(project.getId())) {
-                    if (tailBeginning.containsKey(project.getId())) {
-                        tailBeginning.remove(project.getId());
-                        Arrays.stream(builder.toString().split("\n")).forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/tail", x));
-                    } else {
-                        simpMessageSendingOperations.convertAndSend("/resp/tail", line);
-                    }
+        CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
+            if (tailOutMap.containsKey(project.getId())) {
+                if (tailBeginning.containsKey(project.getId())) {
+                    tailBeginning.remove(project.getId());
+                    Arrays.stream(builder.toString().split("\n")).forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/tail", x));
+                } else {
+                    simpMessageSendingOperations.convertAndSend("/resp/tail", line);
                 }
-                builder.append(line).append("\n");
             }
-            process.waitFor();
-            scanner.close();
-            process.getErrorStream().close();
-            process.getInputStream().close();
-            process.getOutputStream().close();
-            process.destroy();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+            builder.append(line).append("\n");
+        });
         String out = builder.toString();
         tailCleanUp(project.getId());
         log.info(out);
