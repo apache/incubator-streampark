@@ -68,6 +68,7 @@ object CommandUtils extends Logger {
         case "exit" =>
         case _ => commands.add("exit")
       }
+      logInfo(s"[StreamX] Command execute:${commands.mkString("\n")} ")
       val process = Runtime.getRuntime.exec("/bin/bash", null, null)
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       commands.foreach(out.println)
