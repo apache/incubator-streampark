@@ -29,10 +29,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author benjobs
@@ -54,7 +51,7 @@ public class MetricsTask {
         //1) clean file
         String tempPath = WebUtil.getAppDir("temp");
         File temp = new File(tempPath);
-        Arrays.stream(temp.listFiles()).filter(x -> x.getName().matches(FLAMEGRAPH_FILE_REGEXP)).forEach(x -> x.delete());
+        Arrays.stream(Objects.requireNonNull(temp.listFiles())).filter(x -> x.getName().matches(FLAMEGRAPH_FILE_REGEXP)).forEach(File::delete);
 
         //2 clean date
         Date start = new Date();

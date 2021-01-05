@@ -182,7 +182,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     private void findTarOrJar(List<File> list, File path) {
         for (File file : Objects.requireNonNull(path.listFiles())) {
             //定位到target目录下:
-            if (file.isDirectory() && file.getName().equals("target")) {
+            if (file.isDirectory() && "target".equals(file.getName())) {
                 //在target路径下找tar.gz的文件或者jar文件,注意:两者只选其一,不能同时满足,
                 File tar = null, jar = null;
                 for (File targetFile : Objects.requireNonNull(file.listFiles())) {
@@ -231,7 +231,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
     public List<String> jars(Project project) {
         List<String> list = new ArrayList<>(0);
         File apps = new File(project.getAppBase(), project.getModule());
-        for (File file : apps.listFiles()) {
+        for (File file : Objects.requireNonNull(apps.listFiles())) {
             if (file.getName().endsWith(".jar")) {
                 list.add(file.getName());
             }
@@ -244,10 +244,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
         Project project = getById(id);
         File appHome = project.getAppBase();
         Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles())).filter((x) -> x.getName().equals(module)).findFirst();
-        if (fileOptional.isPresent()) {
-            return fileOptional.get().getAbsolutePath();
-        }
-        return null;
+        return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
     @Override
@@ -266,7 +263,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
             }
             List<Map<String, Object>> list = new ArrayList<>();
             //只过滤conf这个目录
-            File[] files = unzipFile.listFiles(x -> x.getName().equals("conf"));
+            File[] files = unzipFile.listFiles(x -> "conf".equals(x.getName()));
             assert files != null;
             for (File item : files) {
                 eachFile(item, list, true);
@@ -370,7 +367,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 }
                 list.add(map);
             } else {
-                for (File item : file.listFiles()) {
+                for (File item : Objects.requireNonNull(file.listFiles())) {
                     String title = item.getName();
                     String value = item.getAbsolutePath();
                     Map<String, Object> map = new HashMap<>(0);
