@@ -27,8 +27,6 @@ import java.util.function.Consumer
 import scala.util.{Failure, Success, Try}
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
 
 object CommandUtils extends Logger {
 
