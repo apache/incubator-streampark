@@ -286,7 +286,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 Git git = new Git(fileRepository);
                 git.reset().setMode(ResetCommand.ResetType.HARD).setRef(project.getBranches()).call();
 
-                log.info("[StreamX] pull starting...");
+                log.info("[StreamX] git pull starting...");
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 
