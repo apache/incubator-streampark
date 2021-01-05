@@ -274,7 +274,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void deploy(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
-        Boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
+        boolean isRunning = application.getState() == FlinkAppState.RUNNING.getValue();
         //1) 需要重启的先停止服务
         if (appParam.getRestart()) {
             cancel(appParam);

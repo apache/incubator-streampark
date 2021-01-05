@@ -27,7 +27,7 @@ public class JvmProfiler implements Serializable {
     private String profiler;
 
     @JsonIgnore
-    public Map<String, Object> getMetricsAsMap() throws IOException {
+    public Map getMetricsAsMap() throws IOException {
         if (CommonUtil.notEmpty(metric)) {
             String content = DeflaterUtils.unzipString(metric);
             return mapper.readValue(content, Map.class);
