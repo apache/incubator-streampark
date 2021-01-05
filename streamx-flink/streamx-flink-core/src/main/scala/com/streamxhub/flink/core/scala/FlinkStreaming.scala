@@ -50,7 +50,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamEnv(args))
+  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStream(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -89,7 +89,7 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val context = new StreamingContext(FlinkInitializer.ofStreamEnv(args, config))
+    val context = new StreamingContext(FlinkInitializer.ofStream(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
