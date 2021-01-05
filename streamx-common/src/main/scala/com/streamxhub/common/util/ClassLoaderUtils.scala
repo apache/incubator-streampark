@@ -108,7 +108,7 @@ object ClassLoaderUtils extends Logger {
     } else {
       if (ext.isEmpty) {
         addURL(file)
-      } else if (ext.filter(x => file.getName.endsWith(x)).nonEmpty) {
+      } else if (ext.exists(x => file.getName.endsWith(x))) {
         Utils.checkJarFile(file.toURI.toURL)
         addURL(file)
       }
