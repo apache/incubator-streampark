@@ -30,6 +30,7 @@ object FlinkTableCli extends FlinkTable {
   override def handle(context: TableContext): Unit = {
     val sql = context.getSQL()
     val segment = sql.split("\\n").toList
+    context.executeSql(sql)
     SQLCommandUtil.parseSQL(segment).foreach(call => {
       call.command match {
         case SQLCommand.SET =>
@@ -43,7 +44,6 @@ object FlinkTableCli extends FlinkTable {
         case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
       }
     })
-
     logInfo(s"[StreamX] tableSQL: $sql")
   }
 

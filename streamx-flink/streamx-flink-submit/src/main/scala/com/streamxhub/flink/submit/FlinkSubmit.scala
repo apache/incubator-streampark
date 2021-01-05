@@ -98,16 +98,15 @@ object FlinkSubmit extends Logger {
 
   def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).getOrElse(null)
 
-  private[this] def getSavePointDir: String = getOptionFromDefaultFlinkConfig(
-    ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
-      .stringType()
-      .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
-  )
 
   def stop(appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
-    val savePointDir = getSavePointDir()
+    val savePointDir = getOptionFromDefaultFlinkConfig(
+      ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
+        .stringType()
+        .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
+    )
 
     val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
       case (false, false) =>
