@@ -71,7 +71,9 @@ object CommandUtils {
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       withExitCommand.foreach(out.println)
       val scanner = new Scanner(process.getInputStream)
-      while (scanner.hasNextLine) consumer.accept(scanner.nextLine)
+      while (scanner.hasNextLine) {
+        consumer.accept(scanner.nextLine)
+      }
       process.waitFor
       scanner.close()
       process.getErrorStream.close()
