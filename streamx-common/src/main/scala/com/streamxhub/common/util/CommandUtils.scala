@@ -25,10 +25,12 @@ import java.io.{BufferedReader, BufferedWriter, InputStreamReader, OutputStreamW
 import java.util.Scanner
 import java.util.function.Consumer
 import scala.util.{Failure, Success, Try}
-import java.lang.{Iterable => JavaIter}
+import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
+import scala.collection.mutable.ArrayBuffer
 
-object CommandUtils {
+object CommandUtils extends Logger {
 
   def execute(command: String): String = {
     val buffer = new StringBuffer()
@@ -61,15 +63,16 @@ object CommandUtils {
     buffer.toString
   }
 
-  def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
+  def execute(commands: JavaList[String], consumer: Consumer[String]): Unit = {
     Try {
-      val withExitCommand = commands.last.trim match {
-        case "exit" => commands.toList
-        case _ => commands ++ "exit"
+      require(commands != null && commands.nonEmpty)
+      commands.last.toLowerCase.trim match {
+        case "exit" =>
+        case _ => commands.add("exit")
       }
       val process = Runtime.getRuntime.exec("/bin/bash", null, null)
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
-      withExitCommand.foreach(out.println)
+      commands.foreach(out.println)
       val scanner = new Scanner(process.getInputStream)
       while (scanner.hasNextLine) {
         consumer.accept(scanner.nextLine)
