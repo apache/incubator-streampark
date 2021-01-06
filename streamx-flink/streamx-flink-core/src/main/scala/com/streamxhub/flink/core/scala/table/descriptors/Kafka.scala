@@ -33,7 +33,9 @@ object Kafka {
     val prop = ConfigUtils.getConf(parameter.toMap, KAFKA_SOURCE_PREFIX)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
     val kafka = new KFK()
-    kafka.version(version)
+    if (version != null) {
+      kafka.version(version)
+    }
     kafka.topic(topic)
     prop.foreach(p => kafka.property(p._1, p._2))
     kafka
