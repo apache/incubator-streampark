@@ -168,6 +168,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse(null)
     strategy match {
       case RestartStrategy.`failure-rate` =>
+
         /**
          * restart-strategy.failure-rate.max-failures-per-interval: 在一个Job认定为失败之前,最大的重启次数
          * restart-strategy.failure-rate.failure-rate-interval: 计算失败率的时间间隔
