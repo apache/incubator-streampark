@@ -24,10 +24,34 @@ import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext
 
+import java.util.concurrent.TimeUnit
+
 object FlinkUtils {
 
   def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
     context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
+  }
+
+  def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
+    val timeUnit = time match {
+      case "" => null
+      case x: String =>
+        val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
+        val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
+          case "" => null
+          case "s" => TimeUnit.SECONDS
+          case "m" | "min" => TimeUnit.MINUTES
+          case "h" => TimeUnit.HOURS
+          case "d" | "day" => TimeUnit.DAYS
+          case _ => throw new IllegalArgumentException()
+        }
+        (num, unit)
+    }
+    timeUnit match {
+      case null => default
+      case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS) //未带单位,值必须为毫秒,这里转成对应的秒...
+      case other => other
+    }
   }
 
 }
