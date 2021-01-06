@@ -23,7 +23,7 @@ package com.streamxhub.flink.core.scala
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.ext.DataStreamExt
-import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
+import com.streamxhub.flink.core.scala.util.{FlinkStreamingInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -50,7 +50,7 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStream(args))
+  def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initJavaStream(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -89,7 +89,7 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val context = new StreamingContext(FlinkInitializer.ofStream(args, config))
+    val context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
