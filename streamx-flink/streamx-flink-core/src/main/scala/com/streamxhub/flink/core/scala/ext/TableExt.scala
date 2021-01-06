@@ -20,6 +20,7 @@
  */
 package com.streamxhub.flink.core.scala.ext
 
+import com.streamxhub.flink.core.scala
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
@@ -40,5 +41,7 @@ object TableExt {
 
     def <<[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
   }
+
+  case class StreamTableContext(ctx: scala.StreamTableContext)
 
 }

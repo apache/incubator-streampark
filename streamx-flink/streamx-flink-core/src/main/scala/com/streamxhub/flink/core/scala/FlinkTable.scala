@@ -208,9 +208,11 @@ trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
+  private[this] var context: TableContext = _
+
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    val context = new TableContext(FlinkTableInitializer.initTable(args))
+    context = new TableContext(FlinkTableInitializer.initTable(args))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
@@ -223,5 +225,12 @@ trait FlinkTable extends Logger {
   def beforeStart(context: TableContext): Unit = {}
 
   def handle(context: TableContext): Unit
+
+  /**
+   * 不希望被显示的调用...
+   *
+   * @return
+   */
+  final implicit def parameter: ParameterTool = context.parameter
 
 }
