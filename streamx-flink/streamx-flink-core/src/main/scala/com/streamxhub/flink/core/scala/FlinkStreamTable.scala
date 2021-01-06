@@ -23,7 +23,7 @@ package com.streamxhub.flink.core.scala
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.ext.TableExt
-import com.streamxhub.flink.core.scala.util.{FlinkInitializer, StreamEnvConfig}
+import com.streamxhub.flink.core.scala.util.{FlinkTableInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
@@ -59,7 +59,7 @@ class StreamTableContext(val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkInitializer.ofJavaStreamTable(args))
+  def this(args: StreamEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -239,7 +239,7 @@ trait FlinkStreamTable extends Logger {
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    val context = new StreamTableContext(FlinkInitializer.ofStreamTable(args, config))
+    val context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
