@@ -20,17 +20,16 @@
  */
 package com.streamxhub.flink.cli
 
-import com.streamxhub.flink.core.scala.{FlinkTable, TableContext}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, FlinkTable, StreamTableContext, TableContext}
 
 import scala.util.{Failure, Success, Try}
 import scala.collection.JavaConversions._
 
-object FlinkTableCli extends FlinkTable {
+object FlinkTableCli extends FlinkStreamTable {
 
-  override def handle(context: TableContext): Unit = {
+  override def handle(context: StreamTableContext): Unit = {
     val sql = context.getSQL()
     val segment = sql.split("\\n").toList
-    context.executeSql(sql)
     SQLCommandUtil.parseSQL(segment).foreach(call => {
       call.command match {
         case SQLCommand.SET =>
