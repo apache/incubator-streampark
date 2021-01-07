@@ -10,7 +10,6 @@ object KafkaTableApp extends FlinkStreamTable {
 
   override def handle(context: StreamTableContext): Unit = {
 
-
     //connect kafka data
     context
       .connect(Kafka("hello", KafkaVer.`010`))
