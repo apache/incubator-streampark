@@ -2,7 +2,7 @@ package com.streamxhub.test.tablesql
 
 import com.streamxhub.flink.core.scala.table.descriptors.{Kafka, KafkaVer}
 import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
-import org.apache.flink.table.descriptors.{Csv, Schema}
+import org.apache.flink.table.descriptors.Csv
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api._
 
@@ -10,13 +10,15 @@ object KafkaTableApp extends FlinkStreamTable {
 
   override def handle(context: StreamTableContext): Unit = {
 
+
     //connect kafka data
-    context.connect(Kafka("hello", KafkaVer.`010`))
+    context
+      .connect(Kafka("hello", KafkaVer.`010`))
       .withFormat(new Csv)
       .withSchema(
-        new Schema()
-          .field("id", DataTypes.STRING())
-          .field("name", DataTypes.STRING()))
+        "id" -> DataTypes.STRING(),
+        "name" -> DataTypes.STRING()
+      )
       .createTemporaryTable("kafka2Table")
 
     //kafka to table
@@ -24,7 +26,7 @@ object KafkaTableApp extends FlinkStreamTable {
 
     //print sink
     table.>>[(String, String)].print("print==>")
- 
+
     /**
      * 'key 等同于 $"key"
      */

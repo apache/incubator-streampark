@@ -20,14 +20,16 @@
  */
 package com.streamxhub.flink.core.scala.ext
 
-import com.streamxhub.flink.core.scala
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.flink.table.api.{Table => FlinkTable}
 import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
+import org.apache.flink.table.descriptors.{ConnectTableDescriptor => TableDescriptor, Schema}
+import org.apache.flink.table.types.DataType
 
 object TableExt {
+
 
   class Table(val table: FlinkTable) {
     def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
@@ -42,6 +44,14 @@ object TableExt {
     def <<[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
   }
 
-  case class StreamTableContext(ctx: scala.StreamTableContext)
+  class ConnectTableDescriptor(table: TableDescriptor) {
+
+    def withSchema(mapping: (String, DataType)*): TableDescriptor = {
+      val schema = new Schema()
+      mapping.foreach(x => schema.field(x._1, x._2))
+      table.withSchema(schema)
+    }
+
+  }
 
 }
