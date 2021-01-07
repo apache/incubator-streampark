@@ -24,7 +24,7 @@ object KafkaTableApp extends FlinkStreamTable {
 
     //print sink
     table.>>[(String, String)].print("print==>")
-
+ 
     /**
      * 'key 等同于 $"key"
      */
@@ -34,21 +34,35 @@ object KafkaTableApp extends FlinkStreamTable {
       .where($"id" === "flink")
       .>>[(String, String)].print("simple where==>")
 
+    table.
+      select('id, 'name)
+      .where('id === "flink")
+      .>>[(String, String)].print("simple where2==>")
+
     /**
      * 查询id=flink,
      * name like apache%
      */
-    table.select('id, 'name)
-      .where('id === "flink")
-      .where('name like "apache%")
+    table.select("id", "name")
+      .where("id" === "flink")
+      .where("name" like "apache%")
       .>>[(String, String)].print("like where==>")
 
     /**
      * filter等同于where的操作
      */
-    table.select($"id", $"name")
-      .filter($"id" === "flink")
+    table.select("id", "name")
+      .filter("id" === "flink")
       .>>[(String, String)].print("Select -> filter ==>")
+
+    /**
+     * groupBy
+     */
+    table
+      .groupBy($"id")
+      .select($"id", $"id".count as "count")
+      .<<[(String, Long)].print("GroupBy ==>")
+
   }
 
 }
