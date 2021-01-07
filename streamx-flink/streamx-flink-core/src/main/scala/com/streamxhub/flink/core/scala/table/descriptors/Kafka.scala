@@ -22,6 +22,7 @@ package com.streamxhub.flink.core.scala.table.descriptors
 
 import com.streamxhub.common.conf.ConfigConst.{KAFKA_SOURCE_PREFIX, KEY_KAFKA_TOPIC}
 import com.streamxhub.common.util.ConfigUtils
+import com.streamxhub.flink.core.scala.table.descriptors.KafkaVer.KafkaVer
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.descriptors.{Kafka => KFK}
 
@@ -29,16 +30,25 @@ import scala.collection.JavaConversions._
 
 object Kafka {
 
-  def apply(version: String, topic: String, alias: String = "")(implicit parameter: ParameterTool): KFK = {
+  def apply(topic: String, version: KafkaVer = KafkaVer.UNIVERSAL, alias: String = "")(implicit parameter: ParameterTool): KFK = {
     val prop = ConfigUtils.getConf(parameter.toMap, KAFKA_SOURCE_PREFIX)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
     val kafka = new KFK()
     if (version != null) {
-      kafka.version(version)
+      version match {
+        case KafkaVer.`010` => kafka.version("0.10")
+        case KafkaVer.`011` => kafka.version("0.11")
+        case _ => kafka.version("universal")
+      }
     }
     kafka.topic(topic)
     prop.foreach(p => kafka.property(p._1, p._2))
     kafka
   }
 
+}
+
+object KafkaVer extends Enumeration {
+  type KafkaVer = Value
+  val `010`, `011`, UNIVERSAL = Value
 }
