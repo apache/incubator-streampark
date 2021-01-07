@@ -32,14 +32,13 @@ object Kafka {
 
   def apply(topic: String, version: KafkaVer = KafkaVer.UNIVERSAL, alias: String = "")(implicit parameter: ParameterTool): KFK = {
     val prop = ConfigUtils.getConf(parameter.toMap, KAFKA_SOURCE_PREFIX)
+    require(version != null)
     require(prop != null && prop.nonEmpty && prop.exists(x => x._1 == KEY_KAFKA_TOPIC))
     val kafka = new KFK()
-    if (version != null) {
-      version match {
-        case KafkaVer.`010` => kafka.version("0.10")
-        case KafkaVer.`011` => kafka.version("0.11")
-        case _ => kafka.version("universal")
-      }
+    version match {
+      case KafkaVer.`010` => kafka.version("0.10")
+      case KafkaVer.`011` => kafka.version("0.11")
+      case _ => kafka.version("universal")
     }
     kafka.topic(topic)
     prop.foreach(p => kafka.property(p._1, p._2))
