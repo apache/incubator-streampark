@@ -85,6 +85,8 @@ trait FlinkStreaming extends Logger {
 
   final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] = new DataStreamExt.ProcessFunction[IN, OUT](ctx)
 
+  final implicit lazy val parameter: ParameterTool = context.parameter
+
   private[this] var context: StreamingContext = _
 
   var jobExecutionResult: JobExecutionResult = _
@@ -107,12 +109,6 @@ trait FlinkStreaming extends Logger {
 
   def handle(context: StreamingContext): Unit
 
-  /**
-   * 不希望被显示的调用...
-   *
-   * @return
-   */
-  final implicit def parameter: ParameterTool = context.parameter
 }
 
 

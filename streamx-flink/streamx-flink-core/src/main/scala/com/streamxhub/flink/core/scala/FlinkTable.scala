@@ -208,6 +208,8 @@ trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
+  final implicit lazy val parameter: ParameterTool = context.parameter
+
   private[this] var context: TableContext = _
 
   def main(args: Array[String]): Unit = {
@@ -225,12 +227,5 @@ trait FlinkTable extends Logger {
   def beforeStart(context: TableContext): Unit = {}
 
   def handle(context: TableContext): Unit
-
-  /**
-   * 不希望被显示的调用...
-   *
-   * @return
-   */
-  final implicit def parameter: ParameterTool = context.parameter
 
 }
