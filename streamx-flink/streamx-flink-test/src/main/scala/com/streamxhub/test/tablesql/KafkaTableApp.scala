@@ -1,6 +1,6 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.table.descriptors.Kafka
+import com.streamxhub.flink.core.scala.table.descriptors.{Kafka, KafkaVer}
 import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 import org.apache.flink.table.descriptors.{Csv, Schema}
 import org.apache.flink.api.scala._
@@ -11,7 +11,7 @@ object KafkaTableApp extends FlinkStreamTable {
   override def handle(context: StreamTableContext): Unit = {
 
     //connect kafka data
-    context.connect(Kafka("0.11", "hello"))
+    context.connect(Kafka("hello", KafkaVer.`010`))
       .withFormat(new Csv)
       .withSchema(
         new Schema()
