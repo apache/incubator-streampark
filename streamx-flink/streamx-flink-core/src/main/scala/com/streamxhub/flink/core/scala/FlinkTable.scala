@@ -22,6 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import com.streamxhub.flink.core.scala.ext.TableExt
 import com.streamxhub.flink.core.scala.util.FlinkTableInitializer
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -207,6 +208,8 @@ class TableContext(val parameter: ParameterTool,
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
+
+  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
