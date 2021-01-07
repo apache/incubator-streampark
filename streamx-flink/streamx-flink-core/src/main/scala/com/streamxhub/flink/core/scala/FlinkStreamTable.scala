@@ -235,6 +235,8 @@ trait FlinkStreamTable extends Logger {
 
   final implicit def tableConversions(table: Table) = new TableExt.TableConversions(table)
 
+  final implicit lazy val parameter: ParameterTool = context.parameter
+
   private[this] var context: StreamTableContext = _
 
   var jobExecutionResult: JobExecutionResult = _
@@ -256,12 +258,5 @@ trait FlinkStreamTable extends Logger {
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(context: StreamTableContext): Unit
-
-  /**
-   * 不希望被显示的调用...
-   *
-   * @return
-   */
-  final implicit def parameter: ParameterTool = context.parameter
 
 }
