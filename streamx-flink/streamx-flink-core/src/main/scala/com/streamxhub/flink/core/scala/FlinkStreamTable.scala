@@ -31,13 +31,13 @@ import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironm
 import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.catalog.Catalog
-import org.apache.flink.table.descriptors.{ConnectorDescriptor, StreamTableDescriptor}
+import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, TableAggregateFunction, TableFunction, UserDefinedFunction}
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.sinks.TableSink
 import org.apache.flink.table.sources.TableSource
-import org.apache.flink.table.types.AbstractDataType
+import org.apache.flink.table.types.{AbstractDataType, DataType}
 
 import java.lang
 import java.util.Optional
@@ -233,7 +233,9 @@ trait FlinkStreamTable extends Logger {
 
   final implicit def tableExt(table: Table): TableExt.Table = new TableExt.Table(table)
 
-  final implicit def tableConversions(table: Table) = new TableExt.TableConversions(table)
+  final implicit def tableConversions(table: Table): TableExt.TableConversions = new TableExt.TableConversions(table)
+
+  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
