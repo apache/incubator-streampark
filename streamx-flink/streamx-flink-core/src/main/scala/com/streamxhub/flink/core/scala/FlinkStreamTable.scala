@@ -194,39 +194,39 @@ class StreamTableContext(val parameter: ParameterTool,
    * @param dataStream
    * @tparam T
    */
-  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit = tableEnv.registerDataStream(name, dataStream)
+  @Deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T]): Unit = tableEnv.registerDataStream(name, dataStream)
 
-  @deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.registerDataStream(name, dataStream, fields: _*)
+  @Deprecated override def registerDataStream[T](name: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.registerDataStream(name, dataStream, fields: _*)
 
-  @deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @Deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  @deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): StreamTableDescriptor = tableEnv.connect(connectorDescriptor)
 
-  @deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
+  @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
-  @deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
+  @Deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
 
-  @deprecated override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = tableEnv.registerTableSource(name, tableSource)
+  @Deprecated override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = tableEnv.registerTableSource(name, tableSource)
 
-  @deprecated override def registerTableSink(name: String, fieldNames: Array[String], fieldTypes: Array[TypeInformation[_]], tableSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, fieldNames, fieldTypes, tableSink)
+  @Deprecated override def registerTableSink(name: String, fieldNames: Array[String], fieldTypes: Array[TypeInformation[_]], tableSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, fieldNames, fieldTypes, tableSink)
 
-  @deprecated override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, configuredSink)
+  @Deprecated override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, configuredSink)
 
-  @deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
+  @Deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
 
-  @deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @Deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @Deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
 
-  @deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
 
-  @deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @Deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
 
-  @deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
 
-  @deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
+  @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 
-  @deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 }
 
 trait FlinkStreamTable extends Logger {
