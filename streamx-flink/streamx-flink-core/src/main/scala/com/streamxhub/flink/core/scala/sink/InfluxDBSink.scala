@@ -66,7 +66,7 @@ class InfluxDBSink(@(transient@param) ctx: StreamingContext,
 
 class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
 
-  var influxDB: InfluxDB = null
+  var influxDB: InfluxDB = _
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
