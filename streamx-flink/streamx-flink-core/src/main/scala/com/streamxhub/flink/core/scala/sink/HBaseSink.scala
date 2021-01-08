@@ -124,7 +124,6 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
       }
     }
 
-
   }
 
   override def close(): Unit = {
