@@ -34,7 +34,8 @@ import org.apache.hadoop.hbase.client._
 
 import java.lang.{Iterable => JIter}
 import java.util.Properties
-import java.util.concurrent.atomic.AtomicLong
+import java.util.concurrent.{TimeUnit, Executors, ScheduledExecutorService}
+import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -78,6 +79,8 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
   private var table: Table = _
   private var mutator: BufferedMutator = _
   private val offset: AtomicLong = new AtomicLong(0L)
+  private val service: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+  private val scheduled: AtomicBoolean = new AtomicBoolean(false)
   private var timestamp = 0L
 
   private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
@@ -107,11 +110,21 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
       case put: Put => putArray += put
       case other => mutations += other
     }
-    (offset.incrementAndGet() % commitBatch, System.currentTimeMillis()) match {
-      case (0, _) => execBatch()
-      case (_, current) if current - timestamp > 1000 => execBatch()
-      case _ =>
+
+    offset.incrementAndGet() % commitBatch match {
+      case 0 => execBatch()
+      case _ => if (!scheduled.get()) {
+        scheduled.set(true)
+        service.schedule(new Runnable {
+          override def run(): Unit = {
+            scheduled.set(false)
+            execBatch()
+          }
+        }, 10, TimeUnit.SECONDS)
+      }
     }
+
+
   }
 
   override def close(): Unit = {
