@@ -46,9 +46,9 @@ object TableExt {
 
   class ConnectTableDescriptor(table: TableDescriptor) {
 
-    def withSchema(mapping: (String, DataType)*): TableDescriptor = {
+    def withSchema(fieldMapping: (String, DataType)*): TableDescriptor = {
       val schema = new Schema()
-      mapping.foreach(x => schema.field(x._1, x._2))
+      fieldMapping.foreach(x => schema.field(x._1, x._2))
       table.withSchema(schema)
     }
 
