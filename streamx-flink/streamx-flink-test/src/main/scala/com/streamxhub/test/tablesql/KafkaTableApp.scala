@@ -64,6 +64,8 @@ object KafkaTableApp extends FlinkStreamTable {
       .select($"id", $"id".count as "count")
       .<<[(String, Long)].print("GroupBy ==>")
 
+
+
   }
 
 }
