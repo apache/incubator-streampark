@@ -85,11 +85,15 @@ trait FlinkStreaming extends Logger {
 
   final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] = new DataStreamExt.ProcessFunction[IN, OUT](ctx)
 
+  final implicit lazy val parameter: ParameterTool = context.parameter
+
+  private[this] var context: StreamingContext = _
+
   var jobExecutionResult: JobExecutionResult = _
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    val context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
+    context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()

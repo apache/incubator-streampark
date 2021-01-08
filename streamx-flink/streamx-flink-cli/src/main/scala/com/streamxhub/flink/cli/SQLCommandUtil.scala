@@ -20,12 +20,11 @@
  */
 package com.streamxhub.flink.cli
 
-import java.util.List
-import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import enumeratum.EnumEntry
 
 import java.util.regex.{Matcher, Pattern}
+import scala.collection.immutable
 
 object SQLCommandUtil {
 
@@ -43,7 +42,7 @@ object SQLCommandUtil {
         stmt.clear()
       }
     }
-    calls
+    calls.toList
   }
 
   def parseSQL(sqlLine: String): Option[SQLCommandCall] = {
@@ -55,7 +54,7 @@ object SQLCommandUtil {
       val sqlCommand = sqlCommands.head
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
-      for (i <- 0 until groups.length) {
+      for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
       sqlCommand.converter(groups).map(operands => SQLCommandCall(sqlCommand, operands))
@@ -66,7 +65,7 @@ object SQLCommandUtil {
 
 
 sealed abstract class SQLCommand(private val regex: String, val converter: Array[String] => Option[Array[String]]) extends EnumEntry {
-  var matcher: Matcher = null
+  var matcher: Matcher = _
 
   def matches(input: String): Boolean = {
     val pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
@@ -77,16 +76,15 @@ sealed abstract class SQLCommand(private val regex: String, val converter: Array
 
 object SQLCommand extends enumeratum.Enum[SQLCommand] {
 
-  val values = findValues
+  val values: immutable.IndexedSeq[SQLCommand] = findValues
 
   case object SET extends SQLCommand(
     "(\\s+(\\S+)\\s*=(.*))?",
-    x =>
-      x match {
-        case a if a.length < 3 => None
-        case a if a(0) == null => Some(new Array[String](0))
-        case _ => Some(Array[String](x(1), x(2)))
-      }
+    {
+      case a if a.length < 3 => None
+      case a if a(0) == null => Some(new Array[String](0))
+      case x => Some(Array[String](x(1), x(2)))
+    }
   )
 
   case object INSERT_INTO extends SQLCommand(

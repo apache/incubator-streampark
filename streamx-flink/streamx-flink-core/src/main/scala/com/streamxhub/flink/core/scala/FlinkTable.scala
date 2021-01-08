@@ -22,6 +22,7 @@ package com.streamxhub.flink.core.scala
 
 import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import com.streamxhub.flink.core.scala.ext.TableExt
 import com.streamxhub.flink.core.scala.util.FlinkTableInitializer
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -173,44 +174,50 @@ class TableContext(val parameter: ParameterTool,
    * @param dataStream
    * @tparam T
    */
-  override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+  @Deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
 
-  override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
+  @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
-  override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
+  @Deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
 
-  override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = tableEnv.registerTableSource(name, tableSource)
+  @Deprecated override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = tableEnv.registerTableSource(name, tableSource)
 
-  override def registerTableSink(name: String, fieldNames: Array[String], fieldTypes: Array[TypeInformation[_]], tableSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, fieldNames, fieldTypes, tableSink)
+  @Deprecated override def registerTableSink(name: String, fieldNames: Array[String], fieldTypes: Array[TypeInformation[_]], tableSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, fieldNames, fieldTypes, tableSink)
 
-  override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, configuredSink)
+  @Deprecated override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, configuredSink)
 
-  override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
+  @Deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
 
-  override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @Deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @Deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
 
-  override def explain(table: Table): String = tableEnv.explain(table)
+  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
 
-  override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @Deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
 
-  override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
 
-  override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
+  @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 
-  override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 
-  override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 }
 
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
+  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
+
+  final implicit lazy val parameter: ParameterTool = context.parameter
+
+  private[this] var context: TableContext = _
+
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    val context = new TableContext(FlinkTableInitializer.initTable(args))
+    context = new TableContext(FlinkTableInitializer.initTable(args))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()

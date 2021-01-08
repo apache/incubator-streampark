@@ -126,7 +126,7 @@ http.sink:
       format: yyyy-MM-dd
 # source config....
 kafka.source:
-  bootstrap.servers: test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092
+  bootstrap.servers: localhost:9092
   topic: hello
   group.id: flink_02
   auto.offset.reset: earliest

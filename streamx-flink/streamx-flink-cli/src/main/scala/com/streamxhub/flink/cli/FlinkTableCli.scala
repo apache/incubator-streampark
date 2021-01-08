@@ -23,7 +23,6 @@ package com.streamxhub.flink.cli
 import com.streamxhub.flink.core.scala.{FlinkStreamTable, FlinkTable, StreamTableContext, TableContext}
 
 import scala.util.{Failure, Success, Try}
-import scala.collection.JavaConversions._
 
 object FlinkTableCli extends FlinkStreamTable {
 
