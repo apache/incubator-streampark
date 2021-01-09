@@ -105,7 +105,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
     table = connection.getTable(tableName)
   }
 
-  override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(value: T, context: SinkFunction.Context): Unit = {
     fun(value).foreach {
       case put: Put => putArray += put
       case other => mutations += other

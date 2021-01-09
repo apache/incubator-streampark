@@ -25,7 +25,7 @@ import com.streamxhub.flink.core.scala.source.KafkaRecord;
 import com.streamxhub.flink.core.scala.source.KafkaStringDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer011;
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
 import java.util.Properties;
@@ -83,7 +83,7 @@ public class KafkaSource<T> {
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer011<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
+        FlinkKafkaConsumer<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
         return ctx.getJavaEnv().addSource(consumer);
     }
 
