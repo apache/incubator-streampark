@@ -21,7 +21,6 @@
 package com.streamxhub.flink.submit
 
 import java.io.{File, Serializable}
-import java.net.{MalformedURLException, URL}
 import java.util._
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import com.streamxhub.common.conf.ConfigConst._
@@ -29,13 +28,11 @@ import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
-import org.apache.flink.client.cli.CliFrontendParser.SHUTDOWN_IF_ATTACHED_OPTION
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.configuration._
-import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.hadoop.fs.Path
@@ -53,6 +50,7 @@ import org.apache.flink.client.cli.CliArgsException
 import org.apache.flink.configuration.ConfigOptions
 
 import java.lang.{Boolean => JBool}
+import java.util.{List => JavaList}
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.apache.flink.util.FlinkException
 
@@ -363,33 +361,21 @@ object FlinkSubmit extends Logger {
    * @throws
    * @return
    */
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: List[String]) = {
-    val configuration = new Configuration
+  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
+    val programOptions = new ProgramOptions(commandLine)
+    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
+    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
+    val effectiveConfiguration = new Configuration(executorConfig)
+    executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    val classpath = new ArrayBuffer[URL]
-    if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
-      for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
-        try classpath.add(new URL(path)) catch {
-          case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:$path,err:$e")
-        }
-      }
+    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
+      case null =>
+      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|$)", "M"))
     }
 
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
-      override def apply(t: URL): String = t.toString
-    })
-
-    commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
+    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
       case null =>
-      case p =>
-        Try(p.toInt) match {
-          case Success(value) =>
-            if (value <= 0) {
-              throw new NumberFormatException("[StreamX] parallelism muse be > 0. ")
-            }
-            configuration.setInteger(CoreOptions.DEFAULT_PARALLELISM.key(), value)
-          case Failure(e) => throw new CliArgsException(s"The parallelism must be a positive number: $p,err:$e ")
-        }
+      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)", "M"))
     }
 
     commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
@@ -400,34 +386,9 @@ object FlinkSubmit extends Logger {
             if (value <= 0) {
               throw new NumberFormatException("[StreamX] slot muse be > 0. ")
             }
-            configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
+            effectiveConfiguration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
           case Failure(e) => throw new CliArgsException(s"The slot must be a positive number: $s,err:$e ")
         }
-    }
-
-    val detachedMode = commandLine.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || commandLine.hasOption(FlinkRunOption.YARN_DETACHED_OPTION.getOpt)
-    val shutdownOnAttachedExit = commandLine.hasOption(SHUTDOWN_IF_ATTACHED_OPTION.getOpt)
-    val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
-    configuration.setBoolean(DeploymentOptions.ATTACHED, !detachedMode)
-    configuration.setBoolean(DeploymentOptions.SHUTDOWN_IF_ATTACHED, shutdownOnAttachedExit)
-
-    SavepointRestoreSettings.toConfiguration(savepointSettings, configuration)
-    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, new function.Function[String, String] {
-      override def apply(t: String): String = t
-    })
-
-    val effectiveConfiguration:Configuration = new Configuration(configuration)
-    val commandLineConfiguration = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    effectiveConfiguration.addAll(commandLineConfiguration)
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)", "M"))
     }
 
     /**
