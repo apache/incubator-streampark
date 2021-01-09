@@ -233,7 +233,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
     }
   }
 
-  override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
     val sql = toSQLFn(value)
     batchSize match {

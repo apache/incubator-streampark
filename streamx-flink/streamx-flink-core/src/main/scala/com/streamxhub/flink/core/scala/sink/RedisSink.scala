@@ -102,7 +102,7 @@ class RedisSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMappe
     redisContainer = RedisContainer.getContainer(jedisConfig)
   }
 
-  override def invoke(input: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(input: T, context: SinkFunction.Context): Unit = {
     redisContainer.invoke[T](mapper, input, None)
     val key = mapper.getKeyFromData(input)
     redisContainer.expire(key, ttl)
@@ -124,7 +124,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
     RedisTransaction[T]()
   }
 
-  override def invoke(transaction: RedisTransaction[T], value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(transaction: RedisTransaction[T], value: T, context: SinkFunction.Context): Unit = {
     transaction.invoked = true
     transaction + (mapper, value, ttl)
   }
