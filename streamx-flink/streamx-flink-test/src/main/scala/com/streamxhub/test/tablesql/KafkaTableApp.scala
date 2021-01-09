@@ -9,10 +9,9 @@ import org.apache.flink.table.api._
 object KafkaTableApp extends FlinkStreamTable {
 
   override def handle(context: StreamTableContext): Unit = {
-
     //connect kafka data
     context
-      .connect(Kafka("hello", KafkaVer.`010`))
+      .connect(Kafka("hello", KafkaVer.UNIVERSAL))
       .withFormat(new Csv)
       .withSchema(
         "id" -> DataTypes.STRING(),
@@ -20,11 +19,29 @@ object KafkaTableApp extends FlinkStreamTable {
       )
       .createTemporaryTable("kafka2Table")
 
+    val ds = context.fromCollection(
+      List(
+        "flink,apapche flink",
+        "kafka,apapche kafka",
+        "spark,spark",
+        "zookeeper,apapche zookeeper",
+        "hadoop,apapche hadoop"
+      )
+    ).map(x => {
+      val array = x.split(",")
+      Entity(array.head, array.last)
+    })
+
+    context.createTemporaryView("kafkaSource", ds)
+
     //kafka to table
+    val table1: Table = context.from("kafkaSource")
+    table1.>>[Entity].print("print==>")
+
     val table: Table = context.from("kafka2Table")
 
     //print sink
-    table.>>[(String, String)].print("print==>")
+    table.>>[Entity].print("print==>")
 
     /**
      * 'key 等同于 $"key"
@@ -65,7 +82,8 @@ object KafkaTableApp extends FlinkStreamTable {
       .<<[(String, Long)].print("GroupBy ==>")
 
 
-
   }
 
 }
+
+case class Entity(val id: String, val name: String)
