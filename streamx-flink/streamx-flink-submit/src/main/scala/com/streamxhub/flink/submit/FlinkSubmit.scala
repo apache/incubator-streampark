@@ -21,11 +21,10 @@
 package com.streamxhub.flink.submit
 
 import java.io.{File, Serializable}
-import java.util.{Arrays, Collections, List, function, List => JavaList, Map => JavaMap}
+import java.util.{Arrays, Collections, function, List => JavaList, Map => JavaMap}
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
-import com.streamxhub.common.util._
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
@@ -50,11 +49,11 @@ import scala.util.{Failure, Success, Try}
 import java.lang.{Boolean => JBool}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.FlinkRunOption.SHUTDOWN_IF_ATTACHED_OPTION
+import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
 import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.util.FlinkException
 
 import java.net.{MalformedURLException, URL}
-import java.util
 
 object FlinkSubmit extends Logger {
 
