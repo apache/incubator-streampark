@@ -96,7 +96,7 @@ object FlinkSubmit extends Logger {
     flinkDefaultConfiguration.get(option)
   }
 
-  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).getOrElse(null)
+  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).orNull
 
 
   def stop(appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
@@ -119,7 +119,7 @@ object FlinkSubmit extends Logger {
     if (savepointPathFuture == null) null else {
       try {
         val clientTimeout = getOptionFromDefaultFlinkConfig(ClientOptions.CLIENT_TIMEOUT)
-        savepointPathFuture.get(clientTimeout.toMillis(), TimeUnit.MILLISECONDS)
+        savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
       } catch {
         case e: Exception =>
           val cause = ExceptionUtils.stringifyException(e)
@@ -416,7 +416,7 @@ object FlinkSubmit extends Logger {
       override def apply(t: String): String = t
     })
 
-    val executorConfig = checkNotNull(activeCustomCommandLine).applyCommandLineOptionsToConfiguration(commandLine)
+    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
 
     effectiveConfiguration.addAll(configuration)

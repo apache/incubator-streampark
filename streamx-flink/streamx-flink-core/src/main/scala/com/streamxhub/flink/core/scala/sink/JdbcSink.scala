@@ -125,7 +125,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
     }
   }
 
-  override def invoke(value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(value: T, context: SinkFunction.Context): Unit = {
     require(connection != null)
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
@@ -236,7 +236,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
     Transaction()
   }
 
-  override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context): Unit = {
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
       case ApiType.java => javaToSQLFunc.from(value)

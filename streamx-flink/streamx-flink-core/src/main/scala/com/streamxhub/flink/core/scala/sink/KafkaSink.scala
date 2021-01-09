@@ -26,10 +26,10 @@ import com.streamxhub.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.serialization.{SerializationSchema, SimpleStringSchema}
 import org.apache.flink.streaming.api.datastream.DataStreamSink
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer011.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer
+import org.apache.flink.streaming.connectors.kafka.FlinkKafkaProducer.{DEFAULT_KAFKA_PRODUCERS_POOL_SIZE, Semantic}
 import org.apache.flink.streaming.connectors.kafka.internals.KeyedSerializationSchemaWrapper
 import org.apache.flink.streaming.connectors.kafka.partitioner.FlinkKafkaPartitioner
-import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaProducer011 => FlinkKafkaProducer}
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Optional, Properties}
@@ -82,15 +82,14 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
         case Some("NONE") => Semantic.NONE
         case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,muse be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
       }
-      val serialization = new KeyedSerializationSchemaWrapper[T](serializationSchema)
+      val schema = new KeyedSerializationSchemaWrapper[T](serializationSchema)
 
-      val optPartitioner = partitioner match {
+      val customPartitioner = partitioner match {
         case null => Optional.ofNullable(null).asInstanceOf[Optional[FlinkKafkaPartitioner[T]]]
         case part => Optional.of(part)
       }
-      new FlinkKafkaProducer[T](topicId, serialization, prop, optPartitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
+      new FlinkKafkaProducer[T](topicId, schema, prop, customPartitioner, semantic, DEFAULT_KAFKA_PRODUCERS_POOL_SIZE)
     }
-
 
     /**
      * versions 0.10+ allow attaching the records' event timestamp when writing them to Kafka;

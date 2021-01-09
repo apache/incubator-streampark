@@ -75,7 +75,6 @@ class StreamingContext(val parameter: ParameterTool, private val environment: St
     println(s"[StreamX] FlinkStreaming $jobName Starting...")
     super.execute(jobName)
   }
-
 }
 
 
