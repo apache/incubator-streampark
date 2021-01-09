@@ -285,8 +285,8 @@ object FlinkSubmit extends Logger {
           array += x._1
           x._2 match {
             case v: String =>
-              v match {
-                case FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt || FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt =>
+              x._1 match {
+                case FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt | FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt =>
                   array += v.trim.replaceFirst("(M$|$)", "M")
                 case _ => array += v
               }
