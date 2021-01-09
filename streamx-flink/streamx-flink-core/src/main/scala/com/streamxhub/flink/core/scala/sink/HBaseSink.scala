@@ -79,7 +79,6 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
   private var table: Table = _
   private var mutator: BufferedMutator = _
   private val offset: AtomicLong = new AtomicLong(0L)
-  private val service: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
   private val scheduled: AtomicBoolean = new AtomicBoolean(false)
   private var timestamp = 0L
 
@@ -88,6 +87,8 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
 
   private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
+
+  @transient private val service: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
 
   override def open(parameters: Configuration): Unit = {
     connection = HBaseClient(prop).connection
