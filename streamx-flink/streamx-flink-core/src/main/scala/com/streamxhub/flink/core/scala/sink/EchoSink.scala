@@ -65,7 +65,7 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
 
   override def beginTransaction(): Echo[T] = new Echo[T]()
 
-  override def invoke(transaction: Echo[T], value: T, context: SinkFunction.Context[_]): Unit = {
+  override def invoke(transaction: Echo[T], value: T, context: SinkFunction.Context): Unit = {
     transaction.invoked = true
     transaction.add(value)
   }

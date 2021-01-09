@@ -35,9 +35,8 @@ import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDesc
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, TableAggregateFunction, TableFunction, UserDefinedFunction}
 import org.apache.flink.table.module.Module
-import org.apache.flink.table.sinks.TableSink
 import org.apache.flink.table.sources.TableSource
-import org.apache.flink.table.types.{AbstractDataType, DataType}
+import org.apache.flink.table.types.AbstractDataType
 
 import java.lang
 import java.util.Optional
@@ -205,12 +204,6 @@ class StreamTableContext(val parameter: ParameterTool,
   @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
 
   @Deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
-
-  @Deprecated override def registerTableSource(name: String, tableSource: TableSource[_]): Unit = tableEnv.registerTableSource(name, tableSource)
-
-  @Deprecated override def registerTableSink(name: String, fieldNames: Array[String], fieldTypes: Array[TypeInformation[_]], tableSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, fieldNames, fieldTypes, tableSink)
-
-  @Deprecated override def registerTableSink(name: String, configuredSink: TableSink[_]): Unit = tableEnv.registerTableSink(name, configuredSink)
 
   @Deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
 
