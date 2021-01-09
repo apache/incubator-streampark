@@ -308,15 +308,11 @@ object FlinkSubmit extends Logger {
         }
 
         array.toArray
-
       }
-
-      appArgs.foreach(x => println(s">>>>appArgs ${x}"))
-
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
-    commandLine.getArgList.foreach(x => {
+    commandLine.getArgs.foreach(x => {
       println(s"getArgList println:${x}")
     })
 
