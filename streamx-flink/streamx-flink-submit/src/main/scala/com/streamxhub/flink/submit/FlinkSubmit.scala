@@ -362,7 +362,7 @@ object FlinkSubmit extends Logger {
    * @return
    */
   @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
-    val programOptions = new ProgramOptions(commandLine)
+    val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
