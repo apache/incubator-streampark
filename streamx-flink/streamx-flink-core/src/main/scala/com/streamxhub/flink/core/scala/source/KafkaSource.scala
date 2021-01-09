@@ -28,7 +28,7 @@ import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 import org.apache.flink.streaming.api.scala.{DataStream, _}
 import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
-import org.apache.flink.streaming.connectors.kafka.{KafkaDeserializationSchema, FlinkKafkaConsumer011 => FlinkKafkaConsumer}
+import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDeserializationSchema}
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import java.io
