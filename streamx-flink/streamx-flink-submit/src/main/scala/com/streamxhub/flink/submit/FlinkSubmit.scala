@@ -416,11 +416,9 @@ object FlinkSubmit extends Logger {
       override def apply(t: String): String = t
     })
 
-    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    logInfo("++++++++" + executorConfig.toString)
-    val effectiveConfiguration = new Configuration(executorConfig)
-
-    effectiveConfiguration.addAll(configuration)
+    val effectiveConfiguration:Configuration = new Configuration(configuration)
+    val commandLineConfiguration = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
+    effectiveConfiguration.addAll(commandLineConfiguration)
 
     commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
       case null =>
