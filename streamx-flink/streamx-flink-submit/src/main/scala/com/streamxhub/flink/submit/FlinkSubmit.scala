@@ -25,7 +25,7 @@ import java.util._
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
-import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util._
 import org.apache.commons.cli._
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
@@ -324,15 +324,21 @@ object FlinkSubmit extends Logger {
       throw new IllegalStateException("No valid command-line found.")
     }
 
-    val activeCommandLine = validateAndGetActiveCommandLine()
+    val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
+    val programOptions = ProgramOptions.create(commandLine)
+    programOptions.validate()
 
+    val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
 
-    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-
-    val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
+    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, programOptions, Collections.singletonList(uri.toString))
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
+
+    println("------------------<<applicationConfiguration>>------------------")
+    println(applicationConfiguration)
+    println("------------------------------------")
+
     var applicationId: ApplicationId = null
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
@@ -361,8 +367,7 @@ object FlinkSubmit extends Logger {
    * @throws
    * @return
    */
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
-    val programOptions = ProgramOptions.create(commandLine)
+  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, programOptions: ProgramOptions, jobJars: JavaList[String]) = {
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
