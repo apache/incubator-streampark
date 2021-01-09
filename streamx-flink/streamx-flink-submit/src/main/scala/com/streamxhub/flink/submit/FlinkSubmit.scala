@@ -284,12 +284,7 @@ object FlinkSubmit extends Logger {
         optionMap.foreach(x => {
           array += x._1
           x._2 match {
-            case v: String =>
-              if (x._1 == FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt || x._1 == FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) {
-                array += v.trim.replaceFirst("(M$|$)", "M")
-              } else {
-                array += v
-              }
+            case v: String => array += v
             case _ =>
           }
         })
