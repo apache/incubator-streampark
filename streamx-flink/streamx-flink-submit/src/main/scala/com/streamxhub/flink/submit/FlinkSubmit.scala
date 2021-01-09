@@ -326,7 +326,6 @@ object FlinkSubmit extends Logger {
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val programOptions = ProgramOptions.create(commandLine)
-    programOptions.validate()
 
     val activeCommandLine = validateAndGetActiveCommandLine()
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
