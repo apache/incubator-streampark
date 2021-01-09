@@ -315,8 +315,9 @@ object FlinkSubmit extends Logger {
       val line = checkNotNull(commandLine)
       println("Custom commandlines: {}", customCommandLines)
       for (cli <- customCommandLines) {
-        println("Checking custom commandline {}, isActive: {}", cli, cli.isActive(line))
-        if (cli.isActive(line)) return cli
+        val isActive = cli.isActive(line)
+        println("Checking custom commandline {}, isActive: {}", cli, isActive)
+        if (isActive) return cli
       }
       throw new IllegalStateException("No valid command-line found.")
     }
@@ -358,9 +359,9 @@ object FlinkSubmit extends Logger {
    * @return
    */
   @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
-    val effectiveConfiguration = new Configuration()
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    effectiveConfiguration.addAll(executorConfig)
+    println(s"${activeCustomCommandLine.getClass},${executorConfig.toString}")
+    val effectiveConfiguration = new Configuration(executorConfig)
     //jar...
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
