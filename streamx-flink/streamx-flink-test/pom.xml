@@ -241,7 +241,7 @@
         <!-- Kafka Connector的支持-->
         <dependency>
             <groupId>org.apache.flink</groupId>
-            <artifactId>flink-sql-connector-kafka-0.11_${scala.binary.version}</artifactId>
+            <artifactId>flink-sql-connector-kafka_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
         </dependency>
 
