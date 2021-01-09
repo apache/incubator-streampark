@@ -38,7 +38,7 @@ After the build is completed, the project will be installed in the local maven w
 
 ### 1. Flink Example with StreamX
 
-1. Make sure flink 1.11.1+
+1. Make sure flink 1.12.0 +
 
 ```scala
 
