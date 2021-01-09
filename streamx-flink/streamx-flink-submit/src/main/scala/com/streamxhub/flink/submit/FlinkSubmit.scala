@@ -417,6 +417,7 @@ object FlinkSubmit extends Logger {
     })
 
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
+    logInfo("++++++++" + executorConfig.toString)
     val effectiveConfiguration = new Configuration(executorConfig)
 
     effectiveConfiguration.addAll(configuration)
