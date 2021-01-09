@@ -312,8 +312,9 @@ object FlinkSubmit extends Logger {
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
-    commandLine.getArgs.foreach(x => {
-      println(s"getArgList println:${x}")
+    println(s"------->${commandLine.getOptions.size}")
+    commandLine.getOptions.foreach(x => {
+      println(s"getArgList println:${x.getArgName}:${x.getValue}")
     })
 
     def validateAndGetActiveCommandLine(): CustomCommandLine = {
