@@ -86,4 +86,4 @@ object KafkaTableApp extends FlinkStreamTable {
 
 }
 
-case class Entity(val id: String, val name: String)
+case class Entity(id: String, name: String)
