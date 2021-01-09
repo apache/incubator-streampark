@@ -88,9 +88,10 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
   private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
 
-  @transient private val service: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor()
+  @transient private var service: ScheduledExecutorService = _
 
   override def open(parameters: Configuration): Unit = {
+    service = Executors.newSingleThreadScheduledExecutor()
     connection = HBaseClient(prop).connection
     val tableName = TableName.valueOf(tabName)
     val mutatorParam = new BufferedMutatorParams(tableName)
