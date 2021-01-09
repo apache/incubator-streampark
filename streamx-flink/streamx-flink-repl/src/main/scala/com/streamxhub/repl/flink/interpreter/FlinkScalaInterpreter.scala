@@ -286,7 +286,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.batchEnv = flinkILoop.scalaBenv
     this.streamEnv = flinkILoop.scalaSenv
     val timeType = properties.getProperty("flink.senv.timecharacteristic", "EventTime")
-    this.streamEnv.setStreamTimeCharacteristic(TimeCharacteristic.valueOf(timeType))
+    this.streamEnv.getJavaEnv.setStreamTimeCharacteristic(TimeCharacteristic.valueOf(timeType))
     this.batchEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
     this.streamEnv.setParallelism(configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM))
 
@@ -295,7 +295,10 @@ class FlinkScalaInterpreter(properties: Properties) {
 
   private def setAsContext(): Unit = {
     val streamFactory = new StreamExecutionEnvironmentFactory() {
-      override def createExecutionEnvironment: JStreamExecutionEnvironment = streamEnv.getJavaEnv
+      override def createExecutionEnvironment(configuration: Configuration): JStreamExecutionEnvironment = {
+        streamEnv.configure(configuration, getFlinkClassLoader)
+        streamEnv.getJavaEnv
+      }
     }
     //StreamExecutionEnvironment
     var method = classOf[JStreamExecutionEnvironment].getDeclaredMethod("initializeContextEnvironment", classOf[StreamExecutionEnvironmentFactory])

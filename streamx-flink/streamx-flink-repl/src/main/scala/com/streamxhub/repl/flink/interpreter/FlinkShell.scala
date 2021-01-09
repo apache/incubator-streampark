@@ -106,7 +106,7 @@ object FlinkShell {
           val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
 
           val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
-          val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine)
+          val executorConfig = customCLI.toConfiguration(commandLine)
           executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
           /**
@@ -214,7 +214,7 @@ object FlinkShell {
     val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, frontend.getCustomCommandLineOptions)
     val commandLine = CliFrontendParser.parse(commandLineOptions, args, true)
     val customCLI = flinkShims.getCustomCli(frontend, commandLine).asInstanceOf[CustomCommandLine]
-    val executorConfig = customCLI.applyCommandLineOptionsToConfiguration(commandLine);
+    val executorConfig = customCLI.toConfiguration(commandLine);
     executorConfig
   }
 }
