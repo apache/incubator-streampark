@@ -21,7 +21,7 @@
 package com.streamxhub.flink.submit
 
 import java.io.{File, Serializable}
-import java.util._
+import java.util.{Arrays, Collections, List, function, List => JavaList, Map => JavaMap}
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
@@ -47,12 +47,14 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
-
-
 import java.lang.{Boolean => JBool}
-import java.util.{List => JavaList}
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.streamxhub.common.conf.FlinkRunOption.SHUTDOWN_IF_ATTACHED_OPTION
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
 import org.apache.flink.util.FlinkException
+
+import java.net.{MalformedURLException, URL}
+import java.util
 
 object FlinkSubmit extends Logger {
 
@@ -160,8 +162,7 @@ object FlinkSubmit extends Logger {
         }
       case x if x.trim.startsWith("json://") =>
         val json = x.trim.drop(7)
-        val map = new ObjectMapper().readValue[Map[String, String]](json, classOf[Map[String, String]])
-        map.toMap
+        new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
       case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
     }
 
@@ -349,18 +350,104 @@ object FlinkSubmit extends Logger {
     applicationId
   }
 
+  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
+    val configuration = new Configuration
+    val classpath = new ArrayBuffer[URL]
+    if (commandLine.hasOption(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
+      for (path <- commandLine.getOptionValues(FlinkRunOption.CLASSPATH_OPTION.getOpt)) {
+        try classpath.add(new URL(path)) catch {
+          case e: MalformedURLException => throw new CliArgsException(s"[StreamX]Bad syntax for classpath:$path,err:$e")
+        }
+      }
+    }
+
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.CLASSPATHS, classpath, new function.Function[URL, String] {
+      override def apply(t: URL): String = t.toString
+    })
+
+    commandLine.getOptionValue(FlinkRunOption.PARALLELISM_OPTION.getOpt) match {
+      case null =>
+      case p =>
+        Try(p.toInt) match {
+          case Success(value) =>
+            if (value <= 0) {
+              throw new NumberFormatException("[StreamX] parallelism muse be > 0. ")
+            }
+            configuration.setInteger(CoreOptions.DEFAULT_PARALLELISM.key(), value)
+          case Failure(e) => throw new CliArgsException(s"The parallelism must be a positive number: $p,err:$e ")
+        }
+    }
+
+    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
+      case null =>
+      case s =>
+        Try(s.toInt) match {
+          case Success(value) =>
+            if (value <= 0) {
+              throw new NumberFormatException("[StreamX] slot muse be > 0. ")
+            }
+            configuration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
+          case Failure(e) => throw new CliArgsException(s"The slot must be a positive number: $s,err:$e ")
+        }
+    }
+
+    val detachedMode = commandLine.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || commandLine.hasOption(FlinkRunOption.YARN_DETACHED_OPTION.getOpt)
+    val shutdownOnAttachedExit = commandLine.hasOption(SHUTDOWN_IF_ATTACHED_OPTION.getOpt)
+    val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
+    configuration.setBoolean(DeploymentOptions.ATTACHED, !detachedMode)
+    configuration.setBoolean(DeploymentOptions.SHUTDOWN_IF_ATTACHED, shutdownOnAttachedExit)
+
+    SavepointRestoreSettings.toConfiguration(savepointSettings, configuration)
+    ConfigUtils.encodeCollectionToConfig(configuration, PipelineOptions.JARS, jobJars, new function.Function[String, String] {
+      override def apply(t: String): String = t
+    })
+
+    println(s"configuration:====>${configuration}")
+
+    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
+    val effectiveConfiguration = new Configuration(executorConfig)
+    effectiveConfiguration.addAll(configuration)
+
+    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
+      case null =>
+      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|$)", "M"))
+    }
+
+    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
+      case null =>
+      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)", "M"))
+    }
+
+    /**
+     * dynamicOption(Highest priority...)
+     */
+    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
+    properties.stringPropertyNames.foreach((key: String) => {
+      val value = properties.getProperty(key)
+      if (value != null) {
+        effectiveConfiguration.setString(key, value)
+      } else {
+        effectiveConfiguration.setBoolean(key, true)
+      }
+    })
+
+    println("-----------------------")
+    println("Effective executor configuration: ", effectiveConfiguration)
+    println("-----------------------")
+    effectiveConfiguration
+  }
+
   /**
    *
    * @param activeCustomCommandLine
    * @param commandLine
    * @param jobJars
-   * @tparam T
+   * @param T
    * @throws
    * @return
    */
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
+  @throws[FlinkException] private def getEffectiveConfiguration2[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    println(s"${activeCustomCommandLine.getClass},${executorConfig.toString}")
     val effectiveConfiguration = new Configuration(executorConfig)
     //jar...
     val programOptions = ProgramOptions.create(commandLine)
@@ -415,8 +502,8 @@ object FlinkSubmit extends Logger {
                         appConf: String,
                         applicationType: String,
                         savePoint: String,
-                        flameGraph: java.util.Map[String, Serializable],
-                        overrideOption: java.util.Map[String, Any],
+                        flameGraph: JavaMap[String, Serializable],
+                        overrideOption: JavaMap[String, Any],
                         dynamicOption: Array[String],
                         args: String)
 
