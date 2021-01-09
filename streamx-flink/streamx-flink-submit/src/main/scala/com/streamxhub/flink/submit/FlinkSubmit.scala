@@ -288,7 +288,7 @@ object FlinkSubmit extends Logger {
               if (x._1 == FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt || x._1 == FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) {
                 array += v.trim.replaceFirst("(M$|$)", "M")
               } else {
-                case _ => array += v
+                array += v
               }
             case _ =>
           }
