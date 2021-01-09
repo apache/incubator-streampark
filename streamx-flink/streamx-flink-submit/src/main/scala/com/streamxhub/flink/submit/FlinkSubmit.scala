@@ -323,6 +323,9 @@ object FlinkSubmit extends Logger {
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     effectiveConfiguration.addAll(configuration)
+    println("-----------------------")
+    println("Effective executor configuration: ", effectiveConfiguration)
+    println("-----------------------")
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
@@ -399,10 +402,6 @@ object FlinkSubmit extends Logger {
         effectiveConfiguration.setBoolean(key, true)
       }
     })
-
-    println("-----------------------")
-    println("Effective executor configuration: ", effectiveConfiguration)
-    println("-----------------------")
     effectiveConfiguration
   }
 
