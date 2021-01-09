@@ -126,6 +126,16 @@ object FlinkSubmit extends Logger {
     }
   }
 
+  private[this] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
+    val line = checkNotNull(commandLine)
+    println("Custom commandlines: {}", customCommandLines)
+    for (cli <- customCommandLines) {
+      val isActive = cli.isActive(line)
+      println("Checking custom commandline {}, isActive: {}", cli, isActive)
+      if (isActive) return cli
+    }
+    throw new IllegalStateException("No valid command-line found.")
+  }
 
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
@@ -311,19 +321,11 @@ object FlinkSubmit extends Logger {
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
-    def validateAndGetActiveCommandLine(): CustomCommandLine = {
-      val line = checkNotNull(commandLine)
-      println("Custom commandlines: {}", customCommandLines)
-      for (cli <- customCommandLines) {
-        val isActive = cli.isActive(line)
-        println("Checking custom commandline {}, isActive: {}", cli, isActive)
-        if (isActive) return cli
-      }
-      throw new IllegalStateException("No valid command-line found.")
-    }
+    commandLine.getOptions.foreach(x => {
+      println(s"commandLine===>${x.getOpt}:${x.getValue}")
+    })
 
-    val activeCommandLine = validateAndGetActiveCommandLine()
-
+    val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
