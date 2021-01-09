@@ -19,7 +19,7 @@ object KafkaTableApp extends FlinkStreamTable {
       )
       .createTemporaryTable("kafka2Table")
 
-    val ds = context.fromCollection(
+    val ds = context.$fromCollection(
       List(
         "flink,apapche flink",
         "kafka,apapche kafka",
@@ -36,7 +36,7 @@ object KafkaTableApp extends FlinkStreamTable {
 
     //kafka to table
     val table1: Table = context.from("kafkaSource")
-    table1.>>[Entity].print("print==>")
+    table1.>>[Entity].print("stream print==>")
 
     val table: Table = context.from("kafka2Table")
 
