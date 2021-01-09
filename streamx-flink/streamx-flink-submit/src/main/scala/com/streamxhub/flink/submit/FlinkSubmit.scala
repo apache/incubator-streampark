@@ -331,7 +331,6 @@ object FlinkSubmit extends Logger {
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
 
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, programOptions, Collections.singletonList(uri.toString))
-    val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
     println("------------------<<applicationConfiguration>>------------------")
@@ -339,6 +338,7 @@ object FlinkSubmit extends Logger {
     println("------------------------------------")
 
     var applicationId: ApplicationId = null
+    val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
@@ -367,9 +367,12 @@ object FlinkSubmit extends Logger {
    * @return
    */
   @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, programOptions: ProgramOptions, jobJars: JavaList[String]) = {
-    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
+    val effectiveConfiguration = new Configuration()
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    val effectiveConfiguration = new Configuration(executorConfig)
+    println(s"activeCustomCommandLine ==> commandLine:${executorConfig.toString}")
+    effectiveConfiguration.addAll(executorConfig)
+    //jar...
+    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
     commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
