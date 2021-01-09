@@ -189,6 +189,7 @@ object FlinkSubmit extends Logger {
     val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
+    var runConfiguration: Configuration = null
     val customCommandLines = {
 
       val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
@@ -214,7 +215,7 @@ object FlinkSubmit extends Logger {
       }
 
       //获取flink的配置
-      val runConfiguration = GlobalConfiguration
+      runConfiguration = GlobalConfiguration
         //从flink-conf.yaml中加载默认配置文件...
         .loadConfiguration(flinkLocalConfDir)
         //设置yarn.provided.lib.dirs
@@ -321,13 +322,10 @@ object FlinkSubmit extends Logger {
       CliFrontendParser.parse(commandLineOptions, appArgs, true)
     }
 
-    commandLine.getOptions.foreach(x => {
-      println(s"commandLine===>${x.getOpt}:${x.getValue}")
-    })
-
     val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
+    effectiveConfiguration.addAll(runConfiguration)
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
     var applicationId: ApplicationId = null
