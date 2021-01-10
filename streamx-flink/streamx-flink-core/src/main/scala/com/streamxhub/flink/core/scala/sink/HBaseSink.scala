@@ -141,7 +141,6 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
 
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
-      offset.set(0L)
       val start = System.currentTimeMillis()
       //put ...
       mutator.mutate(putArray)
@@ -153,6 +152,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
         logInfo(s"[StreamX] HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
+      offset.set(0L)
       timestamp = System.currentTimeMillis()
     }
   }
