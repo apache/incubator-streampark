@@ -119,10 +119,6 @@ object FlinkSubmit extends Logger {
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
 
     val effectiveConfiguration = getEffectiveConfiguration(configuration, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-    println("-----------------------")
-    println("Effective executor configuration after: ", effectiveConfiguration)
-    println("-----------------------")
-
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
     var applicationId: ApplicationId = null
@@ -339,12 +335,12 @@ object FlinkSubmit extends Logger {
 
     commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
       case null =>
-      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|$)", "M"))
+      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|m$|$)", "M"))
     }
 
     commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
       case null =>
-      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|$)", "M"))
+      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|m$|$)", "M"))
     }
 
     commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
@@ -372,6 +368,11 @@ object FlinkSubmit extends Logger {
         effectiveConfiguration.setBoolean(key, true)
       }
     })
+
+    println("-----------------------")
+    println("Effective executor configuration:", effectiveConfiguration)
+    println("-----------------------")
+
     effectiveConfiguration
   }
 
