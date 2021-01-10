@@ -23,8 +23,6 @@ package com.streamxhub.repl.flink.shims;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.flink.client.cli.CliFrontend;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
 

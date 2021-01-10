@@ -127,8 +127,14 @@ object DependencyUtils {
     val localIvyRoot = new File(defaultIvyUserDir, "local")
     localIvy.setLocal(true)
     localIvy.setRepository(new FileRepository(localIvyRoot))
-    val ivyPattern = Seq(localIvyRoot.getAbsolutePath, "[organisation]", "[module]", "[revision]",
-      "ivys", "ivy.xml").mkString(File.separator)
+    val ivyPattern = Seq(
+      localIvyRoot.getAbsolutePath,
+      "[organisation]",
+      "[module]",
+      "[revision]",
+      "ivys",
+      "ivy.xml"
+    ).mkString(File.separator)
     localIvy.addIvyPattern(ivyPattern)
     val artifactPattern = Seq(localIvyRoot.getAbsolutePath, "[organisation]", "[module]",
       "[revision]", "[type]s", "[artifact](-[classifier]).[ext]").mkString(File.separator)
