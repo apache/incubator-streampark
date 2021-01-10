@@ -111,14 +111,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
 
             if (v.getJmMemory() != null) {
-                String jmMem = v.getJmMemory().replaceAll("M", "");
+                String jmMem = v.getJmMemory().replaceAll("[M|m]", "");
                 if (StringUtils.isNotEmpty(jmMem)) {
                     totalJmMemory.addAndGet(Long.parseLong(jmMem));
                 }
             }
 
             if (v.getTmMemory() != null) {
-                String tmMem = v.getTmMemory().replaceAll("M", "");
+                String tmMem = v.getTmMemory().replaceAll("[M|m]", "");
                 if (StringUtils.isNotEmpty(tmMem)) {
                     totalTmMemory.addAndGet(Long.parseLong(tmMem));
                 }
