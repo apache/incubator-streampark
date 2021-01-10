@@ -21,7 +21,7 @@
 package com.streamxhub.flink.submit
 
 import java.io.{File, Serializable}
-import java.util.{Arrays, Collections, List => JavaList, Map => JavaMap}
+import java.util.{Arrays => JavaArrays, Collections, List => JavaList, Map => JavaMap}
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
@@ -49,6 +49,8 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.util.FlinkException
+
+import java.util
 
 object FlinkSubmit extends Logger {
 
@@ -209,7 +211,7 @@ object FlinkSubmit extends Logger {
     //获取flink的配置
     val configuration = globalConfiguration
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, JavaArrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
@@ -311,10 +313,7 @@ object FlinkSubmit extends Logger {
         val buffer = new StringBuffer()
         submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
-          .concat(jvmProfilerJar)
-          .concat("=")
-          .concat(param)
+        array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
       array.toArray
@@ -328,7 +327,6 @@ object FlinkSubmit extends Logger {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
     effectiveConfiguration.addAll(configuration)
-
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
