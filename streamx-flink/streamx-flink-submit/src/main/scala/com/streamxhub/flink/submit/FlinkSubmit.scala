@@ -338,8 +338,13 @@ object FlinkSubmit extends Logger {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
     //jar...
+    commandLine.getOptions.foreach(x => {
+      println(s"====>${x.getOpt} === > ${x.getValue}")
+    })
+
     val programOptions = ProgramOptions.create(commandLine)
-    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(checkNotNull(programOptions), checkNotNull(jobJars))
+
+    val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
     commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
