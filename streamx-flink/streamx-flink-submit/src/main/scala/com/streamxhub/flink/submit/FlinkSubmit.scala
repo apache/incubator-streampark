@@ -32,7 +32,7 @@ import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.YarnDeploymentTarget
 import org.apache.hadoop.fs.Path
-import org.apache.flink.api.common.{ExecutionConfig, JobID}
+import org.apache.flink.api.common.JobID
 import org.apache.flink.configuration._
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
 import org.apache.flink.yarn.configuration.YarnConfigOptions
@@ -47,12 +47,8 @@ import scala.util.{Failure, Success, Try}
 import java.lang.{Boolean => JBool}
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
-import org.apache.commons.cli.{CommandLine, Option, Options}
-import org.apache.flink.client.cli.CliFrontendParser.{DETACHED_OPTION, PARALLELISM_OPTION, SHUTDOWN_IF_ATTACHED_OPTION, YARN_DETACHED_OPTION}
+import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.util.FlinkException
-
-import java.net.{MalformedURLException, URL}
-import java.util
 
 object FlinkSubmit extends Logger {
 
@@ -121,12 +117,8 @@ object FlinkSubmit extends Logger {
     val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
 
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
-    val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
-    println("-----------------------")
-    println("Effective executor configuration before: ", effectiveConfiguration)
-    println("-----------------------")
 
-    effectiveConfiguration.addAll(configuration)
+    val effectiveConfiguration = getEffectiveConfiguration(configuration, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     println("-----------------------")
     println("Effective executor configuration after: ", effectiveConfiguration)
     println("-----------------------")
@@ -216,10 +208,10 @@ object FlinkSubmit extends Logger {
       array
     }
 
+    val globalConfiguration = GlobalConfiguration.loadConfiguration(configurationDirectory)
+
     //获取flink的配置
-    val configuration = GlobalConfiguration
-      //从flink-conf.yaml中加载默认配置文件...
-      .loadConfiguration(configurationDirectory)
+    val configuration = globalConfiguration
       //设置yarn.provided.lib.dirs
       .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
@@ -237,8 +229,7 @@ object FlinkSubmit extends Logger {
       //arguments...
       .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
 
-    configuration -> loadCustomCommandLines(configuration, configurationDirectory)
-
+    configuration -> loadCustomCommandLines(globalConfiguration, configurationDirectory)
   }
 
   private[this] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
@@ -337,73 +328,12 @@ object FlinkSubmit extends Logger {
 
   }
 
-  @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
+  @throws[FlinkException] private def getEffectiveConfiguration[T](configuration: Configuration, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
-    //jar...
-    commandLine.getOptions.foreach(x => {
-      println(s"====>${x.getOpt}===>${x.getValue}")
-    })
-
-    val JAR_OPTION = new Option("j", "jarfile", true, "Flink program JAR file.")
-
-    val CLASS_OPTION = new Option("c", "class", true, "Class with the program entry point (\"main()\" method). Only needed if the " + "JAR file does not specify the class in its manifest.")
-
-    val CLASSPATH_OPTION = new Option("C", "classpath", true, "Adds a URL to each user code " + "classloader  on all nodes in the cluster. The paths must specify a protocol (e.g. file://) and be " + "accessible on all nodes (e.g. by means of a NFS share). You can use this option multiple " + "times for specifying more than one URL. The protocol must be supported by the " + "{@link java.net.URLClassLoader}.")
-
-    val entryPointClass = if (commandLine.hasOption(CLASS_OPTION.getOpt)) commandLine.getOptionValue(CLASS_OPTION.getOpt) else null
-    println(s"entryPointClass===>${entryPointClass}")
-
-    val jarFilePath = if (commandLine.hasOption(JAR_OPTION.getOpt)) commandLine.getOptionValue(JAR_OPTION.getOpt) else null
-    println(s"jarFilePath===>${jarFilePath}")
-
-
-    val classpaths: util.List[URL] = new util.ArrayList[URL]
-    if (commandLine.hasOption(CLASSPATH_OPTION.getOpt)) for (path <- commandLine.getOptionValues(CLASSPATH_OPTION.getOpt)) {
-      try classpaths.add(new URL(path))
-      catch {
-        case e: MalformedURLException =>
-          throw new CliArgsException("Bad syntax for classpath: " + path)
-      }
-    }
-
-    println(s"classpaths===>${classpaths}")
-
-
-    val parallelism = if (commandLine.hasOption(PARALLELISM_OPTION.getOpt)) {
-      val parString: String = commandLine.getOptionValue(PARALLELISM_OPTION.getOpt)
-      try {
-        val parallelism = parString.toInt
-        if (parallelism <= 0) {
-          throw new NumberFormatException
-        }
-        parallelism
-      } catch {
-        case e: NumberFormatException =>
-          throw new CliArgsException("The parallelism must be a positive number: " + parString)
-      }
-    } else {
-      ExecutionConfig.PARALLELISM_DEFAULT
-    }
-
-    println(s"parallelism===>${parallelism}")
-
-
-    val detachedMode = commandLine.hasOption(DETACHED_OPTION.getOpt) || commandLine.hasOption(YARN_DETACHED_OPTION.getOpt)
-
-    println(s"detachedMode===>${detachedMode}")
-
-
-    val shutdownOnAttachedExit = commandLine.hasOption(SHUTDOWN_IF_ATTACHED_OPTION.getOpt)
-    println(s"shutdownOnAttachedExit===>${shutdownOnAttachedExit}")
-
-
-    val savepointSettings = CliFrontendParser.createSavepointRestoreSettings(commandLine)
-    println(s"savepointSettings===>${savepointSettings}")
-
+    effectiveConfiguration.addAll(configuration)
 
     val programOptions = ProgramOptions.create(commandLine)
-
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
