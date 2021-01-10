@@ -101,7 +101,7 @@ object FlinkSubmit extends Logger {
          |      "flameGraph": ${submitInfo.flameGraph != null}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
-         |      "dynamicOption": s"${submitInfo.dynamicOption.mkString(" ")},"
+         |      "dynamicOption": ${submitInfo.dynamicOption.mkString(" ")},"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
