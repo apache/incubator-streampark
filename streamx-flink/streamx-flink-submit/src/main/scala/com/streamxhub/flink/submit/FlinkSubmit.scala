@@ -61,38 +61,6 @@ object FlinkSubmit extends Logger {
 
   private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
 
-  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
-    val flinkConfiguration = new Configuration
-    flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
-    val clusterClientFactory = new YarnClusterClientFactory
-    val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
-    if (applicationId == null) {
-      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-    }
-    val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
-    clusterDescriptor.retrieve(applicationId).getClusterClient
-  }
-
-  private[this] def getJobID(jobId: String): JobID = {
-    Try(JobID.fromHexString(jobId)) match {
-      case Success(id) => id
-      case Failure(e) => throw new CliArgsException(e.getMessage)
-    }
-  }
-
-  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
-    if (flinkDefaultConfiguration == null) {
-      val flinkLocalHome = System.getenv("FLINK_HOME")
-      require(flinkLocalHome != null)
-      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
-      //获取flink的配置
-      this.flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkLocalConfDir)
-    }
-    flinkDefaultConfiguration.get(option)
-  }
-
-  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).orNull
-
   def stop(appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
@@ -122,17 +90,6 @@ object FlinkSubmit extends Logger {
     }
   }
 
-  private[this] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
-    val line = checkNotNull(commandLine)
-    println("Custom commandlines: {}", customCommandLines)
-    for (cli <- customCommandLines) {
-      val isActive = cli.isActive(line)
-      println("Checking custom commandline {}, isActive: {}", cli, isActive)
-      if (isActive) return cli
-    }
-    throw new IllegalStateException("No valid command-line found.")
-  }
-
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logInfo(
       s"""
@@ -148,183 +105,27 @@ object FlinkSubmit extends Logger {
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
-    val appConfigMap = submitInfo.appConf match {
-      case x if x.trim.startsWith("yaml://") =>
-        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
-      case x if x.trim.startsWith("prop://") =>
-        PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.trim.drop(7)))
-      case x if x.trim.startsWith("hdfs://") =>
-
-        /**
-         * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
-         */
-        val text = HdfsUtils.read(submitInfo.appConf)
-        val extension = submitInfo.appConf.split("\\.").last.toLowerCase
-        extension match {
-          case "properties" => PropertiesUtils.fromPropertiesText(text)
-          case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
-        }
-      case x if x.trim.startsWith("json://") =>
-        val json = x.trim.drop(7)
-        new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
-      case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
-    }
+    val appConfigMap = getConfigMapFromSubmit(submitInfo)
 
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
+
     val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
 
-    /**
-     * config....
-     */
-    val flinkLocalHome = System.getenv("FLINK_HOME")
-    logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
-    val flinkName = new File(flinkLocalHome).getName
-    val flinkLocalConfDir = s"$flinkLocalHome/conf"
-    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
-    val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
+    val (configuration, customCommandLines) = getCustomCommandLines(submitInfo, appName, appMain)
 
-    val (configuration, customCommandLines) = {
-
-      val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
-        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
-      }
-
-      val appArgs: ArrayBuffer[String] = {
-        val array = new ArrayBuffer[String]
-        Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
-        array += KEY_FLINK_CONF("--")
-        array += submitInfo.appConf
-        array += KEY_FLINK_HOME("--")
-        array += flinkHdfsHome
-        array += KEY_APP_NAME("--")
-        array += appName
-      }
-
-      if (submitInfo.overrideOption.containsKey("parallelism")) {
-        appArgs += s"--$KEY_FLINK_PARALLELISM"
-        appArgs += submitInfo.overrideOption.get("parallelism").toString
-      }
-
-      //获取flink的配置
-      val configuration = GlobalConfiguration
-        //从flink-conf.yaml中加载默认配置文件...
-        .loadConfiguration(flinkLocalConfDir)
-        //设置yarn.provided.lib.dirs
-        .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
-        //设置flinkDistJar
-        .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
-        //设置用户的jar
-        .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
-        //设置部署模式为"application"
-        .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
-        //yarn application name
-        .set(YarnConfigOptions.APPLICATION_NAME, appName)
-        //yarn application Type
-        .set(YarnConfigOptions.APPLICATION_TYPE, submitInfo.applicationType)
-        //main class
-        .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
-        //arguments...
-        .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
-
-      configuration -> loadCustomCommandLines(configuration, flinkLocalConfDir)
-
-    }
-
-    val commandLine = {
-      //merge options....
-      val customCommandLineOptions = new Options
-      for (customCommandLine <- customCommandLines) {
-        customCommandLine.addGeneralOptions(customCommandLineOptions)
-        customCommandLine.addRunOptions(customCommandLineOptions)
-      }
-      val commandOptions = CliFrontendParser.getRunCommandOptions
-      val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions)
-
-      //read and verify user config...
-      val appArgs = {
-        val optionMap = new mutable.HashMap[String, Any]()
-        appConfigMap.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
-          val key = x._1.drop(optionPrefix.length)
-          //验证参数是否合法...
-          val verify = commandLineOptions.hasOption(key)
-          if (!verify) {
-            println(s"[StreamX] param:$key is error,skip it.")
-          }
-          verify
-        }).foreach(x => {
-          val opt = commandLineOptions.getOption(x._1.drop(optionPrefix.length).trim).getOpt
-          Try(x._2.toBoolean).getOrElse(x._2) match {
-            case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
-            case v => optionMap += s"-$opt" -> v
-          }
-        })
-
-        //fromSavePoint
-        if (submitInfo.savePoint != null) {
-          optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
-        }
-
-        optionMap += "-ynm" -> submitInfo.appName
-
-        //页面定义的参数优先级大于app配置文件
-        submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
-          val option = commandLineOptions.getOption(x._1)
-          if (option.hasArg) {
-            optionMap += s"-${option.getOpt}" -> x._2.toString
-          } else {
-            optionMap += s"-${option.getOpt}" -> true
-          }
-        })
-
-        val array = new ArrayBuffer[String]()
-        optionMap.foreach(x => {
-          array += x._1
-          x._2 match {
-            case v: String => array += v
-            case _ =>
-          }
-        })
-
-        //-D 动态参数配置....
-        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-        //-jvm profile support
-        if (submitInfo.flameGraph != null) {
-          //find jvm-profiler
-          if (jvmProfilerJar == null) {
-            val pluginsPath = System.getProperty("app.home").concat("/plugins")
-            val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
-            jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
-              case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
-              case array if array.length == 1 => array.head
-              case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
-            }
-          }
-
-          val buffer = new StringBuffer()
-          submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
-          val param = buffer.toString.dropRight(1)
-          array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
-            .concat(jvmProfilerJar)
-            .concat("=")
-            .concat(param)
-        }
-
-        array.toArray
-      }
-
-      CliFrontendParser.parse(commandLineOptions, appArgs, true)
-    }
+    val commandLine = getEffectiveCommandLine(appConfigMap, submitInfo, customCommandLines)
 
     val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
+
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
     val effectiveConfiguration = getEffectiveConfiguration(activeCommandLine, commandLine, Collections.singletonList(uri.toString))
+    println("-----------------------")
+    println("Effective executor configuration before: ", effectiveConfiguration)
+    println("-----------------------")
+
     effectiveConfiguration.addAll(configuration)
     println("-----------------------")
-    println("Effective executor configuration: ", effectiveConfiguration)
+    println("Effective executor configuration after: ", effectiveConfiguration)
     println("-----------------------")
 
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
@@ -350,15 +151,189 @@ object FlinkSubmit extends Logger {
     applicationId
   }
 
-  /**
-   *
-   * @param activeCustomCommandLine
-   * @param commandLine
-   * @param jobJars
-   * @param T
-   * @throws
-   * @return
-   */
+  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).orNull
+
+
+  private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo): Map[String, String] = {
+    submitInfo.appConf match {
+      case x if x.trim.startsWith("yaml://") =>
+        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
+      case x if x.trim.startsWith("prop://") =>
+        PropertiesUtils.fromPropertiesText(DeflaterUtils.unzipString(x.trim.drop(7)))
+      case x if x.trim.startsWith("hdfs://") =>
+
+        /**
+         * 如果配置文件为hdfs方式,则需要用户将hdfs相关配置文件copy到resources下...
+         */
+        val text = HdfsUtils.read(submitInfo.appConf)
+        val extension = submitInfo.appConf.split("\\.").last.toLowerCase
+        extension match {
+          case "properties" => PropertiesUtils.fromPropertiesText(text)
+          case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+        }
+      case x if x.trim.startsWith("json://") =>
+        val json = x.trim.drop(7)
+        new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
+      case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
+    }
+  }
+
+  private[this] def getCustomCommandLines(submitInfo: SubmitInfo, appName: String, appMain: String): (Configuration, JavaList[CustomCommandLine]) = {
+    /**
+     * config....
+     */
+    val flinkLocalHome = System.getenv("FLINK_HOME")
+    logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
+    val flinkName = new File(flinkLocalHome).getName
+    val configurationDirectory = s"$flinkLocalHome/conf"
+    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
+    val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
+    val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
+
+    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+      case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+    }
+
+    val appArgs: ArrayBuffer[String] = {
+      val array = new ArrayBuffer[String]
+      Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => array += x)
+      array += KEY_FLINK_CONF("--")
+      array += submitInfo.appConf
+      array += KEY_FLINK_HOME("--")
+      array += flinkHdfsHome
+      array += KEY_APP_NAME("--")
+      array += appName
+      if (submitInfo.overrideOption.containsKey("parallelism")) {
+        array += s"--$KEY_FLINK_PARALLELISM"
+        array += submitInfo.overrideOption.get("parallelism").toString
+      }
+      array
+    }
+
+    //获取flink的配置
+    val configuration = GlobalConfiguration
+      //从flink-conf.yaml中加载默认配置文件...
+      .loadConfiguration(configurationDirectory)
+      //设置yarn.provided.lib.dirs
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+      //设置flinkDistJar
+      .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
+      //设置用户的jar
+      .set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
+      //设置部署模式为"application"
+      .set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
+      //yarn application name
+      .set(YarnConfigOptions.APPLICATION_NAME, appName)
+      //yarn application Type
+      .set(YarnConfigOptions.APPLICATION_TYPE, submitInfo.applicationType)
+      //main class
+      .set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
+      //arguments...
+      .set(ApplicationConfiguration.APPLICATION_ARGS, appArgs.toList.asJava)
+
+    configuration -> loadCustomCommandLines(configuration, configurationDirectory)
+
+  }
+
+  private[this] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
+    val line = checkNotNull(commandLine)
+    println("Custom commandlines: {}", customCommandLines)
+    for (cli <- customCommandLines) {
+      val isActive = cli.isActive(line)
+      println("Checking custom commandline {}, isActive: {}", cli, isActive)
+      if (isActive) return cli
+    }
+    throw new IllegalStateException("No valid command-line found.")
+  }
+
+  private[this] def getEffectiveCommandLine(appConfigMap: Map[String, String], submitInfo: SubmitInfo, customCommandLines: JavaList[CustomCommandLine]): CommandLine = {
+    //merge options....
+    val customCommandLineOptions = new Options
+    for (customCommandLine <- customCommandLines) {
+      customCommandLine.addGeneralOptions(customCommandLineOptions)
+      customCommandLine.addRunOptions(customCommandLineOptions)
+    }
+    val commandOptions = CliFrontendParser.getRunCommandOptions
+    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions)
+    //read and verify user config...
+    val cliArgs = {
+      val optionMap = new mutable.HashMap[String, Any]()
+      appConfigMap.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
+        val key = x._1.drop(optionPrefix.length)
+        //验证参数是否合法...
+        val verify = commandLineOptions.hasOption(key)
+        if (!verify) {
+          println(s"[StreamX] param:$key is error,skip it.")
+        }
+        verify
+      }).foreach(x => {
+        val opt = commandLineOptions.getOption(x._1.drop(optionPrefix.length).trim).getOpt
+        Try(x._2.toBoolean).getOrElse(x._2) match {
+          case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
+          case v => optionMap += s"-$opt" -> v
+        }
+      })
+
+      //fromSavePoint
+      if (submitInfo.savePoint != null) {
+        optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+      }
+
+      optionMap += "-ynm" -> submitInfo.appName
+
+      //页面定义的参数优先级大于app配置文件
+      submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
+        val option = commandLineOptions.getOption(x._1)
+        if (option.hasArg) {
+          optionMap += s"-${option.getOpt}" -> x._2.toString
+        } else {
+          optionMap += s"-${option.getOpt}" -> true
+        }
+      })
+
+      val array = new ArrayBuffer[String]()
+      optionMap.foreach(x => {
+        array += x._1
+        x._2 match {
+          case v: String => array += v
+          case _ =>
+        }
+      })
+
+      //-D 动态参数配置....
+      submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      //-jvm profile support
+      if (submitInfo.flameGraph != null) {
+        //find jvm-profiler
+        if (jvmProfilerJar == null) {
+          val pluginsPath = System.getProperty("app.home").concat("/plugins")
+          val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
+          jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
+            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
+            case array if array.length == 1 => array.head
+            case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
+          }
+        }
+
+        val buffer = new StringBuffer()
+        submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
+        val param = buffer.toString.dropRight(1)
+        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
+          .concat(jvmProfilerJar)
+          .concat("=")
+          .concat(param)
+      }
+
+      array.toArray
+    }
+
+    CliFrontendParser.parse(commandLineOptions, cliArgs, true)
+
+  }
+
   @throws[FlinkException] private def getEffectiveConfiguration[T](activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
@@ -405,6 +380,35 @@ object FlinkSubmit extends Logger {
     effectiveConfiguration
   }
 
+  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
+    val flinkConfiguration = new Configuration
+    flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
+    val clusterClientFactory = new YarnClusterClientFactory
+    val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
+    if (applicationId == null) {
+      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    }
+    val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
+    clusterDescriptor.retrieve(applicationId).getClusterClient
+  }
+
+  private[this] def getJobID(jobId: String): JobID = {
+    Try(JobID.fromHexString(jobId)) match {
+      case Success(id) => id
+      case Failure(e) => throw new CliArgsException(e.getMessage)
+    }
+  }
+
+  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
+    if (flinkDefaultConfiguration == null) {
+      val flinkLocalHome = System.getenv("FLINK_HOME")
+      require(flinkLocalHome != null)
+      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+      //获取flink的配置
+      this.flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkLocalConfDir)
+    }
+    flinkDefaultConfiguration.get(option)
+  }
 
   case class SubmitInfo(flinkUserJar: String,
                         appName: String,
