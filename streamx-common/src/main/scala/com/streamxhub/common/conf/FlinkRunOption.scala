@@ -41,6 +41,7 @@ object FlinkRunOption {
   val CLASSPATH_OPTION = new Option("C", "classpath", true, "Adds a URL to each user code " + "classloader  on all nodes in the cluster. The paths must specify a protocol (e.g. file://) and be " + "accessible on all nodes (e.g. by means of a NFS share). You can use this option multiple " + "times for specifying more than one URL. The protocol must be supported by the " + "{@link java.net.URLClassLoader}.")
 
   val PARALLELISM_OPTION = new Option("p", "parallelism", true, "The parallelism with which to run the program. Optional flag to override the default value " + "specified in the configuration.")
+
   val DETACHED_OPTION = new Option("d", "detached", false, "If present, runs " + "the job in detached mode")
 
   val SHUTDOWN_IF_ATTACHED_OPTION = new Option("sae", "shutdownOnAttachedExit", false, "If the job is submitted in attached mode, perform a best-effort cluster shutdown " + "when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.")
@@ -88,9 +89,10 @@ object FlinkRunOption {
   val PYEXEC_OPTION = new Option("pyexec", "pyExecutable", true, "Specify the path of the python interpreter used to execute the python UDF worker " + "(e.g.: --pyExecutable /usr/local/bin/python3). " + "The python UDF worker depends on Python 3.5+, Apache Beam (version == 2.23.0), " + "Pip (version >= 7.1.0) and SetupTools (version >= 37.0.0). " + "Please ensure that the specified environment meets the above requirements.")
 
   val DYNAMIC_PROPERTIES = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Allows specifying multiple generic configuration options. The available " + "options can be found at https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
-  /**
-   * yarn
-   */
+
+  @deprecated val EXECUTOR_OPTION = new Option("e", "executor", true, "DEPRECATED: Please use the -t option instead which is also available with the \"Application Mode\".\n" + "The name of the executor to be used for executing the given job, which is equivalent " + "to the \"execution.target\" config option.")
+
+  val TARGET_OPTION = new Option("t", "target", true, "The deployment target for the given application, which is equivalent " + "to the \"execution.target\" config option. For the \"run\" action the " + "currently available targets are: $getExecutorFactoryNames(). For the \"run-application\" action")
 
   HELP_OPTION.setRequired(false)
 
@@ -159,7 +161,6 @@ object FlinkRunOption {
     val commOptions = getRunCommandOptions
     val yarnOptions = getYARNOptions
     val resultOptions = new Options
-
     commOptions.getOptions.foreach(resultOptions.addOption)
     yarnOptions.getOptions.filter(x => !resultOptions.hasOption(x.getOpt)).foreach(resultOptions.addOption)
     resultOptions
@@ -169,6 +170,8 @@ object FlinkRunOption {
     var options = buildGeneralOptions(new Options)
     options = getProgramSpecificOptions(options)
     options.addOption(SAVEPOINT_PATH_OPTION)
+    options.addOption(EXECUTOR_OPTION)
+    options.addOption(TARGET_OPTION)
     options.addOption(SAVEPOINT_ALLOW_NON_RESTORED_OPTION)
   }
 
