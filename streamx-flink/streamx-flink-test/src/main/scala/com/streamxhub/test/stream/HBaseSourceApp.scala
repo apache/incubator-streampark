@@ -5,10 +5,10 @@ import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.request.HBaseRequest
 import com.streamxhub.flink.core.scala.source.HBaseSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
+import org.apache.flink.api.scala._
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.client.{Get, Scan}
 import org.apache.hadoop.hbase.util.Bytes
-import org.apache.flink.api.scala._
 
 import java.util
 

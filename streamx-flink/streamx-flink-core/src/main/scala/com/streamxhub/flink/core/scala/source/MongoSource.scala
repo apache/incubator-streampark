@@ -25,21 +25,20 @@ import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
 import com.streamxhub.flink.core.scala.StreamingContext
+import com.streamxhub.flink.core.scala.enums.ApiType
+import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
+import com.streamxhub.flink.core.scala.util.FlinkUtils
+import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
+import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
+import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
 
 import java.util.Properties
-import com.streamxhub.flink.core.scala.enums.ApiType
-import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
-import com.streamxhub.flink.core.scala.util.FlinkUtils
-import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
-import org.apache.flink.api.common.state.ListState
-import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
-import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
-
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.{Success, Try}

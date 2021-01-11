@@ -21,9 +21,9 @@
 package com.streamxhub.flink.core.java.source;
 
 import com.streamxhub.common.util.ConfigUtils;
+import com.streamxhub.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.source.MySQLSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;

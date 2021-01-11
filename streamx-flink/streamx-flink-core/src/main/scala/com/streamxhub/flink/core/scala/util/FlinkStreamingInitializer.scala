@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.util
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{DateUtils, DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util._
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
@@ -38,8 +38,8 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 
 import java.io.File
-import java.util.{HashMap => JavaHashMap}
 import java.util.concurrent.TimeUnit
+import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
 import scala.util.Try
 

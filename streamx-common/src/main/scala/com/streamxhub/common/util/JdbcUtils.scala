@@ -20,15 +20,14 @@
  */
 package com.streamxhub.common.util
 
-import java.sql.{Connection, ResultSet, Statement}
-import java.util.Properties
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.locks.ReentrantLock
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import org.json4s.DefaultFormats
 
+import java.sql.{Connection, ResultSet, Statement}
+import java.util.Properties
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.locks.ReentrantLock
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer

@@ -20,13 +20,12 @@
  */
 package com.streamxhub.common.util
 
-import java.util.Properties
-
 import com.streamxhub.common.conf.ConfigConst._
-import java.util.{Map => JavaMap}
+
+import java.util.{Properties, Map => JavaMap}
+import scala.collection.JavaConversions._
 import scala.collection.immutable.{Map => ScalaMap}
 import scala.util.Try
-import scala.collection.JavaConversions._
 
 object ConfigUtils {
 

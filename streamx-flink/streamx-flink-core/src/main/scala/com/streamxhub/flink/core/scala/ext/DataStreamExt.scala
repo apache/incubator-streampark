@@ -21,8 +21,6 @@
 package com.streamxhub.flink.core.scala.ext
 
 import com.streamxhub.flink.core.scala.sink.EchoSink
-
-import java.time.Duration
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction => ProcFunc}
@@ -31,6 +29,8 @@ import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
 import org.apache.flink.util.Collector
+
+import java.time.Duration
 
 object DataStreamExt {
 

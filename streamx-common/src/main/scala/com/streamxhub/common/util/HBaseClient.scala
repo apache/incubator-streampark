@@ -20,14 +20,13 @@
  */
 package com.streamxhub.common.util
 
-import java.util.Properties
-
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
-import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
-import org.apache.hadoop.security.UserGroupInformation
 import com.streamxhub.common.conf.ConfigConst._
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.hbase.client.{Connection, ConnectionFactory, Table}
+import org.apache.hadoop.hbase.{HBaseConfiguration, TableName}
+import org.apache.hadoop.security.UserGroupInformation
 
+import java.util.Properties
 import scala.collection.JavaConversions._
 
 /**
