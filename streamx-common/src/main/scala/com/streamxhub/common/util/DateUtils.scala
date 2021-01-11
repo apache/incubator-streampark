@@ -24,6 +24,7 @@ import java.util._
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.TimeZone
+import java.util.concurrent.TimeUnit
 import scala.util._
 
 
@@ -136,6 +137,50 @@ object DateUtils {
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     val utcDate: Date = sdf.parse(utcTime)
     utcToLocal(utcDate)
+  }
+
+  /**
+   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
+   *
+   * @param duration in second
+   * @return
+   */
+  def toRichTimeDuration(duration: Long): String = {
+    val days = TimeUnit.SECONDS.toDays(duration)
+    val duration1 = duration - TimeUnit.DAYS.toSeconds(days)
+    val hours = TimeUnit.SECONDS.toHours(duration1)
+    val duration2 = duration1 - TimeUnit.HOURS.toSeconds(hours)
+    val minutes = TimeUnit.SECONDS.toMinutes(duration2)
+    val duration3 = duration2 - TimeUnit.MINUTES.toSeconds(minutes)
+    val seconds = TimeUnit.SECONDS.toSeconds(duration3)
+    val builder = new StringBuilder
+    if (days != 0) builder.append(days + " days ")
+    if (days != 0 || hours != 0) builder.append(hours + " hours ")
+    if (days != 0 || hours != 0 || minutes != 0) builder.append(minutes + " minutes ")
+    builder.append(seconds + " seconds")
+    builder.toString
+  }
+
+  def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
+    val timeUnit = time match {
+      case "" => null
+      case x: String =>
+        val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
+        val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
+          case "" => null
+          case "s" => TimeUnit.SECONDS
+          case "m" | "min" => TimeUnit.MINUTES
+          case "h" => TimeUnit.HOURS
+          case "d" | "day" => TimeUnit.DAYS
+          case _ => throw new IllegalArgumentException()
+        }
+        (num, unit)
+    }
+    timeUnit match {
+      case null => default
+      case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS) //未带单位,值必须为毫秒,这里转成对应的秒...
+      case other => other
+    }
   }
 
   def main(args: Array[String]): Unit = {
