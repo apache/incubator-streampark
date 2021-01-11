@@ -30,8 +30,8 @@ import scala.util.Try
 
 object ParameterCli {
 
+  private[this] val propertyPrefix = "flink.deployment.property."
   private[this] val optionPrefix = "flink.deployment.option."
-  private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
   val flinkOptions: Options = FlinkRunOption.allOptions
 
@@ -47,6 +47,9 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
+    map.map(x => {
+      map
+    })
     val programArgs = args.drop(2)
     action match {
       case "--option" =>
@@ -60,9 +63,9 @@ object ParameterCli {
           }
         })
         buffer.toString.trim
-      case "--dynamic" =>
+      case "--property" =>
         val buffer = new StringBuffer()
-        map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(optionPrefix.length)}=${x._2}"))
+        map.filter(x => x._1.startsWith(propertyPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(optionPrefix.length)}=${x._2}"))
         buffer.toString.trim
       case "--name" =>
         map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
