@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,13 +21,12 @@
 
 package com.streamxhub.common.util
 
-import java.net.URI
-import java.util.Properties
-
 import com.streamxhub.common.conf.ConfigConst._
 import redis.clients.jedis.{Jedis, Protocol}
 import redis.clients.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 
+import java.net.URI
+import java.util.Properties
 import scala.collection.JavaConversions._
 
 /**

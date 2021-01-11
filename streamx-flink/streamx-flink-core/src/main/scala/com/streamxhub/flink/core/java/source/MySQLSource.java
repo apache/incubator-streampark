@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,9 +21,9 @@
 package com.streamxhub.flink.core.java.source;
 
 import com.streamxhub.common.util.ConfigUtils;
+import com.streamxhub.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.source.MySQLSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -35,8 +35,8 @@ import java.util.Properties;
  */
 public class MySQLSource<T> {
 
-    private StreamingContext context;
-    private Properties jdbc;
+    private final StreamingContext context;
+    private final Properties jdbc;
 
     public MySQLSource(StreamingContext context) {
         this(context, (String) null);
@@ -55,7 +55,7 @@ public class MySQLSource<T> {
     public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
         assert queryFunc != null;
         assert resultFunc != null;
-        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction(jdbc, queryFunc, resultFunc, null);
+        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction<>(jdbc, queryFunc, resultFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 

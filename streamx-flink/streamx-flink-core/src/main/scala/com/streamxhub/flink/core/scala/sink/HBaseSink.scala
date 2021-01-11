@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -34,8 +34,8 @@ import org.apache.hadoop.hbase.client._
 
 import java.lang.{Iterable => JIter}
 import java.util.Properties
-import java.util.concurrent.{TimeUnit, Executors, ScheduledExecutorService}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
@@ -141,7 +141,6 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
 
   private[this] def execBatch(): Unit = {
     if (offset.get() > 0) {
-      offset.set(0L)
       val start = System.currentTimeMillis()
       //put ...
       mutator.mutate(putArray)
@@ -153,6 +152,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
         logInfo(s"[StreamX] HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
+      offset.set(0L)
       timestamp = System.currentTimeMillis()
     }
   }

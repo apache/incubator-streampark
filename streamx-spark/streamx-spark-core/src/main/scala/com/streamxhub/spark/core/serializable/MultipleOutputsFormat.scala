@@ -21,8 +21,6 @@
 
 package com.streamxhub.spark.core.serializable
 
-import java.io.IOException
-
 import org.apache.hadoop.io.{DataInputBuffer, NullWritable}
 import org.apache.hadoop.mapred.RawKeyValueIterator
 import org.apache.hadoop.mapreduce.counters.GenericCounter
@@ -31,6 +29,8 @@ import org.apache.hadoop.mapreduce.task.ReduceContextImpl
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
 import org.apache.hadoop.mapreduce.{Job, _}
 import org.apache.hadoop.util.Progress
+
+import java.io.IOException
 
 /**
   *

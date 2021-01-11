@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,31 +20,26 @@
  */
 package com.streamxhub.flink.core.scala.request
 
-import java.util.Properties
-import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
-import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
-import io.vertx.core.{AsyncResult, Handler, Vertx, VertxOptions}
-import io.vertx.core.json.JsonObject
-import io.vertx.ext.sql.ResultSet
-import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
-
-import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
-import io.vertx.ext.jdbc.JDBCClient
-import io.vertx.ext.sql.SQLClient
-import io.vertx.ext.sql.SQLConnection
-import io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME
-
-import java.util.Collections
-import java.util.function.{Consumer, Supplier}
 import com.streamxhub.common.conf.ConfigConst.KEY_INSTANCE
 import com.streamxhub.common.util.{JdbcUtils, Logger, Utils}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
+import io.vertx.core.json.JsonObject
+import io.vertx.core.spi.resolver.ResolverProvider.DISABLE_DNS_RESOLVER_PROP_NAME
+import io.vertx.core.{AsyncResult, Handler, Vertx, VertxOptions}
+import io.vertx.ext.jdbc.JDBCClient
+import io.vertx.ext.sql.{ResultSet, SQLClient, SQLConnection}
+import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.configuration.Configuration
+import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
+import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
 
+import java.util.{Collections, Properties}
+import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
+import java.util.function.{Consumer, Supplier}
 import javax.sql.DataSource
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 
 object JdbcRequest {
 

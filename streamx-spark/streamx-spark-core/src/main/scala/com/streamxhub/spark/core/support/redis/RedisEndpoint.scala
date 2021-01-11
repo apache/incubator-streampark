@@ -21,11 +21,11 @@
 
 package com.streamxhub.spark.core.support.redis
 
-import java.net.URI
-
 import org.apache.spark.SparkConf
 import redis.clients.jedis.{Jedis, Protocol}
-import redis.clients.util.{JedisURIHelper, SafeEncoder, JedisClusterCRC16}
+import redis.clients.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
+
+import java.net.URI
 import scala.collection.JavaConversions._
 
 

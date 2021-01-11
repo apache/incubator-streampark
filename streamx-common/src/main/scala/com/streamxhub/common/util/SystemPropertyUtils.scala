@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,6 @@ package com.streamxhub.common.util
 
 import java.io.File
 import java.security.{AccessController, PrivilegedAction}
-
 import scala.util.{Failure, Success, Try}
 
 object SystemPropertyUtils extends Logger {

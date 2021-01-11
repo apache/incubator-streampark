@@ -28,8 +28,6 @@ import org.elasticsearch.spark.rdd.EsSpark
 
 import scala.collection.Map
 import scala.language.postfixOps
-import scala.reflect.ClassTag
-import scala.reflect.runtime.universe.TypeTag
 
 /**
   *

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,13 +20,11 @@
  */
 package com.streamxhub.flink.core.scala.failover
 
-import java.util.Properties
-
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
-import com.streamxhub.flink.core.scala.failover.FailoverStorageType.FailoverStorageType
-import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{MySQL, HBase, HDFS, Kafka}
+import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
 
+import java.util.Properties
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.util.Try

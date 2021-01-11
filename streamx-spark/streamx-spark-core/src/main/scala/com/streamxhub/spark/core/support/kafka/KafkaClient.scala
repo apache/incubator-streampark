@@ -27,12 +27,8 @@ package com.streamxhub.spark.core.support.kafka
   * 封装 Kafka
   */
 
-import java.lang.reflect.Constructor
-import java.{util => ju}
-
 import com.streamxhub.common.util.Logger
-import com.streamxhub.spark.core.support.kafka.offset.{DefaultOffset, HBaseOffset, MySQLOffset, Offset, RedisOffset}
-import com.streamxhub.spark.monitor.api.util.PropertiesUtil
+import com.streamxhub.spark.core.support.kafka.offset._
 import org.apache.kafka.clients.consumer.ConsumerRecord
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.rdd.RDD
@@ -41,6 +37,8 @@ import org.apache.spark.streaming.dstream.InputDStream
 import org.apache.spark.streaming.kafka010._
 import org.apache.spark.{SparkConf, SparkContext}
 
+import java.lang.reflect.Constructor
+import java.{util => ju}
 import scala.reflect.ClassTag
 
 
@@ -60,7 +58,7 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
       case clazz =>
         logInfo(s"[StreamX] Custom offset management class $clazz")
         val constructors = {
-          val offsetsManagerClass = PropertiesUtil.classForName(clazz)
+          val offsetsManagerClass = Class.forName(clazz)
           offsetsManagerClass
             .getConstructors
             .asInstanceOf[Array[Constructor[_ <: SparkConf]]]
