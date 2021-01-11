@@ -325,38 +325,14 @@ object FlinkSubmit extends Logger {
   @throws[FlinkException] private def getEffectiveConfiguration[T](configuration: Configuration, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
-    effectiveConfiguration.addAll(configuration)
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|m$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|m$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
-      case null =>
-      case s =>
-        Try(s.toInt) match {
-          case Success(value) =>
-            if (value <= 0) {
-              throw new NumberFormatException("[StreamX] slot muse be > 0. ")
-            }
-            effectiveConfiguration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
-          case Failure(e) => throw new CliArgsException(s"The slot must be a positive number: $s,err:$e ")
-        }
-    }
-
     /**
      * dynamicOption(Highest priority...)
      */
-    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
+    val properties = commandLine.getOptionProperties(FlinkRunOption.DYNAMIC_PROPERTIES.getOpt)
     properties.stringPropertyNames.foreach((key: String) => {
       val value = properties.getProperty(key)
       if (value != null) {

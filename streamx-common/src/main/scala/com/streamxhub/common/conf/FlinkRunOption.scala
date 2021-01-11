@@ -87,6 +87,7 @@ object FlinkRunOption {
 
   val PYEXEC_OPTION = new Option("pyexec", "pyExecutable", true, "Specify the path of the python interpreter used to execute the python UDF worker " + "(e.g.: --pyExecutable /usr/local/bin/python3). " + "The python UDF worker depends on Python 3.5+, Apache Beam (version == 2.23.0), " + "Pip (version >= 7.1.0) and SetupTools (version >= 37.0.0). " + "Please ensure that the specified environment meets the above requirements.")
 
+  val DYNAMIC_PROPERTIES = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Allows specifying multiple generic configuration options. The available " + "options can be found at https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
   /**
    * yarn
    */
