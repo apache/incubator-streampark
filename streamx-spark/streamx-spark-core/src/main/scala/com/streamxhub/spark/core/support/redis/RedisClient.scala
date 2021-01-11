@@ -34,8 +34,7 @@ object RedisClient extends Logger {
 
   @transient
   @getter
-  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] =
-    new ConcurrentHashMap[RedisEndpoint, JedisPool]()
+  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] = new ConcurrentHashMap[RedisEndpoint, JedisPool]()
 
   @transient
   @getter

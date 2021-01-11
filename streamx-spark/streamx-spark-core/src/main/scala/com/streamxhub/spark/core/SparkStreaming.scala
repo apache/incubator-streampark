@@ -21,20 +21,14 @@
 
 package com.streamxhub.spark.core
 
-import com.streamxhub.common.util.SystemPropertyUtils
-import org.apache.commons.codec.digest.DigestUtils
+import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.util.{PropertiesUtils, SystemPropertyUtils}
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
-import java.io.StringReader
-import java.nio.charset.StandardCharsets
-import java.util.regex.Pattern
-import java.util.{Base64, Properties}
 import scala.annotation.meta.getter
-import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
 
 /**
   *
@@ -121,97 +115,39 @@ trait SparkStreaming {
       }
     }
     sparkConf = new SparkConf()
-    sparkConf.set(SPARK_PARAM_USER_ARGS, args.mkString("|"))
+    sparkConf.set(KEY_SPARK_USER_ARGS, args.mkString("|"))
     //通过vm -Dspark.debug.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, confPath) = SystemPropertyUtils.get(SPARK_PARAM_DEBUG_CONF, "") match {
-      case "" => (false, sparkConf.get(SPARK_PARAM_DEPLOY_CONF))
+    val (isDebug, confPath) = SystemPropertyUtils.get(KEY_SPARK_CONF, "") match {
+      case "" => (false, sparkConf.get(KEY_SPARK_DEBUG_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
     val localConf = confPath.split("\\.").last match {
-      case "properties" => PropertiesUtil.getPropertiesFromFile(confPath)
-      case "yml" => PropertiesUtil.getPropertiesFromYaml(confPath)
+      case "properties" => PropertiesUtils.fromPropertiesFile(confPath)
+      case "yaml"|"yml" => PropertiesUtils.fromYamlFile(confPath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-    if (Try(localConf(SPARK_PARAM_APP_CONF_VERSION).toInt).isFailure) {
-      System.err.println(s"[StreamX] $SPARK_PARAM_APP_CONF_VERSION must be not empty!must be number")
-      System.exit(1)
-    }
-
-    val (appMain: String, appName: String) = localConf.getOrElse(SPARK_PARAM_MAIN_CLASS, null) match {
+    val (appMain: String, appName: String) = localConf.getOrElse(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
-      case other => localConf.getOrElse(SPARK_PARAM_APP_NAME, null) match {
+      case other => localConf.getOrElse(KEY_SPARK_APP_NAME, null) match {
         case null | "" => (other, other)
         case name => (other, name)
       }
     }
 
     if (appMain == null) {
-      System.err.println(s"[StreamX] $SPARK_PARAM_MAIN_CLASS must be not empty!")
+      System.err.println(s"[StreamX] $KEY_SPARK_MAIN_CLASS must be not empty!")
       System.exit(1)
-    }
-
-    val myId = DigestUtils.md5Hex(appName)
-    sparkConf.set(SPARK_PARAM_APP_MYID, myId)
-
-    //获取本地conf.version版本,key为[spark.app.conf.version]
-    val localVersion = localConf(SPARK_PARAM_APP_CONF_VERSION)
-    //保存本地的配置文件版本,保存key为spark.app.conf.local.version
-    sparkConf.set(SPARK_PARAM_APP_CONF_LOCAL_VERSION, localVersion)
-
-    //本地配置源文件...
-    val localConfSource = Base64.getEncoder.encodeToString(PropertiesUtil.getFileSource(confPath).getBytes(StandardCharsets.UTF_8))
-
-    val cloudConf = Try {
-      val zookeeperURL = localConf(SPARK_PARAM_MONITOR_ZOOKEEPER)
-      val path = s"${Const.SPARK_CONF_PATH_PREFIX}/$myId"
-      val bytes = Base64.getDecoder.decode(ZooKeeperUtil.get(path, zookeeperURL).getBytes(StandardCharsets.UTF_8))
-      val confText = new String(bytes, StandardCharsets.UTF_8)
-      if (Pattern.compile(Const.SPARK_CONF_TYPE_REGEXP).matcher(confText).find) {
-        val properties = new Properties()
-        properties.load(new StringReader(confText))
-        properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
-      } else {
-        PropertiesUtil.getPropertiesFromYamlText(confText).toMap
-      }
-    }.getOrElse(null)
-
-    /**
-      * 直接读取本地的配置文件,注意规则:
-      * 1)读取配置文件里的version,会和配置中心里的version对比,如果配置中心里的version和本地相同或比本地的version大,则会使用配置中心里的version
-      * 如果比本地小则使用本地的配置.
-      * ...
-      */
-    cloudConf match {
-      /**
-        * 配置中心无配置文件,或者获取失败,则读取本地配置文件
-        */
-      case null =>
-        sparkConf.setAll(localConf)
-        sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localConfSource)
-      case _ =>
-        //获取线上版本的app.version,key为[spark.app.conf.version]
-        val cloudVersion = cloudConf(SPARK_PARAM_APP_CONF_VERSION)
-        cloudVersion.toString.compare(localVersion) match {
-          case compare if compare > 0 =>
-            sparkConf.setAll(cloudConf)
-          case _ =>
-            sparkConf.setAll(localConf)
-            sparkConf.set(SPARK_PARAM_APP_CONF_SOURCE, localConfSource)
-        }
-        //保存线上的版本,保存key为[spark.app.conf.cloud.version]
-        sparkConf.set(SPARK_PARAM_APP_CONF_CLOUD_VERSION, cloudVersion)
     }
 
     //debug mode
     if (isDebug) {
-      val appName = sparkConf.get(SPARK_PARAM_APP_NAME)
+      val appName = sparkConf.get(KEY_SPARK_APP_NAME)
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
-    sparkConf.set(SPARK_PARAM_APP_DEBUG, isDebug.toString)
     //优雅停止...
     sparkConf.set("spark.streaming.stopGracefullyOnShutdown","true")
   }
@@ -221,7 +157,7 @@ trait SparkStreaming {
     if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)
     sparkSession = SparkSession.builder().config(sparkConf).getOrCreate()
     // 时间间隔
-    val duration = sparkConf.get("spark.batch.duration").toInt
+    val duration = sparkConf.get(KEY_SPARK_BATCH_DURATION).toInt
     val ssc = new StreamingContext(sparkSession.sparkContext, Seconds(duration))
     handle(ssc)
     ssc
@@ -251,10 +187,8 @@ trait SparkStreaming {
     }
     beforeStarted(context)
     context.start()
-    HeartBeat(context).start()
     afterStarted(context)
     context.awaitTermination()
-    HeartBeat(context).stop()
     beforeStop(context)
   }
 

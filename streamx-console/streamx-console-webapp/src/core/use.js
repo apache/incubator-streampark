@@ -20,7 +20,6 @@ import 'element-ui/lib/theme-chalk/index.css'
 import VueApexCharts from 'vue-apexcharts'
 
 import http from '@/utils/request'
-
 Vue.use(VueParticles)
 
 VueClipboard.config.autoSetContainer = true
