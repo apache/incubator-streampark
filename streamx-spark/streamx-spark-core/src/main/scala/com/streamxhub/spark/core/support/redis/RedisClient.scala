@@ -21,12 +21,11 @@
 
 package com.streamxhub.spark.core.support.redis
 
-import java.util.concurrent.ConcurrentHashMap
-
 import com.streamxhub.common.util.Logger
-import redis.clients.jedis.exceptions.JedisConnectionException
 import redis.clients.jedis._
+import redis.clients.jedis.exceptions.JedisConnectionException
 
+import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.meta.getter
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}

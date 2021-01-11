@@ -21,14 +21,13 @@
 
 package com.streamxhub.spark.core.source
 
-import java.util.concurrent.ConcurrentHashMap
-
 import com.streamxhub.spark.core.support.kafka.KafkaClient
 import org.apache.kafka.clients.consumer.ConsumerRecord
-import org.apache.spark.streaming.{StreamingContext, Time}
 import org.apache.spark.streaming.dstream.DStream
 import org.apache.spark.streaming.kafka010.{HasOffsetRanges, OffsetRange}
+import org.apache.spark.streaming.{StreamingContext, Time}
 
+import java.util.concurrent.ConcurrentHashMap
 import scala.language.postfixOps
 import scala.reflect.ClassTag
 import scala.util.Try

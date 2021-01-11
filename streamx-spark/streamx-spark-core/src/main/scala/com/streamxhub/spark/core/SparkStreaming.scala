@@ -21,26 +21,20 @@
 
 package com.streamxhub.spark.core
 
-import java.io.StringReader
-import java.nio.charset.StandardCharsets
-import java.util.{Base64, Properties}
-import java.util.regex.Pattern
-
 import com.streamxhub.common.util.SystemPropertyUtils
-import com.streamxhub.spark.monitor.api.{Const, HeartBeat}
-import com.streamxhub.spark.monitor.api.util.{PropertiesUtil, ZooKeeperUtil}
-
-import scala.collection.JavaConverters._
-import scala.collection.JavaConversions._
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.streaming.{Seconds, StreamingContext}
 
+import java.io.StringReader
+import java.nio.charset.StandardCharsets
+import java.util.regex.Pattern
+import java.util.{Base64, Properties}
 import scala.annotation.meta.getter
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
-import com.streamxhub.spark.monitor.api.Const._
-import org.apache.commons.codec.digest.DigestUtils
 
 /**
   *

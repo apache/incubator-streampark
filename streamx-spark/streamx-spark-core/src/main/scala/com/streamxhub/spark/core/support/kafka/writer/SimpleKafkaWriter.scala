@@ -21,11 +21,10 @@
 
 package com.streamxhub.spark.core.support.kafka.writer
 
-import java.util.Properties
-
 import com.streamxhub.spark.core.support.kafka.ProducerCache
 import org.apache.kafka.clients.producer.{KafkaProducer, ProducerRecord}
 
+import java.util.Properties
 import scala.annotation.meta.param
 import scala.reflect.ClassTag
 

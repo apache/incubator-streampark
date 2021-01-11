@@ -1,9 +1,9 @@
 package com.streamxhub.common
 
-import org.apache.spark.streaming.StreamingContext
 import com.streamxhub.spark.core.SparkStreaming
 import com.streamxhub.spark.core.source.KafkaDirectSource
 import org.apache.spark.SparkConf
+import org.apache.spark.streaming.StreamingContext
 import scalikejdbc.{ConnectionPool, DB, SQL}
 
 object HelloStreamXApp extends SparkStreaming {

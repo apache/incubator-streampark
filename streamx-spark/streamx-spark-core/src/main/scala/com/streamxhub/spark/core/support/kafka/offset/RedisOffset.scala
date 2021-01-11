@@ -21,9 +21,9 @@
 
 package com.streamxhub.spark.core.support.kafka.offset
 
+import com.streamxhub.spark.core.support.redis.RedisClient._
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
-import com.streamxhub.spark.core.support.redis.RedisClient._
 
 import scala.collection.JavaConversions._
 
