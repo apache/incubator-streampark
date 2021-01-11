@@ -32,9 +32,9 @@ object DateUtils {
 
   val fullFormat = "yyyy-MM-dd HH:mm:ss"
 
-  val dayFormat1 = "yyyyMMdd"
+  val foramt_yyyyMMdd = "yyyyMMdd"
 
-  val dayFormat2 = "yyyy-MM-dd"
+  val `foramt_yyyy-MM-dd` = "yyyy-MM-dd"
 
   def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
@@ -46,7 +46,7 @@ object DateUtils {
 
   def second2Date(time: Long) = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = dayFormat1, timeZone: TimeZone = TimeZone.getDefault) = {
+  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault) = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
