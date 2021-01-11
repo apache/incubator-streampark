@@ -1,23 +1,23 @@
 /**
-  * Copyright (c) 2019 The StreamX Project
-  * <p>
-  * Licensed to the Apache Software Foundation (ASF) under one
-  * or more contributor license agreements. See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership. The ASF licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License. You may obtain a copy of the License at
-  * <p>
-  * http://www.apache.org/licenses/LICENSE-2.0
-  * <p>
-  * Unless required by applicable law or agreed to in writing,
-  * software distributed under the License is distributed on an
-  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  * KIND, either express or implied. See the License for the
-  * specific language governing permissions and limitations
-  * under the License.
-  */
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package com.streamxhub.spark.core
 
@@ -31,10 +31,10 @@ import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
 
 /**
-  *
-  * Spark Streaming 入口封装
-  *
-  */
+ *
+ * Spark Streaming 入口封装
+ *
+ */
 trait SparkStreaming {
 
   protected final def args: Array[String] = params
@@ -55,47 +55,47 @@ trait SparkStreaming {
   var sparkSession: SparkSession = _
 
   /**
-    * 用户设置sparkConf参数,如,spark序列化:
-    * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    * // 注册要序列化的自定义类型。
-    * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
-    *
-    * @param conf
-    */
+   * 用户设置sparkConf参数,如,spark序列化:
+   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+   * // 注册要序列化的自定义类型。
+   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   *
+   * @param conf
+   */
   def configure(conf: SparkConf)
 
   /**
-    * StreamingContext 运行之前执行
-    *
-    * @param ssc
-    */
+   * StreamingContext 运行之前执行
+   *
+   * @param ssc
+   */
   def beforeStarted(ssc: StreamingContext): Unit = {}
 
   /**
-    * StreamingContext 运行之后执行
-    */
+   * StreamingContext 运行之后执行
+   */
   def afterStarted(ssc: StreamingContext): Unit = {
   }
 
   /**
-    * StreamingContext 停止后 程序停止前 执行
-    */
+   * StreamingContext 停止后 程序停止前 执行
+   */
   def beforeStop(ssc: StreamingContext): Unit = {
 
   }
 
   /**
-    * 处理函数
-    *
-    * @param ssc
-    */
+   * 处理函数
+   *
+   * @param ssc
+   */
   def handle(ssc: StreamingContext)
 
   /**
-    * 创建 Context
-    *
-    * @return
-    */
+   * 创建 Context
+   *
+   * @return
+   */
 
   private[this] def initialize(args: Array[String]): Unit = {
     this.params = args
@@ -125,13 +125,15 @@ trait SparkStreaming {
 
     val localConf = confPath.split("\\.").last match {
       case "properties" => PropertiesUtils.fromPropertiesFile(confPath)
-      case "yaml"|"yml" => PropertiesUtils.fromYamlFile(confPath)
+      case "yaml" | "yml" => PropertiesUtils.fromYamlFile(confPath)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
-    val (appMain: String, appName: String) = localConf.getOrElse(KEY_SPARK_MAIN_CLASS, null) match {
+    localConf.foreach(x => sparkConf.set(x._1, x._2))
+
+    val (appMain, appName) = sparkConf.get(KEY_SPARK_MAIN_CLASS, null) match {
       case null | "" => (null, null)
-      case other => localConf.getOrElse(KEY_SPARK_APP_NAME, null) match {
+      case other => sparkConf.get(KEY_SPARK_APP_NAME, null) match {
         case null | "" => (other, other)
         case name => (other, name)
       }
@@ -144,12 +146,11 @@ trait SparkStreaming {
 
     //debug mode
     if (isDebug) {
-      val appName = sparkConf.get(KEY_SPARK_APP_NAME)
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
     //优雅停止...
-    sparkConf.set("spark.streaming.stopGracefullyOnShutdown","true")
+    sparkConf.set("spark.streaming.stopGracefullyOnShutdown", "true")
   }
 
   def creatingContext(): StreamingContext = {
