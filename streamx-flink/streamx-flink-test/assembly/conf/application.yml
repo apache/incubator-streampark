@@ -26,7 +26,7 @@ flink:
         managed.size:
         process.size:
         task.heap.size:
-        task.off-heap.size
+        task.off-heap.size:
         jvm-metaspace.size:
         jvm-overhead.max:
         jvm-overhead.min:
