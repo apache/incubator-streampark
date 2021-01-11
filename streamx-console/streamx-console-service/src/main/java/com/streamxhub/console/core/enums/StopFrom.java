@@ -27,5 +27,12 @@ import java.io.Serializable;
  */
 
 public enum StopFrom implements Serializable {
-    NONE,STREAMX
+    /**
+     * None
+     */
+    NONE,
+    /**
+     * StreamX
+     */
+    STREAMX
 }

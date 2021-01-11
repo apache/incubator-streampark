@@ -56,8 +56,8 @@ public class SavePointController extends BaseController {
 
     @PostMapping("history")
     public RestResponse history(SavePoint savePoint, RestRequest request) {
-        IPage<SavePoint> savePointIPage = savePointService.page(savePoint, request);
-        return RestResponse.create().data(savePointIPage);
+        IPage<SavePoint> page = savePointService.page(savePoint, request);
+        return RestResponse.create().data(page);
     }
 
     @PostMapping("delete")

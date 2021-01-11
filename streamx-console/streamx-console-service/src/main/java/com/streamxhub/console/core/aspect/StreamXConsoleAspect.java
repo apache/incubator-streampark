@@ -30,6 +30,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
+import java.util.Objects;
+
 /**
  * @author benjobs
  */
@@ -52,7 +54,7 @@ public class StreamXConsoleAspect {
             response.put("status", "success");
         } catch (Throwable e) {
             e.printStackTrace();
-            response = RestResponse.create().put("status", "error").put("exception", ExceptionUtils.stringifyException(e));
+            response = Objects.requireNonNull(RestResponse.create().put("status", "error")).put("exception", ExceptionUtils.stringifyException(e));
         }
         return response;
     }
