@@ -18,7 +18,6 @@ package com.streamxhub.repl.flink.test;
 
 
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.FlushListener;
 import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;

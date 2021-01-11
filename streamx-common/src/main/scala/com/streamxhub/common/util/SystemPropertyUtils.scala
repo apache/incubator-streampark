@@ -22,7 +22,6 @@ package com.streamxhub.common.util
 
 import java.io.File
 import java.security.{AccessController, PrivilegedAction}
-
 import scala.util.{Failure, Success, Try}
 
 object SystemPropertyUtils extends Logger {

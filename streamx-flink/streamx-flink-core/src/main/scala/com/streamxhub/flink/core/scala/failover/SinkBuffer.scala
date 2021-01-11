@@ -21,12 +21,12 @@
 
 package com.streamxhub.flink.core.scala.failover
 
+import com.streamxhub.common.util.Logger
+
 import java.util
 import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 import scala.collection.JavaConversions._
-
-import com.streamxhub.common.util.Logger
 
 
 case class SinkBuffer(writer: SinkWriter,

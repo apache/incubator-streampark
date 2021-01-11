@@ -30,10 +30,10 @@ import org.apache.http.impl.client.HttpClients
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager
 import org.apache.http.message.BasicNameValuePair
 import org.apache.http.util.EntityUtils
+
 import java.io.UnsupportedEncodingException
 import java.net.URISyntaxException
 import java.util
-
 import scala.collection.JavaConversions._
 
 object HttpClientUtils {

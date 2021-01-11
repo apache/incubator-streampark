@@ -21,14 +21,11 @@
 package com.streamxhub.common.util
 
 
-import javax.annotation.Nullable
-import java.io.IOException
-import java.io.PrintWriter
-import java.io.StringWriter
+import java.io.{IOException, PrintWriter, StringWriter}
 import java.util.Optional
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ExecutionException
+import java.util.concurrent.{CompletionException, ExecutionException}
 import java.util.function.Predicate
+import javax.annotation.Nullable
 
 
 /**

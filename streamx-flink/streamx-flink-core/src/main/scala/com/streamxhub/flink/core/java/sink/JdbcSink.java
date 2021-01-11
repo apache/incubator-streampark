@@ -29,7 +29,6 @@ import com.streamxhub.flink.core.scala.sink.JdbcSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
-
 import java.util.Properties;
 
 /**

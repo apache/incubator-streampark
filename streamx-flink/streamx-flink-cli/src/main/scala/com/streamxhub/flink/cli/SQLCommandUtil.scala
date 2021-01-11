@@ -20,11 +20,11 @@
  */
 package com.streamxhub.flink.cli
 
-import scala.collection.mutable.ArrayBuffer
 import enumeratum.EnumEntry
 
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
+import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil {
 

@@ -20,11 +20,10 @@
  */
 package com.streamxhub.common.util
 
-import com.mongodb.{MongoClient, MongoClientOptions, MongoClientURI, MongoCredential, ServerAddress}
-import java.util.Properties
-
+import com.mongodb._
 import com.streamxhub.common.conf.ConfigConst._
 
+import java.util.Properties
 import scala.collection.JavaConversions._
 
 object MongoConfig {

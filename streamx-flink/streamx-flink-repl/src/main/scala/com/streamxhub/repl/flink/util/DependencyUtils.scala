@@ -21,10 +21,6 @@
 
 package com.streamxhub.repl.flink.util
 
-import java.io.{File, IOException}
-import java.text.ParseException
-import java.util.UUID
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.LogOptions
@@ -37,6 +33,10 @@ import org.apache.ivy.core.settings.IvySettings
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
+
+import java.io.{File, IOException}
+import java.text.ParseException
+import java.util.UUID
 
 object DependencyUtils {
 

@@ -20,11 +20,10 @@
  */
 package com.streamxhub.flink.core.scala.failover
 
-import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
-
 import com.streamxhub.common.util.{Logger, ThreadUtils}
-import scala.collection.JavaConversions._
 
+import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
 case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {

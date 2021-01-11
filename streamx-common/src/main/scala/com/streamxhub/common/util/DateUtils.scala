@@ -20,10 +20,8 @@
  */
 package com.streamxhub.common.util
 
-import java.util._
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.TimeZone
+import java.util.{Calendar, TimeZone, _}
 import java.util.concurrent.TimeUnit
 import scala.util._
 

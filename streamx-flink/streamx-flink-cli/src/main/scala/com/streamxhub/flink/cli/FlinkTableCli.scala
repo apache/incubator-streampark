@@ -20,7 +20,7 @@
  */
 package com.streamxhub.flink.cli
 
-import com.streamxhub.flink.core.scala.{FlinkStreamTable, FlinkTable, StreamTableContext, TableContext}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 
 import scala.util.{Failure, Success, Try}
 

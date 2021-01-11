@@ -1,12 +1,11 @@
 package com.streamxhub.test.stream
 
-import com.streamxhub.flink.core.scala.FlinkStreaming
 import com.streamxhub.common.util.ConfigUtils
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
-import com.streamxhub.flink.core.scala.StreamingContext
+import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import com.streamxhub.flink.core.scala.request.HBaseRequest
-import org.apache.hadoop.hbase.client.{Get, Result}
 import org.apache.flink.api.scala._
+import org.apache.hadoop.hbase.client.Get
 
 object HBaseTestApp extends FlinkStreaming {
 
