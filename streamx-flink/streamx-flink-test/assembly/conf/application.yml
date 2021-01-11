@@ -31,7 +31,6 @@ flink:
         jvm-overhead.max:
         jvm-overhead.min:
         managed.fraction: 0.4
-
   watermark:
     time.characteristic: EventTime
     interval: 10000
