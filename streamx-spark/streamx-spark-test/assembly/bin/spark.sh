@@ -222,8 +222,8 @@ doStart() {
 
         sudo -u hdfs spark2-submit \
             --files ${app_proper} \
-            --conf "spark.deploy.conf=${app_proper}" \
-	        --conf "spark.deploy.startup=$0 $RUN_ARGS" \
+            --conf "spark.conf=${app_proper}" \
+	          --conf "spark.startup=$0 $RUN_ARGS" \
             --name ${app_name} \
             --queue spark \
             --jars ${jars} ${app_params}  \

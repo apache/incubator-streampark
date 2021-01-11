@@ -58,7 +58,7 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
       case clazz =>
         logInfo(s"[StreamX] Custom offset management class $clazz")
         val constructors = {
-          val offsetsManagerClass = PropertiesUtil.classForName(clazz)
+          val offsetsManagerClass = Class.forName(clazz)
           offsetsManagerClass
             .getConstructors
             .asInstanceOf[Array[Constructor[_ <: SparkConf]]]

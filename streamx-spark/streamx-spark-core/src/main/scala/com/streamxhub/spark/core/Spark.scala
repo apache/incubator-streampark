@@ -21,7 +21,8 @@
 
 package com.streamxhub.spark.core
 
-import com.streamxhub.common.util.SystemPropertyUtils
+import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.util.{PropertiesUtils, SystemPropertyUtils}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.{SparkConf, SparkContext}
 
@@ -31,7 +32,7 @@ import scala.collection.mutable.ArrayBuffer
 /**
   *
   */
-trait SparkDataSet {
+trait Spark {
 
   protected final def args: Array[String] = _args
 
@@ -53,14 +54,12 @@ trait SparkDataSet {
     * StreamingContext 运行之后执行
     */
   def afterStarted(sc: SparkContext): Unit = {
-    HeartBeat(sc).start()
   }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
   def beforeStop(sc: SparkContext): Unit = {
-    HeartBeat(sc).stop()
   }
 
   /**
@@ -73,26 +72,26 @@ trait SparkDataSet {
   def creatingContext(): SparkContext = {
     val sparkConf = new SparkConf()
 
-    sparkConf.set("spark.user.args", args.mkString("|"))
+    sparkConf.set(KEY_SPARK_USER_ARGS, args.mkString("|"))
 
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
-    val (isDebug, conf) = SystemPropertyUtils.get("spark.conf", "") match {
-      case "" => (false, sparkConf.get("spark.conf"))
+    val (isDebug, conf) = SystemPropertyUtils.get(KEY_SPARK_CONF, "") match {
+      case "" => (false, sparkConf.get(KEY_SPARK_DEBUG_CONF))
       case path => (true, path)
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
     conf.split("\\.").last match {
       case "properties" =>
-        sparkConf.setAll(PropertiesUtil.getPropertiesFromFile(conf))
-      case "yml" =>
-        sparkConf.setAll(PropertiesUtil.getPropertiesFromYaml(conf))
+        sparkConf.setAll(PropertiesUtils.fromPropertiesFile(conf))
+      case "yaml"|"yml" =>
+        sparkConf.setAll(PropertiesUtils.fromYamlFile(conf))
       case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
     //debug mode
     if (isDebug) {
-      val appName = sparkConf.get("spark.app.name")
+      val appName = sparkConf.get(KEY_APP_HOME)
       sparkConf.setAppName(s"[LocalDebug] $appName").setMaster("local[*]")
       sparkConf.set("spark.streaming.kafka.maxRatePerPartition", "10")
     }
