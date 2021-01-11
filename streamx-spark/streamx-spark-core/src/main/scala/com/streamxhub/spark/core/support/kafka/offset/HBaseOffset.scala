@@ -21,16 +21,15 @@
 
 package com.streamxhub.spark.core.support.kafka.offset
 
-import java.util
-
-import com.streamxhub.spark.core.support.hbase.HBaseClient
-import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
+import com.streamxhub.common.util.HBaseClient
 import org.apache.hadoop.hbase.client.{Delete, Put, Scan, Table}
 import org.apache.hadoop.hbase.filter._
 import org.apache.hadoop.hbase.util.Bytes
+import org.apache.hadoop.hbase.{CellUtil, HColumnDescriptor, HTableDescriptor, TableName}
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
 
+import java.util
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 
@@ -50,7 +49,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
 
   @transient
   private lazy val table: Table = {
-    val conn = HBaseClient.connect(storeParams)
+    val conn = HBaseClient.apply(storeParams).connection
     if (!conn.getAdmin.tableExists(TableName.valueOf(tableName))) {
       val tableDesc: HTableDescriptor = new HTableDescriptor(TableName.valueOf(tableName))
       tableDesc.addFamily(new HColumnDescriptor(familyName))
@@ -114,8 +113,6 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
       result.close()
     })
 
-    // fix bug
-    // 如果GroupId 已经在Hbase存在了，这个时候新加一个topic ，则新加的Topic 不会被消费
     val offsetMaps = reset.toLowerCase() match {
       case "latest" => getLatestOffsets(topics.toSeq) ++ storedOffsetMap
       case _ => getEarliestOffsets(topics.toSeq) ++ storedOffsetMap

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -24,6 +24,9 @@ import com.streamxhub.common.util.{Logger, Utils}
 import com.streamxhub.flink.core.java.function.{HBaseQueryFunction, HBaseResultFunction}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.StreamingContext
+import com.streamxhub.flink.core.scala.enums.ApiType
+import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
+import com.streamxhub.flink.core.scala.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
@@ -34,11 +37,7 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.client._
 
-import java.util.{Date, Properties}
-import com.streamxhub.flink.core.scala.enums.ApiType
-import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
-import com.streamxhub.flink.core.scala.util.FlinkUtils
-
+import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.{Success, Try}

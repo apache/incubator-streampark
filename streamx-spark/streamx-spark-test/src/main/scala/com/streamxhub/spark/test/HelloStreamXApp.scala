@@ -1,21 +1,21 @@
-package com.streamxhub.common
+package com.streamxhub.spark.test
 
-import org.apache.spark.streaming.StreamingContext
 import com.streamxhub.spark.core.SparkStreaming
 import com.streamxhub.spark.core.source.KafkaDirectSource
 import org.apache.spark.SparkConf
+import org.apache.spark.streaming.StreamingContext
 import scalikejdbc.{ConnectionPool, DB, SQL}
 
 object HelloStreamXApp extends SparkStreaming {
 
   /**
-    * 用户设置sparkConf参数,如,spark序列化:
-    * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
-    * // 注册要序列化的自定义类型。
-    * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
-    *
-    * @param conf
-    */
+   * 用户设置sparkConf参数,如,spark序列化:
+   * conf.set("spark.serializer", "org.apache.spark.serializer.KryoSerializer")
+   * // 注册要序列化的自定义类型。
+   * conf.registerKryoClasses(Array(classOf[User], classOf[Order],...))
+   *
+   * @param conf
+   */
   override def configure(conf: SparkConf): Unit = {}
 
 

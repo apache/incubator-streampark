@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -53,7 +53,21 @@ object ConfigConst {
 
   val SIGN_EMPTY = ""
 
-  //
+  //spark
+
+  val KEY_SPARK_USER_ARGS = "spark.user.args"
+
+  val KEY_SPARK_CONF = "spark.conf"
+
+  val KEY_SPARK_DEBUG_CONF = "spark.debug.conf"
+
+  val KEY_SPARK_MAIN_CLASS="spark.main.class"
+
+  val KEY_SPARK_APP_NAME="spark.app.name"
+
+  val KEY_SPARK_BATCH_DURATION ="spark.batch.duration"
+
+  // flink
   def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
   def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "flink.sql" else s"${prefix}flink.sql"
@@ -62,11 +76,11 @@ object ConfigConst {
 
   def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
 
-  val KEY_FLINK_PARALLELISM = "flink.deployment.option.parallelism"
+  val KEY_FLINK_PARALLELISM = "parallelism.default"
 
-  val KEY_FLINK_APP_NAME = "flink.deployment.option.yarnname"
+  val KEY_FLINK_APP_NAME = "yarn.application.name"
 
-  val KEY_FLINK_APP_MAIN = "flink.deployment.option.class"
+  val KEY_FLINK_APP_MAIN = "class"
 
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"

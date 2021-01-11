@@ -21,15 +21,13 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.{Properties, UUID}
-
+import com.streamxhub.spark.core.support.kafka.writer.KafkaWriter._
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
-import com.streamxhub.spark.core.support.kafka.writer.KafkaWriter._
 
-import scala.collection.JavaConversions._
+import java.util.UUID
 import scala.reflect.ClassTag
 
 /**

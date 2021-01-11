@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,11 +20,11 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.util.Properties
-
 import com.streamxhub.common.util.ClassLoaderUtils
 import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
+
+import java.util.Properties
 
 
 /**

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,7 +22,7 @@ package com.streamxhub.common.conf
 
 
 import com.streamxhub.common.util.PropertiesUtils
-import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.{DefaultParser, Options}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -30,14 +30,14 @@ import scala.util.Try
 
 object ParameterCli {
 
+  private[this] val propertyPrefix = "flink.deployment.property."
   private[this] val optionPrefix = "flink.deployment.option."
-  private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
-  val flinkOptions = FlinkRunOption.allOptions
+  val flinkOptions: Options = FlinkRunOption.allOptions
 
   val parser = new DefaultParser
 
-  def main(args: Array[String]) = print(read(args))
+  def main(args: Array[String]): Unit = print(read(args))
 
   def read(args: Array[String]): String = {
     val action = args(0)
@@ -47,6 +47,9 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
+    map.map(x => {
+      map
+    })
     val programArgs = args.drop(2)
     action match {
       case "--option" =>
@@ -60,12 +63,12 @@ object ParameterCli {
           }
         })
         buffer.toString.trim
-      case "--dynamic" =>
+      case "--property" =>
         val buffer = new StringBuffer()
-        map.filter(x => x._1.startsWith(dynamicPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(optionPrefix.length)}=${x._2}"))
+        map.filter(x => x._1.startsWith(propertyPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(propertyPrefix.length)}=${x._2}"))
         buffer.toString.trim
       case "--name" =>
-        map.getOrElse(ConfigConst.KEY_FLINK_APP_NAME, "").trim match {
+        map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
           case yarnName if yarnName.nonEmpty => yarnName
           case _ => ""
         }

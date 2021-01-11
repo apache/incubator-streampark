@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,16 +20,13 @@
  */
 package com.streamxhub.common.util
 
-import org.apache.hadoop.hdfs.HAUtil
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.FSDataOutputStream
-import org.apache.hadoop.fs.Path
-import org.apache.hadoop.fs.FSDataInputStream
-import org.apache.hadoop.fs.FileSystem
+import org.apache.hadoop.fs.{FSDataInputStream, FSDataOutputStream, FileSystem, Path}
+import org.apache.hadoop.hdfs.HAUtil
 import org.apache.hadoop.io.IOUtils
 
+import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {

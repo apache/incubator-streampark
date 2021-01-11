@@ -3,8 +3,8 @@ package com.streamxhub.test.stream
 import com.streamxhub.flink.core.scala.sink.JdbcSink
 import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
-import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder,JdbcSink => JSink}
 import org.apache.flink.api.scala._
+import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder, JdbcSink => JSink}
 
 import java.sql.PreparedStatement
 

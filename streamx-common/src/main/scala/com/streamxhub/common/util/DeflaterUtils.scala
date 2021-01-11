@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -22,9 +22,7 @@ package com.streamxhub.common.util
 
 import java.io.ByteArrayOutputStream
 import java.util.Base64
-import java.util.zip.DataFormatException
-import java.util.zip.Deflater
-import java.util.zip.Inflater
+import java.util.zip.{DataFormatException, Deflater, Inflater}
 
 object DeflaterUtils {
 

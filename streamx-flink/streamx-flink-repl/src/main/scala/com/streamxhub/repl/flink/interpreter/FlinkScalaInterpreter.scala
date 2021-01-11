@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,12 +21,6 @@
 
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.{BufferedReader, File}
-import java.net.{URL, URLClassLoader}
-import java.nio.file.Files
-import java.util.Properties
-import java.util.concurrent.TimeUnit
-
 import com.streamxhub.common.util.ClassLoaderUtils
 import com.streamxhub.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.repl.flink.shims.FlinkShims
@@ -44,15 +38,18 @@ import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFactory, StreamExecutionEnvironment => JStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
-import org.apache.zeppelin.interpreter.{InterpreterContext}
-
-import scala.tools.nsc.interpreter.IR
+import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
 
+import java.io.{BufferedReader, File}
+import java.net.URLClassLoader
+import java.nio.file.Files
+import java.util.Properties
+import java.util.concurrent.TimeUnit
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
-import scala.tools.nsc.interpreter.{JPrintWriter, SimpleReader}
+import scala.tools.nsc.interpreter.{IR, JPrintWriter, SimpleReader}
 
 /**
  * It instantiate flink scala shell and create env, benv.

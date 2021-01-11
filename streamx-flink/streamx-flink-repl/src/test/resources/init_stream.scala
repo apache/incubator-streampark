@@ -1,7 +1,7 @@
-import org.apache.flink.streaming.api.functions.source.SourceFunction
-import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.checkpoint.ListCheckpointed
+import org.apache.flink.streaming.api.functions.source.SourceFunction
+
 import java.util.Collections
 import scala.collection.JavaConversions._
 
