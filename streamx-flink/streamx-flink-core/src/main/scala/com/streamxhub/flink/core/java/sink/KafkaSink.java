@@ -91,7 +91,7 @@ public class KafkaSink<T> {
     public DataStreamSink<T> sink(DataStream<T> source, String topic) {
         this.topic(topic);
         com.streamxhub.flink.core.scala.sink.KafkaSink scalaSink = new com.streamxhub.flink.core.scala.sink.KafkaSink(this.context, this.property, this.parallelism, this.name, this.uid);
-        org.apache.flink.streaming.api.scala.DataStream scalaDataStream = new org.apache.flink.streaming.api.scala.DataStream<>(source);
+        org.apache.flink.streaming.api.scala.DataStream<T> scalaDataStream = new org.apache.flink.streaming.api.scala.DataStream<>(source);
         return scalaSink.sink(scalaDataStream, this.topic, this.serializer, this.partitioner);
     }
 }

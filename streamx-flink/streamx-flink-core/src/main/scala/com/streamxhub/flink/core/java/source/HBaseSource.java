@@ -41,7 +41,7 @@ public class HBaseSource<T> {
     }
 
     public DataStreamSource<T> getDataStream(HBaseQueryFunction<T> queryFunc, HBaseResultFunction<T> resultFunc) {
-        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, queryFunc, resultFunc, null);
+        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunc, resultFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 }
