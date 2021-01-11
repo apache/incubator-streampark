@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala
 
 import com.esotericsoftware.kryo.Serializer
-import com.streamxhub.common.conf.ConfigConst.{KEY_APP_HOME, KEY_APP_NAME, KEY_FLINK_APP_NAME, KEY_FLINK_SQL, LOGO}
+import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.ext.TableExt
 import com.streamxhub.flink.core.scala.util.{FlinkTableInitializer, StreamEnvConfig}
@@ -29,33 +29,31 @@ import org.apache.flink.api.common.cache.DistributedCache
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.io.{FileInputFormat, FilePathFilter, InputFormat}
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
-import org.apache.flink.api.common.{JobExecutionResult, RuntimeExecutionMode}
 import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.common.{JobExecutionResult, RuntimeExecutionMode}
 import org.apache.flink.api.connector.source.{Source, SourceSplit}
 import org.apache.flink.api.java.tuple
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ReadableConfig
 import org.apache.flink.core.execution.{JobClient, JobListener}
 import org.apache.flink.runtime.state.StateBackend
-import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
-import org.apache.flink.streaming.api.environment.CheckpointConfig
+import org.apache.flink.streaming.api.environment.{CheckpointConfig, StreamExecutionEnvironment => JavaStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.functions.source.{FileMonitoringFunction, FileProcessingMode, SourceFunction}
 import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
-import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironment => JavaStreamExecutionEnvironment}
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
 import org.apache.flink.table.catalog.Catalog
 import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.expressions.Expression
-import org.apache.flink.table.functions.{AggregateFunction, ScalarFunction, TableAggregateFunction, TableFunction, UserDefinedFunction}
+import org.apache.flink.table.functions._
 import org.apache.flink.table.module.Module
 import org.apache.flink.table.sources.TableSource
 import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 
-import java.util.{List => JavaList}
-import java.util.Optional
+import java.util.{Optional, List => JavaList}
 import scala.util.{Failure, Success, Try}
 
 /**

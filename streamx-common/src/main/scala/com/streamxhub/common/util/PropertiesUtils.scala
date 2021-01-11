@@ -20,16 +20,14 @@
  */
 package com.streamxhub.common.util
 
-import java.io._
-import java.util.{Properties, Scanner}
-
 import org.yaml.snakeyaml.Yaml
 
-import java.util.{LinkedHashMap => JavaLinkedMap}
-import scala.collection.JavaConverters._
+import java.io._
+import java.util.{Properties, Scanner, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.Map
-import collection.mutable.{Map => MMap}
+import scala.collection.mutable.{Map => MMap}
 
 /**
  * @author benjobs

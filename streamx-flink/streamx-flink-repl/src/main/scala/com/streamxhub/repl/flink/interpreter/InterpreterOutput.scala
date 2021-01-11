@@ -20,10 +20,9 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.{ByteArrayOutputStream, IOException, OutputStream}
-
 import org.slf4j.Logger
 
+import java.io.{ByteArrayOutputStream, IOException, OutputStream}
 import scala.collection.mutable.ArrayBuffer
 
 class InterpreterOutput(flushListener: FlushListener) extends OutputStream {

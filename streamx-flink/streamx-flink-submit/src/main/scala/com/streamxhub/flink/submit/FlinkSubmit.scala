@@ -20,37 +20,34 @@
  */
 package com.streamxhub.flink.submit
 
-import java.io.{File, Serializable}
-import java.util.{Arrays => JavaArrays, Collections, List => JavaList, Map => JavaMap}
-import java.util.concurrent.{CompletableFuture, TimeUnit}
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
+import com.streamxhub.common.util._
+import org.apache.commons.cli.{CommandLine, Options}
+import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
+import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
-import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.flink.yarn.configuration.YarnDeploymentTarget
-import org.apache.hadoop.fs.Path
-import org.apache.flink.api.common.JobID
 import org.apache.flink.configuration._
+import org.apache.flink.util.FlinkException
+import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
-import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, ClientOptions, CustomCommandLine, ExecutionConfigAccessor, ProgramOptions}
 
+import java.io.{File, Serializable}
+import java.lang.{Boolean => JBool}
+import java.util.concurrent.{CompletableFuture, TimeUnit}
+import java.util.{Collections, Arrays => JavaArrays, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
-import java.lang.{Boolean => JBool}
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
-import org.apache.commons.cli.{CommandLine, Options}
-import org.apache.flink.util.FlinkException
-
-import java.util
 
 object FlinkSubmit extends Logger {
 

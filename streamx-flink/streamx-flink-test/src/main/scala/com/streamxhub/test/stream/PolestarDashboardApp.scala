@@ -5,7 +5,6 @@ import com.streamxhub.flink.core.scala.source.KafkaSource
 import com.streamxhub.flink.core.scala.util.ElasticSearchUtils
 import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
-
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s

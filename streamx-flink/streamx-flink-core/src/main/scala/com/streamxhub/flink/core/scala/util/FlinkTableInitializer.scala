@@ -28,6 +28,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
+
 import scala.util.Try
 
 private[scala] object FlinkTableInitializer {

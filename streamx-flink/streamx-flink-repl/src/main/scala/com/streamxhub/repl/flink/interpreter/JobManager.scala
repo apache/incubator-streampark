@@ -20,8 +20,6 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
-import java.util.concurrent.atomic.AtomicBoolean
 import com.mashape.unirest.http.{JsonNode, Unirest}
 import com.streamxhub.common.util.DateUtils
 import org.apache.commons.lang3.StringUtils
@@ -31,6 +29,8 @@ import org.apache.zeppelin.interpreter.InterpreterContext
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
 

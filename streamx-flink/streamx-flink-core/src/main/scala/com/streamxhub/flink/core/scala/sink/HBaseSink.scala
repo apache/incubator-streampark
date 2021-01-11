@@ -34,8 +34,8 @@ import org.apache.hadoop.hbase.client._
 
 import java.lang.{Iterable => JIter}
 import java.util.Properties
-import java.util.concurrent.{TimeUnit, Executors, ScheduledExecutorService}
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicLong}
+import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer

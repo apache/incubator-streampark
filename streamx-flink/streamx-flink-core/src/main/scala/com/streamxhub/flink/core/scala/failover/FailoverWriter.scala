@@ -20,17 +20,9 @@
  */
 package com.streamxhub.flink.core.scala.failover
 
-import java.io.ByteArrayInputStream
-import java.net.URI
-import java.util._
-import java.util.concurrent.locks.ReentrantLock
-
 import com.streamxhub.common.conf.ConfigConst._
-
-import com.streamxhub.flink.core.scala.failover.FailoverStorageType.FailoverStorageType
-import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{MySQL, HBase, HDFS, Kafka}
-
 import com.streamxhub.common.util._
+import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
 import org.apache.hadoop.conf.{Configuration => HConf}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.hbase.client.{BufferedMutator, BufferedMutatorParams, Put, RetriesExhaustedWithDetailsException, Connection => HBaseConn}
@@ -39,6 +31,10 @@ import org.apache.hadoop.hbase.{HColumnDescriptor, HConstants, HTableDescriptor,
 import org.apache.hadoop.io.IOUtils
 import org.apache.kafka.clients.producer.{Callback, KafkaProducer, ProducerRecord, RecordMetadata}
 
+import java.io.ByteArrayInputStream
+import java.net.URI
+import java.util._
+import java.util.concurrent.locks.ReentrantLock
 import scala.collection.JavaConversions._
 
 

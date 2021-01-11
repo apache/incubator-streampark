@@ -20,13 +20,13 @@
  */
 package com.streamxhub.common.util
 
-import scala.util.control.Breaks._
-import java.io.{BufferedReader, BufferedWriter, InputStreamReader, OutputStreamWriter, PrintWriter}
+import java.io._
+import java.lang.{Iterable => JavaIter}
 import java.util.Scanner
 import java.util.function.Consumer
-import scala.util.{Failure, Success, Try}
-import java.lang.{Iterable => JavaIter}
 import scala.collection.JavaConversions._
+import scala.util.control.Breaks._
+import scala.util.{Failure, Success, Try}
 
 object CommandUtils extends Logger {
 

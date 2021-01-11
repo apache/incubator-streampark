@@ -20,8 +20,6 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.{BufferedReader, File}
-
 import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.flink.annotation.Internal
 import org.apache.flink.client.cli.{CliFrontend, CliFrontendParser, CustomCommandLine}
@@ -33,6 +31,7 @@ import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfigurati
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.slf4j.LoggerFactory
 
+import java.io.{BufferedReader, File}
 import scala.collection.mutable.ArrayBuffer
 
 /**

@@ -23,9 +23,9 @@ package com.streamxhub.flink.core.scala.ext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
-import org.apache.flink.table.api.{Table => FlinkTable}
 import org.apache.flink.table.api.bridge.scala.{TableConversions => FlinkTableConversions}
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor => TableDescriptor, Schema}
+import org.apache.flink.table.api.{Table => FlinkTable}
+import org.apache.flink.table.descriptors.{Schema, ConnectTableDescriptor => TableDescriptor}
 import org.apache.flink.table.types.DataType
 
 object TableExt {
