@@ -65,7 +65,7 @@ object ParameterCli {
         buffer.toString.trim
       case "--property" =>
         val buffer = new StringBuffer()
-        map.filter(x => x._1.startsWith(propertyPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -yD${x._1.drop(propertyPrefix.length)}=${x._2}"))
+        map.filter(x => x._1.startsWith(propertyPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
         buffer.toString.trim
       case "--name" =>
         map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
