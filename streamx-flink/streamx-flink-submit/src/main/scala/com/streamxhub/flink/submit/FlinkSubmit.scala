@@ -271,8 +271,6 @@ object FlinkSubmit extends Logger {
         optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
       }
 
-      optionMap += KEY_FLINK_APP_NAME -> submitInfo.appName
-
       //页面定义的参数优先级大于app配置文件
       submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
         val option = commandLineOptions.getOption(x._1)
@@ -294,6 +292,7 @@ object FlinkSubmit extends Logger {
 
       //-D 动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+
       //-jvm profile support
       if (submitInfo.flameGraph != null) {
         //find jvm-profiler
