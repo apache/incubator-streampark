@@ -42,11 +42,11 @@ object DateUtils {
     df.parse(date)
   }
 
-  def milliSecond2Date(time: Long) = new Date(time)
+  def milliSecond2Date(time: Long): Date = new Date(time)
 
-  def second2Date(time: Long) = milliSecond2Date(time * 1000)
+  def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault) = {
+  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
@@ -59,13 +59,9 @@ object DateUtils {
     calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
   }
 
-  def minuteOf(date: Date = new Date()): Int = {
-    (date.getTime / 1000 / 60).toInt
-  }
+  def minuteOf(date: Date = new Date()): Int = (date.getTime / 1000 / 60).toInt
 
-  def secondOf(date: Date = new Date()): Int = {
-    (date.getTime / 1000).toInt
-  }
+  def secondOf(date: Date = new Date()): Int = (date.getTime / 1000).toInt
 
   def secondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
@@ -178,7 +174,11 @@ object DateUtils {
     }
     timeUnit match {
       case null => default
-      case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS) //未带单位,值必须为毫秒,这里转成对应的秒...
+
+      /**
+       * 未带单位,值必须为毫秒,这里转成对应的秒...
+       */
+      case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
       case other => other
     }
   }
