@@ -158,7 +158,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
 
         case HDFS =>
           val path = properties("path")
-          val format = properties.getOrElse("format", DateUtils.dayFormat1)
+          val format = properties.getOrElse("format", DateUtils.foramt_yyyyMMdd)
           require(path != null)
           val fileName = s"$path/$table"
           val rootPath = new Path(s"$fileName/${DateUtils.format(new Date(), format)}")
