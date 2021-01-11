@@ -1,7 +1,7 @@
 package com.streamxhub.spark.core.support.kafka.offset
 
 import com.streamxhub.common.util.Logger
-import kafka.api.{OffsetRequest, PartitionMetadata, PartitionOffsetRequestInfo, TopicMetadata, TopicMetadataRequest}
+import kafka.api._
 import kafka.common.TopicAndPartition
 import kafka.consumer.SimpleConsumer
 import org.apache.kafka.common.TopicPartition

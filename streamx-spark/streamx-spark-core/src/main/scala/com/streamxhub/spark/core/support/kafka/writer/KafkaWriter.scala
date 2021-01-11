@@ -21,12 +21,11 @@
 
 package com.streamxhub.spark.core.support.kafka.writer
 
-import java.util.Properties
-
 import org.apache.kafka.clients.producer.ProducerRecord
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.dstream.DStream
 
+import java.util.Properties
 import scala.reflect.ClassTag
 
 /**

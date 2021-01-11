@@ -23,8 +23,8 @@ package com.streamxhub.spark.core.sink
 
 import com.streamxhub.common.conf.ConfigConst
 import com.streamxhub.common.util.HBaseClient
-import org.apache.hadoop.hbase.client._
 import org.apache.hadoop.hbase.TableName
+import org.apache.hadoop.hbase.client._
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time

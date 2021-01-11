@@ -21,10 +21,9 @@
 
 package com.streamxhub.spark.core.support.kafka
 
-import java.util.Properties
-
 import org.apache.kafka.clients.producer.KafkaProducer
 
+import java.util.Properties
 import scala.collection.mutable
 
 /**
