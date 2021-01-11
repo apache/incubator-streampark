@@ -55,7 +55,7 @@ public class MySQLSource<T> {
     public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
         assert queryFunc != null;
         assert resultFunc != null;
-        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction(jdbc, queryFunc, resultFunc, null);
+        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction<>(jdbc, queryFunc, resultFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 
