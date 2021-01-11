@@ -22,8 +22,8 @@ package com.streamxhub.repl.flink.interpreter
 
 import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
 import java.util.concurrent.atomic.AtomicBoolean
-
 import com.mashape.unirest.http.{JsonNode, Unirest}
+import com.streamxhub.common.util.DateUtils
 import org.apache.commons.lang3.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.core.execution.JobClient
@@ -40,28 +40,6 @@ object JobManager {
   val RESUME_FROM_SAVEPOINT = "resumeFromSavepoint"
   val RESUME_FROM_CHECKPOINT = "resumeFromLatestCheckpoint"
   val SAVEPOINT_DIR = "savepointDir"
-
-  /**
-   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
-   *
-   * @param duration in second
-   * @return
-   */
-  def toRichTimeDuration(duration: Long) = {
-    val days = TimeUnit.SECONDS.toDays(duration)
-    val duration1 = duration - TimeUnit.DAYS.toSeconds(days)
-    val hours = TimeUnit.SECONDS.toHours(duration1)
-    val duration2 = duration1 - TimeUnit.HOURS.toSeconds(hours)
-    val minutes = TimeUnit.SECONDS.toMinutes(duration2)
-    val duration3 = duration2 - TimeUnit.MINUTES.toSeconds(minutes)
-    val seconds = TimeUnit.SECONDS.toSeconds(duration3)
-    val builder = new StringBuilder
-    if (days != 0) builder.append(days + " days ")
-    if (days != 0 || hours != 0) builder.append(hours + " hours ")
-    if (days != 0 || hours != 0 || minutes != 0) builder.append(minutes + " minutes ")
-    builder.append(seconds + " seconds")
-    builder.toString
-  }
 
 }
 
@@ -223,7 +201,7 @@ class FlinkJobProgressPoller(var flinkWebUrl: String, var jobId: JobID, var cont
               context.out.flush()
               isFirstPoll = false
             }
-            context.getAngularObjectRegistry.add("duration", JobManager.toRichTimeDuration(duration), context.getNoteId, context.getParagraphId)
+            context.getAngularObjectRegistry.add("duration", DateUtils.toRichTimeDuration(duration), context.getNoteId, context.getParagraphId)
           }
           // fetch checkpoints info and save the latest checkpoint into paragraph's config.
           rootNode = Unirest.get(flinkWebUrl + "/jobs/" + jobId.toString + "/checkpoints").asJson.getBody

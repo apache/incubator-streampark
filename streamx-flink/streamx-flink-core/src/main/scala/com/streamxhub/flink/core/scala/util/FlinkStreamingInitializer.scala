@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.util
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util.{DateUtils, DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
@@ -183,9 +183,9 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          */
         val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
 
-        val rateInterval = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
+        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
 
-        val delay = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
 
         streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
@@ -204,7 +204,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
          */
         val attempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
-        val delay = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
 
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
