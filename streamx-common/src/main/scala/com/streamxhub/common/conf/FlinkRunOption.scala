@@ -69,9 +69,9 @@ object FlinkRunOption {
 
   val ZOOKEEPER_NAMESPACE_OPTION = new Option("z", "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
 
-  val CANCEL_WITH_SAVEPOINT_OPTION = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + "specified, the configured default directory (" + CheckpointingOptions.SAVEPOINT_DIRECTORY.key + ") is used.")
+  val CANCEL_WITH_SAVEPOINT_OPTION = new Option("s", "withSavepoint", true, "**DEPRECATION WARNING**: " + "Cancelling a job with savepoint is deprecated. Use \"stop\" instead. \n Trigger" + " savepoint and cancel job. The target directory is optional. If no directory is " + "specified, the configured default directory ( state.savepoints.dir ) is used.")
 
-  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + "If no directory is specified, the configured default will be used (\"" + CheckpointingOptions.SAVEPOINT_DIRECTORY.key + "\").")
+  val STOP_WITH_SAVEPOINT_PATH = new Option("p", "savepointPath", true, "Path to the savepoint (for example hdfs:///flink/savepoint-1537). " + "If no directory is specified, the configured default will be used (\"state.savepoints.dir\").")
 
   val STOP_AND_DRAIN = new Option("d", "drain", false, "Send MAX_WATERMARK before taking the savepoint and stopping the pipelne.")
 
@@ -90,24 +90,6 @@ object FlinkRunOption {
   /**
    * yarn
    */
-  private[this] val shortPrefix = "y"
-  private[this] val longPrefix = "yarn"
-  //yarn
-  // Create the command line options
-  val YARN_QUERY_OPTION = new Option(shortPrefix + "q", longPrefix + "query", false, "Display available YARN resources (memory, cores)")
-  val YARN_QUEUE_OPTION = new Option(shortPrefix + "qu", longPrefix + "queue", true, "Specify YARN queue.")
-  val YARN_SHIPPATH_OPTION = new Option(shortPrefix + "t", longPrefix + "ship", true, "Ship files in the specified directory (t for transfer)")
-  val YARN_FLINKJAR_OPTION = new Option(shortPrefix + "j", longPrefix + "jar", true, "Path to Flink jar file")
-  val YARN_JMMEMORY_OPTION = new Option(shortPrefix + "jm", longPrefix + "jobManagerMemory", true, "Memory for JobManager Container with optional unit (default: MB)")
-  val YARN_TMMEMORY_OPTION = new Option(shortPrefix + "tm", longPrefix + "taskManagerMemory", true, "Memory per TaskManager Container with optional unit (default: MB)")
-  val YARN_SLOTS_OPTION = new Option(shortPrefix + "s", longPrefix + "slots", true, "Number of slots per TaskManager")
-  val YARN_DYNAMIC_OPTION: Option = Option.builder("D").argName("property=value").numberOfArgs(2).valueSeparator('=').desc("Generic configuration options for execution/deployment and for the configured " + "executor. The available options can be found at " + "https://ci.apache.org/projects/flink/flink-docs-stable/ops/config.html").build
-  val YARN_NAME_OPTION = new Option(shortPrefix + "nm", longPrefix + "name", true, "Set a custom name for the application on YARN")
-  val YARN_APPLICATIONTYPE_OPTION = new Option(shortPrefix + "at", longPrefix + "applicationType", true, "Set a custom application type for the application on YARN")
-  val YARN_ZOOKEEPERNAMESPACE_OPTION = new Option(shortPrefix + "z", longPrefix + "zookeeperNamespace", true, "Namespace to create the Zookeeper sub-paths for high availability mode")
-  val YARN_NODELABEL_OPTION = new Option(shortPrefix + "nl", longPrefix + "nodeLabel", true, "Specify YARN node label for the YARN application")
-  val YARN_HELP_OPTION = new Option(shortPrefix + "h", longPrefix + "help", false, "Help for the Yarn session CLI.")
-  val YARN_APPLICATIONID_OPTION = new Option(shortPrefix + "id", longPrefix + "applicationId", true, "Attach to running YARN session")
 
   HELP_OPTION.setRequired(false)
 
@@ -119,9 +101,6 @@ object FlinkRunOption {
 
   CLASSPATH_OPTION.setRequired(false)
   CLASSPATH_OPTION.setArgName("url")
-
-  ADDRESS_OPTION.setRequired(false)
-  ADDRESS_OPTION.setArgName("host:port")
 
   PARALLELISM_OPTION.setRequired(false)
   PARALLELISM_OPTION.setArgName("parallelism")
@@ -242,23 +221,8 @@ object FlinkRunOption {
       case Failure(e) =>
     }
 
-    allOptions.addOption(ADDRESS_OPTION)
-    allOptions.addOption(YARN_FLINKJAR_OPTION)
-    allOptions.addOption(YARN_JMMEMORY_OPTION)
-    allOptions.addOption(YARN_TMMEMORY_OPTION)
-    allOptions.addOption(YARN_QUEUE_OPTION)
-    allOptions.addOption(YARN_QUERY_OPTION)
-    allOptions.addOption(YARN_SHIPPATH_OPTION)
-    allOptions.addOption(YARN_SLOTS_OPTION)
-    allOptions.addOption(YARN_DYNAMIC_OPTION)
     allOptions.addOption(DETACHED_OPTION)
     allOptions.addOption(YARN_DETACHED_OPTION)
-    allOptions.addOption(YARN_NAME_OPTION)
-    allOptions.addOption(YARN_APPLICATIONID_OPTION)
-    allOptions.addOption(YARN_APPLICATIONTYPE_OPTION)
-    allOptions.addOption(YARN_ZOOKEEPERNAMESPACE_OPTION)
-    allOptions.addOption(YARN_NODELABEL_OPTION)
-    allOptions.addOption(YARN_HELP_OPTION)
     allOptions
   }
 
@@ -272,6 +236,7 @@ object FlinkRunOption {
   def getProgramSpecificOptions(options: Options): Options = {
     options.addOption(JAR_OPTION)
     options.addOption(CLASS_OPTION)
+    options.addOption(ADDRESS_OPTION)
     options.addOption(CLASSPATH_OPTION)
     options.addOption(PARALLELISM_OPTION)
     options.addOption(ARGS_OPTION)

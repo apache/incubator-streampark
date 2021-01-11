@@ -191,16 +191,16 @@ doStart() {
 
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local dynamic_params="`java -cp "${jarfile}" $param_cli --dynamic "${app_proper}"`"
+    local property_params="`java -cp "${jarfile}" $param_cli --property "${app_proper}"`"
     # shellcheck disable=SC2006
-    dynamic_params="`echo "$dynamic_params" | sed "$trim"`"
+    property_params="`echo "$property_params" | sed "$trim"`"
 
     echo_g "${app_name} Starting by:<${detached_mode}> mode"
 
     # json all params...
     local runOption="$option"
-    if [ x"$dynamic_params" != x"" ]; then
-        runOption="$runOption $dynamic_params"
+    if [ x"$property_params" != x"" ]; then
+        runOption="$runOption $property_params"
     fi
 
     if [ x"$detached_mode" == x"Detached" ] ; then

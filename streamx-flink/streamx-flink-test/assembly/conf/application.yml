@@ -1,19 +1,37 @@
 flink:
   deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明细的问题的找不到jar文件
-    dynamic: ##这里放动态熟悉... -yD key=value
-    option: ## 这里放启动资源相关配置...注意 -yn(yarncontainer)参数从1.9.0开始已经过时,不推荐使用,从1.10开始已废除.
-      yarnname: FlinkSinkApp            # Set a custom name for the application on YARN
-      class: com.streamxhub.flink.test.FlinkSinkApp                             # main class
+    option:
+      class: com.streamxhub.flink.test.FlinkSinkApp     # main class
+      target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
       detached:                         # -d   (If present, runs the job in detached mode)
-      jobmanager: yarn-cluster          # -m   (Address of the JobManager (master) to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration.)
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
-      yarnapplicationType:              # -yat (Set a custom application type for the application on YARN)
-      yarnjobManagerMemory: 1024M       # -yjm (Memory for JobManager Container with optional unit (default: MB))
-      yarnnodeLabel:                    # -ynl (Specify YARN node label for the YARN application)
-      yarnqueue:                        # -yqu (Specify YARN queue)
-      yarnslots: 1                      # -ys  (Number of slots per TaskManager)
-      yarntaskManagerMemory: 4096M      # -ytm
-      parallelism: 1
+      zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
+      jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
+    property: #@see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+      yarn.application.name: FlinkSinkApp
+      yarn.application.node-label: StreamX
+      taskmanager.numberOfTaskSlots: 1
+      parallelism.default: 2
+      jobmanager.memory:
+        flink.size:
+        heap.size:
+        jvm-metaspace.size:
+        jvm-overhead.max:
+        off-heap.size:
+        process.size:
+      taskmanager.memory:
+        flink.size:
+        framework.heap.size:
+        framework.off-heap.size:
+        managed.size:
+        process.size:
+        task.heap.size:
+        task.off-heap.size
+        jvm-metaspace.size:
+        jvm-overhead.max:
+        jvm-overhead.min:
+        managed.fraction: 0.4
+
   watermark:
     time.characteristic: EventTime
     interval: 10000

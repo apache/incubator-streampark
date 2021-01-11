@@ -87,7 +87,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    config match {
+
+    val map = config match {
       case x if x.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("prop://") =>
@@ -112,6 +113,10 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
         }
     }
+
+    map
+      .filter(!_._1.startsWith("flink.deployment.option."))
+      .map(x => x._1.replace("flink.deployment.property.", "") -> x._2)
   }
 
   private[this] def initParameter(): ParameterTool = {
