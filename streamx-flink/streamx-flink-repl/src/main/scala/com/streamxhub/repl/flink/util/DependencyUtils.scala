@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,10 +21,6 @@
 
 package com.streamxhub.repl.flink.util
 
-import java.io.{File, IOException}
-import java.text.ParseException
-import java.util.UUID
-
 import org.apache.commons.lang3.StringUtils
 import org.apache.ivy.Ivy
 import org.apache.ivy.core.LogOptions
@@ -37,6 +33,10 @@ import org.apache.ivy.core.settings.IvySettings
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
+
+import java.io.{File, IOException}
+import java.text.ParseException
+import java.util.UUID
 
 object DependencyUtils {
 
@@ -127,8 +127,14 @@ object DependencyUtils {
     val localIvyRoot = new File(defaultIvyUserDir, "local")
     localIvy.setLocal(true)
     localIvy.setRepository(new FileRepository(localIvyRoot))
-    val ivyPattern = Seq(localIvyRoot.getAbsolutePath, "[organisation]", "[module]", "[revision]",
-      "ivys", "ivy.xml").mkString(File.separator)
+    val ivyPattern = Seq(
+      localIvyRoot.getAbsolutePath,
+      "[organisation]",
+      "[module]",
+      "[revision]",
+      "ivys",
+      "ivy.xml"
+    ).mkString(File.separator)
     localIvy.addIvyPattern(ivyPattern)
     val artifactPattern = Seq(localIvyRoot.getAbsolutePath, "[organisation]", "[module]",
       "[revision]", "[type]s", "[artifact](-[classifier]).[ext]").mkString(File.separator)

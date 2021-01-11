@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -29,7 +29,6 @@ import com.streamxhub.flink.core.scala.sink.JdbcSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
-
 import java.util.Properties;
 
 /**
@@ -37,7 +36,7 @@ import java.util.Properties;
  */
 public class JdbcSink<T> {
 
-    private StreamingContext context;
+    private final StreamingContext context;
     private Properties jdbc;
     private SQLFromFunction<T> sqlFunc;
     private String dialect = Dialect.MYSQL().toString().toLowerCase();

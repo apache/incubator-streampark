@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -25,9 +25,21 @@ package com.streamxhub.console.core.enums;
  */
 
 public enum ApplicationType {
+    /**
+     * StreamX Flink
+     */
     STREAMX_FLINK(1, "StreamX Flink"),
+    /**
+     * Apache Flink
+     */
     APACHE_FLINK(2, "Apache Flink"),
+    /**
+     * StreamX Spark
+     */
     STREAMX_SPARK(3, "StreamX Spark"),
+    /**
+     * Apache Spark
+     */
     APACHE_SPARK(4, "Apache Spark");
     int type;
     String name;

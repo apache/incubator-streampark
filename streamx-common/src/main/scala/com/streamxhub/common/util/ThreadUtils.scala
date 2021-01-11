@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,9 +21,8 @@
 package com.streamxhub.common.util
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.TimeUnit
+
+import java.util.concurrent.{ExecutorService, ThreadFactory, TimeUnit}
 
 
 object ThreadUtils {

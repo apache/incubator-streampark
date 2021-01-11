@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,15 +21,14 @@
 package com.streamxhub.common.util
 
 
-import java.util
-import java.util.List
-
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
+import org.apache.hadoop.yarn.api.records._
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.util.ConverterUtils
 
+import java.util
+import java.util.List
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 

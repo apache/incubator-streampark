@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -53,8 +53,8 @@ public class ConfigController extends BaseController {
 
     @PostMapping("list")
     public RestResponse list(ApplicationConfig config, RestRequest request) {
-        IPage<ApplicationConfig> configIPage = applicationConfigService.page(config, request);
-        return RestResponse.create().data(configIPage);
+        IPage<ApplicationConfig> page = applicationConfigService.page(config, request);
+        return RestResponse.create().data(page);
     }
 
     @PostMapping("delete")

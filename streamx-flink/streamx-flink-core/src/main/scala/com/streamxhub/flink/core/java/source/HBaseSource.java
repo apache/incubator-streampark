@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -29,19 +29,19 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import java.util.Properties;
 
 /**
- * @param <T>
+ * @author benjobs
  */
 public class HBaseSource<T> {
-    private StreamingContext ctx;
-    private Properties property;
+    private final StreamingContext context;
+    private final Properties property;
 
-    public HBaseSource(StreamingContext ctx, Properties property) {
-        this.ctx = ctx;
+    public HBaseSource(StreamingContext context, Properties property) {
+        this.context = context;
         this.property = property;
     }
 
     public DataStreamSource<T> getDataStream(HBaseQueryFunction<T> queryFunc, HBaseResultFunction<T> resultFunc) {
-        HBaseSourceFunction sourceFunction = new HBaseSourceFunction(property, queryFunc, resultFunc, null);
-        return ctx.getJavaEnv().addSource(sourceFunction);
+        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunc, resultFunc, null);
+        return context.getJavaEnv().addSource(sourceFunction);
     }
 }

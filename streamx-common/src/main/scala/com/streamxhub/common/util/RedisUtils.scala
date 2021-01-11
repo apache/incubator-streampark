@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,13 +20,12 @@
  */
 package com.streamxhub.common.util
 
-import java.util.Set
-
 import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
 
-import scala.collection.immutable
-import scala.collection.JavaConverters._
 import java.lang.{Integer => JInt}
+import java.util.Set
+import scala.collection.JavaConverters._
+import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 
 

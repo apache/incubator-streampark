@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,19 +21,19 @@
 package com.streamxhub.flink.core.scala.request
 
 
-import java.util.Properties
-import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
-import java.util.function.{Consumer, Supplier}
 import com.streamxhub.common.util.{Logger, Utils}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 import org.apache.flink.streaming.api.scala._
+import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 import org.apache.hadoop.hbase.client.{Result, ResultScanner, Table}
 
-import scala.collection.JavaConversions._
+import java.util.Properties
+import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
+import java.util.function.{Consumer, Supplier}
 import scala.annotation.meta.param
+import scala.collection.JavaConversions._
 
 object HBaseRequest {
 

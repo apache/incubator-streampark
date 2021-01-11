@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,17 +21,16 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.{ArrayList => JAList}
-
 import com.streamxhub.common.util.HBaseClient
 import org.apache.hadoop.hbase.TableName
-import org.apache.spark.SparkContext
-import org.apache.spark.streaming.Time
 import org.apache.hadoop.hbase.client._
+import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
+import org.apache.spark.streaming.Time
 
-import scala.reflect.ClassTag
+import java.util.{ArrayList => JAList}
 import scala.collection.JavaConversions._
+import scala.reflect.ClassTag
 
 /**
  *

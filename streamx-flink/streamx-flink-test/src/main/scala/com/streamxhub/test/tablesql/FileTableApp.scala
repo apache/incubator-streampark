@@ -1,9 +1,9 @@
 package com.streamxhub.test.tablesql
 
-import com.streamxhub.flink.core.scala.{FlinkStreamTable, FlinkTable, StreamTableContext, TableContext}
-import org.apache.flink.table.descriptors.{FileSystem, OldCsv, Schema}
+import com.streamxhub.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api._
+import org.apache.flink.table.descriptors.{FileSystem, OldCsv, Schema}
 
 object FileTableApp extends FlinkStreamTable {
 

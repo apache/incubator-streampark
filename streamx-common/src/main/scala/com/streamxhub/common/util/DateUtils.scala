@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,10 +20,9 @@
  */
 package com.streamxhub.common.util
 
-import java.util._
 import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.TimeZone
+import java.util.{Calendar, TimeZone, _}
+import java.util.concurrent.TimeUnit
 import scala.util._
 
 
@@ -31,9 +30,9 @@ object DateUtils {
 
   val fullFormat = "yyyy-MM-dd HH:mm:ss"
 
-  val dayFormat1 = "yyyyMMdd"
+  val foramt_yyyyMMdd = "yyyyMMdd"
 
-  val dayFormat2 = "yyyy-MM-dd"
+  val `foramt_yyyy-MM-dd` = "yyyy-MM-dd"
 
   def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
@@ -41,11 +40,11 @@ object DateUtils {
     df.parse(date)
   }
 
-  def milliSecond2Date(time: Long) = new Date(time)
+  def milliSecond2Date(time: Long): Date = new Date(time)
 
-  def second2Date(time: Long) = milliSecond2Date(time * 1000)
+  def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = dayFormat1, timeZone: TimeZone = TimeZone.getDefault) = {
+  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
@@ -58,13 +57,9 @@ object DateUtils {
     calendar.get(Calendar.HOUR_OF_DAY) * 60 + calendar.get(Calendar.MINUTE)
   }
 
-  def minuteOf(date: Date = new Date()): Int = {
-    (date.getTime / 1000 / 60).toInt
-  }
+  def minuteOf(date: Date = new Date()): Int = (date.getTime / 1000 / 60).toInt
 
-  def secondOf(date: Date = new Date()): Int = {
-    (date.getTime / 1000).toInt
-  }
+  def secondOf(date: Date = new Date()): Int = (date.getTime / 1000).toInt
 
   def secondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
     val calendar = Calendar.getInstance()
@@ -136,6 +131,54 @@ object DateUtils {
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
     val utcDate: Date = sdf.parse(utcTime)
     utcToLocal(utcDate)
+  }
+
+  /**
+   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
+   *
+   * @param duration in second
+   * @return
+   */
+  def toRichTimeDuration(duration: Long): String = {
+    val days = TimeUnit.SECONDS.toDays(duration)
+    val duration1 = duration - TimeUnit.DAYS.toSeconds(days)
+    val hours = TimeUnit.SECONDS.toHours(duration1)
+    val duration2 = duration1 - TimeUnit.HOURS.toSeconds(hours)
+    val minutes = TimeUnit.SECONDS.toMinutes(duration2)
+    val duration3 = duration2 - TimeUnit.MINUTES.toSeconds(minutes)
+    val seconds = TimeUnit.SECONDS.toSeconds(duration3)
+    val builder = new StringBuilder
+    if (days != 0) builder.append(days + " days ")
+    if (days != 0 || hours != 0) builder.append(hours + " hours ")
+    if (days != 0 || hours != 0 || minutes != 0) builder.append(minutes + " minutes ")
+    builder.append(seconds + " seconds")
+    builder.toString
+  }
+
+  def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
+    val timeUnit = time match {
+      case "" => null
+      case x: String =>
+        val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
+        val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
+          case "" => null
+          case "s" => TimeUnit.SECONDS
+          case "m" | "min" => TimeUnit.MINUTES
+          case "h" => TimeUnit.HOURS
+          case "d" | "day" => TimeUnit.DAYS
+          case _ => throw new IllegalArgumentException()
+        }
+        (num, unit)
+    }
+    timeUnit match {
+      case null => default
+
+      /**
+       * 未带单位,值必须为毫秒,这里转成对应的秒...
+       */
+      case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
+      case other => other
+    }
   }
 
   def main(args: Array[String]): Unit = {

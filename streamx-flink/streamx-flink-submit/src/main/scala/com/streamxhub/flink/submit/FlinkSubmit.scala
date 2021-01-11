@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,35 +20,34 @@
  */
 package com.streamxhub.flink.submit
 
-import java.io.{File, Serializable}
-import java.util.{Arrays, Collections, List => JavaList, Map => JavaMap}
-import java.util.concurrent.{CompletableFuture, TimeUnit}
+import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.conf.FlinkRunOption
+import com.streamxhub.common.util._
+import org.apache.commons.cli.{CommandLine, Options}
+import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
+import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
-import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.flink.yarn.configuration.YarnDeploymentTarget
-import org.apache.hadoop.fs.Path
-import org.apache.flink.api.common.JobID
 import org.apache.flink.configuration._
+import org.apache.flink.util.FlinkException
+import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
-import org.apache.flink.yarn.configuration.YarnConfigOptions
+import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, ClientOptions, CustomCommandLine, ExecutionConfigAccessor, ProgramOptions}
 
+import java.io.{File, Serializable}
+import java.lang.{Boolean => JBool}
+import java.util.concurrent.{CompletableFuture, TimeUnit}
+import java.util.{Collections, Arrays => JavaArrays, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
-import java.lang.{Boolean => JBool}
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.streamxhub.common.util.{DeflaterUtils, ExceptionUtils, HdfsUtils, Logger, PropertiesUtils}
-import org.apache.commons.cli.{CommandLine, Options}
-import org.apache.flink.util.FlinkException
 
 object FlinkSubmit extends Logger {
 
@@ -209,7 +208,7 @@ object FlinkSubmit extends Logger {
     //获取flink的配置
     val configuration = globalConfiguration
       //设置yarn.provided.lib.dirs
-      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, Arrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
+      .set(YarnConfigOptions.PROVIDED_LIB_DIRS, JavaArrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
       //设置flinkDistJar
       .set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
       //设置用户的jar
@@ -272,8 +271,6 @@ object FlinkSubmit extends Logger {
         optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
       }
 
-      optionMap += "-ynm" -> submitInfo.appName
-
       //页面定义的参数优先级大于app配置文件
       submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
         val option = commandLineOptions.getOption(x._1)
@@ -295,6 +292,7 @@ object FlinkSubmit extends Logger {
 
       //-D 动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+
       //-jvm profile support
       if (submitInfo.flameGraph != null) {
         //find jvm-profiler
@@ -311,10 +309,7 @@ object FlinkSubmit extends Logger {
         val buffer = new StringBuffer()
         submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-        array += "-Denv.java.opts.taskmanager=-javaagent:$PWD/plugins/jvm-profiler/"
-          .concat(jvmProfilerJar)
-          .concat("=")
-          .concat(param)
+        array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
       array.toArray
@@ -327,39 +322,14 @@ object FlinkSubmit extends Logger {
   @throws[FlinkException] private def getEffectiveConfiguration[T](configuration: Configuration, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
-    effectiveConfiguration.addAll(configuration)
-
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    commandLine.getOptionValue(FlinkRunOption.YARN_JMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case jmm => effectiveConfiguration.setString(JobManagerOptions.TOTAL_PROCESS_MEMORY.key(), jmm.trim.replaceFirst("(M$|m$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_TMMEMORY_OPTION.getOpt) match {
-      case null =>
-      case tmm => effectiveConfiguration.setString(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key(), tmm.trim.replaceFirst("(M$|m$|$)", "M"))
-    }
-
-    commandLine.getOptionValue(FlinkRunOption.YARN_SLOTS_OPTION.getOpt) match {
-      case null =>
-      case s =>
-        Try(s.toInt) match {
-          case Success(value) =>
-            if (value <= 0) {
-              throw new NumberFormatException("[StreamX] slot muse be > 0. ")
-            }
-            effectiveConfiguration.setInteger(TaskManagerOptions.NUM_TASK_SLOTS.key(), value)
-          case Failure(e) => throw new CliArgsException(s"The slot must be a positive number: $s,err:$e ")
-        }
-    }
-
     /**
      * dynamicOption(Highest priority...)
      */
-    val properties = commandLine.getOptionProperties(FlinkRunOption.YARN_DYNAMIC_OPTION.getOpt)
+    val properties = commandLine.getOptionProperties(FlinkRunOption.DYNAMIC_PROPERTIES.getOpt)
     properties.stringPropertyNames.foreach((key: String) => {
       val value = properties.getProperty(key)
       if (value != null) {

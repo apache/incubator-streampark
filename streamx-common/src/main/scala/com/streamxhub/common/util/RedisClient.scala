@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,12 +21,10 @@
 
 package com.streamxhub.common.util
 
-import java.util.concurrent.ConcurrentHashMap
-
-import redis.clients.jedis.Jedis
-
+import redis.clients.jedis.{Jedis, _}
 import redis.clients.jedis.exceptions.JedisConnectionException
-import redis.clients.jedis._
+
+import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.meta.getter
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,10 +20,9 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import java.io.{ByteArrayOutputStream, IOException, OutputStream}
-
 import org.slf4j.Logger
 
+import java.io.{ByteArrayOutputStream, IOException, OutputStream}
 import scala.collection.mutable.ArrayBuffer
 
 class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
@@ -49,7 +48,7 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
 
   override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
 
-  private[this] def toByteArray(): Array[Byte] = buffer.toByteArray
+  private[this] def toByteArray: Array[Byte] = buffer.toByteArray
 
   @throws[IOException] override def close(): Unit = {
     flush()
@@ -57,7 +56,7 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
     if (this.flushListener != null) flushLine()
   }
 
-  override def toString() = new String(toByteArray)
+  override def toString = new String(toByteArray)
 
   def flushLine(): Unit = synchronized {
     val line = new String(lineBuffer.toArray)

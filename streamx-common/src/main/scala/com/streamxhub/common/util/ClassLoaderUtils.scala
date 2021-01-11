@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,9 +21,8 @@
 package com.streamxhub.common.util
 
 import java.io.File
-import java.net.URL
 import java.lang.reflect.Method
-import java.net.URLClassLoader
+import java.net.{URL, URLClassLoader}
 
 object ClassLoaderUtils extends Logger {
 

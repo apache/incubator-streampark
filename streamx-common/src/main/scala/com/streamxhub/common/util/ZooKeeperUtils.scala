@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -20,12 +20,12 @@
  */
 package com.streamxhub.common.util
 
-import java.nio.charset.StandardCharsets
-
 import org.apache.curator.RetryPolicy
 import org.apache.curator.framework.{CuratorFramework, CuratorFrameworkFactory}
 import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
+
+import java.nio.charset.StandardCharsets
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 

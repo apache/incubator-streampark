@@ -1,17 +1,17 @@
 import storage from '@/utils/storage'
 import store from '@/store/'
 import {
-  TOKEN,
   DEFAULT_COLOR,
-  DEFAULT_THEME,
-  DEFAULT_LAYOUT_MODE,
   DEFAULT_COLOR_WEAK,
-  SIDEBAR_TYPE,
+  DEFAULT_CONTENT_WIDTH_TYPE,
   DEFAULT_FIXED_HEADER,
   DEFAULT_FIXED_HEADER_HIDDEN,
   DEFAULT_FIXED_SIDEMENU,
-  DEFAULT_CONTENT_WIDTH_TYPE,
-  DEFAULT_MULTI_TAB
+  DEFAULT_LAYOUT_MODE,
+  DEFAULT_MULTI_TAB,
+  DEFAULT_THEME,
+  SIDEBAR_TYPE,
+  TOKEN
 } from '@/store/mutation-types'
 import config from '@/config/defaultSettings'
 

@@ -2,8 +2,7 @@ package com.streamxhub.spark.core.support.kafka.offset
 
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
-import scalikejdbc.{ConnectionPool, DB}
-import scalikejdbc._
+import scalikejdbc.{ConnectionPool, DB, _}
 
 /**
   *

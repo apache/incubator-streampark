@@ -21,16 +21,13 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.Properties
-
-import com.streamxhub.spark.core.support.redis.{RedisClient, RedisEndpoint}
 import com.streamxhub.spark.core.support.redis.RedisClient._
+import com.streamxhub.spark.core.support.redis.{RedisClient, RedisEndpoint}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 import redis.clients.jedis.Protocol
 
-import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 import scala.reflect.runtime.universe.TypeTag
 

@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (c) 2019 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
@@ -21,7 +21,7 @@
 package com.streamxhub.flink.core.scala.util
 
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.util.{DeflaterUtils, HdfsUtils, Logger, PropertiesUtils}
+import com.streamxhub.common.util._
 import com.streamxhub.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
@@ -39,6 +39,7 @@ import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 
 import java.io.File
 import java.util.concurrent.TimeUnit
+import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
 import scala.util.Try
 
@@ -86,7 +87,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
-    config match {
+
+    val map = config match {
       case x if x.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.drop(7)))
       case x if x.startsWith("prop://") =>
@@ -111,6 +113,10 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
         }
     }
+
+    map
+      .filter(!_._1.startsWith("flink.deployment.option."))
+      .map(x => x._1.replace("flink.deployment.property.", "") -> x._2)
   }
 
   private[this] def initParameter(): ParameterTool = {
@@ -183,9 +189,9 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          */
         val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
 
-        val rateInterval = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
+        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
 
-        val delay = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
 
         streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
@@ -204,7 +210,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
          */
         val attempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
-        val delay = FlinkUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
 
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
@@ -311,7 +317,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           /**
            * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
            */
-          val map = new java.util.HashMap[String, Object]()
+          val map = new JavaHashMap[String, Object]()
           val skipKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)
           parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).filterNot(x => skipKey.contains(x._1)).foreach(x => map.put(x._1, x._2))
           if (map.nonEmpty) {

@@ -1,12 +1,13 @@
 package com.streamxhub.spark.core.support.kafka.offset
 
 import com.streamxhub.common.util.Logger
-import kafka.api.{OffsetRequest, PartitionMetadata, PartitionOffsetRequestInfo, TopicMetadata, TopicMetadataRequest}
+import kafka.api._
 import kafka.common.TopicAndPartition
 import kafka.consumer.SimpleConsumer
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.{SparkConf, SparkException}
 
+import java.util.Properties
 import scala.collection.mutable
 import scala.util.Try
 
@@ -21,6 +22,13 @@ trait Offset extends Logger with Serializable {
   lazy val storeType: String = storeParams.getOrElse("type", "none")
 
   lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+
+  implicit def toProperty(map:Map[String,String]):Properties = {
+    require(map!=null)
+    val prop = new Properties()
+    map.foreach((a) => prop.setProperty(a._1,a._2))
+    prop
+  }
 
   lazy val reset: String = sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
 
