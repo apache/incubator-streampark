@@ -35,8 +35,8 @@ import java.util.Properties;
  */
 public class MySQLSource<T> {
 
-    private StreamingContext context;
-    private Properties jdbc;
+    private final StreamingContext context;
+    private final Properties jdbc;
 
     public MySQLSource(StreamingContext context) {
         this(context, (String) null);

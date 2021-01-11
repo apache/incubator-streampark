@@ -28,18 +28,21 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
 
+/**
+ * @author benjobs
+ */
 public class MongoSource<T> {
-    private StreamingContext ctx;
-    private Properties prop;
+    private StreamingContext context;
+    private Properties property;
 
-    public MongoSource(StreamingContext ctx, Properties prop) {
-        this.ctx = ctx;
-        this.prop = prop;
+    public MongoSource(StreamingContext context, Properties property) {
+        this.context = context;
+        this.property = property;
     }
 
     public DataStreamSource<T> getDataStream(String collectionName, MongoQueryFunction<T> queryFunction, MongoResultFunction<T> resultFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(collectionName,prop, queryFunction,resultFunction, null);
-        return ctx.getJavaEnv().addSource(sourceFunction);
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction(collectionName,property, queryFunction,resultFunction, null);
+        return context.getJavaEnv().addSource(sourceFunction);
     }
 
 }

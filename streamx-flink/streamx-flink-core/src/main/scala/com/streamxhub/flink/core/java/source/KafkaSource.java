@@ -35,15 +35,15 @@ import java.util.Properties;
  */
 public class KafkaSource<T> {
 
-    private StreamingContext ctx;
+    private StreamingContext context;
     private String[] topics;
     private String alias = "";
     private KafkaDeserializationSchema<T> deserializer;
     private WatermarkStrategy<KafkaRecord<T>> strategy;
     private Properties property = new Properties();
 
-    public KafkaSource(StreamingContext ctx) {
-        this.ctx = ctx;
+    public KafkaSource(StreamingContext context) {
+        this.context = context;
         this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
 
@@ -83,8 +83,8 @@ public class KafkaSource<T> {
     }
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
-        FlinkKafkaConsumer<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.ctx, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
-        return ctx.getJavaEnv().addSource(consumer);
+        FlinkKafkaConsumer<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.context, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
+        return context.getJavaEnv().addSource(consumer);
     }
 
 }
