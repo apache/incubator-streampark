@@ -38,6 +38,7 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 
 import java.io.File
+import java.util.{HashMap => JavaHashMap}
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions._
 import scala.util.Try
@@ -311,7 +312,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           /**
            * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
            */
-          val map = new java.util.HashMap[String, Object]()
+          val map = new JavaHashMap[String, Object]()
           val skipKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)
           parameter.getProperties.filter(_._1.startsWith(KEY_FLINK_STATE_ROCKSDB)).filterNot(x => skipKey.contains(x._1)).foreach(x => map.put(x._1, x._2))
           if (map.nonEmpty) {
