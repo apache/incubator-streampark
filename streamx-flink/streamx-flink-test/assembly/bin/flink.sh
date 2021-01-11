@@ -144,6 +144,15 @@ if ${os400}; then
   export QIBM_MULTI_THREADED=Y
 fi
 
+# (0) export HADOOP_CLASSPATH
+# shellcheck disable=SC2006
+if [ x"`hadoop classpath`" == x"" ];then
+  echo_r " Please make sure to export the HADOOP_CLASSPATH environment variable or have hadoop in your classpath"
+else
+   # shellcheck disable=SC2155
+  export HADOOP_CLASSPATH=`hadoop classpath`
+fi
+
 doStart() {
     local proper=""
     if [[ $# -eq 0 ]]; then
