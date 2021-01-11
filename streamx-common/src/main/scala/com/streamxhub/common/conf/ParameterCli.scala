@@ -22,7 +22,7 @@ package com.streamxhub.common.conf
 
 
 import com.streamxhub.common.util.PropertiesUtils
-import org.apache.commons.cli.DefaultParser
+import org.apache.commons.cli.{DefaultParser, Options}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -33,11 +33,11 @@ object ParameterCli {
   private[this] val optionPrefix = "flink.deployment.option."
   private[this] val dynamicPrefix = "flink.deployment.dynamic."
 
-  val flinkOptions = FlinkRunOption.allOptions
+  val flinkOptions: Options = FlinkRunOption.allOptions
 
   val parser = new DefaultParser
 
-  def main(args: Array[String]) = print(read(args))
+  def main(args: Array[String]): Unit = print(read(args))
 
   def read(args: Array[String]): String = {
     val action = args(0)
