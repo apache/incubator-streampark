@@ -22,14 +22,11 @@
 package com.streamxhub.spark.core
 
 import com.streamxhub.common.util.SystemPropertyUtils
-import com.streamxhub.spark.monitor.api.HeartBeat
-import com.streamxhub.spark.monitor.api.util.PropertiesUtil
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.sql.SparkSession
+import org.apache.spark.{SparkConf, SparkContext}
 
 import scala.annotation.meta.getter
 import scala.collection.mutable.ArrayBuffer
-import scala.collection.JavaConversions._
 
 /**
   *

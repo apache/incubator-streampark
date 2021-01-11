@@ -21,14 +21,10 @@
 
 package com.streamxhub.spark.core.sink
 
-import java.util.Properties
-
-import org.apache.hadoop.hbase.client.{ConnectionFactory, HTable}
-import org.apache.hadoop.hbase.{HBaseConfiguration, KeyValue}
-import org.apache.hadoop.hbase.io.ImmutableBytesWritable
-import org.apache.hadoop.hbase.mapreduce.{HFileOutputFormat2, LoadIncrementalHFiles}
-import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.fs.Path
+import org.apache.hadoop.hbase.client.ConnectionFactory
+import org.apache.hadoop.hbase.io.ImmutableBytesWritable
+import org.apache.hadoop.hbase.{HBaseConfiguration, KeyValue, TableName}
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
