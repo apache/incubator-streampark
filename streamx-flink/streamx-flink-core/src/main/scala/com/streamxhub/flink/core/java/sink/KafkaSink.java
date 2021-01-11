@@ -11,8 +11,10 @@ import java.util.Properties;
 
 public class KafkaSink<T> {
 
-    private StreamingContext context;
-    //common param...
+    private final StreamingContext context;
+    /**
+     * common param
+     */
     private Properties property;
     private Integer parallelism;
     private String name;

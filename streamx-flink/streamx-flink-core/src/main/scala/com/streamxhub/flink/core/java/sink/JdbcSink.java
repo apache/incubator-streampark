@@ -37,7 +37,7 @@ import java.util.Properties;
  */
 public class JdbcSink<T> {
 
-    private StreamingContext context;
+    private final StreamingContext context;
     private Properties jdbc;
     private SQLFromFunction<T> sqlFunc;
     private String dialect = Dialect.MYSQL().toString().toLowerCase();
