@@ -145,7 +145,8 @@ object FlinkSubmit extends Logger {
 
 
   private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo): Map[String, String] = {
-    submitInfo.appConf match {
+
+    val map = submitInfo.appConf match {
       case x if x.trim.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
       case x if x.trim.startsWith("prop://") =>
@@ -167,6 +168,7 @@ object FlinkSubmit extends Logger {
         new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
       case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
     }
+    map.map(x => x._1.replaceAll("^flink\\.deployment\\.(property|option)\\.", "") -> x._2)
   }
 
   private[this] def getCustomCommandLines(submitInfo: SubmitInfo, appName: String, appMain: String): (Configuration, JavaList[CustomCommandLine]) = {
