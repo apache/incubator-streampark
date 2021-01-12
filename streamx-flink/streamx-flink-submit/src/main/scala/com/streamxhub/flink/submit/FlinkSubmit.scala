@@ -303,17 +303,17 @@ object FlinkSubmit extends Logger {
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
 
-    val paramArgs = new ArrayBuffer[String]()
-    Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => paramArgs += x)
-    paramArgs += KEY_FLINK_CONF("--")
-    paramArgs += submitInfo.appConf
-    paramArgs += KEY_FLINK_HOME("--")
-    paramArgs += flinkHdfsHome
-    paramArgs += KEY_APP_NAME("--")
-    paramArgs += appName
+    val programArgs = new ArrayBuffer[String]()
+    Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => programArgs += x)
+    programArgs += KEY_FLINK_CONF("--")
+    programArgs += submitInfo.appConf
+    programArgs += KEY_FLINK_HOME("--")
+    programArgs += flinkHdfsHome
+    programArgs += KEY_APP_NAME("--")
+    programArgs += appName
     if (submitInfo.overrideOption.containsKey("parallelism")) {
-      paramArgs += s"--$KEY_FLINK_PARALLELISM"
-      paramArgs += submitInfo.overrideOption.get("parallelism").toString
+      programArgs += s"--$KEY_FLINK_PARALLELISM"
+      programArgs += submitInfo.overrideOption.get("parallelism").toString
     }
 
     //yarn.provided.lib.dirs
@@ -331,7 +331,7 @@ object FlinkSubmit extends Logger {
     //main class
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, appMain)
     //arguments...
-    effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, paramArgs.toList.asJava)
+    effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
     println("-----------------------")
     println("Effective executor configuration:", effectiveConfiguration)
