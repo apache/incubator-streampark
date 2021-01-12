@@ -472,7 +472,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Map<String, Object> property = application.getOptionMap();
 
-        StringBuffer option = new StringBuffer();
+        StringBuilder option = new StringBuilder();
         if (appParam.getAllowNonRestored()) {
             option.append(" -n ");
         }
