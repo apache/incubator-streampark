@@ -51,17 +51,17 @@
           placeholder="请选择Application type"
           @change="handleAppType"
           v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
-          <a-select-option value="1">
+          <a-select-option value='1'>
             StreamX Flink
           </a-select-option>
-          <a-select-option value="2">
+          <a-select-option value='2'>
             Apache Flink
           </a-select-option>
         </a-select>
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 2"
+        v-if="appType === 2"
         label="Program Jar"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -79,7 +79,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 2"
+        v-if="appType === 2"
         label="Program Main"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -90,7 +90,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 1"
+        v-if="appType === 1"
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -459,7 +459,7 @@ export default {
     },
 
     handleAppType (val) {
-      this.appType = val
+      this.appType = parseInt(val)
       this.handleConfOrJar()
     },
 
@@ -600,9 +600,6 @@ export default {
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }
-
-          console.log(params)
-          console.log(abc.name)
 
           if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
