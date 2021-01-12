@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
@@ -50,6 +51,8 @@ import scala.util.{Failure, Success, Try}
 
 object FlinkSubmit extends Logger {
 
+
+  private[this] val propertyPrefix = "flink.deployment.property."
   private[this] val optionPrefix = "flink.deployment.option."
 
   private[this] var flinkDefaultConfiguration: Configuration = _
@@ -151,8 +154,8 @@ object FlinkSubmit extends Logger {
 
   //----------Public Method end ------------------
 
-  private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo): Map[String, String] = {
-    submitInfo.appConf match {
+  private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo, prefix: String = ""): Map[String, String] = {
+    val map = submitInfo.appConf match {
       case x if x.trim.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
       case x if x.trim.startsWith("prop://") =>
@@ -174,6 +177,12 @@ object FlinkSubmit extends Logger {
         new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
       case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
     }
+    prefix match {
+      case "" | null => map
+      case other => map
+        .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
+        .map(x => x._1.replace(other, "") -> x._2)
+    }
   }
 
   private[this] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
@@ -188,7 +197,7 @@ object FlinkSubmit extends Logger {
   }
 
   private[this] def getEffectiveCommandLine(submitInfo: SubmitInfo, customCommandLines: JavaList[CustomCommandLine]): CommandLine = {
-    val appConfigMap = getConfigMapFromSubmit(submitInfo)
+    val appConfigMap = getConfigMapFromSubmit(submitInfo, optionPrefix)
     //merge options....
     val customCommandLineOptions = new Options
     for (customCommandLine <- customCommandLines) {
@@ -201,12 +210,11 @@ object FlinkSubmit extends Logger {
     //read and verify user config...
     val cliArgs = {
       val optionMap = new mutable.HashMap[String, Any]()
-      appConfigMap.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
-        val key = x._1.drop(optionPrefix.length)
+      appConfigMap.filter(x => {
         //验证参数是否合法...
-        val verify = commandLineOptions.hasOption(key)
+        val verify = commandLineOptions.hasOption(x._1)
         if (!verify) {
-          println(s"[StreamX] param:$key is error,skip it.")
+          println(s"[StreamX] param:${x._1} is error,skip it.")
         }
         verify
       }).foreach(x => {
@@ -289,7 +297,7 @@ object FlinkSubmit extends Logger {
       case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
     }
 
-    val appConfigMap = getConfigMapFromSubmit(submitInfo)
+    val appConfigMap = getConfigMapFromSubmit(submitInfo, propertyPrefix)
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
 
