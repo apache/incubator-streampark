@@ -601,6 +601,9 @@ export default {
             description: values.description
           }
 
+          console.log(params)
+          console.log(abc.name)
+
           if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
             const format = configVal.endsWith('.properties') ? 2 : 1
