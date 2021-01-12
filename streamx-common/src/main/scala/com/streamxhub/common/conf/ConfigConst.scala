@@ -80,8 +80,6 @@ object ConfigConst {
 
   val KEY_FLINK_APP_NAME = "yarn.application.name"
 
-  val KEY_FLINK_APP_MAIN = "class"
-
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
