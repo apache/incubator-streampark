@@ -334,6 +334,8 @@ class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFu
 
 case class Transaction(transactionId: String = Utils.uuid(), sql: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
   def +(text: String): Unit = sql.add(text)
+
+  override def toString: String = s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
 }
 
 
