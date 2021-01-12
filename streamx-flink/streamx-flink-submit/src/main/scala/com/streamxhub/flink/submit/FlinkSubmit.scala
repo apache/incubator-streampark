@@ -57,7 +57,7 @@ object FlinkSubmit extends Logger {
 
   private[this] var jvmProfilerJar: String = _
 
-  private[this] val configurationMap = new mutable.HashMap[String, Configuration]()
+  private[this] lazy val configurationMap = new mutable.HashMap[String, Configuration]()
 
   private[this] lazy val FLINK_HOME: String = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
