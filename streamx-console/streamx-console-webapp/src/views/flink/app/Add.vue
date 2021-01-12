@@ -201,7 +201,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Taskmanager Memory Options"
+        label="Jobmanager Memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -210,14 +210,14 @@
           mode="multiple"
           :maxTagCount="maxTagCount"
           placeholder="请选择要设置的资源参数"
-          @change="handleTmMemory"
+          @change="handleJmMemory"
           v-decorator="['options']">
           <a-select-option
             v-for="(conf,index) in options"
-            v-if="conf.group === 'taskmanager-memory'"
+            v-if="conf.group === 'jobmanager-memory'"
             :key="index"
-            :value="conf.name">
-            {{ conf.key }}
+            :value="conf.key">
+            {{ conf.name }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -225,9 +225,9 @@
       <a-form-item
         class="conf-item"
         v-for="(conf,index) in options"
-        v-if="tmMemoryItems.includes(conf.key)"
+        v-if="jmMemoryItems.includes(conf.key)"
         :key="index"
-        :label="conf.name"
+        :label="conf.name.replace(/jobmanager.memory./g,'')"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -256,7 +256,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Jobmanager Memory Options"
+        label="Taskmanager Memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -265,14 +265,14 @@
           mode="multiple"
           :maxTagCount="maxTagCount"
           placeholder="请选择要设置的资源参数"
-          @change="handleJmMemory"
+          @change="handleTmMemory"
           v-decorator="['options']">
           <a-select-option
             v-for="(conf,index) in options"
-            v-if="conf.group === 'jobmanager-memory'"
+            v-if="conf.group === 'taskmanager-memory'"
             :key="index"
-            :value="conf.name">
-            {{ conf.key }}
+            :value="conf.key">
+            {{ conf.name }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -280,9 +280,9 @@
       <a-form-item
         class="conf-item"
         v-for="(conf,index) in options"
-        v-if="jmMemoryItems.includes(conf.key)"
+        v-if="tmMemoryItems.includes(conf.key)"
         :key="index"
-        :label="conf.name"
+        :label="conf.name.replace(/taskmanager.memory./g,'')"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -433,11 +433,11 @@ export default {
     },
 
     handleJmMemory (name) {
-      this.jmMemoryItems = name.replace(/\.|\-/g,'_')
+      this.jmMemoryItems = name
     },
 
     handleTmMemory (name) {
-      this.tmMemoryItems = name.replace(/\.|\-/g, '_')
+      this.tmMemoryItems = name
     },
 
     handleJobName (confFile) {
