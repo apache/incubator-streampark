@@ -187,75 +187,38 @@
         </a-select>
       </a-form-item>
 
-      <a-card title="jobmanager memory">
-        <a-form-item
-          class="conf-item"
-          v-for="(conf,index) in options"
-          v-if="configItems.includes(conf.key) && conf.key.startsWith('jobmanager.memory')"
-          :key="index"
-          :label="conf.name"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-input
-            v-if="conf.type === 'input'"
-            type="text"
-            :placeholder="conf.placeholder"
-            v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-          <a-switch
-            v-if="conf.type === 'switch'"
-            disabled
-            checkedChildren="开"
-            unCheckedChildren="关"
-            checked-children="true"
-            un-checked-children="false"
-            v-model="switchDefaultValue"
-            v-decorator="[`${conf.name}`]"/>
-          <a-input-number
-            v-if="conf.type === 'number'"
-            :min="conf.min"
-            :max="conf.max"
-            :defaultValue="conf.value"
-            :step="conf.step"
-            v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-          <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-          <p class="conf-desc">{{ conf.description }}</p>
-        </a-form-item>
-      </a-card>
-
-      <a-card title="taskmanager memory">
-        <a-form-item
-          class="conf-item"
-          v-for="(conf,index) in options"
-          v-if="configItems.includes(conf.key) && conf.key.startsWith('taskmanager.memory')"
-          :key="index"
-          :label="conf.name"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-          <a-input
-            v-if="conf.type === 'input'"
-            type="text"
-            :placeholder="conf.placeholder"
-            v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-          <a-switch
-            v-if="conf.type === 'switch'"
-            disabled
-            checkedChildren="开"
-            unCheckedChildren="关"
-            checked-children="true"
-            un-checked-children="false"
-            v-model="switchDefaultValue"
-            v-decorator="[`${conf.name}`]"/>
-          <a-input-number
-            v-if="conf.type === 'number'"
-            :min="conf.min"
-            :max="conf.max"
-            :defaultValue="conf.value"
-            :step="conf.step"
-            v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-          <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-          <p class="conf-desc">{{ conf.description }}</p>
-        </a-form-item>
-      </a-card>
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="configItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input
+          v-if="conf.type === 'input'"
+          type="text"
+          :placeholder="conf.placeholder"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-switch
+          v-if="conf.type === 'switch'"
+          disabled
+          checkedChildren="开"
+          unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="switchDefaultValue"
+          v-decorator="[`${conf.name}`]"/>
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.value"
+          :step="conf.step"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
 
       <a-form-item
         label="Dynamic Option"
