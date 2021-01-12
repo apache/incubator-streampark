@@ -83,7 +83,7 @@ export default [
     key: 'jobmanager_memory_heap_size',
     name: 'jobmanager.memory.heap.size',
     placeholder: 'JVM Heap Memory size for JobManager',
-    description: 'JobManager Heap,recommended JVM Heap size is 128.000mb (134217728 bytes)',
+    description: 'JobManager Heap,recommended 128.000mb (134217728 bytes)',
     group: 'jobmanager-memory',
     type: 'number',
     min: 1,
