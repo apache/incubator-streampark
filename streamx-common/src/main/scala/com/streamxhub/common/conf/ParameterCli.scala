@@ -21,6 +21,7 @@
 package com.streamxhub.common.conf
 
 
+import com.streamxhub.common.conf.ConfigConst.{KEY_FLINK_DEPLOYMENT_OPTION_PREFIX, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX}
 import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.{DefaultParser, Options}
 
@@ -30,13 +31,13 @@ import scala.util.Try
 
 object ParameterCli {
 
-  private[this] val propertyPrefix = "flink.deployment.property."
-  private[this] val optionPrefix = "flink.deployment.option."
+  private[this] val propertyPrefix = KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX
+  private[this] val optionPrefix = KEY_FLINK_DEPLOYMENT_OPTION_PREFIX
   private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
-  val flinkOptions: Options = FlinkRunOption.allOptions
+  lazy val flinkOptions: Options = FlinkRunOption.allOptions
 
-  val parser = new DefaultParser
+  lazy val parser = new DefaultParser
 
   def main(args: Array[String]): Unit = print(read(args))
 
@@ -113,12 +114,8 @@ object ParameterCli {
           }
         })
     }
-    optionToArg(optionMap)
-  }
-
-  def optionToArg(option: mutable.Map[String, Any]): Array[String] = {
     val array = new ArrayBuffer[String]
-    option.foreach(x => {
+    optionMap.foreach(x => {
       array += x._1
       if (x._2.isInstanceOf[String]) {
         array += x._2.toString
