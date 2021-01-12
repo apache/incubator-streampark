@@ -73,7 +73,7 @@ object FlinkSubmit extends Logger {
          |      "savePint: ${submitInfo.savePoint}, "
          |      "flameGraph": ${submitInfo.flameGraph != null}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
-         |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+         |      "option: ${submitInfo.option},"
          |      "dynamicOption": ${submitInfo.dynamicOption.mkString(" ")},"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
