@@ -153,7 +153,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="rumMaxTagCount"
+          :maxTagCount="runMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -371,7 +371,7 @@ export default {
   components: { Conf },
   data () {
     return {
-      rumMaxTagCount: 1,
+      runMaxTagCount: 1,
       jmMaxTagCount: 1,
       tmMaxTagCount: 1,
       projectList: [],
