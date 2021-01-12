@@ -225,16 +225,6 @@ object FlinkSubmit extends Logger {
         optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
       }
 
-      //页面定义的参数优先级大于app配置文件
-      submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
-        val option = commandLineOptions.getOption(x._1)
-        if (option.hasArg) {
-          optionMap += s"-${option.getOpt}" -> x._2.toString
-        } else {
-          optionMap += s"-${option.getOpt}" -> true
-        }
-      })
-
       val array = new ArrayBuffer[String]()
       optionMap.foreach(x => {
         array += x._1
@@ -263,7 +253,11 @@ object FlinkSubmit extends Logger {
         array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
-      //-D 动态参数配置....
+      //页面定义的参数优先级大于app配置文件
+      submitInfo.option.split("\\s").foreach(x => array += x)
+      //属性参数...
+      submitInfo.property.foreach(x => array += s"-D${x._1}" -> x._2)
+      //-D 其他动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
       array.toArray
@@ -304,9 +298,9 @@ object FlinkSubmit extends Logger {
     programArgs += flinkHdfsHome
     programArgs += KEY_APP_NAME("--")
     programArgs += appName
-    if (submitInfo.overrideOption.containsKey("parallelism")) {
+    if (submitInfo.property.containsKey(KEY_FLINK_PARALLELISM)) {
       programArgs += s"--$KEY_FLINK_PARALLELISM"
-      programArgs += submitInfo.overrideOption.get("parallelism").toString
+      programArgs += submitInfo.property.get(KEY_FLINK_PARALLELISM).toString
     }
 
     //yarn.provided.lib.dirs
@@ -368,7 +362,8 @@ object FlinkSubmit extends Logger {
                         applicationType: String,
                         savePoint: String,
                         flameGraph: JavaMap[String, Serializable],
-                        overrideOption: JavaMap[String, Any],
+                        option: String,
+                        property: JavaMap[String, Any],
                         dynamicOption: Array[String],
                         args: String)
 
