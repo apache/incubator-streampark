@@ -301,7 +301,7 @@ object FlinkSubmit extends Logger {
 
     val appConfigMap = getConfigMapFromSubmit(submitInfo)
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
-    val appMain = appConfigMap(KEY_FLINK_APP_MAIN)
+    val appMain = appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
 
     val paramArgs = new ArrayBuffer[String]()
     Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => paramArgs += x)

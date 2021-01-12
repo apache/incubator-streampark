@@ -44,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.Configuration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.TaskManagerOptions;
@@ -447,7 +448,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             case APACHE_FLINK:
                 appConf = String.format(
                         "json://{\"%s\":\"%s\"}",
-                        ConfigConst.KEY_FLINK_APP_MAIN(),
+                        ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
                         application.getMainClass()
                 );
                 classPath = String.format("%s/%s/%s", workspaceWithSchemaAndNameService, application.getId(), application.getModule());
