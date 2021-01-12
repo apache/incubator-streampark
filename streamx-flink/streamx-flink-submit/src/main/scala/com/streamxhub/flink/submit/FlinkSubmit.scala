@@ -39,7 +39,7 @@ import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.{File, Serializable}
-import java.lang.{Boolean => JBool}
+import java.lang.{Boolean => JavaBool}
 import java.util.concurrent.{CompletableFuture, TimeUnit}
 import java.util.{Collections, Arrays => JavaArrays, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
@@ -120,7 +120,7 @@ object FlinkSubmit extends Logger {
     applicationId
   }
 
-  def stop(appId: String, jobStringId: String, savePoint: JBool, drain: JBool): String = {
+  def stop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     val jobID = getJobID(jobStringId)
     val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
     val savePointDir = getOptionFromDefaultFlinkConfig(
