@@ -22,7 +22,6 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
