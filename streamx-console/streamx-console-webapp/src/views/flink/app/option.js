@@ -102,6 +102,7 @@ export default [
     key: 'jobmanager_memory_jvm_metaspace_size',
     name: 'jobmanager.memory.jvm-metaspace.size',
     placeholder: 'JVM Metaspace Size for the JobManage',
+    description: 'JVM Metaspace Size for the JobManage',
     group: 'jobmanager-memory',
     type: 'number',
     min: 1,
