@@ -192,7 +192,7 @@
         v-for="(conf,index) in options"
         v-if="configItems.includes(conf.key)"
         :key="index"
-        :label="conf.key"
+        :label="conf.name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
