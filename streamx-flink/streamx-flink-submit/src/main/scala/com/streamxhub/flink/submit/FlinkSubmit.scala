@@ -50,10 +50,6 @@ import scala.util.{Failure, Success, Try}
 
 object FlinkSubmit extends Logger {
 
-
-  private[this] val propertyPrefix = "flink.deployment.property."
-  private[this] val optionPrefix = "flink.deployment.option."
-
   private[this] var flinkDefaultConfiguration: Configuration = _
 
   private[this] var jvmProfilerJar: String = _
@@ -196,7 +192,7 @@ object FlinkSubmit extends Logger {
   }
 
   private[this] def getEffectiveCommandLine(submitInfo: SubmitInfo, customCommandLines: JavaList[CustomCommandLine]): CommandLine = {
-    val appConfigMap = getConfigMapFromSubmit(submitInfo, optionPrefix)
+    val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
     //merge options....
     val customCommandLineOptions = new Options
     for (customCommandLine <- customCommandLines) {
@@ -217,7 +213,7 @@ object FlinkSubmit extends Logger {
         }
         verify
       }).foreach(x => {
-        val opt = commandLineOptions.getOption(x._1.drop(optionPrefix.length).trim).getOpt
+        val opt = commandLineOptions.getOption(x._1.drop(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX.length).trim).getOpt
         Try(x._2.toBoolean).getOrElse(x._2) match {
           case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
           case v => optionMap += s"-$opt" -> v
@@ -296,7 +292,7 @@ object FlinkSubmit extends Logger {
       case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
     }
 
-    val appConfigMap = getConfigMapFromSubmit(submitInfo, propertyPrefix)
+    val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
     val appMain = appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
 

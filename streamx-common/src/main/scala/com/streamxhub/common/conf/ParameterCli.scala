@@ -21,6 +21,7 @@
 package com.streamxhub.common.conf
 
 
+import com.streamxhub.common.conf.ConfigConst.{KEY_FLINK_DEPLOYMENT_OPTION_PREFIX, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX}
 import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.{DefaultParser, Options}
 
@@ -30,8 +31,8 @@ import scala.util.Try
 
 object ParameterCli {
 
-  private[this] val propertyPrefix = "flink.deployment.property."
-  private[this] val optionPrefix = "flink.deployment.option."
+  private[this] val propertyPrefix = KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX
+  private[this] val optionPrefix = KEY_FLINK_DEPLOYMENT_OPTION_PREFIX
   private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
   val flinkOptions: Options = FlinkRunOption.allOptions

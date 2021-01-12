@@ -22,7 +22,6 @@ package com.streamxhub.common.conf
 
 
 object ConfigConst {
-
   /**
    *
    * about parameter...
@@ -75,6 +74,10 @@ object ConfigConst {
   def KEY_FLINK_HOME(prefix: String = null): String = if (prefix == null) "flink.home" else s"${prefix}flink.home"
 
   def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
+
+  val KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX = "flink.deployment.property."
+
+  val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
 
   val KEY_FLINK_PARALLELISM = "parallelism.default"
 
