@@ -22,7 +22,6 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
-import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
@@ -112,7 +111,9 @@ object FlinkSubmit extends Logger {
       println("Flink Job Started: applicationId: " + applicationId)
       println()
       println("------------------------------------")
-    } finally if (clusterDescriptor != null) clusterDescriptor.close()
+    } finally if (clusterDescriptor != null) {
+      clusterDescriptor.close()
+    }
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
@@ -240,9 +241,6 @@ object FlinkSubmit extends Logger {
         }
       })
 
-      //-D 动态参数配置....
-      submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-
       //-jvm profile support
       if (submitInfo.flameGraph != null) {
         //find jvm-profiler
@@ -261,6 +259,10 @@ object FlinkSubmit extends Logger {
         val param = buffer.toString.dropRight(1)
         array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
+
+      //-D 动态参数配置....
+      submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+
       array.toArray
     }
 
@@ -274,18 +276,6 @@ object FlinkSubmit extends Logger {
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
-    /**
-     * dynamicOption(Highest priority...)
-     */
-    val properties = commandLine.getOptionProperties(FlinkRunOption.DYNAMIC_PROPERTIES.getOpt)
-    properties.stringPropertyNames.foreach((key: String) => {
-      val value = properties.getProperty(key)
-      if (value != null) {
-        effectiveConfiguration.setString(key, value)
-      } else {
-        effectiveConfiguration.setBoolean(key, true)
-      }
-    })
 
     val flinkLocalHome = FLINK_HOME
     val flinkName = new File(flinkLocalHome).getName
