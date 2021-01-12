@@ -51,10 +51,10 @@
           placeholder="请选择Application type"
           @change="handleAppType"
           v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
-          <a-select-option value='1'>
+          <a-select-option value="1">
             StreamX Flink
           </a-select-option>
-          <a-select-option value='2'>
+          <a-select-option value="2">
             Apache Flink
           </a-select-option>
         </a-select>
@@ -559,7 +559,7 @@ export default {
         if (!err) {
           const options = {}
           for (const key in values) {
-            let k = key.replace(/\.|\-/g,'_')
+            const k = key.replace(/\.|\-/g, '_')
             if (this.configItems.includes(k)) {
               const v = values[k]
               if (v !== '') {
