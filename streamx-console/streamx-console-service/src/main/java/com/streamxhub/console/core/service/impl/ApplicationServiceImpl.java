@@ -470,17 +470,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Map<String, Object> overrideOption = application.getOptionMap();
+        Map<String, Object> property = application.getOptionMap();
 
-        if (CommonUtil.notEmpty(overrideOption)) {
-            if (appParam.getAllowNonRestored()) {
-                overrideOption.put("allowNonRestoredState", true);
-            }
-        } else {
-            if (appParam.getAllowNonRestored()) {
-                overrideOption = new HashMap<>(1);
-                overrideOption.put("allowNonRestoredState", true);
-            }
+        StringBuffer option = new StringBuffer();
+        if (appParam.getAllowNonRestored()) {
+            option.append(" -n ");
         }
 
         String[] dynamicOption = CommonUtil.notEmpty(application.getDynamicOptions())
@@ -506,7 +500,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.getApplicationType().getName(),
                 savePointDir,
                 flameGraph,
-                overrideOption,
+                option.toString(),
+                property,
                 dynamicOption,
                 application.getArgs()
         );

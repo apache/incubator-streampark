@@ -166,13 +166,22 @@
               {{ conf.key }} ( {{ conf.name }} )
             </a-select-option>
           </a-select-opt-group>
-          <a-select-opt-group label="yarn-cluster options">
+          <a-select-opt-group label="jobmanager-memory options">
             <a-select-option
               v-for="(conf,index) in options"
-              v-if="conf.group === 'yarn-cluster'"
+              v-if="conf.group === 'jobmanager-memory'"
               :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
+              :value="conf.key">
+              {{ conf.key }}
+            </a-select-option>
+          </a-select-opt-group>
+          <a-select-opt-group label="taskmanager-memory options">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'taskmanager-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.key }}
             </a-select-option>
           </a-select-opt-group>
         </a-select>
@@ -203,6 +212,9 @@
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.value"
+          :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
@@ -448,7 +460,14 @@ export default {
             if (this.configItems.includes(k)) {
               const v = values[k]
               if (v !== '') {
-                options[k] = v
+                if (k === 'parallelism') {
+                  options['parallelism.default'] = v
+                }
+                if (k === 'yarnslots') {
+                  options['taskmanager.numberOfTaskSlots'] = v
+                } else {
+                  options[k] = v
+                }
               }
             }
           }
@@ -464,7 +483,7 @@ export default {
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }
-          if (this.appType == 1) {
+          if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
             const format = configVal.endsWith('.properties') ? 2 : 1
             params['format'] = format
