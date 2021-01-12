@@ -558,8 +558,7 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          for (const key in values) {
-            const k = key.replace(/\.|\-/g, '_')
+          for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
               if (v !== '') {
