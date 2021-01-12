@@ -157,33 +157,13 @@
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
-          <a-select-opt-group label="run options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'run'"
-              :key="index"
-              :value="conf.key">
-              {{ conf.opt }} ( {{ conf.name }} )
-            </a-select-option>
-          </a-select-opt-group>
-          <a-select-opt-group label="jobmanager-memory options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'jobmanager-memory'"
-              :key="index"
-              :value="conf.key">
-              {{ conf.key }}
-            </a-select-option>
-          </a-select-opt-group>
-          <a-select-opt-group label="taskmanager-memory options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'taskmanager-memory'"
-              :key="index"
-              :value="conf.key">
-              {{ conf.key }}
-            </a-select-option>
-          </a-select-opt-group>
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'run'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.opt }} ( {{ conf.name }} )
+          </a-select-option>
         </a-select>
       </a-form-item>
 
@@ -191,6 +171,116 @@
         class="conf-item"
         v-for="(conf,index) in options"
         v-if="configItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input
+          v-if="conf.type === 'input'"
+          type="text"
+          :placeholder="conf.placeholder"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-switch
+          v-if="conf.type === 'switch'"
+          disabled
+          checkedChildren="开"
+          unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="switchDefaultValue"
+          v-decorator="[`${conf.name}`]"/>
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.value"
+          :step="conf.step"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Taskmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="maxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleTmMemory"
+          v-decorator="['options']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'taskmanager-memory'"
+            :key="index"
+            :value="conf.name">
+            {{ conf.key }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="tmMemoryItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input
+          v-if="conf.type === 'input'"
+          type="text"
+          :placeholder="conf.placeholder"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <a-switch
+          v-if="conf.type === 'switch'"
+          disabled
+          checkedChildren="开"
+          unCheckedChildren="关"
+          checked-children="true"
+          un-checked-children="false"
+          v-model="switchDefaultValue"
+          v-decorator="[`${conf.name}`]"/>
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.value"
+          :step="conf.step"
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Jobmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="maxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleJmMemory"
+          v-decorator="['options']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'jobmanager-memory'"
+            :key="index"
+            :value="conf.name">
+            {{ conf.key }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="jmMemoryItems.includes(conf.key)"
         :key="index"
         :label="conf.name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
@@ -294,6 +384,8 @@ export default {
       configOverride: null,
       configSource: [],
       configItems: [],
+      jmMemoryItems: [],
+      tmMemoryItems: [],
       form: null,
       options: configOptions,
       confVisiable: false
@@ -338,6 +430,14 @@ export default {
 
     handleConf (name) {
       this.configItems = name
+    },
+
+    handleJmMemory (name) {
+      this.jmMemoryItems = name.replace(/\.|\-/g,'_')
+    },
+
+    handleTmMemory (name) {
+      this.tmMemoryItems = name.replace(/\.|\-/g, '_')
     },
 
     handleJobName (confFile) {
@@ -456,7 +556,8 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          for (const k in values) {
+          for (const key in values) {
+            let k = key.replace(/\.|\-/g,'_')
             if (this.configItems.includes(k)) {
               const v = values[k]
               if (v !== '') {
@@ -468,6 +569,20 @@ export default {
                 } else {
                   options[k] = v
                 }
+              }
+            }
+
+            if (this.jmMemoryItems.includes(k)) {
+              const v = values[k]
+              if (v !== '') {
+                options[k] = v
+              }
+            }
+
+            if (this.tmMemoryItems.includes(k)) {
+              const v = values[k]
+              if (v !== '') {
+                options[k] = v
               }
             }
           }
