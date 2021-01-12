@@ -357,7 +357,7 @@ object FlinkSubmit extends Logger {
 
   private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
     if (flinkDefaultConfiguration == null) {
-      val flinkLocalHome = System.getenv("FLINK_HOME")
+      val flinkLocalHome = FLINK_HOME
       require(flinkLocalHome != null)
       val flinkLocalConfDir = flinkLocalHome.concat("/conf")
       //获取flink的配置
