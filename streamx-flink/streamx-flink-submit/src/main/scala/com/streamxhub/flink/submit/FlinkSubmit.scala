@@ -256,7 +256,7 @@ object FlinkSubmit extends Logger {
       //页面定义的参数优先级大于app配置文件
       submitInfo.option.split("\\s").foreach(x => array += x)
       //属性参数...
-      submitInfo.property.foreach(x => array += s"-D${x._1}" -> x._2)
+      submitInfo.property.foreach(x => array += s"-D${x._1}=${x._2}")
       //-D 其他动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
 
