@@ -156,7 +156,7 @@
           :maxTagCount="runMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
-          v-decorator="['options']">
+          v-decorator="['runOptions']">
           <a-select-option
             v-for="(conf,index) in options"
             v-if="conf.group === 'run'"
@@ -211,7 +211,7 @@
           :maxTagCount="jmMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleJmMemory"
-          v-decorator="['options']">
+          v-decorator="['jmOptions']">
           <a-select-option
             v-for="(conf,index) in options"
             v-if="conf.group === 'jobmanager-memory'"
@@ -266,7 +266,7 @@
           :maxTagCount="tmMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleTmMemory"
-          v-decorator="['options']">
+          v-decorator="['tmOptions']">
           <a-select-option
             v-for="(conf,index) in options"
             v-if="conf.group === 'taskmanager-memory'"
@@ -467,7 +467,7 @@ export default {
       if (this.module && this.appType) {
         this.form.resetFields(['config', 'jobName'])
         this.configOverride = null
-        if (this.appType == 1) {
+        if (this.appType === 1) {
           listConf({
             id: this.projectId,
             module: this.module
