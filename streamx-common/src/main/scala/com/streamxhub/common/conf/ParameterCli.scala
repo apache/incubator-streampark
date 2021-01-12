@@ -32,6 +32,7 @@ object ParameterCli {
 
   private[this] val propertyPrefix = "flink.deployment.property."
   private[this] val optionPrefix = "flink.deployment.option."
+  private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
   val flinkOptions: Options = FlinkRunOption.allOptions
 
@@ -47,9 +48,6 @@ object ParameterCli {
     } else {
       PropertiesUtils.fromYamlFile(conf)
     }
-    map.map(x => {
-      map
-    })
     val programArgs = args.drop(2)
     action match {
       case "--option" =>
@@ -62,10 +60,16 @@ object ParameterCli {
             buffer.append(s" ${x.getValue()}")
           }
         })
+        map.getOrElse(optionMain, null) match {
+          case null =>
+          case mainClass => buffer.append(s" -c $mainClass")
+        }
         buffer.toString.trim
       case "--property" =>
         val buffer = new StringBuffer()
-        map.filter(x => x._1.startsWith(propertyPrefix) && x._2.nonEmpty).foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
+        map
+          .filter(x => x._1 != optionMain && x._1.startsWith(propertyPrefix) && x._2.nonEmpty)
+          .foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
         buffer.toString.trim
       case "--name" =>
         map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
