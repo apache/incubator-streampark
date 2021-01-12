@@ -1,6 +1,7 @@
 export default [
   {
-    key: '-m',
+    opt: '-m',
+    key: 'jobmanager',
     name: 'jobmanager',
     placeholder: '-m,--jobmanager <arg>',
     description: 'JobManager 地址(yarn-cluster)',
@@ -16,7 +17,8 @@ export default [
     }
   },
   {
-    key: '-z',
+    opt: '-z',
+    key: 'zookeeperNamespace',
     name: 'zookeeperNamespace',
     placeholder: '-z,--zookeeperNamespace <arg>',
     description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
@@ -32,7 +34,8 @@ export default [
     }
   },
   {
-    key: '-d',
+    opt: '-d',
+    key: 'detached',
     name: 'detached',
     placeholder: '-d,--detached',
     description: 'If present, runs the job in detached mode',
@@ -44,7 +47,8 @@ export default [
     }
   },
   {
-    key: '-sae',
+    opt: '-sae',
+    key: 'shutdownOnAttachedExit',
     name: 'shutdownOnAttachedExit',
     placeholder: '-sae,--shutdownOnAttachedExit',
     description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
@@ -57,7 +61,8 @@ export default [
   },
   // ------------------------------------------------------- jobmanager-memory -------------------------------------------------------
   {
-    key: 'jobmanager.memory.flink.size',
+    key: 'jobmanager_memory_flink_size',
+    name: 'jobmanager.memory.flink.size',
     placeholder: 'Total Flink Memory size for the JobManage',
     description: 'JobManager总内存大小 (单位: MB)',
     group: 'jobmanager-memory',
@@ -75,7 +80,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.heap.size',
+    key: 'jobmanager_memory_heap_size',
+    name: 'jobmanager.memory.heap.size',
     placeholder: 'JVM Heap Memory size for JobManager',
     description: 'JobManager Heap,recommended JVM Heap size is 128.000mb (134217728 bytes)',
     group: 'jobmanager-memory',
@@ -93,7 +99,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.jvm-metaspace.size',
+    key: 'jobmanager_memory_jvm_metaspace_size',
+    name: 'jobmanager.memory.jvm-metaspace.size',
     placeholder: 'JVM Metaspace Size for the JobManage',
     group: 'jobmanager-memory',
     type: 'number',
@@ -110,7 +117,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.jvm-overhead.fraction',
+    key: 'jobmanager_memory_jvm_overhead_fraction',
+    name: 'jobmanager.memory.jvm-overhead.fraction',
     placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
     description: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
     group: 'jobmanager-memory',
@@ -128,7 +136,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.jvm-overhead.max',
+    key: 'jobmanager_memory_jvm_overhead_max',
+    name: 'jobmanager.memory.jvm-overhead.max',
     placeholder: 'Max JVM Overhead size for the JobManager',
     group: 'jobmanager-memory',
     type: 'number',
@@ -146,7 +155,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.jvm-overhead.min',
+    key: 'jobmanager_memory_jvm_overhead_min',
+    name: 'jobmanager.memory.jvm.overhead.min',
     placeholder: 'Min JVM Overhead size for the JobManager',
     description: 'Min JVM Overhead size for the JobManager',
     group: 'jobmanager-memory',
@@ -164,7 +174,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.off-heap.size',
+    key: 'jobmanager_memory_off_heap_size',
+    name: 'jobmanager.memory.off-heap.size',
     placeholder: 'Off-heap Memory size for JobManager',
     description: 'Off-heap Memory size for JobManager',
     group: 'jobmanager-memory',
@@ -182,7 +193,8 @@ export default [
     }
   },
   {
-    key: 'jobmanager.memory.process.size',
+    key: 'jobmanager_memory_process_size',
+    name: 'jobmanager.memory.process.size',
     placeholder: 'Total Process Memory size for the JobManager',
     description: 'Total Process Memory size for the JobManager',
     group: 'jobmanager-memory',
@@ -201,7 +213,8 @@ export default [
   },
   // ------------------------------------------------------- taskmanager-memory -------------------------------------------------------
   {
-    key: 'taskmanager.memory.flink.size',
+    key: 'taskmanager_memory_flink_size',
+    name: 'taskmanager.memory.flink.size',
     placeholder: 'Total Flink Memory size for the TaskExecutors',
     description: 'Total Flink Memory size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -219,7 +232,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.framework.heap.size',
+    key: 'taskmanager_memory_framework_heap_size',
+    name: 'taskmanager.memory.framework.heap.size',
     placeholder: 'Framework Heap Memory size for TaskExecutors',
     description: 'Framework Heap Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -237,7 +251,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.framework.off-heap.size',
+    key: 'taskmanager_memory_framework_off_heap_size',
+    name: 'taskmanager.memory.framework.off-heap.size',
     placeholder: 'Framework Off-Heap Memory size for TaskExecutors',
     description: 'Framework Off-Heap Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -255,7 +270,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.jvm-metaspace.size',
+    key: 'taskmanager_memory_jvm_metaspace_size',
+    name: 'taskmanager.memory.jvm-metaspace.size',
     placeholder: 'JVM Metaspace Size for the TaskExecutors',
     description: 'JVM Metaspace Size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -273,7 +289,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.jvm-overhead.fraction',
+    key: 'taskmanager_memory_jvm_overhead_fraction',
+    name: 'taskmanager.memory.jvm-overhead.fraction',
     placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
     description: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
     group: 'taskmanager-memory',
@@ -291,7 +308,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.jvm-overhead.max',
+    key: 'taskmanager_memory_jvm_overhead_max',
+    name: 'taskmanager.memory.jvm-overhead.max',
     placeholder: 'Max JVM Overhead size for the TaskExecutors',
     description: 'Max JVM Overhead size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -309,7 +327,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.jvm-overhead.min',
+    key: 'taskmanager_memory_jvm_overhead_min',
+    name: 'taskmanager.memory.jvm-overhead.min',
     placeholder: 'Min JVM Overhead size for the TaskExecutors',
     description: 'Min JVM Overhead size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -327,7 +346,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.managed.fraction',
+    key: 'taskmanager_memory_managed_fraction',
+    name: 'taskmanager.memory.managed.fraction',
     placeholder: 'Min JVM Overhead size for the TaskExecutors',
     description: 'Min JVM Overhead size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -345,7 +365,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.managed.size',
+    key: 'taskmanager_memory_managed_size',
+    name: 'taskmanager.memory.managed.size',
     placeholder: 'Managed Memory size for TaskExecutors',
     description: 'Managed Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -363,7 +384,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.network.fraction',
+    key: 'taskmanager_memory_network_fraction',
+    name: 'taskmanager.memory.network.fraction',
     placeholder: 'Fraction of Total Flink Memory to be used as Network Memory',
     description: 'Fraction of Total Flink Memory to be used as Network Memory',
     group: 'taskmanager-memory',
@@ -381,7 +403,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.network.max',
+    key: 'taskmanager_memory_network_max',
+    name: 'taskmanager.memory.network.max',
     placeholder: 'Max Network Memory size for TaskExecutors',
     description: 'Max Network Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -399,7 +422,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.network.min',
+    key: 'taskmanager_memory_network.min',
+    name: 'taskmanager.memory.network.min',
     placeholder: 'Min Network Memory size for TaskExecutors',
     description: 'Min Network Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -417,7 +441,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.process.size',
+    key: 'taskmanager_memory_process_size',
+    name: 'taskmanager.memory.process.size',
     placeholder: 'Total Process Memory size for the TaskExecutors',
     description: 'Total Process Memory size for the TaskExecutors',
     group: 'taskmanager-memory',
@@ -435,7 +460,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.task.heap.size',
+    key: 'taskmanager_memory_task_heap_size',
+    name: 'taskmanager.memory.task.heap.size',
     placeholder: 'Task Heap Memory size for TaskExecutors',
     description: 'Task Heap Memory size for TaskExecutors',
     group: 'taskmanager-memory',
@@ -453,7 +479,8 @@ export default [
     }
   },
   {
-    key: 'taskmanager.memory.task.off-heap.size',
+    key: 'taskmanager_memory_task_off_heap_size',
+    name: 'taskmanager.memory.task.off-heap.size',
     placeholder: 'Task Off-Heap Memory size for TaskExecutors',
     description: 'Task Off-Heap Memory size for TaskExecutors',
     group: 'taskmanager-memory',

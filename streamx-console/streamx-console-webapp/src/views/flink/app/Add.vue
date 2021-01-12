@@ -162,8 +162,8 @@
               v-for="(conf,index) in options"
               v-if="conf.group === 'run'"
               :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
+              :value="conf.key">
+              {{ conf.opt }} ( {{ conf.name }} )
             </a-select-option>
           </a-select-opt-group>
           <a-select-opt-group label="jobmanager-memory options">
@@ -190,7 +190,7 @@
       <a-form-item
         class="conf-item"
         v-for="(conf,index) in options"
-        v-if="configItems.includes(conf.name)"
+        v-if="configItems.includes(conf.key)"
         :key="index"
         :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
