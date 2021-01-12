@@ -35,9 +35,9 @@ object ParameterCli {
   private[this] val optionPrefix = KEY_FLINK_DEPLOYMENT_OPTION_PREFIX
   private[this] val optionMain = s"$propertyPrefix$$internal.application.main"
 
-  val flinkOptions: Options = FlinkRunOption.allOptions
+  lazy val flinkOptions: Options = FlinkRunOption.allOptions
 
-  val parser = new DefaultParser
+  lazy val parser = new DefaultParser
 
   def main(args: Array[String]): Unit = print(read(args))
 
@@ -114,12 +114,8 @@ object ParameterCli {
           }
         })
     }
-    optionToArg(optionMap)
-  }
-
-  def optionToArg(option: mutable.Map[String, Any]): Array[String] = {
     val array = new ArrayBuffer[String]
-    option.foreach(x => {
+    optionMap.foreach(x => {
       array += x._1
       if (x._2.isInstanceOf[String]) {
         array += x._2.toString
