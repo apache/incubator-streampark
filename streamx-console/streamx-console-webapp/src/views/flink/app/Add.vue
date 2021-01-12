@@ -153,7 +153,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount"
+          :maxTagCount="rumMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['options']">
@@ -201,14 +201,14 @@
       </a-form-item>
 
       <a-form-item
-        label="Jobmanager Memory Options"
+        label="Jobmanager-memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount"
+          :maxTagCount="jmMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleJmMemory"
           v-decorator="['options']">
@@ -256,14 +256,14 @@
       </a-form-item>
 
       <a-form-item
-        label="Taskmanager Memory Options"
+        label="Taskmanager-memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount"
+          :maxTagCount="tmMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleTmMemory"
           v-decorator="['options']">
@@ -371,7 +371,9 @@ export default {
   components: { Conf },
   data () {
     return {
-      maxTagCount: 1,
+      rumMaxTagCount: 1,
+      jmMaxTagCount: 1,
+      tmMaxTagCount: 1,
       projectList: [],
       projectId: null,
       module: null,
