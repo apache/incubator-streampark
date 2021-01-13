@@ -74,15 +74,15 @@ object HelloStreamXApp extends FlinkStreaming {
 Define a series of startup information and source and sink information in the configuration file application.yml. The specific format is as follows:
 ```yaml
 flink:
-  deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明细的问题的找不到jar文件
+  deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明显的问题的找不到jar文件
     option:
-      class: com.your.flink.streamx.HelloStreamXApp     # main class
       target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
       detached:                         # -d   (If present, runs the job in detached mode)
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
       zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
       jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
-    property: #@see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+    property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+      $internal.application.main: com.your.flink.streamx.HelloStreamXApp # main class
       yarn.application.name: FlinkHelloWorldApp
       yarn.application.node-label: StreamX
       taskmanager.numberOfTaskSlots: 1
