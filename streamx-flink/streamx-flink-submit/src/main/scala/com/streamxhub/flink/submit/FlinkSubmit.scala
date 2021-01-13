@@ -74,6 +74,7 @@ object FlinkSubmit extends Logger {
          |      "flameGraph": ${submitInfo.flameGraph != null}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
          |      "option: ${submitInfo.option},"
+         |      "property: ${submitInfo.property},"
          |      "dynamicOption": ${submitInfo.dynamicOption.mkString(" ")},"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
