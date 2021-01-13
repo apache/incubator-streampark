@@ -99,7 +99,7 @@ export default {
       default: 'state'
     },
     data: {
-      type: {},
+      type: Object,
       default: null
     }
   }

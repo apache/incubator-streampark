@@ -98,26 +98,18 @@
               v-for="(conf,index) in options"
               v-if="conf.group === 'run'"
               :key="index"
-              :value="conf.key">
-              {{ conf.opt }} ( {{ conf.name }} )
+              :value="conf.name">
+              {{ conf.key }} ( {{ conf.name }} )
             </a-select-option>
           </a-select-opt-group>
-          <a-select-opt-group label="jobmanager-memory options">
+
+          <a-select-opt-group label="yarn-cluster options">
             <a-select-option
               v-for="(conf,index) in options"
-              v-if="conf.group === 'jobmanager-memory'"
+              v-if="conf.group === 'yarn-cluster'"
               :key="index"
-              :value="conf.key">
-              {{ conf.key }}
-            </a-select-option>
-          </a-select-opt-group>
-          <a-select-opt-group label="taskmanager-memory options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'taskmanager-memory'"
-              :key="index"
-              :value="conf.key">
-              {{ conf.key }}
+              :value="conf.name">
+              {{ conf.key }} ( {{ conf.name }} )
             </a-select-option>
           </a-select-opt-group>
         </a-select>
@@ -126,9 +118,9 @@
       <a-form-item
         class="conf_item"
         v-for="(conf,index) in options"
-        v-if="configItems.includes(conf.key)"
+        v-if="configItems.includes(conf.name)"
         :key="index"
-        :label="conf.name"
+        :label="conf.key"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -148,9 +140,6 @@
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
-          :max="conf.max"
-          :defaultValue="conf.value"
-          :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
@@ -318,11 +307,11 @@ export default {
           const parallelism = this.form.getFieldValue('parallelism') || null
           const yarnslots = this.form.getFieldValue('yarnslots') || null
           if (parallelism) {
-            options['parallelism.default'] = parallelism
+            options['parallelism'] = parallelism
           }
 
           if (yarnslots) {
-            options['taskmanager.numberOfTaskSlots'] = yarnslots
+            options['yarnslots'] = yarnslots
           }
 
           update({

@@ -193,7 +193,7 @@
           v-if="conf.type === 'number'"
           :min="conf.min"
           :max="conf.max"
-          :defaultValue="conf.value"
+          :defaultValue="conf.defaultValue"
           :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
@@ -230,27 +230,13 @@
         :label="conf.name.replace(/jobmanager.memory./g,'')"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input
-          v-if="conf.type === 'input'"
-          type="text"
-          :placeholder="conf.placeholder"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-        <a-switch
-          v-if="conf.type === 'switch'"
-          disabled
-          checkedChildren="开"
-          unCheckedChildren="关"
-          checked-children="true"
-          un-checked-children="false"
-          v-model="switchDefaultValue"
-          v-decorator="[`${conf.name}`]"/>
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
           :max="conf.max"
-          :defaultValue="conf.value"
+          :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -285,27 +271,13 @@
         :label="conf.name.replace(/taskmanager.memory./g,'')"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input
-          v-if="conf.type === 'input'"
-          type="text"
-          :placeholder="conf.placeholder"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
-        <a-switch
-          v-if="conf.type === 'switch'"
-          disabled
-          checkedChildren="开"
-          unCheckedChildren="关"
-          checked-children="true"
-          un-checked-children="false"
-          v-model="switchDefaultValue"
-          v-decorator="[`${conf.name}`]"/>
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
           :max="conf.max"
-          :defaultValue="conf.value"
+          :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -359,8 +331,8 @@
 
 <script>
 
-import { select, modules, listConf, jars } from '@api/project'
-import { create, exists, name, readConf, main } from '@api/application'
+import {jars, listConf, modules, select} from '@api/project'
+import {create, exists, main, name, readConf} from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
 
@@ -390,6 +362,7 @@ export default {
       tmMemoryItems: [],
       form: null,
       options: configOptions,
+      optionsMapping: {},
       confVisiable: false
     }
   },
@@ -400,8 +373,10 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
+    this.optionsMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
+      this.optionsMapping.set(item.key, item.name)
+      this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
   },
 
@@ -558,36 +533,19 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
-          console.log(values)
-          console.log(this.configItems)
-          console.log(this.jmMemoryItems)
-          console.log(this.tmMemoryItems)
           for (const k in values) {
-            if (this.configItems.includes(k)) {
-              const v = values[k]
-              if (v !== '') {
-                if (k === 'parallelism') {
-                  options['parallelism.default'] = v
-                }
-                if (k === 'yarnslots') {
-                  options['taskmanager.numberOfTaskSlots'] = v
-                } else {
+            const v = values[k]
+            if (v !== '') {
+              if (k === 'parallelism') {
+                options['parallelism.default'] = v
+              } else if (k === 'slot') {
+                options['taskmanager.numberOfTaskSlots'] = v
+              } else {
+                if (this.configItems.includes(k)) {
                   options[k] = v
+                } else if (this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+                  options[this.optionsMapping.get(k)] = v
                 }
-              }
-            }
-
-            if (this.jmMemoryItems.includes(k)) {
-              const v = values[k]
-              if (v !== '') {
-                options[k] = v
-              }
-            }
-
-            if (this.tmMemoryItems.includes(k)) {
-              const v = values[k]
-              if (v !== '') {
-                options[k] = v
               }
             }
           }
@@ -603,14 +561,9 @@ export default {
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }
-
-          console.log(params)
-          console.log(abc.name)
-
           if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
-            const format = configVal.endsWith('.properties') ? 2 : 1
-            params['format'] = format
+            params['format'] = configVal.endsWith('.properties') ? 2 : 1
             if (this.configOverride == null) {
               readConf({
                 config: configVal

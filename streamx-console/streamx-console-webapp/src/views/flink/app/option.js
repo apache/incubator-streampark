@@ -7,7 +7,7 @@ export default [
     description: 'JobManager 地址(yarn-cluster)',
     group: 'run',
     type: 'input',
-    value: '',
+    defaultValue: '',
     validator: (rule, value, callback) => {
       if (!value || value.length === 0) {
         callback(new Error('JobManager is require or you can delete this option'))
@@ -24,7 +24,7 @@ export default [
     description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
     group: 'no-support',
     type: 'input',
-    value: '',
+    defaultValue: '',
     validator: (rule, value, callback) => {
       if (!value || value.length === 0) {
         callback(new Error('zookeeperNamespace is require or you can delete this option'))
@@ -41,7 +41,6 @@ export default [
     description: 'If present, runs the job in detached mode',
     group: 'no-support',
     type: 'switch',
-    value: false,
     validator: (rule, value, callback) => {
       callback()
     }
@@ -54,7 +53,7 @@ export default [
     description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
     group: 'no-support',
     type: 'switch',
-    value: false,
+    defaultValue: false,
     validator: (rule, value, callback) => {
       callback()
     }
@@ -70,7 +69,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.flink.size is require or you can delete this option'))
@@ -89,7 +88,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.heap.size is require or you can delete this option'))
@@ -108,7 +107,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 256,
+    defaultValue: 256,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.jvm-metaspace.size is require or you can delete this option'))
@@ -127,7 +126,7 @@ export default [
     min: 0.1,
     max: 1,
     step: 0.1,
-    value: 0.1,
+    defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('yarnnodeLabel is require or you can delete this option.'))
@@ -145,7 +144,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     description: 'Max JVM Overhead size for the JobManager',
     validator: (rule, value, callback) => {
       if (!value) {
@@ -165,7 +164,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 192,
+    defaultValue: 192,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.jvm-overhead.min is required or you can delete this option'))
@@ -184,7 +183,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.off-heap.size is required or you can delete this option'))
@@ -203,7 +202,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.process.size is required or you can delete this option'))
@@ -223,7 +222,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.flink.size is required or you can delete this option'))
@@ -242,7 +241,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.framework.heap.size is required or you can delete this option'))
@@ -261,7 +260,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.framework.off-heap.size is required or you can delete this option'))
@@ -280,7 +279,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 256,
+    defaultValue: 256,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.jvm-metaspace.size is required or you can delete this option'))
@@ -299,7 +298,7 @@ export default [
     min: 0.1,
     max: 1,
     step: 0.1,
-    value: 0.1,
+    defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.jvm-overhead.fraction is required or you can delete this option'))
@@ -318,7 +317,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.jvm-overhead.max is required or you can delete this option'))
@@ -337,7 +336,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 192,
+    defaultValue: 192,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.jvm-overhead.min is required or you can delete this option'))
@@ -356,7 +355,7 @@ export default [
     min: 0.1,
     max: 1,
     step: 0.1,
-    value: 0.4,
+    defaultValue: 0.4,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.managed.fraction is required or you can delete this option'))
@@ -375,7 +374,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.managed.size is required or you can delete this option'))
@@ -394,7 +393,7 @@ export default [
     min: 0.1,
     max: 1,
     step: 0.1,
-    value: 0.1,
+    defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.network.fraction is required or you can delete this option'))
@@ -413,7 +412,7 @@ export default [
     min: 64,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.network.max is required or you can delete this option'))
@@ -432,7 +431,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 64,
+    defaultValue: 64,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.network.min is required or you can delete this option'))
@@ -451,7 +450,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 1024,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.process.size is required or you can delete this option'))
@@ -470,7 +469,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 128,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.task.heap.size is required or you can delete this option'))
@@ -489,7 +488,7 @@ export default [
     min: 1,
     max: 102400,
     step: 1,
-    value: 0,
+    defaultValue: 0,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.task.off-heap.size is required or you can delete this option'))
