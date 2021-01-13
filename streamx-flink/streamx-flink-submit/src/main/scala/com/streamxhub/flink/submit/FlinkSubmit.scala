@@ -260,7 +260,7 @@ object FlinkSubmit extends Logger {
       submitInfo.property.foreach(x => array += s"-D${x._1}=${x._2}")
       //-D 其他动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-
+      println(array.mkString(" "))
       array.toArray
     }
 
