@@ -30,18 +30,18 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
+import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.configuration._
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterClientFactory
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.{File, Serializable}
 import java.lang.{Boolean => JavaBool}
-import java.util.concurrent.{CompletableFuture, TimeUnit}
+import java.util.concurrent.TimeUnit
 import java.util.{Collections, Arrays => JavaArrays, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -54,40 +54,40 @@ import scala.util.{Failure, Success, Try}
  *
  * <p>A JobManager's memory consists of the following components:
  * <ul>
- *     <li>JVM Heap Memory</li>
- *     <li>Off-heap Memory</li>
- *     <li>JVM Metaspace</li>
- *     <li>JVM Overhead</li>
+ * <li>JVM Heap Memory</li>
+ * <li>Off-heap Memory</li>
+ * <li>JVM Metaspace</li>
+ * <li>JVM Overhead</li>
  * </ul>
  * We use Total Process Memory to refer to all the memory components, while Total Flink Memory refering to all
  * the components except JVM Metaspace and JVM Overhead.
  *
  * <p>The relationships of JobManager memory components are shown below.
  * <pre>
- *               ┌ ─ ─ Total Process Memory  ─ ─ ┐
- *                ┌ ─ ─ Total Flink Memory  ─ ─ ┐
- *               │ ┌───────────────────────────┐ │
- *  On-Heap ----- ││      JVM Heap Memory      ││
- *               │ └───────────────────────────┘ │
- *               │ ┌───────────────────────────┐ │
- *            ┌─  ││       Off-heap Memory     ││
- *            │  │ └───────────────────────────┘ │
- *            │   └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
- *            │  │┌─────────────────────────────┐│
- *  Off-Heap ─|   │        JVM Metaspace        │
- *            │  │└─────────────────────────────┘│
- *            │   ┌─────────────────────────────┐
- *            └─ ││        JVM Overhead         ││
- *                └─────────────────────────────┘
- *               └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+ * ┌ ─ ─ Total Process Memory  ─ ─ ┐
+ * ┌ ─ ─ Total Flink Memory  ─ ─ ┐
+ * │ ┌───────────────────────────┐ │
+ * On-Heap ----- ││      JVM Heap Memory      ││
+ * │ └───────────────────────────┘ │
+ * │ ┌───────────────────────────┐ │
+ * ┌─  ││       Off-heap Memory     ││
+ * │  │ └───────────────────────────┘ │
+ * │   └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+ * │  │┌─────────────────────────────┐│
+ * Off-Heap ─|   │        JVM Metaspace        │
+ * │  │└─────────────────────────────┘│
+ * │   ┌─────────────────────────────┐
+ * └─ ││        JVM Overhead         ││
+ * └─────────────────────────────┘
+ * └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
  * </pre>
  */
- 
+
 object FlinkSubmit extends Logger {
 
-  private[this] var flinkDefaultConfiguration = _
+  private[this] var flinkDefaultConfiguration: Configuration = _
 
-  private[this] var jvmProfilerJar = _
+  private[this] var jvmProfilerJar: String = _
 
   private[this] lazy val configurationMap = new mutable.HashMap[String, Configuration]()
 
@@ -128,7 +128,7 @@ object FlinkSubmit extends Logger {
     val effectiveConfiguration = getEffectiveConfiguration(submitInfo, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
-    var applicationId = null
+    var applicationId:ApplicationId = null
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
