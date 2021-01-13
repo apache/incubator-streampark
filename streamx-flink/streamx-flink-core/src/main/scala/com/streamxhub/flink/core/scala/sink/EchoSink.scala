@@ -94,4 +94,6 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
 
 case class Echo[T](transactionId: String = Utils.uuid(), buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
   def add(value: T): Unit = buffer += value
+
+  override def toString: String = s"(transactionId:$transactionId,size:${buffer.size},invoked:$invoked)"
 }

@@ -81,7 +81,7 @@ flink:
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
       zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
       jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
-    property: #@see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+    property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
       $internal.application.main: com.your.flink.streamx.HelloStreamXApp # main class
       yarn.application.name: FlinkHelloWorldApp
       yarn.application.node-label: StreamX

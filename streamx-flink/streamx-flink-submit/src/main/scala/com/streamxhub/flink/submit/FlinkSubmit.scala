@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
@@ -29,24 +30,60 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
+import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.configuration._
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.flink.yarn.{YarnClusterClientFactory, YarnClusterDescriptor}
+import org.apache.flink.yarn.YarnClusterClientFactory
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.io.{File, Serializable}
 import java.lang.{Boolean => JavaBool}
-import java.util.concurrent.{CompletableFuture, TimeUnit}
+import java.util.concurrent.TimeUnit
 import java.util.{Collections, Arrays => JavaArrays, List => JavaList, Map => JavaMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
+
+/**
+ * Describe the specifics of different resource dimensions of the JobManager process.
+ *
+ * <p>A JobManager's memory consists of the following components:
+ * <ul>
+ * <li>JVM Heap Memory</li>
+ * <li>Off-heap Memory</li>
+ * <li>JVM Metaspace</li>
+ * <li>JVM Overhead</li>
+ * </ul>
+ * We use Total Process Memory to refer to all the memory components, while Total Flink Memory refering to all
+ * the components except JVM Metaspace and JVM Overhead.
+ *
+ * <p>The relationships of JobManager memory components are shown below.
+ * <pre>
+ * ┌ ─ ─ Total Process Memory  ─ ─ ┐
+ * ┌ ─ ─ Total Flink Memory  ─ ─ ┐
+ * │ ┌───────────────────────────┐ │
+ * On-Heap ----- ││      JVM Heap Memory      ││
+ * │ └───────────────────────────┘ │
+ * │ ┌───────────────────────────┐ │
+ * ┌─  ││       Off-heap Memory     ││
+ * │  │ └───────────────────────────┘ │
+ * │   └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+ * │  │┌─────────────────────────────┐│
+ * Off-Heap ─|   │        JVM Metaspace        │
+ * │  │└─────────────────────────────┘│
+ * │   ┌─────────────────────────────┐
+ * └─ ││        JVM Overhead         ││
+ * └─────────────────────────────┘
+ * └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
+ * </pre>
+ *
+ * @author benjobs
+ */
 
 object FlinkSubmit extends Logger {
 
@@ -56,7 +93,7 @@ object FlinkSubmit extends Logger {
 
   private[this] lazy val configurationMap = new mutable.HashMap[String, Configuration]()
 
-  private[this] lazy val FLINK_HOME: String = {
+  private[this] lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
     logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
     flinkLocalHome
@@ -73,13 +110,13 @@ object FlinkSubmit extends Logger {
          |      "savePint: ${submitInfo.savePoint}, "
          |      "flameGraph": ${submitInfo.flameGraph != null}, "
          |      "userJar: ${submitInfo.flinkUserJar},"
-         |      "overrideOption: ${submitInfo.overrideOption.mkString(" ")},"
+         |      "option: ${submitInfo.option},"
+         |      "property: ${submitInfo.property},"
          |      "dynamicOption": ${submitInfo.dynamicOption.mkString(" ")},"
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
-
-    val customCommandLines: JavaList[CustomCommandLine] = {
+    val customCommandLines = {
       val configurationDirectory = s"$FLINK_HOME/conf"
       val globalConfiguration = GlobalConfiguration.loadConfiguration(configurationDirectory)
       loadCustomCommandLines(globalConfiguration, configurationDirectory)
@@ -93,7 +130,7 @@ object FlinkSubmit extends Logger {
     val effectiveConfiguration = getEffectiveConfiguration(submitInfo, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
-    var applicationId: ApplicationId = null
+    var applicationId:ApplicationId = null
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
@@ -102,30 +139,28 @@ object FlinkSubmit extends Logger {
       println("------------------<<specification>>------------------")
       println(clusterSpecification)
       println("------------------------------------")
-      val clusterClient: ClusterClient[ApplicationId] = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
+      val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
       println("------------------<<applicationId>>------------------")
       println()
       println("Flink Job Started: applicationId: " + applicationId)
       println()
       println("------------------------------------")
-    } finally if (clusterDescriptor != null) {
-      clusterDescriptor.close()
-    }
+    } finally if (clusterDescriptor != null) clusterDescriptor.close()
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
 
   def stop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     val jobID = getJobID(jobStringId)
-    val clusterClient: ClusterClient[ApplicationId] = getClusterClientByApplicationId(appId)
+    val clusterClient = getClusterClientByApplicationId(appId)
     val savePointDir = getOptionFromDefaultFlinkConfig(
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
         .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
     )
 
-    val savepointPathFuture: CompletableFuture[String] = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
+    val savepointPathFuture = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
       case (false, false) =>
         clusterClient.cancel(jobID)
         null
@@ -133,15 +168,13 @@ object FlinkSubmit extends Logger {
       case (_, _) => clusterClient.stopWithSavepoint(jobID, drain, savePointDir)
     }
 
-    if (savepointPathFuture == null) null else {
-      try {
-        val clientTimeout = getOptionFromDefaultFlinkConfig(ClientOptions.CLIENT_TIMEOUT)
-        savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      } catch {
-        case e: Exception =>
-          val cause = ExceptionUtils.stringifyException(e)
-          throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
-      }
+    if (savepointPathFuture == null) null else try {
+      val clientTimeout = getOptionFromDefaultFlinkConfig(ClientOptions.CLIENT_TIMEOUT)
+      savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+    } catch {
+      case e: Exception =>
+        val cause = ExceptionUtils.stringifyException(e)
+        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
     }
   }
 
@@ -149,7 +182,7 @@ object FlinkSubmit extends Logger {
 
   //----------Public Method end ------------------
 
-  private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo, prefix: String = ""): Map[String, String] = {
+  private[this] def getConfigMapFromSubmit(submitInfo: SubmitInfo, prefix: String = "") = {
     val map = submitInfo.appConf match {
       case x if x.trim.startsWith("yaml://") =>
         PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(x.trim.drop(7)))
@@ -176,7 +209,7 @@ object FlinkSubmit extends Logger {
       case "" | null => map
       case other => map
         .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
-        .map(x => x._1.replace(other, "") -> x._2)
+        .map(x => x._1.drop(other.length) -> x._2)
     }
   }
 
@@ -191,7 +224,7 @@ object FlinkSubmit extends Logger {
     throw new IllegalStateException("No valid command-line found.")
   }
 
-  private[this] def getEffectiveCommandLine(submitInfo: SubmitInfo, customCommandLines: JavaList[CustomCommandLine]): CommandLine = {
+  private[this] def getEffectiveCommandLine(submitInfo: SubmitInfo, customCommandLines: JavaList[CustomCommandLine]) = {
     val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_OPTION_PREFIX)
     //merge options....
     val customCommandLineOptions = new Options
@@ -199,8 +232,7 @@ object FlinkSubmit extends Logger {
       customCommandLine.addGeneralOptions(customCommandLineOptions)
       customCommandLine.addRunOptions(customCommandLineOptions)
     }
-    val commandOptions = CliFrontendParser.getRunCommandOptions
-    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions)
+    val commandLineOptions = FlinkRunOption.mergeOptions(FlinkRunOption.getRunCommandOptions, customCommandLineOptions)
 
     //read and verify user config...
     val cliArgs = {
@@ -208,12 +240,10 @@ object FlinkSubmit extends Logger {
       appConfigMap.filter(x => {
         //验证参数是否合法...
         val verify = commandLineOptions.hasOption(x._1)
-        if (!verify) {
-          println(s"[StreamX] param:${x._1} is error,skip it.")
-        }
+        if (!verify) println(s"[StreamX] param:${x._1} is error,skip it.")
         verify
       }).foreach(x => {
-        val opt = commandLineOptions.getOption(x._1.drop(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX.length).trim).getOpt
+        val opt = commandLineOptions.getOption(x._1.trim).getOpt
         Try(x._2.toBoolean).getOrElse(x._2) match {
           case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
           case v => optionMap += s"-$opt" -> v
@@ -221,19 +251,7 @@ object FlinkSubmit extends Logger {
       })
 
       //fromSavePoint
-      if (submitInfo.savePoint != null) {
-        optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
-      }
-
-      //页面定义的参数优先级大于app配置文件
-      submitInfo.overrideOption.filter(x => commandLineOptions.hasLongOption(x._1)).foreach(x => {
-        val option = commandLineOptions.getOption(x._1)
-        if (option.hasArg) {
-          optionMap += s"-${option.getOpt}" -> x._2.toString
-        } else {
-          optionMap += s"-${option.getOpt}" -> true
-        }
-      })
+      if (submitInfo.savePoint != null) optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
 
       val array = new ArrayBuffer[String]()
       optionMap.foreach(x => {
@@ -263,17 +281,23 @@ object FlinkSubmit extends Logger {
         array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
-      //-D 动态参数配置....
-      submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      //页面定义的参数优先级大于app配置文件
+      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
 
+      //属性参数...
+      if (submitInfo.property != null && submitInfo.property.nonEmpty) submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+
+      //-D 其他动态参数配置....
+      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
       array.toArray
     }
 
-    CliFrontendParser.parse(commandLineOptions, cliArgs, true)
+    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
   }
 
-  @throws[FlinkException] private def getEffectiveConfiguration[T](submitInfo: SubmitInfo, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
+  @throws[FlinkException] private def getEffectiveConfiguration[T](submitInfo: SubmitInfo, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]) = {
+
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
     val programOptions = ProgramOptions.create(commandLine)
@@ -304,18 +328,18 @@ object FlinkSubmit extends Logger {
     programArgs += flinkHdfsHome
     programArgs += KEY_APP_NAME("--")
     programArgs += appName
-    if (submitInfo.overrideOption.containsKey("parallelism")) {
+    if (submitInfo.property.containsKey(KEY_FLINK_PARALLELISM)) {
       programArgs += s"--$KEY_FLINK_PARALLELISM"
-      programArgs += submitInfo.overrideOption.get("parallelism").toString
+      programArgs += submitInfo.property.get(KEY_FLINK_PARALLELISM).toString
     }
 
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, JavaArrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
     //flinkDistJar
     effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
-    //设置用户的jar
+    //pipeline.jars
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
-    //设置部署模式为"application"
+    //execution.target
     effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
     //yarn application name
     effectiveConfiguration.set(YarnConfigOptions.APPLICATION_NAME, appName)
@@ -332,26 +356,22 @@ object FlinkSubmit extends Logger {
     effectiveConfiguration
   }
 
-  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
+  private[this] def getClusterClientByApplicationId(appId: String) = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
-    if (applicationId == null) {
-      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
-    }
-    val clusterDescriptor: YarnClusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
+    if (applicationId == null) throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     clusterDescriptor.retrieve(applicationId).getClusterClient
   }
 
-  private[this] def getJobID(jobId: String): JobID = {
-    Try(JobID.fromHexString(jobId)) match {
-      case Success(id) => id
-      case Failure(e) => throw new CliArgsException(e.getMessage)
-    }
+  private[this] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
+    case Success(id) => id
+    case Failure(e) => throw new CliArgsException(e.getMessage)
   }
 
-  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
+  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]) = {
     if (flinkDefaultConfiguration == null) {
       val flinkLocalHome = FLINK_HOME
       require(flinkLocalHome != null)
@@ -368,7 +388,8 @@ object FlinkSubmit extends Logger {
                         applicationType: String,
                         savePoint: String,
                         flameGraph: JavaMap[String, Serializable],
-                        overrideOption: JavaMap[String, Any],
+                        option: String,
+                        property: JavaMap[String, Any],
                         dynamicOption: Array[String],
                         args: String)
 
