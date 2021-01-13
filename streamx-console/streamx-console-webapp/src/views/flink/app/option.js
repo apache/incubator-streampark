@@ -485,6 +485,7 @@ export default [
     description: 'Task Off-Heap Memory size for TaskExecutors',
     group: 'taskmanager-memory',
     type: 'number',
+    unit: 'mb',
     min: 1,
     max: 102400,
     step: 1,
