@@ -80,7 +80,6 @@ object FlinkSubmit extends Logger {
          |      "args: ${submitInfo.args}"
          |""".stripMargin)
 
-
     val customCommandLines: JavaList[CustomCommandLine] = {
       val configurationDirectory = s"$FLINK_HOME/conf"
       val globalConfiguration = GlobalConfiguration.loadConfiguration(configurationDirectory)
@@ -255,12 +254,19 @@ object FlinkSubmit extends Logger {
       }
 
       //页面定义的参数优先级大于app配置文件
-      submitInfo.option.split("\\s").foreach(x => array += x)
-      //属性参数...
-      submitInfo.property.foreach(x => array += s"-D${x._1}=${x._2}")
-      //-D 其他动态参数配置....
-      submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) {
+        submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
+      }
 
+      //属性参数...
+      if (submitInfo.property != null && submitInfo.property.nonEmpty) {
+        submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      }
+
+      //-D 其他动态参数配置....
+      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) {
+        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      }
       array.toArray
     }
 
@@ -269,10 +275,6 @@ object FlinkSubmit extends Logger {
   }
 
   @throws[FlinkException] private def getEffectiveConfiguration[T](submitInfo: SubmitInfo, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine, jobJars: JavaList[String]): Configuration = {
-
-    commandLine.getOptions.foreach(x => {
-      println(s"${x.getOpt}========>${x.getLongOpt}")
-    })
 
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
@@ -309,21 +311,13 @@ object FlinkSubmit extends Logger {
       programArgs += submitInfo.property.get(KEY_FLINK_PARALLELISM).toString
     }
 
-    val properties = commandLine.getOptionProperties(FlinkRunOption.DYNAMIC_PROPERTIES.getOpt)
-    properties.stringPropertyNames.foreach(key => {
-      properties.getProperty(key) match {
-        case null => effectiveConfiguration.setString(key, "true")
-        case v => effectiveConfiguration.setString(key, v)
-      }
-    })
-
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, JavaArrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
     //flinkDistJar
     effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
-    //设置用户的jar
+    //pipeline.jars
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitInfo.flinkUserJar))
-    //设置部署模式为"application"
+    //execution.target
     effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.APPLICATION.getName)
     //yarn application name
     effectiveConfiguration.set(YarnConfigOptions.APPLICATION_NAME, appName)
