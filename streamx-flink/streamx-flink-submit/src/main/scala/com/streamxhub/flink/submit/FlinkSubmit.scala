@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.conf.FlinkRunOption
 import com.streamxhub.common.conf.FlinkRunOption.DYNAMIC_PROPERTIES
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
@@ -201,8 +202,8 @@ object FlinkSubmit extends Logger {
       customCommandLine.addGeneralOptions(customCommandLineOptions)
       customCommandLine.addRunOptions(customCommandLineOptions)
     }
-    val commandOptions = CliFrontendParser.getRunCommandOptions
-    val commandLineOptions = CliFrontendParser.mergeOptions(commandOptions, customCommandLineOptions)
+    val commandOptions = FlinkRunOption.getRunCommandOptions
+    val commandLineOptions = FlinkRunOption.mergeOptions(commandOptions, customCommandLineOptions)
 
     //read and verify user config...
     val cliArgs = {
@@ -224,7 +225,7 @@ object FlinkSubmit extends Logger {
 
       //fromSavePoint
       if (submitInfo.savePoint != null) {
-        optionMap += s"-${CliFrontendParser.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+        optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
       }
 
       val array = new ArrayBuffer[String]()
@@ -265,7 +266,7 @@ object FlinkSubmit extends Logger {
       array.toArray
     }
 
-    CliFrontendParser.parse(commandLineOptions, cliArgs, true)
+    FlinkRunOption.parse(commandLineOptions, cliArgs, true)
 
   }
 
