@@ -22,6 +22,7 @@ package com.streamxhub.flink.submit
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.common.conf.ConfigConst._
+import com.streamxhub.common.conf.FlinkRunOption.DYNAMIC_PROPERTIES
 import com.streamxhub.common.util._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
@@ -260,7 +261,7 @@ object FlinkSubmit extends Logger {
       submitInfo.property.foreach(x => array += s"-D${x._1}=${x._2}")
       //-D 其他动态参数配置....
       submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
-      println(array.mkString(" "))
+
       array.toArray
     }
 
@@ -274,6 +275,12 @@ object FlinkSubmit extends Logger {
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
+
+    val prop = commandLine.getOptionProperties(DYNAMIC_PROPERTIES.getOpt)
+    println("--------------------------------------------------------------------------------")
+    prop.foreach(p => {
+      println(s"${p._1}======>${p._2}")
+    });
 
     val flinkLocalHome = FLINK_HOME
     val flinkName = new File(flinkLocalHome).getName
