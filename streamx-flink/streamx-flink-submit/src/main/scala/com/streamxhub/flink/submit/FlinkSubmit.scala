@@ -81,6 +81,8 @@ import scala.util.{Failure, Success, Try}
  * └─────────────────────────────┘
  * └ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┘
  * </pre>
+ *
+ * @author benjobs
  */
 
 object FlinkSubmit extends Logger {
