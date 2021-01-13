@@ -390,7 +390,7 @@ export default {
       tmMemoryItems: [],
       form: null,
       options: configOptions,
-      optionsMapping: {},
+      optionsKeyMapping: {},
       optionsValueMapping: {},
       configuration: [
         { key: 'tc', name: ' time characteristic' },
@@ -414,10 +414,10 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
-    this.optionsMapping = new Map()
+    this.optionsKeyMapping = new Map()
     this.optionsValueMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.optionsMapping.set(item.key, item.name)
+      this.optionsKeyMapping.set(item.key, item.name)
       this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
@@ -531,7 +531,7 @@ export default {
                 if (this.configItems.includes(k)) {
                   options[k] = v
                 } else if (this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                  options[this.optionsMapping.get(k)] = v
+                  options[this.optionsKeyMapping.get(k)] = v
                 }
               }
             }

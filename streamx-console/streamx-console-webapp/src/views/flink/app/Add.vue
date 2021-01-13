@@ -362,7 +362,7 @@ export default {
       tmMemoryItems: [],
       form: null,
       options: configOptions,
-      optionsMapping: {},
+      optionsKeyMapping: {},
       confVisiable: false
     }
   },
@@ -373,9 +373,9 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
-    this.optionsMapping = new Map()
+    this.optionsKeyMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.optionsMapping.set(item.key, item.name)
+      this.optionsKeyMapping.set(item.key, item.name)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
   },
@@ -544,7 +544,7 @@ export default {
                 if (this.configItems.includes(k)) {
                   options[k] = v
                 } else if (this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                  options[this.optionsMapping.get(k)] = v
+                  options[this.optionsKeyMapping.get(k)] = v
                 }
               }
             }
