@@ -176,7 +176,7 @@ object FlinkSubmit extends Logger {
       case "" | null => map
       case other => map
         .filter(_._1.startsWith(other)).filter(_._2.nonEmpty)
-        .map(x => x._1.replace(other, "") -> x._2)
+        .map(x => x._1.drop(other.length) -> x._2)
     }
   }
 
@@ -213,7 +213,7 @@ object FlinkSubmit extends Logger {
         }
         verify
       }).foreach(x => {
-        val opt = commandLineOptions.getOption(x._1.drop(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX.length).trim).getOpt
+        val opt = commandLineOptions.getOption(x._1.trim).getOpt
         Try(x._2.toBoolean).getOrElse(x._2) match {
           case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-$opt" -> true
           case v => optionMap += s"-$opt" -> v
