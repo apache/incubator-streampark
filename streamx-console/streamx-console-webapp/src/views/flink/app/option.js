@@ -1,12 +1,13 @@
 export default [
   {
-    key: '-m',
+    opt: '-m',
+    key: 'jobmanager',
     name: 'jobmanager',
     placeholder: '-m,--jobmanager <arg>',
     description: 'JobManager 地址(yarn-cluster)',
     group: 'run',
     type: 'input',
-    value: '',
+    defaultValue: '',
     validator: (rule, value, callback) => {
       if (!value || value.length === 0) {
         callback(new Error('JobManager is require or you can delete this option'))
@@ -16,59 +17,274 @@ export default [
     }
   },
   {
-    key: '-d',
-    name: 'detached',
-    placeholder: '-d,--detached',
-    description: 'If present, runs the job in detached mode',
+    opt: '-z',
+    key: 'zookeeperNamespace',
+    name: 'zookeeperNamespace',
+    placeholder: '-z,--zookeeperNamespace <arg>',
+    description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
     group: 'no-support',
-    type: 'switch',
-    value: false,
+    type: 'input',
+    defaultValue: '',
     validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  {
-    key: '-sae',
-    name: 'shutdownOnAttachedExit',
-    placeholder: '-sae,--shutdownOnAttachedExit',
-    description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
-    group: 'no-support',
-    type: 'switch',
-    value: false,
-    validator: (rule, value, callback) => {
-      callback()
-    }
-  },
-  // ------------------------------------------------------- yarn-cluster -------------------------------------------------------
-  {
-    key: '-yjm',
-    name: 'yarnjobManagerMemory',
-    placeholder: '-yjm,--yarnjobManagerMemory <arg>',
-    description: 'JobManager内存大小 (单位: MB)',
-    group: 'yarn-cluster',
-    type: 'number',
-    min: 1024,
-    value: '',
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('JobManager is require or you can delete this option'))
+      if (!value || value.length === 0) {
+        callback(new Error('zookeeperNamespace is require or you can delete this option'))
       } else {
         callback()
       }
     }
   },
   {
-    key: '-ytm',
-    name: 'yarntaskManagerMemory',
-    placeholder: '-ytm,--yarntaskManagerMemory <arg>',
-    description: 'TaskManager内存大小 (单位: MB)',
-    group: 'yarn-cluster',
+    opt: '-d',
+    key: 'detached',
+    name: 'detached',
+    placeholder: '-d,--detached',
+    description: 'If present, runs the job in detached mode',
+    group: 'no-support',
+    type: 'switch',
+    validator: (rule, value, callback) => {
+      callback()
+    }
+  },
+  {
+    opt: '-sae',
+    key: 'shutdownOnAttachedExit',
+    name: 'shutdownOnAttachedExit',
+    placeholder: '-sae,--shutdownOnAttachedExit',
+    description: '如果非独立模式提交的任务,当客户端中断,集群执行的job任务也会shutdown',
+    group: 'no-support',
+    type: 'switch',
+    defaultValue: false,
+    validator: (rule, value, callback) => {
+      callback()
+    }
+  },
+  // --------------------total-memory--------------------
+  {
+    key: 'jobmanager_memory_flink_size',
+    name: 'jobmanager.memory.flink.size',
+    placeholder: 'Total Flink Memory size for the JobManage',
+    description: 'JobManager Flink总内存大小 (单位: MB)',
+    group: 'total-memory',
     type: 'number',
-    min: 1024,
-    value: '',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('TaskManager is require or you can delete this option'))
+        callback(new Error('jobmanager.memory.flink.size is require or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_flink_size',
+    name: 'taskmanager.memory.flink.size',
+    placeholder: 'Total Flink Memory size for the TaskExecutors',
+    description: 'TaskExecutor Flink总内存大小 (单位: MB)',
+    group: 'total-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.flink.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  // --------------------process-memory--------------------
+  {
+    key: 'jobmanager_memory_process_size',
+    name: 'jobmanager.memory.process.size',
+    placeholder: 'Total Process Memory size for the JobManager',
+    description: 'JobManager 进程总内存大小 (单位: MB)',
+    group: 'process-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.process.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_process_size',
+    name: 'taskmanager.memory.process.size',
+    placeholder: 'Total Process Memory size for the TaskExecutors',
+    description: 'TaskExecutor 进程总内存大小 (单位: MB)',
+    group: 'process-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.process.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  // ------------------------------------------------------- jobmanager-memory -------------------------------------------------------
+  {
+    key: 'jobmanager_memory_heap_size',
+    name: 'jobmanager.memory.heap.size',
+    placeholder: 'JVM Heap Memory size for JobManager',
+    description: 'JobManager 的 JVM 堆内存,推荐大小 128.000mb (134217728 bytes)',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.heap.size is require or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_off_heap_size',
+    name: 'jobmanager.memory.off-heap.size',
+    placeholder: 'Off-heap Memory size for JobManager',
+    description: 'JobManager 的堆外内存(直接内存或本地内存)',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.off-heap.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_jvm_metaspace_size',
+    name: 'jobmanager.memory.jvm-metaspace.size',
+    placeholder: 'JVM Metaspace Size for the JobManage',
+    description: 'JVM Metaspace Size for the JobManage',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 256,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.jvm-metaspace.size is require or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_jvm_overhead_fraction',
+    name: 'jobmanager.memory.jvm-overhead.fraction',
+    placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)于进程总内存占比',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.1,
+    defaultValue: 0.1,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.jvm-overhead.fraction is require or you can delete this option.'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_jvm_overhead_max',
+    name: 'jobmanager.memory.jvm-overhead.max',
+    placeholder: 'Max JVM Overhead size for the JobManager',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)的最大内存',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.jvm-overhead.max is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_jvm_overhead_min',
+    name: 'jobmanager.memory.jvm.overhead.min',
+    placeholder: 'Min JVM Overhead size for the JobManager',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)的最小内存',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 192,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.jvm-overhead.min is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  // ------------------------------------------------------- taskmanager-memory -------------------------------------------------------
+  {
+    key: 'taskmanager_memory_framework_heap_size',
+    name: 'taskmanager.memory.framework.heap.size',
+    placeholder: 'Framework Heap Memory size for TaskExecutors',
+    description: '框架堆内存-用于Flink框架的JVM堆内存 (不建议调整,进阶配置)',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: null,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.framework.heap.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_framework_off_heap_size',
+    name: 'taskmanager.memory.framework.off-heap.size',
+    placeholder: 'Framework Off-Heap Memory size for TaskExecutors',
+    description: '框架堆外内存-用于Flink框架的堆外内存 (不建议调整,进阶配置)',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: null,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.framework.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -76,82 +292,157 @@ export default [
   },
 
   {
-    key: '-yat',
-    name: 'yarnapplicationType',
-    placeholder: '-yat,--yarnapplicationType <arg>',
-    group: 'yarn-cluster',
-    type: 'input',
-    value: '',
+    key: 'taskmanager_memory_task_heap_size',
+    name: 'taskmanager.memory.task.heap.size',
+    placeholder: 'Task Heap Memory size for TaskExecutors',
+    description: '任务堆内存-用于Flink应用的算子及用户代码的JVM堆内存',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnapplicationType is require or you can delete this option'))
+        callback(new Error('taskmanager.memory.task.heap.size is required or you can delete this option'))
       } else {
         callback()
       }
     }
   },
   {
-    key: '-ynl',
-    name: 'yarnnodeLabel',
-    placeholder: '-ynl,--yarnnodeLabel <arg>',
-    description: 'Specify YARN node label for the YARN application',
-    group: 'yarn-cluster',
-    type: 'input',
-    value: '',
+    key: 'taskmanager_memory_task_off_heap_size',
+    name: 'taskmanager.memory.task.off-heap.size',
+    placeholder: 'Task Off-Heap Memory size for TaskExecutors',
+    description: '任务堆外内存-用于Flink算子及用户代码的堆外内存(不建议调整,进阶配置)',
+    group: 'taskmanager-memory',
+    type: 'number',
+    unit: 'mb',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: null,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnnodeLabel is require or you can delete this option.'))
+        callback(new Error('taskmanager.memory.task.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
     }
   },
   {
-    key: '-yqu',
-    name: 'yarnqueue',
-    placeholder: '-yqu,--yarnqueue <arg> ',
-    group: 'yarn-cluster',
-    type: 'input',
-    description: '指定应用的运行队列(on YARN)',
-    value: '',
+    key: 'taskmanager_memory_managed_size',
+    name: 'taskmanager.memory.managed.size',
+    placeholder: 'Managed Memory size for TaskExecutors',
+    description: '托管内存-由Flink管理用于(排序|缓存中间结果|StateBackend)的内存大小',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnqueue is required or you can delete this option'))
+        callback(new Error('taskmanager.memory.managed.size is required or you can delete this option'))
       } else {
         callback()
       }
     }
   },
   {
-    key: '-yz',
-    name: 'yarnzookeeperNamespace',
-    placeholder: '-yz,--yarnzookeeperNamespace <arg>',
-    description: 'Namespace to create the Zookeeper sub-paths for high availability mode',
-    group: 'yarn-cluster',
-    type: 'input',
-    value: '',
+    key: 'taskmanager_memory_managed_fraction',
+    name: 'taskmanager.memory.managed.fraction',
+    placeholder: 'Min JVM Overhead size for the TaskExecutors',
+    description: '托管内存-由Flink管理用于(排序|缓存中间结果|StateBackend)的内存占比',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.1,
+    defaultValue: 0.4,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnzookeeperNamespace is required or you can delete this option'))
+        callback(new Error('taskmanager.memory.managed.fraction is required or you can delete this option'))
       } else {
         callback()
       }
     }
   },
   {
-    key: '-yq',
-    name: 'yarnquery',
-    placeholder: '-yq,--yarnquery',
-    description: '显示YARN上可用的资源(memory, cores)',
-    group: 'yarn-cluster',
-    type: 'switch',
-    value: '',
+    key: 'taskmanager_memory_jvm_metaspace_size',
+    name: 'taskmanager.memory.jvm-metaspace.size',
+    placeholder: 'JVM Metaspace Size for the TaskExecutors',
+    description: 'JVM Metaspace Size for the TaskExecutors',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 256,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnquery is required or you can delete this option'))
+        callback(new Error('taskmanager.memory.jvm-metaspace.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_jvm_overhead_fraction',
+    name: 'taskmanager.memory.jvm-overhead.fraction',
+    placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)于进程总内存占比',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.1,
+    defaultValue: 0.1,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.jvm-overhead.fraction is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_jvm_overhead_max',
+    name: 'taskmanager.memory.jvm-overhead.max',
+    placeholder: 'Max JVM Overhead size for the TaskExecutors',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)的最大内存',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.jvm-overhead.max is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_jvm_overhead_min',
+    name: 'taskmanager.memory.jvm-overhead.min',
+    placeholder: 'Min JVM Overhead size for the TaskExecutors',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)的最小内存',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 192,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.jvm-overhead.min is required or you can delete this option'))
       } else {
         callback()
       }
     }
   }
+
 ]

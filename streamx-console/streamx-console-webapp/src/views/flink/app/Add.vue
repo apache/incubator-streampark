@@ -61,7 +61,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 2"
+        v-if="appType === 2"
         label="Program Jar"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -79,7 +79,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 2"
+        v-if="appType === 2"
         label="Program Main"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -90,7 +90,7 @@
       </a-form-item>
 
       <a-form-item
-        v-if="appType == 1"
+        v-if="appType === 1"
         label="Application conf"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -153,37 +153,26 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="maxTagCount"
+          :maxTagCount="runMaxTagCount"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
-          v-decorator="['options']">
-          <a-select-opt-group label="run options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'run'"
-              :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
-            </a-select-option>
-          </a-select-opt-group>
-          <a-select-opt-group label="yarn-cluster options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'yarn-cluster'"
-              :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
-            </a-select-option>
-          </a-select-opt-group>
+          v-decorator="['runOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'run'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.opt }} ( {{ conf.name }} )
+          </a-select-option>
         </a-select>
       </a-form-item>
 
       <a-form-item
         class="conf-item"
         v-for="(conf,index) in options"
-        v-if="configItems.includes(conf.name)"
+        v-if="configItems.includes(conf.key)"
         :key="index"
-        :label="conf.key"
+        :label="conf.name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -203,7 +192,145 @@
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Total Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="totalTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleProcess"
+          v-decorator="['totalOptions']">
+          <a-select-opt-group label="total memory(Flink 总内存)">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'total-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+          <a-select-opt-group label="process memory(进程总内存)">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'process-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+        </a-select>
+        <p class="conf-desc" style="color: RED;">注意:不要同时设置 "Flink总内存" 和 "进程总内存",会造成内存配置冲突</p>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="totalItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/.memory/g,'').replace(/\./g,' ')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Jobmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="jmMaxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleJmMemory"
+          v-decorator="['jmOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'jobmanager-memory'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="jmMemoryItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/jobmanager.memory./g,'')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Taskmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="tmMaxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleTmMemory"
+          v-decorator="['tmOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'taskmanager-memory'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="tmMemoryItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/taskmanager.memory./g,'')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -257,8 +384,8 @@
 
 <script>
 
-import { select, modules, listConf, jars } from '@api/project'
-import { create, exists, name, readConf, main } from '@api/application'
+import { jars, listConf, modules, select } from '@api/project'
+import { create, exists, main, name, readConf } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
 
@@ -269,7 +396,10 @@ export default {
   components: { Conf },
   data () {
     return {
-      maxTagCount: 1,
+      totalTagCount: 1,
+      runMaxTagCount: 1,
+      jmMaxTagCount: 1,
+      tmMaxTagCount: 1,
       projectList: [],
       projectId: null,
       module: null,
@@ -282,8 +412,12 @@ export default {
       configOverride: null,
       configSource: [],
       configItems: [],
+      totalItems: [],
+      jmMemoryItems: [],
+      tmMemoryItems: [],
       form: null,
       options: configOptions,
+      optionsKeyMapping: {},
       confVisiable: false
     }
   },
@@ -294,8 +428,10 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
+    this.optionsKeyMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
+      this.optionsKeyMapping.set(item.key, item.name)
+      this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
   },
 
@@ -324,8 +460,20 @@ export default {
       })
     },
 
-    handleConf (name) {
-      this.configItems = name
+    handleConf (item) {
+      this.configItems = item
+    },
+
+    handleJmMemory (item) {
+      this.jmMemoryItems = item
+    },
+
+    handleTmMemory (item) {
+      this.tmMemoryItems = item
+    },
+
+    handleProcess (item) {
+      this.totalItems = item
     },
 
     handleJobName (confFile) {
@@ -345,7 +493,7 @@ export default {
     },
 
     handleAppType (val) {
-      this.appType = val
+      this.appType = parseInt(val)
       this.handleConfOrJar()
     },
 
@@ -353,7 +501,7 @@ export default {
       if (this.module && this.appType) {
         this.form.resetFields(['config', 'jobName'])
         this.configOverride = null
-        if (this.appType == 1) {
+        if (this.appType === 1) {
           listConf({
             id: this.projectId,
             module: this.module
@@ -445,10 +593,18 @@ export default {
         if (!err) {
           const options = {}
           for (const k in values) {
-            if (this.configItems.includes(k)) {
-              const v = values[k]
-              if (v !== '') {
-                options[k] = v
+            const v = values[k]
+            if (v !== '') {
+              if (k === 'parallelism') {
+                options['parallelism.default'] = v
+              } else if (k === 'slot') {
+                options['taskmanager.numberOfTaskSlots'] = v
+              } else {
+                if (this.configItems.includes(k)) {
+                  options[k] = v
+                } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+                  options[this.optionsKeyMapping.get(k)] = v
+                }
               }
             }
           }
@@ -464,10 +620,9 @@ export default {
             dynamicOptions: values.dynamicOptions,
             description: values.description
           }
-          if (this.appType == 1) {
+          if (this.appType === 1) {
             const configVal = this.form.getFieldValue('config')
-            const format = configVal.endsWith('.properties') ? 2 : 1
-            params['format'] = format
+            params['format'] = configVal.endsWith('.properties') ? 2 : 1
             if (this.configOverride == null) {
               readConf({
                 config: configVal
@@ -527,7 +682,7 @@ export default {
 
 .conf-desc {
   color: darkgrey;
-  margin-bottom: 0px
+  margin-bottom: -20px
 }
 
 .conf-switch {

@@ -144,7 +144,7 @@
           :min="1"
           :step="1"
           placeholder="Number of slots per TaskManager"
-          v-decorator="['yarnslots']" />
+          v-decorator="['slot']" />
       </a-form-item>
 
       <a-form-item
@@ -169,45 +169,33 @@
       </a-form-item>
 
       <a-form-item
-        label="Options"
+        label="Run Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="selectTagCount.count1"
-          placeholder="请选择要设置的参数"
+          :maxTagCount="runMaxTagCount"
+          placeholder="请选择要设置的资源参数"
           @change="handleConf"
-          v-decorator="['options']">
-          <a-select-opt-group label="run options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'run'"
-              :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
-            </a-select-option>
-          </a-select-opt-group>
-
-          <a-select-opt-group label="yarn-cluster options">
-            <a-select-option
-              v-for="(conf,index) in options"
-              v-if="conf.group === 'yarn-cluster'"
-              :key="index"
-              :value="conf.name">
-              {{ conf.key }} ( {{ conf.name }} )
-            </a-select-option>
-          </a-select-opt-group>
+          v-decorator="['runOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'run'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.opt }} ( {{ conf.name }} )
+          </a-select-option>
         </a-select>
       </a-form-item>
 
       <a-form-item
-        class="conf_item"
+        class="conf-item"
         v-for="(conf,index) in options"
-        v-if="configItems.includes(conf.name)"
+        v-if="configItems.includes(conf.key)"
         :key="index"
-        :label="conf.key"
+        :label="conf.name"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-input
@@ -227,7 +215,144 @@
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Total Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="totalTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleProcess"
+          v-decorator="['totalOptions']">
+          <a-select-opt-group label="total memory">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'total-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+          <a-select-opt-group label="process memory">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'process-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="totalItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/.memory/g,'').replace(/\./g,' ')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Jobmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="jmMaxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleJmMemory"
+          v-decorator="['jmOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'jobmanager-memory'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="jmMemoryItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/jobmanager.memory./g,'')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Taskmanager Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="tmMaxTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleTmMemory"
+          v-decorator="['tmOptions']">
+          <a-select-option
+            v-for="(conf,index) in options"
+            v-if="conf.group === 'taskmanager-memory'"
+            :key="index"
+            :value="conf.key">
+            {{ conf.name }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="tmMemoryItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/taskmanager.memory./g,'')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf.description }}</p>
       </a-form-item>
@@ -301,6 +426,10 @@ export default {
         count1: 1,
         count2: 2
       },
+      runMaxTagCount: 1,
+      totalTagCount: 1,
+      jmMaxTagCount: 1,
+      tmMaxTagCount: 1,
       switchDefaultValue: true,
       compareConf: [],
       defaultConfigId: null,
@@ -310,8 +439,13 @@ export default {
       configVersions: [],
       configSource: [],
       configItems: [],
+      totalItems: [],
+      jmMemoryItems: [],
+      tmMemoryItems: [],
       form: null,
       options: configOptions,
+      optionsKeyMapping: {},
+      optionsValueMapping: {},
       configuration: [
         { key: 'tc', name: ' time characteristic' },
         { key: 'cp', name: ' checkpoints' },
@@ -334,8 +468,12 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
+    this.optionsKeyMapping = new Map()
+    this.optionsValueMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.form.getFieldDecorator(item.name, { initialValue: item.value, preserve: true })
+      this.optionsKeyMapping.set(item.key, item.name)
+      this.optionsValueMapping.set(item.name, item.key)
+      this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
   },
 
@@ -360,8 +498,20 @@ export default {
       })
     },
 
-    handleConf (name) {
-      this.configItems = name
+    handleConf (item) {
+      this.configItems = item
+    },
+
+    handleJmMemory (item) {
+      this.jmMemoryItems = item
+    },
+
+    handleTmMemory (item) {
+      this.tmMemoryItems = item
+    },
+
+    handleProcess (item) {
+      this.totalItems = item
     },
 
     handleChangeNewConfig (confFile) {
@@ -375,8 +525,7 @@ export default {
       readConf({
         config: confFile
       }).then((resp) => {
-        const conf = Base64.decode(resp.data)
-        this.configOverride = conf
+        this.configOverride = Base64.decode(resp.data)
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -404,9 +553,7 @@ export default {
     },
 
     handleChangeConfig (v) {
-      getVer({
-        id: v
-      }).then((resp) => {
+      getVer({ id: v }).then((resp) => {
         this.configOverride = Base64.decode(resp.data.content)
         this.configId = resp.data.id
       })
@@ -432,10 +579,18 @@ export default {
         if (!err) {
           const options = {}
           for (const k in values) {
-            if (this.configItems.includes(k)) {
-              const v = values[k]
-              if (v !== '') {
-                options[k] = v
+            const v = values[k]
+            if (v !== '') {
+              if (k === 'parallelism') {
+                options['parallelism.default'] = v
+              } else if (k === 'slot') {
+                options['taskmanager.numberOfTaskSlots'] = v
+              } else {
+                if (this.configItems.includes(k)) {
+                  options[k] = v
+                } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+                  options[this.optionsKeyMapping.get(k)] = v
+                }
               }
             }
           }
@@ -444,17 +599,7 @@ export default {
           const config = this.configOverride || this.app.config
           const configId = this.strategy === 1 ? this.configId : null
 
-          const parallelism = this.form.getFieldValue('parallelism') || null
-          const yarnslots = this.form.getFieldValue('yarnslots') || null
-          if (parallelism) {
-            options['parallelism'] = parallelism
-          }
-
-          if (yarnslots) {
-            options['yarnslots'] = yarnslots
-          }
-
-          update({
+          const params = {
             id: this.app.id,
             config: Base64.encode(config),
             jobName: values.jobName,
@@ -464,7 +609,8 @@ export default {
             options: JSON.stringify(options),
             dynamicOptions: values.dynamicOptions,
             description: values.description
-          }).then((resp) => {
+          }
+          update(params).then((resp) => {
             const updated = resp.data
             if (updated) {
               this.$router.push({ path: '/flink/app' })
@@ -540,20 +686,45 @@ export default {
           'args': this.app.args,
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
-          'yarnslots': this.defaultOptions.yarnslots,
+          'slot': this.defaultOptions.slot,
           'parallelism': this.defaultOptions.parallelism
         })
       })
-      const array = []
+
+      let parallelism = null
+      let slot = null
+      this.totalItems = []
+      this.jmMemoryItems = []
+      this.tmMemoryItems = []
+      const fieldValueOptions = {}
       for (const k in this.defaultOptions) {
-        if (k !== 'parallelism' && k !== 'yarnslots') {
-          array.push(k)
+        const v = this.defaultOptions[k]
+        const key = this.optionsValueMapping.get(k)
+        fieldValueOptions[key] = v
+        if (k === 'jobmanager.memory.flink.size' || k === 'taskmanager.memory.flink.size' || k === 'jobmanager.memory.process.size' || k === 'taskmanager.memory.process.size') {
+          this.totalItems.push(key)
+        } else {
+          if (k.startsWith('jobmanager.memory.')) {
+            this.jmMemoryItems.push(key)
+          }
+          if (k.startsWith('taskmanager.memory.')) {
+            this.tmMemoryItems.push(key)
+          }
+          if (k === 'taskmanager.numberOfTaskSlots') {
+            parallelism = parseInt(v)
+          }
+          if (k === 'parallelism.default') {
+            slot = parseInt(v)
+          }
         }
       }
-      this.configItems = array
-      this.form.setFieldsValue(this.defaultOptions)
       this.$nextTick(() => {
-        this.form.setFieldsValue({ 'options': array })
+        this.form.setFieldsValue({ 'parallelism': parallelism })
+        this.form.setFieldsValue({ 'slot': slot })
+        this.form.setFieldsValue({ 'totalOptions': this.totalItems })
+        this.form.setFieldsValue({ 'jmOptions': this.jmMemoryItems })
+        this.form.setFieldsValue({ 'tmOptions': this.tmMemoryItems })
+        this.form.setFieldsValue(fieldValueOptions)
       })
     }
 
@@ -581,7 +752,7 @@ export default {
 
 .conf-desc {
   color: darkgrey;
-  margin-bottom: 0px
+  margin-bottom: -20px
 }
 
 .conf-switch {
