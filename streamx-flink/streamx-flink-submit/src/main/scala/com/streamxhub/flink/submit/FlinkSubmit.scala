@@ -201,8 +201,7 @@ object FlinkSubmit extends Logger {
       customCommandLine.addGeneralOptions(customCommandLineOptions)
       customCommandLine.addRunOptions(customCommandLineOptions)
     }
-    val commandOptions = FlinkRunOption.getRunCommandOptions
-    val commandLineOptions = FlinkRunOption.mergeOptions(commandOptions, customCommandLineOptions)
+    val commandLineOptions = FlinkRunOption.mergeOptions(FlinkRunOption.getRunCommandOptions, customCommandLineOptions)
 
     //read and verify user config...
     val cliArgs = {
@@ -304,6 +303,14 @@ object FlinkSubmit extends Logger {
       programArgs += s"--$KEY_FLINK_PARALLELISM"
       programArgs += submitInfo.property.get(KEY_FLINK_PARALLELISM).toString
     }
+
+    val properties = commandLine.getOptionProperties(FlinkRunOption.DYNAMIC_PROPERTIES.getOpt)
+    properties.stringPropertyNames.foreach(key => {
+      properties.getProperty(key) match {
+        case null => effectiveConfiguration.setString(key, "true")
+        case v => effectiveConfiguration.setString(key, v)
+      }
+    })
 
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, JavaArrays.asList(flinkHdfsLibs.toString, flinkHdfsPlugins.toString))
