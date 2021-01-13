@@ -201,7 +201,59 @@
       </a-form-item>
 
       <a-form-item
-        label="Jobmanager-memory Options"
+        label="Total Memory Options"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-select
+          showSearch
+          allowClear
+          mode="multiple"
+          :maxTagCount="totalTagCount"
+          placeholder="请选择要设置的资源参数"
+          @change="handleProcess"
+          v-decorator="['totalOptions']">
+          <a-select-opt-group label="total memory">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'total-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+          <a-select-opt-group label="process memory">
+            <a-select-option
+              v-for="(conf,index) in options"
+              v-if="conf.group === 'process-memory'"
+              :key="index"
+              :value="conf.key">
+              {{ conf.name }}
+            </a-select-option>
+          </a-select-opt-group>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
+        class="conf-item"
+        v-for="(conf,index) in options"
+        v-if="totalItems.includes(conf.key)"
+        :key="index"
+        :label="conf.name.replace(/.memory/g,'').replace(/\./g,' ')"
+        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        <a-input-number
+          v-if="conf.type === 'number'"
+          :min="conf.min"
+          :max="conf.max"
+          :defaultValue="conf.defaultValue"
+          :step="conf.step"
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+        <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
+        <p class="conf-desc">{{ conf.description }}</p>
+      </a-form-item>
+
+      <a-form-item
+        label="Jobmanager Memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -242,7 +294,7 @@
       </a-form-item>
 
       <a-form-item
-        label="Taskmanager-memory Options"
+        label="Taskmanager Memory Options"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
@@ -343,6 +395,7 @@ export default {
   components: { Conf },
   data () {
     return {
+      totalTagCount: 1,
       runMaxTagCount: 1,
       jmMaxTagCount: 1,
       tmMaxTagCount: 1,
@@ -358,6 +411,7 @@ export default {
       configOverride: null,
       configSource: [],
       configItems: [],
+      totalItems: [],
       jmMemoryItems: [],
       tmMemoryItems: [],
       form: null,
@@ -415,6 +469,10 @@ export default {
 
     handleTmMemory (item) {
       this.tmMemoryItems = item
+    },
+
+    handleProcess (item) {
+      this.totalItems = item
     },
 
     handleJobName (confFile) {
@@ -543,7 +601,7 @@ export default {
               } else {
                 if (this.configItems.includes(k)) {
                   options[k] = v
-                } else if (this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+                } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
                   options[this.optionsKeyMapping.get(k)] = v
                 }
               }

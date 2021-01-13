@@ -58,13 +58,13 @@ export default [
       callback()
     }
   },
-  // ------------------------------------------------------- jobmanager-memory -------------------------------------------------------
+  // --------------------total-memory--------------------
   {
     key: 'jobmanager_memory_flink_size',
     name: 'jobmanager.memory.flink.size',
     placeholder: 'Total Flink Memory size for the JobManage',
-    description: 'JobManager总内存大小 (单位: MB)',
-    group: 'jobmanager-memory',
+    description: 'JobManager Flink总内存大小 (单位: MB)',
+    group: 'total-memory',
     type: 'number',
     min: 1,
     max: 102400,
@@ -79,10 +79,69 @@ export default [
     }
   },
   {
+    key: 'taskmanager_memory_flink_size',
+    name: 'taskmanager.memory.flink.size',
+    placeholder: 'Total Flink Memory size for the TaskExecutors',
+    description: 'TaskExecutor Flink总内存大小 (单位: MB)',
+    group: 'total-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.flink.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  // --------------------process-memory--------------------
+  {
+    key: 'jobmanager_memory_process_size',
+    name: 'jobmanager.memory.process.size',
+    placeholder: 'Total Process Memory size for the JobManager',
+    description: 'JobManager 进程总内存大小 (单位: MB)',
+    group: 'process-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.process.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_process_size',
+    name: 'taskmanager.memory.process.size',
+    placeholder: 'Total Process Memory size for the TaskExecutors',
+    description: 'TaskExecutor 进程总内存大小 (单位: MB)',
+    group: 'process-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 1024,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.process.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  // ------------------------------------------------------- jobmanager-memory -------------------------------------------------------
+  {
     key: 'jobmanager_memory_heap_size',
     name: 'jobmanager.memory.heap.size',
     placeholder: 'JVM Heap Memory size for JobManager',
-    description: 'JobManager Heap,recommended 128.000mb (134217728 bytes)',
+    description: 'JobManager 的 JVM 堆内存,推荐大小 128.000mb (134217728 bytes)',
     group: 'jobmanager-memory',
     type: 'number',
     min: 1,
@@ -92,6 +151,25 @@ export default [
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.heap.size is require or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'jobmanager_memory_off_heap_size',
+    name: 'jobmanager.memory.off-heap.size',
+    placeholder: 'Off-heap Memory size for JobManager',
+    description: 'JobManager 的堆外内存(直接内存或本地内存)',
+    group: 'jobmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('jobmanager.memory.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -120,7 +198,7 @@ export default [
     key: 'jobmanager_memory_jvm_overhead_fraction',
     name: 'jobmanager.memory.jvm-overhead.fraction',
     placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
-    description: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)于进程总内存占比',
     group: 'jobmanager-memory',
     type: 'number',
     min: 0.1,
@@ -129,7 +207,7 @@ export default [
     defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('yarnnodeLabel is require or you can delete this option.'))
+        callback(new Error('jobmanager.memory.jvm-overhead.fraction is require or you can delete this option.'))
       } else {
         callback()
       }
@@ -139,13 +217,13 @@ export default [
     key: 'jobmanager_memory_jvm_overhead_max',
     name: 'jobmanager.memory.jvm-overhead.max',
     placeholder: 'Max JVM Overhead size for the JobManager',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)的最大内存',
     group: 'jobmanager-memory',
     type: 'number',
     min: 1,
     max: 102400,
     step: 1,
     defaultValue: 1024,
-    description: 'Max JVM Overhead size for the JobManager',
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('jobmanager.memory.jvm-overhead.max is required or you can delete this option'))
@@ -158,7 +236,7 @@ export default [
     key: 'jobmanager_memory_jvm_overhead_min',
     name: 'jobmanager.memory.jvm.overhead.min',
     placeholder: 'Min JVM Overhead size for the JobManager',
-    description: 'Min JVM Overhead size for the JobManager',
+    description: 'JobManager其他JVM开销(如栈空间,垃圾回收空间)的最小内存',
     group: 'jobmanager-memory',
     type: 'number',
     min: 1,
@@ -173,75 +251,18 @@ export default [
       }
     }
   },
-  {
-    key: 'jobmanager_memory_off_heap_size',
-    name: 'jobmanager.memory.off-heap.size',
-    placeholder: 'Off-heap Memory size for JobManager',
-    description: 'Off-heap Memory size for JobManager',
-    group: 'jobmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 128,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('jobmanager.memory.off-heap.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'jobmanager_memory_process_size',
-    name: 'jobmanager.memory.process.size',
-    placeholder: 'Total Process Memory size for the JobManager',
-    description: 'Total Process Memory size for the JobManager',
-    group: 'jobmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 1024,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('jobmanager.memory.process.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
   // ------------------------------------------------------- taskmanager-memory -------------------------------------------------------
-  {
-    key: 'taskmanager_memory_flink_size',
-    name: 'taskmanager.memory.flink.size',
-    placeholder: 'Total Flink Memory size for the TaskExecutors',
-    description: 'Total Flink Memory size for the TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 1024,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.flink.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
   {
     key: 'taskmanager_memory_framework_heap_size',
     name: 'taskmanager.memory.framework.heap.size',
     placeholder: 'Framework Heap Memory size for TaskExecutors',
-    description: 'Framework Heap Memory size for TaskExecutors',
+    description: '框架堆内存-用于Flink框架的JVM堆内存 (不建议调整,进阶配置)',
     group: 'taskmanager-memory',
     type: 'number',
     min: 1,
     max: 102400,
     step: 1,
-    defaultValue: 128,
+    defaultValue: null,
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.framework.heap.size is required or you can delete this option'))
@@ -254,7 +275,27 @@ export default [
     key: 'taskmanager_memory_framework_off_heap_size',
     name: 'taskmanager.memory.framework.off-heap.size',
     placeholder: 'Framework Off-Heap Memory size for TaskExecutors',
-    description: 'Framework Off-Heap Memory size for TaskExecutors',
+    description: '框架堆外内存-用于Flink框架的堆外内存 (不建议调整,进阶配置)',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: null,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.framework.off-heap.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+
+  {
+    key: 'taskmanager_memory_task_heap_size',
+    name: 'taskmanager.memory.task.heap.size',
+    placeholder: 'Task Heap Memory size for TaskExecutors',
+    description: '任务堆内存-用于Flink应用的算子及用户代码的JVM堆内存',
     group: 'taskmanager-memory',
     type: 'number',
     min: 1,
@@ -263,7 +304,65 @@ export default [
     defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.framework.off-heap.size is required or you can delete this option'))
+        callback(new Error('taskmanager.memory.task.heap.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_task_off_heap_size',
+    name: 'taskmanager.memory.task.off-heap.size',
+    placeholder: 'Task Off-Heap Memory size for TaskExecutors',
+    description: '任务堆外内存-用于Flink算子及用户代码的堆外内存(不建议调整,进阶配置)',
+    group: 'taskmanager-memory',
+    type: 'number',
+    unit: 'mb',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: null,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.task.off-heap.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_managed_size',
+    name: 'taskmanager.memory.managed.size',
+    placeholder: 'Managed Memory size for TaskExecutors',
+    description: '托管内存-由Flink管理用于(排序|缓存中间结果|StateBackend)的内存大小',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 1,
+    max: 102400,
+    step: 1,
+    defaultValue: 128,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.managed.size is required or you can delete this option'))
+      } else {
+        callback()
+      }
+    }
+  },
+  {
+    key: 'taskmanager_memory_managed_fraction',
+    name: 'taskmanager.memory.managed.fraction',
+    placeholder: 'Min JVM Overhead size for the TaskExecutors',
+    description: '托管内存-由Flink管理用于(排序|缓存中间结果|StateBackend)的内存占比',
+    group: 'taskmanager-memory',
+    type: 'number',
+    min: 0.1,
+    max: 1,
+    step: 0.1,
+    defaultValue: 0.4,
+    validator: (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('taskmanager.memory.managed.fraction is required or you can delete this option'))
       } else {
         callback()
       }
@@ -292,7 +391,7 @@ export default [
     key: 'taskmanager_memory_jvm_overhead_fraction',
     name: 'taskmanager.memory.jvm-overhead.fraction',
     placeholder: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
-    description: 'Fraction of Total Process Memory to be reserved for JVM Overhead',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)于进程总内存占比',
     group: 'taskmanager-memory',
     type: 'number',
     min: 0.1,
@@ -311,7 +410,7 @@ export default [
     key: 'taskmanager_memory_jvm_overhead_max',
     name: 'taskmanager.memory.jvm-overhead.max',
     placeholder: 'Max JVM Overhead size for the TaskExecutors',
-    description: 'Max JVM Overhead size for the TaskExecutors',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)的最大内存',
     group: 'taskmanager-memory',
     type: 'number',
     min: 1,
@@ -330,7 +429,7 @@ export default [
     key: 'taskmanager_memory_jvm_overhead_min',
     name: 'taskmanager.memory.jvm-overhead.min',
     placeholder: 'Min JVM Overhead size for the TaskExecutors',
-    description: 'Min JVM Overhead size for the TaskExecutors',
+    description: 'TaskExecutor的其他JVM开销(如栈空间,垃圾回收空间)的最小内存',
     group: 'taskmanager-memory',
     type: 'number',
     min: 1,
@@ -340,159 +439,6 @@ export default [
     validator: (rule, value, callback) => {
       if (!value) {
         callback(new Error('taskmanager.memory.jvm-overhead.min is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_managed_fraction',
-    name: 'taskmanager.memory.managed.fraction',
-    placeholder: 'Min JVM Overhead size for the TaskExecutors',
-    description: 'Min JVM Overhead size for the TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 0.1,
-    max: 1,
-    step: 0.1,
-    defaultValue: 0.4,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.managed.fraction is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_managed_size',
-    name: 'taskmanager.memory.managed.size',
-    placeholder: 'Managed Memory size for TaskExecutors',
-    description: 'Managed Memory size for TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 128,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.managed.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_network_fraction',
-    name: 'taskmanager.memory.network.fraction',
-    placeholder: 'Fraction of Total Flink Memory to be used as Network Memory',
-    description: 'Fraction of Total Flink Memory to be used as Network Memory',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 0.1,
-    max: 1,
-    step: 0.1,
-    defaultValue: 0.1,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.network.fraction is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_network_max',
-    name: 'taskmanager.memory.network.max',
-    placeholder: 'Max Network Memory size for TaskExecutors',
-    description: 'Max Network Memory size for TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 64,
-    max: 102400,
-    step: 1,
-    defaultValue: 1024,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.network.max is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_network.min',
-    name: 'taskmanager.memory.network.min',
-    placeholder: 'Min Network Memory size for TaskExecutors',
-    description: 'Min Network Memory size for TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 64,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.network.min is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_process_size',
-    name: 'taskmanager.memory.process.size',
-    placeholder: 'Total Process Memory size for the TaskExecutors',
-    description: 'Total Process Memory size for the TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 1024,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.process.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_task_heap_size',
-    name: 'taskmanager.memory.task.heap.size',
-    placeholder: 'Task Heap Memory size for TaskExecutors',
-    description: 'Task Heap Memory size for TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 128,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.task.heap.size is required or you can delete this option'))
-      } else {
-        callback()
-      }
-    }
-  },
-  {
-    key: 'taskmanager_memory_task_off_heap_size',
-    name: 'taskmanager.memory.task.off-heap.size',
-    placeholder: 'Task Off-Heap Memory size for TaskExecutors',
-    description: 'Task Off-Heap Memory size for TaskExecutors',
-    group: 'taskmanager-memory',
-    type: 'number',
-    unit: 'mb',
-    min: 1,
-    max: 102400,
-    step: 1,
-    defaultValue: 0,
-    validator: (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('taskmanager.memory.task.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }

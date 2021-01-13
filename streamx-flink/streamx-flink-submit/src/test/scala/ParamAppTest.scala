@@ -1,4 +1,5 @@
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.runtime.jobmanager.JobManagerProcessUtils
 
 object ParamAppTest extends App {
   val arg = Array(
@@ -13,6 +14,7 @@ object ParamAppTest extends App {
     "--flink.deployment.option.parallelism",
     "5"
   )
+  JobManagerProcessUtils
   val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(argsx))
   println(param)
 }
