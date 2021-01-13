@@ -752,7 +752,7 @@ export default {
 
 .conf-desc {
   color: darkgrey;
-  margin-bottom: 0px
+  margin-bottom: -20px
 }
 
 .conf-switch {

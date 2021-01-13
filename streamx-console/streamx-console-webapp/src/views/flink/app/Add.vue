@@ -212,7 +212,7 @@
           placeholder="请选择要设置的资源参数"
           @change="handleProcess"
           v-decorator="['totalOptions']">
-          <a-select-opt-group label="total memory">
+          <a-select-opt-group label="total memory(Flink 总内存)">
             <a-select-option
               v-for="(conf,index) in options"
               v-if="conf.group === 'total-memory'"
@@ -221,7 +221,7 @@
               {{ conf.name }}
             </a-select-option>
           </a-select-opt-group>
-          <a-select-opt-group label="process memory">
+          <a-select-opt-group label="process memory(进程总内存)">
             <a-select-option
               v-for="(conf,index) in options"
               v-if="conf.group === 'process-memory'"
@@ -231,6 +231,7 @@
             </a-select-option>
           </a-select-opt-group>
         </a-select>
+        <p class="conf-desc" style="color: RED;">注意:不要同时设置 "Flink总内存" 和 "进程总内存",会造成内存配置冲突</p>
       </a-form-item>
 
       <a-form-item
@@ -681,7 +682,7 @@ export default {
 
 .conf-desc {
   color: darkgrey;
-  margin-bottom: 0px
+  margin-bottom: -20px
 }
 
 .conf-switch {
