@@ -430,16 +430,16 @@ export default {
       })
     },
 
-    handleConf (name) {
-      this.configItems = name
+    handleConf (item) {
+      this.configItems = item
     },
 
-    handleJmMemory (name) {
-      this.jmMemoryItems = name
+    handleJmMemory (item) {
+      this.jmMemoryItems = item
     },
 
-    handleTmMemory (name) {
-      this.tmMemoryItems = name
+    handleTmMemory (item) {
+      this.tmMemoryItems = item
     },
 
     handleJobName (confFile) {
@@ -558,6 +558,10 @@ export default {
       this.form.validateFields((err, values) => {
         if (!err) {
           const options = {}
+          console.log(values)
+          console.log(this.configItems)
+          console.log(this.jmMemoryItems)
+          console.log(this.tmMemoryItems)
           for (const k in values) {
             if (this.configItems.includes(k)) {
               const v = values[k]
