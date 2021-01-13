@@ -470,8 +470,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
 
-        Map<String, Object> property = application.getOptionMap();
-
         StringBuilder option = new StringBuilder();
         if (appParam.getAllowNonRestored()) {
             option.append(" -n ");
@@ -501,7 +499,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 savePointDir,
                 flameGraph,
                 option.toString(),
-                property,
+                application.getOptionMap(),
                 dynamicOption,
                 application.getArgs()
         );

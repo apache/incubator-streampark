@@ -223,8 +223,7 @@ public class Application implements Serializable {
     @JsonIgnore
     public Map<String, Object> getOptionMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> map = mapper.readValue(getOptions(), Map.class);
-        return map;
+        return mapper.readValue(getOptions(), Map.class);
     }
 
 }
