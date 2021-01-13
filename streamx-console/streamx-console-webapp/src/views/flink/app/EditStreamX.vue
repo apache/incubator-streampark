@@ -418,7 +418,7 @@ export default {
     this.optionsValueMapping = new Map()
     this.options.forEach((item, index, array) => {
       this.optionsMapping.set(item.key, item.name)
-      this.optionsValueMapping.set(item.name,item.key)
+      this.optionsValueMapping.set(item.name, item.key)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
   },
@@ -467,8 +467,7 @@ export default {
       readConf({
         config: confFile
       }).then((resp) => {
-        const conf = Base64.decode(resp.data)
-        this.configOverride = conf
+        this.configOverride = Base64.decode(resp.data)
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -496,9 +495,7 @@ export default {
     },
 
     handleChangeConfig (v) {
-      getVer({
-        id: v
-      }).then((resp) => {
+      getVer({ id: v }).then((resp) => {
         this.configOverride = Base64.decode(resp.data.content)
         this.configId = resp.data.id
       })
@@ -544,7 +541,7 @@ export default {
           const config = this.configOverride || this.app.config
           const configId = this.strategy === 1 ? this.configId : null
 
-          update({
+          const params = {
             id: this.app.id,
             config: Base64.encode(config),
             jobName: values.jobName,
@@ -554,7 +551,8 @@ export default {
             options: JSON.stringify(options),
             dynamicOptions: values.dynamicOptions,
             description: values.description
-          }).then((resp) => {
+          }
+          update(params).then((resp) => {
             const updated = resp.data
             if (updated) {
               this.$router.push({ path: '/flink/app' })
@@ -634,26 +632,35 @@ export default {
           'parallelism': this.defaultOptions.parallelism
         })
       })
-      const array = []
-      const jmArray = []
-      const tmArray = []
+
+      let parallelism = null
+      let slot = null
+      this.jmMemoryItems = []
+      this.tmMemoryItems = []
+      const fieldValueOptions = {}
       for (const k in this.defaultOptions) {
+        const v = this.defaultOptions[k]
+        const key = this.optionsValueMapping.get(k)
+        fieldValueOptions[key] = v
         if (k.startsWith('jobmanager.memory.')) {
-          jmArray.push(this.optionsValueMapping.get(k))
+          this.jmMemoryItems.push(key)
         }
         if (k.startsWith('taskmanager.memory.')) {
-          tmArray.push(this.optionsValueMapping.get(k))
+          this.tmMemoryItems.push(key)
         }
-        if (k !== 'parallelism' && k !== 'slot') {
-          array.push(k)
+        if (k === 'taskmanager.numberOfTaskSlots') {
+          parallelism = parseInt(v)
+        }
+        if (k === 'parallelism.default') {
+          slot = parseInt(v)
         }
       }
-      this.configItems = array
-      this.jmMemoryItems = jmArray
-      this.tmMemoryItems = tmArray
-      this.form.setFieldsValue(this.defaultOptions)
       this.$nextTick(() => {
-        this.form.setFieldsValue({ 'options': array })
+        this.form.setFieldsValue({ 'parallelism': parallelism })
+        this.form.setFieldsValue({ 'slot': slot })
+        this.form.setFieldsValue({ 'jmOptions': this.jmMemoryItems })
+        this.form.setFieldsValue({ 'tmOptions': this.tmMemoryItems })
+        this.form.setFieldsValue(fieldValueOptions)
       })
     }
 

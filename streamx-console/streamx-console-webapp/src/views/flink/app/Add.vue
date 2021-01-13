@@ -331,8 +331,8 @@
 
 <script>
 
-import {jars, listConf, modules, select} from '@api/project'
-import {create, exists, main, name, readConf} from '@api/application'
+import { jars, listConf, modules, select } from '@api/project'
+import { create, exists, main, name, readConf } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
 
