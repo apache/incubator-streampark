@@ -64,7 +64,7 @@
         <a-descriptions bordered size="middle" layout="vertical">
           <a-descriptions-item v-for="(v,k) in options" :key="k">
             <template slot="label">
-              {{ k | optionKey }} <span style="color: darkgrey">({{ k }})</span>
+              {{ k }}
             </template>
             {{ v }}
           </a-descriptions-item>
@@ -573,15 +573,6 @@ export default {
       })
     } else {
       this.$router.back(-1)
-    }
-  },
-  filters: {
-    optionKey: function (title) {
-      for (const opt of configOptions) {
-        if (opt.name === title) {
-          return opt.key
-        }
-      }
     }
   },
   methods: {
