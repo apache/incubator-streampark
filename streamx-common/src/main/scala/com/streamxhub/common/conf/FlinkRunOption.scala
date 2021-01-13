@@ -20,9 +20,10 @@
  */
 package com.streamxhub.common.conf
 
-import org.apache.commons.cli.{Option, Options}
+import org.apache.commons.cli.{CommandLine, DefaultParser, Option, Options}
 
 import scala.collection.JavaConversions._
+import java.lang.{Boolean => JavaBoolean}
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -172,31 +173,7 @@ object FlinkRunOption {
     options.addOption(EXECUTOR_OPTION)
     options.addOption(TARGET_OPTION)
     options.addOption(SAVEPOINT_ALLOW_NON_RESTORED_OPTION)
-  }
-
-  def getInfoCommandOptions: Options = {
-    val options = buildGeneralOptions(new Options)
-    getProgramSpecificOptions(options)
-  }
-
-  def getListCommandOptions: Options = {
-    val options = buildGeneralOptions(new Options)
-    options.addOption(ALL_OPTION)
-    options.addOption(RUNNING_OPTION)
-    options.addOption(SCHEDULED_OPTION)
-  }
-
-  def getCancelCommandOptions: Options = {
-    val options = buildGeneralOptions(new Options)
-    options.addOption(CANCEL_WITH_SAVEPOINT_OPTION)
-  }
-
-  def getStopCommandOptions: Options = buildGeneralOptions(new Options).addOption(STOP_WITH_SAVEPOINT_PATH).addOption(STOP_AND_DRAIN)
-
-  def getSavepointCommandOptions: Options = {
-    val options = buildGeneralOptions(new Options)
-    options.addOption(SAVEPOINT_DISPOSE_OPTION)
-    options.addOption(JAR_OPTION)
+    options.addOption(DYNAMIC_PROPERTIES)
   }
 
   def getYARNOptions: Options = {
@@ -231,5 +208,24 @@ object FlinkRunOption {
     options.addOption(PYEXEC_OPTION)
     options
   }
+
+
+  def mergeOptions(optionsA: Options, optionsB: Options): Options = {
+    val resultOptions = new Options
+    require(optionsA != null)
+    require(optionsB != null)
+    optionsA.getOptions.foreach(resultOptions.addOption)
+    optionsB.getOptions.foreach(resultOptions.addOption)
+    resultOptions
+  }
+
+  def parse(options: Options, args: Array[String], stopAtNonOptions: JavaBoolean): CommandLine = {
+    val parser = new DefaultParser
+    Try(parser.parse(options, args, stopAtNonOptions)) match {
+      case Success(value) => value
+      case Failure(e) => throw e
+    }
+  }
+
 
 }
