@@ -108,7 +108,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[StreamX] HBaseASync request timeout. retrying... ")
+    logWarn("HBaseASync request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 

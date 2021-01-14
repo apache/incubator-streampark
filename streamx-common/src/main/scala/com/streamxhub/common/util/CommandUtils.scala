@@ -64,7 +64,7 @@ object CommandUtils extends Logger {
   def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
     Try {
       require(commands != null && commands.nonEmpty)
-      logInfo(s"[StreamX] Command execute:\n${commands.mkString("\n")} ")
+      logInfo(s"Command execute:\n${commands.mkString("\n")} ")
       val process = Runtime.getRuntime.exec("/bin/bash", null, null)
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       commands.foreach(out.println)

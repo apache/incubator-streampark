@@ -219,7 +219,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
       case RestartStrategy.none => streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.noRestart())
 
-      case null => logger.info("[StreamX] RestartStrategy not set,use default from $flink_conf")
+      case null => logInfo("RestartStrategy not set,use default from $flink_conf")
     }
   }
 
@@ -263,7 +263,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR, null) match {
           //从flink-conf.yaml中读取.
           case null =>
-            logWarn("[StreamX] can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
+            logWarn("can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
             val flinkConf = {
               /**
                * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
@@ -271,7 +271,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
                */
               val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
                 case null | "" =>
-                  logInfo("[StreamX] --flink.home is undefined,now try found from flink-conf.yaml on System env.")
+                  logInfo("--flink.home is undefined,now try found from flink-conf.yaml on System env.")
                   val flinkHome = System.getenv("FLINK_HOME")
                   require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
                   flinkHome
@@ -283,10 +283,10 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
             val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)
             require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
-            logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
+            logInfo(s"stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
           case dir =>
-            logInfo(s"[StreamX] stat.backend: flink.checkpoints.dir found in properties,$dir")
+            logInfo(s"stat.backend: flink.checkpoints.dir found in properties,$dir")
             dir
         }
       }
@@ -298,19 +298,19 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * The aggregate state must fit into the JobManager memory.
          */
         case XStateBackend.jobmanager =>
-          logInfo(s"[StreamX] stat.backend Type: jobmanager...")
+          logInfo(s"stat.backend Type: jobmanager...")
           //default 5 MB,cannot be larger than the akka frame size
           val maxMemorySize = Try(parameter.get(KEY_FLINK_STATE_BACKEND_MEMORY).toInt).getOrElse(MemoryStateBackend.DEFAULT_MAX_STATE_SIZE)
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val ms = new MemoryStateBackend(maxMemorySize, async)
           streamEnvironment.setStateBackend(ms)
         case XStateBackend.filesystem =>
-          logInfo(s"[StreamX] stat.backend Type: filesystem...")
+          logInfo(s"stat.backend Type: filesystem...")
           val async = Try(parameter.get(KEY_FLINK_STATE_BACKEND_ASYNC).toBoolean).getOrElse(false)
           val fs = new FsStateBackend(cpDir, async)
           streamEnvironment.setStateBackend(fs)
         case XStateBackend.rocksdb =>
-          logInfo("[StreamX] stat.backend Type: rocksdb...")
+          logInfo("stat.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
           val rs = new RocksDBStateBackend(cpDir, incremental)
@@ -331,7 +331,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           }
           streamEnvironment.setStateBackend(rs)
         case _ =>
-          logError("[StreamX] usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
+          logError("usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
       }
     }
   }
