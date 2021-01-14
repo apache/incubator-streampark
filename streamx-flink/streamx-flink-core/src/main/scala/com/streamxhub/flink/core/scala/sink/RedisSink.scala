@@ -172,7 +172,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
 
 
 case class RedisTransaction[T](transactionId: String = Utils.uuid(), mapper: ListBuffer[(RedisMapper[T], T, Int)] = ListBuffer.empty[(RedisMapper[T], T, Int)], var invoked: Boolean = false) extends Serializable {
-  def +(redisMapper: RedisMapper[T], r: T, ttl: Int): Unit = mapper.add((redisMapper, r, ttl))
+  def +(redisMapper: RedisMapper[T], r: T, ttl: Int): Unit = mapper += ((redisMapper, r, ttl))
 
   override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }
