@@ -89,17 +89,17 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
 
   case object INSERT_INTO extends SQLCommand(
     "(INSERT\\s+INTO.*)",
-    (x: Array[String]) => Some(Array[String](x(0)))
+    (x: Array[String]) => Some(Array[String](x.head))
   )
 
   case object CREATE_TABLE extends SQLCommand(
     "(CREATE\\s+TABLE.*)",
-    (x: Array[String]) => Some(Array[String](x(0)))
+    (x: Array[String]) => Some(Array[String](x.head))
   )
 
   case object CREATE_VIEW extends SQLCommand(
     "(CREATE\\s+VIEW.*)",
-    (x: Array[String]) => Some(Array[String](x(0)))
+    (x: Array[String]) => Some(Array[String](x.head))
   )
 
 }
