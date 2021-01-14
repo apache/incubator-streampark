@@ -124,8 +124,6 @@ object FlinkSubmit extends Logger {
 
     val commandLine = getEffectiveCommandLine(submitInfo, customCommandLines)
 
-    ch.qos.logback.core.rolling.RollingFileAppender
-
     val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
 
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
