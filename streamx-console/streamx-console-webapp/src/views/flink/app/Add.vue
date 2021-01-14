@@ -231,7 +231,7 @@
             </a-select-option>
           </a-select-opt-group>
         </a-select>
-        <p class="conf-desc" style="color: RED;">注意:不要同时设置 "Flink总内存" 和 "进程总内存",会造成内存配置冲突</p>
+        <p class="conf-desc" style="color: RED;margin-bottom: -20px">注意:不要同时设置 "Flink总内存" 和 "进程总内存",会造成内存配置冲突</p>
       </a-form-item>
 
       <a-form-item
@@ -682,7 +682,7 @@ export default {
 
 .conf-desc {
   color: darkgrey;
-  margin-bottom: -20px
+  margin-bottom: 0px
 }
 
 .conf-switch {
