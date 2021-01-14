@@ -73,7 +73,7 @@ public class HttpReporter implements Reporter {
                 .header("content-type", "application/json;charset=UTF-8")
                 .postData(Utils.toJsonString(param))
                 .asString();
-        logger.log("[StreamX] jvm-profiler profiler:" + profilerName + ",report result:" + response.body());
+        logger.log("jvm-profiler profiler:" + profilerName + ",report result:" + response.body());
     }
 
     @Override

@@ -142,13 +142,13 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
         state.add(last)
       }
     } else {
-      logger.error("[StreamX] HBaseSource snapshotState called on closed source")
+      logError("HBaseSource snapshotState called on closed source")
     }
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
-    logger.info("[StreamX] HBaseSource snapshotState initialize")
+    logInfo("HBaseSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
@@ -157,7 +157,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
   }
 
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
-    logger.info(s"[StreamX] HBaseSource checkpointComplete: $checkpointId")
+    logInfo(s"HBaseSource checkpointComplete: $checkpointId")
   }
 
 }

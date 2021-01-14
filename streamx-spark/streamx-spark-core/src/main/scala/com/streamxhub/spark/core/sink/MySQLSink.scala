@@ -77,7 +77,7 @@ class MySQLSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
     val count = df.count()
     val end = System.currentTimeMillis()
 
-    logger.info(s"time:[$time] write [$count] events use time ${(end - begin) / 1000} S ")
+    logInfo(s"time:[$time] write [$count] events use time ${(end - begin) / 1000} S ")
   }
 }
 

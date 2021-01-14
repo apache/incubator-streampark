@@ -149,7 +149,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit 
       //mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
-        logInfo(s"[StreamX] HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
+        logInfo(s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
       offset.set(0L)

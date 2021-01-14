@@ -89,7 +89,7 @@ object RedisClient extends Logger {
    */
   def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
     val endnoAuth = endpoint.copy(auth = "********")
-    logger.info(s"[StreamX-Flink]RedisClient: createJedisPool with $endnoAuth ")
+    logInfo(s"[StreamX-Flink]RedisClient: createJedisPool with $endnoAuth ")
     new JedisPool(poolConfig, endpoint.host, endpoint.port, endpoint.timeout, endpoint.auth, endpoint.db)
   }
 

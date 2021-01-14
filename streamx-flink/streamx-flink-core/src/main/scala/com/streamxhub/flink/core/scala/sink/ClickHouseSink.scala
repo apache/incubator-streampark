@@ -119,7 +119,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
           failoverChecker = FailoverChecker(clickHouseConf.delayTime)
           sinkBuffer = SinkBuffer(clickHouseWriter, clickHouseConf.delayTime, clickHouseConf.bufferSize, table)
           failoverChecker.addSinkBuffer(sinkBuffer)
-          logInfo("[StreamX] AsyncClickHouseSink initialize... ")
+          logInfo("AsyncClickHouseSink initialize... ")
         }
       }
     }
@@ -145,7 +145,7 @@ class AsyncClickHouseSinkFunction[T](properties: Properties)(implicit toCSVFun: 
       sinkBuffer.put(csv)
     } catch {
       case e: Exception =>
-        logError(s"""[StreamX] Error while sending data to Clickhouse, record = $csv,error:$e""")
+        logError(s"""Error while sending data to Clickhouse, record = $csv,error:$e""")
         throw new RuntimeException(e)
     }
   }
@@ -243,7 +243,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
           statement.asInstanceOf[PreparedStatement].executeUpdate
         } catch {
           case e: Exception =>
-            logError(s"""[StreamX] ClickHouseSink invoke error:$sql""")
+            logError(s"""ClickHouseSink invoke error:$sql""")
             throw e
           case _: Throwable =>
         }
@@ -257,7 +257,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
           }
         } catch {
           case e: Exception =>
-            logError(s"""[StreamX] ClickHouseSink batch invoke error:$sql""")
+            logError(s"""ClickHouseSink batch invoke error:$sql""")
             throw e
           case _: Throwable =>
         }
@@ -274,7 +274,7 @@ class ClickHouseSinkFunction[T](config: Properties)(implicit toSQLFn: T => Strin
       offset.set(0)
       val count = statement.executeBatch().sum
       statement.clearBatch()
-      logInfo(s"[StreamX] ClickHouseSink batch $count successful..")
+      logInfo(s"ClickHouseSink batch $count successful..")
       timestamp = System.currentTimeMillis()
     }
   }
@@ -368,19 +368,19 @@ case class ClickHouseSinkWriter(clickHouseConfig: ClickHouseConfig) extends Sink
       recordQueue.put(params)
     } catch {
       case e: InterruptedException =>
-        logError(s"[StreamX] Interrupted error while putting data to queue,error:$e")
+        logError(s"Interrupted error while putting data to queue,error:$e")
         Thread.currentThread.interrupt()
         throw new RuntimeException(e)
     }
   }
 
   override def close(): Unit = {
-    logInfo("[StreamX] Closing ClickHouse-writer...")
+    logInfo("Closing ClickHouse-writer...")
     tasks.foreach(_.close())
     ThreadUtils.shutdownExecutorService(service)
     ThreadUtils.shutdownExecutorService(callbackService)
     asyncHttpClient.close()
-    logInfo(s"[StreamX] ${classOf[ClickHouseSinkWriter].getSimpleName} is closed")
+    logInfo(s"${classOf[ClickHouseSinkWriter].getSimpleName} is closed")
   }
 
 }
@@ -397,7 +397,7 @@ case class ClickHouseWriterTask(id: Int,
 
   override def run(): Unit = try {
     isWorking = true
-    logInfo(s"[StreamX] Start writer task, id = $id")
+    logInfo(s"Start writer task, id = $id")
     while (isWorking || queue.nonEmpty) {
       val req = queue.poll(300, TimeUnit.MILLISECONDS)
       if (req != null) {
@@ -406,15 +406,15 @@ case class ClickHouseWriterTask(id: Int,
     }
   } catch {
     case e: Exception =>
-      logError("[StreamX] Error while inserting data", e)
+      logError("Error while inserting data", e)
       throw new RuntimeException(e)
   } finally {
-    logInfo(s"[StreamX] Task id = $id is finished")
+    logInfo(s"Task id = $id is finished")
   }
 
   def send(sinkRequest: SinkRequest): Unit = {
     val request = buildRequest(sinkRequest)
-    logger.debug(s"[StreamX] Ready to load data to ${sinkRequest.table}, size = ${sinkRequest.size}")
+    logDebug(s"Ready to load data to ${sinkRequest.table}, size = ${sinkRequest.size}")
     val whenResponse = asyncHttpClient.executeRequest(request)
     val callback = respCallback(whenResponse, sinkRequest)
     whenResponse.addListener(callback, callbackService)
@@ -439,10 +439,10 @@ case class ClickHouseWriterTask(id: Int,
     override def run(): Unit = {
       Try(whenResponse.get()).getOrElse(null) match {
         case null =>
-          logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
+          logError(s"""Error ClickHouseSink executing callback, params = $clickHouseConf,can not get Response. """)
           handleFailedResponse(null, sinkRequest)
         case resp if !clickHouseConf.successCode.contains(resp.getStatusCode) =>
-          logError(s"""[StreamX] Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} """)
+          logError(s"Error ClickHouseSink executing callback, params = $clickHouseConf, StatusCode = ${resp.getStatusCode} ")
           handleFailedResponse(resp, sinkRequest)
         case _ =>
       }
@@ -457,12 +457,12 @@ case class ClickHouseWriterTask(id: Int,
    */
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = {
     if (sinkRequest.attemptCounter > clickHouseConf.maxRetries) {
-      logWarn(s"""[StreamX] Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
+      logWarn(s"""Failed to send data to ClickHouse, cause: limit of attempts is exceeded. ClickHouse response = $response. Ready to flush data to ${clickHouseConf.storageType}""")
       failoverWriter.write(sinkRequest)
-      logInfo(s"[StreamX] failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
+      logInfo(s"failover Successful, StorageType = ${clickHouseConf.storageType}, size = ${sinkRequest.size}")
     } else {
       sinkRequest.incrementCounter()
-      logWarn(s"[StreamX] Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
+      logWarn(s"Next attempt to send data to ClickHouse, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${clickHouseConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   }

@@ -32,17 +32,17 @@ case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {
   val factory: ThreadFactory = ThreadUtils.threadFactory("FailoverChecker")
   val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
   scheduledExecutorService.scheduleWithFixedDelay(getTask, delayTime, delayTime, TimeUnit.MILLISECONDS)
-  logInfo(s"[StreamX] Build Sink scheduled checker, timeout (microSeconds) = $delayTime")
+  logInfo(s"Build Sink scheduled checker, timeout (microSeconds) = $delayTime")
 
   def addSinkBuffer(buffer: SinkBuffer): Unit = {
     this.synchronized(sinkBuffers.add(buffer))
-    logger.debug(s"[StreamX] Add SinkBuffer, target table = ${buffer.table}")
+    logDebug(s"Add SinkBuffer, target table = ${buffer.table}")
   }
 
   def getTask: Runnable = new Runnable {
     override def run(): Unit = {
       this synchronized {
-        logger.debug(s"[StreamX] Start checking buffers. Current count of buffers = ${sinkBuffers.size}")
+        logDebug(s"Start checking buffers. Current count of buffers = ${sinkBuffers.size}")
         sinkBuffers.foreach(_.tryAddToQueue())
       }
     }

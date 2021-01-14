@@ -83,7 +83,7 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
     val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     if (parallelism > 1) {
-      logWarn(s"[StreamX] parallelism:$parallelism, MySQL towPCSink parallelism bust be 1.")
+      logWarn(s"parallelism:$parallelism, MySQL towPCSink parallelism bust be 1.")
     }
     afterSink(sink, 1, name, uid)
   }
@@ -117,7 +117,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
   @throws[Exception]
   override def open(parameters: Configuration): Unit = {
     require(jdbc != null, "[StreamX] JdbcSink jdbc can not be null")
-    logInfo("[StreamX] JdbcSink Open....")
+    logInfo("JdbcSink Open....")
     connection = JdbcUtils.getConnection(jdbc)
     connection.setAutoCommit(false)
     if (batchSize > 1) {
@@ -139,7 +139,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
           connection.commit()
         } catch {
           case e: Exception =>
-            logError(s"[StreamX] JdbcSink invoke error:${sql}")
+            logError(s"JdbcSink invoke error:${sql}")
             throw e
           case _: Throwable =>
         }
@@ -153,7 +153,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
           }
         } catch {
           case e: Exception =>
-            logError(s"[StreamX] JdbcSink batch invoke error:${sql}")
+            logError(s"JdbcSink batch invoke error:${sql}")
             throw e
           case _: Throwable =>
         }
@@ -172,7 +172,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) ex
       val count = statement.executeBatch().sum
       statement.clearBatch()
       connection.commit()
-      logInfo(s"[StreamX] JdbcSink batch $count use ${System.currentTimeMillis() - start} MS")
+      logInfo(s"JdbcSink batch $count use ${System.currentTimeMillis() - start} MS")
       timestamp = System.currentTimeMillis()
     }
   }
@@ -232,7 +232,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   override def initializeUserContext(): Optional[Void] = super.initializeUserContext()
 
   override def beginTransaction(): Transaction = {
-    logInfo("[StreamX] Jdbc2PCSink beginTransaction.")
+    logInfo("Jdbc2PCSink beginTransaction.")
     Transaction()
   }
 
@@ -258,7 +258,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   override def preCommit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
-      logInfo(s"[StreamX] Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
+      logInfo(s"Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
       buffer += transaction.transactionId -> transaction
     }
   }
@@ -276,7 +276,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   override def commit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit和commit...
     if (transaction.invoked && transaction.sql.nonEmpty) {
-      logInfo(s"[StreamX] Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
+      logInfo(s"Jdbc2PCSink commit,TransactionId:${transaction.transactionId}")
       var connection: Connection = null
       var statement: Statement = null
       try {
@@ -298,10 +298,10 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
         buffer -= transaction.transactionId
       } catch {
         case e: SQLException =>
-          logError(s"[StreamX] Jdbc2PCSink commit SQLException:${e.getMessage}")
+          logError(s"Jdbc2PCSink commit SQLException:${e.getMessage}")
           throw e
         case t: Throwable =>
-          logError(s"[StreamX] Jdbc2PCSink commit Throwable:${t.getMessage}")
+          logError(s"Jdbc2PCSink commit Throwable:${t.getMessage}")
           throw t
       } finally {
         JdbcUtils.close(statement, connection)
@@ -310,7 +310,7 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   }
 
   override def abort(transaction: Transaction): Unit = {
-    logInfo(s"[StreamX] Jdbc2PCSink abort,TransactionId:${transaction.transactionId}")
+    logInfo(s"Jdbc2PCSink abort,TransactionId:${transaction.transactionId}")
     buffer -= transaction.transactionId
   }
 

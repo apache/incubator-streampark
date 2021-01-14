@@ -20,7 +20,7 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
-import com.streamxhub.common.util.ClassLoaderUtils
+import com.streamxhub.common.util.{ClassLoaderUtils, Logger}
 import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
 
@@ -30,14 +30,14 @@ import java.util.Properties
 /**
  * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
  */
-class FlinkInterpreter(properties: Properties) {
+class FlinkInterpreter(properties: Properties) extends Logger {
 
   private lazy val LOGGER = LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
   private var interpreter: FlinkScalaInterpreter = _
 
   private def checkScalaVersion(): Unit = {
     val scalaVersionString = scala.util.Properties.versionString
-    LOGGER.info("Using Scala: " + scalaVersionString)
+    logInfo("Using Scala: " + scalaVersionString)
   }
 
   @throws[Exception] def open(): Unit = {

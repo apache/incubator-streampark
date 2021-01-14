@@ -130,13 +130,13 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
         state.add(last)
       }
     } else {
-      logger.error("[StreamX] MySQLSource snapshotState called on closed source")
+      logError("MySQLSource snapshotState called on closed source")
     }
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
-    logger.info("[StreamX] MySQLSource snapshotState initialize")
+    logInfo("MySQLSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
@@ -145,7 +145,7 @@ private[this] class MySQLSourceFunction[R: TypeInformation](apiType: ApiType = A
   }
 
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
-    logger.info(s"[StreamX] MySQLSource checkpointComplete: $checkpointId")
+    logInfo(s"MySQLSource checkpointComplete: $checkpointId")
   }
 }
 
