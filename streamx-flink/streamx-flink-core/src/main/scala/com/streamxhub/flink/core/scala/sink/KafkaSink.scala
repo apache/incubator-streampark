@@ -117,7 +117,7 @@ class KafkaEqualityPartitioner[T](parallelism: Int) extends FlinkKafkaPartitione
   private[this] val partitionIndex: AtomicInteger = new AtomicInteger(0)
 
   override def open(parallelInstanceId: Int, parallelInstances: Int): Unit = {
-    logger.info(s"[StreamX] KafkaEqualityPartitioner: parallelism $parallelism")
+    logInfo(s"KafkaEqualityPartitioner: parallelism $parallelism")
     require(parallelInstanceId >= 0 && parallelInstances > 0, "[StreamX] KafkaEqualityPartitioner:Id of this subtask cannot be negative,Number of subtasks must be larger than 0.")
     this.parallelInstanceId = parallelInstanceId
   }

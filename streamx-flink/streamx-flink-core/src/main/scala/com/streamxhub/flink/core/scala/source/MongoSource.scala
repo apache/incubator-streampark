@@ -145,13 +145,13 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
         state.add(last)
       }
     } else {
-      logger.error("[StreamX] MongoSource snapshotState called on closed source")
+      logError("MongoSource snapshotState called on closed source")
     }
   }
 
   override def initializeState(context: FunctionInitializationContext): Unit = {
     //从checkpoint中恢复...
-    logger.info("[StreamX] MongoSource snapshotState initialize")
+    logInfo("MongoSource snapshotState initialize")
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
@@ -160,7 +160,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   }
 
   override def notifyCheckpointComplete(checkpointId: Long): Unit = {
-    logger.info(s"[StreamX] MongoSource checkpointComplete: $checkpointId")
+    logInfo(s"MongoSource checkpointComplete: $checkpointId")
   }
 
 }

@@ -27,6 +27,8 @@ trait Logger {
 
   @transient private var _logger: SlfLogger = _
 
+  private[this] val prefix = "[StreamX]"
+
   protected def logName = this.getClass.getName.stripSuffix("$")
 
   protected def logger: SlfLogger = {
@@ -38,43 +40,43 @@ trait Logger {
   }
 
   def logInfo(msg: => String) {
-    if (logger.isInfoEnabled) logger.info(msg)
+    if (logger.isInfoEnabled) logInfo(s"$prefix $msg")
   }
 
   def logDebug(msg: => String) {
-    if (logger.isDebugEnabled) logger.debug(msg)
+    if (logger.isDebugEnabled) logger.debug(s"$prefix $msg")
   }
 
   def logTrace(msg: => String) {
-    if (logger.isTraceEnabled) logger.trace(msg)
+    if (logger.isTraceEnabled) logger.trace(s"$prefix $msg")
   }
 
   def logWarn(msg: => String) {
-    if (logger.isWarnEnabled) logger.warn(msg)
+    if (logger.isWarnEnabled) logger.warn(s"$prefix $msg")
   }
 
   def logError(msg: => String) {
-    if (logger.isErrorEnabled) logger.error(msg)
+    if (logger.isErrorEnabled) logger.error(s"$prefix $msg")
   }
 
   def logInfo(msg: => String, throwable: Throwable) {
-    if (logger.isInfoEnabled) logger.info(msg, throwable)
+    if (logger.isInfoEnabled) logInfo(s"$prefix $msg", throwable)
   }
 
   def logDebug(msg: => String, throwable: Throwable) {
-    if (logger.isDebugEnabled) logger.debug(msg, throwable)
+    if (logger.isDebugEnabled) logger.debug(s"$prefix $msg", throwable)
   }
 
   def logTrace(msg: => String, throwable: Throwable) {
-    if (logger.isTraceEnabled) logger.trace(msg, throwable)
+    if (logger.isTraceEnabled) logger.trace(s"$prefix $msg", throwable)
   }
 
   def logWarn(msg: => String, throwable: Throwable) {
-    if (logger.isWarnEnabled) logger.warn(msg, throwable)
+    if (logger.isWarnEnabled) logger.warn(s"$prefix $msg", throwable)
   }
 
   def logError(msg: => String, throwable: Throwable) {
-    if (logger.isErrorEnabled) logger.error(msg, throwable)
+    if (logger.isErrorEnabled) logger.error(s"$prefix $msg", throwable)
   }
 
   protected def initializeLogIfNecessary(isInterpreter: Boolean): Unit = {
