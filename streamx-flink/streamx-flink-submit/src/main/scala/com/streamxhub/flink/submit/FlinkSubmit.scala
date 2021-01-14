@@ -372,7 +372,9 @@ object FlinkSubmit extends Logger {
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
-    if (applicationId == null) throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    if (applicationId == null) {
+      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    }
     val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     clusterDescriptor.retrieve(applicationId).getClusterClient
   }
