@@ -30,7 +30,7 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -360,13 +360,14 @@ object FlinkSubmit extends Logger {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    println("-----------------------")
-    println("Effective executor configuration:", effectiveConfiguration)
-    println("-----------------------")
+    logInfo("[StreamX] -----------------------\n")
+    logInfo(s"[StreamX] Effective executor configuration: $effectiveConfiguration \n")
+    logInfo("[StreamX] -----------------------\n")
+
     effectiveConfiguration
   }
 
-  private[this] def getClusterClientByApplicationId(appId: String) = {
+  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
