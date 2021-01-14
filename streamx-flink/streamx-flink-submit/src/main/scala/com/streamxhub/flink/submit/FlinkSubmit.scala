@@ -360,9 +360,9 @@ object FlinkSubmit extends Logger {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    logInfo("[StreamX] -----------------------\n")
+    logInfo("[StreamX] ------------------------------------\n")
     logInfo(s"[StreamX] Effective executor configuration: $effectiveConfiguration \n")
-    logInfo("[StreamX] -----------------------\n")
+    logInfo("[StreamX] ------------------------------------\n")
 
     effectiveConfiguration
   }
