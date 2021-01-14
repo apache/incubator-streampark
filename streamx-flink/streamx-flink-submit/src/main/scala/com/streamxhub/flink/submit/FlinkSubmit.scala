@@ -130,7 +130,7 @@ object FlinkSubmit extends Logger {
     val effectiveConfiguration = getEffectiveConfiguration(submitInfo, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
-    var applicationId:ApplicationId = null
+    var applicationId: ApplicationId = null
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
@@ -146,7 +146,9 @@ object FlinkSubmit extends Logger {
       println("Flink Job Started: applicationId: " + applicationId)
       println()
       println("------------------------------------")
-    } finally if (clusterDescriptor != null) clusterDescriptor.close()
+    } finally if (clusterDescriptor != null) {
+      clusterDescriptor.close()
+    }
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
@@ -251,7 +253,9 @@ object FlinkSubmit extends Logger {
       })
 
       //fromSavePoint
-      if (submitInfo.savePoint != null) optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+      if (submitInfo.savePoint != null) {
+        optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+      }
 
       val array = new ArrayBuffer[String]()
       optionMap.foreach(x => {
@@ -282,13 +286,19 @@ object FlinkSubmit extends Logger {
       }
 
       //页面定义的参数优先级大于app配置文件
-      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
+      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) {
+        submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
+      }
 
       //属性参数...
-      if (submitInfo.property != null && submitInfo.property.nonEmpty) submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      if (submitInfo.property != null && submitInfo.property.nonEmpty) {
+        submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      }
 
       //-D 其他动态参数配置....
-      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) {
+        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      }
       array.toArray
     }
 
@@ -304,16 +314,18 @@ object FlinkSubmit extends Logger {
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    val flinkLocalHome = FLINK_HOME
-    val flinkName = new File(flinkLocalHome).getName
+    /**
+     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+     */
+    val flinkName = new File(FLINK_HOME).getName
     val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
     val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
-    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+    val flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
       case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
     }
 
     val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
