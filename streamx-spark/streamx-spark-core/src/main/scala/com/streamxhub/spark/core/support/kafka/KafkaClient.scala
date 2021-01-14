@@ -56,7 +56,7 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
           case "none" => new DefaultOffset(sparkConf)
         }
       case clazz =>
-        logInfo(s"[StreamX] Custom offset management class $clazz")
+        logInfo(s"Custom offset management class $clazz")
         val constructors = {
           val offsetsManagerClass = Class.forName(clazz)
           offsetsManagerClass
@@ -94,13 +94,13 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     kafkaParams.get("group.id") match {
       case Some(groupId) =>
         consumerOffsets = offsetManager.get(groupId.toString, topics)
-        logInfo(s"[StreamX] createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
+        logInfo(s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
       case _ =>
-        logInfo(s"[StreamX] createDirectStream witchOut group.id topics ${topics.mkString(",")}")
+        logInfo(s"createDirectStream witchOut group.id topics ${topics.mkString(",")}")
     }
 
     if (consumerOffsets.nonEmpty) {
-      logInfo(s"[StreamX] read topics ==[$topics]== from offsets ==[$consumerOffsets]==")
+      logInfo(s"read topics ==[$topics]== from offsets ==[$consumerOffsets]==")
       val stream = KafkaUtils.createDirectStream[K, V](ssc,
         LocationStrategies.PreferConsistent,
         ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets)

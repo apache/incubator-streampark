@@ -33,7 +33,11 @@ import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
+import java.util.Objects;
 
+/**
+ * @author benjobs
+ */
 @Order
 @Slf4j
 @Component
@@ -59,7 +63,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             String flinkName = new File(flinkLocalHome).getName();
             String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
             if (!HdfsUtils.exists(flinkHome)) {
-                log.info("[StreamX] {} is not exists,upload beginning....", flinkHome);
+                log.info("{} is not exists,upload beginning....", flinkHome);
                 HdfsUtils.upload(flinkLocalHome, flinkHome);
             }
             String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
@@ -67,7 +71,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             //加载streamx下的plugins到$FLINK_HOME/plugins下
             loadPlugins(flinkHdfsPlugins);
         } else {
-            log.warn("[StreamX]The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
+            log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
         }
     }
 
@@ -77,12 +81,12 @@ public class EnvInitializeRunner implements ApplicationRunner {
      * @param pluginPath
      */
     private void loadPlugins(String pluginPath) throws Exception {
-        log.info("[StreamX] loadPlugins starting...");
-        File streamXPlugins = new File(WebUtil.getAppDir("plugins"));
-        for (File file : streamXPlugins.listFiles()) {
+        log.info("loadPlugins starting...");
+        File plugins = new File(WebUtil.getAppDir("plugins"));
+        for (File file : Objects.requireNonNull(plugins.listFiles())) {
             String plugin = pluginPath.concat("/").concat(file.getName());
             if (!HdfsUtils.exists(plugin)) {
-                log.info("[StreamX] load plugin:{} to {}", file.getName(), pluginPath);
+                log.info("load plugin:{} to {}", file.getName(), pluginPath);
                 HdfsUtils.upload(file.getAbsolutePath(), pluginPath);
             }
         }

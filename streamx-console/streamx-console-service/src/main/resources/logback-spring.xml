@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
-    <contextName>apollo</contextName>
+    <contextName>StreamX</contextName>
     <property name="log.path" value="${app.home}/logs"/>
     <property name="log.maxHistory" value="15"/>
     <property name="log.colorPattern"
-              value="%d{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger) | %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss} | %highlight(%-5level) | %boldYellow(%thread) | %boldGreen(%logger) | [StreamX] %msg%n"/>
     <property name="log.pattern"
-              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n"/>
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - [StreamX] %msg%n"/>
 
     <!--输出到控制台-->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">

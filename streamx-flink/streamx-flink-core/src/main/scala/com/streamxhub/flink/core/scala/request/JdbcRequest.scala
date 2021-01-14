@@ -125,7 +125,7 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[StreamX] JdbcASyncClient request timeout. retrying... ")
+    logWarn("JdbcASyncClient request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 
@@ -176,7 +176,7 @@ class JdbcASyncFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => Str
   }
 
   override def timeout(input: T, resultFuture: ResultFuture[R]): Unit = {
-    logger.warn("[StreamX] JdbcASync request timeout. retrying... ")
+    logWarn("JdbcASync request timeout. retrying... ")
     asyncInvoke(input, resultFuture)
   }
 }

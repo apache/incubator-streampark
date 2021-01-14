@@ -120,7 +120,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
   private[this] val buffer: collection.mutable.Map[String, RedisTransaction[T]] = collection.mutable.Map.empty[String, RedisTransaction[T]]
 
   override def beginTransaction(): RedisTransaction[T] = {
-    logInfo("[StreamX] Redis2PCSink beginTransaction.")
+    logInfo("Redis2PCSink beginTransaction.")
     RedisTransaction[T]()
   }
 
@@ -132,7 +132,7 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
   override def preCommit(transaction: RedisTransaction[T]): Unit = {
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
-      logInfo(s"[StreamX] Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
+      logInfo(s"Redis2PCSink preCommit.TransactionId:${transaction.transactionId}")
       buffer += transaction.transactionId -> transaction
     }
   }
@@ -154,17 +154,17 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
         buffer -= redisTransaction.transactionId
       } catch {
         case e: JedisException =>
-          logError(s"[StreamX] Redis2PCSink commit JedisException:${e.getMessage}")
+          logError(s"Redis2PCSink commit JedisException:${e.getMessage}")
           throw e
         case t: Throwable =>
-          logError(s"[StreamX] Redis2PCSink commit Throwable:${t.getMessage}")
+          logError(s"Redis2PCSink commit Throwable:${t.getMessage}")
           throw t
       }
     }
   }
 
   override def abort(transaction: RedisTransaction[T]): Unit = {
-    logInfo(s"[StreamX] Redis2PCSink abort,TransactionId:${transaction.transactionId}")
+    logInfo(s"Redis2PCSink abort,TransactionId:${transaction.transactionId}")
     buffer -= transaction.transactionId
   }
 
@@ -200,7 +200,7 @@ object RedisContainer extends Logger {
       redisContainer
     } catch {
       case e: Exception =>
-        logger.error("[StreamX] RedisSink:Redis has not been properly initialized: ", e)
+        logError("RedisSink:Redis has not been properly initialized: ", e)
         throw e
     }
   }

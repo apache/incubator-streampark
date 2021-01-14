@@ -30,7 +30,7 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli._
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.PackagedProgramUtils
+import org.apache.flink.client.program.{ClusterClient, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.util.FlinkException
 import org.apache.flink.util.Preconditions.checkNotNull
@@ -95,7 +95,7 @@ object FlinkSubmit extends Logger {
 
   private[this] lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
-    logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
+    logInfo(s"flinkHome: $flinkLocalHome")
     flinkLocalHome
   }
 
@@ -136,16 +136,14 @@ object FlinkSubmit extends Logger {
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-      println("------------------<<specification>>------------------")
-      println(clusterSpecification)
-      println("------------------------------------")
+      logInfo("------------------<<specification>>------------------\n")
+      logInfo(s"$clusterSpecification\n")
+      logInfo("------------------------------------\n")
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      println("------------------<<applicationId>>------------------")
-      println()
-      println("Flink Job Started: applicationId: " + applicationId)
-      println()
-      println("------------------------------------")
+      logInfo("------------------<<applicationId>>------------------\n")
+      logInfo(s"Flink Job Started: applicationId: $applicationId \n")
+      logInfo("------------------------------------\n")
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
@@ -282,7 +280,7 @@ object FlinkSubmit extends Logger {
         val buffer = new StringBuffer()
         submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-        array += s"-Denv.java.opts.taskmanager=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS}=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
       //页面定义的参数优先级大于app配置文件
@@ -362,18 +360,21 @@ object FlinkSubmit extends Logger {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    println("-----------------------")
-    println("Effective executor configuration:", effectiveConfiguration)
-    println("-----------------------")
+    logInfo("------------------------------------\n")
+    logInfo(s"Effective executor configuration: $effectiveConfiguration \n")
+    logInfo("------------------------------------\n")
+
     effectiveConfiguration
   }
 
-  private[this] def getClusterClientByApplicationId(appId: String) = {
+  private[this] def getClusterClientByApplicationId(appId: String): ClusterClient[ApplicationId] = {
     val flinkConfiguration = new Configuration
     flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
-    if (applicationId == null) throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    if (applicationId == null) {
+      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+    }
     val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     clusterDescriptor.retrieve(applicationId).getClusterClient
   }
@@ -383,13 +384,11 @@ object FlinkSubmit extends Logger {
     case Failure(e) => throw new CliArgsException(e.getMessage)
   }
 
-  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]) = {
+  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
     if (flinkDefaultConfiguration == null) {
-      val flinkLocalHome = FLINK_HOME
-      require(flinkLocalHome != null)
-      val flinkLocalConfDir = flinkLocalHome.concat("/conf")
+      require(FLINK_HOME != null)
       //获取flink的配置
-      this.flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(flinkLocalConfDir)
+      this.flinkDefaultConfiguration = GlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
     }
     flinkDefaultConfiguration.get(option)
   }

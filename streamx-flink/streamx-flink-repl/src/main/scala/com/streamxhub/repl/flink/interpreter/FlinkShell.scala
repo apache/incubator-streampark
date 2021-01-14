@@ -20,6 +20,7 @@
  */
 package com.streamxhub.repl.flink.interpreter
 
+import com.streamxhub.common.util.Logger
 import com.streamxhub.repl.flink.shims.FlinkShims
 import org.apache.flink.annotation.Internal
 import org.apache.flink.client.cli.{CliFrontend, CliFrontendParser, CustomCommandLine}
@@ -29,7 +30,6 @@ import org.apache.flink.client.program.{ClusterClient, MiniClusterClient}
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.minicluster.{MiniCluster, MiniClusterConfiguration}
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.slf4j.LoggerFactory
 
 import java.io.{BufferedReader, File}
 import scala.collection.mutable.ArrayBuffer
@@ -38,9 +38,7 @@ import scala.collection.mutable.ArrayBuffer
  * Copy from flink, because we need to customize it to make sure
  * it work with multiple versions of flink.
  */
-object FlinkShell {
-
-  private lazy val LOGGER = LoggerFactory.getLogger(getClass)
+object FlinkShell extends Logger {
 
   object ExecutionMode extends Enumeration {
     val UNDEFINED, LOCAL, REMOTE, YARN = Value
@@ -83,7 +81,7 @@ object FlinkShell {
       case ExecutionMode.YARN => createYarnSessionCluster(config, flinkConfig, flinkShims)
       case _ => throw new IllegalArgumentException("please specify execution mode:[local | remote <host> <port> | yarn]")
     }
-    LOGGER.info(s"[StreamX] Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
+    logInfo(s"Notebook connectionInfo:ExecutionMode:${config.executionMode},config:$effectiveConfig")
     (effectiveConfig, clusterClient)
   }
 
@@ -124,7 +122,7 @@ object FlinkShell {
         val clientFactory = serviceLoader.getClusterClientFactory(executorConfig)
         val clusterDescriptor = clientFactory.createClusterDescriptor(executorConfig)
         val clusterSpecification = clientFactory.getClusterSpecification(executorConfig)
-        LOGGER.info(s"\n[StreamX] Notebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n")
+        logInfo(s"\nNotebook connectionInfo:ExecutionMode:${YarnDeploymentTarget.SESSION},clusterSpecification:$clusterSpecification\n")
         val clusterClient = try clusterDescriptor.deploySessionCluster(clusterSpecification).getClusterClient
         finally clusterDescriptor.close()
 
@@ -189,7 +187,7 @@ object FlinkShell {
     setJobManagerInfoToConfig(config, "localhost", port)
     config.set(DeploymentOptions.TARGET, RemoteExecutor.NAME)
     config.setBoolean(DeploymentOptions.ATTACHED, true)
-    println(s"\nStarting local Flink cluster (host: localhost, port: ${port}).\n")
+    logInfo(s"Starting local Flink cluster (host: localhost, port: $port)")
     val clusterClient = new MiniClusterClient(config, cluster)
     (config, Some(clusterClient))
   }

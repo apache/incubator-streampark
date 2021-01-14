@@ -108,7 +108,7 @@ public class FlinkTrackingTask {
 
     @PreDestroy
     public void ending() {
-        log.info("[StreamX] flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
+        log.info("flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
         trackingAppCache.asMap().forEach((k, v) -> persistent(v));
     }
 
@@ -132,7 +132,7 @@ public class FlinkTrackingTask {
                 failoverFromYarn(application, index, stopFrom);
             } catch (IOException exception) {
                 if (application.getState() != FlinkAppState.MAPPING.getValue()) {
-                    log.error("[StreamX] flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
+                    log.error("flinkTrackingTask query jobsOverview from restApi error,job failed,savePoint obsoleted!");
                     if (StopFrom.NONE.equals(stopFrom)) {
                         savePointService.obsolete(application.getId());
                     }
@@ -236,11 +236,11 @@ public class FlinkTrackingTask {
             application.setState(currentState.getValue());
             trackingAppCache.put(application.getId(), application);
         } else if (currentState.equals(FlinkAppState.CANCELED)) {
-            log.info("[StreamX] flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
+            log.info("flinkTrackingTask application state {}, stop tracking and delete stopFrom!", currentState.name());
             application.setOptionState(OptionState.NONE.getValue());
             application.setState(currentState.getValue());
             if (StopFrom.NONE.equals(stopFrom)) {
-                log.info("[StreamX] flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
+                log.info("flinkTrackingTask monitor callback from restApi, job cancel is not form streamX,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
             }
             savePointCache.invalidate(application.getId());
@@ -250,7 +250,7 @@ public class FlinkTrackingTask {
             application.setOptionState(OptionState.NONE.getValue());
             persistentAndClean(application);
         } else if (currentState.equals(FlinkAppState.RESTARTING)) {
-            log.info("[StreamX] flinkTrackingTask application state {},add to starting", currentState.name());
+            log.info("flinkTrackingTask application state {},add to starting", currentState.name());
             startingCache.put(application.getId(), Byte.valueOf("0"));
         } else {
             application.setState(currentState.getValue());
@@ -264,20 +264,20 @@ public class FlinkTrackingTask {
      * @param stopFrom
      */
     private void failoverFromYarn(Application application, Long index, StopFrom stopFrom) {
-        log.info("[StreamX] flinkTrackingTask failoverRestApi starting...");
+        log.info("flinkTrackingTask failoverRestApi starting...");
         // 上一次的状态为canceling(在获取上次信息的时候flink restServer还未关闭为canceling),且本次如获取不到状态(flink restServer已关闭),则认为任务已经CANCELED
         Tracker tracker = canceling.remove(application.getId());
         if (tracker != null && tracker.isPrevious(index)) {
-            log.info("[StreamX] flinkTrackingTask previous state was canceling.");
+            log.info("flinkTrackingTask previous state was canceling.");
             if (StopFrom.NONE.equals(stopFrom)) {
-                log.error("[StreamX] flinkTrackingTask query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
+                log.error("flinkTrackingTask query previous state was canceling and stopFrom NotFound,savePoint obsoleted!");
                 savePointService.obsolete(application.getId());
             }
             application.setState(FlinkAppState.CANCELED.getValue());
             application.setOptionState(OptionState.NONE.getValue());
             this.persistentAndClean(application);
         } else {
-            log.info("[StreamX] flinkTrackingTask previous state was not \"canceling\".");
+            log.info("flinkTrackingTask previous state was not \"canceling\".");
             try {
                 // 2)到yarn的restApi中查询状态
                 AppInfo appInfo = application.httpYarnAppInfo();
@@ -285,7 +285,7 @@ public class FlinkTrackingTask {
                 FlinkAppState flinkAppState = FlinkAppState.valueOf(state);
                 if (FlinkAppState.KILLED.equals(flinkAppState)) {
                     if (StopFrom.NONE.equals(stopFrom)) {
-                        log.error("[StreamX] flinkTrackingTask query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
+                        log.error("flinkTrackingTask query jobsOverview from yarn,job was killed and stopFrom NotFound,savePoint obsoleted!");
                         savePointService.obsolete(application.getId());
                     }
                     flinkAppState = FlinkAppState.CANCELED;
@@ -297,7 +297,7 @@ public class FlinkTrackingTask {
             } catch (Exception e) {
                 // 3)如果从flink的restAPI和yarn的restAPI都查询失败,则任务失联.
                 if (StopFrom.NONE.equals(stopFrom)) {
-                    log.error("[StreamX] flinkTrackingTask query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted!");
+                    log.error("flinkTrackingTask query jobsOverview from restapi and yarn all error and stopFrom NotFound,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
                     application.setState(FlinkAppState.LOST.getValue());
                     //TODO send msg or emails
@@ -329,24 +329,24 @@ public class FlinkTrackingTask {
     //===============================  static public method...  =========================================
 
     public static void addTracking(Application application) {
-        log.info("[StreamX] flinkTrackingTask add app to tracking,appId:{}", application.getId());
+        log.info("flinkTrackingTask add app to tracking,appId:{}", application.getId());
         trackingAppId.put(application.getId(), Byte.valueOf("0"));
         startingCache.put(application.getId(), Byte.valueOf("0"));
         trackingAppCache.put(application.getId(), application);
     }
 
     public static void addStopping(Long appId) {
-        log.info("[StreamX] flinkTrackingTask add app to stopping,appId:{}", appId);
+        log.info("flinkTrackingTask add app to stopping,appId:{}", appId);
         stopAppMap.put(appId, StopFrom.STREAMX);
     }
 
     public static void addSavepoint(Long appId) {
-        log.info("[StreamX] flinkTrackingTask add app to savepoint,appId:{}", appId);
+        log.info("flinkTrackingTask add app to savepoint,appId:{}", appId);
         savePointCache.put(appId, Byte.valueOf("0"));
     }
 
     public static void flushTracking(Long appId) {
-        log.info("[StreamX] flinkTrackingTask flushing app,appId:{}", appId);
+        log.info("flinkTrackingTask flushing app,appId:{}", appId);
         trackingAppCache.invalidate(appId);
     }
 
@@ -355,7 +355,7 @@ public class FlinkTrackingTask {
      * @param runnable
      */
     public static void persistentAfterRunnable(Long appId, Runnable runnable) {
-        log.info("[StreamX] flinkTrackingTask persistentAfterRunnable,appId:{}", appId);
+        log.info("flinkTrackingTask persistentAfterRunnable,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
             persistent(application);
@@ -366,7 +366,7 @@ public class FlinkTrackingTask {
 
     @SneakyThrows
     public static <T> T persistentAfterCallable(Long appId, Callable<T> runnable) {
-        log.info("[StreamX] flinkTrackingTask persistentAfterCallable,appId:{}", appId);
+        log.info("flinkTrackingTask persistentAfterCallable,appId:{}", appId);
         Application application = trackingAppCache.getIfPresent(appId);
         if (application != null) {
             persistent(application);
@@ -377,7 +377,7 @@ public class FlinkTrackingTask {
     }
 
     public static void stopTracking(Long appId) {
-        log.info("[StreamX] flinkTrackingTask stop app,appId:{}", appId);
+        log.info("flinkTrackingTask stop app,appId:{}", appId);
         stopAppMap.remove(appId);
         trackingAppId.invalidate(appId);
         trackingAppCache.invalidate(appId);
