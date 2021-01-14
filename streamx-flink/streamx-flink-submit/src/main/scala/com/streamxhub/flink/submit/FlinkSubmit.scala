@@ -130,7 +130,7 @@ object FlinkSubmit extends Logger {
     val effectiveConfiguration = getEffectiveConfiguration(submitInfo, activeCommandLine, commandLine, Collections.singletonList(uri.toString))
     val applicationConfiguration = ApplicationConfiguration.fromConfiguration(effectiveConfiguration)
 
-    var applicationId:ApplicationId = null
+    var applicationId: ApplicationId = null
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
     val clientFactory = clusterClientServiceLoader.getClusterClientFactory[ApplicationId](effectiveConfiguration)
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
@@ -146,7 +146,9 @@ object FlinkSubmit extends Logger {
       println("Flink Job Started: applicationId: " + applicationId)
       println()
       println("------------------------------------")
-    } finally if (clusterDescriptor != null) clusterDescriptor.close()
+    } finally if (clusterDescriptor != null) {
+      clusterDescriptor.close()
+    }
     configurationMap.put(applicationId.toString, effectiveConfiguration)
     applicationId
   }
@@ -251,7 +253,9 @@ object FlinkSubmit extends Logger {
       })
 
       //fromSavePoint
-      if (submitInfo.savePoint != null) optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+      if (submitInfo.savePoint != null) {
+        optionMap += s"-${FlinkRunOption.SAVEPOINT_PATH_OPTION.getOpt}" -> submitInfo.savePoint
+      }
 
       val array = new ArrayBuffer[String]()
       optionMap.foreach(x => {
@@ -282,13 +286,19 @@ object FlinkSubmit extends Logger {
       }
 
       //页面定义的参数优先级大于app配置文件
-      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
+      if (submitInfo.option != null && submitInfo.option.trim.nonEmpty) {
+        submitInfo.option.split("\\s").filter(_.trim.nonEmpty).foreach(array +=)
+      }
 
       //属性参数...
-      if (submitInfo.property != null && submitInfo.property.nonEmpty) submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      if (submitInfo.property != null && submitInfo.property.nonEmpty) {
+        submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+      }
 
       //-D 其他动态参数配置....
-      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      if (submitInfo.dynamicOption != null && submitInfo.dynamicOption.nonEmpty) {
+        submitInfo.dynamicOption.foreach(x => array += x.replaceFirst("^-D|^", "-D"))
+      }
       array.toArray
     }
 
