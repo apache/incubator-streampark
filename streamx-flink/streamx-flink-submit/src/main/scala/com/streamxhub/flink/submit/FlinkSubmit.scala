@@ -314,16 +314,18 @@ object FlinkSubmit extends Logger {
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    val flinkLocalHome = FLINK_HOME
-    val flinkName = new File(flinkLocalHome).getName
+    /**
+     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+     */
+    val flinkName = new File(FLINK_HOME).getName
     val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
     val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
-    val flinkHdfsDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkLocalHome/lib")
+    val flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
       case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkLocalHome/lib,[${more.mkString(",")}]")
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
     }
 
     val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
