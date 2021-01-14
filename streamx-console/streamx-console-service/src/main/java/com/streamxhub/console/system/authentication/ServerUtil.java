@@ -7,6 +7,9 @@ import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author benjobs
+ */
 @Slf4j
 @Component
 public class ServerUtil {
