@@ -136,16 +136,14 @@ object FlinkSubmit extends Logger {
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-      println("------------------<<specification>>------------------")
-      println(clusterSpecification)
-      println("------------------------------------")
+      logInfo("[StreamX] ------------------<<specification>>------------------\n")
+      logInfo(s"[StreamX] $clusterSpecification\n")
+      logInfo("[StreamX] ------------------------------------\n")
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      println("------------------<<applicationId>>------------------")
-      println()
-      println("Flink Job Started: applicationId: " + applicationId)
-      println()
-      println("------------------------------------")
+      logInfo("[StreamX] ------------------<<applicationId>>------------------\n")
+      logInfo(s"[StreamX] Flink Job Started: applicationId: $applicationId \n")
+      logInfo("[StreamX] ------------------------------------\n")
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
