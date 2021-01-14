@@ -128,7 +128,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                     List<Application> applications = getApplications(project);
                     //更新部署状态
                     applications.forEach((app) -> FlinkTrackingTask.persistentAfterRunnable(app.getId(), () -> {
-                        log.info("[StreamX] update deploy by project:{},appName:{}", project.getId(), app.getJobName());
+                        log.info("update deploy by project:{},appName:{}", project.getId(), app.getJobName());
                         app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
                         this.applicationMapper.updateDeploy(app);
                     }));
@@ -283,7 +283,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> impl
                 Git git = new Git(fileRepository);
                 git.reset().setMode(ResetCommand.ResetType.HARD).setRef(project.getBranches()).call();
 
-                log.info("[StreamX] git pull starting...");
+                log.info("git pull starting...");
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 

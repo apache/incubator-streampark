@@ -104,7 +104,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         val topicPartition = new TopicPartition(topic, partition)
         val finalOffset = earliestOffsets.get(topicPartition) match {
           case Some(left) if left > offset =>
-            logWarn(s"[StreamX] storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
+            logWarn(s"storeType:HBase,consumer group:$groupId,topic:${topicPartition.topic},partition:${topicPartition.partition} offsets was timeOut,updated: $left")
             left
           case _ => offset
         }
@@ -118,7 +118,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
       case _ => getEarliestOffsets(topics.toSeq) ++ storedOffsetMap
     }
 
-    logInfo(s"[StreamX] storeType:HBase,getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
+    logInfo(s"storeType:HBase,getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
 
     offsetMaps
   }
@@ -139,7 +139,7 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
         put
     }.toList
     table.put(puts)
-    logInfo(s"[StreamX] storeType:HBase,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
+    logInfo(s"storeType:HBase,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
   }
 
   /**
@@ -170,6 +170,6 @@ private[kafka] class HBaseOffset(val sparkConf: SparkConf) extends Offset {
     }
     rs.close()
     table.delete(deletes)
-    logInfo(s"[StreamX] storeType:HBase,deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
+    logInfo(s"storeType:HBase,deleteOffsets [ $groupId,${topics.mkString(",")} ] ${deletes.mkString(" ")}")
   }
 }

@@ -107,19 +107,19 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
   def initTableEnv(tableMode: TableMode): Unit = {
     val builder = EnvironmentSettings.newInstance()
     val plannerType = Try(PlannerType.withName(parameter.get(KEY_FLINK_TABLE_PLANNER))).getOrElse {
-      logger.warn(s"[StreamX] $KEY_FLINK_TABLE_PLANNER undefined,use default by: blinkPlanner")
+      logWarn(s" $KEY_FLINK_TABLE_PLANNER undefined,use default by: blinkPlanner")
       PlannerType.blink
     }
 
     plannerType match {
       case PlannerType.blink =>
-        logger.info("[StreamX] blinkPlanner will be use.")
+        logInfo("blinkPlanner will be use.")
         builder.useBlinkPlanner()
       case PlannerType.old =>
-        logger.info("[StreamX] oldPlanner will be use.")
+        logInfo("oldPlanner will be use.")
         builder.useOldPlanner()
       case PlannerType.any =>
-        logger.info("[StreamX] anyPlanner will be use.")
+        logInfo("anyPlanner will be use.")
         builder.useAnyPlanner()
     }
 
@@ -129,28 +129,28 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
         if (tableMode == TableMode.streaming) {
           throw new ExceptionInInitializerError("[StreamX] can not use batch mode in StreamTableEnvironment")
         }
-        logger.info("[StreamX] components should work in batch mode")
+        logInfo("components should work in batch mode")
         builder.inBatchMode()
       case TableMode.streaming =>
         if (tableMode == TableMode.batch) {
           throw new ExceptionInInitializerError("[StreamX] can not use streaming mode in TableEnvironment")
         }
-        logger.info("[StreamX] components should work in streaming mode")
+        logInfo("components should work in streaming mode")
         builder.inStreamingMode()
     }
 
     val buildWith = (parameter.get(KEY_FLINK_TABLE_CATALOG), parameter.get(KEY_FLINK_TABLE_DATABASE))
     buildWith match {
       case (x: String, y: String) if x != null && y != null =>
-        logger.info(s"[StreamX] with built in catalog: $x")
-        logger.info(s"[StreamX] with built in database: $y")
+        logInfo(s"with built in catalog: $x")
+        logInfo(s"with built in database: $y")
         builder.withBuiltInCatalogName(x)
         builder.withBuiltInDatabaseName(y)
       case (x: String, _) if x != null =>
-        logger.info(s"[StreamX] with built in catalog: $x")
+        logInfo(s"with built in catalog: $x")
         builder.withBuiltInCatalogName(x)
       case (_, y: String) if y != null =>
-        logger.info(s"[StreamX] with built in database: $y")
+        logInfo(s"with built in database: $y")
         builder.withBuiltInDatabaseName(y)
       case _ =>
     }

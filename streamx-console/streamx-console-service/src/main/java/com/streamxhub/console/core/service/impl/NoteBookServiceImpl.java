@@ -46,11 +46,11 @@ public class NoteBookServiceImpl implements NoteBookService {
                 interpreter.open();
                 InterpreterOutput out = new InterpreterOutput(log::info);
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
-                log.info("[StreamX] repl submit code:" + result.code());
+                log.info("repl submit code:" + result.code());
                 if (result.code().equals(InterpreterResult.ERROR())) {
-                    log.info("[StreamX] NoteBook submit error: {}", out.toString());
+                    log.info("NoteBook submit error: {}", out.toString());
                 } else if (result.code().equals(InterpreterResult.SUCCESS())) {
-                    log.info("[StreamX] NoteBook submit success: {}", out.toString());
+                    log.info("NoteBook submit success: {}", out.toString());
                 }
             } catch (Throwable e) {
                 e.printStackTrace();

@@ -42,7 +42,7 @@ object FlinkTableCli extends FlinkStreamTable {
         case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
       }
     })
-    logInfo(s"[StreamX] tableSQL: $sql")
+    logInfo(s"tableSQL: $sql")
   }
 
 }

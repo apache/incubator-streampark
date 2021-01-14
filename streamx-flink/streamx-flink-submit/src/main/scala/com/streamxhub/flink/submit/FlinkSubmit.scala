@@ -95,7 +95,7 @@ object FlinkSubmit extends Logger {
 
   private[this] lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
-    logInfo(s"[StreamX] flinkHome: $flinkLocalHome")
+    logInfo(s"flinkHome: $flinkLocalHome")
     flinkLocalHome
   }
 
@@ -124,6 +124,8 @@ object FlinkSubmit extends Logger {
 
     val commandLine = getEffectiveCommandLine(submitInfo, customCommandLines)
 
+    ch.qos.logback.core.rolling.RollingFileAppender
+
     val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
 
     val uri = PackagedProgramUtils.resolveURI(submitInfo.flinkUserJar)
@@ -136,14 +138,14 @@ object FlinkSubmit extends Logger {
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-      logInfo("[StreamX] ------------------<<specification>>------------------\n")
-      logInfo(s"[StreamX] $clusterSpecification\n")
-      logInfo("[StreamX] ------------------------------------\n")
+      logInfo("------------------<<specification>>------------------\n")
+      logInfo(s"$clusterSpecification\n")
+      logInfo("------------------------------------\n")
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      logInfo("[StreamX] ------------------<<applicationId>>------------------\n")
-      logInfo(s"[StreamX] Flink Job Started: applicationId: $applicationId \n")
-      logInfo("[StreamX] ------------------------------------\n")
+      logInfo("------------------<<applicationId>>------------------\n")
+      logInfo(s"Flink Job Started: applicationId: $applicationId \n")
+      logInfo("------------------------------------\n")
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
@@ -360,9 +362,9 @@ object FlinkSubmit extends Logger {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    logInfo("[StreamX] ------------------------------------\n")
-    logInfo(s"[StreamX] Effective executor configuration: $effectiveConfiguration \n")
-    logInfo("[StreamX] ------------------------------------\n")
+    logInfo("------------------------------------\n")
+    logInfo(s"Effective executor configuration: $effectiveConfiguration \n")
+    logInfo("------------------------------------\n")
 
     effectiveConfiguration
   }

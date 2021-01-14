@@ -167,7 +167,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
         override def customizeHttpClient(httpClientBuilder: HttpAsyncClientBuilder): HttpAsyncClientBuilder = {
           if (credentialsProvider != null) {
             httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider)
-            logger.info("[StreamX] elasticsearch auth by userName,password...")
+            logInfo("elasticsearch auth by userName,password...")
           }
           //other config....
           httpClientBuilder
@@ -197,7 +197,7 @@ class RestClientFactoryImpl(val config: Map[String, String]) extends RestClientF
       val maxRetry = Try(config.get(KEY_ES_REST_MAX_RETRY).toString.toInt) match {
         case Success(value) => value
         case _ =>
-          logger.warn(s"[StreamX] config error: $KEY_ES_REST_MAX_RETRY is not set or invalid,use 10000 ")
+          logWarn(s" config error: $KEY_ES_REST_MAX_RETRY is not set or invalid,use 10000 ")
           10000
       }
 

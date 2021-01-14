@@ -78,7 +78,7 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
                     String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
                     String.format("./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ", title, flameGraph.getWidth(), foldedPath, svgPath)
             );
-            CommandUtils.execute(commands, (line) -> log.info("[StreamX] flameGraph: {} ", line));
+            CommandUtils.execute(commands, (line) -> log.info("flameGraph: {} ", line));
             return svgPath;
         }
         return null;

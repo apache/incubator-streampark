@@ -55,7 +55,7 @@ case class SinkBuffer(writer: SinkWriter,
   private[this] def addToQueue(): Unit = {
     val deepCopy = buildDeepCopy(localValues)
     val params = SinkRequest(deepCopy, table)
-    logger.debug(s"[StreamX] Build blank with params: buffer size = ${params.size}, target table  = ${params.table}")
+    logDebug(s"Build blank with params: buffer size = ${params.size}, target table  = ${params.table}")
     writer.write(params)
     localValues.clear()
   }
