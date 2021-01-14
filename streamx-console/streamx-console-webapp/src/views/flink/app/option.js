@@ -72,7 +72,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.flink.size is require or you can delete this option'))
+        callback(new Error('flink.size is require or you can delete this option'))
       } else {
         callback()
       }
@@ -91,7 +91,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.flink.size is required or you can delete this option'))
+        callback(new Error('flink.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -111,7 +111,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.process.size is required or you can delete this option'))
+        callback(new Error('process.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -130,7 +130,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.process.size is required or you can delete this option'))
+        callback(new Error('process.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -150,7 +150,7 @@ export default [
     defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.heap.size is require or you can delete this option'))
+        callback(new Error('heap.size is require or you can delete this option'))
       } else {
         callback()
       }
@@ -169,7 +169,7 @@ export default [
     defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.off-heap.size is required or you can delete this option'))
+        callback(new Error('off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -188,7 +188,7 @@ export default [
     defaultValue: 256,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.jvm-metaspace.size is require or you can delete this option'))
+        callback(new Error('jvm-metaspace.size is require or you can delete this option'))
       } else {
         callback()
       }
@@ -207,7 +207,7 @@ export default [
     defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.jvm-overhead.fraction is require or you can delete this option.'))
+        callback(new Error('jvm-overhead.fraction is require or you can delete this option.'))
       } else {
         callback()
       }
@@ -226,7 +226,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.jvm-overhead.max is required or you can delete this option'))
+        callback(new Error('jvm-overhead.max is required or you can delete this option'))
       } else {
         callback()
       }
@@ -245,7 +245,7 @@ export default [
     defaultValue: 192,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('jobmanager.memory.jvm-overhead.min is required or you can delete this option'))
+        callback(new Error('jvm-overhead.min is required or you can delete this option'))
       } else {
         callback()
       }
@@ -265,7 +265,7 @@ export default [
     defaultValue: null,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.framework.heap.size is required or you can delete this option'))
+        callback(new Error('framework.heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -284,7 +284,7 @@ export default [
     defaultValue: null,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.framework.off-heap.size is required or you can delete this option'))
+        callback(new Error('framework.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -304,7 +304,7 @@ export default [
     defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.task.heap.size is required or you can delete this option'))
+        callback(new Error('task.heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -324,7 +324,7 @@ export default [
     defaultValue: null,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.task.off-heap.size is required or you can delete this option'))
+        callback(new Error('task.off-heap.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -343,7 +343,7 @@ export default [
     defaultValue: 128,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.managed.size is required or you can delete this option'))
+        callback(new Error('managed.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -362,7 +362,7 @@ export default [
     defaultValue: 0.4,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.managed.fraction is required or you can delete this option'))
+        callback(new Error('managed.fraction is required or you can delete this option'))
       } else {
         callback()
       }
@@ -381,7 +381,7 @@ export default [
     defaultValue: 256,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.jvm-metaspace.size is required or you can delete this option'))
+        callback(new Error('jvm-metaspace.size is required or you can delete this option'))
       } else {
         callback()
       }
@@ -400,7 +400,7 @@ export default [
     defaultValue: 0.1,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.jvm-overhead.fraction is required or you can delete this option'))
+        callback(new Error('jvm-overhead.fraction is required or you can delete this option'))
       } else {
         callback()
       }
@@ -419,7 +419,7 @@ export default [
     defaultValue: 1024,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.jvm-overhead.max is required or you can delete this option'))
+        callback(new Error('jvm-overhead.max is required or you can delete this option'))
       } else {
         callback()
       }
@@ -438,7 +438,7 @@ export default [
     defaultValue: 192,
     validator: (rule, value, callback) => {
       if (!value) {
-        callback(new Error('taskmanager.memory.jvm-overhead.min is required or you can delete this option'))
+        callback(new Error('jvm-overhead.min is required or you can delete this option'))
       } else {
         callback()
       }
