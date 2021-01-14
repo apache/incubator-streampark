@@ -80,7 +80,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           val record = new ProducerRecord[String, String](topic, sendData)
           kafkaProducer.send(record, new Callback() {
             override def onCompletion(recordMetadata: RecordMetadata, e: Exception): Unit = {
-              logInfo(s"[StreamX] Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
+              logInfo(s"Failover successful!! storageType:Kafka,table: $table,size:${request.size}")
             }
           }).get()
 
@@ -97,7 +97,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                   mysqlConnect,
                   s"create table $table (`values` text, `timestamp` bigint)"
                 )
-                logWarn(s"[StreamX] Failover storageType:MySQL,table: $table is not exist,auto created...")
+                logWarn(s"Failover storageType:MySQL,table: $table is not exist,auto created...")
               }
             } finally {
               Lock.lock.unlock()
@@ -110,7 +110,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
           })
           val sql = s"INSERT INTO $table(`values`,`timestamp`) VALUES ${records.mkString(",")} "
           JdbcUtils.update(sql)(properties)
-          logInfo(s"[StreamX] Failover successful!! storageType:MySQL,table: $table,size:${request.size}")
+          logInfo(s"Failover successful!! storageType:MySQL,table: $table,size:${request.size}")
 
         case HBase =>
           val tableName = TableName.valueOf(table)
@@ -126,13 +126,13 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
                   val desc = new HTableDescriptor(tableName)
                   desc.addFamily(new HColumnDescriptor(familyName))
                   admin.createTable(desc)
-                  logInfo(s"[StreamX] Failover storageType:HBase,table: $table is not exist,auto created...")
+                  logInfo(s"Failover storageType:HBase,table: $table is not exist,auto created...")
                 }
                 val mutatorParam = new BufferedMutatorParams(tableName)
                   .listener(new BufferedMutator.ExceptionListener {
                     override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
                       for (i <- 0.until(exception.getNumExceptions)) {
-                        logInfo(s"[StreamX] Failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
+                        logInfo(s"Failover storageType:HBase Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
                       }
                     }
                   })

@@ -113,7 +113,7 @@ class HttpSinkFunction(properties: mutable.Map[String, String],
         failoverChecker = FailoverChecker(thresholdConf.delayTime)
         sinkBuffer = SinkBuffer(httpSinkWriter, thresholdConf.delayTime, bufferSize, table)
         failoverChecker.addSinkBuffer(sinkBuffer)
-        logInfo("[StreamX] HttpSink initialize... ")
+        logInfo("HttpSink initialize... ")
       }
       Lock.lock.unlock()
     }
@@ -168,18 +168,18 @@ case class HttpSinkWriter(thresholdConf: ThresholdConf, header: Map[String, Stri
     recordQueue.put(request)
   } catch {
     case e: InterruptedException =>
-      logError(s"[StreamX] Interrupted error while putting data to queue,error:$e")
+      logError(s"Interrupted error while putting data to queue,error:$e")
       Thread.currentThread.interrupt()
       throw new RuntimeException(e)
   }
 
   override def close(): Unit = {
-    logInfo("[StreamX] Closing HttpSink-writer...")
+    logInfo("Closing HttpSink-writer...")
     tasks.foreach(_.close())
     ThreadUtils.shutdownExecutorService(service)
     ThreadUtils.shutdownExecutorService(callbackService)
     asyncHttpClient.close()
-    logInfo(s"[StreamX] ${classOf[HttpSinkWriter].getSimpleName} is closed")
+    logInfo(s"${classOf[HttpSinkWriter].getSimpleName} is closed")
   }
 
 }
@@ -245,7 +245,7 @@ case class HttpWriterTask(id: Int,
 
   override def run(): Unit = try {
     isWorking = true
-    logInfo(s"[StreamX] Start writer task, id = ${id}")
+    logInfo(s"Start writer task, id = ${id}")
     while (isWorking || queue.nonEmpty) {
       val req = queue.poll(100, TimeUnit.MILLISECONDS)
       if (req != null) {
@@ -256,26 +256,26 @@ case class HttpWriterTask(id: Int,
         val callback = respCallback(whenResponse, sinkRequest)
         whenResponse.addListener(callback, callbackService)
         if (req.attemptCounter > 0) {
-          logInfo(s"[StreamX] get retry url from queue,attemptCounter:${req.attemptCounter}")
+          logInfo(s"get retry url from queue,attemptCounter:${req.attemptCounter}")
         }
       }
     }
   } catch {
     case e: Exception =>
-      logError("[StreamX] Error while inserting data", e)
+      logError("Error while inserting data", e)
       throw new RuntimeException(e)
   } finally {
-    logInfo(s"[StreamX] Task id = $id is finished")
+    logInfo(s"Task id = $id is finished")
   }
 
   def respCallback(whenResponse: ListenableFuture[Response], sinkRequest: SinkRequest): Runnable = new Runnable {
     override def run(): Unit = {
       Try(whenResponse.get()).getOrElse(null) match {
         case null =>
-          logError(s"""[StreamX] Error HttpSink executing callback, params = $thresholdConf,can not get Response. """)
+          logError(s"""Error HttpSink executing callback, params = $thresholdConf,can not get Response. """)
           handleFailedResponse(null, sinkRequest)
         case resp if !thresholdConf.successCode.contains(resp.getStatusCode) =>
-          logError(s"""[StreamX] Error HttpSink executing callback, params = $thresholdConf, StatusCode = ${resp.getStatusCode} """)
+          logError(s"""Error HttpSink executing callback, params = $thresholdConf, StatusCode = ${resp.getStatusCode} """)
           handleFailedResponse(resp, sinkRequest)
         case _ =>
       }
@@ -291,10 +291,10 @@ case class HttpWriterTask(id: Int,
   def handleFailedResponse(response: Response, sinkRequest: SinkRequest): Unit = try {
     if (sinkRequest.attemptCounter >= thresholdConf.maxRetries) {
       failoverWriter.write(sinkRequest.copy(records = sinkRequest.records.map(_.replaceFirst("^[A-Z]+///", ""))))
-      logWarn(s"""[StreamX] Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
+      logWarn(s"""Failed to send data to Http, Http response = $response. Ready to flush data to ${thresholdConf.storageType}""")
     } else {
       sinkRequest.incrementCounter()
-      logWarn(s"[StreamX] Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
+      logWarn(s"Next attempt to send data to Http, table = ${sinkRequest.table}, buffer size = ${sinkRequest.size}, current attempt num = ${sinkRequest.attemptCounter}, max attempt num = ${thresholdConf.maxRetries}, response = $response")
       queue.put(sinkRequest)
     }
   } catch {
