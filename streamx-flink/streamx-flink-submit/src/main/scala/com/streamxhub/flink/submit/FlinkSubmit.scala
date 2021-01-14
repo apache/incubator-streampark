@@ -384,7 +384,7 @@ object FlinkSubmit extends Logger {
     case Failure(e) => throw new CliArgsException(e.getMessage)
   }
 
-  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]) = {
+  private[this] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = {
     if (flinkDefaultConfiguration == null) {
       require(FLINK_HOME != null)
       //获取flink的配置
