@@ -160,11 +160,7 @@
                 <exclusions>
                     <exclusion>
                         <groupId>org.apache.curator</groupId>
-                        <artifactId>curator-client</artifactId>
-                    </exclusion>
-                    <exclusion>
-                        <groupId>org.apache.curator</groupId>
-                        <artifactId>curator-recipes</artifactId>
+                        <artifactId>*</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
