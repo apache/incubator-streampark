@@ -24,7 +24,6 @@ import com.streamxhub.common.conf.ConfigConst;
 import com.streamxhub.common.util.HdfsUtils;
 import com.streamxhub.console.base.utils.WebUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.runners.model.InitializationError;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -58,7 +57,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
              */
             String flinkLocalHome = System.getenv("FLINK_HOME");
             if (flinkLocalHome == null) {
-                throw new InitializationError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
             }
             String flinkName = new File(flinkLocalHome).getName();
             String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);

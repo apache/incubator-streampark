@@ -2,11 +2,16 @@
 <project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xmlns="http://maven.apache.org/POM/4.0.0"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.streamxhub</groupId>
+        <artifactId>streamx</artifactId>
+        <version>1.0.0</version>
+    </parent>
 
-    <groupId>com.streamxhub</groupId>
     <artifactId>streamx-console</artifactId>
+    <name>StreamX : Console Parent</name>
+    <description>streamx-console</description>
     <version>1.0.0</version>
 
     <modules>
@@ -39,35 +44,6 @@
 
     <!-- 定义统一版本号 -->
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mybatis.version>3.4.1</mybatis.version>
-        <junit.version>4.13.1</junit.version>
-        <logback.version>1.2.3</logback.version>
-        <protostuff.version>1.1.2</protostuff.version>
-        <objenesis.version>2.6</objenesis.version>
-        <javassist.version>3.19.0-GA</javassist.version>
-        <bytebuddy.version>1.6.3</bytebuddy.version>
-        <hessian.version>4.0.38</hessian.version>
-        <protostuff.version>1.0.12</protostuff.version>
-        <kryo.version>0.42</kryo.version>
-        <fst.version>2.50</fst.version>
-        <fastjson.version>1.2.45</fastjson.version>
-        <zookeeper.version>3.4.11</zookeeper.version>
-        <curator.version>4.2.0</curator.version>
-        <zkclient.version>0.10</zkclient.version>
-        <asm.version>5.2</asm.version>
-        <cglib.version>3.2.5</cglib.version>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <encoding>UTF-8</encoding>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <platform-bom.version>2.0.3.RELEASE</platform-bom.version>
-        <mysql.version>8.0.12</mysql.version>
-        <mybatis-plus.version>3.1.0</mybatis-plus.version>
-        <curator.version>4.2.0</curator.version>
-
         <!-- Build args -->
         <argline>
             -server
@@ -79,22 +55,7 @@
             -Djava.net.preferIPv4Stack=true
         </argline>
         <arguments/>
-
     </properties>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.10.RELEASE</version>
-    </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
-    </dependencies>
 
     <build>
         <plugins>
