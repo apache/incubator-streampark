@@ -21,19 +21,19 @@
 
 package com.streamxhub.plugin.profiling.util;
 
+import java.io.ByteArrayInputStream;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-
 public class IOUtilsTest {
-    @Test
-    public void toByteArray() {
-        byte[] bytes = new byte[]{1, 2, 3};
-        ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
-        byte[] result = Utils.toByteArray(byteArrayInputStream);
-        Assert.assertEquals(3, result.length);
-        Assert.assertEquals(1, result[0]);
-        Assert.assertEquals(3, result[result.length - 1]);
-    }
+  @Test
+  public void toByteArray() {
+    byte[] bytes = new byte[] {1, 2, 3};
+    ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(bytes);
+    byte[] result = Utils.toByteArray(byteArrayInputStream);
+    Assert.assertEquals(3, result.length);
+    Assert.assertEquals(1, result[0]);
+    Assert.assertEquals(3, result[result.length - 1]);
+  }
 }

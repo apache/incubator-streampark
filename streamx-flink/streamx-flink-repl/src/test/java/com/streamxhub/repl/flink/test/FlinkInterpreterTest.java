@@ -16,73 +16,68 @@ package com.streamxhub.repl.flink.test;
  * limitations under the License.
  */
 
+import java.util.Properties;
 
-import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
-import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Properties;
-
+import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
+import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
+import com.streamxhub.repl.flink.interpreter.InterpreterResult;
 
 public class FlinkInterpreterTest {
 
-    private FlinkInterpreter interpreter;
+  private FlinkInterpreter interpreter;
 
-    @Before
-    public void setUp() {
-        Properties p = new Properties();
-        p.setProperty("repl.out", "true");
-        p.setProperty("scala.color", "false");
-        p.setProperty("flink.execution.mode", "yarn");
-        p.setProperty("local.number-taskmanager", "4");
-        interpreter = new FlinkInterpreter(p);
+  @Before
+  public void setUp() {
+    Properties p = new Properties();
+    p.setProperty("repl.out", "true");
+    p.setProperty("scala.color", "false");
+    p.setProperty("flink.execution.mode", "yarn");
+    p.setProperty("local.number-taskmanager", "4");
+    interpreter = new FlinkInterpreter(p);
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    if (interpreter != null) {
+      interpreter.close();
     }
+  }
 
-    @After
-    public void tearDown() throws Exception {
-        if (interpreter != null) {
-            interpreter.close();
-        }
+  @Test
+  public void testWordCount() throws Exception {
+    try {
+      InterpreterOutput out = new InterpreterOutput(line -> {});
+
+      interpreter.open();
+
+      InterpreterResult result =
+          interpreter.interpret("class WoldCount(val wold: String,val count: Int)", out);
+
+      System.out.println(result.code().equals(InterpreterResult.SUCCESS()));
+
+      result =
+          interpreter.interpret(
+              "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n"
+                  + "\n"
+                  + "data.flatMap(line => line.split(\"\\\\s\"))\n"
+                  + "  .map(x=>new WoldCount(x,1))\n"
+                  + "  .keyBy(_.wold)\n"
+                  + "  .sum(\"count\")\n"
+                  + "  .print()\n"
+                  + "\n"
+                  + "env.execute()\n",
+              out);
+
+      System.out.println(out.toString());
+
+      System.out.println(result.code());
+      interpreter.close();
+    } catch (Throwable e) {
+      e.printStackTrace();
     }
-
-    @Test
-    public void testWordCount() throws Exception {
-        try {
-            InterpreterOutput out = new InterpreterOutput(line -> {
-
-            });
-
-            interpreter.open();
-
-            InterpreterResult result = interpreter.interpret(
-                    "class WoldCount(val wold: String,val count: Int)",out
-            );
-
-            System.out.println(result.code().equals(InterpreterResult.SUCCESS()));
-
-            result = interpreter.interpret(
-                    "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
-                            "\n" +
-                            "data.flatMap(line => line.split(\"\\\\s\"))\n" +
-                            "  .map(x=>new WoldCount(x,1))\n" +
-                            "  .keyBy(_.wold)\n" +
-                            "  .sum(\"count\")\n" +
-                            "  .print()\n" +
-                            "\n" +
-                            "env.execute()\n", out);
-
-            System.out.println(out.toString());
-
-            System.out.println(result.code());
-            interpreter.close();
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
-
-    }
-
-
+  }
 }

@@ -32,7 +32,8 @@ trait FlinkExprTyper extends ExprTyper {
     // interpret/interpretSynthetic may change the phase,
     // which would have unintended effects on types.
     val savedPhase = phase
-    try interpretSynthetic(code) finally phase = savedPhase
+    try interpretSynthetic(code)
+    finally phase = savedPhase
   }
 
   override def symbolOfLine(code: String): Symbol = {
@@ -58,9 +59,9 @@ trait FlinkExprTyper extends ExprTyper {
       doInterpret(code) match {
         case IR.Success =>
           repl.definedSymbolList filterNot old match {
-            case Nil => NoSymbol
+            case Nil        => NoSymbol
             case sym :: Nil => sym
-            case syms => NoSymbol.newOverloaded(NoPrefix, syms)
+            case syms       => NoSymbol.newOverloaded(NoPrefix, syms)
           }
         case _ => NoSymbol
       }

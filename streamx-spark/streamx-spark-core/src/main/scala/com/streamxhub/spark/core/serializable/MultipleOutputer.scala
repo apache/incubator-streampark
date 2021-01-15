@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.serializable
 
 import org.apache.avro.mapreduce.AvroMultipleOutputs
@@ -48,7 +47,8 @@ object MultipleOutputer {
     * @tparam K
     * @tparam V
     */
-  implicit class AvroMultipleOutputer[K, V](mo: AvroMultipleOutputs) extends MultipleOutputer[K, V] {
+  implicit class AvroMultipleOutputer[K, V](mo: AvroMultipleOutputs)
+      extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 
     def close(): Unit = mo.close()
@@ -61,7 +61,8 @@ object MultipleOutputer {
     * @tparam K
     * @tparam V
     */
-  implicit class PlainMultipleOutputer[K, V](mo: MultipleOutputs[K, V]) extends MultipleOutputer[K, V] {
+  implicit class PlainMultipleOutputer[K, V](mo: MultipleOutputs[K, V])
+      extends MultipleOutputer[K, V] {
     def write(key: K, value: V, path: String): Unit = mo.write(key, value, path)
 
     def close(): Unit = mo.close()
