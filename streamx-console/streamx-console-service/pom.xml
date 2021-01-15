@@ -16,14 +16,12 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-
-        <junit.version>4.5</junit.version>
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
         <hadoop.version>2.6.0</hadoop.version>
+        <junit.version>4.5</junit.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
-        <clickhouse.version>0.1.53</clickhouse.version>
         <CodeCacheSize>512m</CodeCacheSize>
     </properties>
 
