@@ -21,18 +21,16 @@
 
 package com.streamxhub.plugin.profiling.util;
 
-import com.streamxhub.plugin.profiling.ConfigProvider;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
+import com.streamxhub.plugin.profiling.ConfigProvider;
+
+/** @author benjobs */
 public class DummyConfigProvider implements ConfigProvider {
-    @Override
-    public Map<String, Map<String, List<String>>> getConfig() {
-        return new HashMap<>();
-    }
+  @Override
+  public Map<String, Map<String, List<String>>> getConfig() {
+    return new HashMap<>();
+  }
 }
