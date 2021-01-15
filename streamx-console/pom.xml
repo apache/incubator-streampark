@@ -63,7 +63,7 @@
                             <scalafmt />
                         </scala>
                     </configuration>
-                    <executions>
+                    <!--<executions>
                         <execution>
                             <id>spotless-check</id>
                             <phase>validate</phase>
@@ -71,7 +71,7 @@
                                 <goal>check</goal>
                             </goals>
                         </execution>
-                    </executions>
+                    </executions>-->
                 </plugin>
             </plugins>
         </pluginManagement>
