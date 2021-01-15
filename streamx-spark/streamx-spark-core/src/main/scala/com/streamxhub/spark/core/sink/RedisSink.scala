@@ -21,6 +21,7 @@
 
 package com.streamxhub.spark.core.sink
 
+import com.streamxhub.common.util.Logger
 import com.streamxhub.spark.core.support.redis.RedisClient._
 import com.streamxhub.spark.core.support.redis.{RedisClient, RedisEndpoint}
 import org.apache.spark.SparkContext
@@ -38,7 +39,7 @@ import scala.reflect.runtime.universe.TypeTag
   */
 class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val sc: SparkContext,
                                                          initParams: Map[String, String] = Map.empty[String, String])
-  extends Sink[T] {
+  extends Sink[T] with Logger {
 
   override val prefix: String = "spark.sink.redis."
 
@@ -62,7 +63,7 @@ class RedisSink[T <: scala.Product : ClassTag : TypeTag](@transient override val
             case n: (String, Any) => (n._1, n._2.toString, 3600 * 24 * 7)
             case n: (String, Any, Int) => (n._1, n._2.toString, n._3)
             case _ =>
-              logger.warn("data type error. key is unknown")
+              logWarn("data type error. key is unknown")
               ("UNKNOWN", d.toString, 60)
           }
           pipe.set(k, v)
