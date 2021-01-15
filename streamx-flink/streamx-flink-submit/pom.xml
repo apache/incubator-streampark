@@ -8,11 +8,8 @@
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-flink-submit</artifactId>
     <name>StreamX : Flink Submit</name>
-    <description>streamx-flink-submit</description>
-    <version>1.0.0</version>
 
     <dependencies>
 

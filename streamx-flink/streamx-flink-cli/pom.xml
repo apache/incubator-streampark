@@ -7,19 +7,8 @@
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-flink-cli</artifactId>
     <name>StreamX : Flink Cli</name>
-    <description>streamx-flink-cli</description>
-    <version>1.0.0</version>
-
-    <properties>
-        <flink.version>1.12.0</flink.version>
-        <hive.version>2.3.4</hive.version>
-        <scala.macros.version>2.0.1</scala.macros.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scala.version>2.11.12</scala.version>
-    </properties>
 
     <dependencies>
 
