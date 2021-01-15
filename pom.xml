@@ -444,7 +444,6 @@
                             </indent>
                         </format>
                     </formats>
-
                     <java>
                         <includes>
                             <include>src/main/java/**/*.java</include>
@@ -465,14 +464,10 @@
                             <include>src/main/scala/**/*.scala</include>
                             <include>src/test/scala/**/*.scala</include>
                         </includes>
-                        <importOrder>
-                            <!-- \# refers to the static imports -->
-                            <order>javax,java,scala,org,com,\#</order>
-                        </importOrder>
-                        <removeUnusedImports/>
+                        <scalafmt />
                     </scala>
                 </configuration>
-                <!-- <executions>
+                 <executions>
                      <execution>
                          <id>spotless-check</id>
                          <phase>validate</phase>
@@ -480,7 +475,7 @@
                              <goal>check</goal>
                          </goals>
                      </execution>
-                 </executions>-->
+                 </executions>
             </plugin>
 
             <!--maven-->

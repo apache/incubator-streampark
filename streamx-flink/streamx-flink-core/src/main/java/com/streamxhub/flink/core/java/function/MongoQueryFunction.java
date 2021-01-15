@@ -20,23 +20,21 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import com.mongodb.client.FindIterable;
-import com.mongodb.client.MongoCollection;
 import org.bson.Document;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 @FunctionalInterface
 public interface MongoQueryFunction<T> {
 
-    /**
-     * 返回一个查询条件
-     * @param last
-     * @param collection
-     * @return
-     */
-    FindIterable<Document> query(T last, MongoCollection<Document> collection);
-
+  /**
+   * 返回一个查询条件
+   *
+   * @param last
+   * @param collection
+   * @return
+   */
+  FindIterable<Document> query(T last, MongoCollection<Document> collection);
 }

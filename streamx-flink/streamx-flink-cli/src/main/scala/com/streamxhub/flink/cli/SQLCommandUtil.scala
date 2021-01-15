@@ -36,7 +36,10 @@ object SQLCommandUtil {
       if (line.trim.endsWith(";")) {
         parseSQL(stmt.toString.trim) match {
           case Some(x) => calls += x
-          case _ => throw new RuntimeException("Unsupported command '" + stmt.toString + "'")
+          case _ =>
+            throw new RuntimeException(
+              "Unsupported command '" + stmt.toString + "'"
+            )
         }
         // clear string builder
         stmt.clear()
@@ -50,25 +53,31 @@ object SQLCommandUtil {
     val stmt = sqlLine.trim.replaceFirst(";$", "")
     // parse
     val sqlCommands = SQLCommand.values.filter(_.matches(stmt))
-    if (sqlCommands.isEmpty) None else {
+    if (sqlCommands.isEmpty) None
+    else {
       val sqlCommand = sqlCommands.head
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
         groups(i) = matcher.group(i + 1)
       }
-      sqlCommand.converter(groups).map(operands => SQLCommandCall(sqlCommand, operands))
+      sqlCommand
+        .converter(groups)
+        .map(operands => SQLCommandCall(sqlCommand, operands))
     }
   }
 
 }
 
-
-sealed abstract class SQLCommand(private val regex: String, val converter: Array[String] => Option[Array[String]]) extends EnumEntry {
+sealed abstract class SQLCommand(
+    private val regex: String,
+    val converter: Array[String] => Option[Array[String]]
+) extends EnumEntry {
   var matcher: Matcher = _
 
   def matches(input: String): Boolean = {
-    val pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
+    val pattern =
+      Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL)
     matcher = pattern.matcher(input)
     matcher.matches()
   }
@@ -78,35 +87,38 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
 
   val values: immutable.IndexedSeq[SQLCommand] = findValues
 
-  case object SET extends SQLCommand(
-    "(\\s+(\\S+)\\s*=(.*))?",
-    {
-      case a if a.length < 3 => None
-      case a if a(0) == null => Some(new Array[String](0))
-      case x => Some(Array[String](x(1), x(2)))
-    }
-  )
+  case object SET
+      extends SQLCommand(
+        "(\\s+(\\S+)\\s*=(.*))?", {
+          case a if a.length < 3 => None
+          case a if a(0) == null => Some(new Array[String](0))
+          case x                 => Some(Array[String](x(1), x(2)))
+        }
+      )
 
-  case object INSERT_INTO extends SQLCommand(
-    "(INSERT\\s+INTO.*)",
-    (x: Array[String]) => Some(Array[String](x.head))
-  )
+  case object INSERT_INTO
+      extends SQLCommand(
+        "(INSERT\\s+INTO.*)",
+        (x: Array[String]) => Some(Array[String](x.head))
+      )
 
-  case object CREATE_TABLE extends SQLCommand(
-    "(CREATE\\s+TABLE.*)",
-    (x: Array[String]) => Some(Array[String](x.head))
-  )
+  case object CREATE_TABLE
+      extends SQLCommand(
+        "(CREATE\\s+TABLE.*)",
+        (x: Array[String]) => Some(Array[String](x.head))
+      )
 
-  case object CREATE_VIEW extends SQLCommand(
-    "(CREATE\\s+VIEW.*)",
-    (x: Array[String]) => Some(Array[String](x.head))
-  )
+  case object CREATE_VIEW
+      extends SQLCommand(
+        "(CREATE\\s+VIEW.*)",
+        (x: Array[String]) => Some(Array[String](x.head))
+      )
 
 }
 
 /**
- * Call of SQL command with operands and command type.
- */
+  * Call of SQL command with operands and command type.
+  */
 case class SQLCommandCall(command: SQLCommand, operands: Array[String]) {
   def this(command: SQLCommand) {
     this(command, new Array[String](0))

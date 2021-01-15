@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.support.kafka.offset
 
 import org.apache.kafka.common.TopicPartition
@@ -38,7 +37,10 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
     * @param topics
     * @return
     */
-  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
+  override def get(
+      groupId: String,
+      topics: Set[String]
+  ): Map[TopicPartition, Long] = {
     Map.empty[TopicPartition, Long]
   }
 
@@ -48,9 +50,10 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
     * @param groupId
     * @param offsetInfos
     */
-  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
-
-  }
+  override def update(
+      groupId: String,
+      offsetInfos: Map[TopicPartition, Long]
+  ): Unit = {}
 
   /**
     * 删除 Offsets
@@ -58,7 +61,5 @@ private[kafka] class DefaultOffset(val sparkConf: SparkConf) extends Offset {
     * @param groupId
     * @param topics
     */
-  override def delete(groupId: String, topics: Set[String]): Unit = {
-
-  }
+  override def delete(groupId: String, topics: Set[String]): Unit = {}
 }
