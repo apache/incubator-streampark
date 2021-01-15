@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.sink
 
 import org.apache.spark.SparkContext
@@ -33,15 +34,14 @@ import scala.language.postfixOps
   *
   * 输出ES
   */
-class EsSink[T](
-    @transient override val sc: SparkContext,
-    initParams: Map[String, String] = Map.empty[String, String]
-) extends Sink[T] {
+class EsSink[T](@transient override val sc: SparkContext,
+                initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
 
   override val prefix: String = "spark.sink.es."
 
-  lazy val esParam: Map[String, String] =
-    (param ++ initParams).filter(_._1.startsWith(prefix))
+
+  lazy val esParam: Map[String, String] = (param++initParams).filter(_._1.startsWith(prefix))
 
   /**
     * 输出
@@ -50,7 +50,7 @@ class EsSink[T](
   def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd match {
       case rdd: RDD[String] => EsSpark.saveJsonToEs(rdd, esParam)
-      case _                => EsSpark.saveToEs(rdd, esParam)
+      case _ => EsSpark.saveToEs(rdd, esParam)
     }
   }
 }

@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core
 
 import com.streamxhub.common.conf.ConfigConst._
@@ -39,7 +40,7 @@ trait Spark {
 
   private val sparkListeners = new ArrayBuffer[String]()
 
-  @(transient @getter)
+  @(transient@getter)
   var sparkSession: SparkSession = _
 
   /**
@@ -52,12 +53,14 @@ trait Spark {
   /**
     * StreamingContext 运行之后执行
     */
-  def afterStarted(sc: SparkContext): Unit = {}
+  def afterStarted(sc: SparkContext): Unit = {
+  }
 
   /**
     * StreamingContext 停止后 程序停止前 执行
     */
-  def beforeStop(sc: SparkContext): Unit = {}
+  def beforeStop(sc: SparkContext): Unit = {
+  }
 
   /**
     * 处理函数
@@ -73,23 +76,17 @@ trait Spark {
 
     //通过vm -Dspark.conf传入配置文件的默认当作本地调试模式
     val (isDebug, conf) = SystemPropertyUtils.get(KEY_SPARK_CONF, "") match {
-      case ""   => (false, sparkConf.get(KEY_SPARK_DEBUG_CONF))
+      case "" => (false, sparkConf.get(KEY_SPARK_DEBUG_CONF))
       case path => (true, path)
-      case _ =>
-        throw new IllegalArgumentException(
-          "[StreamX] Usage:properties-file error"
-        )
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file error")
     }
 
     conf.split("\\.").last match {
       case "properties" =>
         sparkConf.setAll(PropertiesUtils.fromPropertiesFile(conf))
-      case "yaml" | "yml" =>
+      case "yaml"|"yml" =>
         sparkConf.setAll(PropertiesUtils.fromYamlFile(conf))
-      case _ =>
-        throw new IllegalArgumentException(
-          "[StreamX] Usage:properties-file format error,muse be properties or yml"
-        )
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
     }
 
     //debug mode
@@ -101,15 +98,10 @@ trait Spark {
 
     initialize(sparkConf)
 
-    val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get(
-      "spark.extraListeners",
-      ""
-    )
-    if (extraListeners != "")
-      sparkConf.set("spark.extraListeners", extraListeners)
+    val extraListeners = sparkListeners.mkString(",") + "," + sparkConf.get("spark.extraListeners", "")
+    if (extraListeners != "") sparkConf.set("spark.extraListeners", extraListeners)
 
-    sparkSession =
-      SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
+    sparkSession = SparkSession.builder().enableHiveSupport().config(sparkConf).getOrCreate()
 
     val sc = sparkSession.sparkContext
     handle(sc)

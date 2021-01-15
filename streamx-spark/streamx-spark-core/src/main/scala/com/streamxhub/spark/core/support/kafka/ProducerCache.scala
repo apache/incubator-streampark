@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.support.kafka
 
 import org.apache.kafka.clients.producer.KafkaProducer
@@ -33,12 +34,10 @@ object ProducerCache {
   private val producers = new mutable.HashMap[Properties, Any]()
 
   def getProducer[K, V](config: Properties): KafkaProducer[K, V] = {
-    producers
-      .getOrElse(config, {
-        val producer = new KafkaProducer[K, V](config)
-        producers(config) = producer
-        producer
-      })
-      .asInstanceOf[KafkaProducer[K, V]]
+    producers.getOrElse(config, {
+      val producer = new KafkaProducer[K, V](config)
+      producers(config) = producer
+      producer
+    }).asInstanceOf[KafkaProducer[K, V]]
   }
 }

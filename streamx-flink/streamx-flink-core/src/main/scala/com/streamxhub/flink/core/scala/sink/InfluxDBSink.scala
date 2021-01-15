@@ -40,27 +40,21 @@ import scala.collection.Map
 
 object InfluxDBSink {
 
-  def apply(
-      @(transient @param) ctx: StreamingContext,
-      property: Properties = new Properties(),
-      parallelism: Int = 0,
-      name: String = null,
-      uid: String = null
-  ): InfluxDBSink = new InfluxDBSink(ctx, property, parallelism, name, uid)
+  def apply(@(transient@param) ctx: StreamingContext,
+            property: Properties = new Properties(),
+            parallelism: Int = 0,
+            name: String = null,
+            uid: String = null): InfluxDBSink = new InfluxDBSink(ctx, property, parallelism, name, uid)
 
 }
 
-class InfluxDBSink(
-    @(transient @param) ctx: StreamingContext,
-    property: Properties = new Properties(),
-    parallelism: Int = 0,
-    name: String = null,
-    uid: String = null
-) extends Sink {
+class InfluxDBSink(@(transient@param) ctx: StreamingContext,
+                   property: Properties = new Properties(),
+                   parallelism: Int = 0,
+                   name: String = null,
+                   uid: String = null) extends Sink {
 
-  def sink[T](stream: DataStream[T], alias: String = "")(
-      implicit entity: InfluxEntity[T]
-  ): DataStreamSink[T] = {
+  def sink[T](stream: DataStream[T], alias: String = "")(implicit entity: InfluxEntity[T]): DataStreamSink[T] = {
     val prop = ConfigUtils.getInfluxConfig(ctx.parameter.toMap)(alias)
     Utils.copyProperties(property, prop)
     val sinkFun = new InfluxDBFunction[T](prop)
@@ -70,10 +64,7 @@ class InfluxDBSink(
 
 }
 
-class InfluxDBFunction[T](config: Properties)(
-    implicit endpoint: InfluxEntity[T]
-) extends RichSinkFunction[T]
-    with Logger {
+class InfluxDBFunction[T](config: Properties)(implicit endpoint: InfluxEntity[T]) extends RichSinkFunction[T] with Logger {
 
   var influxDB: InfluxDB = _
 
@@ -85,14 +76,13 @@ class InfluxDBFunction[T](config: Properties)(
     val password = config.getOrElse(KEY_JDBC_PASSWORD, null)
     influxDB = (username, password, url) match {
       case (null, _, u) => InfluxDBFactory.connect(u)
-      case _            => InfluxDBFactory.connect(url, username, password)
+      case _ => InfluxDBFactory.connect(url, username, password)
     }
     influxDB.enableBatch(2000, 100, TimeUnit.MILLISECONDS)
   }
 
   override def invoke(value: T): Unit = {
-    val point = Point
-      .measurement(endpoint.measurement)
+    val point = Point.measurement(endpoint.measurement)
       .time(System.currentTimeMillis(), TimeUnit.MILLISECONDS)
       .tag(endpoint.tagFun(value))
       .fields(endpoint.fieldFun(value).asInstanceOf[Map[String, Object]])
@@ -107,40 +97,35 @@ class InfluxDBFunction[T](config: Properties)(
 
 }
 
-class InfluxDBOutputFormat[T: TypeInformation](
-    implicit prop: Properties,
-    endpoint: InfluxEntity[T]
-) extends RichOutputFormat[T]
-    with Logger {
+class InfluxDBOutputFormat[T: TypeInformation](implicit prop: Properties, endpoint: InfluxEntity[T]) extends RichOutputFormat[T] with Logger {
 
   private val sinkFunction = new InfluxDBFunction[T](prop)
 
   private var configuration: Configuration = _
 
-  override def configure(configuration: Configuration): Unit =
-    this.configuration = configuration
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
 
-  override def open(taskNumber: Int, numTasks: Int): Unit =
-    sinkFunction.open(this.configuration)
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
 
   override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
 
   override def close(): Unit = sinkFunction.close()
 }
 
+
 /**
-  *
-  * @param database
-  * @param measurement
-  * @param retentionPolicy
-  * @param tagFun
-  * @param fieldFun
-  * @tparam T
-  */
-case class InfluxEntity[T](
-    database: String, //指定database
-    measurement: String, //指定measurement
-    retentionPolicy: String, //失效策略
-    tagFun: T => Map[String, String], //tags 函数
-    fieldFun: T => Map[String, Any] //field 函数
-) {}
+ *
+ * @param database
+ * @param measurement
+ * @param retentionPolicy
+ * @param tagFun
+ * @param fieldFun
+ * @tparam T
+ */
+case class InfluxEntity[T](database: String, //指定database
+                           measurement: String, //指定measurement
+                           retentionPolicy: String, //失效策略
+                           tagFun: T => Map[String, String], //tags 函数
+                           fieldFun: T => Map[String, Any] //field 函数
+                          ) {
+}

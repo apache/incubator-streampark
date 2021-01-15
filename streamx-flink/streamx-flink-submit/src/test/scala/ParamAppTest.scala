@@ -13,7 +13,6 @@ object ParamAppTest extends App {
     "--flink.deployment.option.parallelism",
     "5"
   )
-  val param =
-    ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(argsx))
+  val param = ParameterTool.fromArgs(arg).mergeWith(ParameterTool.fromArgs(argsx))
   println(param)
 }

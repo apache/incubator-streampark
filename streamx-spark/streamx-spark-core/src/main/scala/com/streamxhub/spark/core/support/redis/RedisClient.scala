@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.support.redis
 
 import com.streamxhub.common.util.Logger
@@ -33,8 +34,7 @@ object RedisClient extends Logger {
 
   @transient
   @getter
-  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] =
-    new ConcurrentHashMap[RedisEndpoint, JedisPool]()
+  private lazy val pools: ConcurrentHashMap[RedisEndpoint, JedisPool] = new ConcurrentHashMap[RedisEndpoint, JedisPool]()
 
   @transient
   @getter
@@ -53,8 +53,7 @@ object RedisClient extends Logger {
     * @return
     */
   def connect(params: Map[String, String]): Jedis = {
-    val hosts =
-      params.getOrElse("redis.hosts", "localhost").split(",").map(_.trim)
+    val hosts = params.getOrElse("redis.hosts", "localhost").split(",").map(_.trim)
     val port = params.getOrElse("redis.port", "6379").toInt
     val auth = Try(params("redis.auth")) getOrElse null
     val dbNum = params.getOrElse("redis.dbnum", "0").toInt
@@ -62,6 +61,7 @@ object RedisClient extends Logger {
     val endpoints = hosts.map(RedisEndpoint(_, port, auth, dbNum, timeout))
     connect(endpoints)
   }
+
 
   /**
     * 随机选择一个 RedisEndpoint 创建 或者获取一个Redis 连接池
@@ -75,8 +75,7 @@ object RedisClient extends Logger {
     try {
       connect(res(rnd))
     } catch {
-      case e: Exception =>
-        logger.error(e.getMessage)
+      case e: Exception => logger.error(e.getMessage)
         connect(res.drop(rnd))
     }
   }
@@ -95,10 +94,8 @@ object RedisClient extends Logger {
       try {
         conn = pool.getResource
       } catch {
-        case e: JedisConnectionException
-            if e.getCause.toString.contains(
-              "ERR max number of clients reached"
-            ) => {
+        case e: JedisConnectionException if e.getCause.toString.
+          contains("ERR max number of clients reached") => {
           if (sleepTime < 500) sleepTime *= 2
           Thread.sleep(sleepTime)
         }
@@ -155,21 +152,19 @@ object RedisClient extends Logger {
     cluster
   }
 
+
   def close[R](f: Jedis => R)(implicit redis: Jedis): R = {
     val result = f(redis)
     Try {
       redis.close()
     } match {
       case Success(_) => logger.debug("jedis.close successful.")
-      case Failure(e) =>
-        logger.error(s"jedis.close failed.error:${e.getLocalizedMessage}")
+      case Failure(e) => logger.error(s"jedis.close failed.error:${e.getLocalizedMessage}")
     }
     result
   }
 
-  def closeCluster[R](
-      f: JedisCluster => R
-  )(implicit cluster: JedisCluster): R = {
+  def closeCluster[R](f: JedisCluster => R)(implicit cluster: JedisCluster): R = {
     val result = f(cluster)
     Try {
       cluster.close()
@@ -195,5 +190,6 @@ object RedisClient extends Logger {
   }
 
   def close(): Unit = pools.foreach { case (_, v) => v.close() }
+
 
 }

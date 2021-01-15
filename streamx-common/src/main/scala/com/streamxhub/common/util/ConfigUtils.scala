@@ -29,58 +29,34 @@ import scala.util.Try
 
 object ConfigUtils {
 
-  def getConf(
-      parameter: JavaMap[String, String],
-      prefix: String = "",
-      addfix: String = ""
-  )(implicit alias: String = ""): Properties = {
+  def getConf(parameter: JavaMap[String, String], prefix: String = "", addfix: String = "")(implicit alias: String = ""): Properties = {
     val map = filterParam(parameter, prefix + alias)
     val prop = new Properties()
     map.filter(_._2.nonEmpty).foreach { case (k, v) => prop.put(addfix + k, v) }
     prop
   }
 
-  def getHBaseConfig(parameter: JavaMap[String, String])(
-      implicit alias: String = ""
-  ): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
+  def getHBaseConfig(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, HBASE_PREFIX, HBASE_PREFIX)
 
-  def getInfluxConfig(parameter: JavaMap[String, String])(
-      implicit alias: String = ""
-  ): Properties = getConf(parameter, INFLUX_PREFIX)
+  def getInfluxConfig(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getConf(parameter, INFLUX_PREFIX)
 
-  def getKafkaSinkConf(
-      parameter: JavaMap[String, String],
-      topic: String = "",
-      alias: String = ""
-  ): Properties = {
+  def getKafkaSinkConf(parameter: JavaMap[String, String], topic: String = "", alias: String = ""): Properties = {
     val prefix = KAFKA_SINK_PREFIX + alias
-    val param: ScalaMap[String, String] = filterParam(
-      parameter,
-      if (prefix.endsWith(".")) prefix else s"${prefix}."
-    )
-    if (param.isEmpty)
-      throw new IllegalArgumentException(s"${topic} init error...")
-    else {
+    val param: ScalaMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
+    if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
       val _topic = topic match {
         case SIGN_EMPTY =>
           val top = kafkaProperty.getOrElse(KEY_KAFKA_TOPIC, null)
           if (top == null || top.split(",|\\s+").length > 1) {
-            throw new IllegalArgumentException(
-              s"Can't find a unique topic!!!,you must be input a topic"
-            )
+            throw new IllegalArgumentException(s"Can't find a unique topic!!!,you must be input a topic")
           } else top
         case t => t
       }
-      val hasTopic = !kafkaProperty.toMap.exists(
-        x =>
-          x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic)
-      )
+      val hasTopic = !kafkaProperty.toMap.exists(x => x._1 == KEY_KAFKA_TOPIC && x._2.split(",|\\s+").toSet.contains(_topic))
       if (hasTopic) {
-        throw new IllegalArgumentException(
-          s"Can't find a topic of:${_topic}!!!"
-        )
+        throw new IllegalArgumentException(s"Can't find a topic of:${_topic}!!!")
       } else {
         kafkaProperty.put(KEY_KAFKA_TOPIC, _topic)
         kafkaProperty
@@ -88,30 +64,21 @@ object ConfigUtils {
     }
   }
 
-  def getMySQLConf(parameter: JavaMap[String, String])(
-      implicit alias: String = ""
-  ): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
+  def getMySQLConf(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
 
   /**
-    *
-    * @param parameter
-    * @param dialect
-    * @param alias
-    * @return
-    */
-  def getJdbcConf(
-      parameter: JavaMap[String, String],
-      dialect: String,
-      alias: String
-  ): Properties = {
-    val prefix =
-      if (dialect.endsWith(".")) dialect.toLowerCase()
-      else s"${dialect.toLowerCase()}."
+   *
+   * @param parameter
+   * @param dialect
+   * @param alias
+   * @return
+   */
+  def getJdbcConf(parameter: JavaMap[String, String], dialect: String, alias: String): Properties = {
+    val prefix = if (dialect.endsWith(".")) dialect.toLowerCase() else s"${dialect.toLowerCase()}."
     val fix = alias match {
       case "" | null => prefix
       case other =>
-        val aliasList =
-          parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
+        val aliasList = parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
         require(aliasList.contains(other))
         s"$prefix$alias".replaceFirst("\\.+$|$", ".")
     }
@@ -121,15 +88,8 @@ object ConfigUtils {
     val password = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
-      case (x, y, _, _) if x == null || y == null =>
-        throw new IllegalArgumentException(
-          s"Jdbc instance:$prefix error,[driver|url] must be not null"
-        )
-      case (_, _, x, y)
-          if (x != null && y == null) || (x == null && y != null) =>
-        throw new IllegalArgumentException(
-          "Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null "
-        )
+      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must be not null")
+      case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }
     val param: ScalaMap[String, String] = filterParam(parameter, fix)
@@ -141,14 +101,12 @@ object ConfigUtils {
     properties
   }
 
-  private[this] def filterParam(
-      parameter: JavaMap[String, String],
-      fix: String
-  ): ScalaMap[String, String] = {
-    parameter.toMap
+  private[this] def filterParam(parameter: JavaMap[String, String], fix: String): ScalaMap[String, String] = {
+    parameter
+      .toMap
       .filter(x => x._1.startsWith(fix) && Try(x._2 != null).getOrElse(false))
-      .flatMap(
-        x => Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2)
+      .flatMap(x =>
+        Some(x._1.substring(fix.length).replaceFirst("^\\.", "") -> x._2)
       )
   }
 

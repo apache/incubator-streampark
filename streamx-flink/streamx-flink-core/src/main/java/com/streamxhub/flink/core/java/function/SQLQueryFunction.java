@@ -20,16 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
+
 import java.io.Serializable;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface SQLQueryFunction<T> extends Serializable {
-  /**
-   * 获取要查询的SQL
-   *
-   * @return
-   * @throws Exception
-   */
-  String query(T last) throws Exception;
+    /**
+     * 获取要查询的SQL
+     *
+     * @return
+     * @throws Exception
+     */
+    String query(T last) throws Exception;
+
 }

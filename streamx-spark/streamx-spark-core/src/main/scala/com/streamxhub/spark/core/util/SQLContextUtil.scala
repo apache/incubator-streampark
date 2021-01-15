@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.util
 
 import org.apache.spark.SparkContext
@@ -34,11 +35,7 @@ object SQLContextUtil {
 
   def getSqlContext(@transient sparkContext: SparkContext): SQLContext = {
     if (instance == null) {
-      instance = SparkSession
-        .builder()
-        .config(sparkContext.getConf)
-        .getOrCreate()
-        .sqlContext
+      instance = SparkSession.builder().config(sparkContext.getConf).getOrCreate().sqlContext
     }
     instance
   }
@@ -51,12 +48,7 @@ object SQLContextUtil {
     */
   def getHiveContext(@transient sparkContext: SparkContext): SQLContext = {
     if (hiveContext == null) {
-      hiveContext = SparkSession
-        .builder()
-        .config(sparkContext.getConf)
-        .enableHiveSupport()
-        .getOrCreate()
-        .sqlContext
+      hiveContext = SparkSession.builder().config(sparkContext.getConf).enableHiveSupport().getOrCreate().sqlContext
     }
     hiveContext
   }

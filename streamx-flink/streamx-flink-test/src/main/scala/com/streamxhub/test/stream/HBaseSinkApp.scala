@@ -17,35 +17,12 @@ object HBaseSinkApp extends FlinkStreaming {
 
     //定义转换规则...
     implicit def entry2Put(entity: TestEntity): java.lang.Iterable[Mutation] = {
-      val put = new Put(
-        Bytes.toBytes(System.nanoTime() + random.nextInt(1000000)),
-        entity.timestamp
-      )
-      put.addColumn(
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("cid"),
-        Bytes.toBytes(entity.cityId)
-      )
-      put.addColumn(
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("oid"),
-        Bytes.toBytes(entity.orderId)
-      )
-      put.addColumn(
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("os"),
-        Bytes.toBytes(entity.orderStatus)
-      )
-      put.addColumn(
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("oq"),
-        Bytes.toBytes(entity.quantity)
-      )
-      put.addColumn(
-        Bytes.toBytes("cf"),
-        Bytes.toBytes("sid"),
-        Bytes.toBytes(entity.siteId)
-      )
+      val put = new Put(Bytes.toBytes(System.nanoTime() + random.nextInt(1000000)), entity.timestamp)
+      put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("cid"), Bytes.toBytes(entity.cityId))
+      put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("oid"), Bytes.toBytes(entity.orderId))
+      put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("os"), Bytes.toBytes(entity.orderStatus))
+      put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("oq"), Bytes.toBytes(entity.quantity))
+      put.addColumn(Bytes.toBytes("cf"), Bytes.toBytes("sid"), Bytes.toBytes(entity.siteId))
       Collections.singleton(put)
     }
     //source ===> trans ===> sink
@@ -57,9 +34,8 @@ object HBaseSinkApp extends FlinkStreaming {
     //1.指定HBase 配置文件
     implicit val prop = ConfigUtils.getHBaseConfig(context.parameter.toMap)
     //2.插入...
-    source.writeUsingOutputFormat(
-      new HBaseOutputFormat[TestEntity]("order", entry2Put)
-    )
+    source.writeUsingOutputFormat(new HBaseOutputFormat[TestEntity]("order", entry2Put))
+
 
   }
 

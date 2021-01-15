@@ -33,12 +33,11 @@ import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 /**
-  *
-  */
-class RichHBSink(
-    @transient override val sc: SparkContext,
-    val initParams: Map[String, String] = Map.empty[String, String]
-) extends Sink[Mutation] {
+ *
+ */
+class RichHBSink(@transient override val sc: SparkContext,
+                 val initParams: Map[String, String] = Map.empty[String, String]) extends Sink[Mutation] {
+
 
   override val prefix: String = "spark.sink.hbase."
 
@@ -46,28 +45,24 @@ class RichHBSink(
 
   private val tableName = prop.getProperty("hbase.table")
 
-  private val commitBatch =
-    prop.getOrElse(ConfigConst.KEY_HBASE_COMMIT_BATCH, "1000").toInt
+  private val commitBatch = prop.getOrElse(ConfigConst.KEY_HBASE_COMMIT_BATCH, "1000").toInt
 
   private def getConnect: Connection = HBaseClient(prop).connection
 
   private def getMutator: BufferedMutator = {
     val connection = getConnect
-    val bufferedMutatorParams = new BufferedMutatorParams(
-      TableName.valueOf(tableName)
-    )
+    val bufferedMutatorParams = new BufferedMutatorParams(TableName.valueOf(tableName))
     connection.getBufferedMutator(bufferedMutatorParams)
   }
 
-  private def getTable: Table =
-    getConnect.getTable(TableName.valueOf(tableName))
+  private def getTable: Table = getConnect.getTable(TableName.valueOf(tableName))
 
   /**
-    * 输出
-    *
-    * @param rdd  spark.RDD
-    * @param time spark.streaming.Time
-    */
+   * 输出
+   *
+   * @param rdd  spark.RDD
+   * @param time spark.streaming.Time
+   */
   override def sink(rdd: RDD[Mutation], time: Time): Unit = {
     rdd.foreachPartition { iter =>
       val mutator = getMutator
@@ -75,7 +70,7 @@ class RichHBSink(
       val list = new mutable.ArrayBuffer[Mutation]()
       iter.foreach {
         case put: Put => mutator.mutate(put)
-        case other    => list += other
+        case other => list += other
       }
       batch(table, list: _*)
       mutator.flush()
@@ -85,18 +80,16 @@ class RichHBSink(
   }
 
   /**
-    * 批量插入
-    *
-    * @param actions
-    */
+   * 批量插入
+   *
+   * @param actions
+   */
   def batch(table: Table, actions: Mutation*): Unit = {
     if (actions.nonEmpty) {
       val start = System.currentTimeMillis()
       val (head, tail) = actions.splitAt(commitBatch)
       table.batch(head, new Array[AnyRef](head.length))
-      println(
-        s"batch ${head.size} use ${System.currentTimeMillis() - start} MS"
-      )
+      println(s"batch ${head.size} use ${System.currentTimeMillis() - start} MS")
       batch(table, tail.toList: _*)
     }
   }
