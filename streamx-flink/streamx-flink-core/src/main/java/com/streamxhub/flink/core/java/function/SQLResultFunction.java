@@ -20,17 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
+
 import java.io.Serializable;
 import java.util.Map;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface SQLResultFunction<T> extends Serializable {
-  /**
-   * 将查下结果以Map的方式返回,用户去实现转成对象.
-   *
-   * @param map
-   * @return
-   */
-  Iterable<T> result(Iterable<Map<String, ?>> map);
+    /**
+     * 将查下结果以Map的方式返回,用户去实现转成对象.
+     *
+     * @param map
+     * @return
+     */
+    Iterable<T> result(Iterable<Map<String, ?>> map);
 }

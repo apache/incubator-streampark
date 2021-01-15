@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.support.kafka.writer
 
 import com.streamxhub.spark.core.support.kafka.ProducerCache
@@ -28,8 +29,7 @@ import java.util.Properties
 import scala.annotation.meta.param
 import scala.reflect.ClassTag
 
-class RDDKafkaWriter[T: ClassTag](@(transient @param) rdd: RDD[T])
-    extends KafkaWriter[T] {
+class RDDKafkaWriter[T: ClassTag](@(transient@param) rdd: RDD[T]) extends KafkaWriter[T] {
 
   /**
     *
@@ -40,13 +40,9 @@ class RDDKafkaWriter[T: ClassTag](@(transient @param) rdd: RDD[T])
     * @tparam V The type of the value
     *
     */
-  override def writeToKafka[K, V](
-      producerConfig: Properties,
-      serializerFunc: (T) => ProducerRecord[K, V]
-  ): Unit = {
+  override def writeToKafka[K, V](producerConfig: Properties, serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
     rdd.foreachPartition(events => {
-      val producer: KafkaProducer[K, V] =
-        ProducerCache.getProducer(producerConfig)
+      val producer: KafkaProducer[K, V] = ProducerCache.getProducer(producerConfig)
       events.map(serializerFunc).foreach(producer.send)
     })
   }

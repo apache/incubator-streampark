@@ -20,18 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import java.io.Serializable;
-
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery;
 
-/** @author benjobs */
+import java.io.Serializable;
+
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface HBaseQueryFunction<T> extends Serializable {
-  /**
-   * 获取一个查询对象.
-   *
-   * @param last
-   * @return
-   */
-  HBaseQuery query(T last);
+    /**
+     * 获取一个查询对象.
+     *
+     * @param last
+     * @return
+     */
+    HBaseQuery query(T last);
 }

@@ -100,3 +100,4 @@ private object Logger {
   @volatile private var initialized = false
   val initLock = new Object()
 }
+

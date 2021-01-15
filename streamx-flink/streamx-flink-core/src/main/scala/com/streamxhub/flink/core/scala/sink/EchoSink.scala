@@ -27,10 +27,7 @@ import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.functions.sink.{
-  SinkFunction,
-  TwoPhaseCommitSinkFunction
-}
+import org.apache.flink.streaming.api.functions.sink.{SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.operators.StreamingRuntimeContext
 import org.apache.flink.streaming.api.scala.DataStream
 
@@ -39,37 +36,26 @@ import scala.annotation.meta.param
 import scala.collection.mutable.ListBuffer
 
 /**
-  * println()升级版.精准一次的打印
-  */
+ * println()升级版.精准一次的打印
+ */
 object EchoSink {
 
-  def apply[T](
-      @(transient @param) stream: DataStream[T],
-      sinkIdentifier: String
-  ): DataStreamSink[T] = {
-    stream
-      .addSink(new EchoSinkFunction[T](sinkIdentifier))
-      .name("Echo to Std. Out")
+  def apply[T](@(transient@param) stream: DataStream[T], sinkIdentifier: String): DataStreamSink[T] = {
+    stream.addSink(new EchoSinkFunction[T](sinkIdentifier)).name("Echo to Std. Out")
   }
 
 }
 
 /**
-  * @param sinkIdentifier
-  * @tparam T
-  */
-class EchoSinkFunction[T](sinkIdentifier: String)
-    extends TwoPhaseCommitSinkFunction[T, Echo[T], Void](
-      new KryoSerializer[Echo[T]](classOf[Echo[T]], new ExecutionConfig),
-      VoidSerializer.INSTANCE
-    )
-    with Logger {
+ * @param sinkIdentifier
+ * @tparam T
+ */
+class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunction[T, Echo[T], Void](new KryoSerializer[Echo[T]](classOf[Echo[T]], new ExecutionConfig), VoidSerializer.INSTANCE)
+  with Logger {
 
-  private[this] val buffer: collection.mutable.Map[String, Echo[T]] =
-    collection.mutable.Map.empty
+  private[this] val buffer: collection.mutable.Map[String, Echo[T]] = collection.mutable.Map.empty
 
-  private[this] val writer: PrintSinkOutputWriter[T] =
-    new PrintSinkOutputWriter[T](sinkIdentifier, false)
+  private[this] val writer: PrintSinkOutputWriter[T] = new PrintSinkOutputWriter[T](sinkIdentifier, false)
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
@@ -79,11 +65,7 @@ class EchoSinkFunction[T](sinkIdentifier: String)
 
   override def beginTransaction(): Echo[T] = new Echo[T]()
 
-  override def invoke(
-      transaction: Echo[T],
-      value: T,
-      context: SinkFunction.Context
-  ): Unit = {
+  override def invoke(transaction: Echo[T], value: T, context: SinkFunction.Context): Unit = {
     transaction.invoked = true
     transaction.add(value)
   }
@@ -96,10 +78,9 @@ class EchoSinkFunction[T](sinkIdentifier: String)
 
   override def commit(transaction: Echo[T]): Unit = {
     if (transaction.invoked) {
-
       /**
-        * 此步骤理论上讲有发生异常的可能,如这里循环到一半程序挂了.会导致已经输出的打印无法被撤回,下面的清理也无法完成,出现重复打印的情况....
-        */
+       * 此步骤理论上讲有发生异常的可能,如这里循环到一半程序挂了.会导致已经输出的打印无法被撤回,下面的清理也无法完成,出现重复打印的情况....
+       */
       transaction.buffer.foreach(writer.write)
       //提交完成清空...
       abort(transaction)
@@ -111,13 +92,8 @@ class EchoSinkFunction[T](sinkIdentifier: String)
   }
 }
 
-case class Echo[T](
-    transactionId: String = Utils.uuid(),
-    buffer: ListBuffer[T] = ListBuffer.empty[T],
-    var invoked: Boolean = false
-) extends Serializable {
+case class Echo[T](transactionId: String = Utils.uuid(), buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
   def add(value: T): Unit = buffer += value
 
-  override def toString: String =
-    s"(transactionId:$transactionId,size:${buffer.size},invoked:$invoked)"
+  override def toString: String = s"(transactionId:$transactionId,size:${buffer.size},invoked:$invoked)"
 }
