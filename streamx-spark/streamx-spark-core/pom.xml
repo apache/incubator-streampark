@@ -161,8 +161,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.8.1</version>
                 <configuration>
-                    <source>${java.version}</source>
-                    <target>${java.version}</target>
+                    <source>${project.build.jdk}</source>
+                    <target>${project.build.jdk}</target>
                 </configuration>
             </plugin>
 
