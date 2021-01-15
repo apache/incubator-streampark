@@ -260,7 +260,7 @@ class RestClientFactoryImpl(val config: Map[String, String])
 
       val headers = new BasicHeader("Content-Type", contentType)
       restClientBuilder.setDefaultHeaders(Array(headers))
-      //restClientBuilder.setMaxRetryTimeoutMillis(maxRetry)
+      restClientBuilder.setMaxRetryTimeoutMillis(maxRetry)
     }
 
     configCallback()
