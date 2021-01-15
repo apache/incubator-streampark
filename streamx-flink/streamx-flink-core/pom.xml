@@ -8,11 +8,8 @@
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-flink-core</artifactId>
     <name>StreamX : Flink Core</name>
-    <description>streamx-flink-core</description>
-    <version>1.0.0</version>
 
     <dependencies>
 

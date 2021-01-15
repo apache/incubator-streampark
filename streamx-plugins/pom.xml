@@ -8,11 +8,8 @@
         <artifactId>streamx</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-plugins</artifactId>
     <name>StreamX : Plugin Parent</name>
-    <description>streamx-plugins</description>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>

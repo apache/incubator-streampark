@@ -6,11 +6,8 @@
         <artifactId>streamx</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>jvm-profiler</artifactId>
     <name>StreamX : Plugin JVM Profiler</name>
-    <description>JVM Profiler</description>
-    <version>1.0.0</version>
 
     <licenses>
         <license>

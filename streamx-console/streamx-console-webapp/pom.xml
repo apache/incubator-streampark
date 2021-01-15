@@ -4,16 +4,13 @@
   <groupId>com.streamxhub</groupId>
   <artifactId>streamx-console-webapp</artifactId>
   <version>1.0.0</version>
-
   <name>StreamX : Console Webapp</name>
-  <description>streamx-console-webapp</description>
 
   <build>
     <plugins>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>exec-maven-plugin</artifactId>
-        <version>1.6.0</version>
         <executions>
           <execution>
             <id>exec-npm-install</id>
