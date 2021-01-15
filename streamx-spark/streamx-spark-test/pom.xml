@@ -5,27 +5,13 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-spark</artifactId>
         <version>1.0.0</version>
     </parent>
 
     <artifactId>streamx-spark-test</artifactId>
     <name>StreamX : Spark Test</name>
-    <description>streamx-spark-test</description>
     <version>1.0.0</version>
-
-    <!-- 定义统一版本号-->
-    <properties>
-        <scala.version>2.11.8</scala.version>
-        <streamx.spark.version>1.0.0</streamx.spark.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.build.jdk>1.8</project.build.jdk>
-        <PermGen>64m</PermGen>
-        <MaxPermGen>512m</MaxPermGen>
-        <CodeCacheSize>512m</CodeCacheSize>
-    </properties>
-
 
     <dependencies>
         <dependency>
@@ -34,7 +20,6 @@
             <version>1.0.0</version>
         </dependency>
     </dependencies>
-
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>

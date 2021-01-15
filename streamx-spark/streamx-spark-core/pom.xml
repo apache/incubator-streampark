@@ -5,14 +5,11 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-spark</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-spark-core</artifactId>
     <name>StreamX : Spark Core</name>
-    <description>streamx-spark-core</description>
-    <version>1.0.0</version>
 
     <!--项目基本依赖-->
     <dependencies>
