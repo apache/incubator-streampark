@@ -399,6 +399,7 @@
                 <directory>src/main/resources</directory>
             </resource>
         </resources>
+
         <!--各层强制依赖-->
         <plugins>
             <plugin>
@@ -420,62 +421,6 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>com.diffplug.spotless</groupId>
-                <artifactId>spotless-maven-plugin</artifactId>
-                <version>${spotless.version}</version>
-                <configuration>
-                    <formats>
-                        <!-- you can define as many formats as you want, each is independent -->
-                        <format>
-                            <!-- define the files to apply to -->
-                            <includes>
-                                <include>*.md</include>
-                                <include>.gitignore</include>
-                            </includes>
-                            <!-- define the steps to apply to those files -->
-                            <trimTrailingWhitespace/>
-                            <endWithNewline/>
-                            <indent>
-                                <tabs>true</tabs>
-                                <spacesPerTab>4</spacesPerTab>
-                            </indent>
-                        </format>
-                    </formats>
-                    <java>
-                        <includes>
-                            <include>src/main/java/**/*.java</include>
-                            <include>src/test/java/**/*.java</include>
-                        </includes>
-                        <googleJavaFormat>
-                            <version>1.7</version>
-                            <style>GOOGLE</style>
-                        </googleJavaFormat>
-                        <importOrder>
-                            <!-- \# refers to the static imports -->
-                            <order>javax,java,scala,org,com,\#</order>
-                        </importOrder>
-                        <removeUnusedImports/>
-                    </java>
-                    <scala>
-                        <includes>
-                            <include>src/main/scala/**/*.scala</include>
-                            <include>src/test/scala/**/*.scala</include>
-                        </includes>
-                        <scalafmt />
-                    </scala>
-                </configuration>
-                 <executions>
-                     <execution>
-                         <id>spotless-check</id>
-                         <phase>validate</phase>
-                         <goals>
-                             <goal>check</goal>
-                         </goals>
-                     </execution>
-                 </executions>
             </plugin>
 
             <!--maven-->
@@ -523,6 +468,62 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.7.0</version>
+                    <configuration>
+                        <formats>
+                            <!-- you can define as many formats as you want, each is independent -->
+                            <format>
+                                <!-- define the files to apply to -->
+                                <includes>
+                                    <include>*.md</include>
+                                    <include>.gitignore</include>
+                                </includes>
+                                <!-- define the steps to apply to those files -->
+                                <trimTrailingWhitespace/>
+                                <endWithNewline/>
+                                <indent>
+                                    <tabs>true</tabs>
+                                    <spacesPerTab>4</spacesPerTab>
+                                </indent>
+                            </format>
+                        </formats>
+                        <java>
+                            <includes>
+                                <include>src/main/java/**/*.java</include>
+                                <include>src/test/java/**/*.java</include>
+                            </includes>
+                            <googleJavaFormat>
+                                <version>1.7</version>
+                                <style>GOOGLE</style>
+                            </googleJavaFormat>
+                            <importOrder>
+                                <!-- \# refers to the static imports -->
+                                <order>javax,java,scala,org,com,\#</order>
+                            </importOrder>
+                            <removeUnusedImports/>
+                        </java>
+                        <scala>
+                            <includes>
+                                <include>src/main/scala/**/*.scala</include>
+                                <include>src/test/scala/**/*.scala</include>
+                            </includes>
+                            <scalafmt />
+                        </scala>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotless-check</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
                 <!--(start) shade-->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
