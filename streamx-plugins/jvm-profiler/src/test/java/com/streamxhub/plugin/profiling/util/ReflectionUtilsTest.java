@@ -21,27 +21,31 @@
 
 package com.streamxhub.plugin.profiling.util;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.lang.reflect.InvocationTargetException;
-
 public class ReflectionUtilsTest {
-    static class ClassA {
-        public String method1() {
-            return "hello";
-        }
+  static class ClassA {
+    public String method1() {
+      return "hello";
     }
+  }
 
-    static class ClassB {
-        public static ClassA getClassA() {
-            return new ClassA();
-        }
+  static class ClassB {
+    public static ClassA getClassA() {
+      return new ClassA();
     }
+  }
 
-    @Test
-    public void executeStaticMethods() throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException {
-        Object result = ReflectionUtils.executeStaticMethods("com.streamxhub.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
-        Assert.assertEquals("hello", result);
-    }
+  @Test
+  public void executeStaticMethods()
+      throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
+          InvocationTargetException {
+    Object result =
+        ReflectionUtils.executeStaticMethods(
+            "com.streamxhub.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
+    Assert.assertEquals("hello", result);
+  }
 }

@@ -36,5 +36,4 @@ public class StreamXConsole {
     public static void main(String[] args) {
         SpringApplication.run(StreamXConsole.class, args);
     }
-
 }

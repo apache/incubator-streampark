@@ -1,5 +1,18 @@
 package com.streamxhub.console.system.service.impl;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -17,17 +30,6 @@ import com.streamxhub.console.system.entity.UserRole;
 import com.streamxhub.console.system.service.MenuService;
 import com.streamxhub.console.system.service.UserRoleService;
 import com.streamxhub.console.system.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -95,7 +97,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setModifyTime(new Date());
         updateById(user);
 
-        userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
+        userRoleMapper.delete(
+                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
 
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
@@ -153,9 +156,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         UserRole ur = new UserRole();
         ur.setUserId(user.getUserId());
-        /**
-         * 注册用户角色 ID
-         */
+        /** 注册用户角色 ID */
         ur.setRoleId(2L);
         this.userRoleMapper.insert(ur);
     }
@@ -171,7 +172,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setPassword(password);
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
         }
-
     }
 
     /**
@@ -187,11 +187,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     private void setUserRoles(User user, String[] roles) {
-        Arrays.stream(roles).forEach(roleId -> {
-            UserRole ur = new UserRole();
-            ur.setUserId(user.getUserId());
-            ur.setRoleId(Long.valueOf(roleId));
-            this.userRoleMapper.insert(ur);
-        });
+        Arrays.stream(roles)
+                .forEach(
+                        roleId -> {
+                            UserRole ur = new UserRole();
+                            ur.setUserId(user.getUserId());
+                            ur.setRoleId(Long.valueOf(roleId));
+                            this.userRoleMapper.insert(ur);
+                        });
     }
 }

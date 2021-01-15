@@ -17,36 +17,36 @@ object TransformationsApp extends FlinkDataSet {
 
   override def handle(context: DataSetContext): Unit = {
 
-    *
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html
+ *
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html
     val stream = context.readTextFile("data/in/num.txt")
 
-    *
-     *
-     * map FlatMap
-     *
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html
+ *
+ *
+ * map FlatMap
+ *
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html
     println(" map & flatMap)--------------------------------------")
     val dataSet = stream.flatMap(_.split("\\s+")).map(_.toInt).map(x => 1 -> x)
     dataSet.max(1).print()
 
 
-    *
-     * MapPartition
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#mappartition
+ *
+ * MapPartition
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#mappartition
     println(" MapPartition)--------------------------------------")
     dataSet.mapPartition { in => Some(in.size) }.print()
 
-    *
-     * Filter
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#filter
+ *
+ * Filter
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#filter
     println(" Filter)--------------------------------------")
     dataSet.filter(_._2 > 10).print()
 
 
-    *
-     * transformations-on-grouped-datase
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#transformations-on-grouped-dataset
+ *
+ * transformations-on-grouped-datase
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#transformations-on-grouped-dataset
     println(" Reduce on DataSet Grouped by Key Expression --------------------------------------")
     case class WC(word: String, count: Int) {
       override def toString: String = s"word:${word},count:${count}"
@@ -56,27 +56,27 @@ object TransformationsApp extends FlinkDataSet {
       .flatMap(_.split("\\s+"))
       .map(x => WC(x, 1))
 
-    *
-     * 直接写对应bean中的字段名
+ *
+ * 直接写对应bean中的字段名
     val wc1 = words.groupBy("word").reduce {
       (w1, w2) => WC(w1.word, w1.count + w2.count)
     }
-    *
-     * KeySelector Function
+ *
+ * KeySelector Function
     val wc2 = words.groupBy(_.word).reduce {
       (w1, w2) => WC(w1.word, w1.count + w2.count)
     }
-    *
-     * 下标模式
+ *
+ * 下标模式
     val wc3 = words.groupBy(0).reduce {
       (w1, w2) => WC(w1.word, w1.count + w2.count)
     }
     println(wc3)
 
-    *
-     * Reduce on DataSet Grouped by Field Position Keys (Tuple DataSets only)
-     * 元祖类型的数据,根据数据的字段位置进行分组(必须是元祖类型的数据)
-     * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#reduce-on-dataset-grouped-by-field-position-keys-tuple-datasets-only
+ *
+ * Reduce on DataSet Grouped by Field Position Keys (Tuple DataSets only)
+ * 元祖类型的数据,根据数据的字段位置进行分组(必须是元祖类型的数据)
+ * https://ci.apache.org/projects/flink/flink-docs-release-1.9/dev/batch/dataset_transformations.html#reduce-on-dataset-grouped-by-field-position-keys-tuple-datasets-only
     val tuples: DataSet[(String, Int, Double)] = context.fromCollection(
       List(
         ("a", 1, 1.001),
@@ -90,9 +90,9 @@ object TransformationsApp extends FlinkDataSet {
     //根据元祖的第一和第二个字段分组
     tuples.groupBy(0, 1).reduce((a, b) => (a._1, a._2, a._3 + b._3)).print()
 
-    *
-     * Reduce on DataSet grouped by Case Class Fields
-     * 根据case class的字段进行分组,reduce
+ *
+ * Reduce on DataSet grouped by Case Class Fields
+ * 根据case class的字段进行分组,reduce
     case class MyClass(val a: String, b: Int, c: Double)
     val tuples2: DataSet[MyClass] = context.fromCollection(List(
       MyClass("a", 1, 1.001),
@@ -105,9 +105,9 @@ object TransformationsApp extends FlinkDataSet {
     tuples2.groupBy("a", "b").reduce((a, b) => MyClass(a.a, a.b, a.c + b.c)).print()
 
 
-    *
-     *
-     *
+ *
+ *
+ *
     println(" GroupReduce on Grouped DataSet)--------------------------------------")
 
     val input: DataSet[(Int, String)] = context.fromCollection(List(
@@ -129,14 +129,14 @@ object TransformationsApp extends FlinkDataSet {
         in.foreach(out.collect)
     }.print()
 
-    *
-     * 将同一个组的元素重新组成一个List返回...
+ *
+ * 将同一个组的元素重新组成一个List返回...
     input.groupBy(0).reduceGroup(a => {
       a.map(_._2).toList
     }).print()
 
-    *
-     * 将同一个组的元素,重新组成一个有序的List返回,desc...
+ *
+ * 将同一个组的元素,重新组成一个有序的List返回,desc...
     input.groupBy(0).sortGroup(1, Order.ASCENDING).reduceGroup {
       (in, out: Collector[(Int, String)]) =>
         var prev: (Int, String) = null
@@ -157,8 +157,8 @@ object TransformationsApp extends FlinkDataSet {
     }).printOnTaskManager("reduceGroup")
 
 
-    *
-     * Combinable GroupReduceFunctions
+ *
+ * Combinable GroupReduceFunctions
     println(" Combinable GroupReduceFunctions)--------------------------------------")
     class MyCombinableGroupReducer extends GroupReduceFunction[(String, Int), String] with GroupCombineFunction[(String, Int), (String, Int)] {
       override def reduce(in: java.lang.Iterable[(String, Int)], out: Collector[String]): Unit = {
@@ -211,10 +211,10 @@ object TransformationsApp extends FlinkDataSet {
     groupData.groupBy(0).sortGroup(1, Order.ASCENDING).first(2).print()
 
 
-    *
-     *
-     * counter...
-     *
+ *
+ *
+ * counter...
+ *
 
     stream.map(new RichMapFunction[String, String] {
       //1)定义计数器
@@ -232,8 +232,8 @@ object TransformationsApp extends FlinkDataSet {
       }
     }).print()
 
-    *
-     * GroupCombine on a Grouped DataSet
+ *
+ * GroupCombine on a Grouped DataSet
     println(" GroupCombine on a Grouped DataSet --------------------------------------")
     val input4 = context.readTextFile("data/in/wordcount.txt").flatMap(_.split("\\s+")).map(Tuple1(_))
     val combinedWords: DataSet[(String, Int)] = input4
@@ -265,5 +265,5 @@ object TransformationsApp extends FlinkDataSet {
   }
 
 }
-*/
-*/
+ */
+ */

@@ -26,13 +26,13 @@ import org.slf4j.LoggerFactory
 
 import java.util.Properties
 
-
 /**
- * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
- */
+  * Interpreter for flink scala. It delegates all the function to FlinkScalaInterpreter.
+  */
 class FlinkInterpreter(properties: Properties) extends Logger {
 
-  private lazy val LOGGER = LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
+  private lazy val LOGGER =
+    LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
   private var interpreter: FlinkScalaInterpreter = _
 
   private def checkScalaVersion(): Unit = {
@@ -40,15 +40,18 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     logInfo("Using Scala: " + scalaVersionString)
   }
 
-  @throws[Exception] def open(): Unit = {
+  @throws[Exception]
+  def open(): Unit = {
     checkScalaVersion()
     this.interpreter = new FlinkScalaInterpreter(properties)
     this.interpreter.open()
   }
 
-  @throws[Exception] def close(): Unit = if (this.interpreter != null) this.interpreter.close()
+  @throws[Exception]
+  def close(): Unit = if (this.interpreter != null) this.interpreter.close()
 
-  @throws[Exception] def interpret(code: String, out: InterpreterOutput): InterpreterResult = {
+  @throws[Exception]
+  def interpret(code: String, out: InterpreterOutput): InterpreterResult = {
     // set ClassLoader of current Thread to be the ClassLoader of Flink scala-shell,
     // otherwise codegen will fail to find classes defined in scala-shell
     ClassLoaderUtils.runAsClassLoader(getFlinkScalaShellLoader, () => {
@@ -56,19 +59,24 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     })
   }
 
-  @throws[Exception] def cancel(context: InterpreterContext): Unit = {
+  @throws[Exception]
+  def cancel(context: InterpreterContext): Unit = {
     this.interpreter.cancel(context)
   }
 
-  private[flink] def getExecutionEnvironment = this.interpreter.getExecutionEnvironment()
+  private[flink] def getExecutionEnvironment =
+    this.interpreter.getExecutionEnvironment()
 
-  private[flink] def getStreamExecutionEnvironment = this.interpreter.getStreamExecutionEnvironment()
+  private[flink] def getStreamExecutionEnvironment =
+    this.interpreter.getStreamExecutionEnvironment()
 
   private[flink] def getJobManager = this.interpreter.getJobManager
 
-  private[flink] def getDefaultParallelism: Int = this.interpreter.defaultParallelism
+  private[flink] def getDefaultParallelism: Int =
+    this.interpreter.defaultParallelism
 
-  def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
+  def getFlinkScalaShellLoader: ClassLoader =
+    interpreter.getFlinkScalaShellLoader
 
   private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
 

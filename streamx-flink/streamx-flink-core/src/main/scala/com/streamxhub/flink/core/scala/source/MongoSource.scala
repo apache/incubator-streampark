@@ -23,7 +23,10 @@ package com.streamxhub.flink.core.scala.source
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import com.streamxhub.common.util.{Logger, MongoConfig, Utils}
-import com.streamxhub.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
+import com.streamxhub.flink.core.java.function.{
+  MongoQueryFunction,
+  MongoResultFunction
+}
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
 import com.streamxhub.flink.core.scala.enums.ApiType.ApiType
@@ -31,7 +34,11 @@ import com.streamxhub.flink.core.scala.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
+import org.apache.flink.runtime.state.{
+  CheckpointListener,
+  FunctionInitializationContext,
+  FunctionSnapshotContext
+}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
@@ -43,41 +50,56 @@ import scala.annotation.meta.param
 import scala.collection.JavaConversions._
 import scala.util.{Success, Try}
 
-
 object MongoSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): MongoSource = new MongoSource(ctx, property)
+  def apply(
+      @(transient @param) ctx: StreamingContext,
+      property: Properties = new Properties()
+  ): MongoSource = new MongoSource(ctx, property)
 
 }
 
-class MongoSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
-
+class MongoSource(
+    @(transient @param) val ctx: StreamingContext,
+    property: Properties = new Properties()
+) {
 
   /**
-   *
-   * @param queryFun
-   * @param resultFun
-   * @param prop
-   * @tparam R
-   * @return
-   */
-
-  def getDataStream[R: TypeInformation](collection: String, queryFun: (R, MongoCollection[Document]) => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
+    *
+    * @param queryFun
+    * @param resultFun
+    * @param prop
+    * @tparam R
+    * @return
+    */
+  def getDataStream[R: TypeInformation](
+      collection: String,
+      queryFun: (R, MongoCollection[Document]) => FindIterable[Document],
+      resultFun: MongoCursor[Document] => List[R]
+  )(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](collection, prop, queryFun, resultFun)
+    val mongoFun =
+      new MongoSourceFunction[R](collection, prop, queryFun, resultFun)
     ctx.addSource(mongoFun)
   }
 
 }
 
-
-private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
+private[this] class MongoSourceFunction[R: TypeInformation](
+    apiType: ApiType,
+    prop: Properties = new Properties(),
+    collection: String
+) extends RichSourceFunction[R]
+    with CheckpointedFunction
+    with CheckpointListener
+    with Logger {
 
   private[this] var running = true
   var client: MongoClient = _
   var mongoCollection: MongoCollection[Document] = _
 
-  private[this] var scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document] = _
+  private[this] var scalaQueryFunc
+      : (R, MongoCollection[Document]) => FindIterable[Document] = _
   private[this] var scalaResultFunc: MongoCursor[Document] => List[R] = _
 
   private[this] var javaQueryFunc: MongoQueryFunction[R] = _
@@ -88,14 +110,24 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   private[this] var last: R = _
 
   //for Scala
-  def this(collectionName: String, prop: Properties, scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document], scalaResultFunc: MongoCursor[Document] => List[R]) = {
+  def this(
+      collectionName: String,
+      prop: Properties,
+      scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document],
+      scalaResultFunc: MongoCursor[Document] => List[R]
+  ) = {
     this(ApiType.scala, prop, collectionName)
     this.scalaQueryFunc = scalaQueryFunc
     this.scalaResultFunc = scalaResultFunc
   }
 
   //for JAVA
-  def this(collectionName: String, prop: Properties, queryFunc: MongoQueryFunction[R], resultFunc: MongoResultFunction[R]) {
+  def this(
+      collectionName: String,
+      prop: Properties,
+      queryFunc: MongoQueryFunction[R],
+      resultFunc: MongoResultFunction[R]
+  ) {
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
@@ -125,10 +157,12 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
         case ApiType.java =>
           val find = javaQueryFunc.query(last, mongoCollection)
           if (find != null) {
-            javaResultFunc.result(find.iterator).foreach(x => {
-              last = x
-              ctx.collectWithTimestamp(last, System.currentTimeMillis())
-            })
+            javaResultFunc
+              .result(find.iterator)
+              .foreach(x => {
+                last = x
+                ctx.collectWithTimestamp(last, System.currentTimeMillis())
+              })
           }
       }
     }
@@ -155,7 +189,7 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
-      case _ =>
+      case _          =>
     }
   }
 

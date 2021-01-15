@@ -20,18 +20,20 @@
  */
 package com.streamxhub.console.core.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.console.base.controller.BaseController;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.ApplicationConfig;
 import com.streamxhub.console.core.service.ApplicationConfigService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author benjobs
@@ -47,7 +49,7 @@ public class ConfigController extends BaseController {
 
     @PostMapping("get")
     public RestResponse get(Long id) {
-        ApplicationConfig config =  applicationConfigService.get(id);
+        ApplicationConfig config = applicationConfigService.get(id);
         return RestResponse.create().data(config);
     }
 
@@ -59,8 +61,7 @@ public class ConfigController extends BaseController {
 
     @PostMapping("delete")
     public RestResponse delete(Long id) {
-        Boolean deleted =  applicationConfigService.removeById(id);
+        Boolean deleted = applicationConfigService.removeById(id);
         return RestResponse.create().data(deleted);
     }
-
 }

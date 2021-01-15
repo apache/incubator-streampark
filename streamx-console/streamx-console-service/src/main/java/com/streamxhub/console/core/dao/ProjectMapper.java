@@ -20,12 +20,13 @@
  */
 package com.streamxhub.console.core.dao;
 
-import com.streamxhub.console.core.entity.Project;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Update;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Update;
+import com.streamxhub.console.core.entity.Project;
 
 /**
  * @author benjobs
@@ -42,5 +43,4 @@ public interface ProjectMapper extends BaseMapper<Project> {
 
     @Update("update t_flink_project set BUILDSTATE=0 where id=#{project.id}")
     void startBuild(@Param("project") Project project);
-
 }

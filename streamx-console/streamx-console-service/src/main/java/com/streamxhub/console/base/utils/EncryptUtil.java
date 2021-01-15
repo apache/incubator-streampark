@@ -20,17 +20,17 @@
  */
 package com.streamxhub.console.base.utils;
 
-
 import javax.crypto.Cipher;
+
 import java.security.Key;
 
 public class EncryptUtil {
 
-    //设置默认密匙
+    // 设置默认密匙
     private static String strDefaultKey = "defaultKey";
-    //加密
+    // 加密
     private Cipher encryptCipher = null;
-    //解密
+    // 解密
     private Cipher decryptCipher = null;
 
     private static String byteArr2HexStr(byte[] arrB) {
@@ -66,7 +66,7 @@ public class EncryptUtil {
     }
 
     EncryptUtil(String strKey) throws Exception {
-        //Security.addProvider(new com.sun.crypto.provider.SunJCE());
+        // Security.addProvider(new com.sun.crypto.provider.SunJCE());
         Key key = getKey(strKey.getBytes());
 
         encryptCipher = Cipher.getInstance("DES");

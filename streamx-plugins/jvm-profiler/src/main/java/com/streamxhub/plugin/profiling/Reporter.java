@@ -24,15 +24,12 @@ package com.streamxhub.plugin.profiling;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public interface Reporter {
 
-    default void doArguments(Map<String, List<String>> parsedArgs) {
-    }
+  default void doArguments(Map<String, List<String>> parsedArgs) {}
 
-    void report(String profilerName, Map<String, Object> metrics);
+  void report(String profilerName, Map<String, Object> metrics);
 
-    void close();
+  void close();
 }

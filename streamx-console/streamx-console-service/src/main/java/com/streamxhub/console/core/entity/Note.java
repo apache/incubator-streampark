@@ -20,13 +20,14 @@
  */
 package com.streamxhub.console.core.entity;
 
-import com.wuwenze.poi.annotation.Excel;
+import java.util.Properties;
+import java.util.Scanner;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Properties;
-import java.util.Scanner;
+import com.wuwenze.poi.annotation.Excel;
 
 /**
  * @author benjobs
@@ -63,13 +64,10 @@ public class Note {
         return this.content;
     }
 
-
     @Data
     @AllArgsConstructor
     public static class Content {
         private Properties properties;
         private String code;
     }
-
 }
-

@@ -40,8 +40,8 @@ my $with_pid = 0;
 my $with_tid = 0;
 
 GetOptions('pid' => \$with_pid,
-           'tid' => \$with_tid)
-or die <<USAGE_END;
+    'tid'        => \$with_tid)
+    or die <<USAGE_END;
 USAGE: $0 [options] infile > outfile\n
         --pid           # include PID
         --tid           # include TID
@@ -55,44 +55,48 @@ my $previous_function = "";
 my %stacks;
 
 sub add_current {
-  if(!($current eq "")) {
-    my $entry;
-    if ($with_tid) {
-      $current = "TID=$tid;$current";
+    if (!($current eq "")) {
+        my $entry;
+        if ($with_tid) {
+            $current = "TID=$tid;$current";
+        }
+        if ($with_pid) {
+            $current = "PID=$pid;$current";
+        }
+        $stacks{$current} += 1;
+        $current = "";
     }
-    if ($with_pid) {
-      $current = "PID=$pid;$current";
-    }
-    $stacks{$current} += 1;
-    $current = "";
-  }
 }
 
-while(<>) {
-  chomp;
-  if (m/^PID ([0-9]*)/) {
-    add_current();
-    $pid = $1;
-  }
-  elsif(m/^TID ([0-9]*)/) {
-    add_current();
-    $tid = $1;
-  } elsif(m/^#[0-9]* *0x[0-9a-f]* (.*)/) {
-    if ($current eq "") {
-      $current = $1;
-    } else {
-      $current = "$1;$current";
+while (<>) {
+    chomp;
+    if (m/^PID ([0-9]*)/) {
+        add_current();
+        $pid = $1;
     }
-  } elsif(m/^#[0-9]* *0x[0-9a-f]*/) {
-    if ($current eq "") {
-      $current = "[unknown]";
-    } else {
-      $current = "[unknown];$current";
+    elsif (m/^TID ([0-9]*)/) {
+        add_current();
+        $tid = $1;
     }
-  }
+    elsif (m/^#[0-9]* *0x[0-9a-f]* (.*)/) {
+        if ($current eq "") {
+            $current = $1;
+        }
+        else {
+            $current = "$1;$current";
+        }
+    }
+    elsif (m/^#[0-9]* *0x[0-9a-f]*/) {
+        if ($current eq "") {
+            $current = "[unknown]";
+        }
+        else {
+            $current = "[unknown];$current";
+        }
+    }
 }
 add_current();
 
-foreach my $k (sort { $a cmp $b } keys %stacks) {
-  print "$k $stacks{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %stacks) {
+    print "$k $stacks{$k}\n";
 }

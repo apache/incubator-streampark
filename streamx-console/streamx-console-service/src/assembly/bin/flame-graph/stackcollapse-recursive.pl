@@ -35,26 +35,26 @@
 
 my %stacks;
 
-while(<>) {
-  chomp;
-  my ($stack_, $value) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
-  if ($stack_) {
-    my @stack  = split(/;/, $stack_);
+while (<>) {
+    chomp;
+    my ($stack_, $value) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
+    if ($stack_) {
+        my @stack = split(/;/, $stack_);
 
-    my @result = ();
-    my $i;
-    my $last="";
-    for($i=0; $i!=@stack; ++$i) {
-      if(!($stack[$i] eq $last)) {
-        $result[@result] = $stack[$i];
-        $last = $stack[$i];
-      }
+        my @result = ();
+        my $i;
+        my $last = "";
+        for ($i = 0; $i != @stack; ++$i) {
+            if (!($stack[$i] eq $last)) {
+                $result[@result] = $stack[$i];
+                $last = $stack[$i];
+            }
+        }
+
+        $stacks{join(";", @result)} += $value;
     }
-
-    $stacks{join(";", @result)} += $value;
-  }
 }
 
-foreach my $k (sort { $a cmp $b } keys %stacks) {
-  print "$k $stacks{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %stacks) {
+    print "$k $stacks{$k}\n";
 }

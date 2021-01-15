@@ -1,25 +1,28 @@
 package com.streamxhub.console.system.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.system.authentication.ServerUtil;
-import com.streamxhub.console.system.entity.Menu;
-import com.streamxhub.console.system.service.MenuService;
-import com.streamxhub.console.base.domain.router.VueRouter;
-import com.wuwenze.poi.ExcelKit;
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.router.VueRouter;
+import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.system.authentication.ServerUtil;
+import com.streamxhub.console.system.entity.Menu;
+import com.streamxhub.console.system.service.MenuService;
+import com.wuwenze.poi.ExcelKit;
 
 /**
  * @author benjobs
@@ -63,7 +66,8 @@ public class MenuController extends BaseController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("menu:delete")
-    public void deleteMenus(@NotBlank(message = "{required}") String menuIds) throws ServiceException {
+    public void deleteMenus(@NotBlank(message = "{required}") String menuIds)
+            throws ServiceException {
         try {
             String[] ids = menuIds.split(StringPool.COMMA);
             this.menuService.deleteMeuns(ids);

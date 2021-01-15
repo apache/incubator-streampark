@@ -20,17 +20,17 @@
  */
 package com.streamxhub.console.core.entity;
 
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.common.util.DeflaterUtils;
 import com.wuwenze.poi.annotation.Excel;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
 
 /**
  * @author benjobs
@@ -62,7 +62,8 @@ public class FlameGraph {
     @JsonIgnore
     public Date getStart() {
         if (this.duration > QUERY_DURATION) {
-            throw new IllegalArgumentException("[StreamX] flameGraph query duration cannot be greater than 4 hours");
+            throw new IllegalArgumentException(
+                    "[StreamX] flameGraph query duration cannot be greater than 4 hours");
         }
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getDefault());
@@ -78,5 +79,4 @@ public class FlameGraph {
         }
         return null;
     }
-
 }

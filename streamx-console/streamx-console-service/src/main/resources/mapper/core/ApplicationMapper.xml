@@ -56,13 +56,13 @@
     </select>
 
     <select id="getApp" resultType="application" parameterType="application">
-        SELECT t.*,p.name as projectName,c.content as config,c.format,c.id as configId
+        SELECT t.*, p.name as projectName, c.content as config, c.format, c.id as configId
         FROM t_flink_app t
-        inner join t_flink_project p
-        on t.project_id = p.id
-        left join t_flink_config c
-        on c.app_id = t.id
-        and c.actived = 1
+                 inner join t_flink_project p
+                            on t.project_id = p.id
+                 left join t_flink_config c
+                           on c.app_id = t.id
+                               and c.actived = 1
         where t.id = #{application.id}
     </select>
 

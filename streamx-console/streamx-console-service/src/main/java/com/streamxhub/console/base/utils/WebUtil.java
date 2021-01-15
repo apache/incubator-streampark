@@ -20,13 +20,15 @@
  */
 package com.streamxhub.console.base.utils;
 
-import com.streamxhub.console.base.domain.Constant;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 import java.io.File;
 import java.util.stream.IntStream;
+
+import org.apache.commons.lang3.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.streamxhub.console.base.domain.Constant;
 
 /**
  * 工具类
@@ -81,13 +83,15 @@ public class WebUtil {
             return value;
         }
         StringBuilder result = new StringBuilder();
-        IntStream.range(0, arr.length).forEach(i -> {
-            if (i != arr.length - 1) {
-                result.append(arr[i]).append(StringPool.UNDERSCORE);
-            } else {
-                result.append(arr[i]);
-            }
-        });
+        IntStream.range(0, arr.length)
+                .forEach(
+                        i -> {
+                            if (i != arr.length - 1) {
+                                result.append(arr[i]).append(StringPool.UNDERSCORE);
+                            } else {
+                                result.append(arr[i]);
+                            }
+                        });
         return StringUtils.lowerCase(result.toString());
     }
 
@@ -98,5 +102,4 @@ public class WebUtil {
     public static String getAppDir(String dir) {
         return getAppHome().concat(File.separator).concat(dir);
     }
-
 }

@@ -1,10 +1,9 @@
 package com.streamxhub.console.system.service;
 
+import java.util.List;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.system.entity.UserRole;
-
-import java.util.List;
 
 public interface UserRoleService extends IService<UserRole> {
 

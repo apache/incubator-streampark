@@ -20,11 +20,9 @@
  */
 package com.streamxhub.console.system.runner;
 
-import com.streamxhub.common.conf.ConfigConst;
-import com.streamxhub.common.util.HdfsUtils;
-import com.streamxhub.console.base.utils.WebUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.runners.model.InitializationError;
+import java.io.File;
+import java.util.Objects;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -32,8 +30,11 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
-import java.io.File;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+
+import com.streamxhub.common.conf.ConfigConst;
+import com.streamxhub.common.util.HdfsUtils;
+import com.streamxhub.console.base.utils.WebUtil;
 
 /**
  * @author benjobs
@@ -42,7 +43,6 @@ import java.util.Objects;
 @Slf4j
 @Component
 public class EnvInitializeRunner implements ApplicationRunner {
-
 
     @Autowired
     private ApplicationContext context;
@@ -53,12 +53,11 @@ public class EnvInitializeRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         String profiles = context.getEnvironment().getActiveProfiles()[0];
         if (profiles.equals(PROD_ENV_NAME)) {
-            /**
-             * init config....
-             */
+            /** init config.... */
             String flinkLocalHome = System.getenv("FLINK_HOME");
             if (flinkLocalHome == null) {
-                throw new InitializationError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+                throw new ExceptionInInitializerError(
+                        "[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
             }
             String flinkName = new File(flinkLocalHome).getName();
             String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
@@ -68,10 +67,11 @@ public class EnvInitializeRunner implements ApplicationRunner {
             }
             String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
             String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins");
-            //加载streamx下的plugins到$FLINK_HOME/plugins下
+            // 加载streamx下的plugins到$FLINK_HOME/plugins下
             loadPlugins(flinkHdfsPlugins);
         } else {
-            log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
+            log.warn(
+                    "The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
         }
     }
 
@@ -91,6 +91,4 @@ public class EnvInitializeRunner implements ApplicationRunner {
             }
         }
     }
-
-
 }

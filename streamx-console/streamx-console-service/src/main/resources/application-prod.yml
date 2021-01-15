@@ -37,7 +37,7 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
 
-management.endpoints.web.exposure.include: ['httptrace', 'metrics']
+management.endpoints.web.exposure.include: [ 'httptrace', 'metrics' ]
 
 #mybatis plus 设置
 mybatis-plus:

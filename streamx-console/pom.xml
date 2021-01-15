@@ -4,141 +4,77 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
     <modelVersion>4.0.0</modelVersion>
-
     <groupId>com.streamxhub</groupId>
     <artifactId>streamx-console</artifactId>
-    <version>1.0.0</version>
+    <version>1.1.0</version>
+    <name>StreamX : Console Parent</name>
+    <packaging>pom</packaging>
 
     <modules>
         <module>streamx-console-service</module>
         <module>streamx-console-webapp</module>
     </modules>
 
-    <packaging>pom</packaging>
-
-    <licenses>
-        <license>
-            <name>Apache v2</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-            <distribution>webx</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>benjobs</name>
-            <email>benjobs@qq.com</email>
-            <url>https://github.com/webxhub</url>
-            <roles>
-                <role>Architect</role>
-                <role>Developer</role>
-            </roles>
-            <timezone>+8</timezone>
-        </developer>
-    </developers>
-
-    <!-- 定义统一版本号 -->
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mybatis.version>3.4.1</mybatis.version>
-        <junit.version>4.13.1</junit.version>
-        <logback.version>1.2.3</logback.version>
-        <protostuff.version>1.1.2</protostuff.version>
-        <objenesis.version>2.6</objenesis.version>
-        <javassist.version>3.19.0-GA</javassist.version>
-        <bytebuddy.version>1.6.3</bytebuddy.version>
-        <hessian.version>4.0.38</hessian.version>
-        <protostuff.version>1.0.12</protostuff.version>
-        <kryo.version>0.42</kryo.version>
-        <fst.version>2.50</fst.version>
-        <fastjson.version>1.2.45</fastjson.version>
-        <zookeeper.version>3.4.11</zookeeper.version>
-        <curator.version>4.2.0</curator.version>
-        <zkclient.version>0.10</zkclient.version>
-        <asm.version>5.2</asm.version>
-        <cglib.version>3.2.5</cglib.version>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <encoding>UTF-8</encoding>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <java.version>1.8</java.version>
-        <platform-bom.version>2.0.3.RELEASE</platform-bom.version>
-        <mysql.version>8.0.12</mysql.version>
-        <mybatis-plus.version>3.1.0</mybatis-plus.version>
-        <curator.version>4.2.0</curator.version>
-
-        <!-- Build args -->
-        <argline>
-            -server
-            -Xms256m
-            -Xmx512m
-            -XX:PermSize=64m
-            -XX:MaxPermSize=128m
-            -Dfile.encoding=UTF-8
-            -Djava.net.preferIPv4Stack=true
-        </argline>
-        <arguments/>
-
-    </properties>
-
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.10.RELEASE</version>
-    </parent>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>${junit.version}</version>
-        </dependency>
-    </dependencies>
-
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.1</version>
-                <configuration>
-                    <source>8</source>
-                    <target>8</target>
-                    <optimize>true</optimize>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.2.1</version>
-                <executions>
-                    <execution>
-                        <id>attach-sources</id>
-                        <goals>
-                            <goal>jar</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.16</version>
-                <configuration>
-                    <argLine>-Dfile.encoding=utf-8</argLine>
-                </configuration>
-            </plugin>
-
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.diffplug.spotless</groupId>
+                    <artifactId>spotless-maven-plugin</artifactId>
+                    <version>2.7.0</version>
+                    <configuration>
+                        <formats>
+                            <!-- you can define as many formats as you want, each is independent -->
+                            <format>
+                                <!-- define the files to apply to -->
+                                <includes>
+                                    <include>*.md</include>
+                                    <include>.gitignore</include>
+                                </includes>
+                                <!-- define the steps to apply to those files -->
+                                <trimTrailingWhitespace/>
+                                <endWithNewline/>
+                                <indent>
+                                    <tabs>true</tabs>
+                                    <spacesPerTab>4</spacesPerTab>
+                                </indent>
+                            </format>
+                        </formats>
+                        <java>
+                            <includes>
+                                <include>src/main/java/**/*.java</include>
+                                <include>src/test/java/**/*.java</include>
+                            </includes>
+                            <googleJavaFormat>
+                                <version>1.7</version>
+                                <style>GOOGLE</style>
+                            </googleJavaFormat>
+                            <importOrder>
+                                <!-- \# refers to the static imports -->
+                                <order>javax,java,scala,org,com,\#</order>
+                            </importOrder>
+                            <removeUnusedImports/>
+                        </java>
+                        <scala>
+                            <includes>
+                                <include>src/main/scala/**/*.scala</include>
+                                <include>src/test/scala/**/*.scala</include>
+                            </includes>
+                            <scalafmt />
+                        </scala>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>spotless-check</id>
+                            <phase>validate</phase>
+                            <goals>
+                                <goal>check</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
-
 
 </project>

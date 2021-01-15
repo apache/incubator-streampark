@@ -1,5 +1,11 @@
 package com.streamxhub.console.system.authentication;
 
+import java.util.Date;
+
+import org.apache.commons.lang3.StringUtils;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -7,10 +13,6 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.SpringContextUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
-import java.util.Date;
 
 /**
  * @author benjobs
@@ -18,7 +20,8 @@ import java.util.Date;
 @Slf4j
 public class JWTUtil {
 
-    private static final long EXPIRE_TIME = SpringContextUtil.getBean(StreamXProperties.class).getShiro().getJwtTimeOut() * 1000;
+    private static final long EXPIRE_TIME =
+            SpringContextUtil.getBean(StreamXProperties.class).getShiro().getJwtTimeOut() * 1000;
 
     /**
      * 校验 token是否正确
@@ -30,9 +33,7 @@ public class JWTUtil {
     public static boolean verify(String token, String username, String secret) {
         try {
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            JWTVerifier verifier = JWT.require(algorithm)
-                    .withClaim("username", username)
-                    .build();
+            JWTVerifier verifier = JWT.require(algorithm).withClaim("username", username).build();
             verifier.verify(token);
             log.info("token is valid");
             return true;
@@ -69,10 +70,7 @@ public class JWTUtil {
             username = StringUtils.lowerCase(username);
             Date date = new Date(System.currentTimeMillis() + EXPIRE_TIME);
             Algorithm algorithm = Algorithm.HMAC256(secret);
-            return JWT.create()
-                    .withClaim("username", username)
-                    .withExpiresAt(date)
-                    .sign(algorithm);
+            return JWT.create().withClaim("username", username).withExpiresAt(date).sign(algorithm);
         } catch (Exception e) {
             log.info("error：{}", e);
             return null;

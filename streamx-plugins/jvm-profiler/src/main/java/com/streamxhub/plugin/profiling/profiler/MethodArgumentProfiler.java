@@ -21,91 +21,89 @@
 
 package com.streamxhub.plugin.profiling.profiler;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
 import com.streamxhub.plugin.profiling.Profiler;
 import com.streamxhub.plugin.profiling.Reporter;
 import com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter;
 import com.streamxhub.plugin.profiling.util.ClassAndMethodMetricKey;
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class MethodArgumentProfiler extends ProfilerBase implements Profiler {
-    public static final String PROFILER_NAME = "MethodArgument";
+  public static final String PROFILER_NAME = "MethodArgument";
 
-    private ClassMethodArgumentMetricBuffer buffer;
+  private ClassMethodArgumentMetricBuffer buffer;
 
-    private Reporter reporter = new ConsoleOutputReporter();
+  private Reporter reporter = new ConsoleOutputReporter();
 
-    private long interval = Constants.DEFAULT_METRIC_INTERVAL;
+  private long interval = Constants.DEFAULT_METRIC_INTERVAL;
 
-    public MethodArgumentProfiler(ClassMethodArgumentMetricBuffer buffer, Reporter reporter) {
-        this.buffer = buffer;
-        this.reporter = reporter;
+  public MethodArgumentProfiler(ClassMethodArgumentMetricBuffer buffer, Reporter reporter) {
+    this.buffer = buffer;
+    this.reporter = reporter;
+  }
+
+  @Override
+  public long getInterval() {
+    return interval;
+  }
+
+  public void setInterval(long interval) {
+    this.interval = interval;
+  }
+
+  @Override
+  public void setReporter(Reporter reporter) {
+    this.reporter = reporter;
+  }
+
+  @Override
+  public void profile() {
+    if (buffer == null) {
+      return;
     }
 
-    @Override
-    public long getInterval() {
-        return interval;
+    if (reporter == null) {
+      return;
     }
 
-    public void setInterval(long interval) {
-        this.interval = interval;
+    Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
+
+    long epochMillis = System.currentTimeMillis();
+
+    for (Map.Entry<ClassAndMethodMetricKey, AtomicLong> entry : metrics.entrySet()) {
+      Map<String, Object> commonMap = new HashMap<>();
+
+      commonMap.put("epochMillis", epochMillis);
+      commonMap.put("processName", getProcessName());
+      commonMap.put("host", getHostName());
+      commonMap.put("processUuid", getProcessUuid());
+      commonMap.put("appId", getAppId());
+
+      commonMap.put("className", entry.getKey().getClassName());
+      commonMap.put("methodName", entry.getKey().getMethodName());
+
+      if (getTag() != null) {
+        commonMap.put("tag", getTag());
+      }
+
+      if (getCluster() != null) {
+        commonMap.put("cluster", getCluster());
+      }
+
+      if (getRole() != null) {
+        commonMap.put("role", getRole());
+      }
+
+      {
+        Map<String, Object> metricMap = new HashMap<>(commonMap);
+        metricMap.put("metricName", entry.getKey().getMetricName());
+        metricMap.put("metricValue", (double) entry.getValue().get());
+        reporter.report(PROFILER_NAME, metricMap);
+      }
     }
-
-    @Override
-    public void setReporter(Reporter reporter) {
-        this.reporter = reporter;
-    }
-
-    @Override
-    public void profile() {
-        if (buffer == null) {
-            return;
-        }
-
-        if (reporter == null) {
-            return;
-        }
-
-        Map<ClassAndMethodMetricKey, AtomicLong> metrics = buffer.reset();
-
-        long epochMillis = System.currentTimeMillis();
-
-        for (Map.Entry<ClassAndMethodMetricKey, AtomicLong> entry : metrics.entrySet()) {
-            Map<String, Object> commonMap = new HashMap<>();
-
-            commonMap.put("epochMillis", epochMillis);
-            commonMap.put("processName", getProcessName());
-            commonMap.put("host", getHostName());
-            commonMap.put("processUuid", getProcessUuid());
-            commonMap.put("appId", getAppId());
-
-            commonMap.put("className", entry.getKey().getClassName());
-            commonMap.put("methodName", entry.getKey().getMethodName());
-
-            if (getTag() != null) {
-                commonMap.put("tag", getTag());
-            }
-
-            if (getCluster() != null) {
-                commonMap.put("cluster", getCluster());
-            }
-
-            if (getRole() != null) {
-                commonMap.put("role", getRole());
-            }
-
-            {
-                Map<String, Object> metricMap = new HashMap<>(commonMap);
-                metricMap.put("metricName", entry.getKey().getMetricName());
-                metricMap.put("metricValue", (double) entry.getValue().get());
-                reporter.report(PROFILER_NAME, metricMap);
-            }
-        }
-    }
+  }
 }

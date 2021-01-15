@@ -20,18 +20,19 @@
  */
 package com.streamxhub.console.core.enums;
 
-import lombok.Getter;
-
 import java.util.Arrays;
+
+import lombok.Getter;
 
 /**
  * @author benjobs
  */
-
 @Getter
 public enum FlinkAppState {
 
-    /** Job is newly created, no task has started to run. */
+    /**
+     * Job is newly created, no task has started to run.
+     */
     CREATED(0),
     /**
      * Application which is currently deploying.
@@ -52,22 +53,34 @@ public enum FlinkAppState {
      */
     RESTARTING(4),
 
-    /** Some tasks are scheduled or running, some may be pending, some may be finished. */
+    /**
+     * Some tasks are scheduled or running, some may be pending, some may be finished.
+     */
     RUNNING(5),
 
-    /** The job has failed and is currently waiting for the cleanup to complete. */
+    /**
+     * The job has failed and is currently waiting for the cleanup to complete.
+     */
     FAILING(6),
 
-    /** The job has failed with a non-recoverable task failure. */
+    /**
+     * The job has failed with a non-recoverable task failure.
+     */
     FAILED(7),
 
-    /** Job is being cancelled. */
+    /**
+     * Job is being cancelled.
+     */
     CANCELLING(8),
 
-    /** Job has been cancelled. */
+    /**
+     * Job has been cancelled.
+     */
     CANCELED(9),
 
-    /** All of the job's tasks have successfully finished. */
+    /**
+     * All of the job's tasks have successfully finished.
+     */
     FINISHED(10),
     /**
      * The job has been suspended which means that it has been stopped but not been removed from a
@@ -75,7 +88,9 @@ public enum FlinkAppState {
      */
     SUSPENDED(11),
 
-    /** The job is currently reconciling and waits for task execution report to recover state. */
+    /**
+     * The job is currently reconciling and waits for task execution report to recover state.
+     */
     RECONCILING(12),
     /**
      * 失联

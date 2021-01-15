@@ -1,13 +1,15 @@
 package com.streamxhub.console.base.domain.router;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import java.io.Serializable;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 /**
  * Vue路由 Meta
+ *
  * @author benjobs
  */
 @Data
@@ -23,11 +25,9 @@ public class RouterMeta implements Serializable {
 
     private Boolean keepAlive;
 
-    //private Boolean hideHeader;
+    // private Boolean hideHeader;
 
-    //private Boolean hiddenHeaderContent;
+    // private Boolean hiddenHeaderContent;
 
     private String icon;
-
-
 }

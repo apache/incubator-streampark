@@ -26,16 +26,17 @@ import java.net.{URL, URLClassLoader}
 
 object ClassLoaderUtils extends Logger {
 
-  private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
+  private val classloader =
+    ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
   /**
-   * 指定 classLoader执行代码...
-   *
-   * @param targetClassLoader
-   * @param func
-   * @tparam R
-   * @return
-   */
+    * 指定 classLoader执行代码...
+    *
+    * @param targetClassLoader
+    * @param func
+    * @tparam R
+    * @return
+    */
   def runAsClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
     val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
@@ -59,12 +60,14 @@ object ClassLoaderUtils extends Logger {
     val jarDir = new File(path)
     require(jarDir.exists, s"[StreamX] jarPath: $path is not exists")
     require(jarDir.isDirectory, s"[StreamX] jarPath: $path is not directory")
-    require(jarDir.listFiles.length > 0, s"[StreamX] have not jar in path:$path")
+    require(
+      jarDir.listFiles.length > 0,
+      s"[StreamX] have not jar in path:$path"
+    )
     jarDir.listFiles.foreach { x =>
       loadPath(x.getAbsolutePath, List(".jar", ".zip"))
     }
   }
-
 
   def loadResource(filepath: String): Unit = {
     val file = new File(filepath)
@@ -77,10 +80,11 @@ object ClassLoaderUtils extends Logger {
   }
 
   /**
-   * URLClassLoader的addURL方法
-   */
+    * URLClassLoader的addURL方法
+    */
   private val addURL: Method = try {
-    val add = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+    val add = classOf[URLClassLoader]
+      .getDeclaredMethod("addURL", Array(classOf[URL]): _*)
     add.setAccessible(true)
     add
   } catch {
@@ -92,14 +96,12 @@ object ClassLoaderUtils extends Logger {
     loopFiles(file, ext)
   }
 
-
   private[this] def loopDirs(file: File): Unit = { // 资源文件只加载路径
     if (file.isDirectory) {
       addURL(file)
       file.listFiles.foreach(loopDirs)
     }
   }
-
 
   private[this] def loopFiles(file: File, ext: List[String] = List()): Unit = {
     if (file.isDirectory) {
@@ -121,6 +123,5 @@ object ClassLoaderUtils extends Logger {
       case e: Exception =>
     }
   }
-
 
 }

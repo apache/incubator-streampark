@@ -20,13 +20,9 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.core.entity.Project;
-import com.streamxhub.console.core.service.ProjectService;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import lombok.extern.slf4j.Slf4j;
+import java.util.List;
+import java.util.Map;
+
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -34,8 +30,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.Project;
+import com.streamxhub.console.core.service.ProjectService;
 
 /**
  * @author benjobs
@@ -97,6 +99,4 @@ public class ProjectController extends BaseController {
     public RestResponse select() {
         return RestResponse.create().data(projectService.list());
     }
-
-
 }

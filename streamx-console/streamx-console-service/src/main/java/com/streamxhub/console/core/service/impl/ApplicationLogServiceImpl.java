@@ -20,6 +20,12 @@
  */
 package com.streamxhub.console.core.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -29,10 +35,6 @@ import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.ApplicationLogMapper;
 import com.streamxhub.console.core.entity.*;
 import com.streamxhub.console.core.service.*;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author benjobs
@@ -40,7 +42,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog> implements ApplicationLogService {
+public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog>
+        implements ApplicationLogService {
 
     @Override
     public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {

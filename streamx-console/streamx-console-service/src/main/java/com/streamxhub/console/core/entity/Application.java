@@ -20,6 +20,13 @@
  */
 package com.streamxhub.console.core.entity;
 
+import java.io.*;
+import java.util.Date;
+import java.util.Map;
+
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
 import com.baomidou.mybatisplus.annotation.FieldStrategy;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -36,12 +43,6 @@ import com.streamxhub.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.console.core.metrics.flink.Overview;
 import com.streamxhub.console.core.metrics.yarn.AppInfo;
 import com.wuwenze.poi.annotation.Excel;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.*;
-import java.util.Date;
-import java.util.Map;
 
 import static com.streamxhub.console.core.enums.FlinkAppState.*;
 
@@ -65,6 +66,7 @@ public class Application implements Serializable {
      * 前端和程序在yarn中显示的名称
      */
     private String jobName;
+
     private String appId;
     private String jobId;
     private Integer state;
@@ -80,6 +82,7 @@ public class Application implements Serializable {
      * 应用程序模块
      */
     private String module;
+
     private String options;
     private String dynamicOptions;
     private Integer appType;
@@ -88,6 +91,7 @@ public class Application implements Serializable {
      * 是否需要跟踪监控状态
      */
     private Integer tracking;
+
     private String jar;
     private String mainClass;
 
@@ -105,6 +109,7 @@ public class Application implements Serializable {
      */
     @TableField("TOTAL_TM")
     private Integer totalTM;
+
     private Integer totalSlot;
     private Integer availableSlot;
     private String jmMemory;
@@ -120,6 +125,7 @@ public class Application implements Serializable {
      * running job
      */
     private transient JobsOverview.Task overview;
+
     private transient Boolean backUp;
     private transient Boolean restart;
     private transient String userName;
@@ -225,5 +231,4 @@ public class Application implements Serializable {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(getOptions(), Map.class);
     }
-
 }

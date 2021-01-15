@@ -20,16 +20,17 @@
  */
 package com.streamxhub.console.core.dao;
 
-import com.streamxhub.console.core.entity.Application;
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.streamxhub.console.core.entity.Project;
+import java.util.List;
+
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import java.util.List;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.streamxhub.console.core.entity.Application;
+import com.streamxhub.console.core.entity.Project;
 
 /**
  * @author benjobs
@@ -47,11 +48,13 @@ public interface ApplicationMapper extends BaseMapper<Application> {
     @Update("update t_flink_app set deploy=#{application.deploy} where id=#{application.id}")
     void updateDeploy(@Param("application") Application application);
 
-    @Update("update t_flink_app set state=#{application.state},option_state=#{application.optionState} where id=#{application.id}")
+    @Update(
+            "update t_flink_app set state=#{application.state},option_state=#{application.optionState} where id=#{application.id}")
     void updateState(@Param("application") Application application);
 
-    @Update("update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")
-    boolean mapping(@Param("application")Application appParam);
+    @Update(
+            "update t_flink_app set app_id=#{application.appId},job_id=#{application.jobId},state=14,end_time=null where id=#{application.id}")
+    boolean mapping(@Param("application") Application appParam);
 
     @Update("update t_flink_app set option_state=0")
     void resetOptionState();
