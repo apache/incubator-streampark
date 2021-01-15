@@ -57,11 +57,14 @@ object MySQLCDC extends FlinkStreamTable {
 
   }
 
-  def sqlCDC(): Unit = {}
+
+  def sqlCDC(): Unit = {
+
+
+  }
 
   def apiCDC(): Unit = {
-    val sourceFunction = MySQLSource
-      .builder[String]
+    val sourceFunction = MySQLSource.builder[String]
       .hostname("localhost")
       .port(3306)
       .databaseList("test")
@@ -73,8 +76,7 @@ object MySQLCDC extends FlinkStreamTable {
 
     val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-    env
-      .addSource(sourceFunction)
+    env.addSource(sourceFunction)
       .print("cdc")
       .setParallelism(1)
 

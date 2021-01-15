@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.source
 
 import com.streamxhub.common.util.Logger
@@ -37,9 +38,9 @@ import scala.util.Try
 trait Source extends Logger with Serializable {
   //  lazy val logger: Logger = LoggerFactory.getLogger(getClass)
 
-  @(transient @getter)
+  @(transient@getter)
   val ssc: StreamingContext
-  @(transient @getter)
+  @(transient@getter)
   lazy val sparkConf: SparkConf = ssc.sparkContext.getConf
 
   val prefix: String
@@ -49,6 +50,7 @@ trait Source extends Logger with Serializable {
       Some(k.substring(prefix.length) -> v)
     case _ => None
   } toMap
+
 
   type SourceType
 

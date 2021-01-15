@@ -20,18 +20,20 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import java.io.Serializable;
-
 import org.apache.hadoop.hbase.client.Result;
 
-/** @author benjobs */
+import java.io.Serializable;
+
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface HBaseResultFunction<T> extends Serializable {
-  /**
-   * 返回结合处理
-   *
-   * @param result
-   * @return
-   */
-  T result(Result result);
+    /**
+     * 返回结合处理
+     *
+     * @param result
+     * @return
+     */
+    T result(Result result);
 }

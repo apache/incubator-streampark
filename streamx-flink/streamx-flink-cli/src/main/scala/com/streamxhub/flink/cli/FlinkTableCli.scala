@@ -29,30 +29,19 @@ object FlinkTableCli extends FlinkStreamTable {
   override def handle(context: StreamTableContext): Unit = {
     val sql = context.getSQL()
     val segment = sql.split("\\n").toList
-    SQLCommandUtil
-      .parseSQL(segment)
-      .foreach(call => {
-        call.command match {
-          case SQLCommand.SET =>
-            context.getConfig.getConfiguration
-              .setString(call.operands.head, call.operands(1))
-          case SQLCommand.CREATE_TABLE | SQLCommand.CREATE_VIEW |
-              SQLCommand.INSERT_INTO =>
-            val ddlDml = call.operands(0)
-            Try(context.executeSql(ddlDml)) match {
-              case Success(_) =>
-              case Failure(e) =>
-                throw new RuntimeException(
-                  "[StreamX] SQL parse failed:\n" + ddlDml + "\n",
-                  e
-                )
-            }
-          case _ =>
-            throw new RuntimeException(
-              "[StreamX] Unsupported command: " + call.command
-            )
-        }
-      })
+    SQLCommandUtil.parseSQL(segment).foreach(call => {
+      call.command match {
+        case SQLCommand.SET =>
+          context.getConfig.getConfiguration.setString(call.operands.head, call.operands(1))
+        case SQLCommand.CREATE_TABLE | SQLCommand.CREATE_VIEW | SQLCommand.INSERT_INTO =>
+          val ddlDml = call.operands(0)
+          Try(context.executeSql(ddlDml)) match {
+            case Success(_) =>
+            case Failure(e) => throw new RuntimeException("[StreamX] SQL parse failed:\n" + ddlDml + "\n", e)
+          }
+        case _ => throw new RuntimeException("[StreamX] Unsupported command: " + call.command)
+      }
+    })
     logInfo(s"tableSQL: $sql")
   }
 

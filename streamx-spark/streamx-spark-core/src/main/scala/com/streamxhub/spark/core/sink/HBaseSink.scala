@@ -33,12 +33,11 @@ import scala.collection.JavaConversions._
 import scala.reflect.ClassTag
 
 /**
-  *
-  */
-class HBaseSink[T <: Mutation: ClassTag](
-    @transient override val sc: SparkContext,
-    val initParams: Map[String, String] = Map.empty[String, String]
-) extends Sink[T] {
+ *
+ */
+class HBaseSink[T <: Mutation : ClassTag](@transient override val sc: SparkContext,
+                                          val initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
 
   override val prefix: String = "spark.sink.hbase."
 
@@ -51,9 +50,7 @@ class HBaseSink[T <: Mutation: ClassTag](
 
   private def getMutator: BufferedMutator = {
     val connection = getConnect
-    val bufferedMutatorParams = new BufferedMutatorParams(
-      TableName.valueOf(tableName)
-    )
+    val bufferedMutatorParams = new BufferedMutatorParams(TableName.valueOf(tableName))
     connection.getBufferedMutator(bufferedMutatorParams)
   }
 
@@ -63,42 +60,35 @@ class HBaseSink[T <: Mutation: ClassTag](
   }
 
   /** 输出
-    *
-    * @param rdd  RDD[Put]或者RDD[Delete]
-    * @param time spark.streaming.Time
-    */
-  override def sink(
-      rdd: RDD[T],
-      time: Time = Time(System.currentTimeMillis())
-  ): Unit = {
+   *
+   * @param rdd  RDD[Put]或者RDD[Delete]
+   * @param time spark.streaming.Time
+   */
+  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
     rdd match {
-      case r: RDD[Put] =>
-        r.foreachPartition { put =>
-          val mutator = getMutator
-          put.foreach { p =>
-            mutator.mutate(p.asInstanceOf[Put])
-          }
-          mutator.flush()
-          mutator.close()
-        }
+      case r: RDD[Put] => r.foreachPartition { put =>
+        val mutator = getMutator
+        put.foreach { p => mutator.mutate(p.asInstanceOf[Put]) }
+        mutator.flush()
+        mutator.close()
+      }
 
-      case r: RDD[Delete] =>
-        r.foreachPartition { del =>
-          val table = getTable
-          val delList = new JAList[Delete]()
-          del.foreach { d =>
-            delList += d.asInstanceOf[Delete]
-            if (delList.size() >= commitBatch) {
-              table.batch(delList, null)
-              delList.clear()
-            }
-          }
-          if (delList.size() > 0) {
+      case r: RDD[Delete] => r.foreachPartition { del =>
+        val table = getTable
+        val delList = new JAList[Delete]()
+        del.foreach { d =>
+          delList += d.asInstanceOf[Delete]
+          if (delList.size() >= commitBatch) {
             table.batch(delList, null)
             delList.clear()
           }
-          table.close()
         }
+        if (delList.size() > 0) {
+          table.batch(delList, null)
+          delList.clear()
+        }
+        table.close()
+      }
     }
   }
 }
@@ -106,6 +96,5 @@ class HBaseSink[T <: Mutation: ClassTag](
 object HBaseSink {
   def apply(sc: SparkContext) = new HBaseSink[Put](sc)
 
-  def apply[T <: Mutation: ClassTag](rdd: RDD[T]) =
-    new HBaseSink[T](rdd.sparkContext)
+  def apply[T <: Mutation : ClassTag](rdd: RDD[T]) = new HBaseSink[T](rdd.sparkContext)
 }

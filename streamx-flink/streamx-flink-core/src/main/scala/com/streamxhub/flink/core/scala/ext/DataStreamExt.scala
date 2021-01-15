@@ -21,23 +21,13 @@
 package com.streamxhub.flink.core.scala.ext
 
 import com.streamxhub.flink.core.scala.sink.EchoSink
-import org.apache.flink.api.common.eventtime.{
-  SerializableTimestampAssigner,
-  WatermarkStrategy
-}
+import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
-import org.apache.flink.streaming.api.functions.{
-  AssignerWithPeriodicWatermarks,
-  AssignerWithPunctuatedWatermarks,
-  ProcessFunction => ProcFunc
-}
+import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction => ProcFunc}
 import org.apache.flink.streaming.api.scala.{OutputTag, DataStream => DStream}
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
-import org.apache.flink.streaming.runtime.operators.util.{
-  AssignerWithPeriodicWatermarksAdapter,
-  AssignerWithPunctuatedWatermarksAdapter
-}
+import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
 import org.apache.flink.util.Collector
 
 import java.time.Duration
@@ -45,121 +35,84 @@ import java.time.Duration
 object DataStreamExt {
 
   /**
-    *
-    * @param dataStream DataStream 扩展方法.
-    * @tparam T
-    */
+   *
+   * @param dataStream DataStream 扩展方法.
+   * @tparam T
+   */
+
   class DataStream[T: TypeInformation](val dataStream: DStream[T]) {
 
     /**
-      *
-      * @param fun
-      * @return
-      */
-    def sideOut(fun: (T, ProcFunc[T, T]#Context) => Unit): DStream[T] =
-      dataStream.process(new ProcFunc[T, T] {
-        override def processElement(
-            value: T,
-            ctx: ProcFunc[T, T]#Context,
-            out: Collector[T]
-        ): Unit = {
-          fun(value, ctx)
-          out.collect(value)
-        }
-      })
+     *
+     * @param fun
+     * @return
+     */
+    def sideOut(fun: (T, ProcFunc[T, T]#Context) => Unit): DStream[T] = dataStream.process(new ProcFunc[T, T] {
+      override def processElement(value: T, ctx: ProcFunc[T, T]#Context, out: Collector[T]): Unit = {
+        fun(value, ctx)
+        out.collect(value)
+      }
+    })
 
-    def sideGet[R: TypeInformation](sideTag: String): DStream[R] =
-      dataStream.getSideOutput(new OutputTag[R](sideTag))
+    def sideGet[R: TypeInformation](sideTag: String): DStream[R] = dataStream.getSideOutput(new OutputTag[R](sideTag))
 
     /**
-      * ¬
-      * 两阶段精准一次的print...
-      *
-      * @param sinkIdentifier
-      */
-    def echo(sinkIdentifier: String = null): Unit =
-      EchoSink(dataStream, sinkIdentifier)
+     * ¬
+     * 两阶段精准一次的print...
+     *
+     * @param sinkIdentifier
+     */
+    def echo(sinkIdentifier: String = null): Unit = EchoSink(dataStream, sinkIdentifier)
 
     /**
-      * 基于最大延迟时间的Watermark生成
-      *
-      * @return
-      * */
-    def boundedOutOfOrdernessWatermark(
-        func: T => Long,
-        duration: Duration
-    ): DStream[T] = {
-      dataStream.assignTimestampsAndWatermarks(
-        WatermarkStrategy
-          .forBoundedOutOfOrderness[T](duration)
-          .withTimestampAssigner(new SerializableTimestampAssigner[T]() {
-            override def extractTimestamp(element: T, recordTimestamp: Long)
-                : Long = func(element)
-          })
-      )
+     * 基于最大延迟时间的Watermark生成
+     *
+     * @return
+     * */
+
+    def boundedOutOfOrdernessWatermark(func: T => Long, duration: Duration): DStream[T] = {
+      dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forBoundedOutOfOrderness[T](duration).withTimestampAssigner(new SerializableTimestampAssigner[T]() {
+        override def extractTimestamp(element: T, recordTimestamp: Long): Long = func(element)
+      }))
     }
 
     /**
-      * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
-      *
-      * @param fun
-      * @param maxTimeLag
-      * @return
-      */
-    def timeLagWatermarkWatermark(
-        fun: T => Long,
-        maxTimeLag: Time
-    ): DStream[T] = {
+     * 基于最大延迟时间的Watermark生成,直接用系统时间戳做比较
+     *
+     * @param fun
+     * @param maxTimeLag
+     * @return
+     */
+    def timeLagWatermarkWatermark(fun: T => Long, maxTimeLag: Time): DStream[T] = {
       val assigner = new AssignerWithPeriodicWatermarks[T] {
-        override def extractTimestamp(
-            element: T,
-            previousElementTimestamp: Long
-        ): Long = fun(element)
+        override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
 
-        override def getCurrentWatermark: Watermark =
-          new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
+        override def getCurrentWatermark: Watermark = new Watermark(System.currentTimeMillis() - maxTimeLag.toMilliseconds)
       }
-      dataStream.assignTimestampsAndWatermarks(
-        WatermarkStrategy.forGenerator[T](
-          new AssignerWithPeriodicWatermarksAdapter.Strategy[T](assigner)
-        )
-      )
+      dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPeriodicWatermarksAdapter.Strategy[T](assigner)))
     }
 
-    def punctuatedWatermark(
-        extractTimeFun: T => Long,
-        checkFunc: T => Boolean
-    ): DStream[T] = {
+    def punctuatedWatermark(extractTimeFun: T => Long, checkFunc: T => Boolean): DStream[T] = {
       val assigner = new AssignerWithPunctuatedWatermarks[T] {
-        override def extractTimestamp(
-            element: T,
-            previousElementTimestamp: Long
-        ): Long = extractTimeFun(element)
+        override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = extractTimeFun(element)
 
-        override def checkAndGetNextWatermark(
-            lastElement: T,
-            extractedTimestamp: Long
-        ): Watermark = {
-          if (checkFunc(lastElement)) new Watermark(extractedTimestamp)
-          else null
+        override def checkAndGetNextWatermark(lastElement: T, extractedTimestamp: Long): Watermark = {
+          if (checkFunc(lastElement)) new Watermark(extractedTimestamp) else null
         }
       }
-      dataStream.assignTimestampsAndWatermarks(
-        WatermarkStrategy.forGenerator[T](
-          new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)
-        )
-      )
+      dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)))
     }
 
   }
 
+
   /**
-    * 扩展 ProcessFunction方法
-    *
-    * @param ctx
-    * @tparam IN
-    * @tparam OUT
-    */
+   * 扩展 ProcessFunction方法
+   *
+   * @param ctx
+   * @tparam IN
+   * @tparam OUT
+   */
   class ProcessFunction[IN, OUT](val ctx: ProcFunc[IN, OUT]#Context) {
     def sideOut[R: TypeInformation](outputTag: String, value: R): Unit = {
       val tag = new OutputTag[R](outputTag)
@@ -167,4 +120,7 @@ object DataStreamExt {
     }
   }
 
+
 }
+
+

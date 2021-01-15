@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.sink
 
 import com.streamxhub.spark.core.support.kafka.writer.KafkaWriter._
@@ -34,14 +35,13 @@ import scala.reflect.ClassTag
   *
   * 输出到kafka
   */
-class KafkaSink[T: ClassTag](
-    @transient override val sc: SparkContext,
-    initParams: Map[String, String] = Map.empty[String, String]
-) extends Sink[T] {
+class KafkaSink[T: ClassTag](@transient override val sc: SparkContext,
+                             initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
 
   override val prefix: String = "spark.sink.kafka."
 
-  private lazy val prop = filterProp(param, initParams, prefix)
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private val outputTopic = prop.getProperty("topic")
 
@@ -49,18 +49,7 @@ class KafkaSink[T: ClassTag](
     * 以字符串的形式输出到kafka
     *
     */
-  override def sink(
-      rdd: RDD[T],
-      time: Time = Time(System.currentTimeMillis())
-  ): Unit = {
-    rdd.writeToKafka(
-      prop,
-      x =>
-        new ProducerRecord[String, String](
-          outputTopic,
-          UUID.randomUUID().toString,
-          x.toString
-        )
-    )
+  override def sink(rdd: RDD[T], time: Time = Time(System.currentTimeMillis())): Unit = {
+    rdd.writeToKafka(prop, x => new ProducerRecord[String, String](outputTopic, UUID.randomUUID().toString, x.toString))
   }
 }
