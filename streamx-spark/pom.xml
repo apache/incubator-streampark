@@ -8,11 +8,8 @@
         <artifactId>streamx</artifactId>
         <version>1.0.0</version>
     </parent>
-
     <artifactId>streamx-spark</artifactId>
     <name>StreamX : Spark Parent</name>
-    <description>streamx-spark</description>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -27,15 +24,6 @@
             <url>https://repository.cloudera.com/artifactory/cloudera-repos/</url>
         </repository>
     </repositories>
-
-    <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
 
     <dependencyManagement>
         <!--项目基本依赖-->
