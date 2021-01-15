@@ -6,16 +6,20 @@ Example (click to zoom):
 
 [![Example](http://www.brendangregg.com/FlameGraphs/cpu-bash-flamegraph.svg)](http://www.brendangregg.com/FlameGraphs/cpu-bash-flamegraph.svg)
 
-Click a box to zoom the Flame Graph to this stack frame only.
-To search and highlight all stack frames matching a regular expression, click the _search_ button in the upper right corner or press Ctrl-F.
-By default, search is case sensitive, but this can be toggled by pressing Ctrl-I or by clicking the _ic_ button in the upper right corner.
+Click a box to zoom the Flame Graph to this stack frame only. To search and highlight all stack frames matching a
+regular expression, click the _search_ button in the upper right corner or press Ctrl-F. By default, search is case
+sensitive, but this can be toggled by pressing Ctrl-I or by clicking the _ic_ button in the upper right corner.
 
 Other sites:
-- The Flame Graph article in ACMQ and CACM: http://queue.acm.org/detail.cfm?id=2927301 http://cacm.acm.org/magazines/2016/6/202665-the-flame-graph/abstract
-- CPU profiling using Linux perf\_events, DTrace, SystemTap, or ktap: http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
-- CPU profiling using XCode Instruments: http://schani.wordpress.com/2012/11/16/flame-graphs-for-instruments/  
-- CPU profiling using Xperf.exe: http://randomascii.wordpress.com/2013/03/26/summarizing-xperf-cpu-usage-with-flame-graphs/  
-- Memory profiling: http://www.brendangregg.com/FlameGraphs/memoryflamegraphs.html  
+
+- The Flame Graph article in ACMQ and
+  CACM: http://queue.acm.org/detail.cfm?id=2927301 http://cacm.acm.org/magazines/2016/6/202665-the-flame-graph/abstract
+- CPU profiling using Linux perf\_events, DTrace, SystemTap, or
+  ktap: http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html
+- CPU profiling using XCode Instruments: http://schani.wordpress.com/2012/11/16/flame-graphs-for-instruments/
+- CPU profiling using
+  Xperf.exe: http://randomascii.wordpress.com/2013/03/26/summarizing-xperf-cpu-usage-with-flame-graphs/
+- Memory profiling: http://www.brendangregg.com/FlameGraphs/memoryflamegraphs.html
 - Other examples, updates, and news: http://www.brendangregg.com/flamegraphs.html#Updates
 
 Flame graphs can be created in three steps:
@@ -26,11 +30,13 @@ Flame graphs can be created in three steps:
 
 1\. Capture stacks
 =================
-Stack samples can be captured using Linux perf\_events, FreeBSD pmcstat (hwpmc), DTrace, SystemTap, and many other profilers. See the stackcollapse-\* converters.
+Stack samples can be captured using Linux perf\_events, FreeBSD pmcstat (hwpmc), DTrace, SystemTap, and many other
+profilers. See the stackcollapse-\* converters.
 
 ### Linux perf\_events
 
-Using Linux perf\_events (aka "perf") to capture 60 seconds of 99 Hertz stack samples, both user- and kernel-level stacks, all processes:
+Using Linux perf\_events (aka "perf") to capture 60 seconds of 99 Hertz stack samples, both user- and kernel-level
+stacks, all processes:
 
 ```
 # perf record -F 99 -a -g -- sleep 60
@@ -64,11 +70,14 @@ Using DTrace to capture 60 seconds of user-level stacks for PID 12345 at 97 Hert
 # dtrace -x ustackframes=100 -n 'profile-97 /pid == 12345/ { @[ustack()] = count(); } tick-60s { exit(0); }' -o out.user_stacks
 ```
 
-Switch `ustack()` for `jstack()` if the application has a ustack helper to include translated frames (eg, node.js frames; see: http://dtrace.org/blogs/dap/2012/01/05/where-does-your-node-program-spend-its-time/).  The rate for user-level stack collection is deliberately slower than kernel, which is especially important when using `jstack()` as it performs additional work to translate frames.
+Switch `ustack()` for `jstack()` if the application has a ustack helper to include translated frames (eg, node.js
+frames; see: http://dtrace.org/blogs/dap/2012/01/05/where-does-your-node-program-spend-its-time/). The rate for
+user-level stack collection is deliberately slower than kernel, which is especially important when using `jstack()` as
+it performs additional work to translate frames.
 
 2\. Fold stacks
 ==============
-Use the stackcollapse programs to fold stack samples into single lines.  The programs provided are:
+Use the stackcollapse programs to fold stack samples into single lines. The programs provided are:
 
 - `stackcollapse.pl`: for DTrace stacks
 - `stackcollapse-perf.pl`: for Linux perf_events "perf script" output
@@ -114,7 +123,8 @@ Use flamegraph.pl to render a SVG.
 $ ./flamegraph.pl out.kern_folded > kernel.svg
 ```
 
-An advantage of having the folded input file (and why this is separate to flamegraph.pl) is that you can use grep for functions of interest. Eg:
+An advantage of having the folded input file (and why this is separate to flamegraph.pl) is that you can use grep for
+functions of interest. Eg:
 
 ```
 $ grep cpuid out.kern_folded | ./flamegraph.pl > cpuid.svg
@@ -125,7 +135,8 @@ Provided Examples
 
 ### Linux perf\_events
 
-An example output from Linux "perf script" is included, gzip'd, as example-perf-stacks.txt.gz. The resulting flame graph is example-perf.svg:
+An example output from Linux "perf script" is included, gzip'd, as example-perf-stacks.txt.gz. The resulting flame graph
+is example-perf.svg:
 
 [![Example](http://www.brendangregg.com/FlameGraphs/example-perf.svg)](http://www.brendangregg.com/FlameGraphs/example-perf.svg)
 
@@ -135,15 +146,19 @@ You can create this using:
 $ gunzip -c example-perf-stacks.txt.gz | ./stackcollapse-perf.pl --all | ./flamegraph.pl --color=java --hash > example-perf.svg
 ```
 
-This shows my typical workflow: I'll gzip profiles on the target, then copy them to my laptop for analysis. Since I have hundreds of profiles, I leave them gzip'd!
+This shows my typical workflow: I'll gzip profiles on the target, then copy them to my laptop for analysis. Since I have
+hundreds of profiles, I leave them gzip'd!
 
-Since this profile included Java, I used the flamegraph.pl --color=java palette. I've also used stackcollapse-perf.pl --all, which includes all annotations that help flamegraph.pl use separate colors for kernel and user level code. The resulting flame graph uses: green == Java, yellow == C++, red == user-mode native, orange == kernel.
+Since this profile included Java, I used the flamegraph.pl --color=java palette. I've also used stackcollapse-perf.pl
+--all, which includes all annotations that help flamegraph.pl use separate colors for kernel and user level code. The
+resulting flame graph uses: green == Java, yellow == C++, red == user-mode native, orange == kernel.
 
 This profile was from an analysis of vert.x performance. The benchmark client, wrk, is also visible in the flame graph.
 
 ### DTrace
 
-An example output from DTrace is also included, example-dtrace-stacks.txt, and the resulting flame graph, example-dtrace.svg:
+An example output from DTrace is also included, example-dtrace-stacks.txt, and the resulting flame graph,
+example-dtrace.svg:
 
 [![Example](http://www.brendangregg.com/FlameGraphs/example-dtrace.svg)](http://www.brendangregg.com/FlameGraphs/example-dtrace.svg)
 
@@ -153,7 +168,8 @@ You can generate this using:
 $ ./stackcollapse.pl example-stacks.txt | ./flamegraph.pl > example.svg
 ```
 
-This was from a particular performance investigation: the Flame Graph identified that CPU time was spent in the lofs module, and quantified that time.
+This was from a particular performance investigation: the Flame Graph identified that CPU time was spent in the lofs
+module, and quantified that time.
 
 
 Options
@@ -188,21 +204,20 @@ USAGE: ./flamegraph.pl [options] infile > outfile.svg
 	eg,
 	./flamegraph.pl --title="Flame Graph: malloc()" trace.txt > graph.svg
 
-As suggested in the example, flame graphs can process traces of any event,
-such as malloc()s, provided stack traces are gathered.
+As suggested in the example, flame graphs can process traces of any event, such as malloc()s, provided stack traces are
+gathered.
 
 
 Consistent Palette
 ==================
-If you use the `--cp` option, it will use the $colors selection and randomly
-generate the palette like normal. Any future flamegraphs created using the `--cp`
-option will use the same palette map. Any new symbols from future flamegraphs
-will have their colors randomly generated using the $colors selection.
+If you use the `--cp` option, it will use the $colors selection and randomly generate the palette like normal. Any
+future flamegraphs created using the `--cp`
+option will use the same palette map. Any new symbols from future flamegraphs will have their colors randomly generated
+using the $colors selection.
 
 If you don't like the palette, just delete the palette.map file.
 
-This allows your to change your colorscheme between flamegraphs to make the
-differences REALLY stand out.
+This allows your to change your colorscheme between flamegraphs to make the differences REALLY stand out.
 
 Example:
 

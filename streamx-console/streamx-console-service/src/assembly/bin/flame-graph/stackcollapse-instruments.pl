@@ -13,14 +13,14 @@ my @stack = ();
 
 <>;
 foreach (<>) {
-	chomp;
-	/\d+\.\d+ms[^,]+,(\d+(?:\.\d*)?),\s+,(\s*)(.+)/ or die;
-	my $func = $3;
-	my $depth = length ($2);
-	$stack [$depth] = $3;
-	foreach my $i (0 .. $depth - 1) {
-		print $stack [$i];
-		print ";";
-	}
-	print "$func $1\n";
+    chomp;
+    /\d+\.\d+ms[^,]+,(\d+(?:\.\d*)?),\s+,(\s*)(.+)/ or die;
+    my $func = $3;
+    my $depth = length($2);
+    $stack[$depth] = $3;
+    foreach my $i (0 .. $depth - 1) {
+        print $stack[$i];
+        print ";";
+    }
+    print "$func $1\n";
 }

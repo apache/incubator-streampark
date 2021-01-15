@@ -18,12 +18,12 @@ use strict;
 use Getopt::Long;
 
 # tunables
-my $shorten_pkgs = 0;		# shorten package names
-my $no_pkgs = 0;		    # really shorten package names!!
+my $shorten_pkgs = 0; # shorten package names
+my $no_pkgs = 0;      # really shorten package names!!
 my $help = 0;
 
 sub usage {
-	die <<USAGE_END;
+    die <<USAGE_END;
 USAGE: $0 [options] infile > outfile\n
 	--shorten-pkgs : shorten package names
   --no-pkgs      : suppress package names (makes SVG much more readable)
@@ -32,41 +32,42 @@ USAGE_END
 }
 
 GetOptions(
-	'shorten-pkgs!'   => \$shorten_pkgs,
-	'no-pkgs!'        => \$no_pkgs,
-	'help'            => \$help,
+    'shorten-pkgs!' => \$shorten_pkgs,
+    'no-pkgs!'      => \$no_pkgs,
+    'help'          => \$help,
 ) or usage();
 $help && usage();
 
 my %collapsed;
 
 sub remember_stack {
-	my ($stack, $count) = @_;
-	$collapsed{$stack} += $count;
+    my ($stack, $count) = @_;
+    $collapsed{$stack} += $count;
 }
 
 my @stack;
 
 foreach (<>) {
-	chomp;
+    chomp;
 
-  if (/^\s*at ([^\(]*)/) {
-		my $func = $1;
-		if ($shorten_pkgs || $no_pkgs) {
-			my ($pkgs, $clsFunc) = ( $func =~ m/(.*\.)([^.]+\.[^.]+)$/ );
-			$pkgs =~ s/(\w)\w*/$1/g;
-      $func = $no_pkgs ? $clsFunc: $pkgs . $clsFunc;
-		}
-		unshift @stack, $func;
-	} elsif (@stack ) {
-		next if m/.*waiting on .*/;
-		remember_stack(join(";", @stack), 1) if @stack;
-		undef @stack;
-  }
+    if (/^\s*at ([^\(]*)/) {
+        my $func = $1;
+        if ($shorten_pkgs || $no_pkgs) {
+            my ($pkgs, $clsFunc) = ($func =~ m/(.*\.)([^.]+\.[^.]+)$/);
+            $pkgs =~ s/(\w)\w*/$1/g;
+            $func = $no_pkgs ? $clsFunc : $pkgs . $clsFunc;
+        }
+        unshift @stack, $func;
+    }
+    elsif (@stack) {
+        next if m/.*waiting on .*/;
+        remember_stack(join(";", @stack), 1) if @stack;
+        undef @stack;
+    }
 }
 
 remember_stack(join(";", @stack), 1) if @stack;
 
-foreach my $k (sort { $a cmp $b } keys %collapsed) {
-	print "$k $collapsed{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %collapsed) {
+    print "$k $collapsed{$k}\n";
 }

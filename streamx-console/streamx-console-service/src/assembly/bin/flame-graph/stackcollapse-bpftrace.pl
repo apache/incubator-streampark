@@ -49,18 +49,20 @@ my @stack;
 my $in_stack = 0;
 
 foreach (<>) {
-  chomp;
-  if (!$in_stack) {
-    if (/^@\[/) {
-      $in_stack = 1;
+    chomp;
+    if (!$in_stack) {
+        if (/^@\[/) {
+            $in_stack = 1;
+        }
     }
-  } else {
-    if (m/^\]: (\d+)/) {
-      print join(';', reverse(@stack)) . " $1\n";
-      $in_stack = 0;
-      @stack = ();
-    } else {
-      push(@stack, $_);
+    else {
+        if (m/^\]: (\d+)/) {
+            print join(';', reverse(@stack)) . " $1\n";
+            $in_stack = 0;
+            @stack = ();
+        }
+        else {
+            push(@stack, $_);
+        }
     }
-  }
 }

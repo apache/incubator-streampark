@@ -1,8 +1,7 @@
 package com.streamxhub.console.system.authentication;
 
-import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.service.RoleService;
-import com.streamxhub.console.system.service.UserService;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -14,7 +13,9 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.Set;
+import com.streamxhub.console.system.entity.User;
+import com.streamxhub.console.system.service.RoleService;
+import com.streamxhub.console.system.service.UserService;
 
 /**
  * 自定义实现 ShiroRealm，包含认证和授权两大模块
@@ -35,8 +36,7 @@ public class ShiroRealm extends AuthorizingRealm {
     }
 
     /**
-     * `
-     * 授权模块，获取用户角色和权限
+     * ` 授权模块，获取用户角色和权限
      *
      * @param token token
      * @return AuthorizationInfo 权限信息
@@ -65,7 +65,8 @@ public class ShiroRealm extends AuthorizingRealm {
      * @throws AuthenticationException 认证相关异常
      */
     @Override
-    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
+    protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
+            throws AuthenticationException {
         // 这里的 token是从 JWTFilter 的 executeLogin 方法传递过来的，已经经过了解密
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);

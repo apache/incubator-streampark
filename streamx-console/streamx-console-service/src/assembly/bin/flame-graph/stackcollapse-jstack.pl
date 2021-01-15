@@ -60,13 +60,13 @@ use strict;
 use Getopt::Long;
 
 # tunables
-my $include_tname = 1;		# include thread names in stacks
-my $include_tid = 0;		# include thread IDs in stacks
-my $shorten_pkgs = 0;		# shorten package names
+my $include_tname = 1; # include thread names in stacks
+my $include_tid = 0;   # include thread IDs in stacks
+my $shorten_pkgs = 0;  # shorten package names
 my $help = 0;
 
 sub usage {
-	die <<USAGE_END;
+    die <<USAGE_END;
 USAGE: $0 [options] infile > outfile\n
 	--include-tname
 	--no-include-tname # include/omit thread names in stacks (default: include)
@@ -81,10 +81,10 @@ USAGE_END
 }
 
 GetOptions(
-	'include-tname!'  => \$include_tname,
-	'include-tid!'    => \$include_tid,
-	'shorten-pkgs!'   => \$shorten_pkgs,
-	'help'            => \$help,
+    'include-tname!' => \$include_tname,
+    'include-tid!'   => \$include_tid,
+    'shorten-pkgs!'  => \$shorten_pkgs,
+    'help'           => \$help,
 ) or usage();
 $help && usage();
 
@@ -93,8 +93,8 @@ $help && usage();
 my %collapsed;
 
 sub remember_stack {
-	my ($stack, $count) = @_;
-	$collapsed{$stack} += $count;
+    my ($stack, $count) = @_;
+    $collapsed{$stack} += $count;
 }
 
 my @stack;
@@ -102,75 +102,79 @@ my $tname;
 my $state = "?";
 
 foreach (<>) {
-	next if m/^#/;
-	chomp;
+    next if m/^#/;
+    chomp;
 
-	if (m/^$/) {
-		# only include RUNNABLE states
-		goto clear if $state ne "RUNNABLE";
+    if (m/^$/) {
+        # only include RUNNABLE states
+        goto clear if $state ne "RUNNABLE";
 
-		# save stack
-		if (defined $tname) { unshift @stack, $tname; }
-		remember_stack(join(";", @stack), 1) if @stack;
-clear:
-		undef @stack;
-		undef $tname;
-		$state = "?";
-		next;
-	}
+        # save stack
+        if (defined $tname) {unshift @stack, $tname;}
+        remember_stack(join(";", @stack), 1) if @stack;
+        clear:
+        undef @stack;
+        undef $tname;
+        $state = "?";
+        next;
+    }
 
-	#
-	# While parsing jstack output, the $state variable may be altered from
-	# RUNNABLE to other states. This causes the stacks to be filtered later,
-	# since only RUNNABLE stacks are included.
-	#
+    #
+    # While parsing jstack output, the $state variable may be altered from
+    # RUNNABLE to other states. This causes the stacks to be filtered later,
+    # since only RUNNABLE stacks are included.
+    #
 
-	if (/^"([^"]*)/) {
-		my $name = $1;
+    if (/^"([^"]*)/) {
+        my $name = $1;
 
-		if ($include_tname) {
-			$tname = $name;
-			unless ($include_tid) {
-				$tname =~ s/-\d+$//;
-			}
-		}
+        if ($include_tname) {
+            $tname = $name;
+            unless ($include_tid) {
+                $tname =~ s/-\d+$//;
+            }
+        }
 
-		# set state for various background threads
-		$state = "BACKGROUND" if $name =~ /C. CompilerThread/;
-		$state = "BACKGROUND" if $name =~ /Signal Dispatcher/;
-		$state = "BACKGROUND" if $name =~ /Service Thread/;
-		$state = "BACKGROUND" if $name =~ /Attach Listener/;
+        # set state for various background threads
+        $state = "BACKGROUND" if $name =~ /C. CompilerThread/;
+        $state = "BACKGROUND" if $name =~ /Signal Dispatcher/;
+        $state = "BACKGROUND" if $name =~ /Service Thread/;
+        $state = "BACKGROUND" if $name =~ /Attach Listener/;
 
-	} elsif (/java.lang.Thread.State: (\S+)/) {
-		$state = $1 if $state eq "?";
-	} elsif (/^\s*at ([^\(]*)/) {
-		my $func = $1;
-		if ($shorten_pkgs) {
-			my ($pkgs, $clsFunc) = ( $func =~ m/(.*\.)([^.]+\.[^.]+)$/ );
-			$pkgs =~ s/(\w)\w*/$1/g;
-			$func = $pkgs . $clsFunc;
-		}
-		unshift @stack, $func;
+    }
+    elsif (/java.lang.Thread.State: (\S+)/) {
+        $state = $1 if $state eq "?";
+    }
+    elsif (/^\s*at ([^\(]*)/) {
+        my $func = $1;
+        if ($shorten_pkgs) {
+            my ($pkgs, $clsFunc) = ($func =~ m/(.*\.)([^.]+\.[^.]+)$/);
+            $pkgs =~ s/(\w)\w*/$1/g;
+            $func = $pkgs . $clsFunc;
+        }
+        unshift @stack, $func;
 
-		# fix state for epollWait
-		$state = "WAITING" if $func =~ /epollWait/;
-		$state = "WAITING" if $func =~ /EPoll\.wait/;
+        # fix state for epollWait
+        $state = "WAITING" if $func =~ /epollWait/;
+        $state = "WAITING" if $func =~ /EPoll\.wait/;
 
 
-		# fix state for various networking functions
-		$state = "NETWORK" if $func =~ /socketAccept$/;
-		$state = "NETWORK" if $func =~ /Socket.*accept0$/;
-		$state = "NETWORK" if $func =~ /socketRead0$/;
+        # fix state for various networking functions
+        $state = "NETWORK" if $func =~ /socketAccept$/;
+        $state = "NETWORK" if $func =~ /Socket.*accept0$/;
+        $state = "NETWORK" if $func =~ /socketRead0$/;
 
-	} elsif (/^\s*-/ or /^2\d\d\d-/ or /^Full thread dump/ or
-		 /^JNI global references:/) {
-		# skip these info lines
-		next;
-	} else {
-		warn "Unrecognized line: $_";
-	}
+    }
+    elsif (/^\s*-/ or /^2\d\d\d-/ or /^Full thread dump/ or
+        /^JNI global references:/) {
+        # skip these info lines
+        next;
+    }
+    else {
+        warn "Unrecognized line: $_";
+    }
 }
 
-foreach my $k (sort { $a cmp $b } keys %collapsed) {
-	print "$k $collapsed{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %collapsed) {
+    print "$k $collapsed{$k}\n";
 }

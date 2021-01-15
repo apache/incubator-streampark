@@ -60,15 +60,15 @@ my $prev_count;
 my $prev_indent = -1;
 
 foreach (<>) {
-	if (m/^( *)[0-9.]+%  \[([0-9]+)\]\s*(\S+)/) {
-		my $indent = length($1);
-		if ($indent <= $prev_indent) {
-			print join(';', reverse(@stack[0 .. $prev_indent])) .
-			    " $prev_count\n";
-		}
-		$stack[$indent] = $3;
-		$prev_count = $2;
-		$prev_indent = $indent;
-	}
+    if (m/^( *)[0-9.]+%  \[([0-9]+)\]\s*(\S+)/) {
+        my $indent = length($1);
+        if ($indent <= $prev_indent) {
+            print join(';', reverse(@stack[0 .. $prev_indent])) .
+                " $prev_count\n";
+        }
+        $stack[$indent] = $3;
+        $prev_count = $2;
+        $prev_indent = $indent;
+    }
 }
-print join(';', reverse(@stack[0 .. $prev_indent])) .  " $prev_count\n";
+print join(';', reverse(@stack[0 .. $prev_indent])) . " $prev_count\n";

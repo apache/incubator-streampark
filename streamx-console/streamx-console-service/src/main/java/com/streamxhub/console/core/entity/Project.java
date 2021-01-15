@@ -20,21 +20,23 @@
  */
 package com.streamxhub.console.core.entity;
 
+import java.io.File;
+import java.io.Serializable;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import lombok.Data;
+
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.console.base.properties.StreamXProperties;
 import com.streamxhub.console.base.utils.CommonUtil;
 import com.streamxhub.console.base.utils.SpringContextUtil;
 import com.wuwenze.poi.annotation.Excel;
-import lombok.Data;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-
-import java.io.File;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
 
 /**
  * @author benjobs
@@ -62,8 +64,7 @@ public class Project implements Serializable {
 
     private String password;
     /**
-     * 1:git
-     * 2:svn
+     * 1:git 2:svn
      */
     private Integer repository;
 
@@ -73,11 +74,7 @@ public class Project implements Serializable {
 
     private String description;
     /**
-     * 构建状态:
-     * -1:未构建
-     * 0:正在构建
-     * 1:构建成功
-     * 2:构建失败
+     * 构建状态: -1:未构建 0:正在构建 1:构建成功 2:构建失败
      */
     @TableField("BUILDSTATE")
     private Integer buildState;
@@ -101,7 +98,8 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/project");
+            appSource =
+                    SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/project");
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -119,7 +117,8 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getAppBase() {
-        String appBase = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/app/");
+        String appBase =
+                SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 
@@ -144,43 +143,35 @@ public class Project implements Serializable {
     public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtil.notEmpty(this.getPom())) {
-            buildHome = new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+            buildHome =
+                    new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
         }
         return Arrays.asList("cd ".concat(buildHome), "mvn clean install -DskipTests");
     }
 
     @JsonIgnore
     public String getLog4BuildStart() {
-        return String.format("%s[StreamX] project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
-                getLogHeader("maven"),
-                getName(),
-                getBranches(),
-                getMavenBuildCmd()
-        );
+        return String.format(
+                "%s[StreamX] project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
+                getLogHeader("maven"), getName(), getBranches(), getMavenBuildCmd());
     }
 
     @JsonIgnore
     public String getLog4PullStart() {
-        return String.format("%s[StreamX] project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
-                getLogHeader("git pull"),
-                getName(),
-                getBranches()
-        );
+        return String.format(
+                "%s[StreamX] project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
+                getLogHeader("git pull"), getName(), getBranches());
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
-        return String.format("%s[StreamX] project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
-                getLogHeader("git clone"),
-                getName(),
-                getBranches(),
-                getAppSource()
-        );
+        return String.format(
+                "%s[StreamX] project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
+                getLogHeader("git clone"), getName(), getBranches(), getAppSource());
     }
 
     @JsonIgnore
     public String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
     }
-
 }

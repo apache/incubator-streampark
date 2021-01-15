@@ -1,19 +1,21 @@
 package com.streamxhub.console.system.entity;
 
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
+import javax.validation.constraints.Size;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import lombok.Data;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.console.base.converter.TimeConverter;
 import com.wuwenze.poi.annotation.Excel;
 import com.wuwenze.poi.annotation.ExcelField;
-import lombok.Data;
-
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @TableName("t_user")
@@ -84,6 +86,7 @@ public class User implements Serializable {
 
     @NotBlank(message = "{required}")
     private transient String roleId;
+
     @ExcelField(value = "角色")
     private transient String roleName;
 
@@ -98,17 +101,19 @@ public class User implements Serializable {
 
     private transient String id;
 
-    //盐值
+    // 盐值
     private String salt;
 
-    //昵称
+    // 昵称
     private String nickName;
+
     /**
-     * shiro-redis v3.1.0 必须要有 getAuthCacheKey()或者 getId()方法
-     * # Principal id field name. The field which you can get unique id to identify this principal.
-     * # For example, if you use UserInfo as Principal class, the id field maybe userId, userName, email, etc.
-     * # Remember to add getter to this id field. For example, getUserId(), getUserName(), getEmail(), etc.
-     * # Default value is authCacheKey or id, that means your principal object has a method called "getAuthCacheKey()" or "getId()"
+     * shiro-redis v3.1.0 必须要有 getAuthCacheKey()或者 getId()方法 # Principal id field name. The field
+     * which you can get unique id to identify this principal. # For example, if you use UserInfo as
+     * Principal class, the id field maybe userId, userName, email, etc. # Remember to add getter to
+     * this id field. For example, getUserId(), getUserName(), getEmail(), etc. # Default value is
+     * authCacheKey or id, that means your principal object has a method called "getAuthCacheKey()" or
+     * "getId()"
      *
      * @return userId as Principal id field name
      */

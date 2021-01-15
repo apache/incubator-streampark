@@ -56,11 +56,11 @@ use strict;
 use Getopt::Std;
 
 # defaults
-my $normalize = 0;	# make sample counts equal
-my $striphex = 0;	# strip hex numbers
+my $normalize = 0; # make sample counts equal
+my $striphex = 0;  # strip hex numbers
 
 sub usage {
-	print STDERR <<USAGE_END;
+    print STDERR <<USAGE_END;
 USAGE: $0 [-hns] folded1 folded2 | flamegraph.pl > diff2.svg
 	    -h       # help message
 	    -n       # normalize sample counts
@@ -69,11 +69,11 @@ See stackcollapse scripts for generating folded files.
 Also consider flipping the files and hues to highlight reduced paths:
 $0 folded2 folded1 | ./flamegraph.pl --negate > diff1.svg
 USAGE_END
-	exit 2;
+    exit 2;
 }
 
 usage() if @ARGV < 2;
-our($opt_h, $opt_n, $opt_s);
+our ($opt_h, $opt_n, $opt_s);
 getopts('ns') or usage();
 usage() if $opt_h;
 $normalize = 1 if defined $opt_n;
@@ -87,29 +87,29 @@ my $file2 = $ARGV[1];
 
 open FILE, $file1 or die "ERROR: Can't read $file1\n";
 while (<FILE>) {
-	chomp;
-	my ($stack, $count) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
-	$stack =~ s/0x[0-9a-fA-F]+/0x.../g if $striphex;
-	$Folded{$stack}{1} += $count;
-	$total1 += $count;
+    chomp;
+    my ($stack, $count) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
+    $stack =~ s/0x[0-9a-fA-F]+/0x.../g if $striphex;
+    $Folded{$stack}{1} += $count;
+    $total1 += $count;
 }
 close FILE;
 
 open FILE, $file2 or die "ERROR: Can't read $file2\n";
 while (<FILE>) {
-	chomp;
-	my ($stack, $count) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
-	$stack =~ s/0x[0-9a-fA-F]+/0x.../g if $striphex;
-	$Folded{$stack}{2} += $count;
-	$total2 += $count;
+    chomp;
+    my ($stack, $count) = (/^(.*)\s+?(\d+(?:\.\d*)?)$/);
+    $stack =~ s/0x[0-9a-fA-F]+/0x.../g if $striphex;
+    $Folded{$stack}{2} += $count;
+    $total2 += $count;
 }
 close FILE;
 
 foreach my $stack (keys %Folded) {
-	$Folded{$stack}{1} = 0 unless defined $Folded{$stack}{1};
-	$Folded{$stack}{2} = 0 unless defined $Folded{$stack}{2};
-	if ($normalize && $total1 != $total2) {
-		$Folded{$stack}{1} = int($Folded{$stack}{1} * $total2 / $total1);
-	}
-	print "$stack $Folded{$stack}{1} $Folded{$stack}{2}\n";
+    $Folded{$stack}{1} = 0 unless defined $Folded{$stack}{1};
+    $Folded{$stack}{2} = 0 unless defined $Folded{$stack}{2};
+    if ($normalize && $total1 != $total2) {
+        $Folded{$stack}{1} = int($Folded{$stack}{1} * $total2 / $total1);
+    }
+    print "$stack $Folded{$stack}{1} $Folded{$stack}{2}\n";
 }

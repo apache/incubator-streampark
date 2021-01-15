@@ -1,9 +1,9 @@
 package com.streamxhub.console.system.service;
 
+import java.util.List;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.system.entity.RoleMenu;
-
-import java.util.List;
 
 public interface RoleMenuServie extends IService<RoleMenu> {
 

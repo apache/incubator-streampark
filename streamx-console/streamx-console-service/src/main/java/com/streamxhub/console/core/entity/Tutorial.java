@@ -20,11 +20,12 @@
  */
 package com.streamxhub.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.wuwenze.poi.annotation.Excel;
+import java.util.Date;
+
 import lombok.Data;
 
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.wuwenze.poi.annotation.Excel;
 
 /**
  * @author benjobs

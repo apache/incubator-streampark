@@ -20,13 +20,12 @@
  */
 package com.streamxhub.console.base.utils;
 
+import java.util.Random;
+
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.util.ByteSource;
 
-import java.util.Random;
-
 public class ShaHashUtil {
-
 
     /**
      * 用户密码加密
@@ -36,7 +35,7 @@ public class ShaHashUtil {
      * @return
      */
     public static String encrypt(String salt, String password) {
-       String pass = new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
+        String pass = new Sha256Hash(password, ByteSource.Util.bytes(salt), 1024).toHex();
         return pass;
     }
 
@@ -63,5 +62,4 @@ public class ShaHashUtil {
         String encrypt = encrypt(salt, "123456");
         System.out.println(encrypt);
     }
-
 }

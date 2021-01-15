@@ -54,31 +54,31 @@ use strict;
 my %collapsed;
 
 sub remember_stack {
-	my ($stack, $count) = @_;
-	$collapsed{$stack} += $count;
+    my ($stack, $count) = @_;
+    $collapsed{$stack} += $count;
 }
 
 my @stack;
 
 foreach (<>) {
-	chomp;
+    chomp;
 
-	if (m/^\s*(\d+)+$/) {
-		remember_stack(join(";", @stack), $1);
-		@stack = ();
-		next;
-	}
+    if (m/^\s*(\d+)+$/) {
+        remember_stack(join(";", @stack), $1);
+        @stack = ();
+        next;
+    }
 
-	next if (m/^\s*$/);
+    next if (m/^\s*$/);
 
-	my $frame = $_;
-	$frame =~ s/^\s*//;
-	$frame =~ s/\+[^+]*$//;
-	$frame =~ s/.* : //;
-	$frame = "-" if $frame eq "";
-	unshift @stack, $frame;
+    my $frame = $_;
+    $frame =~ s/^\s*//;
+    $frame =~ s/\+[^+]*$//;
+    $frame =~ s/.* : //;
+    $frame = "-" if $frame eq "";
+    unshift @stack, $frame;
 }
 
-foreach my $k (sort { $a cmp $b } keys %collapsed) {
-	printf "$k $collapsed{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %collapsed) {
+    printf "$k $collapsed{$k}\n";
 }
