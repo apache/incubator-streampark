@@ -28,13 +28,11 @@ import java.util.Collections
 import java.util.concurrent.CopyOnWriteArrayList
 import scala.collection.JavaConversions._
 
-case class SinkBuffer(
-    writer: SinkWriter,
-    delayTime: Long,
-    bufferSize: Int,
-    table: String
-) extends AutoCloseable
-    with Logger {
+
+case class SinkBuffer(writer: SinkWriter,
+                      delayTime: Long,
+                      bufferSize: Int,
+                      table: String) extends AutoCloseable with Logger {
 
   private var timestamp = 0L
 
@@ -57,9 +55,7 @@ case class SinkBuffer(
   private[this] def addToQueue(): Unit = {
     val deepCopy = buildDeepCopy(localValues)
     val params = SinkRequest(deepCopy, table)
-    logDebug(
-      s"Build blank with params: buffer size = ${params.size}, target table  = ${params.table}"
-    )
+    logDebug(s"Build blank with params: buffer size = ${params.size}, target table  = ${params.table}")
     writer.write(params)
     localValues.clear()
   }
@@ -67,8 +63,7 @@ case class SinkBuffer(
   private[this] def flush: Boolean = {
     if (localValues.nonEmpty) {
       localValues.size >= bufferSize || {
-        if (timestamp == 0) false
-        else {
+        if (timestamp == 0) false else {
           val current = System.currentTimeMillis
           current - timestamp > delayTime
         }
@@ -76,10 +71,7 @@ case class SinkBuffer(
     } else false
   }
 
-  private[this] def buildDeepCopy(
-      original: util.List[String]
-  ): util.List[String] =
-    Collections.unmodifiableList(new util.ArrayList[String](original))
+  private[this] def buildDeepCopy(original: util.List[String]): util.List[String] = Collections.unmodifiableList(new util.ArrayList[String](original))
 
   override def close(): Unit = if (localValues.nonEmpty) addToQueue()
 

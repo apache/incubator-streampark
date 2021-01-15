@@ -34,33 +34,27 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.Try
 
 /**
-  * @author benjobs
-  *         基于hikari连接池实现.呃,当然支持多数据源,需注意所有的修改和添加操作都是自动提交事物的...
-  */
+ * @author benjobs
+ *         基于hikari连接池实现.呃,当然支持多数据源,需注意所有的修改和添加操作都是自动提交事物的...
+ */
 object JdbcUtils {
 
   @transient
-  implicit private lazy val formats: DefaultFormats.type =
-    org.json4s.DefaultFormats
+  implicit private lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats
 
-  private val lockMap: mutable.Map[String, ReentrantLock] =
-    new ConcurrentHashMap[String, ReentrantLock]
+  private val lockMap: mutable.Map[String, ReentrantLock] = new ConcurrentHashMap[String, ReentrantLock]
 
-  private[this] val dataSourceHolder =
-    new ConcurrentHashMap[String, HikariDataSource]
+  private[this] val dataSourceHolder = new ConcurrentHashMap[String, HikariDataSource]
 
   /**
-    * 将查询的一行数据的所有字段封装到Map里,返回List。。。
-    *
-    * @param sql
-    * @param jdbcConfig
-    * @return
-    */
-  def select(sql: String, func: ResultSet => Unit = null)(
-      implicit jdbcConfig: Properties
-  ): List[Map[String, _]] = {
-    if (Try(sql.isEmpty).getOrElse(false)) List.empty
-    else {
+   * 将查询的一行数据的所有字段封装到Map里,返回List。。。
+   *
+   * @param sql
+   * @param jdbcConfig
+   * @return
+   */
+  def select(sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties): List[Map[String, _]] = {
+    if (Try(sql.isEmpty).getOrElse(false)) List.empty else {
       val conn = getConnection(jdbcConfig)
       var stmt: Statement = null
       var result: ResultSet = null
@@ -84,8 +78,7 @@ object JdbcUtils {
         }
         if (array.isEmpty) List.empty else array.toList
       } catch {
-        case ex: Exception =>
-          ex.printStackTrace()
+        case ex: Exception => ex.printStackTrace()
           List.empty
       } finally {
         close(result, stmt, conn)
@@ -93,28 +86,21 @@ object JdbcUtils {
     }
   }
 
-  def count(sql: String)(implicit jdbcConfig: Properties): Long =
-    unique(sql).head._2.toString.toLong
+  def count(sql: String)(implicit jdbcConfig: Properties): Long = unique(sql).head._2.toString.toLong
 
-  def count(conn: Connection, sql: String): Long =
-    unique(conn, sql).head._2.toString.toLong
+  def count(conn: Connection, sql: String): Long = unique(conn, sql).head._2.toString.toLong
 
   /**
-    * 直接查询一个对象
-    *
-    * @param sql
-    * @param jdbcConfig
-    * @tparam T
-    * @return
-    */
-  def select2[T](sql: String, func: ResultSet => Unit = null)(
-      implicit jdbcConfig: Properties,
-      manifest: Manifest[T]
-  ): List[T] = toObject[T](select(sql, func))
+   * 直接查询一个对象
+   *
+   * @param sql
+   * @param jdbcConfig
+   * @tparam T
+   * @return
+   */
+  def select2[T](sql: String, func: ResultSet => Unit = null)(implicit jdbcConfig: Properties, manifest: Manifest[T]): List[T] = toObject[T](select(sql, func))
 
-  private[this] def toObject[T](list: List[Map[String, _]])(
-      implicit manifest: Manifest[T]
-  ): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
+  private[this] def toObject[T](list: List[Map[String, _]])(implicit manifest: Manifest[T]): List[T] = if (list.isEmpty) List.empty else list.map(JsonUtils.read[T])
 
   def batch(sql: Iterable[String])(implicit jdbcConfig: Properties): Int = {
     var conn: Connection = null
@@ -127,21 +113,18 @@ object JdbcUtils {
         try {
           var index: Int = 0
           val batchSize = 1000
-          sql
-            .map(x => {
-              prepStat.addBatch(x)
-              index += 1
-              if (index > 0 && index % batchSize == 0) {
-                val count = prepStat.executeBatch().sum
-                conn.commit()
-                prepStat.clearBatch()
-                count
-              } else 0
-            })
-            .sum + prepStat.executeBatch().sum
+          sql.map(x => {
+            prepStat.addBatch(x)
+            index += 1
+            if (index > 0 && index % batchSize == 0) {
+              val count = prepStat.executeBatch().sum
+              conn.commit()
+              prepStat.clearBatch()
+              count
+            } else 0
+          }).sum + prepStat.executeBatch().sum
         } catch {
-          case ex: Exception =>
-            ex.printStackTrace()
+          case ex: Exception => ex.printStackTrace()
             0
         } finally {
           conn.commit()
@@ -150,42 +133,39 @@ object JdbcUtils {
     }
   }
 
-  def update(sql: String)(implicit jdbcConfig: Properties): Int =
-    update(getConnection(jdbcConfig), sql)
+  def update(sql: String)(implicit jdbcConfig: Properties): Int = update(getConnection(jdbcConfig), sql)
 
   /**
-    *
-    * 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQL DDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE。
-    * INSERT、UPDATE 或 DELETE 语句的效果是修改表中零行或多行中的一列或多列。
-    * executeUpdate 的返回值是一个整数（int），指示受影响的行数（即更新计数）。
-    * 对于 CREATE TABLE 或 DROP TABLE 等不操作行的语句，executeUpdate 的返回值总为零
-    *
-    * @param sql
-    * @return
-    */
+   *
+   * 用于执行 INSERT、UPDATE 或 DELETE 语句以及 SQL DDL（数据定义语言）语句，例如 CREATE TABLE 和 DROP TABLE。
+   * INSERT、UPDATE 或 DELETE 语句的效果是修改表中零行或多行中的一列或多列。
+   * executeUpdate 的返回值是一个整数（int），指示受影响的行数（即更新计数）。
+   * 对于 CREATE TABLE 或 DROP TABLE 等不操作行的语句，executeUpdate 的返回值总为零
+   *
+   * @param sql
+   * @return
+   */
   def update(conn: Connection, sql: String): Int = {
     var statement: Statement = null
     try {
       statement = conn.createStatement
       statement.executeUpdate(sql)
     } catch {
-      case ex: Exception =>
-        ex.printStackTrace()
+      case ex: Exception => ex.printStackTrace()
         -1
     } finally {
       close(statement, conn)
     }
   }
 
-  def unique(sql: String)(implicit jdbcConfig: Properties): Map[String, _] =
-    unique(getConnection(jdbcConfig), sql)
+  def unique(sql: String)(implicit jdbcConfig: Properties): Map[String, _] = unique(getConnection(jdbcConfig), sql)
 
   /**
-    * 查询返回一行记录...
-    *
-    * @param sql
-    * @return
-    */
+   * 查询返回一行记录...
+   *
+   * @param sql
+   * @return
+   */
   def unique(conn: Connection, sql: String): Map[String, _] = {
     var stmt: Statement = null
     var result: ResultSet = null
@@ -193,8 +173,7 @@ object JdbcUtils {
       stmt = createStatement(conn)
       result = stmt.executeQuery(sql)
       val count = result.getMetaData.getColumnCount
-      if (!result.next()) Map.empty
-      else {
+      if (!result.next()) Map.empty else {
         var map = Map[String, Any]()
         for (x <- 1 to count) {
           val key = result.getMetaData.getColumnLabel(x)
@@ -204,36 +183,30 @@ object JdbcUtils {
         map
       }
     } catch {
-      case ex: Exception =>
-        ex.printStackTrace()
+      case ex: Exception => ex.printStackTrace()
         Map.empty
     } finally {
       close(result, stmt, conn)
     }
   }
 
-  def unique2[T](
-      sql: String
-  )(implicit jdbcConfig: Properties, manifest: Manifest[T]): T =
-    toObject[T](List(unique(sql))).head
+  def unique2[T](sql: String)(implicit jdbcConfig: Properties, manifest: Manifest[T]): T = toObject[T](List(unique(sql))).head
 
-  def unique2[T](connection: Connection, sql: String)(
-      implicit manifest: Manifest[T]
-  ): T = toObject(List(unique(connection, sql))).head
+  def unique2[T](connection: Connection, sql: String)(implicit manifest: Manifest[T]): T = toObject(List(unique(connection, sql))).head
 
   /**
-    *
-    * 方法execute：
-    * 可用于执行任何SQL语句，返回一个boolean值，表明执行该SQL语句是否返回了ResultSet。
-    * 如果执行后第一个结果是ResultSet，则返回true，否则返回false。
-    * 但它执行SQL语句时比较麻烦，通常我们没有必要使用execute方法来执行SQL语句，而是使用executeQuery或executeUpdate更适合。
-    * 但如果在不清楚SQL语句的类型时则只能使用execute方法来执行该SQL语句了
-    *
-    * @param sql
-    * @return
-    */
-  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean =
-    execute(getConnection(jdbcConfig), sql)
+   *
+   * 方法execute：
+   * 可用于执行任何SQL语句，返回一个boolean值，表明执行该SQL语句是否返回了ResultSet。
+   * 如果执行后第一个结果是ResultSet，则返回true，否则返回false。
+   * 但它执行SQL语句时比较麻烦，通常我们没有必要使用execute方法来执行SQL语句，而是使用executeQuery或executeUpdate更适合。
+   * 但如果在不清楚SQL语句的类型时则只能使用execute方法来执行该SQL语句了
+   *
+   * @param sql
+   * @return
+   */
+
+  def execute(sql: String)(implicit jdbcConfig: Properties): Boolean = execute(getConnection(jdbcConfig), sql)
 
   def execute(conn: Connection, sql: String): Boolean = {
     var stmt: Statement = null
@@ -241,8 +214,7 @@ object JdbcUtils {
       stmt = conn.createStatement
       stmt.execute(sql)
     } catch {
-      case ex: Exception =>
-        ex.printStackTrace()
+      case ex: Exception => ex.printStackTrace()
         false
     } finally {
       close(stmt, conn)
@@ -250,87 +222,54 @@ object JdbcUtils {
   }
 
   /**
-    * 以及Hikari连接池
-    *
-    * @param prop
-    * @return
-    */
+   * 以及Hikari连接池
+   *
+   * @param prop
+   * @return
+   */
   def getConnection(prop: Properties): Connection = {
     val instance = prop(KEY_INSTANCE)
     val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
     try {
       lock.lock()
-      val ds: HikariDataSource =
-        Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
-          case None =>
-            //创建一个数据源对象
-            val jdbcConfig = new HikariConfig()
-            prop
-              .filter(_._1 != KEY_INSTANCE)
-              .foreach(x => {
-                Try(Option(jdbcConfig.getClass.getDeclaredField(x._1)))
-                  .getOrElse(None) match {
-                  case Some(field) =>
-                    field.setAccessible(true)
-                    field.getType.getSimpleName match {
-                      case "String" =>
-                        field.set(jdbcConfig, x._2.asInstanceOf[Object])
-                      case "int" =>
-                        field.set(jdbcConfig, x._2.toInt.asInstanceOf[Object])
-                      case "long" =>
-                        field.set(jdbcConfig, x._2.toLong.asInstanceOf[Object])
-                      case "boolean" =>
-                        field
-                          .set(jdbcConfig, x._2.toBoolean.asInstanceOf[Object])
+      val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+        case None =>
+          //创建一个数据源对象
+          val jdbcConfig = new HikariConfig()
+          prop.filter(_._1 != KEY_INSTANCE).foreach(x => {
+            Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
+              case Some(field) =>
+                field.setAccessible(true)
+                field.getType.getSimpleName match {
+                  case "String" => field.set(jdbcConfig, x._2.asInstanceOf[Object])
+                  case "int" => field.set(jdbcConfig, x._2.toInt.asInstanceOf[Object])
+                  case "long" => field.set(jdbcConfig, x._2.toLong.asInstanceOf[Object])
+                  case "boolean" => field.set(jdbcConfig, x._2.toBoolean.asInstanceOf[Object])
+                  case _ =>
+                }
+              case None =>
+                val setMethod = s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
+                val method = Try(jdbcConfig.getClass.getMethods.filter(_.getName == setMethod).filter(_.getParameterCount == 1).head).getOrElse(null)
+                method match {
+                  case m =>
+                    m.setAccessible(true)
+                    m.getParameterTypes.head.getSimpleName match {
+                      case "String" => m.invoke(jdbcConfig, Seq(x._2.asInstanceOf[Object]): _*)
+                      case "int" => m.invoke(jdbcConfig, Seq(x._2.toInt.asInstanceOf[Object]): _*)
+                      case "long" => m.invoke(jdbcConfig, Seq(x._2.toLong.asInstanceOf[Object]): _*)
+                      case "boolean" => m.invoke(jdbcConfig, Seq(x._2.toBoolean.asInstanceOf[Object]): _*)
                       case _ =>
                     }
-                  case None =>
-                    val setMethod =
-                      s"set${x._1.substring(0, 1).toUpperCase}${x._1.substring(1)}"
-                    val method = Try(
-                      jdbcConfig.getClass.getMethods
-                        .filter(_.getName == setMethod)
-                        .filter(_.getParameterCount == 1)
-                        .head
-                    ).getOrElse(null)
-                    method match {
-                      case m =>
-                        m.setAccessible(true)
-                        m.getParameterTypes.head.getSimpleName match {
-                          case "String" =>
-                            m.invoke(
-                              jdbcConfig,
-                              Seq(x._2.asInstanceOf[Object]): _*
-                            )
-                          case "int" =>
-                            m.invoke(
-                              jdbcConfig,
-                              Seq(x._2.toInt.asInstanceOf[Object]): _*
-                            )
-                          case "long" =>
-                            m.invoke(
-                              jdbcConfig,
-                              Seq(x._2.toLong.asInstanceOf[Object]): _*
-                            )
-                          case "boolean" =>
-                            m.invoke(
-                              jdbcConfig,
-                              Seq(x._2.toBoolean.asInstanceOf[Object]): _*
-                            )
-                          case _ =>
-                        }
-                      case null =>
-                        throw new IllegalArgumentException(
-                          s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP"
-                        )
-                    }
+                  case null =>
+                    throw new IllegalArgumentException(s"jdbcConfig error,property:${x._1} invalid,please see more properties jdbcConfig https://github.com/brettwooldridge/HikariCP")
                 }
-              })
-            val ds = new HikariDataSource(jdbcConfig)
-            dataSourceHolder += instance -> ds
-            ds
-          case Some(x) => x
-        }
+            }
+          })
+          val ds = new HikariDataSource(jdbcConfig)
+          dataSourceHolder += instance -> ds
+          ds
+        case Some(x) => x
+      }
       //返回连接...
       ds.getConnection()
     } finally {
@@ -338,13 +277,8 @@ object JdbcUtils {
     }
   }
 
-  private[this] def createStatement(conn: Connection): Statement =
-    conn.createStatement(
-      ResultSet.TYPE_FORWARD_ONLY,
-      ResultSet.CONCUR_READ_ONLY
-    )
+  private[this] def createStatement(conn: Connection): Statement = conn.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)
 
-  def close(closeable: AutoCloseable*): Unit =
-    Try(closeable.filter(x => x != null).foreach(_.close()))
+  def close(closeable: AutoCloseable*): Unit = Try(closeable.filter(x => x != null).foreach(_.close()))
 
 }

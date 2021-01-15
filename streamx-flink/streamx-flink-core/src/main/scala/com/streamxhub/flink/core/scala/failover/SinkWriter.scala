@@ -23,6 +23,7 @@ package com.streamxhub.flink.core.scala.failover
 
 import com.streamxhub.common.util.Logger
 
+
 trait SinkWriter extends AutoCloseable with Logger {
   def write(request: SinkRequest)
 }

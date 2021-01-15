@@ -16,6 +16,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
   private lazy val user = storeParams("mysql.user")
   private lazy val password = storeParams("mysql.password")
 
+
   /**
     *
     * 存放offset的表模型如下,(topic+groupId+partition 为联合唯一主键)
@@ -32,10 +33,7 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
     * @param topics
     * @return
     */
-  override def get(
-      groupId: String,
-      topics: Set[String]
-  ): Map[TopicPartition, Long] = {
+  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     require(topics.nonEmpty)
     //在Driver端创建数据库连接池
     ConnectionPool.singleton(jdbcURL, user, password)
@@ -60,20 +58,12 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
         DB.readOnly { implicit session =>
           val where = topics.size match {
             case 1 => s""" `topic` = "${topics.head}"  """
-            case _ =>
-              s""" `topic` in (${topics.mkString("\"", "\",\"", "\"")}) """
+            case _ => s""" `topic` in (${topics.mkString("\"", "\",\"", "\"")}) """
           }
-          val sql =
-            s"select `topic`,`partition`,`offset` from $table where `groupId`=? and $where"
-          SQL(sql)
-            .bind(groupId)
-            .map { result =>
-              new TopicPartition(result.string(1), result.int(2)) -> result
-                .long(3)
-            }
-            .list
-            .apply()
-            .toMap
+          val sql = s"select `topic`,`partition`,`offset` from $table where `groupId`=? and $where"
+          SQL(sql).bind(groupId).map { result =>
+            new TopicPartition(result.string(1), result.int(2)) -> result.long(3)
+          }.list.apply().toMap
         }
     }
   }
@@ -84,25 +74,15 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
     * @param groupId
     * @param offsetInfos
     */
-  override def update(
-      groupId: String,
-      offsetInfos: Map[TopicPartition, Long]
-  ): Unit = {
+  override def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit = {
     DB.localTx { implicit session =>
-      offsetInfos.foreach {
-        case (tp, offset) =>
-          val sql =
-            s"insert into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?) on duplicate key update `offset`= values(`offset`) "
-          val updated = SQL(sql)
-            .bind(tp.topic(), groupId, tp.partition(), offset)
-            .update()
-            .apply()
-          if (updated == 0) {
-            throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
-          }
-          logInfo(
-            s"storeType:MySQL,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]"
-          )
+      offsetInfos.foreach { case (tp, offset) =>
+        val sql = s"insert into $table(`topic`,`groupId`,`partition`,`offset`) values(?,?,?,?) on duplicate key update `offset`= values(`offset`) "
+        val updated = SQL(sql).bind(tp.topic(), groupId, tp.partition(), offset).update().apply()
+        if (updated == 0) {
+          throw new Exception(s"Commit kafka topic :${tp.topic()} failed!")
+        }
+        logInfo(s"storeType:MySQL,updateOffsets [ $groupId,${offsetInfos.mkString(",")} ]")
       }
     }
   }
@@ -120,8 +100,6 @@ private[kafka] class MySQLOffset(val sparkConf: SparkConf) extends Offset {
         SQL(sql).bind(topic, groupId).update().apply()
       })
     }
-    logInfo(
-      s"storeType:MySQL,deleteOffsets [ $groupId,${topics.mkString(",")} ]"
-    )
+    logInfo(s"storeType:MySQL,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
 }

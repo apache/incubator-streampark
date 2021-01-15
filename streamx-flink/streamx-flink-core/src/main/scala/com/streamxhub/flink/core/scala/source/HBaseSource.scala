@@ -21,10 +21,7 @@
 package com.streamxhub.flink.core.scala.source
 
 import com.streamxhub.common.util.{Logger, Utils}
-import com.streamxhub.flink.core.java.function.{
-  HBaseQueryFunction,
-  HBaseResultFunction
-}
+import com.streamxhub.flink.core.java.function.{HBaseQueryFunction, HBaseResultFunction}
 import com.streamxhub.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.flink.core.scala.StreamingContext
 import com.streamxhub.flink.core.scala.enums.ApiType
@@ -33,11 +30,7 @@ import com.streamxhub.flink.core.scala.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
-import org.apache.flink.runtime.state.{
-  CheckpointListener,
-  FunctionInitializationContext,
-  FunctionSnapshotContext
-}
+import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}
 import org.apache.flink.streaming.api.checkpoint.CheckpointedFunction
 import org.apache.flink.streaming.api.functions.source.RichSourceFunction
 import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceContext
@@ -51,28 +44,19 @@ import scala.util.{Success, Try}
 
 object HBaseSource {
 
-  def apply(
-      @(transient @param) ctx: StreamingContext,
-      property: Properties = new Properties()
-  ): HBaseSource = new HBaseSource(ctx, property)
+  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): HBaseSource = new HBaseSource(ctx, property)
 
 }
 
 /**
-  * 支持端到端的精准一次,可回放...
-  *
-  * @param ctx
-  * @param property
-  */
-class HBaseSource(
-    @(transient @param) val ctx: StreamingContext,
-    property: Properties = new Properties()
-) {
+ * 支持端到端的精准一次,可回放...
+ *
+ * @param ctx
+ * @param property
+ */
+class HBaseSource(@(transient@param) val ctx: StreamingContext, property: Properties = new Properties()) {
 
-  def getDataStream[R: TypeInformation](
-      query: R => HBaseQuery,
-      func: Result => R
-  )(implicit prop: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](query: R => HBaseQuery, func: Result => R)(implicit prop: Properties = new Properties()): DataStream[R] = {
     Utils.copyProperties(property, prop)
     val hBaseFunc = new HBaseSourceFunction[R](prop, query, func)
     ctx.addSource(hBaseFunc)
@@ -80,13 +64,8 @@ class HBaseSource(
 
 }
 
-class HBaseSourceFunction[R: TypeInformation](
-    apiType: ApiType = ApiType.scala,
-    prop: Properties
-) extends RichSourceFunction[R]
-    with CheckpointedFunction
-    with CheckpointListener
-    with Logger {
+
+class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, prop: Properties) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
 
   @volatile private[this] var running = true
 
@@ -105,22 +84,14 @@ class HBaseSourceFunction[R: TypeInformation](
   private[this] var last: R = _
 
   //for Scala
-  def this(
-      prop: Properties,
-      queryFunc: R => HBaseQuery,
-      resultFunc: Result => R
-  ) = {
+  def this(prop: Properties, queryFunc: R => HBaseQuery, resultFunc: Result => R) = {
     this(ApiType.scala, prop)
     this.scalaQueryFunc = queryFunc
     this.scalaResultFunc = resultFunc
   }
 
   //for JAVA
-  def this(
-      prop: Properties,
-      queryFunc: HBaseQueryFunction[R],
-      resultFunc: HBaseResultFunction[R]
-  ) {
+  def this(prop: Properties, queryFunc: HBaseQueryFunction[R], resultFunc: HBaseResultFunction[R]) {
     this(ApiType.java, prop)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
@@ -137,25 +108,20 @@ class HBaseSourceFunction[R: TypeInformation](
         //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
         query = apiType match {
           case ApiType.scala => scalaQueryFunc(last)
-          case ApiType.java  => javaQueryFunc.query(last)
+          case ApiType.java => javaQueryFunc.query(last)
         }
-        require(
-          query != null && query.getTable != null,
-          "[StreamX] HBaseSource query and query's param table muse be not null "
-        )
+        require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
         table = query.getTable(prop)
-        table
-          .getScanner(query)
-          .foreach(x => {
-            apiType match {
-              case ApiType.scala =>
-                last = scalaResultFunc(x)
-                ctx.collectWithTimestamp(last, System.currentTimeMillis())
-              case ApiType.java =>
-                last = javaResultFunc.result(x)
-                ctx.collectWithTimestamp(last, System.currentTimeMillis())
-            }
-          })
+        table.getScanner(query).foreach(x => {
+          apiType match {
+            case ApiType.scala =>
+              last = scalaResultFunc(x)
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
+            case ApiType.java =>
+              last = javaResultFunc.result(x)
+              ctx.collectWithTimestamp(last, System.currentTimeMillis())
+          }
+        })
       }
     }
   }
@@ -186,7 +152,7 @@ class HBaseSourceFunction[R: TypeInformation](
     state = FlinkUtils.getUnionListState[R](context, OFFSETS_STATE_NAME)
     Try(state.get.head) match {
       case Success(q) => last = q
-      case _          =>
+      case _ =>
     }
   }
 

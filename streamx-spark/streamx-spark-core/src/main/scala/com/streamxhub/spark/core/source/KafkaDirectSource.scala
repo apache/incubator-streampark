@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.source
 
 import com.streamxhub.spark.core.support.kafka.KafkaClient
@@ -38,32 +39,23 @@ import scala.util.Try
   * @param ssc
   * @param overrideParams 指定 Kafka 配置,可以覆盖配置文件
   */
-class KafkaDirectSource[K: ClassTag, V: ClassTag](
-    @transient val ssc: StreamingContext,
-    overrideParams: Map[String, String] = Map.empty[String, String]
-) extends Source {
+class KafkaDirectSource[K: ClassTag, V: ClassTag](@transient val ssc: StreamingContext,
+                                                  overrideParams: Map[String, String] = Map.empty[String, String]
+                                                 ) extends Source {
 
   override val prefix: String = "spark.source.kafka.consume."
 
   // 分区数
-  lazy val repartition: Int =
-    sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
+  lazy val repartition: Int = sparkConf.get("spark.source.kafka.consume.repartition", "0").toInt
 
   // kafka 消费 topic
-  private lazy val topicSet: Set[String] = overrideParams
-    .getOrElse(
-      "consume.topics",
-      sparkConf.get("spark.source.kafka.consume.topics")
-    )
-    .split(",")
-    .map(_.trim)
-    .toSet
+  private lazy val topicSet: Set[String] = overrideParams.getOrElse("consume.topics",
+    sparkConf.get("spark.source.kafka.consume.topics")).split(",").map(_.trim).toSet
 
   // 组装 Kafka 参数
   private lazy val kafkaParams: Map[String, String] = {
     sparkConf.getAll.flatMap {
-      case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) =>
-        Some(k.substring(prefix.length) -> v)
+      case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
       case _ => None
     } toMap
   } ++ overrideParams ++ Map("enable.auto.commit" -> "false")
@@ -75,28 +67,19 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](
   val kafkaClient = new KafkaClient(ssc.sparkContext.getConf)
 
   // 保存 offset
-  private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] =
-    new ConcurrentHashMap[Long, Array[OffsetRange]]
+  private lazy val offsetRanges: java.util.Map[Long, Array[OffsetRange]] = new ConcurrentHashMap[Long, Array[OffsetRange]]
 
   /**
     * 获取DStream 流
     *
     * @return
     */
-  override def getDStream[R: ClassTag](
-      recordHandler: ConsumerRecord[K, V] => R
-  ): DStream[R] = {
-    val stream =
-      kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
-    stream
-      .transform((rdd, time) => {
-        offsetRanges.put(
-          time.milliseconds,
-          rdd.asInstanceOf[HasOffsetRanges].offsetRanges
-        )
-        rdd
-      })
-      .map(recordHandler)
+  override def getDStream[R: ClassTag](recordHandler: ConsumerRecord[K, V] => R): DStream[R] = {
+    val stream = kafkaClient.createDirectStream[K, V](ssc, kafkaParams, topicSet)
+    stream.transform((rdd, time) => {
+      offsetRanges.put(time.milliseconds, rdd.asInstanceOf[HasOffsetRanges].offsetRanges)
+      rdd
+    }).map(recordHandler)
   }
 
   /**
@@ -107,9 +90,7 @@ class KafkaDirectSource[K: ClassTag, V: ClassTag](
     // 更新 offset
     val milliseconds = time.milliseconds
     if (groupId.isDefined) {
-      logInfo(
-        s"updateOffset with ${kafkaClient.offsetStoreType} for time $milliseconds offsetRanges: $offsetRanges"
-      )
+      logInfo(s"updateOffset with ${kafkaClient.offsetStoreType} for time $milliseconds offsetRanges: $offsetRanges")
       val offsetRange = offsetRanges.get(milliseconds)
       kafkaClient.updateOffset(groupId.get, offsetRange)
     }

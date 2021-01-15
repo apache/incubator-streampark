@@ -23,14 +23,16 @@ package com.streamxhub.flink.core.java.function;
 import org.apache.flink.api.java.utils.ParameterTool;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface StreamEnvConfigFunction {
-  /**
-   * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-   *
-   * @param environment
-   * @param parameterTool
-   */
-  void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    /**
+     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     *
+     * @param environment
+     * @param parameterTool
+     */
+    void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
 }

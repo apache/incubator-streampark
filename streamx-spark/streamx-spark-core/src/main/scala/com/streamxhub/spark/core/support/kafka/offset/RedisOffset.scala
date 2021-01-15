@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.support.kafka.offset
 
 import com.streamxhub.spark.core.support.redis.RedisClient._
@@ -33,10 +34,7 @@ import scala.collection.JavaConversions._
   */
 private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
 
-  override def get(
-      groupId: String,
-      topics: Set[String]
-  ): Map[TopicPartition, Long] = {
+  override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
     val offsetMap = close { redis =>
       topics.flatMap(topic => {
@@ -46,9 +44,7 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
             val tp = new TopicPartition(topic, partition.toInt)
             val finalOffset = earliestOffsets.get(tp) match {
               case Some(left) if left > offset.toLong =>
-                logWarn(
-                  s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left"
-                )
+                logWarn(s"storeType:Redis,consumer group:$groupId,topic:${tp.topic},partition:${tp.partition} offsets Outdated,updated:$left")
                 left
               case _ => offset.toLong
             }
@@ -61,37 +57,24 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
     // 如果GroupId 已经在Hbase存在了，这个时候新加一个topic ，则新加的Topic 不会被消费
     val offsetMaps = reset.toLowerCase() match {
       case "largest" => getLatestOffsets(topics.toSeq) ++ offsetMap
-      case _         => getEarliestOffsets(topics.toSeq) ++ offsetMap
+      case _ => getEarliestOffsets(topics.toSeq) ++ offsetMap
     }
     logInfo(s"getOffsets [$groupId,${offsetMaps.mkString(",")}] ")
     offsetMaps
   }
 
-  override def update(
-      groupId: String,
-      offsets: Map[TopicPartition, Long]
-  ): Unit = {
+
+  override def update(groupId: String, offsets: Map[TopicPartition, Long]): Unit = {
     close { redis =>
-      offsets.foreach {
-        case (tp, offset) =>
-          redis.hset(
-            key(groupId, tp.topic),
-            tp.partition().toString,
-            offset.toString
-          )
-      }
+      offsets.foreach { case (tp, offset) => redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString) }
     }(connect(storeParams))
-    logInfo(
-      s"storeType:Redis,updateOffsets [ $groupId,${offsets.mkString(",")} ]"
-    )
+    logInfo(s"storeType:Redis,updateOffsets [ $groupId,${offsets.mkString(",")} ]")
   }
 
   override def delete(groupId: String, topics: Set[String]): Unit = {
     close { redis =>
       topics.foreach(x => redis.del(key(groupId, x)))
     }(connect(storeParams))
-    logInfo(
-      s"storeType:Redis,deleteOffsets [ $groupId,${topics.mkString(",")} ]"
-    )
+    logInfo(s"storeType:Redis,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
 }

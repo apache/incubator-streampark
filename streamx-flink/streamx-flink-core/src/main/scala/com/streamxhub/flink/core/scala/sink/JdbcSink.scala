@@ -34,11 +34,7 @@ import org.apache.flink.api.common.typeutils.base.VoidSerializer
 import org.apache.flink.api.java.typeutils.runtime.kryo.KryoSerializer
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.functions.sink.{
-  RichSinkFunction,
-  SinkFunction,
-  TwoPhaseCommitSinkFunction
-}
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction, TwoPhaseCommitSinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 
 import java.sql._
@@ -50,67 +46,50 @@ import scala.collection.mutable.ListBuffer
 object JdbcSink {
 
   /**
-    * @param ctx   : StreamingContext
-    * @param alias :    实例别名(用于区分多个不同的数据库实例...)
-    * @return
-    */
-  def apply(
-      @(transient @param) ctx: StreamingContext,
-      parallelism: Int = 0,
-      name: String = null,
-      uid: String = null
-  )(implicit alias: String = ""): JdbcSink =
-    new JdbcSink(ctx, parallelism, name, uid)
+   * @param ctx   : StreamingContext
+   * @param alias :    实例别名(用于区分多个不同的数据库实例...)
+   * @return
+   */
+  def apply(@(transient@param) ctx: StreamingContext,
+            parallelism: Int = 0,
+            name: String = null,
+            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
 
 }
 
-class JdbcSink(
-    @(transient @param) ctx: StreamingContext,
-    parallelism: Int = 0,
-    name: String = null,
-    uid: String = null
-)(implicit alias: String = "")
-    extends Sink
-    with Logger {
+class JdbcSink(@(transient@param) ctx: StreamingContext,
+               parallelism: Int = 0,
+               name: String = null,
+               uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   /**
-    *
-    * @param stream  : DataStream
-    * @param dialect : 数据库方言
-    * @param toSQLFn : 转换成SQL的函数,有用户提供.
-    * @tparam T : DataStream里的流的数据类型
-    * @return
-    */
-  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(
-      implicit toSQLFn: T => String
-  ): DataStreamSink[T] = {
-    val prop =
-      ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
+   *
+   * @param stream  : DataStream
+   * @param dialect : 数据库方言
+   * @param toSQLFn : 转换成SQL的函数,有用户提供.
+   * @tparam T : DataStream里的流的数据类型
+   * @return
+   */
+  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
     val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     afterSink(sink, parallelism, name, uid)
   }
 
-  def towPCSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(
-      implicit toSQLFn: T => String
-  ): DataStreamSink[T] = {
-    val prop =
-      ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
+  def towPCSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
+    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
     val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
     val sink = stream.addSink(sinkFun)
     if (parallelism > 1) {
-      logWarn(
-        s"parallelism:$parallelism, MySQL towPCSink parallelism bust be 1."
-      )
+      logWarn(s"parallelism:$parallelism, MySQL towPCSink parallelism bust be 1.")
     }
     afterSink(sink, 1, name, uid)
   }
 
 }
 
-class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
-    extends RichSinkFunction[T]
-    with Logger {
+class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSinkFunction[T] with Logger {
   private var connection: Connection = _
   private var statement: Statement = _
   private var scalaToSQLFn: T => String = _
@@ -119,7 +98,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   private var timestamp: Long = 0L
 
   private val batchSize = jdbc.remove(KEY_JDBC_INSERT_BATCH) match {
-    case null  => DEFAULT_JDBC_INSERT_BATCH
+    case null => DEFAULT_JDBC_INSERT_BATCH
     case batch => batch.toString.toInt
   }
 
@@ -149,7 +128,7 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
     require(connection != null)
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
-      case ApiType.java  => javaToSQLFunc.from(value)
+      case ApiType.java => javaToSQLFunc.from(value)
     }
     batchSize match {
       case 1 =>
@@ -167,9 +146,9 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
         try {
           statement.addBatch(sql)
           (offset.incrementAndGet() % batch, System.currentTimeMillis()) match {
-            case (0, _)                                     => execBatch()
+            case (0, _) => execBatch()
             case (_, current) if current - timestamp > 1000 => execBatch()
-            case _                                          =>
+            case _ =>
           }
         } catch {
           case e: Exception =>
@@ -192,30 +171,23 @@ class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
       val count = statement.executeBatch().sum
       statement.clearBatch()
       connection.commit()
-      logInfo(
-        s"JdbcSink batch $count use ${System.currentTimeMillis() - start} MS"
-      )
+      logInfo(s"JdbcSink batch $count use ${System.currentTimeMillis() - start} MS")
       timestamp = System.currentTimeMillis()
     }
   }
 
 }
 
-class JdbcOutputFormat[T: TypeInformation](
-    implicit prop: Properties,
-    toSQlFun: T => String
-) extends RichOutputFormat[T]
-    with Logger {
+
+class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new JdbcSinkFunction[T](prop, toSQlFun)
 
   var configuration: Configuration = _
 
-  override def configure(configuration: Configuration): Unit =
-    this.configuration = configuration
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
 
-  override def open(taskNumber: Int, numTasks: Int): Unit =
-    sinkFunction.open(this.configuration)
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
 
   override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
 
@@ -227,26 +199,20 @@ object Dialect extends Enumeration {
   val MYSQL, ORACLE, MSSQL, H2 = Value
 }
 
+
 //-------------Jdbc2PCSinkFunction exactly-once support ---------------------------------------------------------------------------------------
 /**
-  * (flink checkpoint + db transactionId) 模拟了提交读.充分利用flink的checkpoint机制,经过flink checkpoint确认过的数据才提交
-  *
-  * @param apiType
-  * @param jdbc
-  * @tparam T
-  */
+ * (flink checkpoint + db transactionId) 模拟了提交读.充分利用flink的checkpoint机制,经过flink checkpoint确认过的数据才提交
+ *
+ * @param apiType
+ * @param jdbc
+ * @tparam T
+ */
 class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
-    extends TwoPhaseCommitSinkFunction[T, Transaction, Void](
-      new KryoSerializer[Transaction](
-        classOf[Transaction],
-        new ExecutionConfig
-      ),
-      VoidSerializer.INSTANCE
-    )
+  extends TwoPhaseCommitSinkFunction[T, Transaction, Void](new KryoSerializer[Transaction](classOf[Transaction], new ExecutionConfig), VoidSerializer.INSTANCE)
     with Logger {
 
-  private[this] val buffer: collection.mutable.Map[String, Transaction] =
-    collection.mutable.Map.empty[String, Transaction]
+  private[this] val buffer: collection.mutable.Map[String, Transaction] = collection.mutable.Map.empty[String, Transaction]
 
   private var scalaToSQLFn: T => String = _
   private var javaToSQLFunc: SQLFromFunction[T] = _
@@ -262,22 +228,17 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
     this.javaToSQLFunc = toSQLFn
   }
 
-  override def initializeUserContext(): Optional[Void] =
-    super.initializeUserContext()
+  override def initializeUserContext(): Optional[Void] = super.initializeUserContext()
 
   override def beginTransaction(): Transaction = {
     logInfo("Jdbc2PCSink beginTransaction.")
     Transaction()
   }
 
-  override def invoke(
-      transaction: Transaction,
-      value: T,
-      context: SinkFunction.Context
-  ): Unit = {
+  override def invoke(transaction: Transaction, value: T, context: SinkFunction.Context): Unit = {
     val sql = apiType match {
       case ApiType.scala => scalaToSQLFn(value)
-      case ApiType.java  => javaToSQLFunc.from(value)
+      case ApiType.java => javaToSQLFunc.from(value)
     }
     if (!sql.toUpperCase.trim.startsWith("INSERT")) {
       transaction.insertMode = false
@@ -288,30 +249,29 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
   }
 
   /**
-    * call on snapshotState
-    * 将要操作的sql语句保存到状态里.如果这一步失败,会回滚
-    *
-    * @param transaction
-    */
+   * call on snapshotState
+   * 将要操作的sql语句保存到状态里.如果这一步失败,会回滚
+   *
+   * @param transaction
+   */
   override def preCommit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit
     if (transaction.invoked) {
-      logInfo(
-        s"Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}"
-      )
+      logInfo(s"Jdbc2PCSink preCommit.TransactionId:${transaction.transactionId}")
       buffer += transaction.transactionId -> transaction
     }
   }
 
+
   /**
-    * 在数据checkpoint完成或者恢复完成的时候会调用该方法,这里直接利用db的事务特性
-    * 当前操作处于第二阶段:
-    * 如果当前一批数据保存成功则整个过程成功
-    * 如果失败,会抛出异常,导致本次完成的checkpoint也会回滚
-    * 进而下次启动的时候还是从上次消费的位置开始.做到端到端精准一次.
-    *
-    * @param transaction
-    */
+   * 在数据checkpoint完成或者恢复完成的时候会调用该方法,这里直接利用db的事务特性
+   * 当前操作处于第二阶段:
+   * 如果当前一批数据保存成功则整个过程成功
+   * 如果失败,会抛出异常,导致本次完成的checkpoint也会回滚
+   * 进而下次启动的时候还是从上次消费的位置开始.做到端到端精准一次.
+   *
+   * @param transaction
+   */
   override def commit(transaction: Transaction): Unit = {
     //防止未调用invoke方法直接调用preCommit和commit...
     if (transaction.invoked && transaction.sql.nonEmpty) {
@@ -355,35 +315,28 @@ class Jdbc2PCSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties)
 
 }
 
-class Jdbc2PCOutputFormat[T: TypeInformation](
-    implicit prop: Properties,
-    toSQlFun: T => String
-) extends RichOutputFormat[T]
-    with Logger {
+
+class Jdbc2PCOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: T => String) extends RichOutputFormat[T] with Logger {
 
   private val sinkFunction = new Jdbc2PCSinkFunction[T](prop, toSQlFun)
 
   private var configuration: Configuration = _
 
-  override def configure(configuration: Configuration): Unit =
-    this.configuration = configuration
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
 
-  override def open(taskNumber: Int, numTasks: Int): Unit =
-    sinkFunction.open(this.configuration)
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
 
   override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
 
   override def close(): Unit = sinkFunction.close()
 }
 
-case class Transaction(
-    transactionId: String = Utils.uuid(),
-    sql: ListBuffer[String] = ListBuffer.empty,
-    var insertMode: Boolean = true,
-    var invoked: Boolean = false
-) extends Serializable {
+case class Transaction(transactionId: String = Utils.uuid(), sql: ListBuffer[String] = ListBuffer.empty, var insertMode: Boolean = true, var invoked: Boolean = false) extends Serializable {
   def +(text: String): Unit = sql += text
 
-  override def toString: String =
-    s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
+  override def toString: String = s"(transactionId:$transactionId,size:${sql.size},insertMode:$insertMode,invoked:$invoked)"
 }
+
+
+
+

@@ -20,61 +20,59 @@
  */
 package com.streamxhub.flink.javacase;
 
+import com.streamxhub.flink.core.java.sink.KafkaSink;
+import com.streamxhub.flink.core.scala.source.KafkaRecord;
+import com.streamxhub.flink.core.scala.util.StreamEnvConfig;
+import com.streamxhub.flink.core.scala.StreamingContext;
+import com.streamxhub.flink.core.java.source.KafkaSource;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 
-import com.streamxhub.flink.core.java.sink.KafkaSink;
-import com.streamxhub.flink.core.java.source.KafkaSource;
-import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.scala.source.KafkaRecord;
-import com.streamxhub.flink.core.scala.util.StreamEnvConfig;
-
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class KafkaJavaApp {
 
-  public static void main(String[] args) {
+    public static void main(String[] args) {
 
-    StreamEnvConfig javaConfig =
-        new StreamEnvConfig(
-            args,
-            (environment, parameterTool) -> {
-              // 用户可以给environment设置参数...
-              System.out.println("environment argument set...");
-            });
+        StreamEnvConfig javaConfig = new StreamEnvConfig(args, (environment, parameterTool) -> {
+            //用户可以给environment设置参数...
+            System.out.println("environment argument set...");
+        });
 
-    StreamingContext context = new StreamingContext(javaConfig);
+        StreamingContext context = new StreamingContext(javaConfig);
 
-    DataStream<LogBean> source =
-        new KafkaSource<LogBean>(context)
-            .deserializer(
-                new KafkaDeserializationSchema<LogBean>() {
-                  @Override
-                  public TypeInformation<LogBean> getProducedType() {
-                    return TypeInformation.of(LogBean.class);
-                  }
+        DataStream<LogBean> source = new KafkaSource<LogBean>(context)
+                .deserializer(new KafkaDeserializationSchema<LogBean>() {
+                    @Override
+                    public TypeInformation<LogBean> getProducedType() {
+                        return TypeInformation.of(LogBean.class);
+                    }
 
-                  @Override
-                  public boolean isEndOfStream(LogBean nextElement) {
-                    return false;
-                  }
+                    @Override
+                    public boolean isEndOfStream(LogBean nextElement) {
+                        return false;
+                    }
 
-                  @Override
-                  public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) {
-                    String value = new String(record.value());
-                    LogBean logBean = new LogBean();
-                    logBean.setControlid("benjobs");
-                    // value to logBean....
-                    return logBean;
-                  }
+                    @Override
+                    public LogBean deserialize(ConsumerRecord<byte[], byte[]> record) {
+                        String value = new String(record.value());
+                        LogBean logBean = new LogBean();
+                        logBean.setControlid("benjobs");
+                        //value to logBean....
+                        return logBean;
+                    }
                 })
-            .getDataStream()
-            .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
+                .getDataStream()
+                .map((MapFunction<KafkaRecord<LogBean>, LogBean>) KafkaRecord::value);
 
-    new KafkaSink<LogBean>(context).sink(source);
+        new KafkaSink<LogBean>(context).sink(source);
 
-    context.start();
-  }
+        context.start();
+    }
+
+
 }
