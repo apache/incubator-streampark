@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.support.kafka.writer
 
 import com.streamxhub.spark.core.support.kafka.ProducerCache
@@ -32,7 +31,9 @@ import scala.reflect.ClassTag
   *
   * A simple Kafka producers
   */
-class SimpleKafkaWriter[T: ClassTag](@(transient@param) msg: T) extends KafkaWriter[T] {
+class SimpleKafkaWriter[T: ClassTag](@(transient @param) msg: T)
+    extends KafkaWriter[T] {
+
   /**
     *
     * @param producerConfig The configuration that can be used to connect to Kafka
@@ -42,8 +43,12 @@ class SimpleKafkaWriter[T: ClassTag](@(transient@param) msg: T) extends KafkaWri
     * @tparam V The type of the value
     *
     */
-  override def writeToKafka[K, V](producerConfig: Properties, serializerFunc: (T) => ProducerRecord[K, V]): Unit = {
-    val producer: KafkaProducer[K, V] = ProducerCache.getProducer(producerConfig)
+  override def writeToKafka[K, V](
+      producerConfig: Properties,
+      serializerFunc: (T) => ProducerRecord[K, V]
+  ): Unit = {
+    val producer: KafkaProducer[K, V] =
+      ProducerCache.getProducer(producerConfig)
     producer.send(serializerFunc(msg))
   }
 }

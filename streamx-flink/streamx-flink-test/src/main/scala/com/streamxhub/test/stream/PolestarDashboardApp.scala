@@ -20,19 +20,20 @@ import scala.util.Try
 object PolestarDashboardApp extends FlinkStreaming {
 
   /**
-   * @param context
-   */
+    * @param context
+    */
   override def handle(context: StreamingContext): Unit = {
     val data = new KafkaSource(context)
 
-    val ds = data.getDataStream[String]()
+    val ds = data
+      .getDataStream[String]()
       .uid("Kafka_Source")
       .name("Kafka_Source")
       .map(x => OrderEntity.build(x.value))
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)
-      .boundedOutOfOrdernessWatermark(_.timestamp,Duration.ofMillis(30 * 1000))
+      .boundedOutOfOrdernessWatermark(_.timestamp, Duration.ofMillis(30 * 1000))
       .keyBy(_.client_id)
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
@@ -56,12 +57,14 @@ object PolestarDashboardApp extends FlinkStreaming {
 
 }
 
-case class OrderEntity(ymd: String,
-                       timestamp: Long,
-                       gmv: Double,
-                       profit: Double,
-                       client_id: String,
-                       num: Int = 1) {
+case class OrderEntity(
+    ymd: String,
+    timestamp: Long,
+    gmv: Double,
+    profit: Double,
+    client_id: String,
+    num: Int = 1
+) {
 
   @transient
   implicit lazy val formats: DefaultFormats.type = org.json4s.DefaultFormats

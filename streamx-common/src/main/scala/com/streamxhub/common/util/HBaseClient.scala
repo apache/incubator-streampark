@@ -30,12 +30,13 @@ import java.util.Properties
 import scala.collection.JavaConversions._
 
 /**
- * @author benjobs
- */
+  * @author benjobs
+  */
 class HBaseClient(func: () => Connection) extends Serializable {
   lazy val connection: Connection = func()
 
-  def table(table: String): Table = connection.getTable(TableName.valueOf(table))
+  def table(table: String): Table =
+    connection.getTable(TableName.valueOf(table))
 }
 
 object HBaseClient {
@@ -47,7 +48,8 @@ object HBaseClient {
     new HBaseClient(() => {
       if (user != null) {
         UserGroupInformation.setConfiguration(conf)
-        val remoteUser: UserGroupInformation = UserGroupInformation.createRemoteUser(user.toString)
+        val remoteUser: UserGroupInformation =
+          UserGroupInformation.createRemoteUser(user.toString)
         UserGroupInformation.setLoginUser(remoteUser)
       }
       val connection = ConnectionFactory.createConnection(conf)

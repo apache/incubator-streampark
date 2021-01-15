@@ -6,7 +6,8 @@ object WordCountApp extends App {
 
   val env = StreamExecutionEnvironment.getExecutionEnvironment
 
-  env.fromElements("hello world", "hello flink", "hello hadoop")
+  env
+    .fromElements("hello world", "hello flink", "hello hadoop")
     .flatMap(_.split("\\s+"))
     .map(x => WoldCount(x, 1))
     .keyBy(_.wold)

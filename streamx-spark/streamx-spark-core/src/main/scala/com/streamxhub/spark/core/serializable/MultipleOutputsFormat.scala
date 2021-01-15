@@ -18,13 +18,15 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.serializable
 
 import org.apache.hadoop.io.{DataInputBuffer, NullWritable}
 import org.apache.hadoop.mapred.RawKeyValueIterator
 import org.apache.hadoop.mapreduce.counters.GenericCounter
-import org.apache.hadoop.mapreduce.lib.output.{LazyOutputFormat, MultipleOutputs}
+import org.apache.hadoop.mapreduce.lib.output.{
+  LazyOutputFormat,
+  MultipleOutputs
+}
 import org.apache.hadoop.mapreduce.task.ReduceContextImpl
 import org.apache.hadoop.mapreduce.task.TaskAttemptContextImpl.DummyReporter
 import org.apache.hadoop.mapreduce.{Job, _}
@@ -37,8 +39,9 @@ import java.io.IOException
   */
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
-  private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V])
-  : MultipleOutputer[K, V] = new MultipleOutputs[K, V](io)
+  private def defaultMultipleOutputsMaker[K, V](
+      io: TaskInputOutputContext[_, _, K, V]
+  ): MultipleOutputer[K, V] = new MultipleOutputs[K, V](io)
 }
 
 /**
@@ -57,10 +60,15 @@ object MultipleOutputsFormat {
   * @tparam K 基础 OutputFormat 的K键类型
   * @tparam V 基础 OutputFormat 的V值类型
   */
-abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
-                                           multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
-                                           (r: TaskInputOutputContext[_, _, K, V]) => MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
-  extends OutputFormat[(String, K), V] {
+abstract class MultipleOutputsFormat[K, V](
+    outputFormat: OutputFormat[K, V],
+    multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[
+      K,
+      V
+    ] = (r: TaskInputOutputContext[_, _, K, V]) =>
+      MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r)
+) extends OutputFormat[(String, K), V] {
+
   /**
     * Check for validity of the output-specification for the job.
     *
@@ -72,7 +80,8 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
     * @param context information about the job
     * @throws IOException when output should not be attempted
     */
-  override def checkOutputSpecs(context: JobContext): Unit = outputFormat.checkOutputSpecs(context)
+  override def checkOutputSpecs(context: JobContext): Unit =
+    outputFormat.checkOutputSpecs(context)
 
   /**
     * Get the output committer for this output format. This is responsible
@@ -83,8 +92,11 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
     * @throws IOException
     * @throws InterruptedException
     */
-  override def getOutputCommitter(context: TaskAttemptContext): OutputCommitter = outputFormat
-    .getOutputCommitter(context)
+  override def getOutputCommitter(
+      context: TaskAttemptContext
+  ): OutputCommitter =
+    outputFormat
+      .getOutputCommitter(context)
 
   /**
     * Get the {@link RecordWriter} for the given task.
@@ -101,12 +113,23 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
       LazyOutputFormat.setOutputFormatClass(job, outputFormat.getClass)
       // 我们通过ReduceContext大多数字段dummied-out因为他们不会使用的上下文
       // of Spark's saveAs*Hadoop* methods
-      val ioContext = new ReduceContextImpl(job.getConfiguration, context.getTaskAttemptID,
-        new DummyIterator, new GenericCounter, new GenericCounter,
-        new DummyRecordWriter, new DummyOutputCommitter, new DummyReporter, null,
-        classOf[NullWritable], classOf[NullWritable])
+      val ioContext = new ReduceContextImpl(
+        job.getConfiguration,
+        context.getTaskAttemptID,
+        new DummyIterator,
+        new GenericCounter,
+        new GenericCounter,
+        new DummyRecordWriter,
+        new DummyOutputCommitter,
+        new DummyReporter,
+        null,
+        classOf[NullWritable],
+        classOf[NullWritable]
+      )
 
-      val multipleOutputs: MultipleOutputer[K, V] = multipleOutputsMaker(ioContext)
+      val multipleOutputs: MultipleOutputer[K, V] = multipleOutputsMaker(
+        ioContext
+      )
 
       /**
         * Writes a keys/value pair.
@@ -122,14 +145,15 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
         }
       }
 
-      override def close(context: TaskAttemptContext): Unit = multipleOutputs.close()
+      override def close(context: TaskAttemptContext): Unit =
+        multipleOutputs.close()
     }
-
 
   private class DummyOutputCommitter extends OutputCommitter {
     override def setupJob(jobContext: JobContext): Unit = ()
 
-    override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean = false
+    override def needsTaskCommit(taskContext: TaskAttemptContext): Boolean =
+      false
 
     override def setupTask(taskContext: TaskAttemptContext): Unit = ()
 

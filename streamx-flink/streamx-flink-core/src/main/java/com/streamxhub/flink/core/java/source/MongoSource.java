@@ -20,29 +20,31 @@
  */
 package com.streamxhub.flink.core.java.source;
 
+import java.util.Properties;
+
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+
 import com.streamxhub.flink.core.java.function.MongoQueryFunction;
 import com.streamxhub.flink.core.java.function.MongoResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.source.MongoSourceFunction;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
-import java.util.Properties;
-
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class MongoSource<T> {
-    private StreamingContext context;
-    private Properties property;
+  private StreamingContext context;
+  private Properties property;
 
-    public MongoSource(StreamingContext context, Properties property) {
-        this.context = context;
-        this.property = property;
-    }
+  public MongoSource(StreamingContext context, Properties property) {
+    this.context = context;
+    this.property = property;
+  }
 
-    public DataStreamSource<T> getDataStream(String collectionName, MongoQueryFunction<T> queryFunction, MongoResultFunction<T> resultFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName,property, queryFunction,resultFunction, null);
-        return context.getJavaEnv().addSource(sourceFunction);
-    }
-
+  public DataStreamSource<T> getDataStream(
+      String collectionName,
+      MongoQueryFunction<T> queryFunction,
+      MongoResultFunction<T> resultFunction) {
+    MongoSourceFunction<T> sourceFunction =
+        new MongoSourceFunction<>(collectionName, property, queryFunction, resultFunction, null);
+    return context.getJavaEnv().addSource(sourceFunction);
+  }
 }

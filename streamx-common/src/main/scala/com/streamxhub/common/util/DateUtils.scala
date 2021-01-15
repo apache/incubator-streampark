@@ -25,7 +25,6 @@ import java.util.{Calendar, TimeZone, _}
 import java.util.concurrent.TimeUnit
 import scala.util._
 
-
 object DateUtils {
 
   val fullFormat = "yyyy-MM-dd HH:mm:ss"
@@ -34,7 +33,11 @@ object DateUtils {
 
   val `foramt_yyyy-MM-dd` = "yyyy-MM-dd"
 
-  def parse(date: String, format: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Date = {
+  def parse(
+      date: String,
+      format: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault
+  ): Date = {
     val df: SimpleDateFormat = new SimpleDateFormat(format)
     df.setTimeZone(timeZone)
     df.parse(date)
@@ -44,13 +47,19 @@ object DateUtils {
 
   def second2Date(time: Long): Date = milliSecond2Date(time * 1000)
 
-  def now(dateFormat: String = foramt_yyyyMMdd, timeZone: TimeZone = TimeZone.getDefault): String = {
+  def now(
+      dateFormat: String = foramt_yyyyMMdd,
+      timeZone: TimeZone = TimeZone.getDefault
+  ): String = {
     val df: SimpleDateFormat = new SimpleDateFormat(dateFormat)
     df.setTimeZone(timeZone)
     df.format(new Date())
   }
 
-  def minuteOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
+  def minuteOfDay(
+      date: Date = new Date(),
+      timeZone: TimeZone = TimeZone.getDefault
+  ): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
@@ -61,31 +70,47 @@ object DateUtils {
 
   def secondOf(date: Date = new Date()): Int = (date.getTime / 1000).toInt
 
-  def secondOfDay(date: Date = new Date(), timeZone: TimeZone = TimeZone.getDefault): Int = {
+  def secondOfDay(
+      date: Date = new Date(),
+      timeZone: TimeZone = TimeZone.getDefault
+  ): Int = {
     val calendar = Calendar.getInstance()
     calendar.setTimeZone(timeZone)
     calendar.setTime(date)
     minuteOfDay(date) * 60 + calendar.get(Calendar.SECOND)
   }
 
-  def format(date: Date = new Date(), fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): String = {
-    if (date == null) null else {
+  def format(
+      date: Date = new Date(),
+      fmt: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault
+  ): String = {
+    if (date == null) null
+    else {
       val simpleDateFormat = new SimpleDateFormat(fmt)
       simpleDateFormat.setTimeZone(timeZone)
       simpleDateFormat.format(date)
     }
   }
 
-  def getTime(time: String, fmt: String = fullFormat, timeZone: TimeZone = TimeZone.getDefault): Long = {
+  def getTime(
+      time: String,
+      fmt: String = fullFormat,
+      timeZone: TimeZone = TimeZone.getDefault
+  ): Long = {
     val simpleDateFormat = new SimpleDateFormat(fmt)
     simpleDateFormat.setTimeZone(timeZone)
     Try(simpleDateFormat.parse(time).getTime)
-      .filter(_ > 0).getOrElse(System.currentTimeMillis())
+      .filter(_ > 0)
+      .getOrElse(System.currentTimeMillis())
   }
 
-
   //日期加减...
-  def +-(i: Int, date: Date = new Date, timeZone: TimeZone = TimeZone.getDefault): Date = {
+  def +-(
+      i: Int,
+      date: Date = new Date,
+      timeZone: TimeZone = TimeZone.getDefault
+  ): Date = {
     val cal = Calendar.getInstance
     cal.setTimeZone(timeZone)
     cal.setTime(date)
@@ -100,11 +125,14 @@ object DateUtils {
 
   def localToUTC(localTime: Date): Date = {
     val localTimeInMillis = localTime.getTime
+
     /** long时间转换成Calendar */
     val calendar = Calendar.getInstance
     calendar.setTimeInMillis(localTimeInMillis)
+
     /** 取得时间偏移量 */
     val zoneOffset = calendar.get(java.util.Calendar.ZONE_OFFSET)
+
     /** 取得夏令时差 */
     val dstOffset = calendar.get(java.util.Calendar.DST_OFFSET)
 
@@ -124,8 +152,8 @@ object DateUtils {
   }
 
   /**
-   * <p>Description:UTC时间转化为本地时间 </p>
-   */
+    * <p>Description:UTC时间转化为本地时间 </p>
+    */
   def utcToLocal(utcTime: String, format: String = fullFormat): Date = {
     val sdf = new SimpleDateFormat(format)
     sdf.setTimeZone(TimeZone.getTimeZone("UTC"))
@@ -134,11 +162,11 @@ object DateUtils {
   }
 
   /**
-   * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
-   *
-   * @param duration in second
-   * @return
-   */
+    * Convert duration in seconds to rich time duration format. e.g. 2 days 3 hours 4 minutes 5 seconds
+    *
+    * @param duration in second
+    * @return
+    */
   def toRichTimeDuration(duration: Long): String = {
     val days = TimeUnit.SECONDS.toDays(duration)
     val duration1 = duration - TimeUnit.DAYS.toSeconds(days)
@@ -150,23 +178,27 @@ object DateUtils {
     val builder = new StringBuilder
     if (days != 0) builder.append(days + " days ")
     if (days != 0 || hours != 0) builder.append(hours + " hours ")
-    if (days != 0 || hours != 0 || minutes != 0) builder.append(minutes + " minutes ")
+    if (days != 0 || hours != 0 || minutes != 0)
+      builder.append(minutes + " minutes ")
     builder.append(seconds + " seconds")
     builder.toString
   }
 
-  def getTimeUnit(time: String, default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)): (Int, TimeUnit) = {
+  def getTimeUnit(
+      time: String,
+      default: (Int, TimeUnit) = (5, TimeUnit.SECONDS)
+  ): (Int, TimeUnit) = {
     val timeUnit = time match {
       case "" => null
       case x: String =>
         val num = x.replaceAll("\\s+|[a-z|A-Z]+$", "").toInt
         val unit = x.replaceAll("^[0-9]+|\\s+", "") match {
-          case "" => null
-          case "s" => TimeUnit.SECONDS
+          case ""          => null
+          case "s"         => TimeUnit.SECONDS
           case "m" | "min" => TimeUnit.MINUTES
-          case "h" => TimeUnit.HOURS
+          case "h"         => TimeUnit.HOURS
           case "d" | "day" => TimeUnit.DAYS
-          case _ => throw new IllegalArgumentException()
+          case _           => throw new IllegalArgumentException()
         }
         (num, unit)
     }
@@ -174,10 +206,10 @@ object DateUtils {
       case null => default
 
       /**
-       * 未带单位,值必须为毫秒,这里转成对应的秒...
-       */
+        * 未带单位,值必须为毫秒,这里转成对应的秒...
+        */
       case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
-      case other => other
+      case other                     => other
     }
   }
 
