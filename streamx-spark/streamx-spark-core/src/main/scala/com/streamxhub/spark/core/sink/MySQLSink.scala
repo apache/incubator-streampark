@@ -18,6 +18,7 @@
   * specific language governing permissions and limitations
   * under the License.
   */
+
 package com.streamxhub.spark.core.sink
 
 import com.streamxhub.spark.core.util.SQLContextUtil
@@ -37,25 +38,26 @@ import scala.reflect.runtime.universe.TypeTag
   * 序列化有问题,暂不支持 checkpoint
   *
   */
-class MySQLSink[T <: scala.Product: ClassTag: TypeTag](
-    @transient override val sc: SparkContext,
-    initParams: Map[String, String] = Map.empty[String, String]
-) extends Sink[T] {
+class MySQLSink[T <: scala.Product : ClassTag : TypeTag](@transient override val sc: SparkContext,
+                                                         initParams: Map[String, String] = Map.empty[String, String])
+  extends Sink[T] {
+
 
   override val prefix: String = "spark.sink.mysql."
 
-  private lazy val prop = filterProp(param, initParams, prefix)
+  private lazy val prop = filterProp(param,initParams,prefix)
 
   private lazy val url = prop.getProperty("url")
   private lazy val table = prop.getProperty("table")
 
   private val saveMode =
     prop.getProperty("saveMode", "append").toLowerCase() match {
-      case "overwrite"     => SaveMode.Overwrite
+      case "overwrite" => SaveMode.Overwrite
       case "errorifexists" => SaveMode.ErrorIfExists
-      case "ignore"        => SaveMode.Ignore
-      case _               => SaveMode.Append
+      case "ignore" => SaveMode.Ignore
+      case _ => SaveMode.Append
     }
+
 
   /**
     * 输出 到 Mysql
@@ -75,8 +77,7 @@ class MySQLSink[T <: scala.Product: ClassTag: TypeTag](
     val count = df.count()
     val end = System.currentTimeMillis()
 
-    logInfo(
-      s"time:[$time] write [$count] events use time ${(end - begin) / 1000} S "
-    )
+    logInfo(s"time:[$time] write [$count] events use time ${(end - begin) / 1000} S ")
   }
 }
+

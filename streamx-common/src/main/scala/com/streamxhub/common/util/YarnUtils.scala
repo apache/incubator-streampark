@@ -20,6 +20,7 @@
  */
 package com.streamxhub.common.util
 
+
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.api.records._
@@ -33,22 +34,19 @@ import scala.collection.mutable.ArrayBuffer
 
 object YarnUtils {
 
+
   /**
-    *
-    * @param appName
-    * @return
-    */
+   *
+   * @param appName
+   * @return
+   */
   def getAppId(appName: String): List[ApplicationId] = {
     val client = getYarnClient()
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
-      client
-        .getApplications(appStates)
-        .filter(_.getName == appName)
-        .map(_.getApplicationId)
+      client.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
     } catch {
-      case e: Exception =>
-        e.printStackTrace()
+      case e: Exception => e.printStackTrace()
         ArrayBuffer.empty[ApplicationId]
     } finally {
       client.close()
@@ -57,11 +55,10 @@ object YarnUtils {
   }
 
   /**
-    * 查询 state
-    *
-    * @param appId
-    * @return
-    */
+   * 查询 state
+   * @param appId
+   * @return
+   */
   def getState(appId: String): YarnApplicationState = {
     val client = getYarnClient()
     val applicationId = ConverterUtils.toApplicationId(appId)
@@ -69,8 +66,7 @@ object YarnUtils {
       val applicationReport = client.getApplicationReport(applicationId)
       applicationReport.getYarnApplicationState
     } catch {
-      case e: Exception =>
-        e.printStackTrace()
+      case e:Exception => e.printStackTrace()
         null
     } finally {
       client.close()
@@ -79,17 +75,15 @@ object YarnUtils {
   }
 
   /**
-    * 判断任务名为appName的任务，是否在yarn中运行，状态为RUNNING
-    *
-    * @return boolean
-    * @param appName
-    * @return
-    */
+   * 判断任务名为appName的任务，是否在yarn中运行，状态为RUNNING
+   *
+   * @return boolean
+   * @param appName
+   * @return
+   */
   def isContains(appName: String): Boolean = {
     val client = getYarnClient()
-    val contains = client
-      .getApplications(util.EnumSet.of(RUNNING))
-      .exists(_.getName == appName)
+    val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName == appName)
     client.close()
     contains
   }

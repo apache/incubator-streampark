@@ -20,77 +20,71 @@
  */
 package com.streamxhub.flink.core.java.source;
 
-import java.util.Properties;
-
+import com.streamxhub.flink.core.scala.StreamingContext;
+import com.streamxhub.flink.core.scala.source.KafkaRecord;
+import com.streamxhub.flink.core.scala.source.KafkaStringDeserializationSchema;
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 import org.apache.flink.streaming.connectors.kafka.FlinkKafkaConsumer;
 import org.apache.flink.streaming.connectors.kafka.KafkaDeserializationSchema;
 
-import com.streamxhub.flink.core.scala.StreamingContext;
-import com.streamxhub.flink.core.scala.source.KafkaRecord;
-import com.streamxhub.flink.core.scala.source.KafkaStringDeserializationSchema;
+import java.util.Properties;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 public class KafkaSource<T> {
 
-  private StreamingContext context;
-  private String[] topics;
-  private String alias = "";
-  private KafkaDeserializationSchema<T> deserializer;
-  private WatermarkStrategy<KafkaRecord<T>> strategy;
-  private Properties property = new Properties();
+    private StreamingContext context;
+    private String[] topics;
+    private String alias = "";
+    private KafkaDeserializationSchema<T> deserializer;
+    private WatermarkStrategy<KafkaRecord<T>> strategy;
+    private Properties property = new Properties();
 
-  public KafkaSource(StreamingContext context) {
-    this.context = context;
-    this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
-  }
-
-  public KafkaSource<T> property(Properties property) {
-    if (property != null) {
-      this.property = property;
+    public KafkaSource(StreamingContext context) {
+        this.context = context;
+        this.deserializer = (KafkaDeserializationSchema<T>) new KafkaStringDeserializationSchema();
     }
-    return this;
-  }
 
-  public KafkaSource<T> topic(String... topic) {
-    if (topic != null) {
-      this.topics = topic;
+    public KafkaSource<T> property(Properties property) {
+        if (property != null) {
+            this.property = property;
+        }
+        return this;
     }
-    return this;
-  }
 
-  public KafkaSource<T> alias(String alias) {
-    if (alias != null) {
-      this.alias = alias;
+    public KafkaSource<T> topic(String... topic) {
+        if (topic != null) {
+            this.topics = topic;
+        }
+        return this;
     }
-    return this;
-  }
 
-  public KafkaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
-    if (deserializer != null) {
-      this.deserializer = deserializer;
+    public KafkaSource<T> alias(String alias) {
+        if (alias != null) {
+            this.alias = alias;
+        }
+        return this;
     }
-    return this;
-  }
 
-  public KafkaSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
-    if (strategy != null) {
-      this.strategy = strategy;
+    public KafkaSource<T> deserializer(KafkaDeserializationSchema<T> deserializer) {
+        if (deserializer != null) {
+            this.deserializer = deserializer;
+        }
+        return this;
     }
-    return this;
-  }
 
-  public DataStreamSource<KafkaRecord<T>> getDataStream() {
-    FlinkKafkaConsumer<KafkaRecord<T>> consumer =
-        com.streamxhub.flink.core.scala.source.KafkaSource.getSource(
-            this.context,
-            this.property,
-            this.topics,
-            this.alias,
-            this.deserializer,
-            this.strategy,
-            null);
-    return context.getJavaEnv().addSource(consumer);
-  }
+    public KafkaSource<T> strategy(WatermarkStrategy<KafkaRecord<T>> strategy) {
+        if (strategy != null) {
+            this.strategy = strategy;
+        }
+        return this;
+    }
+
+    public DataStreamSource<KafkaRecord<T>> getDataStream() {
+        FlinkKafkaConsumer<KafkaRecord<T>> consumer = com.streamxhub.flink.core.scala.source.KafkaSource.getSource(this.context, this.property, this.topics, this.alias, this.deserializer, this.strategy, null);
+        return context.getJavaEnv().addSource(consumer);
+    }
+
 }

@@ -25,8 +25,7 @@ import scala.collection.mutable
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter._
 
-class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
-    extends IMain(settings, out) {
+class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter) extends IMain(settings, out) {
   self =>
 
   override lazy val memberHandlers = new {
@@ -35,25 +34,21 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
 
     import intp.global._
 
-    override def chooseHandler(member: intp.global.Tree): MemberHandler =
-      member match {
-        case member: Import => new FlinkImportHandler(member)
-        case _              => super.chooseHandler(member)
-      }
+    override def chooseHandler(member: intp.global.Tree): MemberHandler = member match {
+      case member: Import => new FlinkImportHandler(member)
+      case _ => super.chooseHandler(member)
+    }
 
     class FlinkImportHandler(imp: Import) extends ImportHandler(imp: Import) {
 
-      override def targetType: Type =
-        intp.global.rootMirror.getModuleIfDefined("" + expr) match {
-          case NoSymbol => intp.typeOfExpression("" + expr)
-          case sym      => sym.tpe
-        }
+      override def targetType: Type = intp.global.rootMirror.getModuleIfDefined("" + expr) match {
+        case NoSymbol => intp.typeOfExpression("" + expr)
+        case sym => sym.tpe
+      }
 
-      private def safeIndexOf(name: Name, s: String): Int =
-        fixIndexOf(name, pos(name, s))
+      private def safeIndexOf(name: Name, s: String): Int = fixIndexOf(name, pos(name, s))
 
-      private def fixIndexOf(name: Name, idx: Int): Int =
-        if (idx == name.length) -1 else idx
+      private def fixIndexOf(name: Name, idx: Int): Int = if (idx == name.length) -1 else idx
 
       private def pos(name: Name, s: String): Int = {
         var i = name.pos(s.charAt(0), 0)
@@ -72,41 +67,29 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
 
       private def isFlattenedSymbol(sym: Symbol): Boolean = {
         sym.owner.isPackageClass &&
-        sym.name.containsName(nme.NAME_JOIN_STRING) &&
-        sym.owner.info.member(
-          sym.name.take(safeIndexOf(sym.name, nme.NAME_JOIN_STRING))
-        ) != NoSymbol
+          sym.name.containsName(nme.NAME_JOIN_STRING) &&
+          sym.owner.info.member(sym.name.take(
+            safeIndexOf(sym.name, nme.NAME_JOIN_STRING))) != NoSymbol
       }
 
-      def importableTargetMembers: List[Symbol] =
-        importableMembers(exitingTyper(targetType))
-          .filterNot(isFlattenedSymbol)
-          .toList
+      def importableTargetMembers: List[Symbol] = importableMembers(exitingTyper(targetType)).filterNot(isFlattenedSymbol).toList
 
-      def isIndividualImport(s: ImportSelector): Boolean =
-        s.name != nme.WILDCARD && s.rename != nme.WILDCARD
+      def isIndividualImport(s: ImportSelector): Boolean = s.name != nme.WILDCARD && s.rename != nme.WILDCARD
 
       def isWildcardImport(s: ImportSelector): Boolean = s.name == nme.WILDCARD
 
       // non-wildcard imports
-      private def individualSelectors: List[ImportSelector] =
-        selectors filter isIndividualImport
+      private def individualSelectors: List[ImportSelector] = selectors filter isIndividualImport
 
       override val importsWildcard: Boolean = selectors exists isWildcardImport
 
       lazy val importableSymbolsWithRenames: List[(Symbol, Name)] = {
-        val selectorRenameMap = individualSelectors
-          .flatMap(x => x.name.bothNames zip x.rename.bothNames)
-          .toMap
-        importableTargetMembers flatMap (
-            m => selectorRenameMap.get(m.name) map (m -> _)
-        )
+        val selectorRenameMap = individualSelectors.flatMap(x => x.name.bothNames zip x.rename.bothNames).toMap
+        importableTargetMembers flatMap (m => selectorRenameMap.get(m.name) map (m -> _))
       }
 
-      override lazy val individualSymbols
-          : List[Symbol] = importableSymbolsWithRenames map (_._1)
-      override lazy val wildcardSymbols: List[Symbol] =
-        if (importsWildcard) importableTargetMembers else Nil
+      override lazy val individualSymbols: List[Symbol] = importableSymbolsWithRenames map (_._1)
+      override lazy val wildcardSymbols: List[Symbol] = if (importsWildcard) importableTargetMembers else Nil
 
     }
 
@@ -116,20 +99,14 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
     val repl: FlinkILoopInterpreter.this.type = self
   } with FlinkExprTyper {}
 
-  override def symbolOfLine(code: String): global.Symbol =
-    expressionTyper.symbolOfLine(code)
+  override def symbolOfLine(code: String): global.Symbol = expressionTyper.symbolOfLine(code)
 
-  override def typeOfExpression(expr: String, silent: Boolean): global.Type =
-    expressionTyper.typeOfExpression(expr, silent)
+  override def typeOfExpression(expr: String, silent: Boolean): global.Type = expressionTyper.typeOfExpression(expr, silent)
 
   import global.Name
 
-  override def importsCode(
-      wanted: Set[Name],
-      wrapper: Request#Wrapper,
-      definesClass: Boolean,
-      generousImports: Boolean
-  ): ComputedImports = {
+  override def importsCode(wanted: Set[Name], wrapper: Request#Wrapper,
+                           definesClass: Boolean, generousImports: Boolean): ComputedImports = {
 
     import global._
     import definitions.PredefModule
@@ -141,33 +118,25 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
     var predefEscapes = false
 
     /**
-      * Narrow down the list of requests from which imports
-      * should be taken.  Removes requests which cannot contribute
-      * useful imports for the specified set of wanted names.
-      */
+     * Narrow down the list of requests from which imports
+     * should be taken.  Removes requests which cannot contribute
+     * useful imports for the specified set of wanted names.
+     */
     case class ReqAndHandler(req: Request, handler: MemberHandler)
 
     def reqsToUse: List[ReqAndHandler] = {
-
       /**
-        * Loop through a list of MemberHandlers and select which ones to keep.
-        * 'wanted' is the set of names that need to be imported.
-        */
-      def select(
-          reqs: List[ReqAndHandler],
-          wanted: Set[Name]
-      ): List[ReqAndHandler] = {
+       * Loop through a list of MemberHandlers and select which ones to keep.
+       * 'wanted' is the set of names that need to be imported.
+       */
+      def select(reqs: List[ReqAndHandler], wanted: Set[Name]): List[ReqAndHandler] = {
         // Single symbol imports might be implicits! See bug #1752.  Rather than
         // try to finesse this, we will mimic all imports for now.
         def keepHandler(handler: MemberHandler) = handler match {
           // While defining classes in class based mode - implicits are not needed.
-          case h: ImportHandler if isClassBased && definesClass =>
-            h.importedNames.exists(x => wanted.contains(x))
+          case h: ImportHandler if isClassBased && definesClass => h.importedNames.exists(x => wanted.contains(x))
           case _: ImportHandler => true
-          case x if generousImports =>
-            x.definesImplicit || (x.definedNames exists (
-                d => wanted.exists(w => d.startsWith(w))
-            ))
+          case x if generousImports => x.definesImplicit || (x.definedNames exists (d => wanted.exists(w => d.startsWith(w))))
           case x => x.definesImplicit || (x.definedNames exists wanted)
         }
 
@@ -180,7 +149,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
             import rh.handler._
             val augment = rh match {
               case ReqAndHandler(_, _: ImportHandler) => referencedNames
-              case _                                  => Nil
+              case _ => Nil
             }
             val newWanted = wanted ++ augment -- definedNames -- importedNames
             rh :: select(rest, newWanted)
@@ -188,10 +157,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
       }
 
       /** Flatten the handlers out and pair each with the original request */
-      select(
-        allReqAndHandlers reverseMap { case (r, h) => ReqAndHandler(r, h) },
-        wanted
-      ).reverse
+      select(allReqAndHandlers reverseMap { case (r, h) => ReqAndHandler(r, h) }, wanted).reverse
     }
 
     // add code for a new object to hold some imports
@@ -207,13 +173,11 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
 
     def wrapBeforeAndAfter[T](op: => T): T = {
       addWrapper()
-      try op
-      finally addWrapper()
+      try op finally addWrapper()
     }
 
     // imports from Predef are relocated to the template header to allow hiding.
-    def checkHeader(h: ImportHandler) =
-      h.referencedNames contains PredefModule.name
+    def checkHeader(h: ImportHandler) = h.referencedNames contains PredefModule.name
 
     // loop through previous requests, adding imports for each one
     wrapBeforeAndAfter {
@@ -223,7 +187,7 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
         val objName = req.lineRep.readPathInstance
         handler match {
           case h: ImportHandler if checkHeader(h) =>
-            header clear ()
+            header clear()
             header append f"${h.member}%n"
           // If the user entered an import, then just use it; add an import wrapping
           // level if the import might conflict with some other import
@@ -239,19 +203,14 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
               maybeWrap(sym.name)
               x match {
                 case _: ClassHandler =>
-                  code.append(
-                    s"import $objName${req.accessPath}.`${sym.name}`\n"
-                  )
+                  code.append(s"import $objName${req.accessPath}.`${sym.name}`\n")
                 case _ =>
-                  val valName =
-                    s"${req.lineRep.packageName}${req.lineRep.readName}"
+                  val valName = s"${req.lineRep.packageName}${req.lineRep.readName}"
                   if (!tempValLines.contains(req.lineRep.lineId)) {
                     code.append(s"val $valName: ${objName}.type = $objName\n")
                     tempValLines += req.lineRep.lineId
                   }
-                  code.append(
-                    s"import ${valName}${req.accessPath}.`${sym.name}`\n"
-                  )
+                  code.append(s"import ${valName}${req.accessPath}.`${sym.name}`\n")
               }
               currentImps += sym.name
             }
@@ -260,23 +219,17 @@ class FlinkILoopInterpreter(settings: Settings, out: JPrintWriter)
           // ambiguity errors will not be generated. Also, quote
           // the name of the variable, so that we don't need to
           // handle quoting keywords separately.
-          case x =>
-            for (sym <- x.definedSymbols) {
-              maybeWrap(sym.name)
-              code append s"import ${x.path}\n"
-              currentImps += sym.name
-            }
+          case x => for (sym <- x.definedSymbols) {
+            maybeWrap(sym.name)
+            code append s"import ${x.path}\n"
+            currentImps += sym.name
+          }
         }
       }
     }
 
     val computedHeader = if (predefEscapes) header.toString else ""
-    ComputedImports(
-      computedHeader,
-      code.toString,
-      trailingBraces.toString,
-      accessPath.toString
-    )
+    ComputedImports(computedHeader, code.toString, trailingBraces.toString, accessPath.toString)
   }
 
   def allReqAndHandlers =

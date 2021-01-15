@@ -28,9 +28,9 @@ After the build is completed, the project will be installed in the local maven w
 
 ```xml
 <dependency>
-	<groupId>com.streamxhub</groupId>
-	<artifactId>streamx-flink-core</artifactId>
-	<version>1.0.0</version>
+    <groupId>com.streamxhub</groupId>
+    <artifactId>streamx-flink-core</artifactId>
+    <version>1.0.0</version>
 </dependency>
 ```
 
@@ -51,20 +51,21 @@ import org.apache.flink.api.scala._
 
 object HelloStreamXApp extends FlinkStreaming {
 
-	override def handle(context: StreamingContext): Unit = {
-		//1) source
-		val source = KafkaSource(context).getDataStream[String](topic = "hello")
-		.uid("kfk_source")
-		.name("kfk_source")
-		.map(_.value)
+  override def handle(context: StreamingContext): Unit = {
+    //1) source
+    val source = KafkaSource(context).getDataStream[String](topic = "hello")
+      .uid("kfk_source")
+      .name("kfk_source")
+      .map(_.value)
 
-		//2) println
-		source.print()
+    //2) println
+    source.print()
 
-		//3) sink
-		KafkaSink(context).sink(source,topic = "kfk_sink")
-    	}
-	
+    //3) sink
+    KafkaSink(context).sink(source,topic = "kfk_sink")
+
+  }
+
 }
 
 ```
@@ -121,14 +122,14 @@ flink:
 restart-strategy: failure-rate #(fixed-delay|failure-rate|none共3个可配置的策略)
 # Up to 10 mission failures are allowed within 5 minutes, and restart every 5 seconds after each failure. If the failure rate exceeds this failure rate, the program will exit
 restart-strategy.failure-rate:
-max-failures-per-interval: 10
-failure-rate-interval: 5min
-delay: 5000
-#failure-rate:
-#  max-failures-per-interval:
-#  failure-rate-interval:
-#  delay:
-#none:
+  max-failures-per-interval: 10
+  failure-rate-interval: 5min
+  delay: 5000
+  #failure-rate:
+  #  max-failures-per-interval:
+  #  failure-rate-interval:
+  #  delay:
+  #none:
 
 #state.backend
 state.backend: rocksdb #保存类型(jobmanager,filesystem,rocksdb)
@@ -141,18 +142,18 @@ state.backend.incremental: true #针对rocksdb有效,是否开启增量
 
 # source config....
 kafka.source:
-bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
-topic: topic1,topic2,topic3
-group.id: hello
-auto.offset.reset: earliest
-#enable.auto.commit: true
-#start.from:
-  #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
-  #offset: # 给每个topic的partition指定offset
-  #topic: topic1,topic2,topic3
-  #topic1: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
-  #topic2: 0:182,1:183,2:182
-  #topic3: 0:192,1:196,2:196
+  bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
+  topic: topic1,topic2,topic3
+  group.id: hello
+  auto.offset.reset: earliest
+  #enable.auto.commit: true
+  #start.from:
+    #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
+    #offset: # 给每个topic的partition指定offset
+      #topic: topic1,topic2,topic3
+      #topic1: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
+      #topic2: 0:182,1:183,2:182
+      #topic3: 0:192,1:196,2:196
 
 
 kafka.sink:

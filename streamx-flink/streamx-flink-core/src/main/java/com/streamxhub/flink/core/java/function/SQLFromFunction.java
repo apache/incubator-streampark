@@ -20,14 +20,17 @@
  */
 package com.streamxhub.flink.core.java.function;
 
+
 import java.io.Serializable;
 
-/** @author benjobs */
+/**
+ * @author benjobs
+ */
 @FunctionalInterface
 public interface SQLFromFunction<T> extends Serializable {
-  /**
-   * @param bean
-   * @return
-   */
-  String from(T bean);
+    /**
+     * @param bean
+     * @return
+     */
+    String from(T bean);
 }

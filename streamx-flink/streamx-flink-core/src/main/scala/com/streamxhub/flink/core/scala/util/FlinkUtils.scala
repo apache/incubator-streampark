@@ -26,16 +26,9 @@ import org.apache.flink.runtime.state.FunctionInitializationContext
 
 object FlinkUtils {
 
-  def getUnionListState[R: TypeInformation](
-      context: FunctionInitializationContext,
-      descriptorName: String
-  ): ListState[R] = {
-    context.getOperatorStateStore.getUnionListState(
-      new ListStateDescriptor(
-        descriptorName,
-        implicitly[TypeInformation[R]].getTypeClass
-      )
-    )
+  def getUnionListState[R: TypeInformation](context: FunctionInitializationContext, descriptorName: String): ListState[R] = {
+    context.getOperatorStateStore.getUnionListState(new ListStateDescriptor(descriptorName, implicitly[TypeInformation[R]].getTypeClass))
   }
+
 
 }

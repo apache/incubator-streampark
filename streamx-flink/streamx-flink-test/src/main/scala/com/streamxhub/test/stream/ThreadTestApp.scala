@@ -46,25 +46,20 @@ object Resource {
 
   private val lock = new ReentrantLock()
 
-  private val connectionCondition: mutable.Map[String, Condition] =
-    new ConcurrentHashMap[String, Condition]()
+  private val connectionCondition: mutable.Map[String, Condition] = new ConcurrentHashMap[String, Condition]()
 
-  private val lockMonitor: mutable.Map[String, String] =
-    new ConcurrentHashMap[String, String]()
-
+  private val lockMonitor: mutable.Map[String, String] = new ConcurrentHashMap[String, String]()
   /**
-    * 默认一个实例连接池大小...
-    */
-  private[this] val connectionPool =
-    new ThreadLocal[ConcurrentHashMap[String, util.Queue[String]]]()
+   * 默认一个实例连接池大小...
+   */
+  private[this] val connectionPool = new ThreadLocal[ConcurrentHashMap[String, util.Queue[String]]]()
 
   private[this] val dataSourceHolder = new ConcurrentHashMap[String, Random]
 
   def get(instance: String): String = {
     try {
       lock.lock()
-      val cond =
-        connectionCondition.getOrElseUpdate(instance, lock.newCondition())
+      val cond = connectionCondition.getOrElseUpdate(instance, lock.newCondition())
       while (lockMonitor.contains(instance)) {
         cond.await()
       }
