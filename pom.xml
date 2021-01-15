@@ -24,7 +24,11 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <java.version>1.8</java.version>
         <spark.version>2.2.0</spark.version>
+        <hive.version>2.3.4</hive.version>
         <flink.version>1.12.0</flink.version>
+        <flink.hadoop.version>2.6.5</flink.hadoop.version>
+        <hiverunner.version>4.0.0</hiverunner.version>
+
         <async.client.version>2.0.39</async.client.version>
         <vertx.version>3.8.3</vertx.version>
         <hadoop.version>2.6.0</hadoop.version>
@@ -40,6 +44,9 @@
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
         <spotless.version>2.7.0</spotless.version>
+        <grpc.version>1.15.0</grpc.version>
+        <gson.version>2.8.5</gson.version>
+        <mockito.version>1.10.19</mockito.version>
 
         <project.build.jdk>1.8</project.build.jdk>
         <PermGen>64m</PermGen>

@@ -11,8 +11,6 @@
 
     <artifactId>streamx-common</artifactId>
     <name>StreamX : Common</name>
-    <description>streamx-common</description>
-    <version>1.0.0</version>
 
     <dependencies>
 

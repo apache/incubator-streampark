@@ -11,8 +11,6 @@
 
     <artifactId>streamx-flink</artifactId>
     <name>StreamX : Flink Parent</name>
-    <description>streamx-flink</description>
-    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <modules>
