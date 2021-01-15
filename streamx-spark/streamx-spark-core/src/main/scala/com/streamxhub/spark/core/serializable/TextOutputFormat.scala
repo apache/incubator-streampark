@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.serializable
 
 import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
@@ -32,7 +31,11 @@ import org.apache.hadoop.mapred.lib.MultipleTextOutputFormat
   */
 class TextOutputFormat extends MultipleTextOutputFormat[Any, Any] {
 
-  override def generateFileNameForKeyValue(key: Any, value: Any, name: String): String = {
+  override def generateFileNameForKeyValue(
+      key: Any,
+      value: Any,
+      name: String
+  ): String = {
     s"${key}_$name"
   }
 

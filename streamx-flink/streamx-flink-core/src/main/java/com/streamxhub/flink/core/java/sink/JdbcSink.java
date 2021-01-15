@@ -20,62 +20,60 @@
  */
 package com.streamxhub.flink.core.java.sink;
 
+import java.util.Properties;
+
+import org.apache.flink.streaming.api.datastream.DataStream;
+import org.apache.flink.streaming.api.datastream.DataStreamSink;
+
 import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.java.function.SQLFromFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.sink.Jdbc2PCSinkFunction;
 import com.streamxhub.flink.core.scala.sink.JdbcSinkFunction;
-import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.DataStreamSink;
 
-import java.util.Properties;
-
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class JdbcSink<T> {
 
-    private final StreamingContext context;
-    private Properties jdbc;
-    private SQLFromFunction<T> sqlFunc;
-    private String dialect = Dialect.MYSQL().toString().toLowerCase();
-    private String alias = "";
+  private final StreamingContext context;
+  private Properties jdbc;
+  private SQLFromFunction<T> sqlFunc;
+  private String dialect = Dialect.MYSQL().toString().toLowerCase();
+  private String alias = "";
 
-    public JdbcSink(StreamingContext context) {
-        this.context = context;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
-    }
+  public JdbcSink(StreamingContext context) {
+    this.context = context;
+    this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
+  }
 
-    public JdbcSink<T> dialect(String dialect) {
-        this.dialect = dialect;
-        return this;
-    }
+  public JdbcSink<T> dialect(String dialect) {
+    this.dialect = dialect;
+    return this;
+  }
 
-    public JdbcSink<T> alias(String alias) {
-        this.alias = alias;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
-        return this;
-    }
+  public JdbcSink<T> alias(String alias) {
+    this.alias = alias;
+    this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
+    return this;
+  }
 
-    public JdbcSink<T> jdbc(Properties jdbc) {
-        this.jdbc = jdbc;
-        return this;
-    }
+  public JdbcSink<T> jdbc(Properties jdbc) {
+    this.jdbc = jdbc;
+    return this;
+  }
 
-    public JdbcSink<T> sql(SQLFromFunction<T> func) {
-        this.sqlFunc = func;
-        return this;
-    }
+  public JdbcSink<T> sql(SQLFromFunction<T> func) {
+    this.sqlFunc = func;
+    return this;
+  }
 
-    public DataStreamSink<T> sink(DataStream<T> dataStream) {
-        JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
-        return dataStream.addSink(sinkFun);
-    }
+  public DataStreamSink<T> sink(DataStream<T> dataStream) {
+    JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
+    return dataStream.addSink(sinkFun);
+  }
 
-    public DataStreamSink<T> towPCSink(DataStream<T> dataStream) {
-        Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.sqlFunc);
-        return dataStream.addSink(sinkFun);
-    }
-
+  public DataStreamSink<T> towPCSink(DataStream<T> dataStream) {
+    Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.sqlFunc);
+    return dataStream.addSink(sinkFun);
+  }
 }

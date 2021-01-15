@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.support.kafka
 
 /**
@@ -26,7 +25,6 @@ package com.streamxhub.spark.core.support.kafka
   *
   * 封装 Kafka
   */
-
 import com.streamxhub.common.util.Logger
 import com.streamxhub.spark.core.support.kafka.offset._
 import org.apache.kafka.clients.consumer.ConsumerRecord
@@ -41,32 +39,35 @@ import java.lang.reflect.Constructor
 import java.{util => ju}
 import scala.reflect.ClassTag
 
-
 class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
 
   // 自定义
   private lazy val offsetManager = {
     sparkConf.get("spark.source.kafka.offset.store.class", "none").trim match {
       case "none" =>
-        sparkConf.get("spark.source.kafka.offset.store.type", "none").trim.toLowerCase match {
+        sparkConf
+          .get("spark.source.kafka.offset.store.type", "none")
+          .trim
+          .toLowerCase match {
           case "redis" => new RedisOffset(sparkConf)
           case "hbase" => new HBaseOffset(sparkConf)
           case "kafka" => new DefaultOffset(sparkConf)
           case "mysql" => new MySQLOffset(sparkConf)
-          case "none" => new DefaultOffset(sparkConf)
+          case "none"  => new DefaultOffset(sparkConf)
         }
       case clazz =>
         logInfo(s"Custom offset management class $clazz")
         val constructors = {
           val offsetsManagerClass = Class.forName(clazz)
-          offsetsManagerClass
-            .getConstructors
+          offsetsManagerClass.getConstructors
             .asInstanceOf[Array[Constructor[_ <: SparkConf]]]
         }
         val constructorTakingSparkConf = constructors.find { c =>
           c.getParameterTypes.sameElements(Array(classOf[SparkConf]))
         }
-        constructorTakingSparkConf.get.newInstance(sparkConf).asInstanceOf[Offset]
+        constructorTakingSparkConf.get
+          .newInstance(sparkConf)
+          .asInstanceOf[Offset]
     }
   }
 
@@ -83,32 +84,39 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     * @tparam V
     * @return
     */
-  def createDirectStream[K: ClassTag, V: ClassTag](ssc: StreamingContext,
-                                                   kafkaParams: Map[String, Object],
-                                                   topics: Set[String]
-                                                  ): InputDStream[ConsumerRecord[K, V]] = {
-
+  def createDirectStream[K: ClassTag, V: ClassTag](
+      ssc: StreamingContext,
+      kafkaParams: Map[String, Object],
+      topics: Set[String]
+  ): InputDStream[ConsumerRecord[K, V]] = {
 
     var consumerOffsets = Map.empty[TopicPartition, Long]
 
     kafkaParams.get("group.id") match {
       case Some(groupId) =>
         consumerOffsets = offsetManager.get(groupId.toString, topics)
-        logInfo(s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}")
+        logInfo(
+          s"createDirectStream witch group.id $groupId topics ${topics.mkString(",")}"
+        )
       case _ =>
-        logInfo(s"createDirectStream witchOut group.id topics ${topics.mkString(",")}")
+        logInfo(
+          s"createDirectStream witchOut group.id topics ${topics.mkString(",")}"
+        )
     }
 
     if (consumerOffsets.nonEmpty) {
       logInfo(s"read topics ==[$topics]== from offsets ==[$consumerOffsets]==")
-      val stream = KafkaUtils.createDirectStream[K, V](ssc,
+      val stream = KafkaUtils.createDirectStream[K, V](
+        ssc,
         LocationStrategies.PreferConsistent,
-        ConsumerStrategies.Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets)
+        ConsumerStrategies
+          .Assign[K, V](consumerOffsets.keys, kafkaParams, consumerOffsets)
       )
       canCommitOffsets = stream.asInstanceOf[CanCommitOffsets]
       stream
     } else {
-      val stream = KafkaUtils.createDirectStream[K, V](ssc,
+      val stream = KafkaUtils.createDirectStream[K, V](
+        ssc,
         LocationStrategies.PreferConsistent,
         ConsumerStrategies.Subscribe[K, V](topics, kafkaParams)
       )
@@ -128,13 +136,14 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     * @tparam V
     * @return
     */
-  def createRDD[K: ClassTag, V: ClassTag](sc: SparkContext,
-                                          kafkaParams: ju.Map[String, Object],
-                                          offsetRanges: Array[OffsetRange],
-                                          locationStrategy: LocationStrategy): RDD[ConsumerRecord[K, V]] = {
+  def createRDD[K: ClassTag, V: ClassTag](
+      sc: SparkContext,
+      kafkaParams: ju.Map[String, Object],
+      offsetRanges: Array[OffsetRange],
+      locationStrategy: LocationStrategy
+  ): RDD[ConsumerRecord[K, V]] = {
     KafkaUtils.createRDD(sc, kafkaParams, offsetRanges, locationStrategy)
   }
-
 
   /**
     * 更新 Offsets
@@ -146,10 +155,11 @@ class KafkaClient(val sparkConf: SparkConf) extends Logger with Serializable {
     offsetStoreType match {
       case "kafka" => canCommitOffsets.commitAsync(offsetRanges)
       case _ =>
-        val tps = offsetRanges.map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset).toMap
+        val tps = offsetRanges
+          .map(x => new TopicPartition(x.topic, x.partition) -> x.untilOffset)
+          .toMap
         offsetManager.update(groupId, tps)
     }
   }
 
 }
-

@@ -18,14 +18,13 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.sink
 
+import com.streamxhub.common.util.Logger
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
-import org.slf4j.LoggerFactory
 
 import java.util.Properties
 import scala.annotation.meta.getter
@@ -35,28 +34,33 @@ import scala.util.Try
 /**
   *
   */
-trait Sink[T] extends Serializable {
+trait Sink[T] extends Serializable with Logger {
 
-  lazy val logger = LoggerFactory.getLogger(getClass)
-
-  @(transient@getter)
+  @(transient @getter)
   val sc: SparkContext
-  @(transient@getter)
+  @(transient @getter)
   lazy val sparkConf = sc.getConf
 
   val prefix: String
 
   lazy val param: Map[String, String] = sparkConf.getAll.flatMap {
-    case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) => Some(k.substring(prefix.length) -> v)
+    case (k, v) if k.startsWith(prefix) && Try(v.nonEmpty).getOrElse(false) =>
+      Some(k.substring(prefix.length) -> v)
     case _ => None
   } toMap
 
-   def filterProp(param: Map[String, String],overrided: Map[String, String],prefix:String = "",replacement:String = "") = {
-     val p = new Properties()
-     val map = param ++ overrided
-     val filtered = if(prefix.isEmpty) map else map.filter(_._1.startsWith(prefix))
-     filtered.foreach(x=>p.put(x._1.replace(prefix,replacement),x._2))
-     p
+  def filterProp(
+      param: Map[String, String],
+      overrided: Map[String, String],
+      prefix: String = "",
+      replacement: String = ""
+  ) = {
+    val p = new Properties()
+    val map = param ++ overrided
+    val filtered =
+      if (prefix.isEmpty) map else map.filter(_._1.startsWith(prefix))
+    filtered.foreach(x => p.put(x._1.replace(prefix, replacement), x._2))
+    p
   }
 
   /**

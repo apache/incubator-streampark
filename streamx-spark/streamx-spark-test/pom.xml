@@ -2,25 +2,16 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
-    <groupId>com.streamxhub</groupId>
-    <artifactId>streamx-spark-test</artifactId>
-    <version>1.0.0</version>
     <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.streamxhub</groupId>
+        <artifactId>streamx-spark</artifactId>
+        <version>1.0.0</version>
+    </parent>
 
-
-    <!-- 定义统一版本号-->
-    <properties>
-        <scala.version>2.11.8</scala.version>
-        <streamx.spark.version>1.0.0</streamx.spark.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <project.build.jdk>1.8</project.build.jdk>
-        <PermGen>64m</PermGen>
-        <MaxPermGen>512m</MaxPermGen>
-        <CodeCacheSize>512m</CodeCacheSize>
-    </properties>
-
+    <artifactId>streamx-spark-test</artifactId>
+    <name>StreamX : Spark Test</name>
+    <version>1.0.0</version>
 
     <dependencies>
         <dependency>
@@ -29,7 +20,6 @@
             <version>1.0.0</version>
         </dependency>
     </dependencies>
-
 
     <build>
         <sourceDirectory>src/main/scala</sourceDirectory>

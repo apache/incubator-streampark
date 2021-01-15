@@ -20,8 +20,10 @@
  */
 package com.streamxhub.common.conf
 
-
-import com.streamxhub.common.conf.ConfigConst.{KEY_FLINK_DEPLOYMENT_OPTION_PREFIX, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX}
+import com.streamxhub.common.conf.ConfigConst.{
+  KEY_FLINK_DEPLOYMENT_OPTION_PREFIX,
+  KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX
+}
 import com.streamxhub.common.util.PropertiesUtils
 import org.apache.commons.cli.{DefaultParser, Options}
 
@@ -62,26 +64,36 @@ object ParameterCli {
           }
         })
         map.getOrElse(optionMain, null) match {
-          case null =>
+          case null      =>
           case mainClass => buffer.append(s" -c $mainClass")
         }
         buffer.toString.trim
       case "--property" =>
         val buffer = new StringBuffer()
         map
-          .filter(x => x._1 != optionMain && x._1.startsWith(propertyPrefix) && x._2.nonEmpty)
-          .foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
+          .filter(
+            x =>
+              x._1 != optionMain && x._1
+                .startsWith(propertyPrefix) && x._2.nonEmpty
+          )
+          .foreach(
+            x =>
+              buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}")
+          )
         buffer.toString.trim
       case "--name" =>
-        map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
+        map
+          .getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "")
+          .trim match {
           case yarnName if yarnName.nonEmpty => yarnName
-          case _ => ""
+          case _                             => ""
         }
       //是否detached模式...
       case "--detached" =>
         val option = getOption(map, programArgs)
         val line = parser.parse(FlinkRunOption.allOptions, option, false)
-        val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
+        val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line
+          .hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
         val mode = if (detached) "Detached" else "Attach"
         mode
       case _ => null
@@ -89,18 +101,27 @@ object ParameterCli {
     }
   }
 
-  def getOption(map: Map[String, String], args: Array[String]): Array[String] = {
+  def getOption(
+      map: Map[String, String],
+      args: Array[String]
+  ): Array[String] = {
     val optionMap = new mutable.HashMap[String, Any]()
-    map.filter(_._1.startsWith(optionPrefix)).filter(_._2.nonEmpty).filter(x => {
-      val key = x._1.drop(optionPrefix.length)
-      //验证参数是否合法...
-      flinkOptions.hasOption(key)
-    }).foreach(x => {
-      Try(x._2.toBoolean).getOrElse(x._2) match {
-        case b if b.isInstanceOf[Boolean] => if (b.asInstanceOf[Boolean]) optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
-        case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
-      }
-    })
+    map
+      .filter(_._1.startsWith(optionPrefix))
+      .filter(_._2.nonEmpty)
+      .filter(x => {
+        val key = x._1.drop(optionPrefix.length)
+        //验证参数是否合法...
+        flinkOptions.hasOption(key)
+      })
+      .foreach(x => {
+        Try(x._2.toBoolean).getOrElse(x._2) match {
+          case b if b.isInstanceOf[Boolean] =>
+            if (b.asInstanceOf[Boolean])
+              optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> true
+          case v => optionMap += s"-${x._1.drop(optionPrefix.length)}".trim -> v
+        }
+      })
     //来自从命令行输入的参数,优先级比配置文件高,若存在则覆盖...
     args match {
       case Array() =>

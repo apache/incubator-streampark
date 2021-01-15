@@ -20,43 +20,44 @@
  */
 package com.streamxhub.flink.core.java.source;
 
+import java.util.Properties;
+
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
+
 import com.streamxhub.common.util.ConfigUtils;
 import com.streamxhub.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.sink.Dialect;
 import com.streamxhub.flink.core.scala.source.MySQLSourceFunction;
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
-import java.util.Properties;
-
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class MySQLSource<T> {
 
-    private final StreamingContext context;
-    private final Properties jdbc;
+  private final StreamingContext context;
+  private final Properties jdbc;
 
-    public MySQLSource(StreamingContext context) {
-        this(context, (String) null);
-    }
+  public MySQLSource(StreamingContext context) {
+    this(context, (String) null);
+  }
 
-    public MySQLSource(StreamingContext context, String alias) {
-        this.context = context;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
-    }
+  public MySQLSource(StreamingContext context, String alias) {
+    this.context = context;
+    this.jdbc =
+        ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
+  }
 
-    public MySQLSource(StreamingContext context, Properties jdbc) {
-        this.context = context;
-        this.jdbc = jdbc;
-    }
+  public MySQLSource(StreamingContext context, Properties jdbc) {
+    this.context = context;
+    this.jdbc = jdbc;
+  }
 
-    public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
-        assert queryFunc != null;
-        assert resultFunc != null;
-        MySQLSourceFunction<T> sourceFunction = new MySQLSourceFunction<>(jdbc, queryFunc, resultFunc, null);
-        return context.getJavaEnv().addSource(sourceFunction);
-    }
-
+  public DataStreamSource<T> getDataStream(
+      SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
+    assert queryFunc != null;
+    assert resultFunc != null;
+    MySQLSourceFunction<T> sourceFunction =
+        new MySQLSourceFunction<>(jdbc, queryFunc, resultFunc, null);
+    return context.getJavaEnv().addSource(sourceFunction);
+  }
 }

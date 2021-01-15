@@ -34,7 +34,8 @@ object CommandUtils extends Logger {
     val buffer = new StringBuffer()
     Try {
       val process: Process = Runtime.getRuntime.exec(command)
-      val reader: BufferedReader = new BufferedReader(new InputStreamReader(process.getInputStream))
+      val reader: BufferedReader =
+        new BufferedReader(new InputStreamReader(process.getInputStream))
       breakable {
         while (true) {
           val line: String = reader.readLine()
@@ -66,11 +67,14 @@ object CommandUtils extends Logger {
       require(commands != null && commands.nonEmpty)
       logInfo(s"Command execute:\n${commands.mkString("\n")} ")
       val process = Runtime.getRuntime.exec("/bin/bash", null, null)
-      val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
+      val out = new PrintWriter(
+        new BufferedWriter(new OutputStreamWriter(process.getOutputStream)),
+        true
+      )
       commands.foreach(out.println)
       commands.last.toLowerCase.trim match {
         case "exit" =>
-        case _ => out.println("exit")
+        case _      => out.println("exit")
       }
       val scanner = new Scanner(process.getInputStream)
       while (scanner.hasNextLine) {
