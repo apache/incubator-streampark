@@ -8,37 +8,41 @@ import org.apache.flink.streaming.api.scala._
 import scala.util.Random
 
 /**
- * 侧输出流
- */
+  * 侧输出流
+  */
 object InfluxDBSinkApp extends FlinkStreaming {
-
 
   override def handle(context: StreamingContext): Unit = {
     val source = context.addSource(new WeatherSource())
 
     //weather,altitude=1000,area=北 temperature=11,humidity=-4
 
-    InfluxDBSink(context).sink(source,"mydb")(InfluxEntity[Weather](
-      "mydb",
-      "test",
-      "autogen",
-      x => Map("altitude" -> x.altitude.toString, "area" -> x.area.toString),
-      x => Map("temperature" -> x.temperature, "humidity" -> x.humidity)))
+    InfluxDBSink(context).sink(source, "mydb")(
+      InfluxEntity[Weather](
+        "mydb",
+        "test",
+        "autogen",
+        x => Map("altitude" -> x.altitude.toString, "area" -> x.area.toString),
+        x => Map("temperature" -> x.temperature, "humidity" -> x.humidity)
+      )
+    )
   }
 
 }
 
 /**
- *
- * 温度 temperature
- * 湿度 humidity
- * 地区 area
- * 海拔 altitude
- */
-case class Weather(temperature: Long,
-                   humidity: Long,
-                   area: String,
-                   altitude: Long)
+  *
+  * 温度 temperature
+  * 湿度 humidity
+  * 地区 area
+  * 海拔 altitude
+  */
+case class Weather(
+    temperature: Long,
+    humidity: Long,
+    area: String,
+    altitude: Long
+)
 
 class WeatherSource extends SourceFunction[Weather] {
 
@@ -52,7 +56,7 @@ class WeatherSource extends SourceFunction[Weather] {
     while (isRunning) {
       val temperature = random.nextInt(100)
       val humidity = random.nextInt(30)
-      val area = List("北","上","广","深")(random.nextInt(4))
+      val area = List("北", "上", "广", "深")(random.nextInt(4))
       val altitude = random.nextInt(10000)
       val order = Weather(temperature, humidity, area, altitude)
       ctx.collect(order)
@@ -60,4 +64,3 @@ class WeatherSource extends SourceFunction[Weather] {
   }
 
 }
-

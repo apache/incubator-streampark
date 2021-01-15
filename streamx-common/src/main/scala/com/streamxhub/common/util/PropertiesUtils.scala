@@ -30,8 +30,8 @@ import scala.collection.Map
 import scala.collection.mutable.{Map => MMap}
 
 /**
- * @author benjobs
- */
+  * @author benjobs
+  */
 object PropertiesUtils {
 
   def getFileSource(filename: String): String = {
@@ -47,22 +47,27 @@ object PropertiesUtils {
     buffer.toString()
   }
 
-  private[this] def eachAppendYamlItem(prefix: String, k: String, v: Any, proper: collection.mutable.Map[String, String]): Map[String, String] = {
+  private[this] def eachAppendYamlItem(
+      prefix: String,
+      k: String,
+      v: Any,
+      proper: collection.mutable.Map[String, String]
+  ): Map[String, String] = {
     v match {
       case map: JavaLinkedMap[String, Any] =>
         map.flatMap(x => {
           prefix match {
-            case "" => eachAppendYamlItem(k, x._1, x._2, proper)
+            case ""    => eachAppendYamlItem(k, x._1, x._2, proper)
             case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
           }
         })
       case text =>
         val value = text match {
-          case null => ""
+          case null  => ""
           case other => other.toString
         }
         prefix match {
-          case "" => proper += k -> value
+          case ""    => proper += k -> value
           case other => proper += s"$other.$k" -> value
         }
         proper
@@ -75,9 +80,14 @@ object PropertiesUtils {
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading conf error:", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading conf error:",
+          e
+        )
     }
   }
 
@@ -85,9 +95,17 @@ object PropertiesUtils {
     try {
       val properties = new Properties()
       properties.load(new StringReader(conf))
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties
+        .stringPropertyNames()
+        .asScala
+        .map(k => (k, properties.getProperty(k).trim))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties ", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading properties ",
+          e
+        )
     }
   }
 
@@ -102,9 +120,14 @@ object PropertiesUtils {
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading properties from $filename",
+          e
+        )
     } finally {
       inputStream.close()
     }
@@ -120,9 +143,17 @@ object PropertiesUtils {
     try {
       val properties = new Properties()
       properties.load(inReader)
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties
+        .stringPropertyNames()
+        .asScala
+        .map(k => (k, properties.getProperty(k).trim))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading properties from $filename",
+          e
+        )
     } finally {
       inReader.close()
     }
@@ -136,9 +167,14 @@ object PropertiesUtils {
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
-        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map)).toMap
+        .flatMap(x => eachAppendYamlItem("", x._1, x._2, map))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading yaml from inputStream", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading yaml from inputStream",
+          e
+        )
     } finally {
       inputStream.close()
     }
@@ -150,9 +186,17 @@ object PropertiesUtils {
     try {
       val properties = new Properties()
       properties.load(inputStream)
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties
+        .stringPropertyNames()
+        .asScala
+        .map(k => (k, properties.getProperty(k).trim))
+        .toMap
     } catch {
-      case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from inputStream", e)
+      case e: IOException =>
+        throw new IllegalArgumentException(
+          s"Failed when loading properties from inputStream",
+          e
+        )
     }
   }
 

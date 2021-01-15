@@ -32,34 +32,40 @@ import scala.annotation.meta.param
 
 object ESSink {
 
-  def apply(@(transient@param) ctx: StreamingContext,
-            property: Properties = new Properties(),
-            parallelism: Int = 0,
-            name: String = null,
-            uid: String = null): ESSink = new ESSink(ctx, property, parallelism, name, uid)
+  def apply(
+      @(transient @param) ctx: StreamingContext,
+      property: Properties = new Properties(),
+      parallelism: Int = 0,
+      name: String = null,
+      uid: String = null
+  ): ESSink = new ESSink(ctx, property, parallelism, name, uid)
 
 }
 
-class ESSink(@(transient@param) context: StreamingContext,
-             property: Properties = new Properties(),
-             parallelism: Int = 0,
-             name: String = null,
-             uid: String = null) {
+class ESSink(
+    @(transient @param) context: StreamingContext,
+    property: Properties = new Properties(),
+    parallelism: Int = 0,
+    name: String = null,
+    uid: String = null
+) {
 
   /**
-   * for ElasticSearch5....
-   *
-   * @param stream
-   * @param suffix
-   * @param failureHandler
-   * @param f
-   * @tparam T
-   * @return
-   */
-  def sink5[T](stream: DataStream[T],
-               suffix: String = "",
-               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
-              (implicit f: T => IndexRequest): DataStreamSink[T] = {
+    * for ElasticSearch5....
+    *
+    * @param stream
+    * @param suffix
+    * @param failureHandler
+    * @param f
+    * @tparam T
+    * @return
+    */
+  def sink5[T](
+      stream: DataStream[T],
+      suffix: String = "",
+      failureHandler: ActionRequestFailureHandler =
+        new RetryRejectedExecutionFailureHandler
+  )(implicit f: T => IndexRequest): DataStreamSink[T] = {
 
     //TODO....
     null
@@ -67,23 +73,26 @@ class ESSink(@(transient@param) context: StreamingContext,
   }
 
   /**
-   * for ElasticSearch6....
-   *
-   * @param stream
-   * @param suffix
-   * @param restClientFactory
-   * @param failureHandler
-   * @param f
-   * @tparam T
-   * @return
-   */
-  def sink6[T](stream: DataStream[T],
-               suffix: String = "",
-               restClientFactory: Any = null,
-               failureHandler: ActionRequestFailureHandler = new RetryRejectedExecutionFailureHandler)
-              (implicit f: T => IndexRequest): DataStreamSink[T] = {
+    * for ElasticSearch6....
+    *
+    * @param stream
+    * @param suffix
+    * @param restClientFactory
+    * @param failureHandler
+    * @param f
+    * @tparam T
+    * @return
+    */
+  def sink6[T](
+      stream: DataStream[T],
+      suffix: String = "",
+      restClientFactory: Any = null,
+      failureHandler: ActionRequestFailureHandler =
+        new RetryRejectedExecutionFailureHandler
+  )(implicit f: T => IndexRequest): DataStreamSink[T] = {
 
-    new ES6Sink(context, property, parallelism, name, uid).sink[T](stream, suffix, failureHandler)(f)
+    new ES6Sink(context, property, parallelism, name, uid)
+      .sink[T](stream, suffix, failureHandler)(f)
   }
 
 }

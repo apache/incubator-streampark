@@ -22,7 +22,13 @@ package com.streamxhub.flink.core.scala.failover
 
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.ConfigUtils
-import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{FailoverStorageType, HBase, HDFS, Kafka, MySQL}
+import com.streamxhub.flink.core.scala.failover.FailoverStorageType.{
+  FailoverStorageType,
+  HBase,
+  HDFS,
+  Kafka,
+  MySQL
+}
 
 import java.util.Properties
 import scala.collection.JavaConversions._
@@ -31,21 +37,45 @@ import scala.util.Try
 
 case class ThresholdConf(parameters: Properties) {
 
-  val bufferSize: Int = Try(parameters(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_BUFFER_SIZE)
-  val queueCapacity: Int = Try(parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY)
-  val delayTime: Long = Try(parameters(KEY_SINK_THRESHOLD_DELAY_TIME).toLong).getOrElse(DEFAULT_SINK_THRESHOLD_DELAY_TIME)
-  val timeout: Int = Try(parameters(KEY_SINK_THRESHOLD_REQ_TIMEOUT).toInt).getOrElse(DEFAULT_SINK_REQUEST_TIMEOUT)
-  val successCode: List[Int] = Try(parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
-  val numWriters: Int = Try(parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_NUM_WRITERS)
-  val maxRetries: Int = Try(parameters(KEY_SINK_THRESHOLD_RETRIES).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_RETRIES)
-  val storageType: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage muse be not null! ")))
+  val bufferSize: Int = Try(parameters(KEY_SINK_THRESHOLD_BUFFER_SIZE).toInt)
+    .getOrElse(DEFAULT_SINK_THRESHOLD_BUFFER_SIZE)
+  val queueCapacity: Int = Try(
+    parameters(KEY_SINK_THRESHOLD_QUEUE_CAPACITY).toInt
+  ).getOrElse(DEFAULT_SINK_THRESHOLD_QUEUE_CAPACITY)
+  val delayTime: Long = Try(parameters(KEY_SINK_THRESHOLD_DELAY_TIME).toLong)
+    .getOrElse(DEFAULT_SINK_THRESHOLD_DELAY_TIME)
+  val timeout: Int = Try(parameters(KEY_SINK_THRESHOLD_REQ_TIMEOUT).toInt)
+    .getOrElse(DEFAULT_SINK_REQUEST_TIMEOUT)
+  val successCode: List[Int] = Try(
+    parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList
+  ).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
+  val numWriters: Int = Try(parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt)
+    .getOrElse(DEFAULT_SINK_THRESHOLD_NUM_WRITERS)
+  val maxRetries: Int = Try(parameters(KEY_SINK_THRESHOLD_RETRIES).toInt)
+    .getOrElse(DEFAULT_SINK_THRESHOLD_RETRIES)
+  val storageType: FailoverStorageType = FailoverStorageType.get(
+    parameters.getOrElse(
+      KEY_SINK_FAILOVER_STORAGE,
+      throw new IllegalArgumentException(
+        s"[StreamX] usage error! failover.storage muse be not null! "
+      )
+    )
+  )
 
   def getFailoverConfig: Properties = {
     storageType match {
-      case Kafka => ConfigUtils.getConf(parameters.toMap.asJava, "failover.kafka.")
-      case MySQL => ConfigUtils.getConf(parameters.toMap.asJava, "failover.mysql.")
-      case HBase => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hbase.", HBASE_PREFIX)
-      case HDFS => ConfigUtils.getConf(parameters.toMap.asJava, "failover.hdfs.")
+      case Kafka =>
+        ConfigUtils.getConf(parameters.toMap.asJava, "failover.kafka.")
+      case MySQL =>
+        ConfigUtils.getConf(parameters.toMap.asJava, "failover.mysql.")
+      case HBase =>
+        ConfigUtils.getConf(
+          parameters.toMap.asJava,
+          "failover.hbase.",
+          HBASE_PREFIX
+        )
+      case HDFS =>
+        ConfigUtils.getConf(parameters.toMap.asJava, "failover.hdfs.")
     }
   }
 }
@@ -54,5 +84,6 @@ object FailoverStorageType extends Enumeration {
   type FailoverStorageType = Value
   val MySQL, HBase, HDFS, Kafka = Value
 
-  def get(key: String): Value = values.find(_.toString.equalsIgnoreCase(key)).get
+  def get(key: String): Value =
+    values.find(_.toString.equalsIgnoreCase(key)).get
 }

@@ -36,7 +36,8 @@ object MongoConfig {
   val password = "password"
   val min_connections_per_host = "min-connections-per-host"
   val max_connections_per_host = "max-connections-per-host"
-  val threads_allowed_to_block_for_connection_multiplier = "threads-allowed-to-block-for-connection-multiplier"
+  val threads_allowed_to_block_for_connection_multiplier =
+    "threads-allowed-to-block-for-connection-multiplier"
   val server_selection_timeout = "server-selection-timeout"
   val max_wait_time = "max-wait-time"
   val max_connection_idel_time = "max-connection-idel-time"
@@ -54,21 +55,31 @@ object MongoConfig {
   val local_threshold = "local-threshold"
   val authentication_database = "authentication-database"
 
-  def getProperty(properties: Properties, k: String)(implicit alias: String = ""): String = {
+  def getProperty(properties: Properties, k: String)(
+      implicit alias: String = ""
+  ): String = {
     val prop = getProperties(properties)
     prop.getProperty(k)
   }
 
-  def getProperties(properties: Properties)(implicit alias: String = ""): Properties = {
+  def getProperties(
+      properties: Properties
+  )(implicit alias: String = ""): Properties = {
     val prop = new Properties()
-    properties.filter(_._1.startsWith(MONGO_PREFIX)).filter(_._2.nonEmpty).map(x => {
-      val k = x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
-      prop.put(k, x._2.trim)
-    })
+    properties
+      .filter(_._1.startsWith(MONGO_PREFIX))
+      .filter(_._2.nonEmpty)
+      .map(x => {
+        val k =
+          x._1.replaceAll(s"$MONGO_PREFIX$alias", "").replaceFirst("^\\.", "")
+        prop.put(k, x._2.trim)
+      })
     prop
   }
 
-  def getClient(properties: Properties)(implicit alias: String = ""): MongoClient = {
+  def getClient(
+      properties: Properties
+  )(implicit alias: String = ""): MongoClient = {
     val mongoParam = getProperties(properties)
     if (mongoParam.containsKey(client_uri)) {
       val clientURI = new MongoClientURI(mongoParam(client_uri))
@@ -80,25 +91,37 @@ object MongoConfig {
         builder.connectionsPerHost(mongoParam(max_connections_per_host).toInt)
       }
       if (mongoParam.containsKey(min_connections_per_host)) {
-        builder.minConnectionsPerHost(mongoParam(min_connections_per_host).toInt)
+        builder.minConnectionsPerHost(
+          mongoParam(min_connections_per_host).toInt
+        )
       }
       if (mongoParam.containsKey(replica_set)) {
         builder.requiredReplicaSetName(mongoParam(replica_set))
       }
-      if (mongoParam.containsKey(threads_allowed_to_block_for_connection_multiplier)) {
-        builder.threadsAllowedToBlockForConnectionMultiplier(mongoParam(threads_allowed_to_block_for_connection_multiplier).toInt)
+      if (mongoParam.containsKey(
+            threads_allowed_to_block_for_connection_multiplier
+          )) {
+        builder.threadsAllowedToBlockForConnectionMultiplier(
+          mongoParam(threads_allowed_to_block_for_connection_multiplier).toInt
+        )
       }
       if (mongoParam.containsKey(server_selection_timeout)) {
-        builder.serverSelectionTimeout(mongoParam(server_selection_timeout).toInt)
+        builder.serverSelectionTimeout(
+          mongoParam(server_selection_timeout).toInt
+        )
       }
       if (mongoParam.containsKey(max_wait_time)) {
         builder.maxWaitTime(mongoParam(max_wait_time).toInt)
       }
       if (mongoParam.containsKey(max_connection_idel_time)) {
-        builder.maxConnectionIdleTime(mongoParam(max_connection_idel_time).toInt)
+        builder.maxConnectionIdleTime(
+          mongoParam(max_connection_idel_time).toInt
+        )
       }
       if (mongoParam.containsKey(max_connection_life_time)) {
-        builder.maxConnectionLifeTime(mongoParam(max_connection_life_time).toInt)
+        builder.maxConnectionLifeTime(
+          mongoParam(max_connection_life_time).toInt
+        )
       }
       if (mongoParam.containsKey(connect_timeout)) {
         builder.connectTimeout(mongoParam(connect_timeout).toInt)
@@ -110,7 +133,9 @@ object MongoConfig {
         builder.sslEnabled(mongoParam(ssl_enabled).toBoolean)
       }
       if (mongoParam.containsKey(ssl_invalid_host_name_allowed)) {
-        builder.sslInvalidHostNameAllowed(mongoParam(ssl_invalid_host_name_allowed).toBoolean)
+        builder.sslInvalidHostNameAllowed(
+          mongoParam(ssl_invalid_host_name_allowed).toBoolean
+        )
       }
       if (mongoParam.containsKey(always_use_m_beans)) {
         builder.alwaysUseMBeans(mongoParam(always_use_m_beans).toBoolean)
@@ -122,29 +147,42 @@ object MongoConfig {
         builder.minHeartbeatFrequency(mongoParam(min_heartbeat_frequency).toInt)
       }
       if (mongoParam.containsKey(heartbeat_connect_timeout)) {
-        builder.heartbeatConnectTimeout(mongoParam(heartbeat_connect_timeout).toInt)
+        builder.heartbeatConnectTimeout(
+          mongoParam(heartbeat_connect_timeout).toInt
+        )
       }
       if (mongoParam.containsKey(heartbeat_socket_timeout)) {
-        builder.heartbeatSocketTimeout(mongoParam(heartbeat_socket_timeout).toInt)
+        builder.heartbeatSocketTimeout(
+          mongoParam(heartbeat_socket_timeout).toInt
+        )
       }
       if (mongoParam.containsKey(local_threshold)) {
         builder.localThreshold(mongoParam(local_threshold).toInt)
       }
       val mongoClientOptions = builder.build
-      val serverAddresses = mongoParam(address).split(",").map(x => {
-        val hostAndPort = x.split(":")
-        val host = hostAndPort.head
-        val port = hostAndPort(1).toInt
-        new ServerAddress(host, port)
-      })
+      val serverAddresses = mongoParam(address)
+        .split(",")
+        .map(x => {
+          val hostAndPort = x.split(":")
+          val host = hostAndPort.head
+          val port = hostAndPort(1).toInt
+          new ServerAddress(host, port)
+        })
       if (mongoParam.containsKey(username)) {
-        val db = if (mongoParam.containsKey(authentication_database)) mongoParam(authentication_database) else mongoParam(database)
+        val db =
+          if (mongoParam.containsKey(authentication_database))
+            mongoParam(authentication_database)
+          else mongoParam(database)
         val mongoCredential = MongoCredential.createScramSha1Credential(
           mongoParam(username),
           db,
           mongoParam(password).toCharArray
         )
-        new MongoClient(serverAddresses.toList, List(mongoCredential), mongoClientOptions)
+        new MongoClient(
+          serverAddresses.toList,
+          List(mongoCredential),
+          mongoClientOptions
+        )
       } else {
         new MongoClient(serverAddresses.toList, mongoClientOptions)
       }

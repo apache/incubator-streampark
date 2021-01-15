@@ -26,11 +26,20 @@ import org.elasticsearch.common.xcontent.XContentType
 
 object ElasticSearchUtils {
 
-  def indexRequest(index: String, indexType: String, id: String, source: String)(implicit xContentType: XContentType = XContentType.JSON): IndexRequest = {
+  def indexRequest(
+      index: String,
+      indexType: String,
+      id: String,
+      source: String
+  )(implicit xContentType: XContentType = XContentType.JSON): IndexRequest = {
     require(source != null, "indexRequest error:source can not be null...")
-    require(xContentType != null, "indexRequest error:xContentType can not be null...")
+    require(
+      xContentType != null,
+      "indexRequest error:xContentType can not be null..."
+    )
     val indexReq = new IndexRequest(index, indexType, id)
-    val mapping = List("source" -> new BytesArray(source), "contentType" -> xContentType)
+    val mapping =
+      List("source" -> new BytesArray(source), "contentType" -> xContentType)
     mapping.foreach { x =>
       val field = indexReq.getClass.getDeclaredField(x._1)
       field.setAccessible(true)
@@ -38,6 +47,5 @@ object ElasticSearchUtils {
     }
     indexReq
   }
-
 
 }
