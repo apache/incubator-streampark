@@ -21,11 +21,11 @@
 
 package com.streamxhub.spark.core.sink
 
+import com.streamxhub.common.util.Logger
 import org.apache.spark.SparkContext
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.Time
 import org.apache.spark.streaming.dstream.DStream
-import org.slf4j.LoggerFactory
 
 import java.util.Properties
 import scala.annotation.meta.getter
@@ -35,9 +35,8 @@ import scala.util.Try
 /**
   *
   */
-trait Sink[T] extends Serializable {
+trait Sink[T] extends Serializable with Logger {
 
-  lazy val logger = LoggerFactory.getLogger(getClass)
 
   @(transient@getter)
   val sc: SparkContext
