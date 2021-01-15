@@ -1,9 +1,10 @@
 package com.streamxhub.console.system.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
+
 import lombok.Data;
 
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableName;
 
 @TableName("t_user_role")
 @Data
@@ -14,5 +15,4 @@ public class UserRole implements Serializable {
     private Long userId;
 
     private Long roleId;
-
 }

@@ -20,6 +20,11 @@
  */
 package com.streamxhub.console.core.service.impl;
 
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -33,10 +38,6 @@ import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.core.dao.SavePointMapper;
 import com.streamxhub.console.core.entity.SavePoint;
 import com.streamxhub.console.core.service.SavePointService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author benjobs
@@ -44,7 +45,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
+public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
+        implements SavePointService {
 
     @Override
     public void obsolete(Long appId) {
@@ -61,7 +63,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (CommonUtil.notEmpty(savePoint.getSavePoint()) && HdfsUtils.exists(savePoint.getSavePoint())) {
+            if (CommonUtil.notEmpty(savePoint.getSavePoint())
+                    && HdfsUtils.exists(savePoint.getSavePoint())) {
                 HdfsUtils.deleteFile(savePoint.getSavePoint());
             }
             removeById(id);

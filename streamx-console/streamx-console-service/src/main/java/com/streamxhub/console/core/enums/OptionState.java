@@ -20,14 +20,13 @@
  */
 package com.streamxhub.console.core.enums;
 
-import lombok.Getter;
-
 import java.util.Arrays;
+
+import lombok.Getter;
 
 /**
  * @author benjobs
  */
-
 @Getter
 public enum OptionState {
 

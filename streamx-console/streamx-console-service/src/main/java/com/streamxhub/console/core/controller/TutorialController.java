@@ -20,17 +20,19 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.core.entity.Tutorial;
-import com.streamxhub.console.core.service.TutorialService;
-import lombok.extern.slf4j.Slf4j;
+import java.io.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.*;
+import lombok.extern.slf4j.Slf4j;
+
+import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.core.entity.Tutorial;
+import com.streamxhub.console.core.service.TutorialService;
 
 /**
  * @author benjobs
@@ -46,8 +48,7 @@ public class TutorialController {
 
     @PostMapping("get")
     public RestResponse get(String name) throws IOException {
-        Tutorial tutorial =  tutorialService.getByName(name);
+        Tutorial tutorial = tutorialService.getByName(name);
         return RestResponse.create().data(tutorial);
     }
-
 }

@@ -23,7 +23,6 @@ package com.streamxhub.console.core.enums;
 /**
  * @author benjobs
  */
-
 public enum ApplicationType {
     /**
      * StreamX Flink
@@ -65,6 +64,4 @@ public enum ApplicationType {
         }
         return null;
     }
-
-
 }

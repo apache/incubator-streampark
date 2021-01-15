@@ -20,16 +20,17 @@
  */
 package com.streamxhub.console.base.utils;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Objects;
+
 import org.apache.commons.io.FileUtils;
 import org.lionsoul.ip2region.DataBlock;
 import org.lionsoul.ip2region.DbConfig;
 import org.lionsoul.ip2region.DbSearcher;
 import org.lionsoul.ip2region.Util;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class AddressUtil {
@@ -45,7 +46,12 @@ public class AddressUtil {
                 String tmpDir = System.getProperties().getProperty("java.io.tmpdir");
                 dbPath = tmpDir + "ip.db";
                 file = new File(dbPath);
-                FileUtils.copyInputStreamToFile(Objects.requireNonNull(AddressUtil.class.getClassLoader().getResourceAsStream("classpath:ip2region/ip2region.db")), file);
+                FileUtils.copyInputStreamToFile(
+                        Objects.requireNonNull(
+                                AddressUtil.class
+                                        .getClassLoader()
+                                        .getResourceAsStream("classpath:ip2region/ip2region.db")),
+                        file);
             }
             DbConfig config = new DbConfig();
             DbSearcher searcher = new DbSearcher(config, file.getPath());
@@ -74,5 +80,4 @@ public class AddressUtil {
         }
         return "";
     }
-
 }

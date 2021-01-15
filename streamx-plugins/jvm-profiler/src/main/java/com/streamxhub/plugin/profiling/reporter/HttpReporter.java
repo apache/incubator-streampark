@@ -21,65 +21,60 @@
 
 package com.streamxhub.plugin.profiling.reporter;
 
-import com.streamxhub.plugin.profiling.ArgumentUtils;
-import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.util.AgentLogger;
-import com.streamxhub.plugin.profiling.util.Utils;
-import scalaj.http.Http;
-import scalaj.http.HttpResponse;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
+import scalaj.http.Http;
+import scalaj.http.HttpResponse;
+
+import com.streamxhub.plugin.profiling.ArgumentUtils;
+import com.streamxhub.plugin.profiling.Reporter;
+import com.streamxhub.plugin.profiling.util.AgentLogger;
+import com.streamxhub.plugin.profiling.util.Utils;
+
+/** @author benjobs */
 public class HttpReporter implements Reporter {
 
-    private static final AgentLogger logger = AgentLogger.getLogger(HttpReporter.class.getName());
+  private static final AgentLogger logger = AgentLogger.getLogger(HttpReporter.class.getName());
 
-    private final static String ARG_ID = "id";
-    private final static String ARG_TOKEN = "token";
-    private final static String ARG_URL = "url";
-    private final static String ARG_TYPE = "type";
-    private Long id;
-    private String token;
-    private String url;
-    private String type;
+  private static final String ARG_ID = "id";
+  private static final String ARG_TOKEN = "token";
+  private static final String ARG_URL = "url";
+  private static final String ARG_TYPE = "type";
+  private Long id;
+  private String token;
+  private String url;
+  private String type;
 
-    public HttpReporter() {
-    }
+  public HttpReporter() {}
 
-    @Override
-    public void doArguments(Map<String, List<String>> parsedArgs) {
-        id = Long.parseLong(ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID).trim());
-        token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
-        url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);
-        type = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TYPE);
-    }
+  @Override
+  public void doArguments(Map<String, List<String>> parsedArgs) {
+    id = Long.parseLong(ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID).trim());
+    token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
+    url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);
+    type = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TYPE);
+  }
 
-    @Override
-    public void report(String profilerName, Map<String, Object> metrics) {
-        String json = Utils.toJsonString(metrics);
-        Map<String, Object> param = new HashMap<>();
-        param.put("id", id);
-        param.put("type", type);
-        param.put("token", token);
-        param.put("profiler", profilerName);
-        param.put("metric", Utils.zipString(json));
-        HttpResponse response = Http.apply(url)
-                .timeout(1000, 5000)
-                .header("content-type", "application/json;charset=UTF-8")
-                .postData(Utils.toJsonString(param))
-                .asString();
-        logger.log("jvm-profiler profiler:" + profilerName + ",report result:" + response.body());
-    }
+  @Override
+  public void report(String profilerName, Map<String, Object> metrics) {
+    String json = Utils.toJsonString(metrics);
+    Map<String, Object> param = new HashMap<>();
+    param.put("id", id);
+    param.put("type", type);
+    param.put("token", token);
+    param.put("profiler", profilerName);
+    param.put("metric", Utils.zipString(json));
+    HttpResponse response =
+        Http.apply(url)
+            .timeout(1000, 5000)
+            .header("content-type", "application/json;charset=UTF-8")
+            .postData(Utils.toJsonString(param))
+            .asString();
+    logger.log("jvm-profiler profiler:" + profilerName + ",report result:" + response.body());
+  }
 
-    @Override
-    public void close() {
-
-    }
-
-
+  @Override
+  public void close() {}
 }

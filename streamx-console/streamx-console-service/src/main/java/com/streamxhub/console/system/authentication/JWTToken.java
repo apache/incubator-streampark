@@ -1,10 +1,12 @@
 package com.streamxhub.console.system.authentication;
 
-import lombok.Data;
 import org.apache.shiro.authc.AuthenticationToken;
+
+import lombok.Data;
 
 /**
  * JSON Web Token
+ *
  * @author benjobs
  */
 @Data
@@ -15,7 +17,6 @@ public class JWTToken implements AuthenticationToken {
     private String token;
 
     private String expireAt;
-
 
     public JWTToken(String token) {
         this.token = token;
@@ -35,5 +36,4 @@ public class JWTToken implements AuthenticationToken {
     public Object getCredentials() {
         return token;
     }
-
 }

@@ -1,29 +1,30 @@
 package com.streamxhub.console.system.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.console.base.domain.router.RouterMeta;
-import com.streamxhub.console.base.domain.router.VueRouter;
-import com.streamxhub.console.system.dao.MenuMapper;
-import com.streamxhub.console.system.entity.Menu;
-import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.service.MenuService;
-import com.streamxhub.console.base.domain.Constant;
-import com.streamxhub.console.base.domain.router.RouterTree;
-import com.streamxhub.console.base.utils.TreeUtil;
-import lombok.extern.slf4j.Slf4j;
+import java.util.*;
+
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.base.domain.Constant;
+import com.streamxhub.console.base.domain.router.RouterMeta;
+import com.streamxhub.console.base.domain.router.RouterTree;
+import com.streamxhub.console.base.domain.router.VueRouter;
+import com.streamxhub.console.base.utils.TreeUtil;
+import com.streamxhub.console.system.dao.MenuMapper;
+import com.streamxhub.console.system.entity.Menu;
+import com.streamxhub.console.system.entity.User;
+import com.streamxhub.console.system.service.MenuService;
 
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements MenuService {
-
 
     @Override
     public List<Menu> findUserPermissions(String username) {
@@ -63,7 +64,6 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         return result;
     }
 
-
     @Override
     public List<Menu> findMenuList(Menu menu) {
         LambdaQueryWrapper<Menu> queryWrapper = new LambdaQueryWrapper<>();
@@ -102,42 +102,44 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     @Override
     public ArrayList<VueRouter<Menu>> getUserRouters(User user) {
         List<VueRouter<Menu>> routes = new ArrayList<>();
-        //只差type为菜单类型
+        // 只差type为菜单类型
         List<Menu> menus = this.findUserMenus(user.getUsername());
-        menus.forEach(menu -> {
-            VueRouter<Menu> route = new VueRouter<>();
-            route.setId(menu.getMenuId().toString());
-            route.setParentId(menu.getParentId().toString());
-            route.setPath(menu.getPath());
-            route.setComponent(menu.getComponent());
-            route.setName(menu.getMenuName());
-            boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
-            route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
-            routes.add(route);
-        });
+        menus.forEach(
+                menu -> {
+                    VueRouter<Menu> route = new VueRouter<>();
+                    route.setId(menu.getMenuId().toString());
+                    route.setParentId(menu.getParentId().toString());
+                    route.setPath(menu.getPath());
+                    route.setComponent(menu.getComponent());
+                    route.setName(menu.getMenuName());
+                    boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
+                    route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
+                    routes.add(route);
+                });
         return TreeUtil.buildVueRouter(routes);
     }
 
     private void buildTrees(List<RouterTree<Menu>> trees, List<Menu> menus, List<String> ids) {
-        menus.forEach(menu -> {
-            ids.add(menu.getMenuId().toString());
-            RouterTree<Menu> tree = new RouterTree<>();
-            tree.setId(menu.getMenuId().toString());
-            tree.setKey(tree.getId());
-            tree.setParentId(menu.getParentId().toString());
-            tree.setText(menu.getMenuName());
-            tree.setTitle(tree.getText());
-            tree.setIcon(menu.getIcon());
-            tree.setComponent(menu.getComponent());
-            tree.setCreateTime(menu.getCreateTime());
-            tree.setModifyTime(menu.getModifyTime());
-            tree.setPath(menu.getPath());
-            tree.setOrder(menu.getOrderNum());
-            tree.setPermission(menu.getPerms());
-            tree.setType(menu.getType());
-            tree.setDisplay(menu.getDisplay());
-            trees.add(tree);
-        });
+        menus.forEach(
+                menu -> {
+                    ids.add(menu.getMenuId().toString());
+                    RouterTree<Menu> tree = new RouterTree<>();
+                    tree.setId(menu.getMenuId().toString());
+                    tree.setKey(tree.getId());
+                    tree.setParentId(menu.getParentId().toString());
+                    tree.setText(menu.getMenuName());
+                    tree.setTitle(tree.getText());
+                    tree.setIcon(menu.getIcon());
+                    tree.setComponent(menu.getComponent());
+                    tree.setCreateTime(menu.getCreateTime());
+                    tree.setModifyTime(menu.getModifyTime());
+                    tree.setPath(menu.getPath());
+                    tree.setOrder(menu.getOrderNum());
+                    tree.setPermission(menu.getPerms());
+                    tree.setType(menu.getType());
+                    tree.setDisplay(menu.getDisplay());
+                    trees.add(tree);
+                });
     }
 
     private void setMenu(Menu menu) {
@@ -158,11 +160,11 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         if (StringUtils.isNotBlank(menu.getType())) {
             queryWrapper.eq(Menu::getType, menu.getType());
         }
-        if (StringUtils.isNotBlank(menu.getCreateTimeFrom()) && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
+        if (StringUtils.isNotBlank(menu.getCreateTimeFrom())
+                && StringUtils.isNotBlank(menu.getCreateTimeTo())) {
             queryWrapper
                     .ge(Menu::getCreateTime, menu.getCreateTimeFrom())
                     .le(Menu::getCreateTime, menu.getCreateTimeTo());
         }
     }
-
 }

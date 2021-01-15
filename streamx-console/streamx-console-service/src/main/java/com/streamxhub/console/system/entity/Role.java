@@ -1,17 +1,19 @@
 package com.streamxhub.console.system.entity;
 
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+
+import java.io.Serializable;
+import java.util.Date;
+
+import lombok.Data;
+
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.console.base.converter.TimeConverter;
 import com.wuwenze.poi.annotation.Excel;
 import com.wuwenze.poi.annotation.ExcelField;
-import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-import java.io.Serializable;
-import java.util.Date;
 
 @Data
 @TableName("t_role")
@@ -44,5 +46,4 @@ public class Role implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String menuId;
-
 }

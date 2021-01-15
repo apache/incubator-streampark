@@ -1,11 +1,12 @@
 package com.streamxhub.console.base.domain.router;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -50,5 +51,4 @@ public class RouterTree<T> {
     public void initChildren() {
         this.children = new ArrayList<>();
     }
-
 }

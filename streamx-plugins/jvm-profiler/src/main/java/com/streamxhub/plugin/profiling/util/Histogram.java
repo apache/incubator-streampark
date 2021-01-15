@@ -23,38 +23,35 @@ package com.streamxhub.plugin.profiling.util;
 
 import java.util.concurrent.atomic.AtomicLong;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class Histogram {
 
-    private AtomicLong count = new AtomicLong(0);
-    private AtomicLong sum = new AtomicLong(0);
-    private AtomicLong min = new AtomicLong(Long.MAX_VALUE);
-    private AtomicLong max = new AtomicLong(Long.MIN_VALUE);
+  private AtomicLong count = new AtomicLong(0);
+  private AtomicLong sum = new AtomicLong(0);
+  private AtomicLong min = new AtomicLong(Long.MAX_VALUE);
+  private AtomicLong max = new AtomicLong(Long.MIN_VALUE);
 
-    public void appendValue(long value) {
-        count.incrementAndGet();
-        sum.addAndGet(value);
+  public void appendValue(long value) {
+    count.incrementAndGet();
+    sum.addAndGet(value);
 
-        min.updateAndGet(x -> value < x ? value : x);
-        max.updateAndGet(x -> value > x ? value : x);
-    }
+    min.updateAndGet(x -> value < x ? value : x);
+    max.updateAndGet(x -> value > x ? value : x);
+  }
 
-    public long getCount() {
-        return count.get();
-    }
+  public long getCount() {
+    return count.get();
+  }
 
-    public long getSum() {
-        return sum.get();
-    }
+  public long getSum() {
+    return sum.get();
+  }
 
-    public long getMin() {
-        return min.get();
-    }
+  public long getMin() {
+    return min.get();
+  }
 
-    public long getMax() {
-        return max.get();
-    }
-
+  public long getMax() {
+    return max.get();
+  }
 }

@@ -1,15 +1,17 @@
 package com.streamxhub.console.base.domain.router;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 /**
  * 构建 Vue路由
+ *
  * @author benjobs
  */
 @Data
@@ -45,5 +47,4 @@ public class VueRouter<T> implements Serializable {
     public void initChildren() {
         this.children = new ArrayList<>();
     }
-
 }

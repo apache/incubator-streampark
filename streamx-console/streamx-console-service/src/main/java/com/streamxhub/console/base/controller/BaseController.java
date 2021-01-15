@@ -1,9 +1,9 @@
 package com.streamxhub.console.base.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
 
 /**
  * @author benjobs
@@ -16,6 +16,4 @@ public class BaseController {
         rspData.put("total", pageInfo.getTotal());
         return rspData;
     }
-
-
 }

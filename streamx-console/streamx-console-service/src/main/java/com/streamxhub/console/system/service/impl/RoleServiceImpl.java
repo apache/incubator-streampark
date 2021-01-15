@@ -1,10 +1,26 @@
 package com.streamxhub.console.system.service.impl;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.utils.SortUtil;
 import com.streamxhub.console.system.dao.RoleMapper;
 import com.streamxhub.console.system.dao.RoleMenuMapper;
 import com.streamxhub.console.system.entity.Role;
@@ -12,20 +28,6 @@ import com.streamxhub.console.system.entity.RoleMenu;
 import com.streamxhub.console.system.service.RoleMenuServie;
 import com.streamxhub.console.system.service.RoleService;
 import com.streamxhub.console.system.service.UserRoleService;
-import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.utils.SortUtil;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -55,7 +57,8 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
             if (StringUtils.isNotBlank(role.getRoleName())) {
                 queryWrapper.eq(Role::getRoleName, role.getRoleName());
             }
-            if (StringUtils.isNotBlank(role.getCreateTimeFrom()) && StringUtils.isNotBlank(role.getCreateTimeTo())) {
+            if (StringUtils.isNotBlank(role.getCreateTimeFrom())
+                    && StringUtils.isNotBlank(role.getCreateTimeTo())) {
                 queryWrapper
                         .ge(Role::getCreateTime, role.getCreateTimeFrom())
                         .le(Role::getCreateTime, role.getCreateTimeTo());
@@ -102,17 +105,20 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         String[] roleId = {String.valueOf(role.getRoleId())};
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
-        roleMenuMapper.delete(new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
+        roleMenuMapper.delete(
+                new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
         String[] menuIds = role.getMenuId().split(StringPool.COMMA);
         setRoleMenus(role, menuIds);
     }
 
     private void setRoleMenus(Role role, String[] menuIds) {
-        Arrays.stream(menuIds).forEach(menuId -> {
-            RoleMenu rm = new RoleMenu();
-            rm.setMenuId(Long.valueOf(menuId));
-            rm.setRoleId(role.getRoleId());
-            this.roleMenuMapper.insert(rm);
-        });
+        Arrays.stream(menuIds)
+                .forEach(
+                        menuId -> {
+                            RoleMenu rm = new RoleMenu();
+                            rm.setMenuId(Long.valueOf(menuId));
+                            rm.setRoleId(role.getRoleId());
+                            this.roleMenuMapper.insert(rm);
+                        });
     }
 }

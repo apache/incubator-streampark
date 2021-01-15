@@ -20,14 +20,6 @@
  */
 package com.streamxhub.console.core.controller;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.core.entity.SavePoint;
-import com.streamxhub.console.core.service.SavePointService;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -35,6 +27,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.core.entity.SavePoint;
+import com.streamxhub.console.core.service.SavePointService;
 
 /**
  * @author benjobs
@@ -66,5 +67,4 @@ public class SavePointController extends BaseController {
         Boolean deleted = savePointService.delete(id);
         return RestResponse.create().data(deleted);
     }
-
 }

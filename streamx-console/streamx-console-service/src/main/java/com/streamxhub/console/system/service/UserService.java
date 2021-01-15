@@ -1,11 +1,11 @@
 package com.streamxhub.console.system.service;
 
+import java.util.Set;
+
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.system.entity.User;
-
-import java.util.Set;
 
 public interface UserService extends IService<User> {
 
@@ -20,7 +20,7 @@ public interface UserService extends IService<User> {
     /**
      * 查询用户详情，包括基本信息，用户角色，用户部门
      *
-     * @param user         user
+     * @param user        user
      * @param restRequest queryRequest
      * @return IPage
      */
@@ -93,10 +93,8 @@ public interface UserService extends IService<User> {
     void resetPassword(String[] usernames) throws Exception;
 
     /**
-     *
      * @param username
      * @return
      */
     Set<String> getPermissions(String username);
-
 }

@@ -20,15 +20,15 @@
  */
 package com.streamxhub.console.core.service;
 
+import java.util.List;
+import java.util.Map;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.domain.RestResponse;
 import com.streamxhub.console.core.entity.Application;
 import com.streamxhub.console.core.entity.Project;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * @author benjobs
@@ -49,10 +49,9 @@ public interface ProjectService extends IService<Project> {
 
     List<String> jars(Project project);
 
-    List<Map<String,Object>> listConf(Project project);
+    List<Map<String, Object>> listConf(Project project);
 
-    String getAppConfPath(Long id,String module);
+    String getAppConfPath(Long id, String module);
 
     List<Application> getApplications(Project project);
-
 }

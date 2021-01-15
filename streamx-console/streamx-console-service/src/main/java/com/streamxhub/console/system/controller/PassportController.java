@@ -1,15 +1,13 @@
 package com.streamxhub.console.system.controller;
 
-import com.streamxhub.console.base.domain.ActiveUser;
-import com.streamxhub.console.base.domain.RestResponse;
-import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.base.properties.StreamXProperties;
-import com.streamxhub.console.base.utils.*;
-import com.streamxhub.console.system.authentication.JWTToken;
-import com.streamxhub.console.system.authentication.JWTUtil;
-import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.service.RoleService;
-import com.streamxhub.console.system.service.UserService;
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.NotBlank;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.lionsoul.ip2region.DbSearcher;
@@ -20,12 +18,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.validation.constraints.NotBlank;
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import com.streamxhub.console.base.domain.ActiveUser;
+import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.base.properties.StreamXProperties;
+import com.streamxhub.console.base.utils.*;
+import com.streamxhub.console.system.authentication.JWTToken;
+import com.streamxhub.console.system.authentication.JWTUtil;
+import com.streamxhub.console.system.entity.User;
+import com.streamxhub.console.system.service.RoleService;
+import com.streamxhub.console.system.service.UserService;
 
 /**
  * @author benjobs
@@ -48,7 +50,8 @@ public class PassportController {
     public RestResponse login(
             @NotBlank(message = "{required}") String username,
             @NotBlank(message = "{required}") String password,
-            HttpServletRequest request) throws Exception {
+            HttpServletRequest request)
+            throws Exception {
         username = StringUtils.lowerCase(username);
 
         final String errorMessage = "用户名或密码错误";
@@ -71,7 +74,8 @@ public class PassportController {
         // 更新用户登录时间
         this.userService.updateLoginTime(username);
         String token = WebUtil.encryptToken(JWTUtil.sign(username, password));
-        LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
+        LocalDateTime expireTime =
+                LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
 
@@ -93,8 +97,8 @@ public class PassportController {
         String now = DateUtil.formatFullTime(LocalDateTime.now());
     }
 
-
-    private String saveTokenToRedis(User user, JWTToken token, HttpServletRequest request) throws Exception {
+    private String saveTokenToRedis(User user, JWTToken token, HttpServletRequest request)
+            throws Exception {
         String ip = IPUtil.getIpAddr(request);
 
         // 构建在线用户
@@ -107,12 +111,7 @@ public class PassportController {
     }
 
     /**
-     * 生成前端需要的用户信息，包括：
-     * 1. token
-     * 2. Vue Router
-     * 3. 用户角色
-     * 4. 用户权限
-     * 5. 前端系统个性化配置信息
+     * 生成前端需要的用户信息，包括： 1. token 2. Vue Router 3. 用户角色 4. 用户权限 5. 前端系统个性化配置信息
      *
      * @param token token
      * @param user  用户信息

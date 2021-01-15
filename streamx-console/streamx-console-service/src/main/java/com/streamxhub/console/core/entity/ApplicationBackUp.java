@@ -20,13 +20,14 @@
  */
 package com.streamxhub.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.streamxhub.common.conf.ConfigConst;
-import com.wuwenze.poi.annotation.Excel;
+import java.util.Date;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.streamxhub.common.conf.ConfigConst;
+import com.wuwenze.poi.annotation.Excel;
 
 /**
  * @author benjobs
@@ -43,14 +44,14 @@ public class ApplicationBackUp {
     private Date createTime;
 
     public ApplicationBackUp() {
-
     }
 
     public ApplicationBackUp(Application application) {
         this.appId = application.getId();
         this.description = application.getBackUpDescription();
         this.createTime = new Date();
-        this.path = String.format("%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createTime.getTime());
+        this.path =
+                String.format(
+                        "%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createTime.getTime());
     }
-
 }
