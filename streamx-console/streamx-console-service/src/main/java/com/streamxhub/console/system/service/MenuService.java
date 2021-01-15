@@ -1,13 +1,13 @@
 package com.streamxhub.console.system.service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.router.VueRouter;
 import com.streamxhub.console.system.entity.Menu;
 import com.streamxhub.console.system.entity.User;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public interface MenuService extends IService<Menu> {
 
@@ -31,7 +31,6 @@ public interface MenuService extends IService<Menu> {
     void deleteMeuns(String[] menuIds) throws Exception;
 
     /**
-     *
      * @return
      */
     ArrayList<VueRouter<Menu>> getUserRouters(User user);

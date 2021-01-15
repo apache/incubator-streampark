@@ -20,15 +20,17 @@
  */
 package com.streamxhub.console.core.service.impl;
 
+import java.util.concurrent.Executors;
+
+import org.springframework.stereotype.Service;
+
+import lombok.extern.slf4j.Slf4j;
+
 import com.streamxhub.console.core.entity.Note;
 import com.streamxhub.console.core.service.NoteBookService;
 import com.streamxhub.repl.flink.interpreter.FlinkInterpreter;
 import com.streamxhub.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.repl.flink.interpreter.InterpreterResult;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-
-import java.util.concurrent.Executors;
 
 /**
  * @author benjobs
@@ -40,33 +42,34 @@ public class NoteBookServiceImpl implements NoteBookService {
     @Override
     public void submit(Note note) {
         Note.Content content = note.getContent();
-        Executors.newSingleThreadExecutor().submit(() -> {
-            FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
-            try {
-                interpreter.open();
-                InterpreterOutput out = new InterpreterOutput(log::info);
-                InterpreterResult result = interpreter.interpret(content.getCode(), out);
-                log.info("repl submit code:" + result.code());
-                if (result.code().equals(InterpreterResult.ERROR())) {
-                    log.info("NoteBook submit error: {}", out.toString());
-                } else if (result.code().equals(InterpreterResult.SUCCESS())) {
-                    log.info("NoteBook submit success: {}", out.toString());
-                }
-            } catch (Throwable e) {
-                e.printStackTrace();
-                throw new RuntimeException(e);
-            } finally {
-                try {
-                    interpreter.close();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        Executors.newSingleThreadExecutor()
+                .submit(
+                        () -> {
+                            FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
+                            try {
+                                interpreter.open();
+                                InterpreterOutput out = new InterpreterOutput(log::info);
+                                InterpreterResult result = interpreter.interpret(content.getCode(), out);
+                                log.info("repl submit code:" + result.code());
+                                if (result.code().equals(InterpreterResult.ERROR())) {
+                                    log.info("NoteBook submit error: {}", out.toString());
+                                } else if (result.code().equals(InterpreterResult.SUCCESS())) {
+                                    log.info("NoteBook submit success: {}", out.toString());
+                                }
+                            } catch (Throwable e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            } finally {
+                                try {
+                                    interpreter.close();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        });
     }
 
     @Override
     public void submit2(Note note) {
-
     }
 }

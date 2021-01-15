@@ -25,7 +25,6 @@ import java.io.Serializable;
 /**
  * @author benjobs
  */
-
 public enum StopFrom implements Serializable {
     /**
      * None

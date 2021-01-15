@@ -20,9 +20,8 @@
  */
 package com.streamxhub.console.core.aspect;
 
-import com.streamxhub.common.util.ExceptionUtils;
-import com.streamxhub.console.base.domain.RestResponse;
-import lombok.extern.slf4j.Slf4j;
+import java.util.Objects;
+
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -30,7 +29,10 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
+import lombok.extern.slf4j.Slf4j;
+
+import com.streamxhub.common.util.ExceptionUtils;
+import com.streamxhub.console.base.domain.RestResponse;
 
 /**
  * @author benjobs
@@ -40,7 +42,8 @@ import java.util.Objects;
 @Aspect
 public class StreamXConsoleAspect {
 
-    @Pointcut("execution(public com.streamxhub.console.base.domain.RestResponse com.streamxhub.console.core.controller.*.*(..))")
+    @Pointcut(
+            "execution(public com.streamxhub.console.base.domain.RestResponse com.streamxhub.console.core.controller.*.*(..))")
     public void response() {
     }
 
@@ -54,9 +57,10 @@ public class StreamXConsoleAspect {
             response.put("status", "success");
         } catch (Throwable e) {
             e.printStackTrace();
-            response = Objects.requireNonNull(RestResponse.create().put("status", "error")).put("exception", ExceptionUtils.stringifyException(e));
+            response =
+                    Objects.requireNonNull(RestResponse.create().put("status", "error"))
+                            .put("exception", ExceptionUtils.stringifyException(e));
         }
         return response;
     }
-
 }

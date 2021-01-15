@@ -20,17 +20,17 @@
  */
 package com.streamxhub.console.core.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.wuwenze.poi.annotation.Excel;
+import java.util.Date;
+
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Date;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.wuwenze.poi.annotation.Excel;
 
 /**
  * @author benjobs
  */
-
 @Data
 @TableName("t_flink_savepoint")
 @Excel("flink savepoint信息")
@@ -46,5 +46,4 @@ public class SavePoint {
     private String savePoint;
 
     private Date createTime;
-
 }

@@ -25,7 +25,6 @@ import java.util.Arrays;
 /**
  * @author benjobs
  */
-
 public enum DeployState {
 
     /**

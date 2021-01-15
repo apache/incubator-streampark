@@ -1,9 +1,12 @@
 package com.streamxhub.console.base.handler;
 
-import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.base.domain.RestResponse;
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import lombok.extern.slf4j.Slf4j;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Path;
+
+import java.util.List;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
 import org.springframework.core.Ordered;
@@ -15,11 +18,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.validation.ConstraintViolation;
-import javax.validation.ConstraintViolationException;
-import javax.validation.Path;
-import java.util.List;
-import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.streamxhub.console.base.domain.RestResponse;
+import com.streamxhub.console.base.exception.ServiceException;
 
 @Slf4j
 @RestControllerAdvice
@@ -71,7 +74,8 @@ public class GlobalExceptionHandler {
         Set<ConstraintViolation<?>> violations = e.getConstraintViolations();
         for (ConstraintViolation<?> violation : violations) {
             Path path = violation.getPropertyPath();
-            String[] pathArr = StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
+            String[] pathArr =
+                    StringUtils.splitByWholeSeparatorPreserveAllTokens(path.toString(), StringPool.DOT);
             message.append(pathArr[1]).append(violation.getMessage()).append(StringPool.COMMA);
         }
         message = new StringBuilder(message.substring(0, message.length() - 1));

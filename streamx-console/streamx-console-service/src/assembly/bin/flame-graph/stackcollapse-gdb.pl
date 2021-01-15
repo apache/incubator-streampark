@@ -40,33 +40,35 @@ my $previous_function = "";
 
 my %stacks;
 
-while(<>) {
-  chomp;
-  if (m/^Thread/) {
-    $current=""
-  }
-  elsif(m/^#[0-9]* *([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)/) {
-    my $function = $3;
-    my $alt = $1;
-    if(not($1 =~ /0x[a-zA-Z0-9]*/)) {
-      $function = $alt;
+while (<>) {
+    chomp;
+    if (m/^Thread/) {
+        $current = ""
     }
-    if ($current eq "") {
-      $current = $function;
-    } else {
-      $current = $function . ";" . $current;
+    elsif (m/^#[0-9]* *([^ ]*) ([^ ]*) ([^ ]*) ([^ ]*)/) {
+        my $function = $3;
+        my $alt = $1;
+        if (not ($1 =~ /0x[a-zA-Z0-9]*/)) {
+            $function = $alt;
+        }
+        if ($current eq "") {
+            $current = $function;
+        }
+        else {
+            $current = $function . ";" . $current;
+        }
     }
-  } elsif(!($current eq "")) {
+    elsif (!($current eq "")) {
+        $stacks{$current} += 1;
+        $current = "";
+    }
+}
+
+if (!($current eq "")) {
     $stacks{$current} += 1;
     $current = "";
-  }
 }
 
-if(!($current eq "")) {
-  $stacks{$current} += 1;
-  $current = "";
-}
-
-foreach my $k (sort { $a cmp $b } keys %stacks) {
-  print "$k $stacks{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %stacks) {
+    print "$k $stacks{$k}\n";
 }

@@ -50,60 +50,60 @@
 
 use strict;
 
-my $headerlines = 3;		# number of input lines to skip
-my $includeoffset = 0;		# include function offset (except leafs)
+my $headerlines = 3;   # number of input lines to skip
+my $includeoffset = 0; # include function offset (except leafs)
 my %collapsed;
 
 sub remember_stack {
-	my ($stack, $count) = @_;
-	$collapsed{$stack} += $count;
+    my ($stack, $count) = @_;
+    $collapsed{$stack} += $count;
 }
 
 my $nr = 0;
 my @stack;
 
 foreach (<>) {
-	next if $nr++ < $headerlines;
-	chomp;
+    next if $nr++ < $headerlines;
+    chomp;
 
-	if (m/^\s*(\d+)+$/) {
-		my $count = $1;
-		my $joined = join(";", @stack);
+    if (m/^\s*(\d+)+$/) {
+        my $count = $1;
+        my $joined = join(";", @stack);
 
-		# trim leaf offset if these were retained:
-		$joined =~ s/\+[^+]*$// if $includeoffset;
+        # trim leaf offset if these were retained:
+        $joined =~ s/\+[^+]*$// if $includeoffset;
 
-		remember_stack($joined, $count);
-		@stack = ();
-		next;
-	}
+        remember_stack($joined, $count);
+        @stack = ();
+        next;
+    }
 
-	next if (m/^\s*$/);
+    next if (m/^\s*$/);
 
-	my $frame = $_;
-	$frame =~ s/^\s*//;
-	$frame =~ s/\+[^+]*$// unless $includeoffset;
+    my $frame = $_;
+    $frame =~ s/^\s*//;
+    $frame =~ s/\+[^+]*$// unless $includeoffset;
 
-	# Remove arguments from C++ function names:
-	$frame =~ s/(::.*)[(<].*/$1/;
+    # Remove arguments from C++ function names:
+    $frame =~ s/(::.*)[(<].*/$1/;
 
-	$frame = "-" if $frame eq "";
+    $frame = "-" if $frame eq "";
 
-        my @inline;
-        for (split /\->/, $frame) {
-            my $func = $_;
+    my @inline;
+    for (split /\->/, $frame) {
+        my $func = $_;
 
-            # Strip out L and ; included in java stacks
-            $func =~ tr/\;/:/;
-            $func =~ s/^L//;
-            $func .= "_[i]" if scalar(@inline) > 0; #inlined
+        # Strip out L and ; included in java stacks
+        $func =~ tr/\;/:/;
+        $func =~ s/^L//;
+        $func .= "_[i]" if scalar(@inline) > 0; #inlined
 
-            push @inline, $func;
-        }
+        push @inline, $func;
+    }
 
-	unshift @stack, @inline;
+    unshift @stack, @inline;
 }
 
-foreach my $k (sort { $a cmp $b } keys %collapsed) {
-	print "$k $collapsed{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %collapsed) {
+    print "$k $collapsed{$k}\n";
 }

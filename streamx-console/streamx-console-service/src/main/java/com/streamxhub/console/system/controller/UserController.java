@@ -1,14 +1,12 @@
 package com.streamxhub.console.system.controller;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.console.base.controller.BaseController;
-import com.streamxhub.console.base.domain.RestRequest;
-import com.streamxhub.console.base.exception.ServiceException;
-import com.streamxhub.console.base.utils.ShaHashUtil;
-import com.streamxhub.console.system.entity.User;
-import com.streamxhub.console.system.service.UserService;
-import com.wuwenze.poi.ExcelKit;
-import lombok.extern.slf4j.Slf4j;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+
+import java.util.List;
+import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,11 +18,16 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import java.util.List;
-import java.util.Map;
+import lombok.extern.slf4j.Slf4j;
+
+import com.baomidou.mybatisplus.core.toolkit.StringPool;
+import com.streamxhub.console.base.controller.BaseController;
+import com.streamxhub.console.base.domain.RestRequest;
+import com.streamxhub.console.base.exception.ServiceException;
+import com.streamxhub.console.base.utils.ShaHashUtil;
+import com.streamxhub.console.system.entity.User;
+import com.streamxhub.console.system.service.UserService;
+import com.wuwenze.poi.ExcelKit;
 
 /**
  * @author benjobs
@@ -77,7 +80,8 @@ public class UserController extends BaseController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public void deleteUsers(@NotBlank(message = "{required}") String userIds) throws ServiceException {
+    public void deleteUsers(@NotBlank(message = "{required}") String userIds)
+            throws ServiceException {
         try {
             String[] ids = userIds.split(StringPool.COMMA);
             this.userService.deleteUsers(ids);
@@ -102,7 +106,8 @@ public class UserController extends BaseController {
     @PutMapping("avatar")
     public void updateAvatar(
             @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String avatar) throws ServiceException {
+            @NotBlank(message = "{required}") String avatar)
+            throws ServiceException {
         try {
             this.userService.updateAvatar(username, avatar);
         } catch (Exception e) {
@@ -131,7 +136,8 @@ public class UserController extends BaseController {
     @PutMapping("password")
     public void updatePassword(
             @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password) throws ServiceException {
+            @NotBlank(message = "{required}") String password)
+            throws ServiceException {
         try {
             userService.updatePassword(username, password);
         } catch (Exception e) {
@@ -143,7 +149,8 @@ public class UserController extends BaseController {
 
     @PutMapping("password/reset")
     @RequiresPermissions("user:reset")
-    public void resetPassword(@NotBlank(message = "{required}") String usernames) throws ServiceException {
+    public void resetPassword(@NotBlank(message = "{required}") String usernames)
+            throws ServiceException {
         try {
             String[] usernameArr = usernames.split(StringPool.COMMA);
             this.userService.resetPassword(usernameArr);
@@ -156,7 +163,8 @@ public class UserController extends BaseController {
 
     @PostMapping("export")
     @RequiresPermissions("user:export")
-    public void export(RestRequest restRequest, User user, HttpServletResponse response) throws ServiceException {
+    public void export(RestRequest restRequest, User user, HttpServletResponse response)
+            throws ServiceException {
         try {
             List<User> users = this.userService.findUserDetail(user, restRequest).getRecords();
             ExcelKit.$Export(User.class, response).downXlsx(users, false);

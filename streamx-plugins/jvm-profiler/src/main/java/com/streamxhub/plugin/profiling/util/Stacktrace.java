@@ -23,60 +23,60 @@ package com.streamxhub.plugin.profiling.util;
 
 import java.util.Arrays;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class Stacktrace {
-    private String threadName;
-    private String threadState;
-    private ClassAndMethod[] stack = new ClassAndMethod[0];
+  private String threadName;
+  private String threadState;
+  private ClassAndMethod[] stack = new ClassAndMethod[0];
 
-    public String getThreadName() {
-        return threadName;
+  public String getThreadName() {
+    return threadName;
+  }
+
+  public void setThreadName(String threadName) {
+    this.threadName = threadName;
+  }
+
+  public String getThreadState() {
+    return threadState;
+  }
+
+  public void setThreadState(String threadState) {
+    this.threadState = threadState;
+  }
+
+  public ClassAndMethod[] getStack() {
+    return stack;
+  }
+
+  public void setStack(ClassAndMethod[] stack) {
+    if (stack == null) {
+      this.stack = new ClassAndMethod[0];
+    } else {
+      this.stack = stack;
     }
+  }
 
-    public void setThreadName(String threadName) {
-        this.threadName = threadName;
-    }
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
 
-    public String getThreadState() {
-        return threadState;
-    }
+    Stacktrace that = (Stacktrace) o;
 
-    public void setThreadState(String threadState) {
-        this.threadState = threadState;
-    }
+    if (threadName != null ? !threadName.equals(that.threadName) : that.threadName != null)
+      return false;
+    if (threadState != null ? !threadState.equals(that.threadState) : that.threadState != null)
+      return false;
 
-    public ClassAndMethod[] getStack() {
-        return stack;
-    }
+    return Arrays.equals(stack, that.stack);
+  }
 
-    public void setStack(ClassAndMethod[] stack) {
-        if (stack == null) {
-            this.stack = new ClassAndMethod[0];
-        } else {
-            this.stack = stack;
-        }
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Stacktrace that = (Stacktrace) o;
-
-        if (threadName != null ? !threadName.equals(that.threadName) : that.threadName != null) return false;
-        if (threadState != null ? !threadState.equals(that.threadState) : that.threadState != null) return false;
-
-        return Arrays.equals(stack, that.stack);
-    }
-
-    @Override
-    public int hashCode() {
-        int result = threadName != null ? threadName.hashCode() : 0;
-        result = 31 * result + (threadState != null ? threadState.hashCode() : 0);
-        result = 31 * result + Arrays.hashCode(stack);
-        return result;
-    }
+  @Override
+  public int hashCode() {
+    int result = threadName != null ? threadName.hashCode() : 0;
+    result = 31 * result + (threadState != null ? threadState.hashCode() : 0);
+    result = 31 * result + Arrays.hashCode(stack);
+    return result;
+  }
 }

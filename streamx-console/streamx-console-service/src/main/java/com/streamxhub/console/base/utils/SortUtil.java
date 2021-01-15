@@ -20,11 +20,12 @@
  */
 package com.streamxhub.console.base.utils;
 
-import com.streamxhub.console.base.domain.Constant;
-import com.streamxhub.console.base.domain.RestRequest;
+import org.apache.commons.lang3.StringUtils;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.commons.lang3.StringUtils;
+import com.streamxhub.console.base.domain.Constant;
+import com.streamxhub.console.base.domain.RestRequest;
 
 /**
  * 处理排序工具类
@@ -40,7 +41,12 @@ public class SortUtil {
      * @param defaultOrder      默认排序规则
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
-    public static void handlePageSort(RestRequest request, Page page, String defaultSort, String defaultOrder, boolean camelToUnderscore) {
+    public static void handlePageSort(
+            RestRequest request,
+            Page page,
+            String defaultSort,
+            String defaultOrder,
+            boolean camelToUnderscore) {
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
         String sortField = WebUtil.camelToUnderscore(request.getSortField());
@@ -98,7 +104,12 @@ public class SortUtil {
      * @param defaultOrder      默认排序规则
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
-    public static void handleWrapperSort(RestRequest request, QueryWrapper wrapper, String defaultSort, String defaultOrder, boolean camelToUnderscore) {
+    public static void handleWrapperSort(
+            RestRequest request,
+            QueryWrapper wrapper,
+            String defaultSort,
+            String defaultOrder,
+            boolean camelToUnderscore) {
         String sortField = request.getSortField();
         if (camelToUnderscore) {
             sortField = WebUtil.camelToUnderscore(sortField);
@@ -141,7 +152,8 @@ public class SortUtil {
      * @param wrapper           wrapper
      * @param camelToUnderscore 是否开启驼峰转下划线
      */
-    public static void handleWrapperSort(RestRequest request, QueryWrapper wrapper, boolean camelToUnderscore) {
+    public static void handleWrapperSort(
+            RestRequest request, QueryWrapper wrapper, boolean camelToUnderscore) {
         handleWrapperSort(request, wrapper, null, null, camelToUnderscore);
     }
 }

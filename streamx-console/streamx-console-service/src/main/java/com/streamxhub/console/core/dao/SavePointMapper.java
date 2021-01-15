@@ -20,13 +20,14 @@
  */
 package com.streamxhub.console.core.dao;
 
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.console.core.entity.SavePoint;
-import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
 
 /**
  * @author benjobs
@@ -40,5 +41,5 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
     SavePoint getLastest(@Param("appId") Long appId);
 
     @Select("select * from t_flink_savepoint where app_id=#{savePoint.appId} and lastest=0")
-    IPage<SavePoint> page(Page<SavePoint> page,@Param("savePoint") SavePoint savePoint);
+    IPage<SavePoint> page(Page<SavePoint> page, @Param("savePoint") SavePoint savePoint);
 }

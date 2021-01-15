@@ -20,15 +20,16 @@
  */
 package com.streamxhub.console.core.controller;
 
-
-import com.streamxhub.console.core.entity.Note;
-import com.streamxhub.console.core.service.NoteBookService;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import lombok.extern.slf4j.Slf4j;
+
+import com.streamxhub.console.core.entity.Note;
+import com.streamxhub.console.core.service.NoteBookService;
 
 /**
  * @author benjobs
@@ -51,5 +52,4 @@ public class NoteBookController {
     public void submit2(Note Note) {
         noteBookService.submit2(Note);
     }
-
 }

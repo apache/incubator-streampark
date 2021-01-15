@@ -31,7 +31,6 @@ import com.streamxhub.console.core.entity.SavePoint;
  */
 public interface SavePointService extends IService<SavePoint> {
     /**
-     *
      * @param appId
      */
     void obsolete(Long appId);

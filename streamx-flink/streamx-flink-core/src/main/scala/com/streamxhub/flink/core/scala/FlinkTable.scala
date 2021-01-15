@@ -26,9 +26,19 @@ import com.streamxhub.flink.core.scala.ext.TableExt
 import com.streamxhub.flink.core.scala.util.FlinkTableInitializer
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableEnvironment, TableResult}
+import org.apache.flink.table.api.{
+  ExplainDetail,
+  StatementSet,
+  Table,
+  TableConfig,
+  TableEnvironment,
+  TableResult
+}
 import org.apache.flink.table.catalog.Catalog
-import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
+import org.apache.flink.table.descriptors.{
+  ConnectTableDescriptor,
+  ConnectorDescriptor
+}
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions.{ScalarFunction, UserDefinedFunction}
 import org.apache.flink.table.module.Module
@@ -39,33 +49,37 @@ import java.lang
 import java.util.Optional
 import scala.util.{Failure, Success, Try}
 
-class TableContext(val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment) extends TableEnvironment {
-
+class TableContext(
+    val parameter: ParameterTool,
+    private val tableEnv: TableEnvironment
+) extends TableEnvironment {
 
   /**
-   * for scala
-   *
-   * @param args
-   */
+    * for scala
+    *
+    * @param args
+    */
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
   /**
-   *
-   * @param args
-   */
+    *
+    * @param args
+    */
   def this(args: Array[String]) = this(FlinkTableInitializer.initTable(args))
 
   /**
-   * 推荐使用该Api启动任务...
-   *
-   * @return
-   */
+    * 推荐使用该Api启动任务...
+    *
+    * @return
+    */
   def start(): JobExecutionResult = {
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
+    val appName = (
+      parameter.get(KEY_APP_NAME(), null),
+      parameter.get(KEY_FLINK_APP_NAME, null)
+    ) match {
+      case (appName: String, _)    => appName
       case (null, appName: String) => appName
-      case _ => ""
+      case _                       => ""
     }
     execute(appName)
   }
@@ -86,41 +100,75 @@ class TableContext(val parameter: ParameterTool,
     }
   }
 
-  override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
+  override def fromValues(values: Expression*): Table =
+    tableEnv.fromValues(values)
 
-  override def fromValues(rowType: AbstractDataType[_], values: Expression*): Table = tableEnv.fromValues(rowType, values: _*)
+  override def fromValues(
+      rowType: AbstractDataType[_],
+      values: Expression*
+  ): Table = tableEnv.fromValues(rowType, values: _*)
 
-  override def fromValues(values: lang.Iterable[_]): Table = tableEnv.fromValues(values)
+  override def fromValues(values: lang.Iterable[_]): Table =
+    tableEnv.fromValues(values)
 
-  override def fromValues(rowType: AbstractDataType[_], values: lang.Iterable[_]): Table = tableEnv.fromValues(rowType, values)
+  override def fromValues(
+      rowType: AbstractDataType[_],
+      values: lang.Iterable[_]
+  ): Table = tableEnv.fromValues(rowType, values)
 
-  override def registerCatalog(catalogName: String, catalog: Catalog): Unit = tableEnv.registerCatalog(catalogName, catalog)
+  override def registerCatalog(catalogName: String, catalog: Catalog): Unit =
+    tableEnv.registerCatalog(catalogName, catalog)
 
-  override def getCatalog(catalogName: String): Optional[Catalog] = tableEnv.getCatalog(catalogName)
+  override def getCatalog(catalogName: String): Optional[Catalog] =
+    tableEnv.getCatalog(catalogName)
 
-  override def loadModule(moduleName: String, module: Module): Unit = tableEnv.loadModule(moduleName, module)
+  override def loadModule(moduleName: String, module: Module): Unit =
+    tableEnv.loadModule(moduleName, module)
 
-  override def unloadModule(moduleName: String): Unit = tableEnv.unloadModule(moduleName)
+  override def unloadModule(moduleName: String): Unit =
+    tableEnv.unloadModule(moduleName)
 
-  override def createTemporarySystemFunction(name: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createTemporarySystemFunction(name, functionClass)
+  override def createTemporarySystemFunction(
+      name: String,
+      functionClass: Class[_ <: UserDefinedFunction]
+  ): Unit = tableEnv.createTemporarySystemFunction(name, functionClass)
 
-  override def createTemporarySystemFunction(name: String, functionInstance: UserDefinedFunction): Unit = tableEnv.createTemporarySystemFunction(name, functionInstance)
+  override def createTemporarySystemFunction(
+      name: String,
+      functionInstance: UserDefinedFunction
+  ): Unit = tableEnv.createTemporarySystemFunction(name, functionInstance)
 
-  override def dropTemporarySystemFunction(name: String): Boolean = tableEnv.dropTemporarySystemFunction(name)
+  override def dropTemporarySystemFunction(name: String): Boolean =
+    tableEnv.dropTemporarySystemFunction(name)
 
-  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createFunction(path, functionClass)
+  override def createFunction(
+      path: String,
+      functionClass: Class[_ <: UserDefinedFunction]
+  ): Unit = tableEnv.createFunction(path, functionClass)
 
-  override def createFunction(path: String, functionClass: Class[_ <: UserDefinedFunction], ignoreIfExists: Boolean): Unit = tableEnv.createFunction(path, functionClass)
+  override def createFunction(
+      path: String,
+      functionClass: Class[_ <: UserDefinedFunction],
+      ignoreIfExists: Boolean
+  ): Unit = tableEnv.createFunction(path, functionClass)
 
   override def dropFunction(path: String): Boolean = tableEnv.dropFunction(path)
 
-  override def createTemporaryFunction(path: String, functionClass: Class[_ <: UserDefinedFunction]): Unit = tableEnv.createTemporaryFunction(path, functionClass)
+  override def createTemporaryFunction(
+      path: String,
+      functionClass: Class[_ <: UserDefinedFunction]
+  ): Unit = tableEnv.createTemporaryFunction(path, functionClass)
 
-  override def createTemporaryFunction(path: String, functionInstance: UserDefinedFunction): Unit = tableEnv.createTemporaryFunction(path, functionInstance)
+  override def createTemporaryFunction(
+      path: String,
+      functionInstance: UserDefinedFunction
+  ): Unit = tableEnv.createTemporaryFunction(path, functionInstance)
 
-  override def dropTemporaryFunction(path: String): Boolean = tableEnv.dropTemporaryFunction(path)
+  override def dropTemporaryFunction(path: String): Boolean =
+    tableEnv.dropTemporaryFunction(path)
 
-  override def createTemporaryView(path: String, view: Table): Unit = tableEnv.createTemporaryView(path, view)
+  override def createTemporaryView(path: String, view: Table): Unit =
+    tableEnv.createTemporaryView(path, view)
 
   override def from(path: String): Table = tableEnv.from(path)
 
@@ -134,74 +182,108 @@ class TableContext(val parameter: ParameterTool,
 
   override def listViews(): Array[String] = tableEnv.listViews()
 
-  override def listTemporaryTables(): Array[String] = tableEnv.listTemporaryTables
+  override def listTemporaryTables(): Array[String] =
+    tableEnv.listTemporaryTables
 
-  override def listTemporaryViews(): Array[String] = tableEnv.listTemporaryViews()
+  override def listTemporaryViews(): Array[String] =
+    tableEnv.listTemporaryViews()
 
-  override def listUserDefinedFunctions(): Array[String] = tableEnv.listUserDefinedFunctions()
+  override def listUserDefinedFunctions(): Array[String] =
+    tableEnv.listUserDefinedFunctions()
 
   override def listFunctions(): Array[String] = tableEnv.listFunctions()
 
-  override def dropTemporaryTable(path: String): Boolean = tableEnv.dropTemporaryTable(path)
+  override def dropTemporaryTable(path: String): Boolean =
+    tableEnv.dropTemporaryTable(path)
 
-  override def dropTemporaryView(path: String): Boolean = tableEnv.dropTemporaryView(path)
+  override def dropTemporaryView(path: String): Boolean =
+    tableEnv.dropTemporaryView(path)
 
-  override def explainSql(statement: String, extraDetails: ExplainDetail*): String = tableEnv.explainSql(statement, extraDetails: _*)
+  override def explainSql(
+      statement: String,
+      extraDetails: ExplainDetail*
+  ): String = tableEnv.explainSql(statement, extraDetails: _*)
 
   override def sqlQuery(query: String): Table = tableEnv.sqlQuery(query)
 
-  override def executeSql(statement: String): TableResult = tableEnv.executeSql(statement)
+  override def executeSql(statement: String): TableResult =
+    tableEnv.executeSql(statement)
 
   override def getCurrentCatalog: String = tableEnv.getCurrentCatalog
 
-  override def useCatalog(catalogName: String): Unit = tableEnv.useCatalog(catalogName)
+  override def useCatalog(catalogName: String): Unit =
+    tableEnv.useCatalog(catalogName)
 
   override def getCurrentDatabase: String = tableEnv.getCurrentDatabase
 
-  override def useDatabase(databaseName: String): Unit = tableEnv.useDatabase(databaseName)
+  override def useDatabase(databaseName: String): Unit =
+    tableEnv.useDatabase(databaseName)
 
   override def getConfig: TableConfig = tableEnv.getConfig
 
-  override def createStatementSet(): StatementSet = tableEnv.createStatementSet()
-
+  override def createStatementSet(): StatementSet =
+    tableEnv.createStatementSet()
 
   /**
-   * deprecated!!! what are you fucking for??? don't call this method
-   *
-   * @param name
-   * @param dataStream
-   * @tparam T
-   */
-  @Deprecated override def fromTableSource(source: TableSource[_]): Table = tableEnv.fromTableSource(source)
+    * deprecated!!! what are you fucking for??? don't call this method
+    *
+    * @param name
+    * @param dataStream
+    * @tparam T
+    */
+  @Deprecated override def fromTableSource(source: TableSource[_]): Table =
+    tableEnv.fromTableSource(source)
 
-  @Deprecated override def registerFunction(name: String, function: ScalarFunction): Unit = tableEnv.registerFunction(name, function)
+  @Deprecated override def registerFunction(
+      name: String,
+      function: ScalarFunction
+  ): Unit = tableEnv.registerFunction(name, function)
 
-  @Deprecated override def registerTable(name: String, table: Table): Unit = tableEnv.registerTable(name, table)
+  @Deprecated override def registerTable(name: String, table: Table): Unit =
+    tableEnv.registerTable(name, table)
 
-  @Deprecated override def scan(tablePath: String*): Table = tableEnv.scan(tablePath: _*)
+  @Deprecated override def scan(tablePath: String*): Table =
+    tableEnv.scan(tablePath: _*)
 
-  @Deprecated override def insertInto(table: Table, sinkPath: String, sinkPathContinued: String*): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
+  @Deprecated override def insertInto(
+      table: Table,
+      sinkPath: String,
+      sinkPathContinued: String*
+  ): Unit = tableEnv.insertInto(table, sinkPath, sinkPathContinued: _*)
 
-  @Deprecated override def insertInto(targetPath: String, table: Table): Unit = tableEnv.insertInto(targetPath, table)
+  @Deprecated override def insertInto(targetPath: String, table: Table): Unit =
+    tableEnv.insertInto(targetPath, table)
 
-  @Deprecated override def explain(table: Table): String = tableEnv.explain(table)
+  @Deprecated override def explain(table: Table): String =
+    tableEnv.explain(table)
 
-  @Deprecated override def explain(table: Table, extended: Boolean): String = tableEnv.explain(table, extended)
+  @Deprecated override def explain(table: Table, extended: Boolean): String =
+    tableEnv.explain(table, extended)
 
-  @Deprecated override def explain(extended: Boolean): String = tableEnv.explain(extended)
+  @Deprecated override def explain(extended: Boolean): String =
+    tableEnv.explain(extended)
 
-  @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
+  @Deprecated override def getCompletionHints(
+      statement: String,
+      position: Int
+  ): Array[String] = tableEnv.getCompletionHints(statement, position)
 
-  @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+  @Deprecated override def sqlUpdate(stmt: String): Unit =
+    tableEnv.sqlUpdate(stmt)
 
-  @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+  @Deprecated override def connect(
+      connectorDescriptor: ConnectorDescriptor
+  ): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
 }
 
 trait FlinkTable extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
-  final implicit def descriptorExt(table: ConnectTableDescriptor): TableExt.ConnectTableDescriptor = new TableExt.ConnectTableDescriptor(table)
+  final implicit def descriptorExt(
+      table: ConnectTableDescriptor
+  ): TableExt.ConnectTableDescriptor =
+    new TableExt.ConnectTableDescriptor(table)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
@@ -216,9 +298,9 @@ trait FlinkTable extends Logger {
   }
 
   /**
-   * 用户可覆盖次方法...
-   *
-   */
+    * 用户可覆盖次方法...
+    *
+    */
   def beforeStart(context: TableContext): Unit = {}
 
   def handle(context: TableContext): Unit

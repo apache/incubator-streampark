@@ -20,11 +20,6 @@
  */
 package com.streamxhub.console.base.utils;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.cglib.beans.BeanMap;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -40,14 +35,18 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.cglib.beans.BeanMap;
+
+import lombok.extern.slf4j.Slf4j;
+
+import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 @Slf4j
 public abstract class CommonUtil implements Serializable {
 
-
     private static final long serialVersionUID = 6458428317155311192L;
-
 
     private static String OS = System.getProperty("os.name").toLowerCase();
 
@@ -159,7 +158,6 @@ public abstract class CommonUtil implements Serializable {
         }
     }
 
-
     public static float toFloat(Object val, float defVal) {
         if (isEmpty(val)) {
             return defVal;
@@ -231,8 +229,9 @@ public abstract class CommonUtil implements Serializable {
 
     /**
      * Check whether the given Collection contains the given element instance.
-     * <p>Enforces the given instance to be present, rather than returning
-     * <code>true</code> for an equal element as well.
+     *
+     * <p>Enforces the given instance to be present, rather than returning <code>true</code> for an
+     * equal element as well.
      *
      * @param collection the Collection to check
      * @param element    the element to look for
@@ -248,7 +247,6 @@ public abstract class CommonUtil implements Serializable {
         }
         return false;
     }
-
 
     public static <A, E extends A> A[] toArray(Enumeration<E> enumeration, A[] array) {
         ArrayList<A> elements = new ArrayList<A>();
@@ -291,7 +289,7 @@ public abstract class CommonUtil implements Serializable {
         return new EnumerationIterator<E>(enumeration);
     }
 
-    //获取系统名字
+    // 获取系统名字
     public static String getOsName() {
         return OS;
     }
@@ -418,9 +416,7 @@ public abstract class CommonUtil implements Serializable {
     }
 
     /**
-     * linux内核平台 1
-     * window： 2
-     * 其他平台 0
+     * linux内核平台 1 window： 2 其他平台 0
      */
     public static int getPlatform() {
         int platform = 0;
@@ -432,7 +428,6 @@ public abstract class CommonUtil implements Serializable {
         }
         return platform;
     }
-
 
     public static <K, V extends Comparable<? super V>> Map<K, V> sortMapByValue(Map<K, V> map) {
         List<Map.Entry<K, V>> list = new LinkedList<Map.Entry<K, V>>(map.entrySet());
@@ -474,7 +469,6 @@ public abstract class CommonUtil implements Serializable {
         return Arrays.copyOf(arrayList.toArray(array), arrayList.size());
     }
 
-
     public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
         AssertUtil.notNull(array);
         List<T> arrayList = new ArrayList<T>(array.length + 1);
@@ -513,7 +507,6 @@ public abstract class CommonUtil implements Serializable {
     public static Double fixedNum(Number number) {
         return fixedNum(number, 2);
     }
-
 
     public static Double fixedNum(Number number, int offset) {
         if (number.doubleValue() == 0.00) {
@@ -604,7 +597,8 @@ public abstract class CommonUtil implements Serializable {
      * @throws InstantiationException
      * @throws IllegalAccessException
      */
-    public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz) throws InstantiationException, IllegalAccessException {
+    public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz)
+            throws InstantiationException, IllegalAccessException {
         List<T> list = Lists.newArrayList();
         if (maps != null && maps.size() > 0) {
             Map<String, Object> map = null;
@@ -618,7 +612,4 @@ public abstract class CommonUtil implements Serializable {
         }
         return list;
     }
-
 }
-
-

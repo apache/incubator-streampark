@@ -12,9 +12,9 @@
 #   ...
 #   Samples:
 #   samples/count cpu/nanoseconds
-#        1   10000000: 1 2 
-#        2   10000000: 3 2 
-#        1   10000000: 4 2 
+#        1   10000000: 1 2
+#        2   10000000: 3 2
+#        1   10000000: 4 2
 #        ...
 #   Locations
 #        1: 0x58b265 scanblock :0 s=0
@@ -26,7 +26,7 @@
 #        ...
 #
 # Example Output:
-# 
+#
 #   GC;flushptrbuf 2
 #   GC;runtime.MSpan_Sweep 1
 #   GC;scanblock 1
@@ -65,13 +65,13 @@ use Getopt::Long;
 my $help = 0;
 
 sub usage {
-	die <<USAGE_END;
+    die <<USAGE_END;
 USAGE: $0 infile > outfile\n
 USAGE_END
 }
 
 GetOptions(
-	'help' => \$help,
+    'help' => \$help,
 ) or usage();
 $help && usage();
 
@@ -82,8 +82,8 @@ my %frames;
 my %collapsed;
 
 sub remember_stack {
-	my ($stack, $count) = @_;
-	$stacks{$stack} += $count;
+    my ($stack, $count) = @_;
+    $stacks{$stack} += $count;
 }
 
 #
@@ -97,54 +97,58 @@ sub remember_stack {
 #        4: 0x58d6a8 runtime.MSpan_Sweep :0 s=0
 #
 sub format_statck {
-	my ($stack) = @_;
-	my @loc_list = split(/ /, $stack);
+    my ($stack) = @_;
+    my @loc_list = split(/ /, $stack);
 
-	for (my $i=0; $i<=$#loc_list; $i++) {
-		my $loc_name = $frames{$loc_list[$i]};
-		$loc_list[$i] = $loc_name if ($loc_name);
-	}
-	return join(";", reverse(@loc_list));
+    for (my $i = 0; $i <= $#loc_list; $i++) {
+        my $loc_name = $frames{$loc_list[$i]};
+        $loc_list[$i] = $loc_name if ($loc_name);
+    }
+    return join(";", reverse(@loc_list));
 }
 
 foreach (<>) {
-	next if m/^#/;
-	chomp;
+    next if m/^#/;
+    chomp;
 
-	if ($state eq "ignore") {
-		if (/Samples:/) {
-		$state = "sample";
-			next;
-		}
+    if ($state eq "ignore") {
+        if (/Samples:/) {
+            $state = "sample";
+            next;
+        }
 
-	} elsif ($state eq "sample") {
-		if (/^\s*([0-9]+)\s*[0-9]+: ([0-9 ]+)/) {
-			my $samples = $1;
-			my $stack = $2;
-			remember_stack($stack, $samples);
-		} elsif (/Locations/) {
-			$state = "location";
-			next;
-		}
+    }
+    elsif ($state eq "sample") {
+        if (/^\s*([0-9]+)\s*[0-9]+: ([0-9 ]+)/) {
+            my $samples = $1;
+            my $stack = $2;
+            remember_stack($stack, $samples);
+        }
+        elsif (/Locations/) {
+            $state = "location";
+            next;
+        }
 
-	} elsif ($state eq "location") {
-		if (/^\s*([0-9]*): 0x[0-9a-f]+ (M=[0-9]+ )?([^ ]+) .*/) {
-			my $loc_id = $1;
-			my $loc_name = $3;
-			$frames{$loc_id} = $loc_name;
-		} elsif (/Mappings/) {
-			$state = "mapping";
-			last;
-		}
-	}
+    }
+    elsif ($state eq "location") {
+        if (/^\s*([0-9]*): 0x[0-9a-f]+ (M=[0-9]+ )?([^ ]+) .*/) {
+            my $loc_id = $1;
+            my $loc_name = $3;
+            $frames{$loc_id} = $loc_name;
+        }
+        elsif (/Mappings/) {
+            $state = "mapping";
+            last;
+        }
+    }
 }
 
 foreach my $k (keys %stacks) {
-	my $stack = format_statck($k);
-	my $count = $stacks{$k};
-	$collapsed{$stack} += $count;
+    my $stack = format_statck($k);
+    my $count = $stacks{$k};
+    $collapsed{$stack} += $count;
 }
 
-foreach my $k (sort { $a cmp $b } keys %collapsed) {
-	print "$k $collapsed{$k}\n";
+foreach my $k (sort {$a cmp $b} keys %collapsed) {
+    print "$k $collapsed{$k}\n";
 }

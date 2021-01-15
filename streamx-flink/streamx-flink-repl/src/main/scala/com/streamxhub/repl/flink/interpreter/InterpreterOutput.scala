@@ -44,13 +44,16 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
     }
   }
 
-  @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
+  @throws[IOException]
+  override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
-  override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
+  override def write(b: Array[Byte], off: Int, len: Int): Unit =
+    for (i <- off until len) write(b(i))
 
   private[this] def toByteArray: Array[Byte] = buffer.toByteArray
 
-  @throws[IOException] override def close(): Unit = {
+  @throws[IOException]
+  override def close(): Unit = {
     flush()
     //防止最后一行不输出...
     if (this.flushListener != null) flushLine()
@@ -66,8 +69,8 @@ class InterpreterOutput(flushListener: FlushListener) extends OutputStream {
 
 }
 
-
-private[interpreter] class InterpreterOutputStream(logger: Logger) extends LogOutputStream {
+private[interpreter] class InterpreterOutputStream(logger: Logger)
+    extends LogOutputStream {
 
   private[this] var interpreterOutput: InterpreterOutput = null
   private[this] var ignore: Boolean = false
@@ -78,9 +81,13 @@ private[interpreter] class InterpreterOutputStream(logger: Logger) extends LogOu
     this.interpreterOutput = interpreterOutput
   }
 
-  @throws[IOException] override def write(b: Int): Unit = {
+  @throws[IOException]
+  override def write(b: Int): Unit = {
     if (ignore && b == '\n') {
-      val error = Thread.currentThread.getStackTrace.filter(x => x.getClassName == "scala.tools.nsc.interpreter.ReplReporter" && x.getMethodName == "error")
+      val error = Thread.currentThread.getStackTrace.filter(
+        x =>
+          x.getClassName == "scala.tools.nsc.interpreter.ReplReporter" && x.getMethodName == "error"
+      )
       if (error.nonEmpty) {
         return
       }
@@ -93,20 +100,25 @@ private[interpreter] class InterpreterOutputStream(logger: Logger) extends LogOu
     }
   }
 
-  @throws[IOException] override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
+  @throws[IOException]
+  override def write(b: Array[Byte]): Unit = write(b, 0, b.length)
 
-  @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = for (i <- off until len) write(b(i))
+  @throws[IOException]
+  override def write(b: Array[Byte], off: Int, len: Int): Unit =
+    for (i <- off until len) write(b(i))
 
   @Override def processLine(s: String, i: Int): Unit = {
     logger.debug("Interpreter output:" + s)
   }
 
-  @throws[IOException] override def close(): Unit = {
+  @throws[IOException]
+  override def close(): Unit = {
     super.close()
     if (interpreterOutput != null) interpreterOutput.close()
   }
 
-  @throws[IOException] override def flush(): Unit = {
+  @throws[IOException]
+  override def flush(): Unit = {
     super.flush()
     if (interpreterOutput != null) interpreterOutput.flush()
   }
@@ -125,7 +137,8 @@ private[this] abstract class LogOutputStream extends OutputStream {
     this.level = level
   }
 
-  @throws[IOException] override def write(cc: Int): Unit = {
+  @throws[IOException]
+  override def write(cc: Int): Unit = {
     val c = cc.toByte
     if (c != 10 && c != 13) {
       buffer.write(cc)
@@ -135,16 +148,19 @@ private[this] abstract class LogOutputStream extends OutputStream {
     this.skip = c == 13
   }
 
-  @throws[IOException] override def flush(): Unit = {
+  @throws[IOException]
+  override def flush(): Unit = {
     if (this.buffer.size > 0) this.processBuffer()
   }
 
-  @throws[IOException] override def close(): Unit = {
+  @throws[IOException]
+  override def close(): Unit = {
     if (this.buffer.size > 0) this.processBuffer()
     super.close()
   }
 
-  @throws[IOException] override def write(b: Array[Byte], off: Int, len: Int): Unit = {
+  @throws[IOException]
+  override def write(b: Array[Byte], off: Int, len: Int): Unit = {
     var offset = off
     var blockStartOffset = off
     var remaining = len
@@ -173,17 +189,18 @@ private[this] abstract class LogOutputStream extends OutputStream {
 
   def getMessageLevel: Int = this.level
 
-  protected def processLine(line: String): Unit = this.processLine(line, this.level)
+  protected def processLine(line: String): Unit =
+    this.processLine(line, this.level)
 
   protected def processLine(var1: String, var2: Int): Unit
 }
 
 trait FlushListener {
+
   /**
-   * 注意:返回的数据,千万不能调用println打印,因为此时的Console.out,System.out,System.err已经被interpreter占用,
-   * 专门用来输出执行flink代码的信息
-   * 如果显示的调用println,会导致递归...
-   */
+    * 注意:返回的数据,千万不能调用println打印,因为此时的Console.out,System.out,System.err已经被interpreter占用,
+    * 专门用来输出执行flink代码的信息
+    * 如果显示的调用println,会导致递归...
+    */
   def onLine(line: String)
 }
-

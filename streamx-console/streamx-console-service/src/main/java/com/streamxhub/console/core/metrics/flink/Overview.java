@@ -20,8 +20,9 @@
  */
 package com.streamxhub.console.core.metrics.flink;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author benjobs
@@ -54,5 +55,4 @@ public class Overview {
 
     @JsonProperty("flink-commit")
     private String flinkCommit;
-
 }

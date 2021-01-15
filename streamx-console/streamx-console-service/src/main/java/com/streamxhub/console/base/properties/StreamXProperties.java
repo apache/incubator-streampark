@@ -20,9 +20,10 @@
  */
 package com.streamxhub.console.base.properties;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+
+import lombok.Data;
 
 @Data
 @Configuration
@@ -38,5 +39,4 @@ public class StreamXProperties {
     private String yarnUrl;
 
     private String consoleUrl;
-
 }

@@ -10,12 +10,16 @@
 
     <!--根据用户Id删除该用户的角色关系-->
     <delete id="deleteByUserId">
-		DELETE FROM t_user_role WHERE user_id = #{userId}
-	</delete>
+        DELETE
+        FROM t_user_role
+        WHERE user_id = #{userId}
+    </delete>
 
     <!--根据角色Id删除该角色的用户关系-->
     <delete id="deleteByRoleId">
-		DELETE FROM t_user_role WHERE role_id = #{roleId}
-	</delete>
+        DELETE
+        FROM t_user_role
+        WHERE role_id = #{roleId}
+    </delete>
 
 </mapper>

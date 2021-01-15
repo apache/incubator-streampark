@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.channel
 
 import org.apache.spark.streaming.dstream.DStream

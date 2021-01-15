@@ -19,18 +19,20 @@ object KafkaTableApp extends FlinkStreamTable {
       )
       .createTemporaryTable("kafka2Table")
 
-    val ds = context.$fromCollection(
-      List(
-        "flink,apapche flink",
-        "kafka,apapche kafka",
-        "spark,spark",
-        "zookeeper,apapche zookeeper",
-        "hadoop,apapche hadoop"
+    val ds = context
+      .$fromCollection(
+        List(
+          "flink,apapche flink",
+          "kafka,apapche kafka",
+          "spark,spark",
+          "zookeeper,apapche zookeeper",
+          "hadoop,apapche hadoop"
+        )
       )
-    ).map(x => {
-      val array = x.split(",")
-      Entity(array.head, array.last)
-    })
+      .map(x => {
+        val array = x.split(",")
+        Entity(array.head, array.last)
+      })
 
     context.createTemporaryView("kafkaSource", ds)
 
@@ -44,43 +46,49 @@ object KafkaTableApp extends FlinkStreamTable {
     table.>>[Entity].print("print==>")
 
     /**
-     * 'key 等同于 $"key"
-     */
+      * 'key 等同于 $"key"
+      */
     // select  where
-    table.
-      select($"id", $"name")
+    table
+      .select($"id", $"name")
       .where($"id" === "flink")
-      .>>[(String, String)].print("simple where==>")
+      .>>[(String, String)]
+      .print("simple where==>")
 
-    table.
-      select('id, 'name)
+    table
+      .select('id, 'name)
       .where('id === "flink")
-      .>>[(String, String)].print("simple where2==>")
+      .>>[(String, String)]
+      .print("simple where2==>")
 
     /**
-     * 查询id=flink,
-     * name like apache%
-     */
-    table.select("id", "name")
+      * 查询id=flink,
+      * name like apache%
+      */
+    table
+      .select("id", "name")
       .where("id" === "flink")
       .where("name" like "apache%")
-      .>>[(String, String)].print("like where==>")
+      .>>[(String, String)]
+      .print("like where==>")
 
     /**
-     * filter等同于where的操作
-     */
-    table.select("id", "name")
+      * filter等同于where的操作
+      */
+    table
+      .select("id", "name")
       .filter("id" === "flink")
-      .>>[(String, String)].print("Select -> filter ==>")
+      .>>[(String, String)]
+      .print("Select -> filter ==>")
 
     /**
-     * groupBy
-     */
+      * groupBy
+      */
     table
       .groupBy($"id")
       .select($"id", $"id".count as "count")
-      .<<[(String, Long)].print("GroupBy ==>")
-
+      .<<[(String, Long)]
+      .print("GroupBy ==>")
 
   }
 

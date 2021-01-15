@@ -21,15 +21,16 @@
 package com.streamxhub.console.core.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.console.base.domain.RestRequest;
 import com.streamxhub.console.base.exception.ServiceException;
 import com.streamxhub.console.core.entity.ApplicationBackUp;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * @author benjobs
  */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     Boolean delete(Long id) throws ServiceException;
+
     IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request);
 }

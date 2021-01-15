@@ -22,7 +22,12 @@ package com.streamxhub.flink.core.scala.failover
 
 import com.streamxhub.common.util.{Logger, ThreadUtils}
 
-import java.util.concurrent.{Executors, ScheduledExecutorService, ThreadFactory, TimeUnit}
+import java.util.concurrent.{
+  Executors,
+  ScheduledExecutorService,
+  ThreadFactory,
+  TimeUnit
+}
 import scala.collection.JavaConversions._
 import scala.collection.mutable.ListBuffer
 
@@ -30,8 +35,14 @@ case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {
 
   val sinkBuffers: ListBuffer[SinkBuffer] = ListBuffer[SinkBuffer]()
   val factory: ThreadFactory = ThreadUtils.threadFactory("FailoverChecker")
-  val scheduledExecutorService: ScheduledExecutorService = Executors.newSingleThreadScheduledExecutor(factory)
-  scheduledExecutorService.scheduleWithFixedDelay(getTask, delayTime, delayTime, TimeUnit.MILLISECONDS)
+  val scheduledExecutorService: ScheduledExecutorService =
+    Executors.newSingleThreadScheduledExecutor(factory)
+  scheduledExecutorService.scheduleWithFixedDelay(
+    getTask,
+    delayTime,
+    delayTime,
+    TimeUnit.MILLISECONDS
+  )
   logInfo(s"Build Sink scheduled checker, timeout (microSeconds) = $delayTime")
 
   def addSinkBuffer(buffer: SinkBuffer): Unit = {
@@ -42,12 +53,15 @@ case class FailoverChecker(delayTime: Long) extends AutoCloseable with Logger {
   def getTask: Runnable = new Runnable {
     override def run(): Unit = {
       this synchronized {
-        logDebug(s"Start checking buffers. Current count of buffers = ${sinkBuffers.size}")
+        logDebug(
+          s"Start checking buffers. Current count of buffers = ${sinkBuffers.size}"
+        )
         sinkBuffers.foreach(_.tryAddToQueue())
       }
     }
   }
 
-  override def close(): Unit = ThreadUtils.shutdownExecutorService(scheduledExecutorService)
+  override def close(): Unit =
+    ThreadUtils.shutdownExecutorService(scheduledExecutorService)
 
 }

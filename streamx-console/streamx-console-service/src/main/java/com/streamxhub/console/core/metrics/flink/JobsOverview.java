@@ -20,11 +20,12 @@
  */
 package com.streamxhub.console.core.metrics.flink;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
-
 import java.io.Serializable;
 import java.util.List;
+
+import lombok.Data;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * @author benjobs
@@ -38,15 +39,21 @@ public class JobsOverview implements Serializable {
     public static class Job implements Serializable {
         @JsonProperty("jid")
         private String id;
+
         private String name;
         private String state;
+
         @JsonProperty("start-time")
         private Long startTime;
+
         @JsonProperty("end-time")
         private Long endTime;
+
         private Long duration;
+
         @JsonProperty("last-modification")
         private Long lastModification;
+
         private Task tasks;
     }
 
@@ -64,4 +71,3 @@ public class JobsOverview implements Serializable {
         private int reconciling;
     }
 }
-
