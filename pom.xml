@@ -453,7 +453,7 @@
                             <style>GOOGLE</style>
                         </googleJavaFormat>
                         <importOrder>
-                            <!-- \# refers to the static imports -->
+                             \# refers to the static imports
                             <order>javax,java,scala,org,com,\#</order>
                         </importOrder>
                         <removeUnusedImports/>
