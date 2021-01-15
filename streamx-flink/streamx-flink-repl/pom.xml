@@ -319,9 +319,9 @@
                     </jvmArgs>
                     <javacArgs>
                         <javacArg>-source</javacArg>
-                        <javacArg>${java.version}</javacArg>
+                        <javacArg>${project.build.jdk}</javacArg>
                         <javacArg>-target</javacArg>
-                        <javacArg>${java.version}</javacArg>
+                        <javacArg>${project.build.jdk}</javacArg>
                         <javacArg>-Xlint:all,-serial,-path,-options</javacArg>
                     </javacArgs>
                 </configuration>
