@@ -2,17 +2,18 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-
+    <modelVersion>4.0.0</modelVersion>
     <groupId>com.streamxhub</groupId>
     <artifactId>streamx</artifactId>
     <version>1.0.0</version>
-    <modelVersion>4.0.0</modelVersion>
     <packaging>pom</packaging>
+    <name>StreamX</name>
+    <description>The flink and spark development scaffolding</description>
 
     <modules>
         <module>streamx-common</module>
         <module>streamx-flink</module>
-        <!--<module>streamx-spark</module>-->
+       <!-- <module>streamx-spark</module>-->
         <module>streamx-plugins</module>
         <module>streamx-console</module>
     </modules>
@@ -467,15 +468,15 @@
                         <removeUnusedImports/>
                     </scala>
                 </configuration>
-               <!-- <executions>
-                    <execution>
-                        <id>spotless-check</id>
-                        <phase>validate</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>-->
+                <!-- <executions>
+                     <execution>
+                         <id>spotless-check</id>
+                         <phase>validate</phase>
+                         <goals>
+                             <goal>check</goal>
+                         </goals>
+                     </execution>
+                 </executions>-->
             </plugin>
 
             <!--maven-->
