@@ -38,6 +38,7 @@
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
+        <spotless.version>2.7.0</spotless.version>
 
         <project.build.jdk>1.8</project.build.jdk>
         <PermGen>64m</PermGen>
@@ -92,8 +93,8 @@
             <version>${slf4j.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <!--logbak end-->
+
     </dependencies>
 
     <dependencyManagement>
@@ -414,6 +415,67 @@
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.diffplug.spotless</groupId>
+                <artifactId>spotless-maven-plugin</artifactId>
+                <version>${spotless.version}</version>
+                <configuration>
+                    <formats>
+                        <!-- you can define as many formats as you want, each is independent -->
+                        <format>
+                            <!-- define the files to apply to -->
+                            <includes>
+                                <include>*.md</include>
+                                <include>.gitignore</include>
+                            </includes>
+                            <!-- define the steps to apply to those files -->
+                            <trimTrailingWhitespace/>
+                            <endWithNewline/>
+                            <indent>
+                                <tabs>true</tabs>
+                                <spacesPerTab>4</spacesPerTab>
+                            </indent>
+                        </format>
+                    </formats>
+
+                    <java>
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+                        <googleJavaFormat>
+                            <version>1.7</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <importOrder>
+                            <!-- \# refers to the static imports -->
+                            <order>javax,java,scala,org,com,\#</order>
+                        </importOrder>
+                        <removeUnusedImports/>
+                    </java>
+                    <scala>
+                        <includes>
+                            <include>src/main/scala/**/*.scala</include>
+                            <include>src/test/scala/**/*.scala</include>
+                        </includes>
+                        <importOrder>
+                            <!-- \# refers to the static imports -->
+                            <order>javax,java,scala,org,com,\#</order>
+                        </importOrder>
+                        <removeUnusedImports/>
+                    </scala>
+                </configuration>
+               <!-- <executions>
+                    <execution>
+                        <id>spotless-check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>-->
             </plugin>
 
             <!--maven-->
