@@ -75,37 +75,37 @@ Define a series of startup information and source and sink information in the co
 ```yaml
 flink:
   deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明显的问题的找不到jar文件
-	option:
-	target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
-	detached:                         # -d   (If present, runs the job in detached mode)
-	shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
-	zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
-	jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
-	property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
-	$internal.application.main: com.your.flink.streamx.HelloStreamXApp # main class
-	yarn.application.name: FlinkHelloWorldApp
-	yarn.application.node-label: StreamX
-	taskmanager.numberOfTaskSlots: 1
-	parallelism.default: 2
-	jobmanager.memory:
-      flink.size:
-      heap.size:
-      jvm-metaspace.size:
-      jvm-overhead.max:
-      off-heap.size:
-      process.size:
-	taskmanager.memory:
-	  flink.size:
-	  framework.heap.size:
-	  framework.off-heap.size:
-	  managed.size:
-	  process.size:
-	  task.heap.size:
-	  task.off-heap.size:
-	  jvm-metaspace.size:
-	  jvm-overhead.max:
-	  jvm-overhead.min:
-	  managed.fraction: 0.4
+    option:
+      target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
+      detached:                         # -d   (If present, runs the job in detached mode)
+      shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
+      zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
+      jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
+      property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+      $internal.application.main: com.your.flink.streamx.HelloStreamXApp # main class
+      yarn.application.name: FlinkHelloWorldApp
+      yarn.application.node-label: StreamX
+      taskmanager.numberOfTaskSlots: 1
+      parallelism.default: 2
+      jobmanager.memory:
+        flink.size:
+        heap.size:
+        jvm-metaspace.size:
+        jvm-overhead.max:
+        off-heap.size:
+        process.size:
+      taskmanager.memory:
+        flink.size:
+        framework.heap.size:
+        framework.off-heap.size:
+        managed.size:
+        process.size:
+        task.heap.size:
+        task.off-heap.size:
+        jvm-metaspace.size:
+        jvm-overhead.max:
+        jvm-overhead.min:
+        managed.fraction: 0.4
   watermark:
     time.characteristic: EventTime
     interval: 10000
