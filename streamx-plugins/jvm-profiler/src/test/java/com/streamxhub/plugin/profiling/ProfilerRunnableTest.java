@@ -21,37 +21,35 @@
 
 package com.streamxhub.plugin.profiling;
 
-import com.streamxhub.plugin.profiling.Profiler;
-import com.streamxhub.plugin.profiling.ProfilerRunner;
-import com.streamxhub.plugin.profiling.Reporter;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 public class ProfilerRunnableTest {
-    @Test
-    public void invokeRunnable() {
-        final AtomicInteger i = new AtomicInteger(10);
+  @Test
+  public void invokeRunnable() {
+    final AtomicInteger i = new AtomicInteger(10);
 
-        ProfilerRunner profilerRunnable = new ProfilerRunner(new Profiler() {
-            @Override
-            public long getInterval() {
+    ProfilerRunner profilerRunnable =
+        new ProfilerRunner(
+            new Profiler() {
+              @Override
+              public long getInterval() {
                 return 0;
-            }
+              }
 
-            @Override
-            public void setReporter(Reporter reporter) {
-            }
+              @Override
+              public void setReporter(Reporter reporter) {}
 
-            @Override
-            public void profile() {
+              @Override
+              public void profile() {
                 i.incrementAndGet();
-            }
-        });
+              }
+            });
 
-        profilerRunnable.run();
+    profilerRunnable.run();
 
-        Assert.assertEquals(11, i.get());
-    }
+    Assert.assertEquals(11, i.get());
+  }
 }

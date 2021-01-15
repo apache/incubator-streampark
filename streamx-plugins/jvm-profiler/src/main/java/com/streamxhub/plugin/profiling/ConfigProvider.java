@@ -24,15 +24,14 @@ package com.streamxhub.plugin.profiling;
 import java.util.List;
 import java.util.Map;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public interface ConfigProvider {
-    /***
-     * Returns a map containing multiple child maps. Each child map contains a group of key/value pairs
-     * for a specific jvm profiler user (identified by tag value when start the profiler). The child map
-     * for empty tag value contains the default configuration for all profilers.
-     * @return
-     */
-    Map<String, Map<String, List<String>>> getConfig();
+  /**
+   * * Returns a map containing multiple child maps. Each child map contains a group of key/value
+   * pairs for a specific jvm profiler user (identified by tag value when start the profiler). The
+   * child map for empty tag value contains the default configuration for all profilers.
+   *
+   * @return
+   */
+  Map<String, Map<String, List<String>>> getConfig();
 }

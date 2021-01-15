@@ -23,25 +23,23 @@ package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class MethodArgumentCollector {
-    private ClassMethodArgumentMetricBuffer buffer;
+  private ClassMethodArgumentMetricBuffer buffer;
 
-    public MethodArgumentCollector(ClassMethodArgumentMetricBuffer buffer) {
-        this.buffer = buffer;
+  public MethodArgumentCollector(ClassMethodArgumentMetricBuffer buffer) {
+    this.buffer = buffer;
+  }
+
+  public void collectMetric(String className, String methodName, String argument) {
+    if (argument == null) {
+      argument = "";
     }
 
-    public void collectMetric(String className, String methodName, String argument) {
-        if (argument == null) {
-            argument = "";
-        }
-
-        if (argument.length() > Constants.MAX_STRING_LENGTH) {
-            argument = argument.substring(0, Constants.MAX_STRING_LENGTH);
-        }
-
-        buffer.appendValue(className, methodName, argument);
+    if (argument.length() > Constants.MAX_STRING_LENGTH) {
+      argument = argument.substring(0, Constants.MAX_STRING_LENGTH);
     }
+
+    buffer.appendValue(className, methodName, argument);
+  }
 }
