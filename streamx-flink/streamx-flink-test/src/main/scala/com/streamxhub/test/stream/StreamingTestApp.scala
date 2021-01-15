@@ -14,17 +14,20 @@ object StreamingTestApp extends FlinkStreaming {
 
     val source = context.socketTextStream(host, port)
 
-    source.flatMap(_.split("\\s+"))
+    source
+      .flatMap(_.split("\\s+"))
       .map(x => {
         (x, 1, 2)
       })
       .keyBy(_._1)
       .reduce(new ReduceFunction[(String, Int, Int)] {
-        override def reduce(v1: (String, Int, Int), v2: (String, Int, Int)): (String, Int, Int) = {
+        override def reduce(
+            v1: (String, Int, Int),
+            v2: (String, Int, Int)
+        ): (String, Int, Int) = {
           (v1._1, v1._2 + v2._2, v1._3 + v2._3)
         }
       })
-
 
   }
 }

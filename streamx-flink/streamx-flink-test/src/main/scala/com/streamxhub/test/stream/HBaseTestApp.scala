@@ -16,12 +16,13 @@ object HBaseTestApp extends FlinkStreaming {
 
     source.print("source:>>>")
 
-    HBaseRequest(source).requestOrdered[(String,Boolean)](x => {
-      new HBaseQuery("person", new Get(x.getBytes()))
-    }, timeout = 5000, resultFunc = (a, r) => {
-      a -> !r.isEmpty
-    }).print(" check.... ")
-
+    HBaseRequest(source)
+      .requestOrdered[(String, Boolean)](x => {
+        new HBaseQuery("person", new Get(x.getBytes()))
+      }, timeout = 5000, resultFunc = (a, r) => {
+        a -> !r.isEmpty
+      })
+      .print(" check.... ")
 
   }
 

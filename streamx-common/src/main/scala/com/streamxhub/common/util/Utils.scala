@@ -31,19 +31,28 @@ object Utils {
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
-  @throws[IOException] def checkJarFile(jar: URL): Unit = {
+  @throws[IOException]
+  def checkJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x
       case Failure(_) => throw new IOException(s"JAR file path is invalid $jar")
     }
     if (!jarFile.exists) {
-      throw new IOException(s"JAR file does not exist '${jarFile.getAbsolutePath}'")
+      throw new IOException(
+        s"JAR file does not exist '${jarFile.getAbsolutePath}'"
+      )
     }
     if (!jarFile.canRead) {
-      throw new IOException(s"JAR file can't be read '${jarFile.getAbsolutePath}'")
+      throw new IOException(
+        s"JAR file can't be read '${jarFile.getAbsolutePath}'"
+      )
     }
     Try(new JarFile(jarFile)) match {
-      case Failure(e) => throw new IOException(s"Error while opening jar file '${jarFile.getAbsolutePath}'", e)
+      case Failure(e) =>
+        throw new IOException(
+          s"Error while opening jar file '${jarFile.getAbsolutePath}'",
+          e
+        )
       case Success(x) => x.close()
     }
   }
@@ -60,7 +69,8 @@ object Utils {
   }
 
   def main(args: Array[String]): Unit = {
-    val jar = "/Users/benjobs/Workspace/deploy/workspace/app/1/flink-quickstart-1.0/flink-quickstart-1.0.jar"
+    val jar =
+      "/Users/benjobs/Workspace/deploy/workspace/app/1/flink-quickstart-1.0/flink-quickstart-1.0.jar"
     val manifest = getJarManifest(new File(jar))
     println(manifest.getMainAttributes.getValue("Main-Class"))
   }

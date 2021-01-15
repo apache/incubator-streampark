@@ -20,20 +20,19 @@
  */
 package com.streamxhub.flink.core.java.function;
 
-import com.mongodb.client.MongoCursor;
 import org.bson.Document;
 
-/**
- * @author benjobs
- */
+import com.mongodb.client.MongoCursor;
+
+/** @author benjobs */
 @FunctionalInterface
 public interface MongoResultFunction<T> {
 
-    /**
-     * 处理查询结果
-     * @param cursor
-     * @return
-     */
-    Iterable<T> result(MongoCursor<Document> cursor);
-
+  /**
+   * 处理查询结果
+   *
+   * @param cursor
+   * @return
+   */
+  Iterable<T> result(MongoCursor<Document> cursor);
 }
