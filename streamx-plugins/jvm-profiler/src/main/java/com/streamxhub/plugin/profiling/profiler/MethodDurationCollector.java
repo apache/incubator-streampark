@@ -23,17 +23,16 @@ package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public class MethodDurationCollector {
-    private ClassAndMethodLongMetricBuffer buffer;
+  private ClassAndMethodLongMetricBuffer buffer;
 
-    public MethodDurationCollector(ClassAndMethodLongMetricBuffer buffer) {
-        this.buffer = buffer;
-    }
+  public MethodDurationCollector(ClassAndMethodLongMetricBuffer buffer) {
+    this.buffer = buffer;
+  }
 
-    public void collectLongMetric(String className, String methodName, String metricName, long metricValue) {
-        buffer.appendValue(className, methodName, metricName, metricValue);
-    }
+  public void collectLongMetric(
+      String className, String methodName, String metricName, long metricValue) {
+    buffer.appendValue(className, methodName, metricName, metricValue);
+  }
 }

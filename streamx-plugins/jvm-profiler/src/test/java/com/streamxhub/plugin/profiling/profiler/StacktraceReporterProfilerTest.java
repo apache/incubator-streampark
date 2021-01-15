@@ -21,92 +21,99 @@
 
 package com.streamxhub.plugin.profiling.profiler;
 
-import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.util.ClassAndMethod;
-import com.streamxhub.plugin.profiling.util.Stacktrace;
-import com.streamxhub.plugin.profiling.util.StacktraceMetricBuffer;
-import org.junit.Assert;
-import org.junit.Test;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.streamxhub.plugin.profiling.Reporter;
+import com.streamxhub.plugin.profiling.util.ClassAndMethod;
+import com.streamxhub.plugin.profiling.util.Stacktrace;
+import com.streamxhub.plugin.profiling.util.StacktraceMetricBuffer;
+
 public class StacktraceReporterProfilerTest {
-    @Test
-    public void profile() {
-        final List<String> nameList = new ArrayList<>();
-        final List<Map<String, Object>> metricList = new ArrayList<>();
+  @Test
+  public void profile() {
+    final List<String> nameList = new ArrayList<>();
+    final List<Map<String, Object>> metricList = new ArrayList<>();
 
-        Reporter reporter = new Reporter() {
-            @Override
-            public void report(String profilerName, Map<String, Object> metrics) {
-                nameList.add(profilerName);
-                metricList.add(metrics);
-            }
+    Reporter reporter =
+        new Reporter() {
+          @Override
+          public void report(String profilerName, Map<String, Object> metrics) {
+            nameList.add(profilerName);
+            metricList.add(metrics);
+          }
 
-            @Override
-            public void close() {
-            }
+          @Override
+          public void close() {}
         };
 
-        long epochMillis1 = System.currentTimeMillis();
+    long epochMillis1 = System.currentTimeMillis();
 
-        StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
-        StacktraceReporterProfiler profiler = new StacktraceReporterProfiler(buffer, reporter);
+    StacktraceMetricBuffer buffer = new StacktraceMetricBuffer();
+    StacktraceReporterProfiler profiler = new StacktraceReporterProfiler(buffer, reporter);
 
-        profiler.setInterval(123);
-        Assert.assertEquals(123L, profiler.getInterval());
+    profiler.setInterval(123);
+    Assert.assertEquals(123L, profiler.getInterval());
 
-        profiler.profile();
-        Assert.assertEquals(0, nameList.size());
-        Assert.assertEquals(0, metricList.size());
+    profiler.profile();
+    Assert.assertEquals(0, nameList.size());
+    Assert.assertEquals(0, metricList.size());
 
-        Stacktrace stacktrace = new Stacktrace();
-        buffer.appendValue(stacktrace);
+    Stacktrace stacktrace = new Stacktrace();
+    buffer.appendValue(stacktrace);
 
-        profiler.profile();
+    profiler.profile();
 
-        long epochMillis2 = System.currentTimeMillis();
+    long epochMillis2 = System.currentTimeMillis();
 
-        Assert.assertEquals(1, nameList.size());
-        Assert.assertEquals("Stacktrace", nameList.get(0));
+    Assert.assertEquals(1, nameList.size());
+    Assert.assertEquals("Stacktrace", nameList.get(0));
 
-        Assert.assertEquals(1, metricList.size());
+    Assert.assertEquals(1, metricList.size());
 
-        Map<String, Object> map = metricList.get(0);
+    Map<String, Object> map = metricList.get(0);
 
-        Assert.assertTrue((long) map.get("startEpoch") >= epochMillis1);
-        Assert.assertTrue((long) map.get("startEpoch") <= epochMillis2);
-        Assert.assertTrue((long) map.get("endEpoch") >= epochMillis1);
-        Assert.assertTrue((long) map.get("endEpoch") <= epochMillis2);
-        Assert.assertTrue((long) map.get("endEpoch") >= (long) map.get("startEpoch"));
-        Assert.assertEquals(1L, (long) map.get("count"));
-        Assert.assertNull(map.get("threadName"));
-        Assert.assertNull(map.get("threadState"));
-        Assert.assertArrayEquals(new String[0], ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));
+    Assert.assertTrue((long) map.get("startEpoch") >= epochMillis1);
+    Assert.assertTrue((long) map.get("startEpoch") <= epochMillis2);
+    Assert.assertTrue((long) map.get("endEpoch") >= epochMillis1);
+    Assert.assertTrue((long) map.get("endEpoch") <= epochMillis2);
+    Assert.assertTrue((long) map.get("endEpoch") >= (long) map.get("startEpoch"));
+    Assert.assertEquals(1L, (long) map.get("count"));
+    Assert.assertNull(map.get("threadName"));
+    Assert.assertNull(map.get("threadState"));
+    Assert.assertArrayEquals(
+        new String[0], ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));
 
-        stacktrace = new Stacktrace();
-        stacktrace.setThreadName("thread1");
-        stacktrace.setThreadState("RUNNING");
-        stacktrace.setStack(new ClassAndMethod[]{new ClassAndMethod("class1", "method1"), new ClassAndMethod("class2", "method2")});
+    stacktrace = new Stacktrace();
+    stacktrace.setThreadName("thread1");
+    stacktrace.setThreadState("RUNNING");
+    stacktrace.setStack(
+        new ClassAndMethod[] {
+          new ClassAndMethod("class1", "method1"), new ClassAndMethod("class2", "method2")
+        });
 
-        buffer.appendValue(stacktrace);
-        buffer.appendValue(stacktrace);
+    buffer.appendValue(stacktrace);
+    buffer.appendValue(stacktrace);
 
-        profiler.profile();
+    profiler.profile();
 
-        Assert.assertEquals(2, nameList.size());
-        Assert.assertEquals("Stacktrace", nameList.get(0));
-        Assert.assertEquals("Stacktrace", nameList.get(1));
+    Assert.assertEquals(2, nameList.size());
+    Assert.assertEquals("Stacktrace", nameList.get(0));
+    Assert.assertEquals("Stacktrace", nameList.get(1));
 
-        Assert.assertEquals(2, metricList.size());
+    Assert.assertEquals(2, metricList.size());
 
-        map = metricList.get(1);
+    map = metricList.get(1);
 
-        Assert.assertEquals(2L, (long) map.get("count"));
-        Assert.assertEquals("thread1", map.get("threadName"));
-        Assert.assertEquals("RUNNING", map.get("threadState"));
-        Assert.assertArrayEquals(new String[]{"class1.method1", "class2.method2"}, ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));
-    }
+    Assert.assertEquals(2L, (long) map.get("count"));
+    Assert.assertEquals("thread1", map.get("threadName"));
+    Assert.assertEquals("RUNNING", map.get("threadState"));
+    Assert.assertArrayEquals(
+        new String[] {"class1.method1", "class2.method2"},
+        ((ArrayList<String>) map.get("stacktrace")).toArray(new String[0]));
+  }
 }
