@@ -20,12 +20,13 @@
  */
 package com.streamxhub.common.conf
 
-object ConfigConst {
 
+object ConfigConst {
   /**
-    *
-    * about parameter...
-    */
+   *
+   * about parameter...
+   */
+
   val KEY_APP_HOME = "app.home"
 
   val KEY_HOST = "host"
@@ -41,8 +42,8 @@ object ConfigConst {
   val KEY_TIMEOUT = "timeout"
 
   /**
-    * sign....
-    */
+   * sign....
+   */
   val SIGN_COLON = ":"
 
   val SIGN_SEMICOLON = ";"
@@ -59,24 +60,20 @@ object ConfigConst {
 
   val KEY_SPARK_DEBUG_CONF = "spark.debug.conf"
 
-  val KEY_SPARK_MAIN_CLASS = "spark.main.class"
+  val KEY_SPARK_MAIN_CLASS="spark.main.class"
 
-  val KEY_SPARK_APP_NAME = "spark.app.name"
+  val KEY_SPARK_APP_NAME="spark.app.name"
 
-  val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
+  val KEY_SPARK_BATCH_DURATION ="spark.batch.duration"
 
   // flink
-  def KEY_FLINK_CONF(prefix: String = null): String =
-    if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
+  def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
 
-  def KEY_FLINK_SQL(prefix: String = null): String =
-    if (prefix == null) "flink.sql" else s"${prefix}flink.sql"
+  def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "flink.sql" else s"${prefix}flink.sql"
 
-  def KEY_FLINK_HOME(prefix: String = null): String =
-    if (prefix == null) "flink.home" else s"${prefix}flink.home"
+  def KEY_FLINK_HOME(prefix: String = null): String = if (prefix == null) "flink.home" else s"${prefix}flink.home"
 
-  def KEY_APP_NAME(prefix: String = null): String =
-    if (prefix == null) "app.name" else s"${prefix}app.name"
+  def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
 
   val KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX = "flink.deployment.property."
 
@@ -101,8 +98,7 @@ object ConfigConst {
 
   val KEY_FLINK_CHECKPOINTS_MAX_CONCURRENT = "flink.checkpoints.maxConcurrent"
 
-  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN =
-    "flink.checkpoints.minPauseBetween"
+  val KEY_FLINK_CHECKPOINTS_MIN_PAUSEBETWEEN = "flink.checkpoints.minPauseBetween"
 
   //---state---
 
@@ -118,26 +114,23 @@ object ConfigConst {
 
   val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
 
+
   //---restart-strategy---
 
   val KEY_FLINK_RESTART_STRATEGY = "restart-strategy"
 
-  val KEY_FLINK_RESTART_FAILURE_PER_INTERVAL =
-    "restart-strategy.failure-rate.max-failures-per-interval"
+  val KEY_FLINK_RESTART_FAILURE_PER_INTERVAL = "restart-strategy.failure-rate.max-failures-per-interval"
 
-  val KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL =
-    "restart-strategy.failure-rate.failure-rate-interval"
+  val KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL = "restart-strategy.failure-rate.failure-rate-interval"
 
-  val KEY_FLINK_RESTART_FAILURE_RATE_DELAY =
-    "restart-strategy.failure-rate.delay"
+  val KEY_FLINK_RESTART_FAILURE_RATE_DELAY = "restart-strategy.failure-rate.delay"
 
   val KEY_FLINK_RESTART_ATTEMPTS = "restart-strategy.fixed-delay.attempts"
 
   val KEY_FLINK_RESTART_DELAY = "restart-strategy.fixed-delay.delay"
 
   // ---watermark---
-  val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC =
-    "flink.watermark.time.characteristic"
+  val KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC = "flink.watermark.time.characteristic"
 
   val KEY_FLINK_WATERMARK_INTERVAL = "flink.watermark.interval"
 
@@ -151,8 +144,9 @@ object ConfigConst {
   val KEY_FLINK_TABLE_DATABASE = "flink.table.database"
 
   /**
-    * about config Kafka
-    */
+   * about config Kafka
+   */
+
   val KAFKA_SINK_PREFIX = "kafka.sink."
 
   val KAFKA_SOURCE_PREFIX = "kafka.source."
@@ -176,8 +170,8 @@ object ConfigConst {
   val KEY_ALIAS = "alias"
 
   /**
-    * about config jdbc...
-    */
+   * about config jdbc...
+   */
   val MYSQL_PREFIX = "mysql."
   val KEY_JDBC_DRIVER = "driverClassName"
   val KEY_JDBC_DATABASE = "database"
@@ -188,10 +182,9 @@ object ConfigConst {
   val DEFAULT_JDBC_INSERT_BATCH = 1
 
   val MONGO_PREFIX = "mongodb."
-
   /**
-    * about config HBase
-    */
+   * about config HBase
+   */
   val HBASE_PREFIX = "hbase."
 
   val KEY_HBASE_COMMIT_BATCH = "hbase.commit.batch"
@@ -205,22 +198,21 @@ object ConfigConst {
   val DEFAULT_HBASE_WRITE_SIZE = 1024 * 1024 * 10
 
   /**
-    * about influx
-    */
+   * about influx
+   */
   val INFLUX_PREFIX = "influx."
   val KEY_INFLUX_ACTIONS = "actions"
   val KEY_INFLUX_FLUSH_DURATION = "flush.duration"
-
   /**
-    * about clickhouse
-    */
+   * about clickhouse
+   */
   val CLICKHOUSE_SINK_PREFIX = "clickhouse.sink"
 
   val HTTP_SINK_PREFIX = "http.sink"
 
   /**
-    * sink threshold and failover...
-    */
+   * sink threshold and failover...
+   */
   val KEY_SINK_THRESHOLD_BUFFER_SIZE: String = "threshold.bufferSize"
   val KEY_SINK_THRESHOLD_NUM_WRITERS: String = "threshold.numWriters"
   val KEY_SINK_THRESHOLD_QUEUE_CAPACITY: String = "threshold.queueCapacity"
@@ -238,12 +230,11 @@ object ConfigConst {
   val DEFAULT_SINK_THRESHOLD_DELAY_TIME = 1000L
   val DEFAULT_SINK_THRESHOLD_BUFFER_SIZE = 1000
   val DEFAULT_SINK_THRESHOLD_RETRIES = 3
-  val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int =
-    Runtime.getRuntime.availableProcessors()
+  val DEFAULT_SINK_THRESHOLD_NUM_WRITERS: Int = Runtime.getRuntime.availableProcessors()
 
   /**
-    * about config es
-    */
+   * about config es
+   */
   val ES_PREFIX = "es.sink."
 
   val KEY_ES_AUTH_USER = "es.auth.user"
@@ -318,3 +309,6 @@ object ConfigConst {
        |""".stripMargin
 
 }
+
+
+

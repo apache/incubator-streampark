@@ -11,6 +11,7 @@ import java.util.Properties
 import scala.collection.mutable
 import scala.util.Try
 
+
 /**
   * Offset 管理
   */
@@ -20,24 +21,19 @@ trait Offset extends Logger with Serializable {
 
   lazy val storeType: String = storeParams.getOrElse("type", "none")
 
-  lazy val storeParams: Map[String, String] =
-    sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+  lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
 
-  implicit def toProperty(map: Map[String, String]): Properties = {
-    require(map != null)
+  implicit def toProperty(map:Map[String,String]):Properties = {
+    require(map!=null)
     val prop = new Properties()
-    map.foreach((a) => prop.setProperty(a._1, a._2))
+    map.foreach((a) => prop.setProperty(a._1,a._2))
     prop
   }
 
-  lazy val reset: String =
-    sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
+  lazy val reset: String = sparkConf.get("spark.source.kafka.consume.auto.offset.reset", "largest")
 
-  lazy val (host, port) = sparkConf
-    .get("spark.source.kafka.consume.bootstrap.servers")
-    .split(",")
-    .head
-    .split(":") match {
+  lazy val (host, port) = sparkConf.get("spark.source.kafka.consume.bootstrap.servers")
+    .split(",").head.split(":") match {
     case Array(h, p) => (h, p.toInt)
   }
 
@@ -75,14 +71,14 @@ trait Offset extends Logger with Serializable {
     */
   def key(groupId: String, topic: String): String = s"$groupId#$topic"
 
+
   /**
     * 获取最旧的Offsets
     *
     * @param topics
     * @return
     */
-  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] =
-    getOffsets(topics, OffsetRequest.EarliestTime)
+  def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.EarliestTime)
 
   /**
     * 获取最新的Offset
@@ -90,24 +86,15 @@ trait Offset extends Logger with Serializable {
     * @param topics
     * @return
     */
-  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] =
-    getOffsets(topics, OffsetRequest.LatestTime)
+  def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.LatestTime)
 
-  private def getLeaders(
-      topics: Seq[String]
-  ): Map[(String, Int), Seq[TopicPartition]] = {
-    val consumer = new SimpleConsumer(
-      host,
-      port,
-      100000,
-      64 * 1024,
-      s"leaderLookup-${System.currentTimeMillis()}"
-    )
+
+  private def getLeaders(topics: Seq[String]): Map[(String, Int), Seq[TopicPartition]] = {
+    val consumer = new SimpleConsumer(host, port, 100000, 64 * 1024, s"leaderLookup-${System.currentTimeMillis()}")
     val req = new TopicMetadataRequest(topics, 0)
     val resp = consumer.send(req)
 
-    val leaderAndTopicPartition =
-      new mutable.HashMap[(String, Int), Seq[TopicPartition]]()
+    val leaderAndTopicPartition = new mutable.HashMap[(String, Int), Seq[TopicPartition]]()
 
     resp.topicsMetadata.foreach((metadata: TopicMetadata) => {
       val topic = metadata.topic
@@ -116,21 +103,10 @@ trait Offset extends Logger with Serializable {
           case Some(endPoint) =>
             val hp = endPoint.host -> endPoint.port
             leaderAndTopicPartition.get(hp) match {
-              case Some(taps) =>
-                leaderAndTopicPartition.put(
-                  hp,
-                  taps :+ new TopicPartition(topic, partition.partitionId)
-                )
-              case None =>
-                leaderAndTopicPartition.put(
-                  hp,
-                  Seq(new TopicPartition(topic, partition.partitionId))
-                )
+              case Some(taps) => leaderAndTopicPartition.put(hp, taps :+ new TopicPartition(topic, partition.partitionId))
+              case None => leaderAndTopicPartition.put(hp, Seq(new TopicPartition(topic, partition.partitionId)))
             }
-          case None =>
-            throw new SparkException(
-              s"get topic[$topic] partition[${partition.partitionId}] leader failed"
-            )
+          case None => throw new SparkException(s"get topic[$topic] partition[${partition.partitionId}] leader failed")
         }
       })
     })
@@ -146,32 +122,15 @@ trait Offset extends Logger with Serializable {
     * @param time
     * @return
     */
-  private def getOffsets(
-      topics: Seq[String],
-      time: Long
-  ): Map[TopicPartition, Long] = {
+  private def getOffsets(topics: Seq[String], time: Long): Map[TopicPartition, Long] = {
     val leaders = getLeaders(topics)
     val offsetMap = new mutable.HashMap[TopicPartition, Long]()
 
     leaders.foreach {
       case ((leaderHost, _port), taps) =>
-        val consumer = new SimpleConsumer(
-          leaderHost,
-          _port,
-          100000,
-          64 * 1024,
-          s"offsetLookup-${System.currentTimeMillis()}"
-        )
+        val consumer = new SimpleConsumer(leaderHost, _port, 100000, 64 * 1024, s"offsetLookup-${System.currentTimeMillis()}")
 
-        val requestInfo = taps
-          .map(
-            x =>
-              TopicAndPartition(x.topic(), x.partition()) -> PartitionOffsetRequestInfo(
-                time,
-                1
-              )
-          )
-          .toMap
+        val requestInfo = taps.map(x => TopicAndPartition(x.topic(), x.partition()) -> PartitionOffsetRequestInfo(time, 1)).toMap
 
         val offsetRequest = new OffsetRequest(requestInfo)
 
@@ -181,16 +140,11 @@ trait Offset extends Logger with Serializable {
           logError(s"get topic offset failed offsetResponse $offsetResponse")
           throw new SparkException(s"get topic offset failed $leaderHost $taps")
         }
-        offsetResponse.offsetsGroupedByTopic.values
-          .foreach(partitionToResponse => {
-            partitionToResponse.foreach {
-              case (tap, por) =>
-                offsetMap.put(
-                  new TopicPartition(tap.topic, tap.partition),
-                  por.offsets.head
-                )
-            }
-          })
+        offsetResponse.offsetsGroupedByTopic.values.foreach(partitionToResponse => {
+          partitionToResponse.foreach {
+            case (tap, por) => offsetMap.put(new TopicPartition(tap.topic, tap.partition), por.offsets.head)
+          }
+        })
         Try(consumer.close())
     }
     offsetMap.toMap

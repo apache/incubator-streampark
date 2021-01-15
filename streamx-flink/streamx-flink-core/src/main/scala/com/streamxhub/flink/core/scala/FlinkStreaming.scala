@@ -23,57 +23,47 @@ package com.streamxhub.flink.core.scala
 import com.streamxhub.common.conf.ConfigConst._
 import com.streamxhub.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.flink.core.scala.ext.DataStreamExt
-import com.streamxhub.flink.core.scala.util.{
-  FlinkStreamingInitializer,
-  StreamEnvConfig
-}
+import com.streamxhub.flink.core.scala.util.{FlinkStreamingInitializer, StreamEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.functions.ProcessFunction
 import org.apache.flink.streaming.api.scala._
 
+
 /**
-  * @author benjobs
-  * @param parameter
-  * @param environment
-  */
-class StreamingContext(
-    val parameter: ParameterTool,
-    private val environment: StreamExecutionEnvironment
-) extends StreamExecutionEnvironment(environment.getJavaEnv) {
+ * @author benjobs
+ * @param parameter
+ * @param environment
+ */
+class StreamingContext(val parameter: ParameterTool, private val environment: StreamExecutionEnvironment) extends StreamExecutionEnvironment(environment.getJavaEnv) {
 
   /**
-    * for scala
-    *
-    * @param args
-    */
-  def this(args: (ParameterTool, StreamExecutionEnvironment)) =
-    this(args._1, args._2)
+   * for scala
+   *
+   * @param args
+   */
+  def this(args: (ParameterTool, StreamExecutionEnvironment)) = this(args._1, args._2)
 
   /**
-    * for Java
-    *
-    * @param args
-    */
-  def this(args: StreamEnvConfig) =
-    this(FlinkStreamingInitializer.initJavaStream(args))
+   * for Java
+   *
+   * @param args
+   */
+  def this(args: StreamEnvConfig) = this(FlinkStreamingInitializer.initJavaStream(args))
 
   /**
-    * 推荐使用该Api启动任务...
-    *
-    * @return
-    */
+   * 推荐使用该Api启动任务...
+   *
+   * @return
+   */
   def start(): JobExecutionResult = execute()
 
   @Deprecated override def execute(): JobExecutionResult = {
-    val appName = (
-      parameter.get(KEY_APP_NAME(), null),
-      parameter.get(KEY_FLINK_APP_NAME, null)
-    ) match {
-      case (appName: String, _)    => appName
+    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+      case (appName: String, _) => appName
       case (null, appName: String) => appName
-      case _                       => ""
+      case _ => ""
     }
     execute(appName)
   }
@@ -85,16 +75,12 @@ class StreamingContext(
   }
 }
 
+
 trait FlinkStreaming extends Logger {
 
-  final implicit def streamExt[T: TypeInformation](
-      dataStream: DataStream[T]
-  ): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
+  final implicit def streamExt[T: TypeInformation](dataStream: DataStream[T]): DataStreamExt.DataStream[T] = new DataStreamExt.DataStream[T](dataStream)
 
-  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](
-      ctx: ProcessFunction[IN, OUT]#Context
-  ): DataStreamExt.ProcessFunction[IN, OUT] =
-    new DataStreamExt.ProcessFunction[IN, OUT](ctx)
+  final implicit def procFuncExt[IN: TypeInformation, OUT: TypeInformation](ctx: ProcessFunction[IN, OUT]#Context): DataStreamExt.ProcessFunction[IN, OUT] = new DataStreamExt.ProcessFunction[IN, OUT](ctx)
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
@@ -104,25 +90,23 @@ trait FlinkStreaming extends Logger {
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
-    context = new StreamingContext(
-      FlinkStreamingInitializer.initStream(args, config)
-    )
+    context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
     beforeStart(context)
     handle(context)
     jobExecutionResult = context.start()
   }
 
   /**
-    * 用户可覆盖次方法...
-    *
-    */
+   * 用户可覆盖次方法...
+   *
+   */
   def beforeStart(context: StreamingContext): Unit = {}
 
-  def config(
-      env: StreamExecutionEnvironment,
-      parameter: ParameterTool
-  ): Unit = {}
+  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(context: StreamingContext): Unit
 
 }
+
+
+

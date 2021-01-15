@@ -18,13 +18,12 @@ object KafkaSinkApp extends FlinkStreaming {
 
 }
 
-case class Behavior(
-    user_id: String,
-    item_id: Long,
-    category_id: Long,
-    behavior: String,
-    ts: Long
-) {
+
+case class Behavior(user_id: String,
+                    item_id: Long,
+                    category_id: Long,
+                    behavior: String,
+                    ts: Long) {
   override def toString: String = {
     s"""
        |{
@@ -37,6 +36,7 @@ case class Behavior(
        |""".stripMargin
   }
 }
+
 
 class BehaviorSource extends SourceFunction[Behavior] {
   private[this] var isRunning = true
@@ -54,15 +54,11 @@ class BehaviorSource extends SourceFunction[Behavior] {
       val item_id = random.nextInt(100)
       val category_id = random.nextInt(20)
       val behavior = seq(random.nextInt(5))
-      val order = Behavior(
-        user_id.toString,
-        item_id,
-        category_id,
-        behavior,
-        System.currentTimeMillis()
-      )
+      val order = Behavior(user_id.toString, item_id, category_id, behavior, System.currentTimeMillis())
       ctx.collect(order)
     }
   }
 
 }
+
+

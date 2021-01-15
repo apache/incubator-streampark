@@ -27,10 +27,7 @@ import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.datastream.DataStreamSink
-import org.apache.flink.streaming.api.functions.sink.{
-  RichSinkFunction,
-  SinkFunction
-}
+import org.apache.flink.streaming.api.functions.sink.{RichSinkFunction, SinkFunction}
 import org.apache.flink.streaming.api.scala.DataStream
 import org.apache.hadoop.hbase.TableName
 import org.apache.hadoop.hbase.client._
@@ -45,41 +42,29 @@ import scala.collection.mutable.ArrayBuffer
 
 object HBaseSink {
 
-  def apply(
-      @(transient @param) ctx: StreamingContext,
-      property: Properties = new Properties(),
-      parallelism: Int = 0,
-      name: String = null,
-      uid: String = null
-  )(implicit alias: String = ""): HBaseSink =
-    new HBaseSink(ctx, property, parallelism, name, uid)
+  def apply(@(transient@param) ctx: StreamingContext,
+            property: Properties = new Properties(),
+            parallelism: Int = 0,
+            name: String = null,
+            uid: String = null)(implicit alias: String = ""): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
 
 }
 
-class HBaseSink(
-    @(transient @param) ctx: StreamingContext,
-    property: Properties = new Properties(),
-    parallelism: Int = 0,
-    name: String = null,
-    uid: String = null
-)(implicit alias: String = "")
-    extends Sink
-    with Logger {
+class HBaseSink(@(transient@param) ctx: StreamingContext,
+                property: Properties = new Properties(),
+                parallelism: Int = 0,
+                name: String = null,
+                uid: String = null)(implicit alias: String = "") extends Sink with Logger {
 
   /**
-    * @param stream
-    * @param tableName
-    * @param fun
-    * @tparam T
-    * @return
-    */
-  def sink[T](stream: DataStream[T], tableName: String)(
-      implicit fun: T => JIter[Mutation]
-  ): DataStreamSink[T] = {
-    implicit val prop: Properties =
-      ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(
-        alias
-      )
+   * @param stream
+   * @param tableName
+   * @param fun
+   * @tparam T
+   * @return
+   */
+  def sink[T](stream: DataStream[T], tableName: String)(implicit fun: T => JIter[Mutation]): DataStreamSink[T] = {
+    implicit val prop: Properties = ConfigUtils.getConf(ctx.parameter.toMap, HBASE_PREFIX, HBASE_PREFIX)(alias)
     Utils.copyProperties(property, prop)
     val sinkFun = new HBaseSinkFunction[T](tableName, fun)
     val sink = stream.addSink(sinkFun)
@@ -88,10 +73,7 @@ class HBaseSink(
 
 }
 
-class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
-    implicit prop: Properties
-) extends RichSinkFunction[T]
-    with Logger {
+class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(implicit prop: Properties) extends RichSinkFunction[T] with Logger {
 
   private var connection: Connection = _
   private var table: Table = _
@@ -100,10 +82,8 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
   private val scheduled: AtomicBoolean = new AtomicBoolean(false)
   private var timestamp = 0L
 
-  private val commitBatch =
-    prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
-  private val writeBufferSize =
-    prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
+  private val commitBatch = prop.getOrElse(KEY_HBASE_COMMIT_BATCH, s"$DEFAULT_HBASE_COMMIT_BATCH").toInt
+  private val writeBufferSize = prop.getOrElse(KEY_HBASE_WRITE_SIZE, s"$DEFAULT_HBASE_WRITE_SIZE").toLong
 
   private val mutations = new ArrayBuffer[Mutation]()
   private val putArray = new ArrayBuffer[Put]()
@@ -117,13 +97,9 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
     val mutatorParam = new BufferedMutatorParams(tableName)
       .writeBufferSize(writeBufferSize)
       .listener(new BufferedMutator.ExceptionListener {
-        override def onException(
-            exception: RetriesExhaustedWithDetailsException,
-            mutator: BufferedMutator
-        ): Unit = {
+        override def onException(exception: RetriesExhaustedWithDetailsException, mutator: BufferedMutator): Unit = {
           for (i <- 0.until(exception.getNumExceptions)) {
-            logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception
-              .getRow(i)},error:${exception.getLocalizedMessage}")
+            logger.error(s"[StreamX] HBaseSink Failed to sent put ${exception.getRow(i)},error:${exception.getLocalizedMessage}")
           }
         }
       })
@@ -134,21 +110,20 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
   override def invoke(value: T, context: SinkFunction.Context): Unit = {
     fun(value).foreach {
       case put: Put => putArray += put
-      case other    => mutations += other
+      case other => mutations += other
     }
 
     offset.incrementAndGet() % commitBatch match {
       case 0 => execBatch()
-      case _ =>
-        if (!scheduled.get()) {
-          scheduled.set(true)
-          service.schedule(new Runnable {
-            override def run(): Unit = {
-              scheduled.set(false)
-              execBatch()
-            }
-          }, 10, TimeUnit.SECONDS)
-        }
+      case _ => if (!scheduled.get()) {
+        scheduled.set(true)
+        service.schedule(new Runnable {
+          override def run(): Unit = {
+            scheduled.set(false)
+            execBatch()
+          }
+        }, 10, TimeUnit.SECONDS)
+      }
     }
 
   }
@@ -174,9 +149,7 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
       //mutation...
       if (mutations.nonEmpty) {
         table.batch(mutations, new Array[AnyRef](mutations.length))
-        logInfo(
-          s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS"
-        )
+        logInfo(s"HBaseSink batchSize:${mutations.length} use ${System.currentTimeMillis() - start} MS")
         mutations.clear()
       }
       offset.set(0L)
@@ -186,22 +159,15 @@ class HBaseSinkFunction[T](tabName: String, fun: T => JIter[Mutation])(
 
 }
 
-class HBaseOutputFormat[T: TypeInformation](
-    tabName: String,
-    fun: T => JIter[Mutation]
-)(implicit prop: Properties)
-    extends RichOutputFormat[T]
-    with Logger {
+class HBaseOutputFormat[T: TypeInformation](tabName: String, fun: T => JIter[Mutation])(implicit prop: Properties) extends RichOutputFormat[T] with Logger {
 
   val sinkFunction = new HBaseSinkFunction[T](tabName, fun)
 
   var configuration: Configuration = _
 
-  override def configure(configuration: Configuration): Unit =
-    this.configuration = configuration
+  override def configure(configuration: Configuration): Unit = this.configuration = configuration
 
-  override def open(taskNumber: Int, numTasks: Int): Unit =
-    sinkFunction.open(this.configuration)
+  override def open(taskNumber: Int, numTasks: Int): Unit = sinkFunction.open(this.configuration)
 
   override def writeRecord(record: T): Unit = sinkFunction.invoke(record, null)
 

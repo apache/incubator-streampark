@@ -51,11 +51,11 @@ object ZooKeeperUtils {
           // curator链接zookeeper的策略:RetryUntilElapsed maxElapsedTimeMs:最大重试时间 sleepMsBetweenRetries:每次重试间隔 重试时间超过maxElapsedTimeMs后，就不再重试
           // val retryPolicy:RetryPolicy = new RetryUntilElapsed(2000, 3000)
           val retryPolicy: RetryPolicy = new RetryNTimes(5, 2000)
-          val client = CuratorFrameworkFactory.builder
+          val client = CuratorFrameworkFactory
+            .builder
             .connectString(url)
             .retryPolicy(retryPolicy)
-            .connectionTimeoutMs(2000)
-            .build
+            .connectionTimeoutMs(2000).build
           client.start()
           map += url -> client
           client
@@ -78,16 +78,11 @@ object ZooKeeperUtils {
     val stat = client.checkExists.forPath(path)
     stat match {
       case null => List.empty[String]
-      case _    => client.getChildren.forPath(path).asScala.toList
+      case _ => client.getChildren.forPath(path).asScala.toList
     }
   }
 
-  def create(
-      path: String,
-      value: String = null,
-      url: String = connect,
-      persistent: Boolean = false
-  ): Boolean = {
+  def create(path: String, value: String = null, url: String = connect, persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
@@ -95,15 +90,10 @@ object ZooKeeperUtils {
         case null =>
           val data = value match {
             case null | "" => Array.empty[Byte]
-            case _         => value.getBytes(StandardCharsets.UTF_8)
+            case _ => value.getBytes(StandardCharsets.UTF_8)
           }
-          val mode =
-            if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
-          val opResult = client
-            .create()
-            .creatingParentsIfNeeded()
-            .withMode(mode)
-            .forPath(path, data)
+          val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
+          val opResult = client.create().creatingParentsIfNeeded().withMode(mode).forPath(path, data)
           path == opResult
         case _ => false
       }
@@ -114,27 +104,17 @@ object ZooKeeperUtils {
     }
   }
 
-  def update(
-      path: String,
-      value: String,
-      url: String = connect,
-      persistent: Boolean = false
-  ): Boolean = {
+  def update(path: String, value: String, url: String = connect, persistent: Boolean = false): Boolean = {
     try {
       val client = getClient(url)
       val stat = client.checkExists.forPath(path)
       stat match {
         case null =>
-          val mode =
-            if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
-          val opResult = client.create.creatingParentsIfNeeded
-            .withMode(mode)
-            .forPath(path, value.getBytes(StandardCharsets.UTF_8))
+          val mode = if (persistent) CreateMode.PERSISTENT else CreateMode.EPHEMERAL
+          val opResult = client.create.creatingParentsIfNeeded.withMode(mode).forPath(path, value.getBytes(StandardCharsets.UTF_8))
           path == opResult
         case _ =>
-          val opResult = client
-            .setData()
-            .forPath(path, value.getBytes(StandardCharsets.UTF_8))
+          val opResult = client.setData().forPath(path, value.getBytes(StandardCharsets.UTF_8))
           opResult != null
       }
     } catch {
@@ -150,7 +130,7 @@ object ZooKeeperUtils {
       val stat = client.checkExists.forPath(path)
       stat match {
         case null =>
-        case _    => client.delete.deletingChildrenIfNeeded().forPath(path)
+        case _ => client.delete.deletingChildrenIfNeeded().forPath(path)
       }
     } catch {
       case e: Exception => e.printStackTrace()
@@ -163,7 +143,7 @@ object ZooKeeperUtils {
       val stat = client.checkExists.forPath(path)
       stat match {
         case null => null
-        case _    => new String(client.getData.forPath(path))
+        case _ => new String(client.getData.forPath(path))
       }
     } catch {
       case e: Exception =>

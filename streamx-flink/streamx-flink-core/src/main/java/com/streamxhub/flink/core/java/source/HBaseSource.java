@@ -20,29 +20,28 @@
  */
 package com.streamxhub.flink.core.java.source;
 
-import java.util.Properties;
-
-import org.apache.flink.streaming.api.datastream.DataStreamSource;
-
 import com.streamxhub.flink.core.java.function.HBaseQueryFunction;
 import com.streamxhub.flink.core.java.function.HBaseResultFunction;
 import com.streamxhub.flink.core.scala.StreamingContext;
 import com.streamxhub.flink.core.scala.source.HBaseSourceFunction;
+import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
-/** @author benjobs */
+import java.util.Properties;
+
+/**
+ * @author benjobs
+ */
 public class HBaseSource<T> {
-  private final StreamingContext context;
-  private final Properties property;
+    private final StreamingContext context;
+    private final Properties property;
 
-  public HBaseSource(StreamingContext context, Properties property) {
-    this.context = context;
-    this.property = property;
-  }
+    public HBaseSource(StreamingContext context, Properties property) {
+        this.context = context;
+        this.property = property;
+    }
 
-  public DataStreamSource<T> getDataStream(
-      HBaseQueryFunction<T> queryFunc, HBaseResultFunction<T> resultFunc) {
-    HBaseSourceFunction<T> sourceFunction =
-        new HBaseSourceFunction<>(property, queryFunc, resultFunc, null);
-    return context.getJavaEnv().addSource(sourceFunction);
-  }
+    public DataStreamSource<T> getDataStream(HBaseQueryFunction<T> queryFunc, HBaseResultFunction<T> resultFunc) {
+        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunc, resultFunc, null);
+        return context.getJavaEnv().addSource(sourceFunction);
+    }
 }
