@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.support.kafka.writer
 
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -28,7 +27,8 @@ import java.util.Properties
 import scala.annotation.meta.param
 import scala.reflect.ClassTag
 
-class DStreamKafkaWriter[T: ClassTag](@(transient@param) dstream: DStream[T]) extends KafkaWriter[T] {
+class DStreamKafkaWriter[T: ClassTag](@(transient @param) dstream: DStream[T])
+    extends KafkaWriter[T] {
 
   /**
     *
@@ -39,8 +39,10 @@ class DStreamKafkaWriter[T: ClassTag](@(transient@param) dstream: DStream[T]) ex
     * @tparam V The type of the value
     *
     */
-  override def writeToKafka[K, V](producerConfig: Properties,
-                                  serializerFunc: T => ProducerRecord[K, V]): Unit = {
+  override def writeToKafka[K, V](
+      producerConfig: Properties,
+      serializerFunc: T => ProducerRecord[K, V]
+  ): Unit = {
     dstream.foreachRDD { rdd =>
       val rddWriter = new RDDKafkaWriter[T](rdd)
       rddWriter.writeToKafka(producerConfig, serializerFunc)

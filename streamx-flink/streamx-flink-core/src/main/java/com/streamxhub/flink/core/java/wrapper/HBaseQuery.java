@@ -20,14 +20,15 @@
  */
 package com.streamxhub.flink.core.java.wrapper;
 
-import com.streamxhub.common.util.HBaseClient;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Properties;
+
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.Scan;
 import org.apache.hadoop.hbase.client.Table;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Properties;
+import com.streamxhub.common.util.HBaseClient;
 
 /**
  * 封装一个HBase查询的条件对象,包装了scan和get两种查询方式.
@@ -36,53 +37,53 @@ import java.util.Properties;
  */
 public class HBaseQuery extends Scan implements Serializable {
 
-    private String table;
-    private volatile Table htable;
-    private transient Scan scan;
-    private transient Get get;
+  private String table;
+  private volatile Table htable;
+  private transient Scan scan;
+  private transient Get get;
 
-    /**
-     * @param table 要查询的Hbase table表名
-     * @param scan  根据scan为查询条件进行查询
-     * @throws IOException
-     */
-    public HBaseQuery(String table, Scan scan) throws IOException {
-        super(scan);
-        this.table = table;
-        this.scan = scan;
-    }
+  /**
+   * @param table 要查询的Hbase table表名
+   * @param scan 根据scan为查询条件进行查询
+   * @throws IOException
+   */
+  public HBaseQuery(String table, Scan scan) throws IOException {
+    super(scan);
+    this.table = table;
+    this.scan = scan;
+  }
 
-    /**
-     * @param table 要查询的Hbase table表名
-     * @param get   根据get为查询条件进行查询
-     * @throws IOException
-     */
-    public HBaseQuery(String table, Get get) {
-        super(get);
-        this.table = table;
-        this.get = get;
-    }
+  /**
+   * @param table 要查询的Hbase table表名
+   * @param get 根据get为查询条件进行查询
+   * @throws IOException
+   */
+  public HBaseQuery(String table, Get get) {
+    super(get);
+    this.table = table;
+    this.get = get;
+  }
 
-    public Table getTable(Properties prop) {
+  public Table getTable(Properties prop) {
+    if (htable == null) {
+      synchronized (HBaseQuery.class) {
         if (htable == null) {
-            synchronized (HBaseQuery.class) {
-                if (htable == null) {
-                    htable = HBaseClient.apply(prop).table(this.getTable());
-                }
-            }
+          htable = HBaseClient.apply(prop).table(this.getTable());
         }
-        return htable;
+      }
     }
+    return htable;
+  }
 
-    public String getTable() {
-        return table;
-    }
+  public String getTable() {
+    return table;
+  }
 
-    public Scan getScan() {
-        return scan;
-    }
+  public Scan getScan() {
+    return scan;
+  }
 
-    public Get getGet() {
-        return get;
-    }
+  public Get getGet() {
+    return get;
+  }
 }

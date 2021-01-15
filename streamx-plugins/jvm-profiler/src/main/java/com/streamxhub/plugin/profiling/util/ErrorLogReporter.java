@@ -21,11 +21,9 @@
 
 package com.streamxhub.plugin.profiling.util;
 
-/**
- * @author benjobs
- */
+/** @author benjobs */
 public interface ErrorLogReporter {
-    void report(String message, Throwable exception);
+  void report(String message, Throwable exception);
 
-    void close();
+  void close();
 }

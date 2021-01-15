@@ -8,12 +8,14 @@ import org.apache.flink.table.descriptors.{FileSystem, OldCsv, Schema}
 object FileTableApp extends FlinkStreamTable {
 
   override def handle(context: StreamTableContext): Unit = {
-    context.connect(new FileSystem().path("data/in/order.txt"))
+    context
+      .connect(new FileSystem().path("data/in/order.txt"))
       .withFormat(new OldCsv())
-      .withSchema(new Schema()
-        .field("id", DataTypes.STRING())
-        .field("count", DataTypes.INT())
-        .field("amount", DataTypes.STRING())
+      .withSchema(
+        new Schema()
+          .field("id", DataTypes.STRING())
+          .field("count", DataTypes.INT())
+          .field("amount", DataTypes.STRING())
       )
       .createTemporaryTable("orders")
     val orders = context.from("orders")

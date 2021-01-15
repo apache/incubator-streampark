@@ -1,23 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub</groupId>
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-    <modelVersion>4.0.0</modelVersion>
     <artifactId>streamx-flink-cli</artifactId>
-    <name>streamx-flink-cli</name>
-    <description>streamx-flink-cli</description>
-
-    <properties>
-        <flink.version>1.12.0</flink.version>
-        <hive.version>2.3.4</hive.version>
-        <scala.macros.version>2.0.1</scala.macros.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scala.version>2.11.12</scala.version>
-    </properties>
+    <name>StreamX : Flink Cli</name>
 
     <dependencies>
 

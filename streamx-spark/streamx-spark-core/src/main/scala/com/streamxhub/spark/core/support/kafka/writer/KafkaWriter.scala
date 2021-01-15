@@ -18,7 +18,6 @@
   * specific language governing permissions and limitations
   * under the License.
   */
-
 package com.streamxhub.spark.core.support.kafka.writer
 
 import org.apache.kafka.clients.producer.ProducerRecord
@@ -40,6 +39,7 @@ import scala.reflect.ClassTag
   * }}}
   */
 object KafkaWriter {
+
   /**
     * This implicit method allows the user to call dstream.writeToKafka(..)
     *
@@ -49,19 +49,27 @@ object KafkaWriter {
     * @tparam V - The type of the value to serialize to
     * @return
     */
-  implicit def createKafkaOutputWriter[T: ClassTag, K, V](dstream: DStream[T]): KafkaWriter[T] = {
+  implicit def createKafkaOutputWriter[T: ClassTag, K, V](
+      dstream: DStream[T]
+  ): KafkaWriter[T] = {
     new DStreamKafkaWriter[T](dstream)
   }
 
-  implicit def createKafkaOutputWriter[T: ClassTag, K, V](rdd: RDD[T]): KafkaWriter[T] = {
+  implicit def createKafkaOutputWriter[T: ClassTag, K, V](
+      rdd: RDD[T]
+  ): KafkaWriter[T] = {
     new RDDKafkaWriter[T](rdd)
   }
 
-  implicit def createKafkaOutputWriter[T: ClassTag, K, V](msg: Iterator[T]): KafkaWriter[T] = {
+  implicit def createKafkaOutputWriter[T: ClassTag, K, V](
+      msg: Iterator[T]
+  ): KafkaWriter[T] = {
     new IterKafkaWriter[T](msg)
   }
 
-  implicit def createKafkaOutputWriter[T: ClassTag, K, V](msg: T): KafkaWriter[T] = {
+  implicit def createKafkaOutputWriter[T: ClassTag, K, V](
+      msg: T
+  ): KafkaWriter[T] = {
     new SimpleKafkaWriter[T](msg)
   }
 }
@@ -116,5 +124,8 @@ abstract class KafkaWriter[T: ClassTag]() extends Serializable {
     * @tparam V The type of the value
     *
     */
-  def writeToKafka[K, V](producerConfig: Properties, serializerFunc: T => ProducerRecord[K, V]): Unit
+  def writeToKafka[K, V](
+      producerConfig: Properties,
+      serializerFunc: T => ProducerRecord[K, V]
+  ): Unit
 }
