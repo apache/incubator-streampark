@@ -74,7 +74,7 @@ override def handle(context: StreamingContext): Unit = {
 Define a series of startup information and source and sink information in the configuration file application.yml. The specific format is as follows:
 ```yaml
 flink:
-deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明显的问题的找不到jar文件
+  deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明显的问题的找不到jar文件
 	option:
 	target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
 	detached:                         # -d   (If present, runs the job in detached mode)
@@ -88,35 +88,35 @@ deployment: #注意这里的参数一定能要flink启动支持的参数(因为�
 	taskmanager.numberOfTaskSlots: 1
 	parallelism.default: 2
 	jobmanager.memory:
-		flink.size:
-		heap.size:
-		jvm-metaspace.size:
-		jvm-overhead.max:
-		off-heap.size:
-		process.size:
+      flink.size:
+      heap.size:
+      jvm-metaspace.size:
+      jvm-overhead.max:
+      off-heap.size:
+      process.size:
 	taskmanager.memory:
-		flink.size:
-		framework.heap.size:
-		framework.off-heap.size:
-		managed.size:
-		process.size:
-		task.heap.size:
-		task.off-heap.size:
-		jvm-metaspace.size:
-		jvm-overhead.max:
-		jvm-overhead.min:
-		managed.fraction: 0.4
-watermark:
-	time.characteristic: EventTime
-	interval: 10000
-checkpoints:
-	unaligned: true
-	enable: true
-	interval: 5000
-	mode: EXACTLY_ONCE
-table:
-	planner: blink # (blink|old|any)
-	mode: streaming #(batch|streaming)
+	  flink.size:
+	  framework.heap.size:
+	  framework.off-heap.size:
+	  managed.size:
+	  process.size:
+	  task.heap.size:
+	  task.off-heap.size:
+	  jvm-metaspace.size:
+	  jvm-overhead.max:
+	  jvm-overhead.min:
+	  managed.fraction: 0.4
+  watermark:
+    time.characteristic: EventTime
+    interval: 10000
+  checkpoints:
+    unaligned: true
+    enable: true
+    interval: 5000
+    mode: EXACTLY_ONCE
+  table:
+    planner: blink # (blink|old|any)
+    mode: streaming #(batch|streaming)
 
 # restart-strategy
 restart-strategy: failure-rate #(fixed-delay|failure-rate|none共3个可配置的策略)
@@ -148,20 +148,20 @@ group.id: hello
 auto.offset.reset: earliest
 #enable.auto.commit: true
 #start.from:
-	#timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
-	#offset: # 给每个topic的partition指定offset
-	#topic: topic1,topic2,topic3
-	#topic1: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
-	#topic2: 0:182,1:183,2:182
-	#topic3: 0:192,1:196,2:196
+  #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
+  #offset: # 给每个topic的partition指定offset
+  #topic: topic1,topic2,topic3
+  #topic1: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
+  #topic2: 0:182,1:183,2:182
+  #topic3: 0:192,1:196,2:196
 
 
 kafka.sink:
-bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
-topic: kfk_sink
-transaction.timeout.ms: 1000
-semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
-batch.size: 1
+  bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
+  topic: kfk_sink
+  transaction.timeout.ms: 1000
+  semantic: AT_LEAST_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
+  batch.size: 1
 
 ```
 
