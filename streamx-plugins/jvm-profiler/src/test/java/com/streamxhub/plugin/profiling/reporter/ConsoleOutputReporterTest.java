@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.reporter;
+package com.streamxhub.streamx.plugin.profiling.reporter;
 
 import java.util.HashMap;
 

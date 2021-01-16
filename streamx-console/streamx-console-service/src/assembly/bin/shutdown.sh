@@ -21,7 +21,7 @@
 
 #kill server
 # shellcheck disable=SC2006
-pid=`jps -l|grep "com.streamxhub.console.StreamXConsole"|awk '{print $1}'`
+pid=`jps -l|grep "com.streamxhub.streamx.console.StreamXConsole"|awk '{print $1}'`
 if [[ -z "${pid}" ]]
 then
   echo "application is already stop"

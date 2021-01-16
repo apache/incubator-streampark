@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.transformer;
+package com.streamxhub.streamx.plugin.profiling.transformer;
 
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -30,10 +30,10 @@ import org.junit.Test;
 
 import junit.framework.Assert;
 
-import com.streamxhub.plugin.profiling.profiler.Constants;
-import com.streamxhub.plugin.profiling.profiler.MethodArgumentCollector;
-import com.streamxhub.plugin.profiling.util.ClassAndMethodMetricKey;
-import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
+import com.streamxhub.streamx.plugin.profiling.profiler.Constants;
+import com.streamxhub.streamx.plugin.profiling.profiler.MethodArgumentCollector;
+import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethodMetricKey;
+import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
 public class MethodProfilerStaticProxyTest {
   private ClassMethodArgumentMetricBuffer buffer;

@@ -19,14 +19,14 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.util;
+package com.streamxhub.streamx.plugin.profiling.util;
 
 import java.lang.reflect.InvocationTargetException;
 
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.plugin.profiling.Arguments;
+import com.streamxhub.streamx.plugin.profiling.Arguments;
 
 public class SparkUtilsTest {
   @Test

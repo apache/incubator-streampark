@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.1.10.RELEASE</version>
+        <version>2.3.8.RELEASE</version>
         <relativePath/>
     </parent>
     <artifactId>streamx-console-service</artifactId>
@@ -34,13 +34,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-repl</artifactId>
             <version>1.0.0</version>
             <exclusions>
@@ -52,7 +52,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-submit</artifactId>
             <version>1.0.0</version>
             <exclusions>
@@ -68,7 +68,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>jvm-profiler</artifactId>
             <version>1.0.0</version>
         </dependency>
@@ -112,6 +112,30 @@
             <artifactId>spring-boot-starter-websocket</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+
+        <!-- shiro-spring -->
+        <dependency>
+            <groupId>org.apache.shiro</groupId>
+            <artifactId>shiro-spring</artifactId>
+            <version>1.4.0</version>
+        </dependency>
+
+        <!-- spring cache -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-cache</artifactId>
+        </dependency>
+
+        <!-- aop依赖 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+
         <!-- 动态数据源 -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -133,13 +157,6 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- freemaker引擎 -->
-        <dependency>
-            <groupId>org.freemarker</groupId>
-            <artifactId>freemarker</artifactId>
-            <version>2.3.28</version>
-        </dependency>
-
         <!-- sql 打印 -->
         <dependency>
             <groupId>p6spy</groupId>
@@ -153,35 +170,10 @@
             <artifactId>commons-lang3</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.6</version>
-        </dependency>
-
         <!-- mysql -->
         <dependency>
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
-        </dependency>
-
-        <!-- aop依赖 -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-aop</artifactId>
-        </dependency>
-
-        <!-- shiro-spring -->
-        <dependency>
-            <groupId>org.apache.shiro</groupId>
-            <artifactId>shiro-spring</artifactId>
-            <version>1.4.0</version>
-        </dependency>
-
-        <!-- spring cache -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-cache</artifactId>
         </dependency>
 
         <!-- ip2region -->
@@ -242,6 +234,12 @@
         </dependency>
 
         <dependency>
+            <groupId>xml-apis</groupId>
+            <artifactId>xml-apis</artifactId>
+            <version>1.4.01</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-client</artifactId>
             <version>${hadoop.version}</version>
@@ -251,7 +249,6 @@
             <groupId>org.scala-lang.modules</groupId>
             <artifactId>scala-xml_2.11</artifactId>
             <version>1.0.5</version>
-            <scope>compile</scope>
         </dependency>
 
         <dependency>

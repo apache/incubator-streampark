@@ -24,10 +24,10 @@ spring:
       datasource:
         # 数据源-1，名称为 primary
         primary:
-          username: hopsonone
-          password: hopsonone123
+          username: sync
+          password: sync
           driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://10.2.39.40:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
+          url: jdbc:mysql://47.94.197.105:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=Asia/Shanghai
   aop.proxy-target-class: true
   messages.encoding: utf-8
 
@@ -39,7 +39,7 @@ management.endpoints.web.exposure.include: [ 'httptrace', 'metrics' ]
 
 #mybatis plus 设置
 mybatis-plus:
-  type-aliases-package: com.streamxhub.console.*.entity
+  type-aliases-package: com.streamxhub.streamx.console.*.entity
   mapper-locations: classpath:mapper/*/*.xml
   configuration:
     jdbc-type-for-null: null

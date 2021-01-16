@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.util;
+package com.streamxhub.streamx.plugin.profiling.util;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -45,7 +45,7 @@ public class ReflectionUtilsTest {
           InvocationTargetException {
     Object result =
         ReflectionUtils.executeStaticMethods(
-            "com.streamxhub.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
+            "com.streamxhub.streamx.plugin.profiling.util.ReflectionUtilsTest$ClassB", "getClassA.method1");
     Assert.assertEquals("hello", result);
   }
 }
