@@ -26,8 +26,9 @@ import redis.clients.jedis.exceptions.JedisConnectionException
 
 import java.util.concurrent.ConcurrentHashMap
 import scala.annotation.meta.getter
+import scala.annotation.tailrec
 import scala.collection.JavaConversions._
-import scala.util.{Failure, Success, Try}
+import scala.util.Random
 
 object RedisClient extends Logger {
 
@@ -45,14 +46,15 @@ object RedisClient extends Logger {
    * @param res
    * @return
    */
-  def connect(res: Array[RedisEndpoint]): Jedis = {
-    require(res.length > 0, "The RedisEndpoint array is empty!!!")
-    val rnd = scala.util.Random.nextInt().abs % res.length
+  @tailrec
+  def connect(endpoints: Array[RedisEndpoint]): Jedis = {
+    require(endpoints.length > 0, "The RedisEndpoint array is empty!!!")
+    val index = Random.nextInt().abs % endpoints.length
     try {
-      connect(res(rnd))
+      connect(endpoints(index))
     } catch {
       case e: Exception => logger.error(e.getMessage)
-        connect(res.drop(rnd))
+        connect(endpoints.drop(index))
     }
   }
 
@@ -88,13 +90,12 @@ object RedisClient extends Logger {
    * @return
    */
   def createJedisPool(endpoint: RedisEndpoint): JedisPool = {
-    val endnoAuth = endpoint.copy(auth = "********")
-    logInfo(s"[StreamX-Flink]RedisClient: createJedisPool with $endnoAuth ")
+    val endpointEn: RedisEndpoint = endpoint.copy(auth = "********")
+    logInfo(s"[StreamX-Flink]RedisClient: createJedisPool with $endpointEn ")
     new JedisPool(poolConfig, endpoint.host, endpoint.port, endpoint.timeout, endpoint.auth, endpoint.db)
   }
 
   private lazy val poolConfig = {
-
     val poolConfig: JedisPoolConfig = new JedisPoolConfig()
     /*最大连接数*/
     poolConfig.setMaxTotal(1000)
@@ -117,47 +118,10 @@ object RedisClient extends Logger {
     require(res.nonEmpty, "The RedisEndpoint array is empty!!!")
     val head = res.head
     val cluster = clusters.getOrElseUpdate(head, {
-      val haps = res.map(r => new HostAndPort(r.host, r.port)).toSet
-      new JedisCluster(haps, head.timeout, 1000, 1, head.auth, poolConfig)
+      val hostPorts = res.map(r => new HostAndPort(r.host, r.port)).toSet
+      new JedisCluster(hostPorts, head.timeout, 1000, 1, head.auth, poolConfig)
     })
     cluster
-  }
-
-
-  def doRedis[R](f: Jedis => R)(implicit redis: Jedis): R = {
-    val result = f(redis)
-    Try {
-      redis.close()
-    } match {
-      case Success(_) => logger.debug("jedis.close successful.")
-      case Failure(e) => logger.error(s"jedis.close failed.error:${e.getLocalizedMessage}")
-    }
-    result
-  }
-
-  def doCluster[R](f: JedisCluster => R)(implicit cluster: JedisCluster): R = {
-    val result = f(cluster)
-    Try {
-      cluster.close()
-    } match {
-      case Success(_) => logger.debug("jedis.close successful.")
-      case Failure(_) => logger.error("jedis.close failed.")
-    }
-    result
-  }
-
-  def doPipe[R](f: Pipeline => R)(implicit jedis: Jedis): R = {
-    val pipe = jedis.pipelined()
-    val result = f(pipe)
-    Try {
-      pipe.sync()
-      pipe.close()
-      jedis.close()
-    } match {
-      case Success(_) => logger.debug("pipe.close successful.")
-      case Failure(_) => logger.error("pipe.close failed.")
-    }
-    result
   }
 
   def close(): Unit = pools.foreach { case (_, v) => v.close() }

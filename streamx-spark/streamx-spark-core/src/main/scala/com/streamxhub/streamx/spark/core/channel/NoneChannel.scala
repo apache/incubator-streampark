@@ -36,7 +36,7 @@ class NoneChannel extends Channel[String, String] {
     * @param dStream
     * @return
     */
-  override def procese(dStream: DStream[String]): DStream[String] = {
+  override def handle(dStream: DStream[String]): DStream[String] = {
     dStream
   }
 }

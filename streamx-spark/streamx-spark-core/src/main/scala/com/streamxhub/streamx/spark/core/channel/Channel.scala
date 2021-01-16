@@ -34,5 +34,5 @@ trait Channel[M, N] {
     * @param dStream
     * @return
     */
-  def procese(dStream: DStream[M]): DStream[N]
+  def handle(dStream: DStream[M]): DStream[N]
 }

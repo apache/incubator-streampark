@@ -34,8 +34,7 @@ import scala.language.postfixOps
   *
   * 输出ES
   */
-class EsSink[T](@transient override val sc: SparkContext,
-                initParams: Map[String, String] = Map.empty[String, String])
+class EsSink[T](@transient override val sc: SparkContext, initParams: Map[String, String] = Map.empty[String, String])
   extends Sink[T] {
 
   override val prefix: String = "spark.sink.es."
