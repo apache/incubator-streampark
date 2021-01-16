@@ -46,14 +46,13 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
             String prepared,
             String sql,
             String url) {
-        return StringUtils.isNotBlank(sql)
-                ? DateUtil.formatFullTime(LocalDateTime.now(), DateUtil.FULL_TIME_SPLIT_PATTERN)
-                + " | 耗时 "
-                + elapsed
-                + " ms | SQL 语句："
-                + StringUtils.LF
-                + sql.replaceAll("[\\s]+", StringUtils.SPACE)
-                + ";"
-                : "";
+
+        return StringUtils.isBlank(sql) ? "" :
+                String.format(
+                        "%s  | 耗时 %d ms | SQL 语句：\n %s;",
+                        DateUtil.formatFullTime(LocalDateTime.now()),
+                        elapsed,
+                        sql.replaceAll("[\\s]+", StringUtils.SPACE)
+                );
     }
 }

@@ -57,8 +57,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         try {
             Page<User> page = new Page<>();
             SortUtil.handlePageSort(request, page, "userId", Constant.ORDER_ASC, false);
-            IPage<User> pages = this.baseMapper.findUserDetail(page, user);
-            return pages;
+            return this.baseMapper.findUserDetail(page, user);
         } catch (Exception e) {
             log.info("查询用户异常", e);
             return null;
@@ -97,8 +96,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setModifyTime(new Date());
         updateById(user);
 
-        userRoleMapper.delete(
-                new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
+        userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
 
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
@@ -187,13 +185,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     private void setUserRoles(User user, String[] roles) {
-        Arrays.stream(roles)
-                .forEach(
-                        roleId -> {
-                            UserRole ur = new UserRole();
-                            ur.setUserId(user.getUserId());
-                            ur.setRoleId(Long.valueOf(roleId));
-                            this.userRoleMapper.insert(ur);
-                        });
+        Arrays.stream(roles).forEach(roleId -> {
+            UserRole ur = new UserRole();
+            ur.setUserId(user.getUserId());
+            ur.setRoleId(Long.valueOf(roleId));
+            this.userRoleMapper.insert(ur);
+        });
     }
 }

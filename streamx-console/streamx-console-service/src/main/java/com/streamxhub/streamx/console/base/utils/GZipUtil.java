@@ -98,11 +98,12 @@ public class GZipUtil {
      */
     private static void close(InputStream input) {
         // 静默关闭处理
-        try {
-            if (null != input) {
+        if (null != input) {
+            try {
                 input.close();
+            } catch (IOException ignored) {
+
             }
-        } catch (IOException ignored) {
         }
     }
 

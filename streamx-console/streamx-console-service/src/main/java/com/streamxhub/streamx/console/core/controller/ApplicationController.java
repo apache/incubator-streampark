@@ -113,16 +113,14 @@ public class ApplicationController extends BaseController {
     @PostMapping("deploy")
     @RequiresPermissions("app:deploy")
     public RestResponse deploy(Application app) {
-        Executors.newSingleThreadExecutor()
-                .submit(
-                        () -> {
-                            try {
-                                app.setBackUp(true);
-                                applicationService.deploy(app);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        });
+        Executors.newSingleThreadExecutor().submit(() -> {
+            try {
+                app.setBackUp(true);
+                applicationService.deploy(app);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         return RestResponse.create();
     }
 

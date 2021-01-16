@@ -50,8 +50,10 @@ public class AddressUtil {
                         Objects.requireNonNull(
                                 AddressUtil.class
                                         .getClassLoader()
-                                        .getResourceAsStream("classpath:ip2region/ip2region.db")),
-                        file);
+                                        .getResourceAsStream("classpath:ip2region/ip2region.db")
+                        ),
+                        file
+                );
             }
             DbConfig config = new DbConfig();
             DbSearcher searcher = new DbSearcher(config, file.getPath());

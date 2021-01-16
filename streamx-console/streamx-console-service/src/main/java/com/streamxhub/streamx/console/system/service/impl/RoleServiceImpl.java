@@ -112,13 +112,11 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     }
 
     private void setRoleMenus(Role role, String[] menuIds) {
-        Arrays.stream(menuIds)
-                .forEach(
-                        menuId -> {
-                            RoleMenu rm = new RoleMenu();
-                            rm.setMenuId(Long.valueOf(menuId));
-                            rm.setRoleId(role.getRoleId());
-                            this.roleMenuMapper.insert(rm);
-                        });
+        Arrays.stream(menuIds).forEach(menuId -> {
+            RoleMenu rm = new RoleMenu();
+            rm.setMenuId(Long.valueOf(menuId));
+            rm.setRoleId(role.getRoleId());
+            this.roleMenuMapper.insert(rm);
+        });
     }
 }

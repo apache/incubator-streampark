@@ -45,30 +45,29 @@ public class TreeUtil {
             return null;
         }
         List<RouterTree<T>> topNodes = new ArrayList<>();
-        nodes.forEach(
-                node -> {
-                    String pid = node.getParentId();
-                    if (pid == null || TOP_NODE_ID.equals(pid)) {
-                        topNodes.add(node);
-                        return;
+        nodes.forEach(node -> {
+            String pid = node.getParentId();
+            if (pid == null || TOP_NODE_ID.equals(pid)) {
+                topNodes.add(node);
+                return;
+            }
+            for (RouterTree<T> n : nodes) {
+                String id = n.getId();
+                if (id != null && id.equals(pid)) {
+                    if (n.getChildren() == null) {
+                        n.initChildren();
                     }
-                    for (RouterTree<T> n : nodes) {
-                        String id = n.getId();
-                        if (id != null && id.equals(pid)) {
-                            if (n.getChildren() == null) {
-                                n.initChildren();
-                            }
-                            n.getChildren().add(node);
-                            node.setHasParent(true);
-                            n.setHasChildren(true);
-                            n.setHasParent(true);
-                            return;
-                        }
-                    }
-                    if (topNodes.isEmpty()) {
-                        topNodes.add(node);
-                    }
-                });
+                    n.getChildren().add(node);
+                    node.setHasParent(true);
+                    n.setHasChildren(true);
+                    n.setHasParent(true);
+                    return;
+                }
+            }
+            if (topNodes.isEmpty()) {
+                topNodes.add(node);
+            }
+        });
 
         RouterTree<T> root = new RouterTree<>();
         root.setId("0");
@@ -92,27 +91,26 @@ public class TreeUtil {
             return null;
         }
         List<VueRouter<T>> topRoutes = new ArrayList<>();
-        routes.forEach(
-                route -> {
-                    String parentId = route.getParentId();
-                    if (parentId == null || TOP_NODE_ID.equals(parentId)) {
-                        topRoutes.add(route);
-                        return;
+        routes.forEach(route -> {
+            String parentId = route.getParentId();
+            if (parentId == null || TOP_NODE_ID.equals(parentId)) {
+                topRoutes.add(route);
+                return;
+            }
+            for (VueRouter<T> parent : routes) {
+                String id = parent.getId();
+                if (id != null && id.equals(parentId)) {
+                    if (parent.getChildren() == null) {
+                        parent.initChildren();
                     }
-                    for (VueRouter<T> parent : routes) {
-                        String id = parent.getId();
-                        if (id != null && id.equals(parentId)) {
-                            if (parent.getChildren() == null) {
-                                parent.initChildren();
-                            }
-                            parent.getChildren().add(route);
-                            parent.setHasChildren(true);
-                            route.setHasParent(true);
-                            parent.setHasParent(true);
-                            return;
-                        }
-                    }
-                });
+                    parent.getChildren().add(route);
+                    parent.setHasChildren(true);
+                    route.setHasParent(true);
+                    parent.setHasParent(true);
+                    return;
+                }
+            }
+        });
 
         ArrayList<VueRouter<T>> list = new ArrayList<>();
         VueRouter<T> root = new VueRouter<>();
