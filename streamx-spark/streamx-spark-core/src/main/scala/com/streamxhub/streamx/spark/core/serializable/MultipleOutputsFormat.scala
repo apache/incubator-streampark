@@ -1,23 +1,23 @@
 /**
-  * Copyright (c) 2019 The StreamX Project
-  * <p>
-  * Licensed to the Apache Software Foundation (ASF) under one
-  * or more contributor license agreements. See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership. The ASF licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License. You may obtain a copy of the License at
-  * <p>
-  * http://www.apache.org/licenses/LICENSE-2.0
-  * <p>
-  * Unless required by applicable law or agreed to in writing,
-  * software distributed under the License is distributed on an
-  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  * KIND, either express or implied. See the License for the
-  * specific language governing permissions and limitations
-  * under the License.
-  */
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package com.streamxhub.streamx.spark.core.serializable
 
@@ -33,8 +33,8 @@ import org.apache.hadoop.util.Progress
 import java.io.IOException
 
 /**
-  *
-  */
+ *
+ */
 object MultipleOutputsFormat {
   // Type inference fails with this inlined in constructor parameters
   private def defaultMultipleOutputsMaker[K, V](io: TaskInputOutputContext[_, _, K, V])
@@ -42,58 +42,58 @@ object MultipleOutputsFormat {
 }
 
 /**
-  * 将此子类创建为创建OutputFormat的多输出 。 这个子类必须有一个nullary构造函数
-  * hadoop可以用 `.newInstance` 来构造它 ， 呃...
-  *
-  * 输出格式需要一个两部分的键 （ outputPath ， actualKey ）,该字符串outputPath将被用于
-  * 将输出分成不同的目录 （ '/' 分隔的文件名 ） 。
-  *
-  * 由于某些原因 ， MultipleOutputs与Avro不兼容 ， 但AvroMultipleOutputs几乎相同
-  * 这些明显相关的类没有共同的祖先 ， 因此它们在MultipleOutputer类型类下组合
-  * 至少允许将来扩展 。
-  *
-  * @param outputFormat         负责写入的底层 OutputFormat
-  * @param multipleOutputsMaker 工厂方法,用于构建实现 MultiplerOutputer trait的对象
-  * @tparam K 基础 OutputFormat 的K键类型
-  * @tparam V 基础 OutputFormat 的V值类型
-  */
+ * 将此子类创建为创建OutputFormat的多输出 。 这个子类必须有一个nullary构造函数
+ * hadoop可以用 `.newInstance` 来构造它 ， 呃...
+ *
+ * 输出格式需要一个两部分的键 （ outputPath ， actualKey ）,该字符串outputPath将被用于
+ * 将输出分成不同的目录 （ '/' 分隔的文件名 ） 。
+ *
+ * 由于某些原因 ， MultipleOutputs与Avro不兼容 ， 但AvroMultipleOutputs几乎相同
+ * 这些明显相关的类没有共同的祖先 ， 因此它们在MultipleOutputer类型类下组合
+ * 至少允许将来扩展 。
+ *
+ * @param outputFormat         负责写入的底层 OutputFormat
+ * @param multipleOutputsMaker 工厂方法,用于构建实现 MultiplerOutputer trait的对象
+ * @tparam K 基础 OutputFormat 的K键类型
+ * @tparam V 基础 OutputFormat 的V值类型
+ */
 abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
                                            multipleOutputsMaker: TaskInputOutputContext[_, _, K, V] => MultipleOutputer[K, V] =
                                            (r: TaskInputOutputContext[_, _, K, V]) => MultipleOutputsFormat.defaultMultipleOutputsMaker[K, V](r))
   extends OutputFormat[(String, K), V] {
   /**
-    * Check for validity of the output-specification for the job.
-    *
-    * <p>This is to validate the output specification for the job when it is
-    * a job is submitted.  Typically checks that it does not already exist,
-    * throwing an exception when it already exists, so that output is not
-    * overwritten.</p>
-    *
-    * @param context information about the job
-    * @throws IOException when output should not be attempted
-    */
+   * Check for validity of the output-specification for the job.
+   *
+   * <p>This is to validate the output specification for the job when it is
+   * a job is submitted.  Typically checks that it does not already exist,
+   * throwing an exception when it already exists, so that output is not
+   * overwritten.</p>
+   *
+   * @param context information about the job
+   * @throws IOException when output should not be attempted
+   */
   override def checkOutputSpecs(context: JobContext): Unit = outputFormat.checkOutputSpecs(context)
 
   /**
-    * Get the output committer for this output format. This is responsible
-    * for ensuring the output is committed correctly.
-    *
-    * @param context the task context
-    * @return an output committer
-    * @throws IOException
-    * @throws InterruptedException
-    */
+   * Get the output committer for this output format. This is responsible
+   * for ensuring the output is committed correctly.
+   *
+   * @param context the task context
+   * @return an output committer
+   * @throws IOException
+   * @throws InterruptedException
+   */
   override def getOutputCommitter(context: TaskAttemptContext): OutputCommitter = outputFormat
     .getOutputCommitter(context)
 
   /**
-    * Get the {@link RecordWriter} for the given task.
-    *
-    * @param context the information about the current task.
-    * @return a { @link RecordWriter} to write the output for the job.
-    * @throws IOException
-    */
-  override def getRecordWriter(context: TaskAttemptContext): RecordWriter[(String, Any), Any] =
+   * Get the {@link RecordWriter} for the given task.
+   *
+   * @param context the information about the current task.
+   * @return a { @link RecordWriter} to write the output for the job.
+   * @throws IOException
+   */
+  override def getRecordWriter(context: TaskAttemptContext) =
     new RecordWriter[(String, K), V] {
 
       val job: Job = Job.getInstance(context.getConfiguration)
@@ -109,12 +109,12 @@ abstract class MultipleOutputsFormat[K, V](outputFormat: OutputFormat[K, V],
       val multipleOutputs: MultipleOutputer[K, V] = multipleOutputsMaker(ioContext)
 
       /**
-        * Writes a keys/value pair.
-        *
-        * @param keys  the key to write.
-        * @param value the value to write.
-        * @throws IOException
-        */
+       * Writes a keys/value pair.
+       *
+       * @param keys  the key to write.
+       * @param value the value to write.
+       * @throws IOException
+       */
       override def write(keys: (String, K), value: V): Unit = {
         keys match {
           case (path, key) =>
