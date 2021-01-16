@@ -1,4 +1,4 @@
-package com.streamxhub.plugin.profiling.profiler;
+package com.streamxhub.streamx.plugin.profiling.profiler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -7,7 +7,7 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.Reporter;
 
 public class ThreadInfoProfilerTest {
   @Test

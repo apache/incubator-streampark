@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling;
+package com.streamxhub.streamx.plugin.profiling;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

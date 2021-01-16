@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling;
+package com.streamxhub.streamx.plugin.profiling;
 
 import java.io.File;
 import java.io.IOException;
@@ -51,10 +51,10 @@ public class AgentITCase {
             agentJar,
             "-javaagent:"
                 + agentJar
-                + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir="
+                + "=configProvider=com.streamxhub.streamx.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.streamx.plugin.profiling.reporter.FileOutputReporter,outputDir="
                 + outputDir
-                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-            "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
+                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+            "com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication",
             "2000");
 
     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -123,10 +123,10 @@ public class AgentITCase {
             agentJar,
             "-javaagent:"
                 + agentJar
-                + "=noop=true,configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir="
+                + "=noop=true,configProvider=com.streamxhub.streamx.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.streamx.plugin.profiling.reporter.FileOutputReporter,outputDir="
                 + outputDir
-                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-            "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
+                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+            "com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication",
             "2000");
 
     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -156,10 +156,10 @@ public class AgentITCase {
             agentJar,
             "-javaagent:"
                 + agentJar
-                + "=configProvider=com.streamxhub.plugin.profiling.util.NoopConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir="
+                + "=configProvider=com.streamxhub.streamx.plugin.profiling.util.NoopConfigProvider,reporter=com.streamxhub.streamx.plugin.profiling.reporter.FileOutputReporter,outputDir="
                 + outputDir
-                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
-            "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
+                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.1,ioProfiling=true",
+            "com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication",
             "2000");
 
     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -189,10 +189,10 @@ public class AgentITCase {
             agentJar,
             "-javaagent:"
                 + agentJar
-                + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir="
+                + "=configProvider=com.streamxhub.streamx.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.streamx.plugin.profiling.reporter.FileOutputReporter,outputDir="
                 + outputDir
-                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.0",
-            "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
+                + ",tag=mytag,metricInterval=200,durationProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod,argumentProfiling=com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication.publicSleepMethod.0",
+            "com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication",
             "2000");
 
     pb.redirectOutput(ProcessBuilder.Redirect.INHERIT);
@@ -253,10 +253,10 @@ public class AgentITCase {
             agentJar,
             "-javaagent:"
                 + agentJar
-                + "=configProvider=com.streamxhub.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.plugin.profiling.reporter.FileOutputReporter,outputDir="
+                + "=configProvider=com.streamxhub.streamx.plugin.profiling.util.DummyConfigProvider,reporter=com.streamxhub.streamx.plugin.profiling.reporter.FileOutputReporter,outputDir="
                 + outputDir
                 + ",tag=mytag,appIdVariable=APP_ID",
-            "com.streamxhub.plugin.profiling.example.HelloWorldApplication",
+            "com.streamxhub.streamx.plugin.profiling.example.HelloWorldApplication",
             "2000");
 
     pb.environment().put("APP_ID", "TEST_APP_ID_123_ABC");

@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.util;
+package com.streamxhub.streamx.plugin.profiling.util;
 
 import java.util.Map;
 

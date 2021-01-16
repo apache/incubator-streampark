@@ -25,8 +25,8 @@ cat > $code_dir/Demo.scala <<EOF
 package ${group_id}.$module
 
 import org.apache.spark.streaming.StreamingContext
-import com.streamxhub.spark.core.Streaming
-import com.streamxhub.spark.core.support.kafka.KafkaDirectSource
+import com.streamxhub.streamx.spark.core.Streaming
+import com.streamxhub.streamx.spark.core.support.kafka.KafkaDirectSource
 
 object HelloStreamXApp extends Streaming {
     override def handle(ssc : StreamingContext): Unit = {
@@ -159,7 +159,7 @@ EOF
 
     <dependencies>
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-spark</artifactId>
         </dependency>
     </dependencies>
@@ -225,7 +225,7 @@ cat > $name/pom.xml <<EOF
              mvn clean package -Pwithjar -Dmaven.test.skip=true
             包含依赖jar打包，会将assembly.xml 文件中
             <includes>
-                <include>com.streamxhub.spark:spark-core</include>
+                <include>com.streamxhub.streamx.spark:spark-core</include>
             </includes>
             包含的Jar和pom中设置 <scope>\${project.scope}</scope> 的jar一起打包进去，
             这样蹩脚的设计，主要是因为我不知道怎么能优雅的把 运行、编译都依赖的JarA 抽离出来
@@ -277,7 +277,7 @@ cat > $name/pom.xml <<EOF
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>com.streamxhub</groupId>
+                <groupId>com.streamxhub.streamx</groupId>
                 <artifactId>streamx-spark-core</artifactId>
                 <version>\${streamx.spark.version}</version>
             </dependency>
