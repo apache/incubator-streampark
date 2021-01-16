@@ -115,8 +115,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
 
     map
-      .filter(!_._1.startsWith("flink.deployment.option."))
-      .map(x => x._1.replace("flink.deployment.property.", "") -> x._2)
+      .filter(_._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX))
+      .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
   }
 
   private[this] def initParameter(): ParameterTool = {
