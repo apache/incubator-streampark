@@ -136,6 +136,12 @@
             <artifactId>spring-boot-starter-aop</artifactId>
         </dependency>
 
+        <!-- quartz -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-quartz</artifactId>
+        </dependency>
+
         <!-- 动态数据源 -->
         <dependency>
             <groupId>com.baomidou</groupId>
@@ -195,12 +201,6 @@
             <artifactId>lombok</artifactId>
             <version>1.18.16</version>
             <scope>provided</scope>
-        </dependency>
-
-        <!-- quartz -->
-        <dependency>
-            <groupId>org.quartz-scheduler</groupId>
-            <artifactId>quartz</artifactId>
         </dependency>
 
         <!-- Excel工具 -->

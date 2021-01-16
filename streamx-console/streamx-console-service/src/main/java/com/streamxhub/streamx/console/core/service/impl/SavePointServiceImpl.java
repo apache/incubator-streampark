@@ -63,8 +63,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (CommonUtil.notEmpty(savePoint.getSavePoint())
-                    && HdfsUtils.exists(savePoint.getSavePoint())) {
+            if (CommonUtil.notEmpty(savePoint.getSavePoint()) && HdfsUtils.exists(savePoint.getSavePoint())) {
                 HdfsUtils.deleteFile(savePoint.getSavePoint());
             }
             removeById(id);

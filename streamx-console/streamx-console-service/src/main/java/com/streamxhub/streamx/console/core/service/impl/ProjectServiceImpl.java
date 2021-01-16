@@ -121,35 +121,25 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         tailBuffer.put(id, new StringBuilder());
         boolean success = cloneOrPull(project);
         if (success) {
-            Executors.newSingleThreadExecutor()
-                    .submit(
-                            () -> {
-                                boolean build = ProjectServiceImpl.this.mavenBuild(project);
-                                if (build) {
-                                    this.baseMapper.successBuild(project);
-                                    // 发布到apps下
-                                    this.deploy(project);
-                                    // 更新application的发布状态.
-                                    List<Application> applications = getApplications(project);
-                                    // 更新部署状态
-                                    applications.forEach(
-                                            (app) ->
-                                                    FlinkTrackingTask.persistentAfterRunnable(
-                                                            app.getId(),
-                                                            () -> {
-                                                                log.info(
-                                                                        "update deploy by project:{},appName:{}",
-                                                                        project.getId(),
-                                                                        app.getJobName());
-                                                                app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
-                                                                this.applicationMapper.updateDeploy(app);
-                                                            }));
-                                } else {
-                                    this.baseMapper.failureBuild(project);
-                                }
-                            });
-            return RestResponse.create()
-                    .message("[StreamX] git clone and pull success. begin maven install");
+            Executors.newSingleThreadExecutor().submit(() -> {
+                boolean build = ProjectServiceImpl.this.mavenBuild(project);
+                if (build) {
+                    this.baseMapper.successBuild(project);
+                    // 发布到apps下
+                    this.deploy(project);
+                    // 更新application的发布状态.
+                    List<Application> applications = getApplications(project);
+                    // 更新部署状态
+                    applications.forEach((app) -> FlinkTrackingTask.persistentAfterRunnable(app.getId(), () -> {
+                        log.info("update deploy by project:{},appName:{}", project.getId(), app.getJobName());
+                        app.setDeploy(DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+                        this.applicationMapper.updateDeploy(app);
+                    }));
+                } else {
+                    this.baseMapper.failureBuild(project);
+                }
+            });
+            return RestResponse.create().message("[StreamX] git clone and pull success. begin maven install");
         } else {
             return RestResponse.create().message("[StreamX] clone or pull error.");
         }
@@ -160,39 +150,40 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         List<File> apps = new ArrayList<>();
         // 在项目路径下寻找编译完成的tar.gz(StreamX项目)文件或jar(普通,官方标准的flink工程)...
         findTarOrJar(apps, path);
-        apps.forEach(
-                (app) -> {
-                    String appPath = app.getAbsolutePath();
-                    // 1). tar.gz文件....
-                    if (appPath.endsWith("tar.gz")) {
-                        File deployPath = project.getAppBase();
-                        if (!deployPath.exists()) {
-                            deployPath.mkdirs();
-                        }
-                        // 将项目解包到app下.
-                        if (app.exists()) {
-                            String cmd =
-                                    String.format(
-                                            "tar -xzvf %s -C %s", app.getAbsolutePath(), deployPath.getAbsolutePath());
-                            CommandUtils.execute(cmd);
-                        }
-                    } else {
-                        try {
-                            // 2) .jar文件(普通,官方标准的flink工程)
-                            Utils.checkJarFile(app.toURI().toURL());
-                            String moduleName = app.getName().replace(".jar", "");
-                            File appBase = project.getAppBase();
-                            File targetDir = new File(appBase, moduleName);
-                            if (!targetDir.exists()) {
-                                targetDir.mkdirs();
-                            }
-                            File targetJar = new File(targetDir, app.getName());
-                            app.renameTo(targetJar);
-                        } catch (IOException exception) {
-                            exception.printStackTrace();
-                        }
+        apps.forEach((app) -> {
+            String appPath = app.getAbsolutePath();
+            // 1). tar.gz文件....
+            if (appPath.endsWith("tar.gz")) {
+                File deployPath = project.getAppBase();
+                if (!deployPath.exists()) {
+                    deployPath.mkdirs();
+                }
+                // 将项目解包到app下.
+                if (app.exists()) {
+                    String cmd = String.format(
+                            "tar -xzvf %s -C %s",
+                            app.getAbsolutePath(),
+                            deployPath.getAbsolutePath()
+                    );
+                    CommandUtils.execute(cmd);
+                }
+            } else {
+                try {
+                    // 2) .jar文件(普通,官方标准的flink工程)
+                    Utils.checkJarFile(app.toURI().toURL());
+                    String moduleName = app.getName().replace(".jar", "");
+                    File appBase = project.getAppBase();
+                    File targetDir = new File(appBase, moduleName);
+                    if (!targetDir.exists()) {
+                        targetDir.mkdirs();
                     }
-                });
+                    File targetJar = new File(targetDir, app.getName());
+                    app.renameTo(targetJar);
+                } catch (IOException exception) {
+                    exception.printStackTrace();
+                }
+            }
+        });
     }
 
     private void findTarOrJar(List<File> list, File path) {
@@ -223,8 +214,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 }
                 File target = tar == null ? jar : tar;
                 if (target == null) {
-                    throw new RuntimeException(
-                            "[StreamX] can't find tar.gz or jar in " + file.getAbsolutePath());
+                    throw new RuntimeException("[StreamX] can't find tar.gz or jar in " + file.getAbsolutePath());
                 }
                 list.add(target);
             }
@@ -240,8 +230,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getAppBase();
         List<String> list = new ArrayList<>();
-        Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                .forEach((x) -> list.add(x.getName()));
+        Arrays.stream(Objects.requireNonNull(appHome.listFiles())).forEach((x) -> list.add(x.getName()));
         return list;
     }
 
@@ -261,10 +250,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     public String getAppConfPath(Long id, String module) {
         Project project = getById(id);
         File appHome = project.getAppBase();
-        Optional<File> fileOptional =
-                Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                        .filter((x) -> x.getName().equals(module))
-                        .findFirst();
+        Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
+                .filter((x) -> x.getName().equals(module))
+                .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -307,46 +295,50 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 
-                PullResult result =
-                        git.pull()
-                                .setRemote("origin")
-                                .setRemoteBranchName(project.getBranches())
-                                .setCredentialsProvider(project.getCredentialsProvider())
-                                .call();
+                PullResult result = git.pull()
+                        .setRemote("origin")
+                        .setRemoteBranchName(project.getBranches())
+                        .setCredentialsProvider(project.getCredentialsProvider())
+                        .call();
 
                 tailBuffer.get(project.getId()).append(result.getMergeResult().toString()).append("\n");
                 git.close();
 
-                tailBuffer
-                        .get(project.getId())
-                        .append(
-                                String.format("[StreamX] project [%s] git pull successful!\n", project.getName()));
+                tailBuffer.get(project.getId()).append(
+                        String.format(
+                                "[StreamX] project [%s] git pull successful!\n",
+                                project.getName()
+                        )
+                );
 
             } else {
                 tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
-                Git git =
-                        Git.cloneRepository()
-                                .setURI(project.getUrl())
-                                .setDirectory(project.getAppSource())
-                                .setBranch(project.getBranches())
-                                .setCredentialsProvider(project.getCredentialsProvider())
-                                .call();
+                Git git = Git.cloneRepository()
+                        .setURI(project.getUrl())
+                        .setDirectory(project.getAppSource())
+                        .setBranch(project.getBranches())
+                        .setCredentialsProvider(project.getCredentialsProvider())
+                        .call();
 
                 File workTree = git.getRepository().getWorkTree();
 
                 gitWorkTree(project.getId(), workTree, "");
 
-                tailBuffer
-                        .get(project.getId())
-                        .append(
-                                String.format("[StreamX] project [%s] git clone successful!\n", project.getName()));
+                tailBuffer.get(project.getId()).append(
+                        String.format(
+                                "[StreamX] project [%s] git clone successful!\n",
+                                project.getName()
+                        )
+                );
             }
             return true;
         } catch (Exception e) {
-            String errorLog =
-                    String.format(
-                            "[StreamX] project [%s] branch [%s] git %s failure, err: %s",
-                            project.getName(), project.getBranches(), isCloned ? "pull " : "clone", e);
+            String errorLog = String.format(
+                    "[StreamX] project [%s] branch [%s] git %s failure, err: %s",
+                    project.getName(),
+                    project.getBranches(),
+                    isCloned ? "pull " : "clone", e
+            );
             tailBuffer.get(project.getId()).append(errorLog);
             e.printStackTrace();
         }
@@ -407,20 +399,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         StringBuilder builder = tailBuffer.get(project.getId());
         builder.append(project.getLog4BuildStart());
         tailBuffer.put(project.getId(), builder);
-        CommandUtils.execute(
-                project.getMavenBuildCmd(),
-                (line) -> {
-                    if (tailOutMap.containsKey(project.getId())) {
-                        if (tailBeginning.containsKey(project.getId())) {
-                            tailBeginning.remove(project.getId());
-                            Arrays.stream(builder.toString().split("\n"))
-                                    .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/tail", x));
-                        } else {
-                            simpMessageSendingOperations.convertAndSend("/resp/tail", line);
-                        }
-                    }
-                    builder.append(line).append("\n");
-                });
+        CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
+            if (tailOutMap.containsKey(project.getId())) {
+                if (tailBeginning.containsKey(project.getId())) {
+                    tailBeginning.remove(project.getId());
+                    Arrays.stream(builder.toString().split("\n"))
+                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/tail", x));
+                } else {
+                    simpMessageSendingOperations.convertAndSend("/resp/tail", line);
+                }
+            }
+            builder.append(line).append("\n");
+        });
         String out = builder.toString();
         tailCleanUp(project.getId());
         log.info(out);

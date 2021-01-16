@@ -48,12 +48,12 @@ public class ShaHashUtil {
     public static String getRandomSalt(int length) {
         String base = "abcdefghijklmnopqrstuvwxyz0123456789";
         Random random = new Random();
-        StringBuffer sb = new StringBuffer();
+        StringBuilder builder = new StringBuilder();
         for (int i = 0; i < length; i++) {
             int number = random.nextInt(base.length());
-            sb.append(base.charAt(number));
+            builder.append(base.charAt(number));
         }
-        return sb.toString();
+        return builder.toString();
     }
 
     public static void main(String[] args) {

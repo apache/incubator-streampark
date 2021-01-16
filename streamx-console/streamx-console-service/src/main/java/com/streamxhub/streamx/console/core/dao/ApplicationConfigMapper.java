@@ -47,6 +47,5 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
     void active(@Param("id") Long id);
 
     @Select("select * from t_flink_config where app_id=#{config.appId}")
-    IPage<ApplicationConfig> page(
-            Page<ApplicationConfig> page, @Param("config") ApplicationConfig config);
+    IPage<ApplicationConfig> page(Page<ApplicationConfig> page, @Param("config") ApplicationConfig config);
 }

@@ -41,10 +41,8 @@ public interface FlameGraphMapper extends BaseMapper<FlameGraph> {
      * @param end
      * @return
      */
-    @Select(
-            "select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
-    List<FlameGraph> getFlameGraph(
-            @Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
+    @Select("select * from t_flame_graph where app_id=#{appId} and timeline between #{start} and #{end} order by timeline asc")
+    List<FlameGraph> getFlameGraph(@Param("appId") Long appId, @Param("start") Date start, @Param("end") Date end);
 
     @Delete("delete from t_flame_graph where timeline < #{end}")
     void clean(Date end);

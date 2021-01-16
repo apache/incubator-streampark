@@ -104,42 +104,40 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
         List<VueRouter<Menu>> routes = new ArrayList<>();
         // 只差type为菜单类型
         List<Menu> menus = this.findUserMenus(user.getUsername());
-        menus.forEach(
-                menu -> {
-                    VueRouter<Menu> route = new VueRouter<>();
-                    route.setId(menu.getMenuId().toString());
-                    route.setParentId(menu.getParentId().toString());
-                    route.setPath(menu.getPath());
-                    route.setComponent(menu.getComponent());
-                    route.setName(menu.getMenuName());
-                    boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
-                    route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
-                    routes.add(route);
-                });
+        menus.forEach(menu -> {
+            VueRouter<Menu> route = new VueRouter<>();
+            route.setId(menu.getMenuId().toString());
+            route.setParentId(menu.getParentId().toString());
+            route.setPath(menu.getPath());
+            route.setComponent(menu.getComponent());
+            route.setName(menu.getMenuName());
+            boolean hidden = menu.getDisplay().equals(Menu.DISPLAY_NONE);
+            route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
+            routes.add(route);
+        });
         return TreeUtil.buildVueRouter(routes);
     }
 
     private void buildTrees(List<RouterTree<Menu>> trees, List<Menu> menus, List<String> ids) {
-        menus.forEach(
-                menu -> {
-                    ids.add(menu.getMenuId().toString());
-                    RouterTree<Menu> tree = new RouterTree<>();
-                    tree.setId(menu.getMenuId().toString());
-                    tree.setKey(tree.getId());
-                    tree.setParentId(menu.getParentId().toString());
-                    tree.setText(menu.getMenuName());
-                    tree.setTitle(tree.getText());
-                    tree.setIcon(menu.getIcon());
-                    tree.setComponent(menu.getComponent());
-                    tree.setCreateTime(menu.getCreateTime());
-                    tree.setModifyTime(menu.getModifyTime());
-                    tree.setPath(menu.getPath());
-                    tree.setOrder(menu.getOrderNum());
-                    tree.setPermission(menu.getPerms());
-                    tree.setType(menu.getType());
-                    tree.setDisplay(menu.getDisplay());
-                    trees.add(tree);
-                });
+        menus.forEach(menu -> {
+            ids.add(menu.getMenuId().toString());
+            RouterTree<Menu> tree = new RouterTree<>();
+            tree.setId(menu.getMenuId().toString());
+            tree.setKey(tree.getId());
+            tree.setParentId(menu.getParentId().toString());
+            tree.setText(menu.getMenuName());
+            tree.setTitle(tree.getText());
+            tree.setIcon(menu.getIcon());
+            tree.setComponent(menu.getComponent());
+            tree.setCreateTime(menu.getCreateTime());
+            tree.setModifyTime(menu.getModifyTime());
+            tree.setPath(menu.getPath());
+            tree.setOrder(menu.getOrderNum());
+            tree.setPermission(menu.getPerms());
+            tree.setType(menu.getType());
+            tree.setDisplay(menu.getDisplay());
+            trees.add(tree);
+        });
     }
 
     private void setMenu(Menu menu) {

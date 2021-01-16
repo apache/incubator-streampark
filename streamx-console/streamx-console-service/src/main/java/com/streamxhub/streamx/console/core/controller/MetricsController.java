@@ -54,13 +54,7 @@ public class MetricsController {
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
             if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
-                System.out.println(
-                        "id:"
-                                + jvmProfiler.getId()
-                                + ",token:"
-                                + jvmProfiler.getToken()
-                                + ",type:"
-                                + jvmProfiler.getType());
+                log.debug("id:{},token:{},type:{}", jvmProfiler.getId(), jvmProfiler.getToken(), jvmProfiler.getType());
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());
                 flameGraph.setProfiler(jvmProfiler.getProfiler());
@@ -78,8 +72,12 @@ public class MetricsController {
     public ResponseEntity<Resource> flameGraph(FlameGraph flameGraph) throws IOException {
         String file = flameGraphService.generateFlameGraph(flameGraph);
         if (file != null) {
-            String contentDisposition =
-                    ContentDisposition.builder("attachment").filename(file).build().toString();
+            String contentDisposition = ContentDisposition
+                    .builder("attachment")
+                    .filename(file)
+                    .build()
+                    .toString();
+
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, contentDisposition)
                     .contentType(MediaType.parseMediaType("image/svg+xml"))

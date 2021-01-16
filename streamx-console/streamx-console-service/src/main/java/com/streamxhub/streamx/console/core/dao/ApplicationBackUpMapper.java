@@ -34,6 +34,5 @@ import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
 public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
     @Select("SELECT * from t_app_backup where app_id=#{backUp.appId}")
-    IPage<ApplicationBackUp> page(
-            Page<ApplicationBackUp> page, @Param("backUp") ApplicationBackUp backUp);
+    IPage<ApplicationBackUp> page(Page<ApplicationBackUp> page, @Param("backUp") ApplicationBackUp backUp);
 }
