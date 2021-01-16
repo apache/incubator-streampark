@@ -413,7 +413,7 @@ object RedisUtils extends Logger {
     result
   }
 
-  def doPipe[R](f: Pipeline => R)(implicit endpoint: RedisEndpoint): R = {
+  def doPipeline[R](f: Pipeline => R)(implicit endpoint: RedisEndpoint): R = {
     val redis = RedisClient.connect(endpoint)
     val pipe = redis.pipelined()
     val result = f(pipe)
@@ -427,5 +427,6 @@ object RedisUtils extends Logger {
     }
     result
   }
+
 
 }
