@@ -113,53 +113,51 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AtomicInteger availableSlot = new AtomicInteger(0);
         AtomicInteger runningJob = new AtomicInteger(0);
 
-        FlinkTrackingTask.getAllTrackingApp()
-                .forEach(
-                        (_k, v) -> {
-                            if (v.getJmMemory() != null) {
-                                String jmMem = v.getJmMemory().replaceAll("[M|m]", "");
-                                if (StringUtils.isNotEmpty(jmMem)) {
-                                    totalJmMemory.addAndGet(Long.parseLong(jmMem));
-                                }
-                            }
+        FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
+            if (v.getJmMemory() != null) {
+                String jmMem = v.getJmMemory().replaceAll("[M|m]", "");
+                if (StringUtils.isNotEmpty(jmMem)) {
+                    totalJmMemory.addAndGet(Long.parseLong(jmMem));
+                }
+            }
 
-                            if (v.getTmMemory() != null) {
-                                String tmMem = v.getTmMemory().replaceAll("[M|m]", "");
-                                if (StringUtils.isNotEmpty(tmMem)) {
-                                    totalTmMemory.addAndGet(Long.parseLong(tmMem));
-                                }
-                            }
+            if (v.getTmMemory() != null) {
+                String tmMem = v.getTmMemory().replaceAll("[M|m]", "");
+                if (StringUtils.isNotEmpty(tmMem)) {
+                    totalTmMemory.addAndGet(Long.parseLong(tmMem));
+                }
+            }
 
-                            if (v.getTotalTM() != null) {
-                                totalTm.addAndGet(v.getTotalTM());
-                            }
+            if (v.getTotalTM() != null) {
+                totalTm.addAndGet(v.getTotalTM());
+            }
 
-                            if (v.getTotalSlot() != null) {
-                                totalSlot.addAndGet(v.getTotalSlot());
-                            }
+            if (v.getTotalSlot() != null) {
+                totalSlot.addAndGet(v.getTotalSlot());
+            }
 
-                            if (v.getAvailableSlot() != null) {
-                                availableSlot.addAndGet(v.getAvailableSlot());
-                            }
+            if (v.getAvailableSlot() != null) {
+                availableSlot.addAndGet(v.getAvailableSlot());
+            }
 
-                            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
-                                runningJob.incrementAndGet();
-                            }
+            if (v.getState() == FlinkAppState.RUNNING.getValue()) {
+                runningJob.incrementAndGet();
+            }
 
-                            JobsOverview.Task task = v.getOverview();
-                            if (task != null) {
-                                overview.setTotal(overview.getTotal() + task.getTotal());
-                                overview.setCreated(overview.getCreated() + task.getCreated());
-                                overview.setScheduled(overview.getScheduled() + task.getScheduled());
-                                overview.setDeploying(overview.getDeploying() + task.getDeploying());
-                                overview.setRunning(overview.getRunning() + task.getRunning());
-                                overview.setFinished(overview.getFinished() + task.getFinished());
-                                overview.setCanceling(overview.getCanceling() + task.getCanceling());
-                                overview.setCanceled(overview.getCanceled() + task.getCanceled());
-                                overview.setFailed(overview.getFailed() + task.getFailed());
-                                overview.setReconciling(overview.getReconciling() + task.getReconciling());
-                            }
-                        });
+            JobsOverview.Task task = v.getOverview();
+            if (task != null) {
+                overview.setTotal(overview.getTotal() + task.getTotal());
+                overview.setCreated(overview.getCreated() + task.getCreated());
+                overview.setScheduled(overview.getScheduled() + task.getScheduled());
+                overview.setDeploying(overview.getDeploying() + task.getDeploying());
+                overview.setRunning(overview.getRunning() + task.getRunning());
+                overview.setFinished(overview.getFinished() + task.getFinished());
+                overview.setCanceling(overview.getCanceling() + task.getCanceling());
+                overview.setCanceled(overview.getCanceled() + task.getCanceled());
+                overview.setFailed(overview.getFailed() + task.getFailed());
+                overview.setReconciling(overview.getReconciling() + task.getReconciling());
+            }
+        });
         Map<String, Serializable> map = new HashMap();
         map.put("task", overview);
         map.put("jmMemory", totalJmMemory.get());
@@ -180,14 +178,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         /** 瞒天过海,暗度陈仓,偷天换日,鱼目混珠. */
         List<Application> records = page.getRecords();
         List<Application> newRecords = new ArrayList<>(records.size());
-        records.forEach(
-                x -> {
-                    Application app = FlinkTrackingTask.getTracking(x.getId());
-                    if (app != null) {
-                        app.setProjectName(x.getProjectName());
-                    }
-                    newRecords.add(app == null ? x : app);
-                });
+        records.forEach(x -> {
+            Application app = FlinkTrackingTask.getTracking(x.getId());
+            if (app != null) {
+                app.setProjectName(x.getProjectName());
+            }
+            newRecords.add(app == null ? x : app);
+        });
         page.setRecords(newRecords);
         return page;
     }
@@ -230,18 +227,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
                 configService.create(appParam);
             }
-            Executors.newSingleThreadExecutor()
-                    .submit(
-                            () -> {
-                                try {
-                                    appParam.setBackUp(false);
-                                    appParam.setRestart(false);
-                                    deploy(appParam);
-                                    return true;
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                            });
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    appParam.setBackUp(false);
+                    appParam.setRestart(false);
+                    deploy(appParam);
+                    return true;
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
         }
         return saved;
     }
@@ -250,31 +245,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     public boolean update(Application appParam) {
         // update other...
-        return FlinkTrackingTask.persistentAfterCallable(
-                appParam.getId(),
-                () -> {
-                    try {
-                        Application application = getById(appParam.getId());
-                        application.setJobName(appParam.getJobName());
-                        application.setArgs(appParam.getArgs());
-                        application.setOptions(appParam.getOptions());
-                        application.setDynamicOptions(appParam.getDynamicOptions());
-                        application.setDescription(appParam.getDescription());
-                        // update config...
-                        if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
-                            configService.update(appParam);
-                        } else {
-                            application.setJar(appParam.getJar());
-                            application.setMainClass(appParam.getMainClass());
-                        }
-                        /** 配置文件已更新 */
-                        application.setDeploy(DeployState.NEED_RESTART_AFTER_UPDATE.get());
-                        baseMapper.updateById(application);
-                        return true;
-                    } catch (Exception e) {
-                        return false;
-                    }
-                });
+        return FlinkTrackingTask.persistentAfterCallable(appParam.getId(), () -> {
+            try {
+                Application application = getById(appParam.getId());
+                application.setJobName(appParam.getJobName());
+                application.setArgs(appParam.getArgs());
+                application.setOptions(appParam.getOptions());
+                application.setDynamicOptions(appParam.getDynamicOptions());
+                application.setDescription(appParam.getDescription());
+                // update config...
+                if (application.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+                    configService.update(appParam);
+                } else {
+                    application.setJar(appParam.getJar());
+                    application.setMainClass(appParam.getMainClass());
+                }
+                /** 配置文件已更新 */
+                application.setDeploy(DeployState.NEED_RESTART_AFTER_UPDATE.get());
+                baseMapper.updateById(application);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        });
     }
 
     @Override
@@ -330,12 +323,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void clean(Application appParam) {
-        FlinkTrackingTask.persistentAfterRunnable(
-                appParam.getId(),
-                () -> {
-                    appParam.setDeploy(DeployState.NONE.get());
-                    this.baseMapper.updateDeploy(appParam);
-                });
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
+            appParam.setDeploy(DeployState.NONE.get());
+            this.baseMapper.updateDeploy(appParam);
+        });
     }
 
     @Override
@@ -354,8 +345,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
             application.setConfig(encode);
         }
-        String path =
-                this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+        String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
         application.setConfPath(path);
         return application;
     }
@@ -364,8 +354,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public String getMain(Application application) {
         Project project = new Project();
         project.setId(application.getProjectId());
-        String modulePath =
-                project.getAppBase().getAbsolutePath().concat("/").concat(application.getModule());
+        String modulePath = project.getAppBase().getAbsolutePath().concat("/").concat(application.getModule());
         File jarFile = new File(modulePath, application.getJar());
         Manifest manifest = Utils.getJarManifest(jarFile);
         return manifest.getMainAttributes().getValue("Main-Class");
@@ -373,69 +362,62 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean mapping(Application appParam) {
-        return FlinkTrackingTask.persistentAfterCallable(
-                appParam.getId(),
-                () -> {
-                    boolean mapping = this.baseMapper.mapping(appParam);
-                    Application application = getById(appParam.getId());
-                    FlinkTrackingTask.addTracking(application);
-                    return mapping;
-                });
+        return FlinkTrackingTask.persistentAfterCallable(appParam.getId(), () -> {
+            boolean mapping = this.baseMapper.mapping(appParam);
+            Application application = getById(appParam.getId());
+            FlinkTrackingTask.addTracking(application);
+            return mapping;
+        });
     }
 
     @Override
     public void updateState(Application appParam) {
-        FlinkTrackingTask.persistentAfterRunnable(
-                appParam.getId(), () -> this.baseMapper.updateState(appParam));
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> this.baseMapper.updateState(appParam));
     }
 
     public void updateDeploy(Application appParam) {
-        FlinkTrackingTask.persistentAfterRunnable(
-                appParam.getId(), () -> this.baseMapper.updateDeploy(appParam));
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> this.baseMapper.updateDeploy(appParam));
     }
 
     @Override
     public void cancel(Application appParam) {
-        FlinkTrackingTask.persistentAfterRunnable(
-                appParam.getId(),
-                () -> {
-                    Application application = getById(appParam.getId());
-                    application.setState(FlinkAppState.CANCELLING.getValue());
-                    if (appParam.getSavePointed()) {
-                        // 正在执行savepoint...
-                        application.setOptionState(OptionState.SAVEPOINTING.getValue());
-                    } else {
-                        application.setOptionState(OptionState.CANCELLING.getValue());
-                    }
-                    this.baseMapper.updateById(application);
-                    // 准备停止...
-                    FlinkTrackingTask.addStopping(appParam.getId());
-                    /** 此步骤可能会比较耗时,重新开启一个线程去执行.. */
-                    Executors.newSingleThreadExecutor()
-                            .submit(
-                                    () -> {
-                                        try {
-                                            FlinkTrackingTask.addSavepoint(application.getId());
-                                            SavePoint savePoint = new SavePoint();
-                                            String savePointDir =
-                                                    FlinkSubmit.stop(
-                                                            application.getAppId(),
-                                                            application.getJobId(),
-                                                            appParam.getSavePointed(),
-                                                            appParam.getDrain());
-                                            savePoint.setSavePoint(savePointDir);
-                                            savePoint.setAppId(application.getId());
-                                            savePoint.setLastest(true);
-                                            savePoint.setCreateTime(new Date());
-                                            // 之前的配置设置为已过期
-                                            savePointService.obsolete(application.getId());
-                                            savePointService.save(savePoint);
-                                        } catch (Exception e) {
-                                            // 保持savepoint失败.则将之前的统统设置为过期
-                                            savePointService.obsolete(application.getId());
-                                        }
-                                    });
-                });
+        FlinkTrackingTask.persistentAfterRunnable(appParam.getId(), () -> {
+            Application application = getById(appParam.getId());
+            application.setState(FlinkAppState.CANCELLING.getValue());
+            if (appParam.getSavePointed()) {
+                // 正在执行savepoint...
+                application.setOptionState(OptionState.SAVEPOINTING.getValue());
+            } else {
+                application.setOptionState(OptionState.CANCELLING.getValue());
+            }
+            this.baseMapper.updateById(application);
+            // 准备停止...
+            FlinkTrackingTask.addStopping(appParam.getId());
+            /** 此步骤可能会比较耗时,重新开启一个线程去执行.. */
+            Executors.newSingleThreadExecutor().submit(() -> {
+                try {
+                    FlinkTrackingTask.addSavepoint(application.getId());
+                    SavePoint savePoint = new SavePoint();
+                    String savePointDir = FlinkSubmit.stop(
+                            application.getAppId(),
+                            application.getJobId(),
+                            appParam.getSavePointed(),
+                            appParam.getDrain()
+                    );
+
+                    savePoint.setSavePoint(savePointDir);
+                    savePoint.setAppId(application.getId());
+                    savePoint.setLastest(true);
+                    savePoint.setCreateTime(new Date());
+                    // 之前的配置设置为已过期
+                    savePointService.obsolete(application.getId());
+                    savePointService.save(savePoint);
+                } catch (Exception e) {
+                    // 保持savepoint失败.则将之前的统统设置为过期
+                    savePointService.obsolete(application.getId());
+                }
+            });
+        });
     }
 
     @Override
@@ -453,8 +435,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
-        String workspaceWithSchemaAndNameService =
-                HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
+        String workspaceWithSchemaAndNameService = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
 
         String appConf, flinkUserJar;
         switch (application.getApplicationType()) {
@@ -463,26 +444,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String confContent = applicationConfig.getContent();
                 String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
                 appConf = String.format("%s://%s", format, confContent);
-                String classPath =
-                        String.format(
-                                "%s/%s/%s/lib",
-                                workspaceWithSchemaAndNameService, application.getId(), application.getModule());
+                String classPath = String.format(
+                        "%s/%s/%s/lib",
+                        workspaceWithSchemaAndNameService, application.getId(), application.getModule()
+                );
                 flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
                 break;
             case APACHE_FLINK:
-                appConf =
-                        String.format(
-                                "json://{\"%s\":\"%s\"}",
-                                ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(), application.getMainClass());
-                classPath =
-                        String.format(
-                                "%s/%s/%s",
-                                workspaceWithSchemaAndNameService, application.getId(), application.getModule());
+                appConf = String.format(
+                        "json://{\"%s\":\"%s\"}",
+                        ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(), application.getMainClass()
+                );
+                classPath = String.format(
+                        "%s/%s/%s",
+                        workspaceWithSchemaAndNameService, application.getId(), application.getModule()
+                );
                 flinkUserJar = String.format("%s/%s", classPath, application.getJar());
                 break;
             default:
-                throw new IllegalArgumentException(
-                        "[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
         }
 
         String savePointDir = null;
@@ -502,10 +482,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             option.append(" -n ");
         }
 
-        String[] dynamicOption =
-                CommonUtil.notEmpty(application.getDynamicOptions())
-                        ? application.getDynamicOptions().split("\\s+")
-                        : new String[0];
+        String[] dynamicOption = CommonUtil.notEmpty(application.getDynamicOptions())
+                ? application.getDynamicOptions().split("\\s+")
+                : new String[0];
 
         Map<String, Serializable> flameGraph = null;
         if (appParam.getFlameGraph()) {
@@ -519,18 +498,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flameGraph.put("metricInterval", 1000 * 60 * 2);
         }
 
-        FlinkSubmit.SubmitInfo submitInfo =
-                new FlinkSubmit.SubmitInfo(
-                        flinkUserJar,
-                        application.getJobName(),
-                        appConf,
-                        application.getApplicationType().getName(),
-                        savePointDir,
-                        flameGraph,
-                        option.toString(),
-                        application.getOptionMap(),
-                        dynamicOption,
-                        application.getArgs());
+        FlinkSubmit.SubmitInfo submitInfo = new FlinkSubmit.SubmitInfo(
+                flinkUserJar,
+                application.getJobName(),
+                appConf,
+                application.getApplicationType().getName(),
+                savePointDir,
+                flameGraph,
+                option.toString(),
+                application.getOptionMap(),
+                dynamicOption,
+                application.getArgs()
+        );
 
         ApplicationLog log = new ApplicationLog();
         log.setAppId(application.getId());

@@ -57,20 +57,20 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
-        List<FlameGraph> flameGraphList =
-                this.baseMapper.getFlameGraph(
-                        flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd());
+        List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(
+                flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd()
+        );
         if (CommonUtil.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
             flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
             Application application = applicationService.getById(flameGraph.getAppId());
-            String jsonName =
-                    String.format(
-                            "%d_%d_%d.json",
-                            flameGraph.getAppId(),
-                            flameGraph.getStart().getTime(),
-                            flameGraph.getEnd().getTime());
+            String jsonName = String.format(
+                    "%d_%d_%d.json",
+                    flameGraph.getAppId(),
+                    flameGraph.getStart().getTime(),
+                    flameGraph.getEnd().getTime()
+            );
             String jsonPath = WebUtil.getAppDir("temp").concat(File.separator).concat(jsonName);
             String foldedPath = jsonPath.replace(".json", ".folded");
             String svgPath = jsonPath.replace(".json", ".svg");
@@ -82,13 +82,17 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
 
             String title = application.getJobName().concat(" ___ FlameGraph");
             // generate...
-            List<String> commands =
-                    Arrays.asList(
-                            String.format("cd %s", flameGraphPath),
-                            String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
-                            String.format(
-                                    "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
-                                    title, flameGraph.getWidth(), foldedPath, svgPath));
+            List<String> commands = Arrays.asList(
+                    String.format("cd %s", flameGraphPath),
+                    String.format("python ./stackcollapse.py -i %s > %s ", jsonPath, foldedPath),
+                    String.format(
+                            "./flamegraph.pl --title=\"%s\" --width=%d --colors=java %s > %s ",
+                            title,
+                            flameGraph.getWidth(),
+                            foldedPath,
+                            svgPath
+                    )
+            );
             CommandUtils.execute(commands, (line) -> log.info("flameGraph: {} ", line));
             return svgPath;
         }
