@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling.profiler;
+package com.streamxhub.streamx.plugin.profiling.profiler;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,8 +29,8 @@ import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.plugin.profiling.Reporter;
-import com.streamxhub.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
+import com.streamxhub.streamx.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
 public class MethodArgumentProfilerTest {
   @Test

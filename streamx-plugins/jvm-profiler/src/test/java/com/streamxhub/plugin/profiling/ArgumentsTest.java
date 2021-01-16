@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.plugin.profiling;
+package com.streamxhub.streamx.plugin.profiling;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -29,16 +29,16 @@ import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.plugin.profiling.reporter.ConsoleOutputReporter;
-import com.streamxhub.plugin.profiling.util.ClassAndMethod;
-import com.streamxhub.plugin.profiling.util.ClassMethodArgument;
+import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
+import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
+import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgument;
 
 public class ArgumentsTest {
   @Test
   public void allArguments() {
     Arguments arguments =
         Arguments.parseArgs(
-            "reporter=com.streamxhub.plugin.profiling.ArgumentsTest$DummyReporter,durationProfiling=a.bc.foo,metricInterval=123,appIdVariable=APP_ID1,appIdRegex=app123,argumentProfiling=package1.class1.method1.1");
+            "reporter=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyReporter,durationProfiling=a.bc.foo,metricInterval=123,appIdVariable=APP_ID1,appIdRegex=app123,argumentProfiling=package1.class1.method1.1");
     Assert.assertEquals(6, arguments.getRawArgValues().size());
     Assert.assertFalse(arguments.isNoop());
     Assert.assertEquals(DummyReporter.class, arguments.getReporter().getClass());
@@ -110,7 +110,7 @@ public class ArgumentsTest {
   public void setReporter() {
     Arguments arguments = Arguments.parseArgs("");
 
-    arguments.setReporter("com.streamxhub.plugin.profiling.ArgumentsTest$DummyReporter");
+    arguments.setReporter("com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyReporter");
     Reporter reporter = arguments.getReporter();
     Assert.assertTrue(reporter instanceof ArgumentsTest.DummyReporter);
   }
@@ -120,7 +120,7 @@ public class ArgumentsTest {
     Arguments arguments = Arguments.parseArgs("");
 
     arguments.setConfigProvider(
-        "com.streamxhub.plugin.profiling.ArgumentsTest$DummyConfigProvider");
+        "com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyConfigProvider");
     ConfigProvider configProvider = arguments.getConfigProvider();
     Assert.assertTrue(configProvider instanceof ArgumentsTest.DummyConfigProvider);
   }
@@ -129,7 +129,7 @@ public class ArgumentsTest {
   public void processConfigProvider_DummyConfigProvider() {
     Arguments arguments =
         Arguments.parseArgs(
-            "tag=tag1,cluster=cluster1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.plugin.profiling.ArgumentsTest$DummyConfigProvider");
+            "tag=tag1,cluster=cluster1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyConfigProvider");
 
     arguments.runConfigProvider();
 
@@ -148,7 +148,7 @@ public class ArgumentsTest {
   public void processConfigProvider_SimpleConfigProvider() {
     Arguments arguments =
         Arguments.parseArgs(
-            "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.plugin.profiling.ArgumentsTest$SimpleConfigProvider");
+            "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$SimpleConfigProvider");
 
     arguments.runConfigProvider();
 
@@ -166,7 +166,7 @@ public class ArgumentsTest {
   public void processConfigProvider_OverrideConfigProvider() {
     Arguments arguments =
         Arguments.parseArgs(
-            "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
+            "tag=tag1,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
 
     arguments.runConfigProvider();
 
@@ -181,7 +181,7 @@ public class ArgumentsTest {
 
     arguments =
         Arguments.parseArgs(
-            "tag=tag2,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
+            "tag=tag2,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
 
     arguments.runConfigProvider();
 
@@ -196,7 +196,7 @@ public class ArgumentsTest {
 
     arguments =
         Arguments.parseArgs(
-            "tag=tag3,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
+            "tag=tag3,metricInterval=1000,ioProfiling=true,durationProfiling=a.bc.foo,durationProfiling=ab.c.d.test,configProvider=com.streamxhub.streamx.plugin.profiling.ArgumentsTest$OverrideConfigProvider");
 
     arguments.runConfigProvider();
 
