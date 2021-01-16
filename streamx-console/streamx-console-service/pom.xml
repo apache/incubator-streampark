@@ -34,13 +34,13 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>1.0.0</version>
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-repl</artifactId>
             <version>1.0.0</version>
             <exclusions>
@@ -52,7 +52,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-submit</artifactId>
             <version>1.0.0</version>
             <exclusions>
@@ -68,7 +68,7 @@
         </dependency>
 
         <dependency>
-            <groupId>com.streamxhub</groupId>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>jvm-profiler</artifactId>
             <version>1.0.0</version>
         </dependency>

@@ -7,7 +7,7 @@ flink:
       zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
       jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
     property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
-      $internal.application.main: com.streamxhub.flink.test.FlinkSinkApp # main class
+      $internal.application.main: com.streamxhub.streamx.flink.test.FlinkSinkApp # main class
       yarn.application.name: FlinkSinkApp
       yarn.application.node-label: StreamX
       taskmanager.numberOfTaskSlots: 1

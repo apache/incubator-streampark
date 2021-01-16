@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.streamxhub.console.system.dao.RoleMapper">
-    <resultMap id="roleMap" type="com.streamxhub.console.system.entity.Role">
+<mapper namespace="com.streamxhub.streamx.console.system.dao.RoleMapper">
+    <resultMap id="roleMap" type="com.streamxhub.streamx.console.system.entity.Role">
         <!--
           WARNING - @mbg.generated
         -->
