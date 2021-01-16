@@ -42,9 +42,7 @@ public class MetricsTask {
     @Autowired
     private FlameGraphService flameGraphService;
 
-    private final String FLAMEGRAPH_FILE_REGEXP =
-            "\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg";
-
+    private final String FLAMEGRAPH_FILE_REGEXP = "\\d+_\\d+\\.json|\\d+_\\d+\\.folded|\\d+_\\d+\\.svg";
     /**
      * hour.
      */
