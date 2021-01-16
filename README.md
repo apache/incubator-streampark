@@ -28,7 +28,7 @@ After the build is completed, the project will be installed in the local maven w
 
 ```xml
 <dependency>
-    <groupId>com.streamxhub</groupId>
+    <groupId>com.streamxhub.streamx</groupId>
     <artifactId>streamx-flink-core</artifactId>
     <version>1.0.0</version>
 </dependency>
@@ -44,9 +44,9 @@ After the build is completed, the project will be installed in the local maven w
 
 package com.your.flink.streamx
 
-import com.streamxhub.flink.core.scala.sink.KafkaSink
-import com.streamxhub.flink.core.scala.source.KafkaSource
-import com.streamxhub.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.sink.KafkaSink
+import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
+import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
 
 object HelloStreamXApp extends FlinkStreaming {
