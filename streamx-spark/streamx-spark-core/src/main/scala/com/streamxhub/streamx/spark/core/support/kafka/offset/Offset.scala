@@ -13,20 +13,20 @@ import scala.util.Try
 
 
 /**
-  * Offset 管理
-  */
+ * Offset 管理
+ */
 trait Offset extends Logger with Serializable {
 
   val sparkConf: SparkConf
 
   lazy val storeType: String = storeParams.getOrElse("type", "none")
 
-  lazy val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
+  lazy implicit val storeParams: Map[String, String] = sparkConf.getAllWithPrefix(s"spark.source.kafka.offset.store.").toMap
 
-  implicit def toProperty(map:Map[String,String]):Properties = {
-    require(map!=null)
+  implicit def toProperty(map: Map[String, String]): Properties = {
+    require(map != null)
     val prop = new Properties()
-    map.foreach((a) => prop.setProperty(a._1,a._2))
+    map.foreach((a) => prop.setProperty(a._1, a._2))
     prop
   }
 
@@ -38,54 +38,54 @@ trait Offset extends Logger with Serializable {
   }
 
   /**
-    * 获取存储的Offset
-    *
-    * @param groupId
-    * @param topics
-    * @return
-    */
+   * 获取存储的Offset
+   *
+   * @param groupId
+   * @param topics
+   * @return
+   */
   def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long]
 
   /**
-    * 更新 Offsets
-    *
-    * @param groupId
-    * @param offsetInfos
-    */
+   * 更新 Offsets
+   *
+   * @param groupId
+   * @param offsetInfos
+   */
   def update(groupId: String, offsetInfos: Map[TopicPartition, Long]): Unit
 
   /**
-    * 删除 Offsets
-    *
-    * @param groupId
-    * @param topics
-    */
+   * 删除 Offsets
+   *
+   * @param groupId
+   * @param topics
+   */
   def delete(groupId: String, topics: Set[String]): Unit
 
   /**
-    * 生成Key
-    *
-    * @param groupId
-    * @param topic
-    * @return
-    */
+   * 生成Key
+   *
+   * @param groupId
+   * @param topic
+   * @return
+   */
   def key(groupId: String, topic: String): String = s"$groupId#$topic"
 
 
   /**
-    * 获取最旧的Offsets
-    *
-    * @param topics
-    * @return
-    */
+   * 获取最旧的Offsets
+   *
+   * @param topics
+   * @return
+   */
   def getEarliestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.EarliestTime)
 
   /**
-    * 获取最新的Offset
-    *
-    * @param topics
-    * @return
-    */
+   * 获取最新的Offset
+   *
+   * @param topics
+   * @return
+   */
   def getLatestOffsets(topics: Seq[String]): Map[TopicPartition, Long] = getOffsets(topics, OffsetRequest.LatestTime)
 
 
@@ -115,13 +115,13 @@ trait Offset extends Logger with Serializable {
   }
 
   /**
-    * 获取指定时间的Offset
-    * 想
-    *
-    * @param topics
-    * @param time
-    * @return
-    */
+   * 获取指定时间的Offset
+   * 想
+   *
+   * @param topics
+   * @param time
+   * @return
+   */
   private def getOffsets(topics: Seq[String], time: Long): Map[TopicPartition, Long] = {
     val leaders = getLeaders(topics)
     val offsetMap = new mutable.HashMap[TopicPartition, Long]()

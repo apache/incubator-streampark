@@ -1,42 +1,53 @@
 /**
-  * Copyright (c) 2019 The StreamX Project
-  * <p>
-  * Licensed to the Apache Software Foundation (ASF) under one
-  * or more contributor license agreements. See the NOTICE file
-  * distributed with this work for additional information
-  * regarding copyright ownership. The ASF licenses this file
-  * to you under the Apache License, Version 2.0 (the
-  * "License"); you may not use this file except in compliance
-  * with the License. You may obtain a copy of the License at
-  * <p>
-  * http://www.apache.org/licenses/LICENSE-2.0
-  * <p>
-  * Unless required by applicable law or agreed to in writing,
-  * software distributed under the License is distributed on an
-  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-  * KIND, either express or implied. See the License for the
-  * specific language governing permissions and limitations
-  * under the License.
-  */
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 
 package com.streamxhub.streamx.spark.core.support.kafka.offset
 
-import com.streamxhub.streamx.spark.core.support.redis.RedisClient._
+import com.streamxhub.streamx.common.util.{RedisEndpoint, RedisUtils}
 import org.apache.kafka.common.TopicPartition
 import org.apache.spark.SparkConf
+import redis.clients.jedis.Protocol
 
 import scala.collection.JavaConversions._
+import scala.util.Try
 
 /**
-  *
-  *
-  * Offset 存储到Redis
-  */
+ *
+ *
+ * Offset 存储到Redis
+ */
 private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
+
+  private[this] implicit def endpoint(implicit params: Map[String, String]): RedisEndpoint = {
+    val host = params.getOrElse("redis.hosts", Protocol.DEFAULT_HOST)
+    val port = params.getOrElse("redis.port", Protocol.DEFAULT_PORT.toString).toInt
+    val auth = Try(params("redis.auth")) getOrElse null
+    val dbNum = params.getOrElse("redis.db", Protocol.DEFAULT_DATABASE.toString).toInt
+    val timeout = params.getOrElse("redis.timeout", Protocol.DEFAULT_TIMEOUT.toString).toInt
+    RedisEndpoint(host, port, auth, dbNum, timeout)
+  }
 
   override def get(groupId: String, topics: Set[String]): Map[TopicPartition, Long] = {
     val earliestOffsets = getEarliestOffsets(topics.toSeq)
-    val offsetMap = close { redis =>
+    val offsetMap = RedisUtils.doRedis { redis =>
       topics.flatMap(topic => {
         redis.hgetAll(key(groupId, topic)).map {
           case (partition, offset) =>
@@ -51,10 +62,8 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
             tp -> finalOffset
         }
       })
-    }(connect(storeParams))
+    }
 
-    // fix bug
-    // 如果GroupId 已经在Hbase存在了，这个时候新加一个topic ，则新加的Topic 不会被消费
     val offsetMaps = reset.toLowerCase() match {
       case "largest" => getLatestOffsets(topics.toSeq) ++ offsetMap
       case _ => getEarliestOffsets(topics.toSeq) ++ offsetMap
@@ -63,18 +72,17 @@ private[kafka] class RedisOffset(val sparkConf: SparkConf) extends Offset {
     offsetMaps
   }
 
-
   override def update(groupId: String, offsets: Map[TopicPartition, Long]): Unit = {
-    close { redis =>
+    RedisUtils.doRedis { redis =>
       offsets.foreach { case (tp, offset) => redis.hset(key(groupId, tp.topic), tp.partition().toString, offset.toString) }
-    }(connect(storeParams))
+    }
     logInfo(s"storeType:Redis,updateOffsets [ $groupId,${offsets.mkString(",")} ]")
   }
 
   override def delete(groupId: String, topics: Set[String]): Unit = {
-    close { redis =>
-      topics.foreach(x => redis.del(key(groupId, x)))
-    }(connect(storeParams))
+    RedisUtils.doRedis(redis => topics.foreach(x => redis.del(key(groupId, x))))
     logInfo(s"storeType:Redis,deleteOffsets [ $groupId,${topics.mkString(",")} ]")
   }
+
+
 }
