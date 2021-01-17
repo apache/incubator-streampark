@@ -38,6 +38,8 @@ import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTar
 import org.apache.flink.yarn.YarnClusterClientFactory
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.slf4j.LoggerFactory
+
 
 import java.io.{File, Serializable}
 import java.lang.{Boolean => JavaBool}
@@ -85,7 +87,9 @@ import scala.util.{Failure, Success, Try}
  * @author benjobs
  */
 
-object FlinkSubmit extends Logger {
+object FlinkSubmit {
+
+  private lazy val logger = LoggerFactory.getLogger(this.getClass.getName.stripSuffix("$"))
 
   private[this] var flinkDefaultConfiguration: Configuration = _
 
@@ -95,13 +99,13 @@ object FlinkSubmit extends Logger {
 
   private[this] lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
-    logInfo(s"flinkHome: $flinkLocalHome")
+    logger.info(s"[StreamX] flinkHome: $flinkLocalHome")
     flinkLocalHome
   }
 
   //----------Public Method------------------
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
-    logInfo(
+    logger.info(
       s"""
          |"[StreamX] flink submit," +
          |      "appName: ${submitInfo.appName},"
@@ -136,14 +140,14 @@ object FlinkSubmit extends Logger {
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-      logInfo("------------------<<specification>>------------------\n")
-      logInfo(s"$clusterSpecification\n")
-      logInfo("------------------------------------\n")
+      logger.info("[StreamX] ------------------<<specification>>------------------\n")
+      logger.info(s"[StreamX] $clusterSpecification\n")
+      logger.info("[StreamX] ------------------------------------\n")
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      logInfo("------------------<<applicationId>>------------------\n")
-      logInfo(s"Flink Job Started: applicationId: $applicationId \n")
-      logInfo("------------------------------------\n")
+      logger.info("[StreamX] ------------------<<applicationId>>------------------\n")
+      logger.info(s"[StreamX] Flink Job Started: applicationId: $applicationId \n")
+      logger.info("[StreamX] ------------------------------------\n")
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
@@ -360,9 +364,9 @@ object FlinkSubmit extends Logger {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    logInfo("------------------------------------\n")
-    logInfo(s"Effective executor configuration: $effectiveConfiguration \n")
-    logInfo("------------------------------------\n")
+    logger.info("[StreamX] ------------------------------------\n")
+    logger.info(s"[StreamX] Effective executor configuration: $effectiveConfiguration \n")
+    logger.info("[StreamX] ------------------------------------\n")
 
     effectiveConfiguration
   }
