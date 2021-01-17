@@ -29,9 +29,9 @@ trait Logger {
 
   private[this] val prefix = "[StreamX]"
 
-  private def logName = this.getClass.getName.stripSuffix("$")
+  protected def logName: String = this.getClass.getName.stripSuffix("$")
 
-  private def logger: SlfLogger = {
+  protected def logger: SlfLogger = {
     if (_logger == null) {
       initializeLogIfNecessary(false)
       _logger = LoggerFactory.getLogger(logName)
