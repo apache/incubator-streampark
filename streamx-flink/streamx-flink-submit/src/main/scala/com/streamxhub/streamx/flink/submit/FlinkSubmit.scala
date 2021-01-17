@@ -178,7 +178,7 @@ object FlinkSubmit extends Logger {
     }
   }
 
-  def getSubmitedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).orNull
+  def getSubmittedConfiguration(appId: ApplicationId): Configuration = configurationMap.remove(appId.toString).orNull
 
   //----------Public Method end ------------------
 

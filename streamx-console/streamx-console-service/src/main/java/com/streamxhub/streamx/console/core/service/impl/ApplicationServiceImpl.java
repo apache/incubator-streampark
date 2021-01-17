@@ -517,7 +517,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
-            Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
+            Configuration configuration = FlinkSubmit.getSubmittedConfiguration(appId);
             if (configuration != null) {
                 String jmMemory = configuration.toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 String tmMemory = configuration.toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
