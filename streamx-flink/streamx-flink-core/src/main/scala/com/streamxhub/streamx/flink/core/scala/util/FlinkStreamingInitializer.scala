@@ -115,7 +115,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
 
     map
-      .filter(_._1.startsWith(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX))
+      .filter(!_._1.startsWith(KEY_FLINK_DEPLOYMENT_OPTION_PREFIX))
       .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
   }
 
