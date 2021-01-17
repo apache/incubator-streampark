@@ -99,7 +99,7 @@ object FlinkSubmit {
 
   private[this] lazy val FLINK_HOME = {
     val flinkLocalHome = System.getenv("FLINK_HOME")
-    logger.info(s"[StreamX] flinkHome: $flinkLocalHome")
+    logger.info(s"flinkHome: $flinkLocalHome")
     flinkLocalHome
   }
 
@@ -107,7 +107,7 @@ object FlinkSubmit {
   @throws[Exception] def submit(submitInfo: SubmitInfo): ApplicationId = {
     logger.info(
       s"""
-         |"[StreamX] flink submit," +
+         |"flink submit," +
          |      "appName: ${submitInfo.appName},"
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
@@ -140,14 +140,14 @@ object FlinkSubmit {
     val clusterDescriptor = clientFactory.createClusterDescriptor(effectiveConfiguration)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(effectiveConfiguration)
-      logger.info("[StreamX] ------------------<<specification>>------------------\n")
-      logger.info(s"[StreamX] $clusterSpecification\n")
-      logger.info("[StreamX] ------------------------------------\n")
+      logger.info("------------------<<specification>>------------------\n")
+      logger.info(s"$clusterSpecification\n")
+      logger.info("------------------------------------\n")
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      logger.info("[StreamX] ------------------<<applicationId>>------------------\n")
-      logger.info(s"[StreamX] Flink Job Started: applicationId: $applicationId \n")
-      logger.info("[StreamX] ------------------------------------\n")
+      logger.info("------------------<<applicationId>>------------------\n")
+      logger.info(s"Flink Job Started: applicationId: $applicationId \n")
+      logger.info("------------------------------------\n")
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
@@ -178,7 +178,7 @@ object FlinkSubmit {
     } catch {
       case e: Exception =>
         val cause = ExceptionUtils.stringifyException(e)
-        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
+        throw new FlinkException(s"Triggering a savepoint for the job $jobStringId failed. $cause");
     }
   }
 
@@ -202,12 +202,12 @@ object FlinkSubmit {
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+          case _ => throw new IllegalArgumentException("Usage:flink.conf file error,muse be properties or yml")
         }
       case x if x.trim.startsWith("json://") =>
         val json = x.trim.drop(7)
         new ObjectMapper().readValue[JavaMap[String, String]](json, classOf[JavaMap[String, String]]).toMap
-      case _ => throw new IllegalArgumentException("[StreamX] appConf format error.")
+      case _ => throw new IllegalArgumentException("appConf format error.")
     }
     prefix match {
       case "" | null => map
@@ -244,7 +244,7 @@ object FlinkSubmit {
       appConfigMap.filter(x => {
         //验证参数是否合法...
         val verify = commandLineOptions.hasOption(x._1)
-        if (!verify) println(s"[StreamX] param:${x._1} is error,skip it.")
+        if (!verify) println(s"param:${x._1} is error,skip it.")
         verify
       }).foreach(x => {
         val opt = commandLineOptions.getOption(x._1.trim).getOpt
@@ -275,9 +275,9 @@ object FlinkSubmit {
           val pluginsPath = System.getProperty("app.home").concat("/plugins")
           val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
           jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
-            case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
+            case Array() => throw new IllegalArgumentException(s"can no found jvm-profiler jar in $pluginsPath")
             case array if array.length == 1 => array.head
-            case more => throw new IllegalArgumentException(s"[StreamX] found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
+            case more => throw new IllegalArgumentException(s"found multiple jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
           }
         }
 
@@ -325,9 +325,9 @@ object FlinkSubmit {
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
 
     val flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
+      case Array() => throw new IllegalArgumentException(s"can no found flink-dist jar in $FLINK_HOME/lib")
       case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
+      case more => throw new IllegalArgumentException(s"found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
     }
 
     val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
@@ -364,9 +364,9 @@ object FlinkSubmit {
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
 
-    logger.info("[StreamX] ------------------------------------\n")
-    logger.info(s"[StreamX] Effective executor configuration: $effectiveConfiguration \n")
-    logger.info("[StreamX] ------------------------------------\n")
+    logger.info("------------------------------------\n")
+    logger.info(s"Effective executor configuration: $effectiveConfiguration \n")
+    logger.info("------------------------------------\n")
 
     effectiveConfiguration
   }
@@ -377,7 +377,7 @@ object FlinkSubmit {
     val clusterClientFactory = new YarnClusterClientFactory
     val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
     if (applicationId == null) {
-      throw new FlinkException("[StreamX] getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
+      throw new FlinkException("getClusterClient error. No cluster id was specified. Please specify a cluster to which you would like to connect.")
     }
     val clusterDescriptor = clusterClientFactory.createClusterDescriptor(flinkConfiguration)
     clusterDescriptor.retrieve(applicationId).getClusterClient
