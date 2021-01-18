@@ -197,7 +197,7 @@
           :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -250,7 +250,7 @@
           :step="conf.step"
           v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -291,7 +291,7 @@
           :step="conf.step"
           v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -332,7 +332,7 @@
           :step="conf.step"
           v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -430,9 +430,19 @@ export default {
     this.form = this.$form.createForm(this)
     this.optionsKeyMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.optionsKeyMapping.set(item.key, item.name)
+      this.optionsKeyMapping.set(item.key, item)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
+  },
+
+  filters: {
+    description (option) {
+      if (option.unit) {
+        return option.description + ' (单位' + option.unit + ')'
+      } else {
+        return option.description
+      }
+    }
   },
 
   methods: {
@@ -603,7 +613,10 @@ export default {
                 if (this.configItems.includes(k)) {
                   options[k] = v
                 } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                  options[this.optionsKeyMapping.get(k)] = v
+                  const opt = this.optionsKeyMapping.get(k)
+                  const unit = opt['unit'] || ''
+                  const name = opt['name']
+                  options[name] = v + unit
                 }
               }
             }

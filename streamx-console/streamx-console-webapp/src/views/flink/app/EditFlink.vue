@@ -133,7 +133,7 @@
           :step="conf.step"
           v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -174,7 +174,7 @@
           :step="conf.step"
           v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -215,7 +215,7 @@
           :step="conf.step"
           v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
-        <p class="conf-desc">{{ conf.description }}</p>
+        <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
 
       <a-form-item
@@ -289,7 +289,6 @@ export default {
       tmMemoryItems: [],
       form: null,
       options: configOptions,
-      optionsMapping: {},
       confEdit: {
         visiable: false
       }
@@ -308,11 +307,19 @@ export default {
 
   beforeMount () {
     this.form = this.$form.createForm(this)
-    this.optionsMapping = new Map()
     this.options.forEach((item, index, array) => {
-      this.optionsMapping.set(item.key, item.name)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
     })
+  },
+
+  filters: {
+    description (option) {
+      if (option.unit) {
+        return option.description + ' (单位' + option.unit + ')'
+      } else {
+        return option.description
+      }
+    }
   },
 
   methods: {
