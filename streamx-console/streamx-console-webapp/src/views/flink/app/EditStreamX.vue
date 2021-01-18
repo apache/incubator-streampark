@@ -602,7 +602,7 @@ export default {
                   const opt = this.optionsKeyMapping.get(k)
                   const unit = opt['unit'] || ''
                   const name = opt['name']
-                  options[name] = v.toLowerCase().replace(/[k|m|g]b$/g,'') + unit
+                  options[name] = v.toLowerCase().replace(/[k|m|g]b$/g, '') + unit
                 }
               }
             }
