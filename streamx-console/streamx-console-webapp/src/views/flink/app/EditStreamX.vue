@@ -590,7 +590,7 @@ export default {
           const options = {}
           for (const k in values) {
             const v = values[k]
-            if (v !== '') {
+            if (v !== '' && v !== undefined) {
               if (k === 'parallelism') {
                 options['parallelism.default'] = v
               } else if (k === 'slot') {
@@ -602,7 +602,13 @@ export default {
                   const opt = this.optionsKeyMapping.get(k)
                   const unit = opt['unit'] || ''
                   const name = opt['name']
-                  options[name] = v.toLowerCase().replace(/[k|m|g]b$/g, '') + unit
+                  if (typeof v === 'string') {
+                    options[name] = v.replace(/[k|m|g]b$/g, '') + unit
+                  } else if( typeof v === 'number') {
+                    options[name] = v + unit
+                  } else {
+                    options[name] = v
+                  }
                 }
               }
             }
