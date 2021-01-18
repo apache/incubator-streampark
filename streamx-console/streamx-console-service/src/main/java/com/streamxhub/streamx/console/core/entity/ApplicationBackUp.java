@@ -50,8 +50,11 @@ public class ApplicationBackUp {
         this.appId = application.getId();
         this.description = application.getBackUpDescription();
         this.createTime = new Date();
-        this.path =
-                String.format(
-                        "%s/%d/%d", ConfigConst.APP_HISTORY(), application.getId(), createTime.getTime());
+        this.path = String.format(
+                "%s/%d/%d",
+                ConfigConst.APP_HISTORY(),
+                application.getId(),
+                createTime.getTime()
+        );
     }
 }

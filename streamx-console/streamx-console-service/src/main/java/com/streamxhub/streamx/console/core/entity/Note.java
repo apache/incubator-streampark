@@ -49,17 +49,17 @@ public class Note {
         if (this.content == null) {
             Scanner scanner = new Scanner(this.text);
             Properties properties = new Properties();
-            StringBuffer codeBuffer = new StringBuffer();
+            StringBuilder codeBuilder = new StringBuilder();
             while (scanner.hasNextLine()) {
                 String line = scanner.nextLine();
                 if (line.startsWith("%flink.")) {
-                    String[] dyProp = line.trim().split("\\=");
+                    String[] dyProp = line.trim().split("=");
                     properties.setProperty(dyProp[0].substring(1), dyProp[1]);
                 } else {
-                    codeBuffer.append(line).append("\n");
+                    codeBuilder.append(line).append("\n");
                 }
             }
-            this.content = new Content(properties, codeBuffer.toString());
+            this.content = new Content(properties, codeBuilder.toString());
         }
         return this.content;
     }

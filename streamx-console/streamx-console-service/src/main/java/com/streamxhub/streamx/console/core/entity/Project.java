@@ -181,7 +181,7 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
-    public String getLogHeader(String header) {
+    private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
     }
 }
