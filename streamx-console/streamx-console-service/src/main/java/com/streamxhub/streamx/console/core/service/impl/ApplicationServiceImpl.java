@@ -113,7 +113,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         AtomicInteger availableSlot = new AtomicInteger(0);
         AtomicInteger runningJob = new AtomicInteger(0);
 
-        FlinkTrackingTask.getAllTrackingApp().forEach((_k, v) -> {
+        FlinkTrackingTask.getAllTrackingApp().forEach((k, v) -> {
             if (v.getJmMemory() != null) {
                 String jmMem = v.getJmMemory().replaceAll("[M|m]", "");
                 if (StringUtils.isNotEmpty(jmMem)) {
@@ -158,7 +158,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 overview.setReconciling(overview.getReconciling() + task.getReconciling());
             }
         });
-        Map<String, Serializable> map = new HashMap();
+        Map<String, Serializable> map = new HashMap<>();
         map.put("task", overview);
         map.put("jmMemory", totalJmMemory.get());
         map.put("tmMemory", totalTmMemory.get());
@@ -205,7 +205,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
-        QueryWrapper<Application> queryWrapper = new QueryWrapper();
+        QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("job_name", appParam.getJobName());
         int count = this.baseMapper.selectCount(queryWrapper);
         boolean exists = YarnUtils.isContains(appParam.getJobName());
@@ -446,20 +446,33 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 appConf = String.format("%s://%s", format, confContent);
                 String classPath = String.format(
                         "%s/%s/%s/lib",
-                        workspaceWithSchemaAndNameService, application.getId(), application.getModule()
+                        workspaceWithSchemaAndNameService,
+                        application.getId(),
+                        application.getModule()
                 );
-                flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
+                flinkUserJar = String.format(
+                        "%s/%s.jar",
+                        classPath,
+                        application.getModule()
+                );
                 break;
             case APACHE_FLINK:
                 appConf = String.format(
                         "json://{\"%s\":\"%s\"}",
-                        ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(), application.getMainClass()
+                        ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
+                        application.getMainClass()
                 );
                 classPath = String.format(
                         "%s/%s/%s",
-                        workspaceWithSchemaAndNameService, application.getId(), application.getModule()
+                        workspaceWithSchemaAndNameService,
+                        application.getId(),
+                        application.getModule()
                 );
-                flinkUserJar = String.format("%s/%s", classPath, application.getJar());
+                flinkUserJar = String.format(
+                        "%s/%s",
+                        classPath,
+                        application.getJar()
+                );
                 break;
             default:
                 throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
@@ -517,7 +530,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             ApplicationId appId = FlinkSubmit.submit(submitInfo);
-            Configuration configuration = FlinkSubmit.getSubmitedConfiguration(appId);
+            Configuration configuration = FlinkSubmit.getSubmittedConfiguration(appId);
             if (configuration != null) {
                 String jmMemory = configuration.toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 String tmMemory = configuration.toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());

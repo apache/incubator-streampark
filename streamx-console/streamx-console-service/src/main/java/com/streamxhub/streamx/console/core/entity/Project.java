@@ -98,8 +98,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource =
-                    SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/project");
+            appSource = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/project");
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -117,8 +116,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getAppBase() {
-        String appBase =
-                SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/app/");
+        String appBase = SpringContextUtil.getBean(StreamXProperties.class).getAppHome().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 
@@ -143,8 +141,9 @@ public class Project implements Serializable {
     public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtil.notEmpty(this.getPom())) {
-            buildHome =
-                    new File(buildHome.concat("/").concat(this.getPom())).getParentFile().getAbsolutePath();
+            buildHome = new File(buildHome.concat("/").concat(this.getPom()))
+                    .getParentFile()
+                    .getAbsolutePath();
         }
         return Arrays.asList("cd ".concat(buildHome), "mvn clean install -DskipTests");
     }
@@ -152,26 +151,37 @@ public class Project implements Serializable {
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-                "%s[StreamX] project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
-                getLogHeader("maven"), getName(), getBranches(), getMavenBuildCmd());
+                "%s project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
+                getLogHeader("maven"),
+                getName(),
+                getBranches(),
+                getMavenBuildCmd()
+        );
     }
 
     @JsonIgnore
     public String getLog4PullStart() {
         return String.format(
-                "%s[StreamX] project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
-                getLogHeader("git pull"), getName(), getBranches());
+                "%s project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
+                getLogHeader("git pull"),
+                getName(),
+                getBranches()
+        );
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-                "%s[StreamX] project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
-                getLogHeader("git clone"), getName(), getBranches(), getAppSource());
+                "%s project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
+                getLogHeader("git clone"),
+                getName(),
+                getBranches(),
+                getAppSource()
+        );
     }
 
     @JsonIgnore
-    public String getLogHeader(String header) {
+    private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
     }
 }

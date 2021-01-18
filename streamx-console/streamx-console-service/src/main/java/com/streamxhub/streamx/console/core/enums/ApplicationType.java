@@ -57,9 +57,9 @@ public enum ApplicationType {
     }
 
     public static ApplicationType of(int type) {
-        for (ApplicationType etype : ApplicationType.values()) {
-            if (etype.getType() == type) {
-                return etype;
+        for (ApplicationType appType : ApplicationType.values()) {
+            if (appType.getType() == type) {
+                return appType;
             }
         }
         return null;

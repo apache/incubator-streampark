@@ -68,7 +68,7 @@ public class FlameGraph {
         Calendar cal = Calendar.getInstance();
         cal.setTimeZone(TimeZone.getDefault());
         cal.setTime(this.getEnd());
-        cal.add(Calendar.MINUTE, 0 - duration);
+        cal.add(Calendar.MINUTE, -duration);
         return cal.getTime();
     }
 
