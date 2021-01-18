@@ -105,11 +105,11 @@ done
 
 # Get standard environment variables
 # shellcheck disable=SC2006
-PRGDIR=`dirname "$PRG"`
+PRG_DIR=`dirname "$PRG"`
 
 # shellcheck disable=SC2006
 # shellcheck disable=SC2164
-APP_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
+APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
 APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_BIN="$APP_BASE"/bin
@@ -197,23 +197,14 @@ if [[ $? -ne 1 ]];then
   exit 1;
 fi
 
-#check openjdk
-# shellcheck disable=SC2006
-# shellcheck disable=SC2126
-if [[ "`${RUNJAVA} -version 2>&1 | head -1|grep "openjdk"|wc -l`"x == "1"x ]]; then
-  echo_r "ERROR: please uninstall OpenJDK and install jdk first"
-  exit 1;
-fi
-
-
-
-APP_PIDDIR="/var/run";
-if [[ ! -d "$APP_PIDDIR" ]] ; then
-    mkdir ${APP_PIDDIR};
+APP_PID_DIR="/var/run";
+if [[ ! -d "$APP_PID_DIR" ]] ; then
+    mkdir ${APP_PID_DIR};
 fi
 APP_PID="$APP_BASE/streamx.pid";
 
 # Add on extra jar files to CLASSPATH
+# shellcheck disable=SC2236
 if [[ ! -z "$CLASSPATH" ]] ; then
   CLASSPATH="$CLASSPATH":
 fi
@@ -258,6 +249,7 @@ if [[ ${have_tty} -eq 1 ]]; then
   else
     echo_w "Using JRE_HOME:   $JRE_HOME"
   fi
+  # shellcheck disable=SC2236
   if [[ ! -z "$APP_PID" ]]; then
     echo_w "Using APP_PID:   $APP_PID"
   fi
@@ -327,7 +319,8 @@ fi
 # StreamX main
 MAIN="com.streamxhub.streamx.console.StreamXConsole"
 
-JAVA_OPTS="""-server
+JAVA_OPTS="""
+-server
 -Xms1024m
 -Xmx1024m
 -Xmn256m
@@ -335,7 +328,8 @@ JAVA_OPTS="""-server
 -XX:+UseConcMarkSweepGC
 -XX:CMSInitiatingOccupancyFraction=70
 -XX:ThreadStackSize=512
--Xloggc:${APP_HOME}/logs/gc.log"""
+-Xloggc:${APP_HOME}/logs/gc.log
+"""
 
 eval "${RUNJAVA}" \
   $JAVA_OPTS \
