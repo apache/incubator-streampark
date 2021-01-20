@@ -33,7 +33,7 @@ import org.apache.flink.streaming.api.scala.DataStream
 
 import java.io.Serializable
 import scala.annotation.meta.param
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
 /**
  * println()升级版.精准一次的打印
@@ -92,7 +92,7 @@ class EchoSinkFunction[T](sinkIdentifier: String) extends TwoPhaseCommitSinkFunc
   }
 }
 
-case class Echo[T](transactionId: String = Utils.uuid(), buffer: ListBuffer[T] = ListBuffer.empty[T], var invoked: Boolean = false) extends Serializable {
+case class Echo[T](transactionId: String = Utils.uuid(), buffer: mutable.MutableList[T] = mutable.MutableList.empty[T], var invoked: Boolean = false) extends Serializable {
   def add(value: T): Unit = buffer += value
 
   override def toString: String = s"(transactionId:$transactionId,size:${buffer.size},invoked:$invoked)"
