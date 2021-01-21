@@ -604,7 +604,7 @@ export default {
                   const name = opt['name']
                   if (typeof v === 'string') {
                     options[name] = v.replace(/[k|m|g]b$/g, '') + unit
-                  } else if( typeof v === 'number') {
+                  } else if (typeof v === 'number') {
                     options[name] = v + unit
                   } else {
                     options[name] = v
