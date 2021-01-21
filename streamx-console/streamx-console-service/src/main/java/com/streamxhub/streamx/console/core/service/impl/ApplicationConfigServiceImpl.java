@@ -20,13 +20,13 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.util.Base64;
 import java.util.Date;
 
+import com.streamxhub.streamx.console.base.utils.WebUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,6 +57,11 @@ public class ApplicationConfigServiceImpl
         implements ApplicationConfigService {
 
     private String flinkConfTemplate = null;
+
+    private String PROD_ENV_NAME = "prod";
+
+    @Autowired
+    private ApplicationContext context;
 
     @Override
     public synchronized void create(Application application) {
@@ -136,7 +141,18 @@ public class ApplicationConfigServiceImpl
     @Override
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
-            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("flink-application.template");
+            String profiles = context.getEnvironment().getActiveProfiles()[0];
+            InputStream inputStream = null;
+            if (profiles.equals(PROD_ENV_NAME)) {
+                //生产环境部署读取conf/flink-application.template
+                try {
+                    inputStream = new FileInputStream(WebUtil.getAppDir("conf").concat("/flink-application.template"));
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("flink-application.template");
+            }
             assert inputStream != null;
             try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
                  BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
