@@ -601,13 +601,18 @@ export default {
     },
 
     handleSQLConf () {
-      template({}).then((resp) => {
-        const sqlJobConfig = Base64.decode(resp.data)
+      if (this.configOverride != null) {
         this.confVisiable = true
-        this.$refs.confEdit.set(sqlJobConfig)
-      }).catch((error) => {
-        this.$message.error(error.message)
-      })
+        this.$refs.confEdit.set(this.configOverride)
+      } else {
+        template({}).then((resp) => {
+          const sqlJobConfig = Base64.decode(resp.data)
+          this.confVisiable = true
+          this.$refs.confEdit.set(sqlJobConfig)
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
+      }
     },
 
     handleModule (module) {
@@ -929,15 +934,15 @@ export default {
 }
 
 >>> .CodeMirror {
-  border: 1px solid rgba(222,222,222,0.5) !important;
+  border: 1px solid rgba(222, 222, 222, 0.5) !important;
 }
 
->>> .CodeMirror-line, >>>.CodeMirror-code > div {
+>>> .CodeMirror-line, >>> .CodeMirror-code > div {
   height: 20px;
   line-height: 20px;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'source-code-pro','Menlo', 'Ubuntu Mono','Consolas', monospace !important;
+  font-family: 'source-code-pro', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
 >>> .CodeMirror-linenumber {
