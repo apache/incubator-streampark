@@ -57,11 +57,18 @@ public class Application implements Serializable {
 
     private Long id;
 
+    /**
+     * 1) dataStream
+     * 2) flink SQL
+     */
+    private Integer jobType;
+
     private Long projectId;
     /**
      * 创建人
      */
     private Long userId;
+
     /**
      * 前端和程序在yarn中显示的名称
      */
@@ -109,6 +116,7 @@ public class Application implements Serializable {
      */
     @TableField("TOTAL_TM")
     private Integer totalTM;
+    private String sql;
 
     private Integer totalSlot;
     private Integer availableSlot;

@@ -58,7 +58,7 @@
     "babel-eslint": "^7.2.3",
     "babel-jest": "^25.0.0",
     "babel-plugin-import": "^1.11.0",
-    "codemirror": "^5.57.0",
+    "codemirror": "^5.59.2",
     "element-ui": "^2.13.2",
     "eslint": "^5.16.0",
     "eslint-plugin-html": "^5.0.0",

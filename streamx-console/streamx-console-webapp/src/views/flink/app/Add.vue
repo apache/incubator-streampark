@@ -3,115 +3,164 @@
     <a-form @submit="handleSubmit" :form="form">
 
       <a-form-item
-        label="Project"
+        label="Job Type"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
         <a-select
-          showSearch
-          optionFilterProp="children"
-          :filterOption="filterOption"
-          placeholder="请选择项目"
-          @change="handleProject"
-          v-decorator="[ 'project', {rules: [{ required: true }]} ]">
-          <a-select-option
-            v-for="p in projectList"
-            :key="p.id"
-            :value="p.id">
-            {{ p.name }}
+          placeholder="请选择作业类型"
+          @change="handleJobType"
+          v-decorator="[ 'jobType' , {rules: [{ required: true }]} ]">
+          <a-select-option value="dataStream">
+            DateStream
+          </a-select-option>
+          <a-select-option value="sql">
+            Flink SQL
           </a-select-option>
         </a-select>
       </a-form-item>
 
-      <a-form-item
-        label="Module"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          label="应用"
-          showSearch
-          optionFilterProp="children"
-          :filterOption="filterOption"
-          placeholder="请选择模块"
-          @change="handleModule"
-          v-decorator="[ 'module', {rules: [{ required: true }]} ]">
-          <a-select-option
-            v-for="name in moduleList"
-            :key="name"
-            :value="name">
-            {{ name }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
+      <template v-if="jobType === 'sql'">
+        <a-form-item
+          label="Environment"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            placeholder="请选择Table Environment"
+            @change="handleTableEnv"
+            v-decorator="[ 'tableEnv', {rules: [{ required: true, validator: handleCheckTableEnv }]} ]">
+            <a-select-option value="1">
+              StreamTableEnvironment
+            </a-select-option>
+            <a-select-option value="2">
+              TableEnvironment
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-      <a-form-item
-        label="Application Type"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          placeholder="请选择Application type"
-          @change="handleAppType"
-          v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
-          <a-select-option value="1">
-            StreamX Flink
-          </a-select-option>
-          <a-select-option value="2">
-            Apache Flink
-          </a-select-option>
-        </a-select>
-      </a-form-item>
+        <a-form-item
+          label="Flink SQL"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <textarea
+            ref="flinkSQL"
+            placeholder="Flink SQL">
+          </textarea>
+          <p class="conf-desc" style="color: RED;margin-bottom: -20px">{{ flinkSQLMsg }}</p>
+        </a-form-item>
+      </template>
 
-      <a-form-item
-        v-if="appType === 2"
-        label="Program Jar"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-select
-          placeholder="请选择jar"
-          @change="handleJars"
-          v-decorator="[ 'jar', {rules: [{ required: true }] }]">
-          <a-select-option
-            v-for="(jar,index) in jars"
-            :key="index"
-            :value="jar">
-            {{ jar }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
+      <template v-else>
+        <a-form-item
+          label="Project"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            showSearch
+            optionFilterProp="children"
+            :filterOption="filterOption"
+            placeholder="请选择项目"
+            @change="handleProject"
+            v-decorator="[ 'project', {rules: [{ required: true }]} ]">
+            <a-select-option
+              v-for="p in projectList"
+              :key="p.id"
+              :value="p.id">
+              {{ p.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-      <a-form-item
-        v-if="appType === 2"
-        label="Program Main"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="请输入Main class"
-          v-decorator="[ 'mainClass', {rules: [{ required: true, message: '请输入Main class'}]} ]"/>
-      </a-form-item>
+        <a-form-item
+          label="Module"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            label="应用"
+            showSearch
+            optionFilterProp="children"
+            :filterOption="filterOption"
+            placeholder="请选择模块"
+            @change="handleModule"
+            v-decorator="[ 'module', {rules: [{ required: true }]} ]">
+            <a-select-option
+              v-for="name in moduleList"
+              :key="name"
+              :value="name">
+              {{ name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
 
-      <a-form-item
-        v-if="appType === 1"
-        label="Application conf"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
-        <a-tree-select
-          :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
-          :treeData="configSource"
-          placeholder="请选择配置文件"
-          treeDefaultExpandAll
-          @change="handleJobName"
-          v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig }]} ]">
-          <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
-            <a-icon
-              type="setting"
-              theme="twoTone"
-              twoToneColor="#4a9ff5"
-              @click.stop="handleEditConfig()"
-              title="编辑配置">
-            </a-icon>
-          </template>
-        </a-tree-select>
-      </a-form-item>
+        <a-form-item
+          label="Application Type"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            placeholder="请选择Application type"
+            @change="handleAppType"
+            v-decorator="[ 'appType', {rules: [{ required: true, message: '请选择模块'}]} ]">
+            <a-select-option value="1">
+              StreamX Flink
+            </a-select-option>
+            <a-select-option value="2">
+              Apache Flink
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+
+        <a-form-item
+          v-if="appType === 2"
+          label="Program Jar"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-select
+            placeholder="请选择jar"
+            @change="handleJars"
+            v-decorator="[ 'jar', {rules: [{ required: true }] }]">
+            <a-select-option
+              v-for="(jar,index) in jars"
+              :key="index"
+              :value="jar">
+              {{ jar }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+
+        <a-form-item
+          v-if="appType === 2"
+          label="Program Main"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="请输入Main class"
+            v-decorator="[ 'mainClass', {rules: [{ required: true, message: '请输入Main class'}]} ]"/>
+        </a-form-item>
+
+        <a-form-item
+          v-if="appType === 1"
+          label="Application conf"
+          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          <a-tree-select
+            :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
+            :treeData="configSource"
+            placeholder="请选择配置文件"
+            treeDefaultExpandAll
+            @change="handleJobName"
+            v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckConfig }]} ]">
+            <template slot="suffixIcon" v-if="this.form.getFieldValue('config')">
+              <a-icon
+                type="setting"
+                theme="twoTone"
+                twoToneColor="#4a9ff5"
+                @click.stop="handleEditConfig()"
+                title="编辑配置">
+              </a-icon>
+            </template>
+          </a-tree-select>
+        </a-form-item>
+      </template>
 
       <a-form-item
         label="Application Name"
@@ -347,6 +396,7 @@
       </a-form-item>
 
       <a-form-item
+        v-if="jobType === 'dataStream'"
         label="Program Args"
         :labelCol="{lg: {span: 7}, sm: {span: 7}}"
         :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
@@ -389,6 +439,20 @@ import { create, exists, main, name, readConf } from '@api/application'
 import Conf from './Conf'
 import configOptions from './option'
 
+import CodeMirror from 'codemirror'
+import 'codemirror/theme/darcula.css'
+import 'codemirror/theme/cobalt.css'
+import 'codemirror/theme/dracula.css'
+import 'codemirror/theme/idea.css'
+import 'codemirror/theme/erlang-dark.css'
+import 'codemirror/theme/rubyblue.css'
+
+import 'codemirror/lib/codemirror.css'
+import 'codemirror/mode/shell/shell'
+import 'codemirror/mode/sql/sql'
+import 'codemirror/addon/hint/show-hint'
+import 'codemirror/addon/hint/sql-hint'
+
 const Base64 = require('js-base64').Base64
 
 export default {
@@ -400,12 +464,16 @@ export default {
       runMaxTagCount: 1,
       jmMaxTagCount: 1,
       tmMaxTagCount: 1,
+      jobType: 'sql',
+      tableEnv: 1,
       projectList: [],
       projectId: null,
       module: null,
       moduleList: [],
       jars: [],
       app: null,
+      flinkSQL: null,
+      flinkSQLMsg: null,
       appType: 0,
       switchDefaultValue: true,
       config: null,
@@ -418,7 +486,8 @@ export default {
       form: null,
       options: configOptions,
       optionsKeyMapping: {},
-      confVisiable: false
+      confVisiable: false,
+      codeMirror: null
     }
   },
 
@@ -432,6 +501,11 @@ export default {
     this.options.forEach((item, index, array) => {
       this.optionsKeyMapping.set(item.key, item)
       this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
+    })
+    this.form.getFieldDecorator('jobType', { initialValue: 'sql' })
+    this.form.getFieldDecorator('tableMode', { initialValue: 'streaming' })
+    this.$nextTick(() => {
+      this.handleCodeMirror()
     })
   },
 
@@ -457,6 +531,22 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleJobType (value) {
+      this.jobType = value
+      if (this.jobType === 'sql') {
+        this.$nextTick(() => {
+          this.handleCodeMirror()
+        })
+      } else {
+        document.querySelector('.CodeMirror').remove()
+        this.codeMirror = null
+      }
+    },
+
+    handleTableEnv (value) {
+      this.tableEnv = value
     },
 
     handleProject (value) {
@@ -562,6 +652,22 @@ export default {
       }
     },
 
+    handleCheckTableEnv (rule, value, callback) {
+      if (!value) {
+        callback(new Error('请选择Table Environment'))
+      } else {
+        callback()
+      }
+    },
+
+    handleCheckSQL (rule, value, callback) {
+      if (!value) {
+        callback(new Error('Flink SQL不能为空'))
+      } else {
+        callback()
+      }
+    },
+
     handleCheckConfig (rule, value, callback) {
       if (value) {
         const isProp = value.endsWith('.properties')
@@ -600,68 +706,138 @@ export default {
     handleSubmit (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
-        if (!err) {
-          const options = {}
-          for (const k in values) {
-            const v = values[k]
-            if (v !== '' && v !== undefined) {
-              if (k === 'parallelism') {
-                options['parallelism.default'] = v
-              } else if (k === 'slot') {
-                options['taskmanager.numberOfTaskSlots'] = v
-              } else {
-                if (this.configItems.includes(k)) {
-                  options[k] = v
-                } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
-                  const opt = this.optionsKeyMapping.get(k)
-                  const unit = opt['unit'] || ''
-                  const name = opt['name']
-                  if (typeof v === 'string') {
-                    options[name] = v.replace(/[k|m|g]b$/g, '') + unit
-                  } else if( typeof v === 'number') {
-                    options[name] = v + unit
-                  } else {
-                    options[name] = v
-                  }
-                }
-              }
-            }
-          }
-
-          // common params...
-          const params = {
-            projectId: values.project,
-            module: values.module,
-            appType: this.appType,
-            jobName: values.jobName,
-            args: values.args,
-            options: JSON.stringify(options),
-            dynamicOptions: values.dynamicOptions,
-            description: values.description
-          }
-          if (this.appType === 1) {
-            const configVal = this.form.getFieldValue('config')
-            params['format'] = configVal.endsWith('.properties') ? 2 : 1
-            if (this.configOverride == null) {
-              readConf({
-                config: configVal
-              }).then((resp) => {
-                params['config'] = resp.data
-                this.handleCreate(params)
-              }).catch((error) => {
-                this.$message.error(error.message)
-              })
-            } else {
-              params['config'] = Base64.enable(this.configOverride)
-              this.handleCreate(params)
-            }
+        if (this.jobType === 'sql') {
+          if (this.flinkSQL == null) {
+            this.flinkSQLMsg = 'Flink SQL不能为空'
+            return
           } else {
-            params['jar'] = this.form.getFieldValue('jar') || null
-            params['mainClass'] = this.form.getFieldValue('mainClass') || null
-            this.handleCreate(params)
+            this.flinkSQLMsg = null
+          }
+        }
+        if (!err) {
+          if (this.jobType === 'dataStream') {
+            this.handleSubmitStreaming(values)
+          } else {
+            this.handleSubmitSQL(values)
           }
         }
       })
+    },
+
+    handleSubmitStreaming (values) {
+      const options = this.handleFormValue(values)
+      // common params...
+      const params = {
+        jobType: 1,
+        projectId: values.project,
+        module: values.module,
+        appType: this.appType,
+        jobName: values.jobName,
+        args: values.args,
+        options: JSON.stringify(options),
+        dynamicOptions: values.dynamicOptions,
+        description: values.description
+      }
+      if (this.appType === 1) {
+        const configVal = this.form.getFieldValue('config')
+        params['format'] = configVal.endsWith('.properties') ? 2 : 1
+        if (this.configOverride == null) {
+          readConf({
+            config: configVal
+          }).then((resp) => {
+            params['config'] = resp.data
+            this.handleCreate(params)
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        } else {
+          params['config'] = Base64.enable(this.configOverride)
+          this.handleCreate(params)
+        }
+      } else {
+        params['jar'] = this.form.getFieldValue('jar') || null
+        params['mainClass'] = this.form.getFieldValue('mainClass') || null
+        this.handleCreate(params)
+      }
+    },
+
+    handleSubmitSQL (values) {
+      const options = this.handleFormValue(values)
+      // common params...
+      const params = {
+        jobType: 2,
+        sql: this.flinkSQL,
+        jobName: values.jobName,
+        args: values.args,
+        options: JSON.stringify(options),
+        dynamicOptions: values.dynamicOptions,
+        description: values.description
+      }
+      console.log(params)
+    },
+
+    handleFormValue (values) {
+      const options = {}
+      for (const k in values) {
+        const v = values[k]
+        if (v !== '' && v !== undefined) {
+          if (k === 'parallelism') {
+            options['parallelism.default'] = v
+          } else if (k === 'slot') {
+            options['taskmanager.numberOfTaskSlots'] = v
+          } else {
+            if (this.configItems.includes(k)) {
+              options[k] = v
+            } else if (this.totalItems.includes(k) || this.jmMemoryItems.includes(k) || this.tmMemoryItems.includes(k)) {
+              const opt = this.optionsKeyMapping.get(k)
+              const unit = opt['unit'] || ''
+              const name = opt['name']
+              if (typeof v === 'string') {
+                options[name] = v.replace(/[k|m|g]b$/g, '') + unit
+              } else if (typeof v === 'number') {
+                options[name] = v + unit
+              } else {
+                options[name] = v
+              }
+            }
+          }
+        }
+      }
+      return options
+    },
+
+    handleCodeMirror () {
+      this.codeMirror = CodeMirror.fromTextArea(this.$refs.flinkSQL, {
+        tabSize: 2,
+        styleActiveLine: true,
+        lineNumbers: true,
+        line: true,
+        foldGutter: true,
+        styleSelectedText: false,
+        matchBrackets: true,
+        showCursorWhenSelecting: true,
+        extraKeys: { 'Ctrl': 'autocomplete' },
+        lint: true,
+        readOnly: false,
+        autoMatchParens: true,
+        mode: 'text/x-mysql',
+        theme: 'default',	// 设置主题
+        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+        autoCloseBrackets: true
+      })
+
+      this.codeMirror.setSize('auto', '450px')
+
+      this.codeMirror.on('change', (mirror) => {
+        this.flinkSQL = mirror.getValue()
+      })
+
+      if (this.flinkSQL != null) {
+        this.codeMirror.setValue(this.flinkSQL)
+        setTimeout(() => {
+          this.codeMirror.refresh()
+        }, 1)
+      }
     },
 
     handleCreate (params) {
@@ -721,4 +897,17 @@ export default {
   cursor: not-allowed;
   opacity: unset !important;
 }
+
+>>> .CodeMirror {
+  border: 1px solid rgba(222,222,222,0.5) !important;
+}
+
+>>> .CodeMirror-line, >>>.CodeMirror-code > div {
+  height: 20px;
+  line-height: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+}
+
 </style>
