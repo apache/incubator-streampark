@@ -56,7 +56,7 @@
             type="text"
             placeholder="请手动设置参数"
             @focus="handleSQLConf"
-            v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckSQLConf }]} ]"/>
+            v-decorator="[ 'config', {rules: [{ validator: handleCheckSQLConf }]} ]"/>
         </a-form-item>
       </template>
 
@@ -786,7 +786,7 @@ export default {
             this.$message.error(error.message)
           })
         } else {
-          params['config'] = Base64.enable(this.configOverride)
+          params['config'] = Base64.encode(this.configOverride)
           this.handleCreate(params)
         }
       } else {
@@ -798,7 +798,7 @@ export default {
 
     handleSubmitSQL (values) {
       const options = this.handleFormValue(values)
-      options['config'] = Base64.enable(this.configOverride)
+      options['config'] = Base64.encode(this.configOverride)
       // common params...
       const params = {
         jobType: 2,
