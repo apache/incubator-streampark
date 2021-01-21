@@ -821,7 +821,7 @@ export default {
         readOnly: false,
         autoMatchParens: true,
         mode: 'text/x-mysql',
-        theme: 'default',	// 设置主题
+        theme: 'default',
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
         autoCloseBrackets: true
       })
