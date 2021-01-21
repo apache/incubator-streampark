@@ -223,7 +223,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setCreateTime(new Date());
         boolean saved = save(appParam);
-        if (saved) {
+        if (saved && appParam.needDeploy()) {
             if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
                 configService.create(appParam);
             }

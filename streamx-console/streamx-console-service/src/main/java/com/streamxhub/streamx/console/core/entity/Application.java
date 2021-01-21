@@ -24,6 +24,7 @@ import java.io.*;
 import java.util.Date;
 import java.util.Map;
 
+import com.streamxhub.streamx.console.core.enums.JobType;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -238,5 +239,11 @@ public class Application implements Serializable {
     public Map<String, Object> getOptionMap() throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         return mapper.readValue(getOptions(), Map.class);
+    }
+
+    @JsonIgnore
+    public boolean needDeploy() {
+        return this.getJobType() == JobType.DATASTREAM.getType()
+                || this.getJobType() == JobType.DEVSQL.getType();
     }
 }

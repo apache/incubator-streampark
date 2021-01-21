@@ -4,8 +4,8 @@
 
       <a-form-item
         label="Job Type"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="请选择作业类型"
           @change="handleJobType"
@@ -22,8 +22,8 @@
       <template v-if="jobType === 'sql'">
         <a-form-item
           label="Environment"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="请选择Table Environment"
             @change="handleTableEnv"
@@ -39,8 +39,8 @@
 
         <a-form-item
           label="Flink SQL"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <textarea
             ref="flinkSQL"
             placeholder="Flink SQL">
@@ -52,8 +52,8 @@
       <template v-else>
         <a-form-item
           label="Project"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             showSearch
             optionFilterProp="children"
@@ -72,8 +72,8 @@
 
         <a-form-item
           label="Module"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             label="应用"
             showSearch
@@ -93,8 +93,8 @@
 
         <a-form-item
           label="Application Type"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="请选择Application type"
             @change="handleAppType"
@@ -111,8 +111,8 @@
         <a-form-item
           v-if="appType === 2"
           label="Program Jar"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
             placeholder="请选择jar"
             @change="handleJars"
@@ -129,8 +129,8 @@
         <a-form-item
           v-if="appType === 2"
           label="Program Main"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
             placeholder="请输入Main class"
@@ -140,8 +140,8 @@
         <a-form-item
           v-if="appType === 1"
           label="Application conf"
-          :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
           <a-tree-select
             :dropdownStyle="{ maxHeight: '400px', overflow: 'auto' }"
             :treeData="configSource"
@@ -164,8 +164,8 @@
 
       <a-form-item
         label="Application Name"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="text"
           placeholder="请输入任务名称"
@@ -174,8 +174,8 @@
 
       <a-form-item
         label="Parallelism"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input-number
           :min="1"
           :step="1"
@@ -185,8 +185,8 @@
 
       <a-form-item
         label="Task Slots"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input-number
           :min="1"
           :step="1"
@@ -196,8 +196,8 @@
 
       <a-form-item
         label="Run Options"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
@@ -222,8 +222,8 @@
         v-if="configItems.includes(conf.key)"
         :key="index"
         :label="conf.name"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           v-if="conf.type === 'input'"
           type="text"
@@ -251,8 +251,8 @@
 
       <a-form-item
         label="Total Memory Options"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
@@ -289,8 +289,8 @@
         v-if="totalItems.includes(conf.key)"
         :key="index"
         :label="conf.name.replace(/.memory/g,'').replace(/\./g,' ')"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
@@ -303,9 +303,9 @@
       </a-form-item>
 
       <a-form-item
-        label="Jobmanager Memory Options"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        label="JM Memory Options"
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
@@ -330,8 +330,8 @@
         v-if="jmMemoryItems.includes(conf.key)"
         :key="index"
         :label="conf.name.replace(/jobmanager.memory./g,'')"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
@@ -344,9 +344,9 @@
       </a-form-item>
 
       <a-form-item
-        label="Taskmanager Memory Options"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        label="TM Memory Options"
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           showSearch
           allowClear
@@ -371,8 +371,8 @@
         v-if="tmMemoryItems.includes(conf.key)"
         :key="index"
         :label="conf.name.replace(/taskmanager.memory./g,'')"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
@@ -386,8 +386,8 @@
 
       <a-form-item
         label="Dynamic Option"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="4"
           name="dynamicOptions"
@@ -398,8 +398,8 @@
       <a-form-item
         v-if="jobType === 'dataStream'"
         label="Program Args"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="4"
           name="args"
@@ -409,8 +409,8 @@
 
       <a-form-item
         label="Description"
-        :labelCol="{lg: {span: 7}, sm: {span: 7}}"
-        :wrapperCol="{lg: {span: 10}, sm: {span: 17} }">
+        :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
         <a-textarea
           rows="4"
           name="description"
@@ -773,7 +773,7 @@ export default {
         dynamicOptions: values.dynamicOptions,
         description: values.description
       }
-      console.log(params)
+      this.handleCreate(params)
     },
 
     handleFormValue (values) {
@@ -821,7 +821,7 @@ export default {
         readOnly: false,
         autoMatchParens: true,
         mode: 'text/x-mysql',
-        theme: 'default',
+        theme: 'default',	// 设置主题
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
         autoCloseBrackets: true
       })
@@ -907,7 +907,16 @@ export default {
   line-height: 20px;
   font-size: 13px;
   font-weight: 600;
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace !important;
+  font-family: 'source-code-pro','Menlo', 'Ubuntu Mono','Consolas', monospace !important;
 }
 
+>>> .CodeMirror-linenumber {
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
+}
+
+>>> .CodeMirror-gutters {
+  background: #ebebeb;
+  width: 42px;
+  border: unset;
+}
 </style>
