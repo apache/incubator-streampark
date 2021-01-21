@@ -43,7 +43,7 @@ import java.io.IOException
 import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable
 
 object RedisSink {
 
@@ -171,8 +171,11 @@ class Redis2PCSinkFunction[T](jedisConfig: FlinkJedisConfigBase, mapper: RedisMa
 }
 
 
-case class RedisTransaction[T](transactionId: String = Utils.uuid(), mapper: ListBuffer[(RedisMapper[T], T, Int)] = ListBuffer.empty[(RedisMapper[T], T, Int)], var invoked: Boolean = false) extends Serializable {
-  def +(redisMapper: RedisMapper[T], r: T, ttl: Int): Unit = mapper += ((redisMapper, r, ttl))
+case class RedisTransaction[T](
+                                transactionId: String = Utils.uuid(),
+                                mapper: mutable.MutableList[(RedisMapper[T], T, Int)] = mutable.MutableList.empty[(RedisMapper[T], T, Int)],
+                                var invoked: Boolean = false) extends Serializable {
+  def +(redisMapper: (RedisMapper[T], T, Int)): Unit = mapper += redisMapper
 
   override def toString: String = s"(transactionId:$transactionId,size:${mapper.size},invoked:$invoked)"
 }
