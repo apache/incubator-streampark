@@ -33,11 +33,11 @@ public enum JobType {
     /**
      * FLink SQL
      */
-    SQL(1, "sql"),
+    SQL(2, "sql"),
     /**
      * 代码开发的SQL作业
      */
-    DEVSQL(2, "devSQL");
+    DEVSQL(3, "devSQL");
 
     int type;
     String name;

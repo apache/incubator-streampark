@@ -809,6 +809,7 @@ export default {
         dynamicOptions: values.dynamicOptions,
         description: values.description
       }
+      console.log(params)
       this.handleCreate(params)
     },
 
