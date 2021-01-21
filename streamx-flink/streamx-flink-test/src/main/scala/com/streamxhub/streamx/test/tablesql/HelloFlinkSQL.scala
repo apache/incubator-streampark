@@ -34,7 +34,7 @@ object HelloFlinkSQL extends FlinkStreamTable {
     //数据提取
     val sourceTab = context.from("kafka_source")
     //这里我们暂时先使用 标注了 deprecated 的API, 因为新的异步提交测试有待改进...
-    sourceTab.insertInto("print_sink")
+    sourceTab.executeInsert("print_sink")
 
   }
 }
