@@ -21,10 +21,12 @@
 package com.streamxhub.streamx.console.core.service.impl;
 
 import java.io.*;
+import java.net.URL;
 import java.util.Base64;
 import java.util.Date;
 
 import com.streamxhub.streamx.console.base.utils.WebUtil;
+import org.apache.commons.io.FileUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -142,26 +144,19 @@ public class ApplicationConfigServiceImpl
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
             String profiles = context.getEnvironment().getActiveProfiles()[0];
-            InputStream inputStream = null;
+            String path;
             if (profiles.equals(PROD_ENV_NAME)) {
                 //生产环境部署读取conf/flink-application.template
-                try {
-                    inputStream = new FileInputStream(WebUtil.getAppDir("conf").concat("/flink-application.template"));
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
-                }
+                path = WebUtil.getAppDir("conf").concat("/flink-application.template");
             } else {
-                inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("flink-application.template");
+                URL url = Thread.currentThread().getContextClassLoader().getResource("flink-application.template");
+                assert url != null;
+                path = url.getPath();
             }
-            assert inputStream != null;
-            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
-                StringBuilder builder = new StringBuilder();
-                String line;
-                while ((line = bufferedReader.readLine()) != null) {
-                    builder.append(line).append("\n");
-                }
-                this.flinkConfTemplate = builder.toString().trim();
+            File file = new File(path);
+            try {
+                String conf = FileUtils.readFileToString(file, "utf-8");
+                this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();
             }
