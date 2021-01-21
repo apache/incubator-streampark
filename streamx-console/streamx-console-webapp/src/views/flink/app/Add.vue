@@ -56,8 +56,7 @@
             type="text"
             placeholder="请手动设置参数"
             @focus="handleSQLConf"
-            v-decorator="['config',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
-          <p class="conf-desc" style="color: RED;margin-bottom: -20px">{{ sqlConfMsg }}</p>
+            v-decorator="[ 'config', {rules: [{ required: true, validator: handleCheckSQLConf }]} ]"/>
         </a-form-item>
       </template>
 
@@ -487,7 +486,6 @@ export default {
       app: null,
       flinkSQL: null,
       flinkSQLMsg: null,
-      sqlConfMsg: null,
       appType: 0,
       switchDefaultValue: true,
       config: null,
@@ -681,6 +679,14 @@ export default {
       }
     },
 
+    handleCheckSQLConf (rule, value, callback) {
+      if (this.configOverride == null) {
+        callback(new Error('Job参数不能为空'))
+      } else {
+        callback()
+      }
+    },
+
     handleCheckTableEnv (rule, value, callback) {
       if (!value) {
         callback(new Error('请选择Table Environment'))
@@ -741,11 +747,6 @@ export default {
             return
           } else {
             this.flinkSQLMsg = null
-          }
-
-          if (this.configOverride == null) {
-            this.sqlConfMsg = 'Job参数不能为空'
-            return
           }
         }
         if (!err) {
