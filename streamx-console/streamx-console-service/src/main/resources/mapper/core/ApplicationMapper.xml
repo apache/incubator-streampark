@@ -14,7 +14,7 @@
         <result column="JOB_TYPE" jdbcType="INTEGER" property="jobType"/>
         <result column="TRACKING" jdbcType="INTEGER" property="tracking"/>
         <result column="JAR" jdbcType="VARCHAR" property="jar"/>
-        <result column="SQL" jdbcType="LONGVARCHAR" property="sql"/>
+        <result column="FLINK_SQL" jdbcType="LONGVARCHAR" property="flinkSQL"/>
         <result column="MAIN_CLASS" jdbcType="VARCHAR" property="mainClass"/>
         <result column="JOB_ID" jdbcType="VARCHAR" property="jobId"/>
         <result column="USER_ID" jdbcType="INTEGER" property="userId"/>

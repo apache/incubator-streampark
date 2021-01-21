@@ -796,7 +796,7 @@ export default {
       // common params...
       const params = {
         jobType: 2,
-        sql: this.flinkSQL,
+        flinkSQL: this.flinkSQL,
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),

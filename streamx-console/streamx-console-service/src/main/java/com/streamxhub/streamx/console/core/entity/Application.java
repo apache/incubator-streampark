@@ -117,7 +117,9 @@ public class Application implements Serializable {
      */
     @TableField("TOTAL_TM")
     private Integer totalTM;
-    private String sql;
+
+    @TableField("FLINK_SQL")
+    private String flinkSQL;
 
     private Integer totalSlot;
     private Integer availableSlot;
