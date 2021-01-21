@@ -798,18 +798,17 @@ export default {
 
     handleSubmitSQL (values) {
       const options = this.handleFormValue(values)
-      options['config'] = Base64.encode(this.configOverride)
       // common params...
       const params = {
         jobType: 2,
         flinkSQL: this.flinkSQL,
+        config: Base64.encode(this.configOverride),
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions,
         description: values.description
       }
-      console.log(params)
       this.handleCreate(params)
     },
 

@@ -223,10 +223,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setCreateTime(new Date());
         boolean saved = save(appParam);
-        if (saved && appParam.needDeploy()) {
-            if (appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+        if (saved) {
+            if (appParam.getJobType() == JobType.SQL.getType()) {
+                appParam.setFormat(1);
+                configService.create(appParam);
+                return true;
+            }
+
+            if (appParam.getJobType() == JobType.DEVSQL.getType()) {
                 configService.create(appParam);
             }
+
+            if (appParam.getJobType() == JobType.DATASTREAM.getType() &&
+                    appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+                configService.create(appParam);
+            }
+
             Executors.newSingleThreadExecutor().submit(() -> {
                 try {
                     appParam.setBackUp(false);
