@@ -47,6 +47,18 @@
           </textarea>
           <p class="conf-desc" style="color: RED;margin-bottom: -20px">{{ flinkSQLMsg }}</p>
         </a-form-item>
+
+        <a-form-item
+          label="Application conf"
+          :labelCol="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="请手动设置参数"
+            @focus="handleSQLConf"
+            v-decorator="['config',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
+          <p class="conf-desc" style="color: RED;margin-bottom: -20px">{{ sqlConfMsg }}</p>
+        </a-form-item>
       </template>
 
       <template v-else>
@@ -436,6 +448,7 @@
 
 import { jars, listConf, modules, select } from '@api/project'
 import { create, exists, main, name, readConf } from '@api/application'
+import { template } from '@api/config'
 import Conf from './Conf'
 import configOptions from './option'
 
@@ -474,6 +487,7 @@ export default {
       app: null,
       flinkSQL: null,
       flinkSQLMsg: null,
+      sqlConfMsg: null,
       appType: 0,
       switchDefaultValue: true,
       config: null,
@@ -581,6 +595,16 @@ export default {
         config: confFile
       }).then((resp) => {
         this.form.setFieldsValue({ 'jobName': resp.data })
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+
+    handleSQLConf () {
+      template({}).then((resp) => {
+        const sqlJobConfig = Base64.decode(resp.data)
+        this.confVisiable = true
+        this.$refs.confEdit.set(sqlJobConfig)
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -713,6 +737,11 @@ export default {
           } else {
             this.flinkSQLMsg = null
           }
+
+          if (this.configOverride == null) {
+            this.sqlConfMsg = 'Job参数不能为空'
+            return
+          }
         }
         if (!err) {
           if (this.jobType === 'dataStream') {
@@ -763,6 +792,7 @@ export default {
 
     handleSubmitSQL (values) {
       const options = this.handleFormValue(values)
+      options['config'] = Base64.enable(this.configOverride)
       // common params...
       const params = {
         jobType: 2,

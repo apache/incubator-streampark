@@ -26,6 +26,8 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
 
+import java.io.IOException;
+
 public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     void create(Application application);
@@ -37,4 +39,6 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
     ApplicationConfig get(Long id);
 
     IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request);
+
+    String readTemplate();
 }

@@ -53,6 +53,12 @@ public class ConfigController extends BaseController {
         return RestResponse.create().data(config);
     }
 
+    @PostMapping("template")
+    public RestResponse template() {
+        String config = applicationConfigService.readTemplate();
+        return RestResponse.create().data(config);
+    }
+
     @PostMapping("list")
     public RestResponse list(ApplicationConfig config, RestRequest request) {
         IPage<ApplicationConfig> page = applicationConfigService.page(config, request);

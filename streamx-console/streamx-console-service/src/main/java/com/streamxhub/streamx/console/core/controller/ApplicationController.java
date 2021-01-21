@@ -79,6 +79,7 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(application);
     }
 
+
     @PostMapping("dashboard")
     public RestResponse dashboard() {
         Map<String, Serializable> map = applicationService.dashboard();

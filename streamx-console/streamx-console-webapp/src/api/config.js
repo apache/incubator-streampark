@@ -5,6 +5,10 @@ export function get (params) {
   return http.post(api.Config.GET, params)
 }
 
+export function template (params) {
+  return http.post(api.Config.TEMPLATE, params)
+}
+
 export function list (params) {
   return http.post(api.Config.LIST, params)
 }

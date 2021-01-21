@@ -56,6 +56,7 @@ export default {
   },
   Config: {
     GET: '/flink/conf/get',
+    TEMPLATE: '/flink/conf/template',
     LIST: '/flink/conf/list',
     DELETE: '/flink/conf/delete'
   },

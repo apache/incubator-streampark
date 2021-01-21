@@ -20,6 +20,10 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Base64;
 import java.util.Date;
 
@@ -51,6 +55,8 @@ import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 public class ApplicationConfigServiceImpl
         extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
         implements ApplicationConfigService {
+
+    private String flinkConfTemplate = null;
 
     @Override
     public synchronized void create(Application application) {
@@ -125,5 +131,25 @@ public class ApplicationConfigServiceImpl
         Page<ApplicationConfig> page = new Page<>();
         SortUtil.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, config);
+    }
+
+    @Override
+    public synchronized String readTemplate() {
+        if (flinkConfTemplate == null) {
+            InputStream inputStream = Thread.currentThread().getContextClassLoader().getResourceAsStream("flink-application.template");
+            assert inputStream != null;
+            try (InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
+                 BufferedReader bufferedReader = new BufferedReader(inputStreamReader)) {
+                StringBuilder builder = new StringBuilder();
+                String line;
+                while ((line = bufferedReader.readLine()) != null) {
+                    builder.append(line).append("\n");
+                }
+                this.flinkConfTemplate = builder.toString().trim();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return this.flinkConfTemplate;
     }
 }
