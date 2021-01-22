@@ -231,8 +231,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean saved = save(appParam);
         if (saved) {
 
-            if (appParam.isPureSQL()
-                    || appParam.isDevSQL()
+            if (appParam.isPureSQL()) {
+                configService.create(appParam);
+                return true;
+            }
+
+            if (appParam.isDevSQL()
                     || (appParam.isDataStream() && appParam.isStreamxFlink())) {
                 configService.create(appParam);
             }
