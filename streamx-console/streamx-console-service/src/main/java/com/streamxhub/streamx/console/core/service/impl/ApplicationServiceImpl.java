@@ -223,6 +223,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 配置文件中配置的yarnName..
         appParam.setUserId(serverUtil.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
+        appParam.setAppType(ApplicationType.STREAMX_FLINK.getType());
         if (appParam.isPureSQL()) {
             String sql = DeflaterUtils.zipString(appParam.getFlinkSQL());
             appParam.setFlinkSQL(sql);
