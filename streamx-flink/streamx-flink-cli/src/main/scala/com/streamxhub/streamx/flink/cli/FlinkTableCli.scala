@@ -27,7 +27,7 @@ import scala.util.{Failure, Success, Try}
 object FlinkTableCli extends FlinkStreamTable {
 
   override def handle(context: StreamTableContext): Unit = {
-    val sql = context.getSQL()
+    val sql = context.getSql()
     val segment = sql.split("\\n").toList
     SQLCommandUtil.parseSQL(segment).foreach(call => {
       call.command match {
