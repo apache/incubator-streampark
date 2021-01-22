@@ -329,7 +329,11 @@ object FlinkSubmit extends Logger {
 
     val appConfigMap = getConfigMapFromSubmit(submitInfo, KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
     val appName = if (submitInfo.appName == null) appConfigMap(KEY_FLINK_APP_NAME) else submitInfo.appName
-    val appMain = appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
+    val appMain = {
+      if (submitInfo.jobType == 2) "com.streamxhub.streamx.flink.cli.FlinkTableCli" else {
+        appConfigMap(ApplicationConfiguration.APPLICATION_MAIN_CLASS.key())
+      }
+    }
 
     val programArgs = new ArrayBuffer[String]()
     Try(submitInfo.args.split("\\s+")).getOrElse(Array()).foreach(x => programArgs += x)
