@@ -901,7 +901,7 @@ export default {
       }, {
         title: 'Job Type',
         dataIndex: 'jobType',
-        width: 120,
+        width: 100,
         scopedSlots: { customRender: 'jobType' },
         filters: [
           { text: 'DataStream', value: 1 },
@@ -1491,4 +1491,28 @@ export default {
   margin-right: 0px;
   cursor: default;
 }
+
+.app_state {
+  width: 80px;
+}
+
+.app_state > .ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  cursor: default;
+}
+
+.task-tag > .ant-tag {
+  border-radius: 0;
+  font-weight: 700;
+  font-size: 13px;
+  text-align: center;
+  padding: 0 4px;
+  margin-right: 0px;
+  cursor: default;
+}
+
 </style>
