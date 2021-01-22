@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.streamx.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
+import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
@@ -150,12 +151,19 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       case p if p > 0 => localStreamEnv.setParallelism(p)
       case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
     }
-    val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {
       localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
     }
-    localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
+
+    /**
+     * 1.12版本中废弃....
+     * val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
+     * localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
+     */
+    val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
+    localStreamEnv.setRuntimeMode(executionMode)
+
     //重启策略.
     restartStrategy()
 
