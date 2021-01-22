@@ -31,8 +31,9 @@ flink:
         jvm-overhead.max:
         jvm-overhead.min:
         managed.fraction: 0.4
+
+  execution.runtime-mode: STREAMING #(STREAMING|BATCH|AUTOMATIC)
   watermark:
-    time.characteristic: EventTime
     interval: 10000
   checkpoints:
     unaligned: true

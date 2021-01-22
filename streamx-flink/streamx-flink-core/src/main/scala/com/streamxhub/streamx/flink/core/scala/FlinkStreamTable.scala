@@ -98,10 +98,10 @@ class StreamTableContext(val parameter: ParameterTool,
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkStreamTable $jobName Starting...")
-    streamEnv.execute(jobName)
+    null
   }
 
-  private[flink] def getSQL(): String = {
+  private[flink] def getSql(): String = {
     Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
       case Success(value) => value
       case Failure(exception) =>
