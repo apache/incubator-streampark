@@ -21,7 +21,9 @@
 package com.streamxhub.streamx.console.system.runner;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -79,15 +81,21 @@ public class EnvInitializeRunner implements ApplicationRunner {
      *
      * @param pluginPath
      */
-    private void loadPlugins(String pluginPath) throws Exception {
+    private void loadPlugins(String pluginPath) {
         log.info("loadPlugins starting...");
-        File plugins = new File(WebUtil.getAppDir("plugins"));
-        for (File file : Objects.requireNonNull(plugins.listFiles())) {
-            String plugin = pluginPath.concat("/").concat(file.getName());
-            if (!HdfsUtils.exists(plugin)) {
-                log.info("load plugin:{} to {}", file.getName(), pluginPath);
-                HdfsUtils.upload(file.getAbsolutePath(), pluginPath);
+        Executors.newSingleThreadExecutor().submit(() -> {
+            File plugins = new File(WebUtil.getAppDir("plugins"));
+            for (File file : Objects.requireNonNull(plugins.listFiles())) {
+                String plugin = pluginPath.concat("/").concat(file.getName());
+                if (!HdfsUtils.exists(plugin)) {
+                    log.info("load plugin:{} to {}", file.getName(), pluginPath);
+                    try {
+                        HdfsUtils.upload(file.getAbsolutePath(), pluginPath);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
             }
-        }
+        });
     }
 }
