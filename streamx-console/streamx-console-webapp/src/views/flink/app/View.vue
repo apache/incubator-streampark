@@ -421,9 +421,9 @@
 
         <template slot="jobType" slot-scope="text, record">
           <div class="app_state">
-            <a-tag color="#2f54eb" v-if="record['jobType'] === 0">DataStream</a-tag>
-            <a-tag color="#1ABBDC" v-if="record['jobType'] === 1">Table & SQL</a-tag>
-            <a-tag color="#108ee9" v-if="record['jobType'] === 2">Dev SQL</a-tag>
+            <a-tag color="#2f54eb" v-if="record['jobType'] === 1">DataStream</a-tag>
+            <a-tag color="#1ABBDC" v-if="record['jobType'] === 2">Table & SQL</a-tag>
+            <a-tag color="#108ee9" v-if="record['jobType'] === 3">Dev SQL</a-tag>
           </div>
         </template>
 
@@ -904,8 +904,8 @@ export default {
         width: 120,
         scopedSlots: { customRender: 'jobType' },
         filters: [
-          { text: 'DataStream', value: 0 },
-          { text: 'Table & SQL', value: 1 },
+          { text: 'DataStream', value: 1 },
+          { text: 'Table & SQL', value: 2 },
           { text: 'Dev SQL', value: 3 }
         ],
         filteredValue: filteredInfo.state || null,
