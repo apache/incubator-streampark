@@ -942,7 +942,7 @@ export default {
   height: 20px;
   line-height: 20px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 500;
   font-family: 'source-code-pro', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
 }
 
