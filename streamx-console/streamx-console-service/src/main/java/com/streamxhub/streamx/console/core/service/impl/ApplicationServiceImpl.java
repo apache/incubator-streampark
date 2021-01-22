@@ -223,21 +223,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 配置文件中配置的yarnName..
         appParam.setUserId(serverUtil.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
+        if (appParam.isPureSQL()) {
+            String sql = DeflaterUtils.zipString(appParam.getFlinkSQL());
+            appParam.setFlinkSQL(sql);
+        }
         appParam.setCreateTime(new Date());
         boolean saved = save(appParam);
         if (saved) {
-            if (appParam.getJobType() == JobType.SQL.getType()) {
-                appParam.setFormat(1);
-                configService.create(appParam);
-                return true;
-            }
 
-            if (appParam.getJobType() == JobType.DEVSQL.getType()) {
-                configService.create(appParam);
-            }
-
-            if (appParam.getJobType() == JobType.DATASTREAM.getType() &&
-                    appParam.getAppType() == ApplicationType.STREAMX_FLINK.getType()) {
+            if (appParam.isPureSQL()
+                    || appParam.isDevSQL()
+                    || (appParam.isDataStream() && appParam.isStreamxFlink())) {
                 configService.create(appParam);
             }
 
@@ -314,9 +310,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!HdfsUtils.exists(workspace)) {
             HdfsUtils.mkdirs(workspace);
         }
+
         File needUpFile = new File(application.getAppBase(), application.getModule());
         HdfsUtils.upload(needUpFile.getAbsolutePath(), workspace);
-
         // 4) 更新发布状态,需要重启的应用则重新启动...
         if (appParam.getRestart()) {
             // 重新启动.
@@ -334,6 +330,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         }
     }
+
 
     @Override
     public void clean(Application appParam) {
@@ -440,6 +437,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
+    @Transactional(rollbackFor = {Exception.class})
     public boolean start(Application appParam) throws Exception {
         Application application = getById(appParam.getId());
         assert application != null;
@@ -447,49 +445,70 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         application.setFlameGraph(appParam.getFlameGraph());
         this.baseMapper.updateById(application);
 
+        JobType jobType = JobType.of(application.getJobType());
         Project project = projectService.getById(application.getProjectId());
         assert project != null;
         String workspaceWithSchemaAndNameService = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
 
         String appConf, flinkUserJar;
-        switch (application.getApplicationType()) {
-            case STREAMX_FLINK:
-                ApplicationConfig applicationConfig = configService.getActived(application.getId());
-                String confContent = applicationConfig.getContent();
-                String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
-                appConf = String.format("%s://%s", format, confContent);
-                String classPath = String.format(
-                        "%s/%s/%s/lib",
-                        workspaceWithSchemaAndNameService,
-                        application.getId(),
-                        application.getModule()
-                );
-                flinkUserJar = String.format(
-                        "%s/%s.jar",
-                        classPath,
-                        application.getModule()
-                );
+        ApplicationConfig applicationConfig = configService.getActived(application.getId());
+        String confContent = applicationConfig.getContent();
+        switch (jobType) {
+            case DATASTREAM:
+                switch (application.getApplicationType()) {
+                    case STREAMX_FLINK:
+                        String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
+                        appConf = String.format("%s://%s", format, confContent);
+                        String classPath = String.format(
+                                "%s/%s/%s/lib",
+                                workspaceWithSchemaAndNameService,
+                                application.getId(),
+                                application.getModule()
+                        );
+                        flinkUserJar = String.format(
+                                "%s/%s.jar",
+                                classPath,
+                                application.getModule()
+                        );
+                        break;
+                    case APACHE_FLINK:
+                        appConf = String.format(
+                                "json://{\"%s\":\"%s\"}",
+                                ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
+                                application.getMainClass()
+                        );
+                        classPath = String.format(
+                                "%s/%s/%s",
+                                workspaceWithSchemaAndNameService,
+                                application.getId(),
+                                application.getModule()
+                        );
+                        flinkUserJar = String.format(
+                                "%s/%s",
+                                classPath,
+                                application.getJar()
+                        );
+                        break;
+                    default:
+                        throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                }
                 break;
-            case APACHE_FLINK:
-                appConf = String.format(
-                        "json://{\"%s\":\"%s\"}",
-                        ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
-                        application.getMainClass()
-                );
-                classPath = String.format(
-                        "%s/%s/%s",
-                        workspaceWithSchemaAndNameService,
-                        application.getId(),
-                        application.getModule()
-                );
+            case PURESQL:
+                appConf = String.format("yaml://%s", confContent);
+
+                String flinkLocalHome = System.getenv("FLINK_HOME");
+                String flinkName = new File(flinkLocalHome).getName();
+                String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
+                String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
+                String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins");
                 flinkUserJar = String.format(
                         "%s/%s",
-                        classPath,
-                        application.getJar()
+                        flinkHdfsPlugins,
+                        ConfigConst.APP_FLINK_SQL_DIST_JAR()
                 );
                 break;
             default:
-                throw new IllegalArgumentException("[StreamX] ApplicationType must be (StreamX flink | Apache flink)... ");
+                throw new UnsupportedOperationException("Unsupported...");
         }
 
         String savePointDir = null;
@@ -525,15 +544,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             flameGraph.put("metricInterval", 1000 * 60 * 2);
         }
 
+
+        Map<String, Object> optionMap = application.getOptionMap();
+        if (jobType.equals(JobType.PURESQL)) {
+            optionMap.put(ConfigConst.KEY_FLINK_SQL(null), application.getFlinkSQL());
+        }
+
+
         FlinkSubmit.SubmitInfo submitInfo = new FlinkSubmit.SubmitInfo(
                 flinkUserJar,
+                application.getJobType(),
                 application.getJobName(),
                 appConf,
                 application.getApplicationType().getName(),
                 savePointDir,
                 flameGraph,
                 option.toString(),
-                application.getOptionMap(),
+                optionMap,
                 dynamicOption,
                 application.getArgs()
         );
@@ -573,4 +600,5 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return false;
         }
     }
+
 }

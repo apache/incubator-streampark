@@ -238,14 +238,39 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public Map<String, Object> getOptionMap() throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        return mapper.readValue(getOptions(), Map.class);
+    public Map<String, Object> getOptionMap() {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(getOptions(), Map.class);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @JsonIgnore
     public boolean needDeploy() {
         return this.getJobType() == JobType.DATASTREAM.getType()
                 || this.getJobType() == JobType.DEVSQL.getType();
+    }
+
+    @JsonIgnore
+    public boolean isPureSQL() {
+        return this.getJobType() == JobType.PURESQL.getType();
+    }
+
+    @JsonIgnore
+    public boolean isDevSQL() {
+        return this.getJobType() == JobType.DEVSQL.getType();
+    }
+
+    @JsonIgnore
+    public boolean isDataStream() {
+        return this.getJobType() == JobType.DATASTREAM.getType();
+    }
+
+    @JsonIgnore
+    public boolean isStreamxFlink() {
+        return this.getAppType() == ApplicationType.STREAMX_FLINK.getType();
     }
 }

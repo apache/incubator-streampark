@@ -77,7 +77,7 @@ create_module() {
             <outputDirectory>lib</outputDirectory>
             <useProjectAttachments>true</useProjectAttachments>
             <includes>
-                <include>com.streamxhub:streamx-spark</include>
+                <include>com.streamxhub.streamx:streamx-spark</include>
             </includes>
         </dependencySet>
         <dependencySet>
@@ -208,7 +208,7 @@ cat > $name/pom.xml <<EOF
             mvn clean package
             直接打包，只会将 assembly.xml 文件中
             <includes>
-                <include>com.streamxhub:streamx-spark</include>
+                <include>com.streamxhub.streamx:streamx-spark</include>
             </includes>
             包含的Jar包打包进去
              -->

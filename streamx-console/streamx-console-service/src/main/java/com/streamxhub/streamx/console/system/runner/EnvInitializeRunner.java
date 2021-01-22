@@ -70,8 +70,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             // 加载streamx下的plugins到$FLINK_HOME/plugins下
             loadPlugins(flinkHdfsPlugins);
         } else {
-            log.warn(
-                    "The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
+            log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
         }
     }
 

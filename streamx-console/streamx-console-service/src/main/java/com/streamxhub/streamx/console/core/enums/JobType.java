@@ -33,7 +33,7 @@ public enum JobType {
     /**
      * FLink SQL
      */
-    SQL(2, "Pure SQL"),
+    PURESQL(2, "Pure SQL"),
     /**
      * 代码开发的SQL作业
      */
