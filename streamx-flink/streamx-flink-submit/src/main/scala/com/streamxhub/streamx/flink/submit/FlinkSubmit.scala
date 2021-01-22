@@ -281,7 +281,7 @@ object FlinkSubmit extends Logger {
         val buffer = new StringBuffer()
         submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS}=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
       //页面定义的参数优先级大于app配置文件
