@@ -44,10 +44,15 @@
           style="margin-top: 10px">
           <textarea
             ref="flinkSQL"
-            placeholder="Flink SQL"
-          >
-          </textarea>
+            placeholder="Flink SQL">
+              </textarea>
           <p class="conf-desc" :style="{color: 'RED',marginBottom:(flinkSQLMsg == null?'0px':'-25px')}">{{ flinkSQLMsg }}</p>
+          <a-icon
+            class="fullscreen"
+            type="fullscreen"
+            twoToneColor="#4a9ff5"
+            @click="handleFullscreen()">
+          </a-icon>
         </a-form-item>
 
         <a-form-item
@@ -454,16 +459,9 @@ import Conf from './Conf'
 import configOptions from './option'
 
 import CodeMirror from 'codemirror'
-import 'codemirror/theme/darcula.css'
-import 'codemirror/theme/cobalt.css'
-import 'codemirror/theme/dracula.css'
-import 'codemirror/theme/idea.css'
-import 'codemirror/theme/erlang-dark.css'
-import 'codemirror/theme/rubyblue.css'
-
 import 'codemirror/lib/codemirror.css'
-import 'codemirror/mode/shell/shell'
-import 'codemirror/mode/sql/sql'
+import './sql'
+
 import 'codemirror/addon/hint/show-hint'
 import 'codemirror/addon/hint/sql-hint'
 
@@ -613,6 +611,10 @@ export default {
           this.$message.error(error.message)
         })
       }
+    },
+
+    handleFullscreen () {
+      console.log('fullscreen')
     },
 
     handleModule (module) {
@@ -858,10 +860,15 @@ export default {
         lint: true,
         readOnly: false,
         autoMatchParens: true,
-        mode: 'text/x-mysql',
+        mode: 'text/x-flinksql',
         theme: 'default',	// 设置主题
         gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
         autoCloseBrackets: true
+      })
+
+      this.$nextTick(() => {
+        const fullscreen = document.querySelector('.fullscreen')
+        document.querySelector('.CodeMirror').appendChild(fullscreen)
       })
 
       this.codeMirror.setSize('auto', '450px')
@@ -937,24 +944,35 @@ export default {
 }
 
 >>> .CodeMirror {
-  border: 1px solid rgba(222, 222, 222, 0.5) !important;
+  border: 1px solid rgba(222, 222, 222, .8) !important;
+  -webkit-box-shadow: inset 5px 0 10px -6px #333333;
+  box-shadow: inset 5px 0 10px -6px #333333;
 }
 
 >>> .CodeMirror-line, >>> .CodeMirror-code > div {
-  height: 20px;
-  line-height: 20px;
-  font-size: 13px;
+  height: 22px;
+  line-height: 22px;
+  font-size: 14px;
   font-weight: 500;
-  font-family: 'source-code-pro', 'Menlo', 'Ubuntu Mono', 'Consolas', monospace !important;
-}
-
->>> .CodeMirror-linenumber {
-  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', 'Consolas', 'source-code-pro', monospace;
 }
 
 >>> .CodeMirror-gutters {
   background: #ebebeb;
   width: 42px;
   border: unset;
+}
+
+.fullscreen {
+  color: dimgrey;
+  z-index: 99;
+  position: absolute;
+  top: 10px;
+  float: right;
+  right: 13px;
+  cursor: pointer;
+}
+
+.fullscreen:hover {
+  color: #1890ff;
 }
 </style>
