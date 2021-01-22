@@ -40,12 +40,14 @@
         <a-form-item
           label="Flink SQL"
           :labelCol="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
+          :wrapperCol="{lg: {span: 16}, sm: {span: 17} }"
+          style="margin-top: 10px">
           <textarea
             ref="flinkSQL"
-            placeholder="Flink SQL">
+            placeholder="Flink SQL"
+          >
           </textarea>
-          <p class="conf-desc" style="color: RED;margin-bottom: -20px">{{ flinkSQLMsg }}</p>
+          <p class="conf-desc" :style="{color: 'RED',marginBottom:(flinkSQLMsg == null?'0px':'-25px')}">{{ flinkSQLMsg }}</p>
         </a-form-item>
 
         <a-form-item
