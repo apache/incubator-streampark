@@ -23,7 +23,6 @@ package com.streamxhub.streamx.console.system.runner;
 import java.io.File;
 import java.io.IOException;
 import java.util.Objects;
-import java.util.concurrent.Executors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -58,8 +57,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             /** init config.... */
             String flinkLocalHome = System.getenv("FLINK_HOME");
             if (flinkLocalHome == null) {
-                throw new ExceptionInInitializerError(
-                        "[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
             }
             String flinkName = new File(flinkLocalHome).getName();
             String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
@@ -68,8 +66,8 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.upload(flinkLocalHome, flinkHome);
             }
             String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
-            String streamxPlugins = flinkHdfsHome.concat("/plugins/streamx-flink");
-            // 加载streamx下的plugins到$FLINK_HOME/plugins/streamx-flink下
+            String streamxPlugins = flinkHdfsHome.concat("/plugins");
+            // 加载streamx下的plugins到$FLINK_HOME/plugins下
             loadPlugins(streamxPlugins);
         } else {
             log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
@@ -81,21 +79,15 @@ public class EnvInitializeRunner implements ApplicationRunner {
      *
      * @param pluginPath
      */
-    private void loadPlugins(String pluginPath) {
+    private void loadPlugins(String pluginPath) throws IOException {
         log.info("loadPlugins starting...");
-        Executors.newSingleThreadExecutor().submit(() -> {
-            File plugins = new File(WebUtil.getAppDir("plugins"));
-            for (File file : Objects.requireNonNull(plugins.listFiles())) {
-                String plugin = pluginPath.concat("/").concat(file.getName());
-                if (!HdfsUtils.exists(plugin)) {
-                    log.info("load plugin:{} to {}", file.getName(), pluginPath);
-                    try {
-                        HdfsUtils.upload(file.getAbsolutePath(), pluginPath);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
+        File plugins = new File(WebUtil.getAppDir("plugins"));
+        for (File file : Objects.requireNonNull(plugins.listFiles())) {
+            String plugin = pluginPath.concat("/").concat(file.getName());
+            if (!HdfsUtils.exists(plugin)) {
+                log.info("load plugin:{} to {}", file.getName(), pluginPath);
+                HdfsUtils.upload(file.getAbsolutePath(), pluginPath);
             }
-        });
+        }
     }
 }

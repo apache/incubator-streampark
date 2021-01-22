@@ -504,7 +504,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String flinkName = new File(flinkLocalHome).getName();
                 String flinkHome = ConfigConst.APP_FLINK().concat("/").concat(flinkName);
                 String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
-                String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins/streamx-flink");
+                String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins");
                 flinkUserJar = String.format(
                         "%s/%s",
                         flinkHdfsPlugins,

@@ -270,7 +270,7 @@ object FlinkSubmit extends Logger {
         //find jvm-profiler
         if (jvmProfilerJar == null) {
           val pluginsPath = System.getProperty("app.home").concat("/plugins")
-          val jvmProfilerPlugin = new File(pluginsPath, "streamx-flink")
+          val jvmProfilerPlugin = new File(pluginsPath, "jvm-profiler")
           jvmProfilerJar = jvmProfilerPlugin.list().filter(_.matches("jvm-profiler-.*\\.jar")) match {
             case Array() => throw new IllegalArgumentException(s"[StreamX] can no found jvm-profiler jar in $pluginsPath")
             case array if array.length == 1 => array.head
@@ -281,7 +281,7 @@ object FlinkSubmit extends Logger {
         val buffer = new StringBuffer()
         submitInfo.flameGraph.foreach(p => buffer.append(s"${p._1}=${p._2},"))
         val param = buffer.toString.dropRight(1)
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS}=-javaagent:$$PWD/plugins/streamx-flink/$jvmProfilerJar=$param"
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS}=-javaagent:$$PWD/plugins/jvm-profiler/$jvmProfilerJar=$param"
       }
 
       //页面定义的参数优先级大于app配置文件
