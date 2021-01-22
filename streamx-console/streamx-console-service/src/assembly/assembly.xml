@@ -20,7 +20,7 @@
             </includes>
         </dependencySet>
         <dependencySet>
-            <outputDirectory>plugins/streamx-flink-cli</outputDirectory>
+            <outputDirectory>plugins/streamx-cli</outputDirectory>
             <includes>
                 <include>com.streamxhub.streamx:streamx-flink-cli</include>
             </includes>
