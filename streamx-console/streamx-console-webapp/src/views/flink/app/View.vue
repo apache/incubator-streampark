@@ -419,6 +419,14 @@
           </template>
         </template>
 
+        <template slot="jobType" slot-scope="text, record">
+          <div class="app_state">
+            <a-tag color="#2f54eb" v-if="record['jobType'] === 0">DataStream</a-tag>
+            <a-tag color="#1ABBDC" v-if="record['jobType'] === 1">Table & SQL</a-tag>
+            <a-tag color="#108ee9" v-if="record['jobType'] === 2">Dev SQL</a-tag>
+          </div>
+        </template>
+
         <template slot="duration" slot-scope="text, record">
           {{ record.duration | duration }}
         </template>
@@ -891,26 +899,21 @@ export default {
           }
         }
       }, {
-        title: 'Project',
-        dataIndex: 'projectName',
-        width: 200,
-        scopedSlots: {
-          filterDropdown: 'filterDropdown',
-          filterIcon: 'filterIcon',
-          customRender: 'filterRender'
+        title: 'Job Type',
+        dataIndex: 'jobType',
+        width: 120,
+        scopedSlots: { customRender: 'jobType' },
+        filters: [
+          { text: 'DataStream', value: 0 },
+          { text: 'Table & SQL', value: 1 },
+          { text: 'Dev SQL', value: 3 }
+        ],
+        filteredValue: filteredInfo.state || null,
+        onFilter: (value, record) => {
+          return record.state === value
         },
-        onFilter: (value, record) =>
-          record['projectName']
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
-        onFilterDropdownVisibleChange: visible => {
-          if (visible) {
-            setTimeout(() => {
-              this.searchInput.focus()
-            })
-          }
-        }
+        sorter: (a, b) => a.state - b.state,
+        sortOrder: sortedInfo.columnKey === 'jobType' && sortedInfo.order
       }, {
         title: 'Start Time',
         dataIndex: 'startTime',

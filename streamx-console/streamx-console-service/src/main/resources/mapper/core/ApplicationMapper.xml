@@ -37,11 +37,14 @@
 
     <select id="page" resultType="application" parameterType="application">
         SELECT t.*,p.name as projectName,u.username FROM t_flink_app t
-        inner join t_flink_project p
-        on t.project_id = p.id
         inner join t_user u
         on t.user_id = u.user_id
+        left join t_flink_project p
+        on t.project_id = p.id
         <where>
+            <if test="application.jobType != null and application.jobType != ''">
+                AND t.job_type =  #{application.jobType}
+            </if>
             <if test="application.jobName != null and application.jobName != ''">
                 AND t.job_name like '%${application.jobName}%'
             </if>
@@ -60,11 +63,11 @@
     <select id="getApp" resultType="application" parameterType="application">
         SELECT t.*, p.name as projectName, c.content as config, c.format, c.id as configId
         FROM t_flink_app t
-                 inner join t_flink_project p
-                            on t.project_id = p.id
-                 left join t_flink_config c
-                           on c.app_id = t.id
-                               and c.actived = 1
+        left join t_flink_project p
+        on t.project_id = p.id
+        left join t_flink_config c
+        on c.app_id = t.id
+        and c.actived = 1
         where t.id = #{application.id}
     </select>
 
