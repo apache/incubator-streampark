@@ -419,16 +419,16 @@
           </template>
         </template>
 
+        <template slot="duration" slot-scope="text, record">
+          {{ record.duration | duration }}
+        </template>
+
         <template slot="jobType" slot-scope="text, record">
           <div class="app_state">
             <a-tag color="#545454" v-if="record['jobType'] === 1">DataStream</a-tag>
             <a-tag color="#0C7EF2" v-if="record['jobType'] === 2">Pure SQL</a-tag>
             <a-tag color="#722ed1" v-if="record['jobType'] === 3">Dev SQL</a-tag>
           </div>
-        </template>
-
-        <template slot="duration" slot-scope="text, record">
-          {{ record.duration | duration }}
         </template>
 
         <template slot="task" slot-scope="text, record">
@@ -899,6 +899,19 @@ export default {
           }
         }
       }, {
+        title: 'Start Time',
+        dataIndex: 'startTime',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
+        width: 180
+      }, {
+        title: 'Duration',
+        dataIndex: 'duration',
+        sorter: true,
+        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
+        scopedSlots: { customRender: 'duration' },
+        width: 150
+      }, {
         title: 'Job Type',
         dataIndex: 'jobType',
         width: 120,
@@ -914,19 +927,6 @@ export default {
         },
         sorter: (a, b) => a.state - b.state,
         sortOrder: sortedInfo.columnKey === 'jobType' && sortedInfo.order
-      }, {
-        title: 'Start Time',
-        dataIndex: 'startTime',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
-        width: 180
-      }, {
-        title: 'Duration',
-        dataIndex: 'duration',
-        sorter: true,
-        sortOrder: sortedInfo.columnKey === 'duration' && sortedInfo.order,
-        scopedSlots: { customRender: 'duration' },
-        width: 150
       }, {
         title: 'Task',
         dataIndex: 'task',
