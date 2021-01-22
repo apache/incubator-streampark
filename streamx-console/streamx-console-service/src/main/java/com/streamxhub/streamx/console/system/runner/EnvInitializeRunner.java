@@ -66,9 +66,9 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.upload(flinkLocalHome, flinkHome);
             }
             String flinkHdfsHome = HdfsUtils.getDefaultFS().concat(flinkHome);
-            String flinkHdfsPlugins = flinkHdfsHome.concat("/plugins");
+            String streamxPlugins = flinkHdfsHome.concat("/plugins/streamx-flink");
             // 加载streamx下的plugins到$FLINK_HOME/plugins下
-            loadPlugins(flinkHdfsPlugins);
+            loadPlugins(streamxPlugins);
         } else {
             log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
         }
