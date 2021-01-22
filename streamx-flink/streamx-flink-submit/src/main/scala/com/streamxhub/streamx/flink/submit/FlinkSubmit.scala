@@ -105,6 +105,7 @@ object FlinkSubmit extends Logger {
       s"""
          |"[StreamX] flink submit," +
          |      "appName: ${submitInfo.appName},"
+         |      "jobType: ${submitInfo.jobType},"
          |      "appConf: ${submitInfo.appConf},"
          |      "applicationType: ${submitInfo.applicationType},"
          |      "savePint: ${submitInfo.savePoint}, "
@@ -290,7 +291,7 @@ object FlinkSubmit extends Logger {
 
       //属性参数...
       if (submitInfo.property != null && submitInfo.property.nonEmpty) {
-        submitInfo.property.foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
+        submitInfo.property.filter(_._1 != KEY_FLINK_SQL()).foreach(x => array += s"-D${x._1.trim}=${x._2.toString.trim}")
       }
 
       //-D 其他动态参数配置....
@@ -338,6 +339,12 @@ object FlinkSubmit extends Logger {
     programArgs += flinkHdfsHome
     programArgs += KEY_APP_NAME("--")
     programArgs += appName
+
+    if (submitInfo.jobType == 2) {
+      programArgs += KEY_FLINK_SQL("--")
+      programArgs += submitInfo.property.remove(KEY_FLINK_SQL()).toString
+    }
+
     if (submitInfo.property.containsKey(KEY_FLINK_PARALLELISM)) {
       programArgs += s"--$KEY_FLINK_PARALLELISM"
       programArgs += submitInfo.property.get(KEY_FLINK_PARALLELISM).toString
@@ -394,6 +401,7 @@ object FlinkSubmit extends Logger {
   }
 
   case class SubmitInfo(flinkUserJar: String,
+                        jobType: Int,
                         appName: String,
                         appConf: String,
                         applicationType: String,
