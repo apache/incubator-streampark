@@ -254,6 +254,10 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
+  val APP_FLINK_SQL_DIST_JAR = "streamx-flink-cli-1.0.0.jar"
+
+  val APP_EXTENSION = "/streamx/extension"
+
   val APP_WORKSPACE = "/streamx/workspace"
 
   val APP_FLINK = "/streamx/flink"
