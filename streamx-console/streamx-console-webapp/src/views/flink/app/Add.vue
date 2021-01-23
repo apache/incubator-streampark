@@ -59,12 +59,25 @@
           label="Application conf"
           :labelCol="{lg: {span: 5}, sm: {span: 7}}"
           :wrapperCol="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            placeholder="请手动设置参数"
-            @focus="handleSQLConf"
+          <a-switch
+            checkedChildren="开"
+            unCheckedChildren="关"
+            checked-children="true"
+            un-checked-children="false"
+            @click="handleSQLConf"
+            v-model="isSetConfig"
             v-decorator="[ 'config', {rules: [{ validator: handleCheckSQLConf }]} ]"/>
+          <a-icon
+            v-if="isSetConfig"
+            type="setting"
+            style="margin-left: 10px"
+            theme="twoTone"
+            twoToneColor="#4a9ff5"
+            @click="handleSQLConf(true)"
+            title="修改角色">
+          </a-icon>
         </a-form-item>
+
       </template>
 
       <template v-else>
@@ -187,7 +200,7 @@
         <a-input
           type="text"
           placeholder="请输入任务名称"
-          v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,trigger:'submit' } ]}]"/>
+          v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName } ]}]"/>
       </a-form-item>
 
       <a-form-item
@@ -246,7 +259,7 @@
           v-if="conf.type === 'input'"
           type="text"
           :placeholder="conf.placeholder"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
           disabled
@@ -262,7 +275,7 @@
           :max="conf.max"
           :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
@@ -315,7 +328,7 @@
           :max="conf.max"
           :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
@@ -356,7 +369,7 @@
           :max="conf.max"
           :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
@@ -397,7 +410,7 @@
           :max="conf.max"
           :defaultValue="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator, trigger:'submit'} ]}]"/>
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span v-if="conf.type === 'switch'" class="conf-switch">({{ conf.placeholder }})</span>
         <p class="conf-desc">{{ conf | description }}</p>
       </a-form-item>
@@ -505,6 +518,7 @@ export default {
       appType: 0,
       switchDefaultValue: true,
       config: null,
+      isSetConfig: false,
       configOverride: null,
       configSource: [],
       configItems: [],
@@ -660,18 +674,24 @@ export default {
       })
     },
 
-    handleSQLConf () {
-      if (this.configOverride != null) {
-        this.controller.visiable.conf = true
-        this.$refs.confEdit.set(this.configOverride)
-      } else {
-        template({}).then((resp) => {
-          const sqlJobConfig = Base64.decode(resp.data)
+    handleSQLConf (checked) {
+      if (checked) {
+        if (this.configOverride != null) {
           this.controller.visiable.conf = true
-          this.$refs.confEdit.set(sqlJobConfig)
-        }).catch((error) => {
-          this.$message.error(error.message)
-        })
+          this.$refs.confEdit.set(this.configOverride)
+        } else {
+          template({}).then((resp) => {
+            this.controller.visiable.conf = true
+            const sqlJobConfig = Base64.decode(resp.data)
+            this.$refs.confEdit.set(sqlJobConfig)
+          }).catch((error) => {
+            this.$message.error(error.message)
+          })
+        }
+      } else {
+        this.controller.visiable.conf = false
+        this.configOverride = null
+        this.isSetConfig = false
       }
     },
 
@@ -764,14 +784,6 @@ export default {
       }
     },
 
-    handleCheckSQLConf (rule, value, callback) {
-      if (this.configOverride == null) {
-        callback(new Error('Job参数不能为空'))
-      } else {
-        callback()
-      }
-    },
-
     handleCheckTableEnv (rule, value, callback) {
       if (!value) {
         callback(new Error('请选择Table Environment'))
@@ -808,6 +820,14 @@ export default {
       }
     },
 
+    handleCheckSQLConf (rule, value, callback) {
+      if (this.configOverride == null) {
+        callback(new Error('Job参数不能为空'))
+      } else {
+        callback()
+      }
+    },
+
     handleEditConfig () {
       const config = this.form.getFieldValue('config')
       readConf({
@@ -823,10 +843,25 @@ export default {
 
     handleEditConfClose () {
       this.controller.visiable.conf = false
+      if (this.configOverride == null) {
+        this.isSetConfig = false
+      }
+      if (this.jobType === 'sql') {
+        this.handleCheckSQLConf()
+      }
     },
 
     handleEditConfOk (value) {
-      this.configOverride = value
+      if (value == null || !value.replace(/^\s+|\s+$/gm, '')) {
+        this.isSetConfig = false
+        this.configOverride = null
+      } else {
+        this.isSetConfig = true
+        this.configOverride = value
+      }
+      if (this.jobType === 'sql') {
+        this.handleCheckSQLConf()
+      }
     },
 
     handleSubmit (e) {
@@ -890,7 +925,7 @@ export default {
       const params = {
         jobType: 2,
         flinkSQL: this.controller.flinkSQL.content,
-        config: Base64.encode(this.configOverride),
+        config: this.configOverride == null ? null : Base64.encode(this.configOverride),
         jobName: values.jobName,
         args: values.args,
         options: JSON.stringify(options),

@@ -233,7 +233,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
 
             if (appParam.isPureSQL()) {
-                configService.create(appParam);
+                if (appParam.getConfig() != null) {
+                    configService.create(appParam);
+                }
                 return true;
             }
 
@@ -275,7 +277,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setJar(appParam.getJar());
                     application.setMainClass(appParam.getMainClass());
                 }
-                /** 配置文件已更新 */
+                //配置文件已更新
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_UPDATE.get());
                 baseMapper.updateById(application);
                 return true;
