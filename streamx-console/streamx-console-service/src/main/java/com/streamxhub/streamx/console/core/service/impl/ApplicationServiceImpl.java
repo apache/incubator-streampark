@@ -361,8 +361,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
             application.setConfig(encode);
         }
-        String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
-        application.setConfPath(path);
+        if (application.isPureSQL()) {
+            String unzipString = DeflaterUtils.unzipString(application.getFlinkSQL());
+            String encode = Base64.getEncoder().encodeToString(unzipString.getBytes());
+            application.setFlinkSQL(encode);
+        } else {
+            String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
+            application.setConfPath(path);
+        }
         return application;
     }
 

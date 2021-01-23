@@ -45,13 +45,13 @@
           <textarea
             ref="flinkSQL"
             placeholder="Flink SQL">
-              </textarea>
-          <p class="conf-desc" :style="{color: 'RED',marginBottom:(flinkSQLMsg == null?'0px':'-25px')}">{{ flinkSQLMsg }}</p>
+          </textarea>
+          <p class="conf-desc" :style="{color: 'RED',marginBottom:(controller.flinkSQL.error == null?'0px':'-25px')}">{{ controller.flinkSQL.error }}</p>
           <a-icon
-            class="fullscreen"
+            class="bigScreen"
             type="fullscreen"
             twoToneColor="#4a9ff5"
-            @click="handleFullscreen()">
+            @click="handleBigScreenOpen()">
           </a-icon>
         </a-form-item>
 
@@ -220,7 +220,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="runMaxTagCount"
+          :maxTagCount="controller.tagCount.run"
           placeholder="请选择要设置的资源参数"
           @change="handleConf"
           v-decorator="['runOptions']">
@@ -275,7 +275,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="totalTagCount"
+          :maxTagCount="controller.tagCount.total"
           placeholder="请选择要设置的资源参数"
           @change="handleProcess"
           v-decorator="['totalOptions']">
@@ -328,7 +328,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="jmMaxTagCount"
+          :maxTagCount="controller.tagCount.jm"
           placeholder="请选择要设置的资源参数"
           @change="handleJmMemory"
           v-decorator="['jmOptions']">
@@ -369,7 +369,7 @@
           showSearch
           allowClear
           mode="multiple"
-          :maxTagCount="tmMaxTagCount"
+          :maxTagCount="controller.tagCount.tm"
           placeholder="请选择要设置的资源参数"
           @change="handleTmMemory"
           v-decorator="['tmOptions']">
@@ -445,7 +445,28 @@
 
     </a-form>
 
-    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="confVisiable"></Conf>
+    <a-modal
+      v-model="controller.visiable.bigScreen"
+      width="100%"
+      class="bigScreen-model"
+      :bodyStyle="controller.modal.bigScreen.style"
+      :destroyOnClose="controller.modal.destroyOnClose"
+      @ok="handleBigScreenOk">
+      <template slot="title">
+        <a-icon type="table"/>&nbsp; {{ controller.modal.bigScreen.title }}
+      </template>
+      <template slot="closeIcon">
+        <a-icon type="fullscreen-exit"/>
+      </template>
+      <template slot="footer">
+        <a-button key="submit" type="primary" @click="handleBigScreenOk">
+          确定
+        </a-button>
+      </template>
+      <textarea ref="bigCodeMirror"></textarea>
+    </a-modal>
+
+    <conf ref="confEdit" @close="handleEditConfClose" @ok="handleEditConfOk" :visiable="controller.visiable.conf"></Conf>
 
   </a-card>
 </template>
@@ -472,10 +493,6 @@ export default {
   components: { Conf },
   data () {
     return {
-      totalTagCount: 1,
-      runMaxTagCount: 1,
-      jmMaxTagCount: 1,
-      tmMaxTagCount: 1,
       jobType: 'sql',
       tableEnv: 1,
       projectList: [],
@@ -484,8 +501,7 @@ export default {
       moduleList: [],
       jars: [],
       app: null,
-      flinkSQL: null,
-      flinkSQLMsg: null,
+      bigScreenVisible: false,
       appType: 0,
       switchDefaultValue: true,
       config: null,
@@ -498,8 +514,36 @@ export default {
       form: null,
       options: configOptions,
       optionsKeyMapping: {},
-      confVisiable: false,
-      codeMirror: null
+      controller: {
+        tagCount: {
+          total: 1,
+          run: 1,
+          jm: 1,
+          tm: 1
+        },
+        visiable: {
+          conf: false,
+          bigScreen: false
+        },
+        modal: {
+          destroyOnClose: true,
+          bigScreen: {
+            style: {
+              height: null,
+              padding: '5px'
+            },
+            title: 'Flink SQL'
+          }
+        },
+        codeMirror: {
+          textarea: null,
+          bigScreen: null
+        },
+        flinkSQL: {
+          content: null,
+          error: null
+        }
+      }
     }
   },
 
@@ -553,7 +597,7 @@ export default {
         })
       } else {
         document.querySelector('.CodeMirror').remove()
-        this.codeMirror = null
+        this.controller.codeMirror.textarea = null
       }
     },
 
@@ -600,12 +644,12 @@ export default {
 
     handleSQLConf () {
       if (this.configOverride != null) {
-        this.confVisiable = true
+        this.controller.visiable.conf = true
         this.$refs.confEdit.set(this.configOverride)
       } else {
         template({}).then((resp) => {
           const sqlJobConfig = Base64.decode(resp.data)
-          this.confVisiable = true
+          this.controller.visiable.conf = true
           this.$refs.confEdit.set(sqlJobConfig)
         }).catch((error) => {
           this.$message.error(error.message)
@@ -613,8 +657,47 @@ export default {
       }
     },
 
-    handleFullscreen () {
-      console.log('fullscreen')
+    handleBigScreenOpen () {
+      this.controller.visiable.bigScreen = true
+      const height = document.documentElement.offsetHeight || document.body.offsetHeight
+      this.controller.modal.bigScreen.style.height = (height - 108) + 'px'
+      this.$nextTick(() => {
+        this.controller.codeMirror.bigScreen = CodeMirror.fromTextArea(this.$refs.bigCodeMirror, {
+          tabSize: 2,
+          styleActiveLine: true,
+          lineNumbers: true,
+          line: true,
+          foldGutter: true,
+          styleSelectedText: false,
+          matchBrackets: true,
+          showCursorWhenSelecting: true,
+          extraKeys: { 'Ctrl': 'autocomplete' },
+          lint: true,
+          readOnly: false,
+          autoMatchParens: true,
+          mode: 'text/x-flinksql',
+          theme: 'default',	// 设置主题
+          gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+          autoCloseBrackets: true
+        })
+
+        this.controller.codeMirror.bigScreen.setSize('100%', '100%')
+
+        if (this.controller.flinkSQL.content != null) {
+          this.controller.codeMirror.bigScreen.setValue(this.controller.flinkSQL.content)
+          setTimeout(() => {
+            this.controller.codeMirror.bigScreen.refresh()
+          }, 1)
+        }
+
+        this.controller.codeMirror.bigScreen.on('change', (mirror) => {
+          this.controller.codeMirror.textarea.setValue(mirror.getValue())
+        })
+      })
+    },
+
+    handleBigScreenOk () {
+      this.controller.visiable.bigScreen = false
     },
 
     handleModule (module) {
@@ -699,11 +782,17 @@ export default {
       }
     },
 
-    handleCheckSQL (rule, value, callback) {
-      if (!value) {
-        callback(new Error('Flink SQL不能为空'))
+    handleCheckSQL () {
+      if (this.controller.flinkSQL.content == null || !this.controller.flinkSQL.content.replace(/^\s+|\s+$/gm, '')) {
+        this.controller.flinkSQL.error = 'Flink SQL不能为空'
+        const elem = document.querySelector('.CodeMirror')
+        this.addClass(elem, 'CodeMirror_error')
+        return false
       } else {
-        callback()
+        const elem = document.querySelector('.CodeMirror')
+        this.removeClass(elem, 'CodeMirror_error')
+        this.controller.flinkSQL.error = null
+        return true
       }
     },
 
@@ -727,7 +816,7 @@ export default {
         config: config
       }).then((resp) => {
         const conf = Base64.decode(resp.data)
-        this.confVisiable = true
+        this.controller.visiable.conf = true
         this.$refs.confEdit.set(conf)
       }).catch((error) => {
         this.$message.error(error.message)
@@ -735,7 +824,7 @@ export default {
     },
 
     handleEditConfClose () {
-      this.confVisiable = false
+      this.controller.visiable.conf = false
     },
 
     handleEditConfOk (value) {
@@ -746,11 +835,8 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (this.jobType === 'sql') {
-          if (this.flinkSQL == null) {
-            this.flinkSQLMsg = 'Flink SQL不能为空'
+          if (!this.handleCheckSQL()) {
             return
-          } else {
-            this.flinkSQLMsg = null
           }
         }
         if (!err) {
@@ -785,18 +871,18 @@ export default {
             config: configVal
           }).then((resp) => {
             params['config'] = resp.data
-            this.handleCreate(params)
+            this.handleCreateApp(params)
           }).catch((error) => {
             this.$message.error(error.message)
           })
         } else {
           params['config'] = Base64.encode(this.configOverride)
-          this.handleCreate(params)
+          this.handleCreateApp(params)
         }
       } else {
         params['jar'] = this.form.getFieldValue('jar') || null
         params['mainClass'] = this.form.getFieldValue('mainClass') || null
-        this.handleCreate(params)
+        this.handleCreateApp(params)
       }
     },
 
@@ -805,7 +891,7 @@ export default {
       // common params...
       const params = {
         jobType: 2,
-        flinkSQL: this.flinkSQL,
+        flinkSQL: this.controller.flinkSQL.content,
         config: Base64.encode(this.configOverride),
         jobName: values.jobName,
         args: values.args,
@@ -813,7 +899,7 @@ export default {
         dynamicOptions: values.dynamicOptions,
         description: values.description
       }
-      this.handleCreate(params)
+      this.handleCreateApp(params)
     },
 
     handleFormValue (values) {
@@ -847,7 +933,7 @@ export default {
     },
 
     handleCodeMirror () {
-      this.codeMirror = CodeMirror.fromTextArea(this.$refs.flinkSQL, {
+      this.controller.codeMirror.textarea = CodeMirror.fromTextArea(this.$refs.flinkSQL, {
         tabSize: 2,
         styleActiveLine: true,
         lineNumbers: true,
@@ -867,25 +953,25 @@ export default {
       })
 
       this.$nextTick(() => {
-        const fullscreen = document.querySelector('.fullscreen')
-        document.querySelector('.CodeMirror').appendChild(fullscreen)
+        const bigScreen = document.querySelector('.bigScreen')
+        document.querySelector('.CodeMirror').appendChild(bigScreen)
       })
 
-      this.codeMirror.setSize('auto', '450px')
+      this.controller.codeMirror.textarea.setSize('auto', '450px')
 
-      this.codeMirror.on('change', (mirror) => {
-        this.flinkSQL = mirror.getValue()
+      this.controller.codeMirror.textarea.on('change', (mirror) => {
+        this.controller.flinkSQL.content = mirror.getValue()
       })
 
-      if (this.flinkSQL != null) {
-        this.codeMirror.setValue(this.flinkSQL)
+      if (this.controller.flinkSQL.content != null) {
+        this.controller.codeMirror.textarea.setValue(this.controller.flinkSQL.content)
         setTimeout(() => {
-          this.codeMirror.refresh()
+          this.controller.codeMirror.textarea.refresh()
         }, 1)
       }
     },
 
-    handleCreate (params) {
+    handleCreateApp (params) {
       create(params).then((resp) => {
         const created = resp.data
         if (created) {
@@ -900,6 +986,30 @@ export default {
 
     handleGoBack () {
       this.$router.go(-1)
+    },
+
+    hasClass (elem, cls) {
+      cls = cls || ''
+      if (cls.replace(/\s/g, '').length === 0) {
+        return false
+      }
+      return new RegExp(' ' + cls + ' ').test(' ' + elem.className + ' ')
+    },
+
+    addClass (elem, cls) {
+      if (!this.hasClass(elem, cls)) {
+        elem.className = elem.className === '' ? cls : elem.className + ' ' + cls
+      }
+    },
+
+    removeClass (elem, cls) {
+      if (this.hasClass(elem, cls)) {
+        let newClass = ' ' + elem.className.replace(/[\t\r\n]/g, '') + ' '
+        while (newClass.indexOf(' ' + cls + ' ') >= 0) {
+          newClass = newClass.replace(' ' + cls + ' ', ' ')
+        }
+        elem.className = newClass.replace(/^\s+|\s+$/g, '')
+      }
     }
 
   }
@@ -944,9 +1054,13 @@ export default {
 }
 
 >>> .CodeMirror {
-  border: 1px solid rgba(222, 222, 222, .8) !important;
+  border: 1px solid rgba(222, 222, 222, .8);
   -webkit-box-shadow: inset 5px 0 10px -6px #333333;
   box-shadow: inset 5px 0 10px -6px #333333;
+}
+
+>>> .CodeMirror_error {
+  border: 1px solid red !important;
 }
 
 >>> .CodeMirror-line, >>> .CodeMirror-code > div {
@@ -962,17 +1076,22 @@ export default {
   border: unset;
 }
 
-.fullscreen {
+.bigScreen {
   color: dimgrey;
   z-index: 99;
   position: absolute;
-  top: 10px;
+  top: 8px;
   float: right;
   right: 13px;
   cursor: pointer;
 }
 
-.fullscreen:hover {
+.bigScreen:hover {
   color: #1890ff;
+}
+
+>>> .ant-modal {
+  top: 0 !important;
+  padding-bottom: 0 !important;
 }
 </style>
