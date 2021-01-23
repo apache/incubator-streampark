@@ -536,6 +536,24 @@ export default {
           }
         },
         codeMirror: {
+          option: {
+            tabSize: 2,
+            styleActiveLine: true,
+            lineNumbers: true,
+            line: true,
+            foldGutter: true,
+            styleSelectedText: false,
+            matchBrackets: true,
+            showCursorWhenSelecting: true,
+            extraKeys: { 'Ctrl': 'autocomplete' },
+            lint: true,
+            readOnly: false,
+            autoMatchParens: true,
+            mode: 'text/x-flinksql',
+            theme: 'default',	// 设置主题
+            gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
+            autoCloseBrackets: true
+          },
           textarea: null,
           bigScreen: null
         },
@@ -662,34 +680,14 @@ export default {
       const height = document.documentElement.offsetHeight || document.body.offsetHeight
       this.controller.modal.bigScreen.style.height = (height - 108) + 'px'
       this.$nextTick(() => {
-        this.controller.codeMirror.bigScreen = CodeMirror.fromTextArea(this.$refs.bigCodeMirror, {
-          tabSize: 2,
-          styleActiveLine: true,
-          lineNumbers: true,
-          line: true,
-          foldGutter: true,
-          styleSelectedText: false,
-          matchBrackets: true,
-          showCursorWhenSelecting: true,
-          extraKeys: { 'Ctrl': 'autocomplete' },
-          lint: true,
-          readOnly: false,
-          autoMatchParens: true,
-          mode: 'text/x-flinksql',
-          theme: 'default',	// 设置主题
-          gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
-          autoCloseBrackets: true
-        })
-
+        this.controller.codeMirror.bigScreen = CodeMirror.fromTextArea(this.$refs.bigCodeMirror, this.controller.codeMirror.option)
         this.controller.codeMirror.bigScreen.setSize('100%', '100%')
-
         if (this.controller.flinkSQL.content != null) {
           this.controller.codeMirror.bigScreen.setValue(this.controller.flinkSQL.content)
           setTimeout(() => {
             this.controller.codeMirror.bigScreen.refresh()
           }, 1)
         }
-
         this.controller.codeMirror.bigScreen.on('change', (mirror) => {
           this.controller.codeMirror.textarea.setValue(mirror.getValue())
         })
@@ -933,36 +931,15 @@ export default {
     },
 
     handleCodeMirror () {
-      this.controller.codeMirror.textarea = CodeMirror.fromTextArea(this.$refs.flinkSQL, {
-        tabSize: 2,
-        styleActiveLine: true,
-        lineNumbers: true,
-        line: true,
-        foldGutter: true,
-        styleSelectedText: false,
-        matchBrackets: true,
-        showCursorWhenSelecting: true,
-        extraKeys: { 'Ctrl': 'autocomplete' },
-        lint: true,
-        readOnly: false,
-        autoMatchParens: true,
-        mode: 'text/x-flinksql',
-        theme: 'default',	// 设置主题
-        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers'],
-        autoCloseBrackets: true
-      })
-
+      this.controller.codeMirror.textarea = CodeMirror.fromTextArea(this.$refs.flinkSQL, this.controller.codeMirror.option)
       this.$nextTick(() => {
         const bigScreen = document.querySelector('.bigScreen')
         document.querySelector('.CodeMirror').appendChild(bigScreen)
       })
-
       this.controller.codeMirror.textarea.setSize('auto', '450px')
-
       this.controller.codeMirror.textarea.on('change', (mirror) => {
         this.controller.flinkSQL.content = mirror.getValue()
       })
-
       if (this.controller.flinkSQL.content != null) {
         this.controller.codeMirror.textarea.setValue(this.controller.flinkSQL.content)
         setTimeout(() => {
