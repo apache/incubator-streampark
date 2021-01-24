@@ -28,6 +28,7 @@ import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
+import scala.collection.JavaConversions._
 
 import scala.util.Try
 
@@ -102,6 +103,25 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
       }
     }
     localTableEnv
+  }
+
+
+  /**
+   * table SQL 下--flink.conf 非必须传入,取决于开发者.
+   *
+   * @return
+   */
+  override def initParameter(): ParameterTool = {
+    val argsMap = ParameterTool.fromArgs(args)
+    argsMap.get(KEY_FLINK_CONF(), null) match {
+      case null | "" =>
+        logWarn("Usage:can't fond config,you can set \"--flink.conf $path \" in main arguments")
+        ParameterTool.fromSystemProperties().mergeWith(argsMap)
+      case file =>
+        val configArgs = super.readFlinkConf(file)
+        //显示指定的优先级 > 项目配置文件 > 系统配置文件...
+        ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
+    }
   }
 
   def initTableEnv(tableMode: TableMode): Unit = {
