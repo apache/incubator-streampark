@@ -66,7 +66,7 @@
             un-checked-children="false"
             @click="handleSQLConf"
             v-model="isSetConfig"
-            v-decorator="[ 'config', {rules: [{ validator: handleCheckSQLConf }]} ]"/>
+            v-decorator="[ 'config' ]"/>
           <a-icon
             v-if="isSetConfig"
             type="setting"
@@ -820,14 +820,6 @@ export default {
       }
     },
 
-    handleCheckSQLConf (rule, value, callback) {
-      if (this.configOverride == null) {
-        callback(new Error('Job参数不能为空'))
-      } else {
-        callback()
-      }
-    },
-
     handleEditConfig () {
       const config = this.form.getFieldValue('config')
       readConf({
@@ -846,9 +838,6 @@ export default {
       if (this.configOverride == null) {
         this.isSetConfig = false
       }
-      if (this.jobType === 'sql') {
-        this.handleCheckSQLConf()
-      }
     },
 
     handleEditConfOk (value) {
@@ -858,9 +847,6 @@ export default {
       } else {
         this.isSetConfig = true
         this.configOverride = value
-      }
-      if (this.jobType === 'sql') {
-        this.handleCheckSQLConf()
       }
     },
 

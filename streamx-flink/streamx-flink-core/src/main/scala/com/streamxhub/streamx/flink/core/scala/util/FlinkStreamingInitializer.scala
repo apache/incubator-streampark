@@ -36,7 +36,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.CheckpointingMode
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -86,7 +86,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  private[this] def readFlinkConf(config: String): Map[String, String] = {
+  private[util] def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
 
     val map = config match {
@@ -120,22 +120,15 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
   }
 
-  /**
-   * --flink.conf 非必须传入,取决于开发者.
-   *
-   * @return
-   */
-  private[this] def initParameter(): ParameterTool = {
+  private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    argsMap.get(KEY_FLINK_CONF(), null) match {
-      case null | "" =>
-        logWarn("Usage:can't fond config,you can set \"--flink.conf $path \" in main arguments")
-        ParameterTool.fromSystemProperties().mergeWith(argsMap)
-      case file =>
-        val configArgs = readFlinkConf(file)
-        //显示指定的优先级 > 项目配置文件 > 系统配置文件...
-        ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
+    val config = argsMap.get(KEY_FLINK_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+      case file => file
     }
+    val configArgs = readFlinkConf(config)
+    //显示指定的优先级 > 项目配置文件 > 系统配置文件...
+    ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
   }
 
   def streamEnvironment: StreamExecutionEnvironment = {
