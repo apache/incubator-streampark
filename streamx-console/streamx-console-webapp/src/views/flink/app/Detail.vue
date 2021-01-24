@@ -21,16 +21,16 @@
         {{ app.projectName }}
       </a-descriptions-item>
       <a-descriptions-item label="Application Type">
-        <span v-if="app.appType == 1">
+        <div v-if="app.appType == 1">
           <a-tag color="cyan">
             StreamX Flink
           </a-tag>
-        </span>
-        <span v-else-if="app.appType == 2">
+        </div>
+        <div v-else-if="app.appType == 2">
           <a-tag color="blue">
             Apache Flink
           </a-tag>
-        </span>
+        </div>
       </a-descriptions-item>
       <a-descriptions-item label="Status">
         <State option="state" :data="app"></State>
@@ -82,6 +82,7 @@
               :dataSource="configVersions"
               :pagination="pagination.config"
               :loading="pager.config.loading"
+              @change="handleTableChange"
               class="detail-table">
               <template slot="format" slot-scope="text, record">
                 <a-tag color="#2db7f5" v-if="record.format == 1">
@@ -136,9 +137,7 @@
         </a-descriptions>
       </a-tab-pane>
       <a-tab-pane key="3" tab="Flink SQL" v-if="app && app.jobType === 2">
-        <div>
-          {{ app.flinkSQL }}
-        </div>
+        <textarea class="flinkSQL"></textarea>
       </a-tab-pane>
       <a-tab-pane key="4" tab="Savepoints" v-if="app && savePoints && savePoints.length>0">
         <a-descriptions>
@@ -269,8 +268,8 @@
       @close="handleEditConfClose"
       @ok="handleEditConfOk"
       :visiable="confVisiable"
-      :readOnly="true"></Conf>
-
+      :readOnly="true">
+    </Conf>
     <a-modal v-model="compareVisible" on-ok="handleCompareOk" v-if="compareVisible">
       <template slot="title">
         <icon-font slot="icon" type="icon-git-compare" style="color: green"/>
@@ -316,7 +315,6 @@
         </a-form-item>
       </a-form>
     </a-modal>
-
     <a-modal
       v-model="execOption.visible"
       width="80%"
@@ -333,7 +331,6 @@
       </template>
       <textarea id="startExp" ref="startExp" class="startExp"></textarea>
     </a-modal>
-
   </a-card>
 </template>
 <script>
@@ -344,9 +341,12 @@ import configOptions from './option'
 import { get as getVer, list as listVer, remove as removeConf } from '@api/config'
 import { history, remove as removeSp } from '@api/savepoint'
 import Conf from './Conf'
-import 'codemirror/lib/codemirror.css'
 import { Icon } from 'ant-design-vue'
 import notification from 'ant-design-vue/lib/notification'
+
+import CodeMirror from 'codemirror'
+import 'codemirror/lib/codemirror.css'
+import './sql'
 
 const IconFont = Icon.createFromIconfontCN({
   scriptUrl: '//at.alicdn.com/t/font_2006309_wqixwmes1xi.js'
@@ -388,18 +388,23 @@ export default {
           info: null,
           loading: false
         },
-        savePoints: {
+        flinkSQL: {
           key: '3',
           info: null,
           loading: false
         },
-        backUp: {
+        savePoints: {
           key: '4',
           info: null,
           loading: false
         },
-        startLog: {
+        backUp: {
           key: '5',
+          info: null,
+          loading: false
+        },
+        startLog: {
+          key: '6',
           info: null,
           loading: false
         }
@@ -438,7 +443,32 @@ export default {
           showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
         }
       },
-      codeMirror: null,
+
+      codeMirror: {
+        option: {
+          tabSize: 8,
+          styleActiveLine: true,
+          lineNumbers: true,
+          line: true,
+          foldGutter: true,
+          styleSelectedText: true,
+          matchBrackets: true,
+          showCursorWhenSelecting: true,
+          extraKeys: { 'Ctrl': 'autocomplete' },
+          lint: true,
+          readOnly: true,
+          autoMatchParens: true,
+          indentWithTabs: true,
+          smartIndent: true,
+          cursorHeight: 1, // 光标高度
+          autoRefresh: true,
+          theme: 'default',	// 设置主题
+          gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
+        },
+        flinkSQL: null,
+        exception: null
+      },
+
       execOption: {
         modalStyle: {
           height: '600px',
@@ -568,7 +598,7 @@ export default {
     if (appId) {
       this.CleanAppId()
       this.handleGet(appId)
-      const timer = window.setInterval(() => this.handleGet(appId), 2000)
+      const timer = window.setInterval(() => this.handleGet(appId), 5000)
       this.$once('hook:beforeDestroy', () => {
         clearInterval(timer)
       })
@@ -584,17 +614,54 @@ export default {
         if (!this.app) {
           this.app = resp.data
           this.options = JSON.parse(this.app.options)
-          this.handleConfig()
-          this.handleSavePoint()
-          this.handleBackUps()
-          this.handleStartLog()
+          this.$nextTick(() => {
+            this.handleFlinkSQL()
+            this.handleConfig()
+            this.handleSavePoint()
+            this.handleBackUps()
+            this.handleStartLog()
+          })
         } else {
           this.app = resp.data
           this.options = JSON.parse(this.app.options)
+          this.$nextTick(() => {
+            this.handleFlinkSQL()
+          })
         }
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+    handleFlinkSQL () {
+      if (this.app.jobType === 2) {
+        this.app.flinkSQL = Base64.decode(this.app.flinkSQL)
+        if (this.codeMirror.flinkSQL == null) {
+          let processed = false
+          const interId = setInterval(() => {
+            const elem = document.querySelector('.flinkSQL')
+            if (elem != null && !processed) {
+              processed = true
+              this.codeMirror.option.mode = 'text/x-flinksql'
+              this.codeMirror.flinkSQL = CodeMirror.fromTextArea(elem, this.codeMirror.option)
+              this.codeMirror.flinkSQL.setSize('auto', '450px')
+              this.codeMirror.flinkSQL.setValue(this.app.flinkSQL)
+              setTimeout(() => {
+                this.codeMirror.flinkSQL.refresh()
+              }, 10)
+              clearInterval(interId)
+            }
+          }, 1)
+        }
+        const interId2 = setInterval(() => {
+          if (this.codeMirror.flinkSQL != null) {
+            clearInterval(interId2)
+            this.codeMirror.flinkSQL.setValue(this.app.flinkSQL)
+            setTimeout(() => {
+              this.codeMirror.flinkSQL.refresh()
+            }, 10)
+          }
+        }, 1)
+      }
     },
     handleConfig () {
       const params = {
@@ -621,7 +688,10 @@ export default {
           }
         })
         this.configVersions = resp.data.records
-        const pageSize = this.pager.config.info.pageSize || this.pagination.config.defaultPageSize
+        let pageSize = this.pagination.config.defaultPageSize
+        if (this.pager.config.info != null) {
+          pageSize = this.pager.config.info.pageSize || pageSize
+        }
         if (pagination.total >= pageSize) {
           this.allConfigVersions = this.configVersions
         }
@@ -829,14 +899,18 @@ export default {
           this.handleConfig()
           break
         case '3':
+          this.pager.flinkSQL.info = pagination
+          this.handleFlinkSQL()
+          break
+        case '4':
           this.pager.savePoints.info = pagination
           this.handleSavePoint()
           break
-        case '4':
+        case '5':
           this.pager.backUp.info = pagination
           this.handleBackUps()
           break
-        case '5':
+        case '6':
           this.pager.startLog.info = pagination
           this.handleStartLog()
           break
@@ -844,41 +918,22 @@ export default {
     },
 
     handleCodeMirror () {
-      this.codeMirror = CodeMirror.fromTextArea(document.querySelector('.startExp'), {
-        tabSize: 8,
-        styleActiveLine: true,
-        lineNumbers: true,
-        line: true,
-        foldGutter: true,
-        styleSelectedText: true,
-        matchBrackets: true,
-        showCursorWhenSelecting: true,
-        extraKeys: { 'Ctrl': 'autocomplete' },
-        lint: true,
-        readOnly: true,
-        autoMatchParens: true,
-        indentWithTabs: true,
-        smartIndent: true,
-        cursorHeight: 1, // 光标高度
-        autoRefresh: true,
-        modes: [
-          {
-            value: 'x-java',
-            label: 'Java'
-          },
-          {
-            value: 'x-scala',
-            label: 'Scala'
-          }
-        ],
-        theme: 'default',	// 设置主题
-        gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter', 'CodeMirror-lint-markers']
-      })
-      this.codeMirror.setSize('auto', '600px')
+      this.codeMirror.option.modes = [
+        {
+          value: 'x-java',
+          label: 'Java'
+        },
+        {
+          value: 'x-scala',
+          label: 'Scala'
+        }
+      ]
+      this.codeMirror.exception = CodeMirror.fromTextArea(document.querySelector('.startExp'), this.codeMirror.option)
+      this.codeMirror.exception.setSize('auto', '600px')
       this.$nextTick(() => {
-        this.codeMirror.setValue(this.execOption.content)
+        this.codeMirror.exception.setValue(this.execOption.content)
         setTimeout(() => {
-          this.codeMirror.refresh()
+          this.codeMirror.exception.refresh()
         }, 1)
       })
     },
