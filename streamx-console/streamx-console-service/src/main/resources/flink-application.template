@@ -9,22 +9,11 @@ flink:
       jobmanager.memory:
         flink.size:
         heap.size:
-        jvm-metaspace.size:
-        jvm-overhead.max:
-        off-heap.size:
         process.size:
       taskmanager.memory:
         flink.size:
-        framework.heap.size:
-        framework.off-heap.size:
         managed.size:
         process.size:
-        task.heap.size:
-        task.off-heap.size:
-        jvm-metaspace.size:
-        jvm-overhead.max:
-        jvm-overhead.min:
-        managed.fraction: 0.4
   watermark:
     interval: 10000
   checkpoints:
