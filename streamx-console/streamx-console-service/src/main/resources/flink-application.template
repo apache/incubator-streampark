@@ -1,17 +1,11 @@
 flink:
   deployment:
     option:
-      target: yarn-per-job              # --target <arg> (local|remote|yarn-per-job|yarn-session|run-application)
-      detached:                         # -d   (If present, runs the job in detached mode)
+      detached:                         # -d
       shutdownOnAttachedExit:           # -sae
       zookeeperNamespace:               # -z
       jobmanager:                       #  -m
     property:
-      $internal.application.main:       # main class,Flink SQL不用填写此项
-      yarn.application.name:
-      yarn.application.node-label:
-      taskmanager.numberOfTaskSlots: 1
-      parallelism.default: 2
       jobmanager.memory:
         flink.size:
         heap.size:
@@ -32,7 +26,6 @@ flink:
         jvm-overhead.min:
         managed.fraction: 0.4
   watermark:
-    time.characteristic: EventTime
     interval: 10000
   checkpoints:
     unaligned: true
