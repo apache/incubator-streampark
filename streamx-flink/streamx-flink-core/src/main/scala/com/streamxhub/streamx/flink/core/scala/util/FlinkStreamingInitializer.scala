@@ -36,7 +36,7 @@ import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
+import org.apache.flink.streaming.api.CheckpointingMode
 
 import java.io.File
 import java.util.concurrent.TimeUnit
