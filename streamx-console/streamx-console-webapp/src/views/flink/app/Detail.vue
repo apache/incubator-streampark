@@ -388,11 +388,6 @@ export default {
           info: null,
           loading: false
         },
-        flinkSQL: {
-          key: '3',
-          info: null,
-          loading: false
-        },
         savePoints: {
           key: '4',
           info: null,
@@ -633,7 +628,7 @@ export default {
       })
     },
     handleFlinkSQL () {
-      if (this.app.jobType === 2) {
+      if (this.app.jobType === 2 && this.codeMirror.flinkSQL === null) {
         const interId = setInterval(() => {
           const elem = document.querySelector('.flinkSQL')
           if (elem != null) {
