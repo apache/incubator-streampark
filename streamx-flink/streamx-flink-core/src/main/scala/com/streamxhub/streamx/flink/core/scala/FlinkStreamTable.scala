@@ -42,7 +42,7 @@ import org.apache.flink.streaming.api.functions.source.{FileMonitoringFunction, 
 import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.scala.OverrideStreamTableEnvironment
 import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
 import org.apache.flink.table.catalog.Catalog
 import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor, StreamTableDescriptor}
@@ -64,15 +64,15 @@ import scala.util.{Failure, Success, Try}
  * @param tableEnv
  */
 class StreamTableContext(val parameter: ParameterTool,
-                         private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+                                 private val streamEnv: StreamExecutionEnvironment,
+                                 private val tableEnv: OverrideStreamTableEnvironment) extends OverrideStreamTableEnvironment {
 
   /**
    * for scala
    *
    * @param args
    */
-  def this(args: (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment)) = this(args._1, args._2, args._3)
+  def this(args: (ParameterTool, StreamExecutionEnvironment, OverrideStreamTableEnvironment)) = this(args._1, args._2, args._3)
 
   /**
    * for Java
