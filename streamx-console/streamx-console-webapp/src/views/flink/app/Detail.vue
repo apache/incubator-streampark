@@ -882,10 +882,6 @@ export default {
           this.pager.config.info = pagination
           this.handleConfig()
           break
-        case '3':
-          this.pager.flinkSQL.info = pagination
-          this.handleFlinkSQL()
-          break
         case '4':
           this.pager.savePoints.info = pagination
           this.handleSavePoint()
