@@ -20,16 +20,18 @@
  */
 package com.streamxhub.streamx.flink.core.scala.util
 
+import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
 import com.streamxhub.streamx.flink.core.scala.enums.TableMode.TableMode
 import com.streamxhub.streamx.flink.core.scala.enums.{ApiType, PlannerType, TableMode}
 import org.apache.flink.api.java.utils.ParameterTool
+import org.apache.flink.configuration.ConfigOptions.key
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
+import org.apache.flink.table.api.bridge.scala.OverrideStreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
-import scala.collection.JavaConversions._
 
+import scala.collection.JavaConversions._
 import scala.util.Try
 
 private[scala] object FlinkTableInitializer {
@@ -48,7 +50,7 @@ private[scala] object FlinkTableInitializer {
     (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
   }
 
-  def initStreamTable(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initStreamTable(args: Array[String], config: (StreamExecutionEnvironment, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment, OverrideStreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -61,7 +63,7 @@ private[scala] object FlinkTableInitializer {
     (flinkInitializer.parameter, flinkInitializer.streamEnvironment, flinkInitializer.streamTableEnvironment)
   }
 
-  def initJavaStreamTable(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
+  def initJavaStreamTable(args: StreamEnvConfig): (ParameterTool, StreamExecutionEnvironment, OverrideStreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
         if (flinkInitializer == null) {
@@ -79,11 +81,11 @@ private[scala] object FlinkTableInitializer {
 
 private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType) extends FlinkStreamingInitializer(args, apiType) {
 
-  private[this] var localStreamTableEnv: StreamTableEnvironment = _
+  private[this] var localStreamTableEnv: OverrideStreamTableEnvironment = _
 
   private[this] var localTableEnv: TableEnvironment = _
 
-  def streamTableEnvironment: StreamTableEnvironment = {
+  def streamTableEnvironment: OverrideStreamTableEnvironment = {
     if (localStreamTableEnv == null) {
       this.synchronized {
         if (localStreamTableEnv == null) {
@@ -185,7 +187,18 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
         if (javaStreamEnvConfFunc != null) {
           javaStreamEnvConfFunc.configuration(streamEnvironment.getJavaEnv, parameter)
         }
-        localStreamTableEnv = StreamTableEnvironment.create(streamEnvironment, setting)
+        localStreamTableEnv = OverrideStreamTableEnvironment.create(streamEnvironment, setting)
+    }
+    val appNameOption = key(ConfigConst.KEY_FLINK_APP_NAME).stringType.noDefaultValue().withDescription("The flink Job name")
+    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+      case (appName: String, _) => appName
+      case (null, appName: String) => appName
+      case _ => null
+    }
+
+    tableMode match {
+      case TableMode.batch => localTableEnv.getConfig.getConfiguration.setString(appNameOption, appName)
+      case TableMode.streaming => localStreamTableEnv.getConfig.getConfiguration.setString(appNameOption, appName)
     }
   }
 
