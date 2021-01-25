@@ -86,7 +86,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
-  private[this] def readFlinkConf(config: String): Map[String, String] = {
+  private[util] def readFlinkConf(config: String): Map[String, String] = {
     val extension = config.split("\\.").last.toLowerCase
 
     val map = config match {
@@ -120,7 +120,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       .map(x => x._1.replace(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX, "") -> x._2)
   }
 
-  private[this] def initParameter(): ParameterTool = {
+  private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_FLINK_CONF(), null) match {
       case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
