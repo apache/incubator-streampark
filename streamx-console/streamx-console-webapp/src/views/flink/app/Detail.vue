@@ -615,18 +615,18 @@ export default {
           this.app = resp.data
           this.options = JSON.parse(this.app.options)
           this.$nextTick(() => {
-            this.handleFlinkSQL()
             this.handleConfig()
+            this.handleFlinkSQL()
             this.handleSavePoint()
             this.handleBackUps()
             this.handleStartLog()
           })
         } else {
+          /**
+           * 第一次之后,每次轮询只管基本信息的变更
+           * @type {any}
+           */
           this.app = resp.data
-          this.options = JSON.parse(this.app.options)
-          this.$nextTick(() => {
-            this.handleFlinkSQL()
-          })
         }
       }).catch((error) => {
         this.$message.error(error.message)
@@ -634,33 +634,20 @@ export default {
     },
     handleFlinkSQL () {
       if (this.app.jobType === 2) {
-        this.app.flinkSQL = Base64.decode(this.app.flinkSQL)
-        if (this.codeMirror.flinkSQL == null) {
-          let processed = false
-          const interId = setInterval(() => {
-            const elem = document.querySelector('.flinkSQL')
-            if (elem != null && !processed) {
-              processed = true
-              this.codeMirror.option.mode = 'text/x-flinksql'
-              this.codeMirror.flinkSQL = CodeMirror.fromTextArea(elem, this.codeMirror.option)
-              this.codeMirror.flinkSQL.setSize('auto', '450px')
-              this.codeMirror.flinkSQL.setValue(this.app.flinkSQL)
-              setTimeout(() => {
-                this.codeMirror.flinkSQL.refresh()
-              }, 10)
-              clearInterval(interId)
-            }
-          }, 1)
-        }
-        const interId2 = setInterval(() => {
-          if (this.codeMirror.flinkSQL != null) {
-            clearInterval(interId2)
-            this.codeMirror.flinkSQL.setValue(this.app.flinkSQL)
+        const interId = setInterval(() => {
+          const elem = document.querySelector('.flinkSQL')
+          if (elem != null) {
+            clearInterval(interId)
+            this.codeMirror.option.mode = 'text/x-flinksql'
+            this.codeMirror.flinkSQL = CodeMirror.fromTextArea(elem, this.codeMirror.option)
+            this.codeMirror.flinkSQL.setSize('auto', '450px')
+            this.codeMirror.flinkSQL.setValue(Base64.decode(this.app.flinkSQL)
+            )
             setTimeout(() => {
               this.codeMirror.flinkSQL.refresh()
             }, 10)
           }
-        }, 1)
+        }, 10)
       }
     },
     handleConfig () {
