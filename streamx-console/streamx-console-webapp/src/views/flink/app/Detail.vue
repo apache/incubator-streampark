@@ -641,11 +641,8 @@ export default {
             this.codeMirror.option.mode = 'text/x-flinksql'
             this.codeMirror.flinkSQL = CodeMirror.fromTextArea(elem, this.codeMirror.option)
             this.codeMirror.flinkSQL.setSize('auto', '450px')
-            this.codeMirror.flinkSQL.setValue(Base64.decode(this.app.flinkSQL)
-            )
-            setTimeout(() => {
-              this.codeMirror.flinkSQL.refresh()
-            }, 10)
+            this.codeMirror.flinkSQL.setValue(Base64.decode(this.app.flinkSQL))
+            this.codeMirror.flinkSQL.refresh()
           }
         }, 10)
       }
