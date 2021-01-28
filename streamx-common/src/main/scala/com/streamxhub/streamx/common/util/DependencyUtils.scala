@@ -113,7 +113,7 @@ object DependencyUtils {
   def createRepoResolvers(defaultIvyUserDir: File): ChainResolver = {
     // We need a chain resolver if we want to check multiple repositories
     val cr = new ChainResolver
-    cr.setName("flink-list")
+    cr.setName("streamx-list")
 
     val localM2 = new IBiblioResolver
     localM2.setM2compatible(true)
@@ -280,8 +280,8 @@ object DependencyUtils {
   def getModuleDescriptor: DefaultModuleDescriptor = DefaultModuleDescriptor.newDefaultInstance(
     // Include UUID in module name, so multiple clients resolving maven coordinate at the same time
     // do not modify the same resolution file concurrently.
-    ModuleRevisionId.newInstance("org.apache.flink",
-      s"flink-parent-${UUID.randomUUID.toString}",
+    ModuleRevisionId.newInstance("com.streamxhub.streamx",
+      s"dependency-parent-${UUID.randomUUID.toString}",
       "1.0"))
 
   private def clearIvyResolutionFiles(
