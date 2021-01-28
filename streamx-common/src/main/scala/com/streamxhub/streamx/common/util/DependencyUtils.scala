@@ -60,7 +60,7 @@ object DependencyUtils {
         buildIvySettings(Option(repositories), Option(ivyRepoPath))
     }
 
-    resolveMavenCoordinates(packages, ivySettings, exclusions = exclusions)
+    resolveMavenCoordinates(packages, ivySettings, exclusions)
   }
 
   // Exposed for testing

@@ -41,6 +41,8 @@ object ConfigConst {
 
   val KEY_TIMEOUT = "timeout"
 
+  val KEY_JOB_ID = "jobId"
+
   /**
    * sign....
    */
