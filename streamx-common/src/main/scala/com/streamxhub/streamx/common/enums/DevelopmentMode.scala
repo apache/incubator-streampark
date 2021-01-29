@@ -25,7 +25,6 @@ import enumeratum.EnumEntry
 
 
 sealed abstract class DevelopmentMode(val mode: String, val value: Int) extends EnumEntry {
-
 }
 
 object DevelopmentMode extends enumeratum.Enum[DevelopmentMode] {
