@@ -26,8 +26,8 @@ public enum DevelopmentMode {
     CUSTOMCODE("Custom Code", 1),
     PURESQL("Pure SQL", 2);
 
-    private String mode;
-    private Integer value;
+    String mode;
+    Integer value;
 
     DevelopmentMode(String mode, Integer value) {
         this.mode = mode;
