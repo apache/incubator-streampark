@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy}
+import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
 import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
