@@ -38,4 +38,8 @@ public enum DevelopmentMode {
         return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
     }
 
+    public Integer getValue() {
+        return value;
+    }
+
 }
