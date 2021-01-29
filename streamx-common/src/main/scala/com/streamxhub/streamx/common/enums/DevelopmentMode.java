@@ -22,6 +22,9 @@ package com.streamxhub.streamx.common.enums;
 
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
 public enum DevelopmentMode {
     CUSTOMCODE("Custom Code", 1),
     PURESQL("Pure SQL", 2);
