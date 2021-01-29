@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core.scala.enums
+package com.streamxhub.streamx.common.enums
 
-object StateBackend extends Enumeration {
-  type StateBackend = Value
-  val jobmanager, filesystem, rocksdb = Value
+object ApiType extends Enumeration {
+  type ApiType = Value
+  val java, scala = Value
 }

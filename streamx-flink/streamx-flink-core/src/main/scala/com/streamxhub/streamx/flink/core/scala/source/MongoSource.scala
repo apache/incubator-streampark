@@ -22,11 +22,11 @@ package com.streamxhub.streamx.flink.core.scala.source
 
 import com.mongodb.MongoClient
 import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
+import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.streamx.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
+import ApiType.ApiType
 import com.streamxhub.streamx.flink.core.scala.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation

@@ -18,10 +18,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core.scala.enums
+package com.streamxhub.streamx.common.enums
+
+import scala.collection.immutable
+import enumeratum.EnumEntry
 
 
-object ApiType extends Enumeration {
-  type ApiType = Value
-  val java, scala = Value
+sealed abstract class DevelopmentMode(val mode: String, val value: Int) extends EnumEntry {
+
+}
+
+object DevelopmentMode extends enumeratum.Enum[DevelopmentMode] {
+
+  val values: immutable.IndexedSeq[DevelopmentMode] = findValues
+
+  case object CUSTOMCODE extends DevelopmentMode("Custom Code", 1)
+
+  case object PURESQL extends DevelopmentMode("Pure SQL", 2)
+
+  def of(value: Int): DevelopmentMode = findValues.filter(_.value == value).head
+
 }
