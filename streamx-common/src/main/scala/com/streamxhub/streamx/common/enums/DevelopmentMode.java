@@ -18,23 +18,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.enums
+package com.streamxhub.streamx.common.enums;
 
-import scala.collection.immutable
-import enumeratum.EnumEntry
+import java.util.Arrays;
 
+public enum DevelopmentMode {
+    CUSTOMCODE("Custom Code", 1),
+    PURESQL("Pure SQL", 2);
 
-sealed abstract class DevelopmentMode(val mode: String, val value: Int) extends EnumEntry {
-}
+    private String mode;
+    private Integer value;
 
-object DevelopmentMode extends enumeratum.Enum[DevelopmentMode] {
+    DevelopmentMode(String mode, Integer value) {
+        this.mode = mode;
+        this.value = value;
+    }
 
-  val values: immutable.IndexedSeq[DevelopmentMode] = findValues
-
-  case object CUSTOMCODE extends DevelopmentMode("Custom Code", 1)
-
-  case object PURESQL extends DevelopmentMode("Pure SQL", 2)
-
-  def of(value: Int): DevelopmentMode = findValues.filter(_.value == value).head
+    public static DevelopmentMode of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
+    }
 
 }
