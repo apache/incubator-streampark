@@ -45,12 +45,7 @@ object DependencyUtils {
                                 repositories: String,
                                 ivyRepoPath: String,
                                 ivySettingsPath: Option[String]): List[String] = {
-    val exclusions: Seq[String] =
-      if (packagesExclusions != null && packagesExclusions.trim.isEmpty) {
-        packagesExclusions.split(",")
-      } else {
-        Nil
-      }
+    val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
       case Some(path) =>
