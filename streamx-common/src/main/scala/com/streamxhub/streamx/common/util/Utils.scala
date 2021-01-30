@@ -29,6 +29,19 @@ import scala.util.{Failure, Success, Try}
 
 object Utils {
 
+  def notEmpty(elem: Any): Boolean = {
+    elem match {
+      case null => false
+      case x => x match {
+        case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
+        case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
+      }
+      case _ => true
+    }
+  }
+
+  def isEmpty(elem: Any): Boolean = !notEmpty(elem)
+
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
   @throws[IOException] def checkJarFile(jar: URL): Unit = {

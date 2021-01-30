@@ -44,7 +44,7 @@ object DependencyUtils {
                                 packages: String,
                                 repositories: String,
                                 ivyRepoPath: String,
-                                ivySettingsPath: Option[String]): String = {
+                                ivySettingsPath: Option[String]): List[String] = {
     val exclusions: Seq[String] =
       if (packagesExclusions != null && packagesExclusions.trim.isEmpty) {
         packagesExclusions.split(",")
@@ -160,12 +160,12 @@ object DependencyUtils {
    */
   def resolveDependencyPaths(
                               artifacts: Array[AnyRef],
-                              cacheDirectory: File): String = {
+                              cacheDirectory: File): List[String] = {
     artifacts.map { artifactInfo =>
       val artifact = artifactInfo.asInstanceOf[Artifact].getModuleRevisionId
       cacheDirectory.getAbsolutePath + File.separator +
         s"${artifact.getOrganisation}_${artifact.getName}-${artifact.getRevision}.jar"
-    }.mkString(":")
+    }.toList
   }
 
   /** Adds the given maven coordinates to Ivy's module descriptor. */
@@ -311,10 +311,8 @@ object DependencyUtils {
                                coordinates: String,
                                ivySettings: IvySettings,
                                exclusions: Seq[String] = Nil,
-                               isTest: Boolean = false): String = {
-    if (coordinates == null || coordinates.trim.isEmpty) {
-      ""
-    } else {
+                               isTest: Boolean = false): List[String] = {
+    if (Utils.isEmpty(coordinates)) List.empty[String] else {
       val sysOut = System.out
       try {
         // To prevent ivy from logging to system out
