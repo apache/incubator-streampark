@@ -22,6 +22,8 @@ package com.streamxhub.streamx.common.util
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
+import java.lang.{Iterable => JavaIterable}
+import java.util.{Map => JavaMap}
 import java.util.function.BiConsumer
 import java.util.jar.{JarFile, JarInputStream}
 import java.util.{Properties, UUID}
@@ -32,10 +34,10 @@ object Utils {
   def notEmpty(elem: Any): Boolean = {
     elem match {
       case null => false
-      case x => x match {
-        case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
-        case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
-      }
+      case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
+      case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
+      case x if x.isInstanceOf[JavaIterable[_]] => x.asInstanceOf[JavaIterable].iterator().hasNext
+      case x if x.isInstanceOf[JavaMap[_, _]] => !x.asInstanceOf[JavaMap[_, _]].isEmpty
       case _ => true
     }
   }
