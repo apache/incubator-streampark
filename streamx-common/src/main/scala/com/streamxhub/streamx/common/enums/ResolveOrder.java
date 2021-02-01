@@ -23,8 +23,17 @@ package com.streamxhub.streamx.common.enums;
 
 import java.util.Arrays;
 
+/**
+ * classloader.resolve-order
+ */
 public enum ResolveOrder {
+    /**
+     * parent-first
+     */
     PARENT_FIRST("parent-first", 0),
+    /**
+     * child-first
+     */
     CHILD_FIRST("child-first", 1);
     String name;
     Integer value;
