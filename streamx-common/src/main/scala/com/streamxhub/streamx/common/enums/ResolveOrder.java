@@ -24,8 +24,8 @@ package com.streamxhub.streamx.common.enums;
 import java.util.Arrays;
 
 public enum ResolveOrder {
-    PARENT_FIRST("parent first", 0),
-    CHILD_FIRST("child first", 1);
+    PARENT_FIRST("parent-first", 0),
+    CHILD_FIRST("child-first", 1);
     String name;
     Integer value;
 
