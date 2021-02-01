@@ -22,7 +22,6 @@ package com.streamxhub.streamx.common.util
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
-import java.util
 import java.util.{Map => JavaMap,Collection => JavaCollection}
 import java.util.function.BiConsumer
 import java.util.jar.{JarFile, JarInputStream}
