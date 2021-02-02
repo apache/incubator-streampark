@@ -337,7 +337,7 @@ object DependencyUtils extends Logger {
         val artifacts = extractMavenCoordinates(coordinates)
         val packagesDirectory: File = new File(ivySettings.getDefaultIvyUserDir, "jars")
         // scalastyle:off println
-        logInfo(s"Ivy Default Cache set to: ${ivySettings.getDefaultCache.getAbsolutePath}")
+        outCallback.accept(s"Ivy Default Cache set to: ${ivySettings.getDefaultCache.getAbsolutePath}")
         outCallback.accept(s"The jars for the packages stored in: $packagesDirectory")
         // scalastyle:on println
         val ivy = Ivy.newInstance(ivySettings)
