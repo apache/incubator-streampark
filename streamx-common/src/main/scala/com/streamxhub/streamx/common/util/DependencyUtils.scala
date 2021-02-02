@@ -32,8 +32,9 @@ import org.apache.ivy.core.settings.IvySettings
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
+import org.apache.ivy.util.{DefaultMessageLogger, Message}
 
-import java.io.{ByteArrayOutputStream, File, IOException, OutputStream, PrintStream}
+import java.io.{File, IOException}
 import java.text.ParseException
 import java.util.UUID
 import java.util.function.Consumer
@@ -48,6 +49,8 @@ object DependencyUtils {
                                 ivySettingsPath: Option[String],
                                 outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
+
+    initLogger(outCallback)
 
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
@@ -329,10 +332,7 @@ object DependencyUtils {
                                isTest: Boolean = false
                              ): List[String] = {
     if (Utils.isEmpty(coordinates)) List.empty[String] else {
-      val sysOut = System.out
-      val printStream = new PrintStream(new LogOutputStream(outCallback), true)
       try {
-        System.setOut(printStream)
         // To prevent ivy from logging to system out
         val artifacts = extractMavenCoordinates(coordinates)
         val packagesDirectory: File = new File(ivySettings.getDefaultIvyUserDir, "jars")
@@ -344,6 +344,7 @@ object DependencyUtils {
         // Set resolve options to download transitive dependencies as well
         val resolveOptions = new ResolveOptions
         resolveOptions.setTransitive(true)
+        resolveOptions.setOutputReport(true)
         val retrieveOptions = new RetrieveOptions
         // Turn downloading and logging off for testing
         if (isTest) {
@@ -351,6 +352,8 @@ object DependencyUtils {
           resolveOptions.setLog(LogOptions.LOG_QUIET)
           retrieveOptions.setLog(LogOptions.LOG_QUIET)
         } else {
+          resolveOptions.setLog(LogOptions.LOG_QUIET)
+          retrieveOptions.setLog(LogOptions.LOG_QUIET)
           resolveOptions.setDownload(true)
         }
 
@@ -386,9 +389,6 @@ object DependencyUtils {
         paths
       } catch {
         case e: Throwable => throw e
-      } finally {
-        printStream.close()
-        System.setOut(sysOut)
       }
     }
   }
@@ -404,28 +404,31 @@ object DependencyUtils {
     rule
   }
 
+  private[this] def initLogger(outCallback: Consumer[String]): Unit = {
+    if (Message.getDefaultLogger == null) {
+      Message.setDefaultLogger(new DefaultMessageLogger(Message.MSG_INFO) {
+        override def log(msg: String, level: Int): Unit = outCallback.accept(msg)
 
-  private class LogOutputStream(outCallback: Consumer[String]) extends OutputStream {
-    private val buffer: ByteArrayOutputStream = new ByteArrayOutputStream()
+        override def rawlog(msg: String, level: Int): Unit = outCallback.accept(msg)
 
-    @throws[IOException] override def write(cc: Int): Unit = {
-      buffer.write(cc)
+        override def doEndProgress(msg: String): Unit = outCallback.accept(msg)
+
+        override def debug(msg: String): Unit = outCallback.accept(msg)
+
+        override def verbose(msg: String): Unit = outCallback.accept(msg)
+
+        override def deprecated(msg: String): Unit = outCallback.accept(msg)
+
+        override def info(msg: String): Unit = outCallback.accept(msg)
+
+        override def rawinfo(msg: String): Unit = outCallback.accept(msg)
+
+        override def warn(msg: String): Unit = outCallback.accept(msg)
+
+        override def error(msg: String): Unit = outCallback.accept(msg)
+      })
     }
-
-    @throws[IOException] override def flush(): Unit = {
-      this.processBuffer()
-    }
-
-    @throws[IOException] override def close(): Unit = {
-      this.processBuffer()
-      super.close()
-    }
-
-    protected def processBuffer(): Unit = {
-      outCallback.accept(this.buffer.toString())
-      this.buffer.reset()
-    }
-
   }
+
 
 }
