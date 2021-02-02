@@ -32,14 +32,17 @@ import org.apache.ivy.core.settings.IvySettings
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
-import org.apache.ivy.util.{DefaultMessageLogger, Message}
+import org.apache.ivy.util.{DefaultMessageLogger, Message, MessageLogger}
 
 import java.io.{File, IOException}
 import java.text.ParseException
 import java.util.UUID
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Consumer
 
 object DependencyUtils {
+
+  val logInit: AtomicBoolean = new AtomicBoolean(false)
 
   def resolveMavenDependencies(
                                 packagesExclusions: String,
@@ -405,7 +408,7 @@ object DependencyUtils {
   }
 
   private[this] def initLogger(outCallback: Consumer[String]): Unit = {
-    if (Message.getDefaultLogger == null) {
+    if (!logInit.getAndSet(true)) {
       Message.setDefaultLogger(new DefaultMessageLogger(Message.MSG_INFO) {
         override def log(msg: String, level: Int): Unit = outCallback.accept(msg)
 
