@@ -88,15 +88,23 @@ object DependencyUtils extends Logger {
   def extractMavenCoordinates(coordinates: String): Seq[MavenCoordinate] = {
     coordinates.split(",").map { p =>
       val splits = p.replace("/", ":").split(":")
-      require(splits.length == 3, s"Provided Maven Coordinates must be in the form " +
-        s"'groupId:artifactId:version'. The coordinate provided is: $p")
-      require(splits(0) != null && splits(0).trim.nonEmpty, s"The groupId cannot be null or " +
-        s"be whitespace. The groupId provided is: ${splits(0)}")
-      require(splits(1) != null && splits(1).trim.nonEmpty, s"The artifactId cannot be null or " +
-        s"be whitespace. The artifactId provided is: ${splits(1)}")
-      require(splits(2) != null && splits(2).trim.nonEmpty, s"The version cannot be null or " +
-        s"be whitespace. The version provided is: ${splits(2)}")
-      new MavenCoordinate(splits(0), splits(1), splits(2))
+      require(
+        splits.length == 3,
+        s"Provided Maven Coordinates must be in the form 'groupId:artifactId:version'. The coordinate provided is: $p"
+      )
+      require(
+        splits(0) != null && splits(0).trim.nonEmpty,
+        s"The groupId cannot be null or be whitespace. The groupId provided is: ${splits(0)}"
+      )
+      require(
+        splits(1) != null && splits(1).trim.nonEmpty,
+        s"The artifactId cannot be null or be whitespace. The artifactId provided is: ${splits(1)}"
+      )
+      require(
+        splits(2) != null && splits(2).trim.nonEmpty,
+        s"The version cannot be null or be whitespace. The version provided is: ${splits(2)}"
+      )
+      MavenCoordinate(splits(0), splits(1), splits(2))
     }
   }
 
@@ -136,8 +144,15 @@ object DependencyUtils extends Logger {
       "ivy.xml"
     ).mkString(File.separator)
     localIvy.addIvyPattern(ivyPattern)
-    val artifactPattern = Seq(localIvyRoot.getAbsolutePath, "[organisation]", "[module]",
-      "[revision]", "[type]s", "[artifact](-[classifier]).[ext]").mkString(File.separator)
+    val artifactPattern = Seq(
+      localIvyRoot.getAbsolutePath,
+      "[organisation]",
+      "[module]",
+      "[revision]",
+      "[type]s",
+      "[artifact](-[classifier]).[ext]"
+    ).mkString(File.separator)
+
     localIvy.addArtifactPattern(artifactPattern)
     localIvy.setName("local-ivy-cache")
     cr.add(localIvy)
@@ -163,8 +178,7 @@ object DependencyUtils extends Logger {
                              cacheDirectory: File): List[String] = {
     artifacts.map { artifactInfo =>
       val artifact = artifactInfo.asInstanceOf[Artifact].getModuleRevisionId
-      cacheDirectory.getAbsolutePath + File.separator +
-        s"${artifact.getOrganisation}_${artifact.getName}-${artifact.getRevision}.jar"
+      s"${cacheDirectory.getAbsolutePath}${File.separator}${artifact.getOrganisation}_${artifact.getName}-${artifact.getRevision}.jar"
     }.toList
   }
 
@@ -279,9 +293,11 @@ object DependencyUtils extends Logger {
   def getModuleDescriptor: DefaultModuleDescriptor = DefaultModuleDescriptor.newDefaultInstance(
     // Include UUID in module name, so multiple clients resolving maven coordinate at the same time
     // do not modify the same resolution file concurrently.
-    ModuleRevisionId.newInstance("com.streamxhub.streamx",
+    ModuleRevisionId.newInstance(
+      "com.streamxhub.streamx",
       s"dependency-parent-${UUID.randomUUID.toString}",
-      "1.0"))
+      "1.0")
+  )
 
   private def clearIvyResolutionFiles(
                                        mdId: ModuleRevisionId,
