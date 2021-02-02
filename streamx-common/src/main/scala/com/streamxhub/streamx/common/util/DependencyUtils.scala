@@ -38,7 +38,7 @@ import java.text.ParseException
 import java.util.UUID
 import java.util.function.Consumer
 
-object DependencyUtils extends Logger {
+object DependencyUtils {
 
   def resolveMavenDependencies(
                                 packagesExclusions: String,
