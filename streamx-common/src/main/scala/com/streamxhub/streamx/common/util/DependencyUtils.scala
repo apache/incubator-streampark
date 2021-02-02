@@ -386,7 +386,7 @@ object DependencyUtils extends Logger {
         case Success(value) => value
         case Failure(e) =>
           outCallback(e.getMessage)
-          null
+          throw e
       }
     }
   }
