@@ -32,17 +32,14 @@ import org.apache.ivy.core.settings.IvySettings
 import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
-import org.apache.ivy.util.{DefaultMessageLogger, Message, MessageLogger}
+import org.apache.ivy.util.{DefaultMessageLogger, Message}
 
 import java.io.{File, IOException}
 import java.text.ParseException
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.function.Consumer
 
 object DependencyUtils {
-
-  val logInit: AtomicBoolean = new AtomicBoolean(false)
 
   def resolveMavenDependencies(
                                 packagesExclusions: String,
@@ -52,8 +49,6 @@ object DependencyUtils {
                                 ivySettingsPath: Option[String],
                                 outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
-
-    initLogger(outCallback)
 
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
@@ -336,6 +331,7 @@ object DependencyUtils {
                              ): List[String] = {
     if (Utils.isEmpty(coordinates)) List.empty[String] else {
       try {
+        setDefaultLogger(outCallback)
         // To prevent ivy from logging to system out
         val artifacts = extractMavenCoordinates(coordinates)
         val packagesDirectory: File = new File(ivySettings.getDefaultIvyUserDir, "jars")
@@ -355,8 +351,6 @@ object DependencyUtils {
           resolveOptions.setLog(LogOptions.LOG_QUIET)
           retrieveOptions.setLog(LogOptions.LOG_QUIET)
         } else {
-          resolveOptions.setLog(LogOptions.LOG_QUIET)
-          retrieveOptions.setLog(LogOptions.LOG_QUIET)
           resolveOptions.setDownload(true)
         }
 
@@ -407,30 +401,28 @@ object DependencyUtils {
     rule
   }
 
-  private[this] def initLogger(outCallback: Consumer[String]): Unit = {
-    if (!logInit.getAndSet(true)) {
-      Message.setDefaultLogger(new DefaultMessageLogger(Message.MSG_INFO) {
-        override def log(msg: String, level: Int): Unit = outCallback.accept(msg)
+  private[this] def setDefaultLogger(outCallback: Consumer[String]): Unit = {
+    Message.setDefaultLogger(new DefaultMessageLogger(Message.MSG_INFO) {
+      override def log(msg: String, level: Int): Unit = outCallback.accept(msg)
 
-        override def rawlog(msg: String, level: Int): Unit = outCallback.accept(msg)
+      override def rawlog(msg: String, level: Int): Unit = outCallback.accept(msg)
 
-        override def doEndProgress(msg: String): Unit = outCallback.accept(msg)
+      override def doEndProgress(msg: String): Unit = outCallback.accept(msg)
 
-        override def debug(msg: String): Unit = outCallback.accept(msg)
+      override def debug(msg: String): Unit = outCallback.accept(msg)
 
-        override def verbose(msg: String): Unit = outCallback.accept(msg)
+      override def verbose(msg: String): Unit = outCallback.accept(msg)
 
-        override def deprecated(msg: String): Unit = outCallback.accept(msg)
+      override def deprecated(msg: String): Unit = outCallback.accept(msg)
 
-        override def info(msg: String): Unit = outCallback.accept(msg)
+      override def info(msg: String): Unit = outCallback.accept(msg)
 
-        override def rawinfo(msg: String): Unit = outCallback.accept(msg)
+      override def rawinfo(msg: String): Unit = outCallback.accept(msg)
 
-        override def warn(msg: String): Unit = outCallback.accept(msg)
+      override def warn(msg: String): Unit = outCallback.accept(msg)
 
-        override def error(msg: String): Unit = outCallback.accept(msg)
-      })
-    }
+      override def error(msg: String): Unit = outCallback.accept(msg)
+    })
   }
 
 
