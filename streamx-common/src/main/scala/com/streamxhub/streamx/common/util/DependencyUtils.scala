@@ -51,13 +51,18 @@ object DependencyUtils extends Logger {
 
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
-      case Some(path) =>
-        loadIvySettings(path, Option(repositories), Option(ivyRepoPath), outCallback)
-
-      case None =>
-        buildIvySettings(Option(repositories), Option(ivyRepoPath), outCallback)
+      case Some(path) => loadIvySettings(
+        path,
+        Option(repositories),
+        Option(ivyRepoPath),
+        outCallback
+      )
+      case None => buildIvySettings(
+        Option(repositories),
+        Option(ivyRepoPath),
+        outCallback
+      )
     }
-
     resolveMavenCoordinates(packages, ivySettings, exclusions, outCallback)
   }
 
