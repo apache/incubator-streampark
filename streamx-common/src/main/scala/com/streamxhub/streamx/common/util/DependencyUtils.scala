@@ -33,10 +33,10 @@ import org.apache.ivy.plugins.matcher.GlobPatternMatcher
 import org.apache.ivy.plugins.repository.file.FileRepository
 import org.apache.ivy.plugins.resolver.{ChainResolver, FileSystemResolver, IBiblioResolver}
 
-import java.io.{File, IOException}
+import java.io.{ByteArrayOutputStream, File, IOException, OutputStream, PrintStream}
 import java.text.ParseException
 import java.util.UUID
-import scala.util.{Failure, Success, Try}
+import java.util.function.Consumer
 
 object DependencyUtils extends Logger {
 
@@ -46,7 +46,7 @@ object DependencyUtils extends Logger {
                                 repositories: String,
                                 ivyRepoPath: String,
                                 ivySettingsPath: Option[String],
-                                outCallback: String => Unit): List[String] = {
+                                outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
 
     // Create the IvySettings, either load from file or build defaults
@@ -186,13 +186,13 @@ object DependencyUtils extends Logger {
   def addDependenciesToIvy(md: DefaultModuleDescriptor,
                            artifacts: Seq[MavenCoordinate],
                            ivyConfName: String,
-                           outCallback: String => Unit): Unit = {
+                           outCallback: Consumer[String]): Unit = {
     artifacts.foreach { mvn =>
       val ri = ModuleRevisionId.newInstance(mvn.groupId, mvn.artifactId, mvn.version)
       val dd = new DefaultDependencyDescriptor(ri, false, false)
       dd.addDependencyConfiguration(ivyConfName, ivyConfName + "(runtime)")
       // scalastyle:off println
-      outCallback(s"${dd.getDependencyId} added as a dependency")
+      outCallback.accept(s"${dd.getDependencyId} added as a dependency")
       // scalastyle:on println
       md.addDependency(dd)
     }
@@ -214,10 +214,9 @@ object DependencyUtils extends Logger {
    * @param ivyPath     The path to the local ivy repository
    * @return An IvySettings object
    */
-  def buildIvySettings(remoteRepos: Option[String], ivyPath: Option[String], outCallback: String => Unit): IvySettings = {
+  def buildIvySettings(remoteRepos: Option[String], ivyPath: Option[String], outCallback: Consumer[String]): IvySettings = {
     val ivySettings: IvySettings = new IvySettings
     processIvyPathArg(ivySettings, ivyPath)
-
     // create a pattern matcher
     ivySettings.addMatcher(new GlobPatternMatcher)
     // create the dependency resolvers
@@ -240,7 +239,7 @@ object DependencyUtils extends Logger {
                        settingsFile: String,
                        remoteRepos: Option[String],
                        ivyPath: Option[String],
-                       outCallback: String => Unit
+                       outCallback: Consumer[String]
                      ): IvySettings = {
     val file = new File(settingsFile)
     require(file.exists(), s"Ivy settings file $file does not exist")
@@ -266,7 +265,7 @@ object DependencyUtils extends Logger {
   }
 
   /* Add any optional additional remote repositories */
-  private def processRemoteRepoArg(ivySettings: IvySettings, remoteRepos: Option[String], outCallback: String => Unit): Unit = {
+  private def processRemoteRepoArg(ivySettings: IvySettings, remoteRepos: Option[String], outCallback: Consumer[String]): Unit = {
     remoteRepos.filterNot(_.trim.isEmpty).map(_.split(",")).foreach { repositoryList =>
       val cr = new ChainResolver
       cr.setName("user-list")
@@ -281,7 +280,7 @@ object DependencyUtils extends Logger {
         brr.setName(s"repo-${i + 1}")
         cr.add(brr)
         // scalastyle:off println
-        outCallback(s"$repo added as a remote repository with the name: ${brr.getName}")
+        outCallback.accept(s"$repo added as a remote repository with the name: ${brr.getName}")
         // scalastyle:on println
       }
       ivySettings.addResolver(cr)
@@ -326,17 +325,20 @@ object DependencyUtils extends Logger {
                                coordinates: String,
                                ivySettings: IvySettings,
                                exclusions: Seq[String] = Nil,
-                               outCallback: String => Unit,
+                               outCallback: Consumer[String],
                                isTest: Boolean = false
                              ): List[String] = {
     if (Utils.isEmpty(coordinates)) List.empty[String] else {
-      Try {
+      val sysOut = System.out
+      val printStream = new PrintStream(new LogOutputStream(outCallback), true)
+      try {
+        System.setOut(printStream)
         // To prevent ivy from logging to system out
         val artifacts = extractMavenCoordinates(coordinates)
         val packagesDirectory: File = new File(ivySettings.getDefaultIvyUserDir, "jars")
         // scalastyle:off println
         logInfo(s"Ivy Default Cache set to: ${ivySettings.getDefaultCache.getAbsolutePath}")
-        outCallback(s"The jars for the packages stored in: $packagesDirectory")
+        outCallback.accept(s"The jars for the packages stored in: $packagesDirectory")
         // scalastyle:on println
         val ivy = Ivy.newInstance(ivySettings)
         // Set resolve options to download transitive dependencies as well
@@ -382,11 +384,11 @@ object DependencyUtils extends Logger {
         val mdId = md.getModuleRevisionId
         clearIvyResolutionFiles(mdId, ivySettings, ivyConfName)
         paths
-      } match {
-        case Success(value) => value
-        case Failure(e) =>
-          outCallback(e.getMessage)
-          throw e
+      } catch {
+        case e: Throwable => throw e
+      } finally {
+        printStream.close()
+        System.setOut(sysOut)
       }
     }
   }
@@ -400,6 +402,30 @@ object DependencyUtils extends Logger {
     val rule = new DefaultExcludeRule(id, ivySettings.getMatcher("glob"), null)
     rule.addConfiguration(ivyConfName)
     rule
+  }
+
+
+  private class LogOutputStream(outCallback: Consumer[String]) extends OutputStream {
+    private val buffer: ByteArrayOutputStream = new ByteArrayOutputStream()
+
+    @throws[IOException] override def write(cc: Int): Unit = {
+      buffer.write(cc)
+    }
+
+    @throws[IOException] override def flush(): Unit = {
+      this.processBuffer()
+    }
+
+    @throws[IOException] override def close(): Unit = {
+      this.processBuffer()
+      super.close()
+    }
+
+    protected def processBuffer(): Unit = {
+      outCallback.accept(this.buffer.toString())
+      this.buffer.reset()
+    }
+
   }
 
 }
