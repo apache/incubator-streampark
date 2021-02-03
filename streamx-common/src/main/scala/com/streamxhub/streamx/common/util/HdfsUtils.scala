@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.common.util
 
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, FSDataOutputStream, FileSystem, Path}
@@ -106,6 +107,19 @@ object HdfsUtils extends Logger {
   @throws[IOException] def list(hdfsPath: String): List[String] = {
     val path: Path = getPath(hdfsPath)
     hdfs.listStatus(path).map(_.getPath.getName).toList
+  }
+
+  @throws[IOException] def fileMd5(fileName: String): String = {
+    val path = getPath(fileName)
+    val in = hdfs.open(path)
+    Try(DigestUtils.md5Hex(in)) match {
+      case Success(s) =>
+        in.close()
+        s
+      case Failure(e) =>
+        in.close()
+        throw e
+    }
   }
 
   @throws[IOException] def upload(fileName: String, hdfsPath: String): Unit = {
