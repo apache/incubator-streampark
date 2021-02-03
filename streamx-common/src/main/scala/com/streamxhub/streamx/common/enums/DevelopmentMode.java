@@ -18,10 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core.scala.enums
+package com.streamxhub.streamx.common.enums;
 
+import java.util.Arrays;
 
-object ApiType extends Enumeration {
-  type ApiType = Value
-  val java, scala = Value
+/**
+ * @author benjobs
+ */
+public enum DevelopmentMode {
+    CUSTOMCODE("Custom Code", 1),
+    PURESQL("Pure SQL", 2);
+
+    String mode;
+    Integer value;
+
+    DevelopmentMode(String mode, Integer value) {
+        this.mode = mode;
+        this.value = value;
+    }
+
+    public static DevelopmentMode of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
+    }
+
+    public Integer getValue() {
+        return value;
+    }
+
 }

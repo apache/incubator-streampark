@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core.scala.enums
+package com.streamxhub.streamx.common.enums
 
 object TableMode extends Enumeration {
   type TableMode = Value

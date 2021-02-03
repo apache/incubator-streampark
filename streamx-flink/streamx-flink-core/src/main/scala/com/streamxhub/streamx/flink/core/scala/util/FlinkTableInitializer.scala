@@ -21,9 +21,9 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.core.scala.enums.TableMode.TableMode
-import com.streamxhub.streamx.flink.core.scala.enums.{ApiType, PlannerType, TableMode}
+import com.streamxhub.streamx.common.enums.{ApiType, PlannerType, TableMode}
+import com.streamxhub.streamx.common.enums.ApiType.ApiType
+import com.streamxhub.streamx.common.enums.TableMode.TableMode
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment

@@ -41,6 +41,8 @@ object ConfigConst {
 
   val KEY_TIMEOUT = "timeout"
 
+  val KEY_JOB_ID = "jobId"
+
   /**
    * sign....
    */
@@ -254,9 +256,9 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val APP_FLINK_SQL_DIST_JAR = "streamx-flink-cli-1.0.0.jar"
+  val APP_PLUGINS = "/streamx/plugins"
 
-  val APP_EXTENSION = "/streamx/extension"
+  val APP_UPLOADS = "/streamx/uploads"
 
   val APP_WORKSPACE = "/streamx/workspace"
 

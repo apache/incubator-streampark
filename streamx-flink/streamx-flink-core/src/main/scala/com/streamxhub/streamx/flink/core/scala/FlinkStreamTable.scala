@@ -101,13 +101,11 @@ class StreamTableContext(val parameter: ParameterTool,
     null
   }
 
-  private[flink] def getSql(): String = {
-    Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
-      case Success(value) => value
-      case Failure(exception) =>
-        new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
-        null
-    }
+  private[flink] lazy val sql = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
+    case Success(value) => value
+    case Failure(exception) =>
+      new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
+      null
   }
 
   //...streamEnv api start...

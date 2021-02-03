@@ -21,10 +21,10 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
 import com.streamxhub.streamx.common.util._
 import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
-import com.streamxhub.streamx.flink.core.scala.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
+import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time

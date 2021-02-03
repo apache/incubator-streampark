@@ -22,12 +22,27 @@ package com.streamxhub.streamx.common.util
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
+import java.util.{Collection => JavaCollection, Map => JavaMap}
 import java.util.function.BiConsumer
 import java.util.jar.{JarFile, JarInputStream}
 import java.util.{Properties, UUID}
 import scala.util.{Failure, Success, Try}
 
 object Utils {
+
+  def notEmpty(elem: Any): Boolean = {
+    elem match {
+      case null => false
+      case x if x.isInstanceOf[CharSequence] => elem.toString.trim.nonEmpty
+      case x if x.isInstanceOf[Traversable[_]] => x.asInstanceOf[Traversable[_]].nonEmpty
+      case x if x.isInstanceOf[Iterable[_]] => x.asInstanceOf[Iterable[_]].nonEmpty
+      case x if x.isInstanceOf[JavaCollection[_]] => !x.asInstanceOf[JavaCollection[_]].isEmpty
+      case x if x.isInstanceOf[JavaMap[_, _]] => !x.asInstanceOf[JavaMap[_, _]].isEmpty
+      case _ => true
+    }
+  }
+
+  def isEmpty(elem: Any): Boolean = !notEmpty(elem)
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 

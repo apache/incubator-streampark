@@ -21,11 +21,11 @@
 package com.streamxhub.streamx.flink.core.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.core.java.function.SQLFromFunction
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType
-import com.streamxhub.streamx.flink.core.scala.enums.ApiType.ApiType
+import ApiType.ApiType
 import com.streamxhub.streamx.flink.core.scala.sink.Dialect.Dialect
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
