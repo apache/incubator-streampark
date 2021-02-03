@@ -258,6 +258,8 @@ object ConfigConst {
 
   val APP_PLUGINS = "/streamx/plugins"
 
+  val APP_UPLOADS = "/streamx/uploads"
+
   val APP_WORKSPACE = "/streamx/workspace"
 
   val APP_FLINK = "/streamx/flink"
