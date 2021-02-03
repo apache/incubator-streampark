@@ -29,7 +29,6 @@ import org.apache.hadoop.io.IOUtils
 
 import java.io.{ByteArrayOutputStream, FileWriter, IOException}
 import scala.util.{Failure, Success, Try}
-import scala.collection.JavaConversions._
 
 object HdfsUtils extends Logger {
 
@@ -119,7 +118,6 @@ object HdfsUtils extends Logger {
         throw e
     }
   }
-
 
   @throws[IOException] def movie(src: String, dst: String): Unit = {
     hdfs.rename(getPath(src), getPath(dst))
