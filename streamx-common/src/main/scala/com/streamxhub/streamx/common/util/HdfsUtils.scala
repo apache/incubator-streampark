@@ -61,6 +61,25 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
+  @throws[IOException] def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
+
+  @throws[IOException] def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
+
+  @throws[IOException] def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
+
+  def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
+    FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
+
+  def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
+    hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
+
+  def upload2(srcs: Array[String], dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
+    hdfs.copyFromLocalFile(delSrc, overwrite, srcs.map(getPath), getPath(dst))
+
+  def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
+    hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
+
+
   @throws[Exception] def getNameNode: String = {
     Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
       case Success(value) => value
@@ -98,13 +117,14 @@ object HdfsUtils extends Logger {
     new String(out.toByteArray)
   }
 
-  @throws[IOException] def deleteFile(fileName: String): Unit = {
-    val path: Path = getPath(fileName)
-    require(hdfs.exists(path))
-    hdfs.delete(path, true)
+  @throws[IOException] def delete(src: String): Unit = {
+    val path: Path = getPath(src)
+    if (hdfs.exists(path)) {
+      hdfs.delete(path, true)
+    } else {
+      logWarn(s"hdfs delete $src,bust file $src is not exists!")
+    }
   }
-
-  @throws[IOException] def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
 
   @throws[IOException] def fileMd5(fileName: String): String = {
     val path = getPath(fileName)
@@ -119,12 +139,6 @@ object HdfsUtils extends Logger {
     }
   }
 
-  @throws[IOException] def movie(src: String, dst: String): Unit = {
-    hdfs.rename(getPath(src), getPath(dst))
-  }
-
-  @throws[IOException] def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
-
   // 下载文件到local
   @throws[IOException] def downToLocal(hdfsPath: String, localPath: String): Unit = {
     val path: Path = getPath(hdfsPath)
@@ -135,18 +149,6 @@ object HdfsUtils extends Logger {
     fw.close()
     input.close()
   }
-
-  def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
-
-  def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
-
-  def upload2(srcs: Array[String], dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    hdfs.copyFromLocalFile(delSrc, overwrite, srcs.map(getPath), getPath(dst))
-
-  def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
-    hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
   private[this] def getPath(hdfsPath: String) = new Path(hdfsPath)
 
