@@ -10,7 +10,7 @@ import scala.collection.JavaConversions._
 
 object MongoSourceApp extends FlinkStreaming {
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     implicit val prop = context.parameter.getProperties
     val source = new MongoSource(context)
     source.getDataStream[String](

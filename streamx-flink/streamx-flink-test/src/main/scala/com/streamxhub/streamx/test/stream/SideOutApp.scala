@@ -14,7 +14,7 @@ import scala.util.Random
 object SideOutApp extends FlinkStreaming {
 
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     val source = context.addSource(new SideSource())
     /**
      * 侧输出流。。。

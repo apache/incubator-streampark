@@ -13,7 +13,7 @@ import scala.util.Random
 object InfluxDBSinkApp extends FlinkStreaming {
 
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     val source = context.addSource(new WeatherSource())
 
     //weather,altitude=1000,area=北 temperature=11,humidity=-4

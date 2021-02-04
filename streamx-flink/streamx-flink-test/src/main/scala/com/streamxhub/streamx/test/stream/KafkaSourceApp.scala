@@ -12,7 +12,7 @@ object KafkaSourceApp extends FlinkStreaming {
    */
   override def beforeStart(context: StreamingContext): Unit = super.beforeStart(context)
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
 
     //one topic
     KafkaSource(context).getDataStream[String]()

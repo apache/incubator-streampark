@@ -84,15 +84,15 @@ trait FlinkStreaming extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  private[this] var context: StreamingContext = _
+  var context: StreamingContext = _
 
   var jobExecutionResult: JobExecutionResult = _
 
   final def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreaming])
     context = new StreamingContext(FlinkStreamingInitializer.initStream(args, config))
-    beforeStart(context)
-    handle(context)
+    beforeStart()
+    handle()
     jobExecutionResult = context.start()
   }
 
@@ -100,11 +100,11 @@ trait FlinkStreaming extends Logger {
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(context: StreamingContext): Unit = {}
+  def beforeStart(): Unit = {}
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handle(context: StreamingContext): Unit
+  def handle(): Unit
 
 }
 

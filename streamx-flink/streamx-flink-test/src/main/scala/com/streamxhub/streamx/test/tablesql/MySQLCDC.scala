@@ -7,7 +7,7 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 
 object MySQLCDC extends FlinkStreamTable {
 
-  override def handle(context: StreamTableContext): Unit = {
+  override def handle(): Unit = {
 
     val sourceDDL =
       """

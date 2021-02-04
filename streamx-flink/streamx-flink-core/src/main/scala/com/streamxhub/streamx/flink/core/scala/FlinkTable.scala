@@ -202,13 +202,13 @@ trait FlinkTable extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  private[this] var context: TableContext = _
+  var context: TableContext = _
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
     context = new TableContext(FlinkTableInitializer.initTable(args))
-    beforeStart(context)
-    handle(context)
+    beforeStart()
+    handle()
     jobExecutionResult = context.start()
   }
 
@@ -216,8 +216,8 @@ trait FlinkTable extends Logger {
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(context: TableContext): Unit = {}
+  def beforeStart(): Unit = {}
 
-  def handle(context: TableContext): Unit
+  def handle(): Unit
 
 }
