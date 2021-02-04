@@ -10,7 +10,7 @@ object KafkaSourceApp extends FlinkStreaming {
    * 用户可覆盖次方法...
    *
    */
-  override def beforeStart(context: StreamingContext): Unit = super.beforeStart(context)
+  override def beforeStart(): Unit = super.beforeStart
 
   override def handle(): Unit = {
 
