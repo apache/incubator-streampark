@@ -61,11 +61,11 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
-  @throws[IOException] def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
+  def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
 
-  @throws[IOException] def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
+  def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
 
-  @throws[IOException] def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
+  def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
 
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
