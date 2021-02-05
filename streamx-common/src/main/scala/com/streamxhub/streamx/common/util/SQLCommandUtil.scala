@@ -28,7 +28,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil {
 
-  def parseSQL(lines: List[String]): List[SQLCommandCall] = {
+  def parseSQL(lines: Array[String]): List[SQLCommandCall] = {
     val calls = new ArrayBuffer[SQLCommandCall]
     val stmt = new StringBuilder
     for (line <- lines if line.trim.nonEmpty && !line.startsWith("--")) {
