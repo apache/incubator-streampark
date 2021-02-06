@@ -28,24 +28,30 @@ import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil {
 
-  def parseSQL(lines: Array[String]): List[SQLCommandCall] = {
-    val calls = new ArrayBuffer[SQLCommandCall]
-    val stmt = new StringBuilder
-    for (line <- lines if line.trim.nonEmpty && !line.startsWith("--")) {
-      stmt.append("\n").append(line)
-      if (line.trim.endsWith(";")) {
-        parseSQL(stmt.toString.trim) match {
-          case Some(x) => calls += x
-          case _ => throw new RuntimeException("Unsupported command '" + stmt.toString + "'")
+  def parseSQL(sql: String): List[SQLCommandCall] = {
+    require(sql != null, s"$sql must be not null")
+    if (!sql.endsWith(";")) {
+      throw new RuntimeException(s"Unsupported command >>> $sql <<<,must be endsWith ';'")
+    } else {
+      val lines = sql.split("\\n")
+      val calls = new ArrayBuffer[SQLCommandCall]
+      val stmt = new StringBuilder
+      for (line <- lines if line.trim.nonEmpty && !line.startsWith("--")) {
+        stmt.append("\n").append(line)
+        if (line.trim.endsWith(";")) {
+          parseLine(stmt.toString.trim) match {
+            case Some(x) => calls += x
+            case _ => throw new RuntimeException(s"Unsupported command '${stmt.toString()}'")
+          }
+          // clear string builder
+          stmt.clear()
         }
-        // clear string builder
-        stmt.clear()
       }
+      calls.toList
     }
-    calls.toList
   }
 
-  def parseSQL(sqlLine: String): Option[SQLCommandCall] = {
+  private[this] def parseLine(sqlLine: String): Option[SQLCommandCall] = {
     // remove ';' at the end
     val stmt = sqlLine.trim.replaceFirst(";$", "")
     // parse
