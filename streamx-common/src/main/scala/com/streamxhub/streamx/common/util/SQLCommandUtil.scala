@@ -29,25 +29,30 @@ import scala.collection.mutable.ArrayBuffer
 object SQLCommandUtil {
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    require(sql != null, s"$sql must be not null")
+    require(sql != null && !sql.trim.isEmpty, s"$sql must be not empty")
     if (!sql.endsWith(";")) {
-      throw new RuntimeException(s"Unsupported command >>> $sql <<<,must be endsWith ';'")
+      throw new RuntimeException(s"Unsupported command, must be endsWith ';', $sql")
     } else {
-      val lines = sql.split("\\n")
-      val calls = new ArrayBuffer[SQLCommandCall]
-      val stmt = new StringBuilder
-      for (line <- lines if line.trim.nonEmpty && !line.startsWith("--")) {
-        stmt.append("\n").append(line)
-        if (line.trim.endsWith(";")) {
-          parseLine(stmt.toString.trim) match {
-            case Some(x) => calls += x
-            case _ => throw new RuntimeException(s"Unsupported command '${stmt.toString()}'")
+      val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
+      lines match {
+        case x if x.isEmpty =>
+          throw new RuntimeException(s"Unsupported command,must be not empty,$sql")
+        case x =>
+          val calls = new ArrayBuffer[SQLCommandCall]
+          val stmt = new StringBuilder
+          for (line <- x) {
+            stmt.append("\n").append(line)
+            if (line.trim.endsWith(";")) {
+              parseLine(stmt.toString.trim) match {
+                case Some(x) => calls += x
+                case _ => throw new RuntimeException(s"Unsupported command '${stmt.toString()}'")
+              }
+              // clear string builder
+              stmt.clear()
+            }
           }
-          // clear string builder
-          stmt.clear()
-        }
+          calls.toList
       }
-      calls.toList
     }
   }
 
