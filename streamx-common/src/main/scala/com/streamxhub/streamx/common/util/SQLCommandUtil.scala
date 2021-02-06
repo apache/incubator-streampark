@@ -48,10 +48,10 @@ object SQLCommandUtil {
             stmt.clear()
           }
         }
-        calls match {
-          case ArrayBuffer.empty =>
+        calls.toList match {
+          case Nil =>
             throw new RuntimeException(s"Unsupported command,must be endsWith ';',$sql")
-          case _ => calls.toList
+          case r => r
         }
     }
   }
