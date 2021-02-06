@@ -29,7 +29,7 @@ import scala.collection.mutable.ArrayBuffer
 object SQLCommandUtil {
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    require(sql != null && !sql.trim.isEmpty, s"$sql must be not empty")
+    require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,$sql")
     if (!sql.endsWith(";")) {
       throw new RuntimeException(s"Unsupported command, must be endsWith ';', $sql")
     } else {
