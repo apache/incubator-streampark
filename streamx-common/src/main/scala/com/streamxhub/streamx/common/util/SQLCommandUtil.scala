@@ -29,11 +29,11 @@ import scala.collection.mutable.ArrayBuffer
 object SQLCommandUtil {
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,$sql")
+    require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,sql:$sql")
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
       case x if x.isEmpty =>
-        throw new RuntimeException(s"Unsupported command,must be not empty,$sql")
+        throw new RuntimeException(s"Unsupported command,must be not empty,sql:$sql")
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -42,7 +42,7 @@ object SQLCommandUtil {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"Unsupported command '${stmt.toString()}'")
+              case _ => throw new RuntimeException(s"Unsupported command,sql:'${stmt.toString()}'")
             }
             // clear string builder
             stmt.clear()
@@ -50,7 +50,7 @@ object SQLCommandUtil {
         }
         calls.toList match {
           case Nil =>
-            throw new RuntimeException(s"Unsupported command,must be endsWith ';',$sql")
+            throw new RuntimeException(s"Unsupported command,must be endsWith ';',sql:$sql")
           case r => r
         }
     }
