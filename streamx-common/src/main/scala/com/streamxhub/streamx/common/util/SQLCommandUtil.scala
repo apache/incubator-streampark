@@ -42,7 +42,7 @@ object SQLCommandUtil {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"Unsupported command,sql:'${stmt.toString()}'")
+              case _ => throw new RuntimeException(s"Unsupported command,sql:${stmt.toString()}")
             }
             // clear string builder
             stmt.clear()
