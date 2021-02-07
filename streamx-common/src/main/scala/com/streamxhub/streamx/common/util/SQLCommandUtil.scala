@@ -203,7 +203,8 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
     "(CREATE\\s+VIEW.*)", {
       case a if a.length < 2 => None
       case x => Some(Array[String](x(1), x(2)))
-    })
+    }
+  )
 
   case object CREATE_FUNCTION extends SQLCommand(
     "create function",
@@ -241,7 +242,8 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
       case a if a.length < 3 => None
       case a if a(0) == null => Some(new Array[String](0))
       case x => Some(Array[String](x(1), x(2)))
-    })
+    }
+  )
 
   case object RESET extends SQLCommand(
     "reset",
