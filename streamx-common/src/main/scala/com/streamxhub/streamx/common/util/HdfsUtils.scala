@@ -121,7 +121,7 @@ object HdfsUtils extends Logger {
     if (hdfs.exists(path)) {
       hdfs.delete(path, true)
     } else {
-      logWarn(s"hdfs delete $src,bust file $src is not exists!")
+      logWarn(s"hdfs delete $src,but file $src is not exists!")
     }
   }
 
