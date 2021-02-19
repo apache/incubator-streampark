@@ -52,6 +52,7 @@ object JdbcSink {
    */
   def apply(@(transient@param)
             parallelism: Int = 0,
+            alias: String = "",
             name: String = null,
             uid: String = null)(implicit ctx: StreamingContext): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
 
@@ -59,8 +60,9 @@ object JdbcSink {
 
 class JdbcSink(@(transient@param) ctx: StreamingContext,
                parallelism: Int = 0,
+               alias: String = "",
                name: String = null,
-               uid: String = null)(implicit alias: String = "") extends Sink with Logger {
+               uid: String = null) extends Sink with Logger {
 
   /**
    *
