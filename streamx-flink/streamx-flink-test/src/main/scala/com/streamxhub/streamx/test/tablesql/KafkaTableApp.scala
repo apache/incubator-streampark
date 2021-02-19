@@ -8,7 +8,7 @@ import org.apache.flink.table.descriptors.Csv
 
 object KafkaTableApp extends FlinkStreamTable {
 
-  override def handle(context: StreamTableContext): Unit = {
+  override def handle(): Unit = {
     //connect kafka data
     context
       .connect(Kafka("hello", KafkaVer.UNIVERSAL))

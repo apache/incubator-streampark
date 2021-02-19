@@ -4,7 +4,7 @@ import com.streamxhub.streamx.flink.core.scala.{FlinkStreamTable, StreamTableCon
 
 object HelloFlinkSQL extends FlinkStreamTable {
 
-  override def handle(context: StreamTableContext): Unit = {
+  override def handle(): Unit = {
     val sourceDDL =
       """
         |create table kafka_source (

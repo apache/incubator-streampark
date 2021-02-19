@@ -46,19 +46,19 @@ object DependencyUtils {
                                 packages: String,
                                 repositories: String,
                                 ivyRepoPath: String,
-                                ivySettingsPath: Option[String],
+                                ivySettingsPath: String,
                                 outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
 
     // Create the IvySettings, either load from file or build defaults
     val ivySettings = ivySettingsPath match {
-      case Some(path) => loadIvySettings(
-        path,
+      case null => buildIvySettings(
         Option(repositories),
         Option(ivyRepoPath),
         outCallback
       )
-      case None => buildIvySettings(
+      case path => loadIvySettings(
+        path,
         Option(repositories),
         Option(ivyRepoPath),
         outCallback

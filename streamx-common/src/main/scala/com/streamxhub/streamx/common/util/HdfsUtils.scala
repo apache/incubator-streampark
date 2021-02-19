@@ -61,11 +61,11 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
-  @throws[IOException] def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
+  def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
 
-  @throws[IOException] def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
+  def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
 
-  @throws[IOException] def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
+  def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
 
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
@@ -79,8 +79,7 @@ object HdfsUtils extends Logger {
   def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
     hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
-
-  @throws[Exception] def getNameNode: String = {
+  def getNameNode: String = {
     Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
       case Success(value) => value
       case Failure(exception) => throw exception
@@ -94,7 +93,7 @@ object HdfsUtils extends Logger {
    * @param content
    * @throws
    */
-  @throws[IOException] def create(fileName: String, content: String): Unit = {
+  def create(fileName: String, content: String): Unit = {
     val path: Path = getPath(fileName)
     require(hdfs.exists(path), s"[StreamX] hdfs $fileName is exists!! ")
     val outputStream: FSDataOutputStream = hdfs.create(path)
@@ -105,7 +104,7 @@ object HdfsUtils extends Logger {
 
   def exists(path: String): Boolean = hdfs.exists(getPath(path))
 
-  @throws[IOException] def read(fileName: String): String = {
+  def read(fileName: String): String = {
     val path: Path = getPath(fileName)
     require(hdfs.exists(path) && !hdfs.isDirectory(path), s"[StreamX] path:$fileName not exists or isDirectory ")
     val in = hdfs.open(path)
@@ -117,16 +116,16 @@ object HdfsUtils extends Logger {
     new String(out.toByteArray)
   }
 
-  @throws[IOException] def delete(src: String): Unit = {
+  def delete(src: String): Unit = {
     val path: Path = getPath(src)
     if (hdfs.exists(path)) {
       hdfs.delete(path, true)
     } else {
-      logWarn(s"hdfs delete $src,bust file $src is not exists!")
+      logWarn(s"hdfs delete $src,but file $src is not exists!")
     }
   }
 
-  @throws[IOException] def fileMd5(fileName: String): String = {
+  def fileMd5(fileName: String): String = {
     val path = getPath(fileName)
     val in = hdfs.open(path)
     Try(DigestUtils.md5Hex(in)) match {
@@ -139,8 +138,7 @@ object HdfsUtils extends Logger {
     }
   }
 
-  // 下载文件到local
-  @throws[IOException] def downToLocal(hdfsPath: String, localPath: String): Unit = {
+  def downToLocal(hdfsPath: String, localPath: String): Unit = {
     val path: Path = getPath(hdfsPath)
     val input: FSDataInputStream = hdfs.open(path)
     val content: String = input.readUTF

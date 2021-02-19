@@ -16,7 +16,7 @@ object DashboardApp extends FlinkStreaming {
     List(x.userId.toString, x.siteId.toString).asJava
   }
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     val source = context.addSource(new OrderSource())
     val ds = source.map(x => doAction(x)).flatMap(_.asScala)
     ds.print()

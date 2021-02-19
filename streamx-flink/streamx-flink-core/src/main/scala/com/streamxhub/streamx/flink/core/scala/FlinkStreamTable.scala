@@ -376,15 +376,15 @@ trait FlinkStreamTable extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  private[this] var context: StreamTableContext = _
+  var context: StreamTableContext = _
 
   var jobExecutionResult: JobExecutionResult = _
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
     context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
-    beforeStart(context)
-    handle(context)
+    beforeStart()
+    handle()
     jobExecutionResult = context.start()
   }
 
@@ -392,10 +392,10 @@ trait FlinkStreamTable extends Logger {
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(context: StreamTableContext): Unit = {}
+  def beforeStart(): Unit = {}
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
-  def handle(context: StreamTableContext): Unit
+  def handle(): Unit
 
 }

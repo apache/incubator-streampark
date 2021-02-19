@@ -27,7 +27,7 @@ import java.util.Arrays;
  */
 public enum DevelopmentMode {
     CUSTOMCODE("Custom Code", 1),
-    PURESQL("Pure SQL", 2);
+    FLINKSQL("Flink SQL", 2);
 
     String mode;
     Integer value;

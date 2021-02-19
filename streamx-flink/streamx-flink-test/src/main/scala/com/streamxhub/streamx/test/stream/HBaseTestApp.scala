@@ -9,7 +9,7 @@ import org.apache.hadoop.hbase.client.Get
 
 object HBaseTestApp extends FlinkStreaming {
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
     //one topic
     val source = context.fromCollection(Seq("123322242", "1111", "222"))

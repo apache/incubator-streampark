@@ -373,7 +373,7 @@ object RedisUtils extends Logger {
     var cursor = ScanParams.SCAN_POINTER_START
     do {
       val scanResult = r.scan(cursor, scanParams)
-      cursor = scanResult.getStringCursor
+      cursor = scanResult.getCursor
       val keys = scanResult.getResult.asScala.toList
       if (keys.nonEmpty) {
         r.del(keys: _*)

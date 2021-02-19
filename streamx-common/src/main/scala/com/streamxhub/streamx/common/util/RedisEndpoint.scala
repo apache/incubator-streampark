@@ -22,8 +22,8 @@
 package com.streamxhub.streamx.common.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import redis.clients.jedis.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 import redis.clients.jedis.{Jedis, Protocol}
-import redis.clients.util.{JedisClusterCRC16, JedisURIHelper, SafeEncoder}
 
 import java.net.URI
 import java.util.Properties
