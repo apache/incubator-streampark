@@ -15,7 +15,7 @@ object KafkaSourceApp extends FlinkStreaming {
   override def handle(): Unit = {
 
     //one topic
-    KafkaSource(context).getDataStream[String]()
+    KafkaSource().getDataStream[String]()
       .uid("kfkSource1")
       .name("kfkSource1")
       .map(x => {

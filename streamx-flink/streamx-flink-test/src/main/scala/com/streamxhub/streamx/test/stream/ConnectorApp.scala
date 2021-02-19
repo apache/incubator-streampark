@@ -36,7 +36,7 @@ object ConnectorApp extends FlinkStreaming {
       Serialization.write(x)
     )
     //3)定义esSink并下沉=数据. done
-    ESSink(context).sink6[OrderEntity](ds)
+    ESSink().sink6[OrderEntity](ds)
   }
 
 

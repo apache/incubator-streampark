@@ -2,7 +2,7 @@ package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.common.util.ConfigUtils
 import com.streamxhub.streamx.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.util.Bytes
@@ -28,7 +28,7 @@ object HBaseSinkApp extends FlinkStreaming {
     //source ===> trans ===> sink
 
     //1）插入方式1
-    HBaseSink(context).sink[TestEntity](source, "order")
+    HBaseSink().sink[TestEntity](source, "order")
 
     //2) 插入方式2
     //1.指定HBase 配置文件

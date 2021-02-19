@@ -45,11 +45,11 @@ import scala.util.Try
 
 object HttpSink {
 
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             header: Map[String, String] = Map.empty[String, String],
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): HttpSink = new HttpSink(ctx, header, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): HttpSink = new HttpSink(ctx, header, parallelism, name, uid)
 
 }
 

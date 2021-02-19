@@ -51,15 +51,20 @@ import scala.util.Try
 object ClickHouseSink {
 
   /**
-   * @param ctx   : StreamingContext
-   * @param alias : ClickHouse实例名称(用于区分多个不同的ClickHouse实例...)
+   *
+   * @param property
+   * @param parallelism
+   * @param name
+   * @param uid
+   * @param ctx
    * @return
    */
-  def apply(@(transient@param) ctx: StreamingContext,
+
+  def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): ClickHouseSink = new ClickHouseSink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): ClickHouseSink = new ClickHouseSink(ctx, property, parallelism, name, uid)
 
 }
 

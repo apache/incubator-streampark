@@ -41,7 +41,7 @@ public class MongoSource<T> {
     }
 
     public DataStreamSource<T> getDataStream(String collectionName, MongoQueryFunction<T> queryFunction, MongoResultFunction<T> resultFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName,property, queryFunction,resultFunction, null);
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName, property, queryFunction, resultFunction, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
 

@@ -4,7 +4,7 @@ import com.streamxhub.streamx.common.util.ConfigUtils
 import com.streamxhub.streamx.flink.core.java.wrapper.HBaseQuery
 import com.streamxhub.streamx.flink.core.scala.request.HBaseRequest
 import com.streamxhub.streamx.flink.core.scala.source.HBaseSource
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.hadoop.hbase.CellUtil
 import org.apache.hadoop.hbase.client.{Get, Scan}
@@ -18,7 +18,7 @@ object HBaseSourceApp extends FlinkStreaming {
 
     implicit val conf = ConfigUtils.getHBaseConfig(context.parameter.toMap)
 
-    val id = new HBaseSource(context).getDataStream[String](query => {
+    val id = HBaseSource().getDataStream[String](query => {
       Thread.sleep(10)
       if (query == null) {
         new HBaseQuery("person", new Scan())
@@ -31,7 +31,7 @@ object HBaseSourceApp extends FlinkStreaming {
 
     HBaseRequest(id).requestOrdered(x => {
       new HBaseQuery("person", new Get(x.getBytes()))
-    }, (a,r) => {
+    }, (a, r) => {
       val map = new util.HashMap[String, String]()
       val cellScanner = r.cellScanner()
       while (cellScanner.advance()) {

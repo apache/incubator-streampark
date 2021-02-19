@@ -1,7 +1,7 @@
 package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.flink.core.scala.sink.KafkaSink
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 
@@ -13,7 +13,7 @@ object KafkaSinkApp extends FlinkStreaming {
     val source = new BehaviorSource()
     val ds = context.addSource[Behavior](source).map(_.toString)
     ds.print()
-    KafkaSink(context).sink(ds)
+    KafkaSink().sink(ds)
   }
 
 }

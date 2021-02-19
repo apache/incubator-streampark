@@ -6,7 +6,7 @@ flink:
       shutdownOnAttachedExit:           # -sae (If the job is submitted in attached mode, perform a best-effort cluster shutdown when the CLI is terminated abruptly, e.g., in response to a user interrupt, such as typing Ctrl + C.)
       zookeeperNamespace:               # -z Namespace to create the Zookeeper sub-paths  for high availability mode
       jobmanager:                       #  -m Address of the JobManager to which to connect. Use this flag to connect to a different JobManager than the one specified in the configuration. Attention: This option is respected only if the  high-availability configuration is NONE
-    property:                           # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
+    property: # see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
       $internal.application.main: com.streamxhub.streamx.flink.test.FlinkSinkApp # main class
       yarn.application.name: FlinkSinkApp
       yarn.application.node-label: StreamX
@@ -153,7 +153,7 @@ kafka.source:
     #timestamp: 1591286400000 #指定timestamp,针对所有的topic生效
     #offset: # 给每个topic的partition指定offset
     #topic: kafka01,kafka02
-    #kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
+  #kafka01: 0:182,1:183,2:182 #分区0从182开始消费,分区1从183...
   #kafka02: 0:182,1:183,2:182
   #hopsonone_park_gz_tjd_specilog: 0:192,1:196,2:196
 

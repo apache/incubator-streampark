@@ -44,7 +44,7 @@ import scala.util.{Success, Try}
 
 object MySQLSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): MySQLSource = new MySQLSource(ctx, property)
+  def apply(@(transient@param) property: Properties = new Properties())(implicit ctx: StreamingContext): MySQLSource = new MySQLSource(ctx, property)
 
 }
 

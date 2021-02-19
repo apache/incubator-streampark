@@ -26,39 +26,39 @@
 # Better OS/400 detection: see Bugzilla 31132
 
 #echo color
-WHITE_COLOR="\E[1;37m";
-RED_COLOR="\E[1;31m";
-BLUE_COLOR='\E[1;34m';
-GREEN_COLOR="\E[1;32m";
-YELLOW_COLOR="\E[1;33m";
-RES="\E[0m";
+WHITE_COLOR="\E[1;37m"
+RED_COLOR="\E[1;31m"
+BLUE_COLOR='\E[1;34m'
+GREEN_COLOR="\E[1;32m"
+YELLOW_COLOR="\E[1;33m"
+RES="\E[0m"
 
-echo_r () {
-    # Color red: Error, Failed
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}Flink${RES}] ${RED_COLOR}$1${RES}\n"
+echo_r() {
+  # Color red: Error, Failed
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[${BLUE_COLOR}Flink${RES}] ${RED_COLOR}$1${RES}\n"
 }
 
-echo_g () {
-    # Color green: Success
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}Flink${RES}] ${GREEN_COLOR}$1${RES}\n"
+echo_g() {
+  # Color green: Success
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[${BLUE_COLOR}Flink${RES}] ${GREEN_COLOR}$1${RES}\n"
 }
 
-echo_y () {
-    # Color yellow: Warning
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}Flink${RES}] ${YELLOW_COLOR}$1${RES}\n"
+echo_y() {
+  # Color yellow: Warning
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[${BLUE_COLOR}Flink${RES}] ${YELLOW_COLOR}$1${RES}\n"
 }
 
-echo_w () {
-    # Color yellow: White
-    [[ $# -ne 1 ]] && return 1
-    # shellcheck disable=SC2059
-    printf "[${BLUE_COLOR}Flink${RES}] ${WHITE_COLOR}$1${RES}\n"
+echo_w() {
+  # Color yellow: White
+  [[ $# -ne 1 ]] && return 1
+  # shellcheck disable=SC2059
+  printf "[${BLUE_COLOR}Flink${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
 # OS specific support.  $var _must_ be set to either true or false.
@@ -67,32 +67,32 @@ darwin=false
 os400=false
 hpux=false
 # shellcheck disable=SC2006
-case "`uname`" in
-CYGWIN*) cygwin=true;;
-Darwin*) darwin=true;;
-OS400*) os400=true;;
-HP-UX*) hpux=true;;
+case "$(uname)" in
+CYGWIN*) cygwin=true ;;
+Darwin*) darwin=true ;;
+OS400*) os400=true ;;
+HP-UX*) hpux=true ;;
 esac
 
 # resolve links - $0 may be a softlink
 PRG="$0"
 
-while [[ -h "$PRG" ]]; do
+while [[ -L "$PRG" ]]; do
   # shellcheck disable=SC2006
-  ls=`ls -ld "$PRG"`
+  ls=$(ls -ld "$PRG")
   # shellcheck disable=SC2006
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '/.*' > /dev/null; then
+  link=$(expr "$ls" : '.*-> \(.*\)$')
+  if expr "$link" : '/.*' >/dev/null; then
     PRG="$link"
   else
     # shellcheck disable=SC2006
-    PRG=`dirname "$PRG"`/"$link"
+    PRG=$(dirname "$PRG")/"$link"
   fi
 done
 
 # Get standard environment variables
 # shellcheck disable=SC2006
-PRGDIR=`dirname "$PRG"`
+PRGDIR=$(dirname "$PRG")
 
 # shellcheck disable=SC2124
 # shellcheck disable=SC2034
@@ -100,7 +100,10 @@ RUN_ARGS="$@"
 #global variables....
 # shellcheck disable=SC2006
 # shellcheck disable=SC2164
-APP_HOME=`cd "$PRGDIR/.." >/dev/null; pwd`
+APP_HOME=$(
+  cd "$PRGDIR/.." >/dev/null
+  pwd
+)
 APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_LOG="$APP_BASE"/logs
@@ -114,23 +117,27 @@ APP_TEMP="$APP_BASE"/temp
 # For Cygwin, ensure paths are in UNIX format before anything is touched
 if ${cygwin}; then
   # shellcheck disable=SC2006
-  [[ -n "$APP_HOME" ]] && APP_HOME=`cygpath --unix "$APP_HOME"`
+  [[ -n "$APP_HOME" ]] && APP_HOME=$(cygpath --unix "$APP_HOME")
   # shellcheck disable=SC2006
-  [[ -n "$APP_BASE" ]] && APP_BASE=`cygpath --unix "$APP_BASE"`
+  [[ -n "$APP_BASE" ]] && APP_BASE=$(cygpath --unix "$APP_BASE")
 fi
 
 # Ensure that neither APP_HOME nor APP_BASE contains a colon
 # as this is used as the separator in the classpath and Java provides no
 # mechanism for escaping if the same character appears in the path.
 case ${APP_HOME} in
-  *:*) echo "Using APP_HOME:   $APP_HOME";
-       echo "Unable to start as APP_HOME contains a colon (:) character";
-       exit 1;
+*:*)
+  echo "Using APP_HOME:   $APP_HOME"
+  echo "Unable to start as APP_HOME contains a colon (:) character"
+  exit 1
+  ;;
 esac
 case ${APP_BASE} in
-  *:*) echo "Using APP_BASE:   $APP_BASE";
-       echo "Unable to start as APP_BASE contains a colon (:) character";
-       exit 1;
+*:*)
+  echo "Using APP_BASE:   $APP_BASE"
+  echo "Unable to start as APP_BASE contains a colon (:) character"
+  exit 1
+  ;;
 esac
 
 # For OS400
@@ -146,120 +153,120 @@ fi
 
 # (0) export HADOOP_CLASSPATH
 # shellcheck disable=SC2006
-if [ x"`hadoop classpath`" == x"" ];then
+if [ x"$(hadoop classpath)" == x"" ]; then
   echo_r " Please make sure to export the HADOOP_CLASSPATH environment variable or have hadoop in your classpath"
 else
-   # shellcheck disable=SC2155
-  export HADOOP_CLASSPATH=`hadoop classpath`
+  # shellcheck disable=SC2155
+  export HADOOP_CLASSPATH=$(hadoop classpath)
 fi
 
 doStart() {
-    local proper=""
-    if [[ $# -eq 0 ]]; then
-      proper="application.yml"
-      echo_w "not input properties-file,use default application.yml"
-    else
-      #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
-      proper=$(echo "$1"|awk -F 'conf/' '{print $2}')
-      shift;
-    fi
-    # flink properties file
-    local app_proper=""
-    if [[ -f "$APP_CONF/$proper" ]] ; then
-       app_proper="$APP_CONF/$proper"
-    else
-       echo_r "Usage: properties file:$proper not exists!!! ";
-       exit 1;
-    fi
+  local proper=""
+  if [[ $# -eq 0 ]]; then
+    proper="application.yml"
+    echo_w "not input properties-file,use default application.yml"
+  else
+    #Solve the path problem, arbitrary path, ignore prefix, only take the content after conf/
+    proper=$(echo "$1" | awk -F 'conf/' '{print $2}')
+    shift
+  fi
+  # flink properties file
+  local app_proper=""
+  if [[ -f "$APP_CONF/$proper" ]]; then
+    app_proper="$APP_CONF/$proper"
+  else
+    echo_r "Usage: properties file:$proper not exists!!! "
+    exit 1
+  fi
 
-    # flink main jar...
-    # shellcheck disable=SC2155
-    local jarfile="${APP_LIB}/$(basename "${APP_BASE}").jar"
+  # flink main jar...
+  # shellcheck disable=SC2155
+  local jarfile="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
-    local param_cli="com.streamxhub.streamx.common.conf.ParameterCli"
+  local param_cli="com.streamxhub.streamx.common.conf.ParameterCli"
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local app_name="$(java -cp "${jarfile}" $param_cli --name "${app_proper}")"
+  if [ x"${app_name}" == x"" ]; then
+    echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
+    exit 1
+  fi
+
+  local trim="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local detached_mode="$(java -cp "${jarfile}" $param_cli --detached "${app_proper}") $*"
+  # shellcheck disable=SC2006
+  # trim...
+  detached_mode="$(echo "$detached_mode" | sed "$trim")"
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local option="$(java -cp "${jarfile}" $param_cli --option "${app_proper}") $*"
+  # shellcheck disable=SC2006
+  option="$(echo "$option" | sed "$trim")"
+
+  # shellcheck disable=SC2006
+  # shellcheck disable=SC2155
+  local property_params="$(java -cp "${jarfile}" $param_cli --property "${app_proper}")"
+  # shellcheck disable=SC2006
+  property_params="$(echo "$property_params" | sed "$trim")"
+
+  echo_g "${app_name} Starting by:<${detached_mode}> mode"
+
+  # json all params...
+  local runOption="$option"
+  if [ x"$property_params" != x"" ]; then
+    runOption="$runOption $property_params"
+  fi
+
+  if [ x"$detached_mode" == x"Detached" ]; then
+    flink run \
+    $runOption \
+    $jarfile \
+    --flink.conf $app_proper
+    echo "${app_name}" >"${APP_TEMP}/.running"
+  else
     # shellcheck disable=SC2006
     # shellcheck disable=SC2155
-    local app_name="`java -cp "${jarfile}" $param_cli --name "${app_proper}"`"
-    if [ x"${app_name}" == x"" ] ; then
-       echo_r "Usage:yarnname must be set,pluase check your conf:${app_proper}"
-       exit 1
-    fi
+    local app_log_date=$(date "+%Y%m%d_%H%M%S")
+    local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
 
-    local trim="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
-    # shellcheck disable=SC2006
-    # shellcheck disable=SC2155
-    local detached_mode="`java -cp "${jarfile}" $param_cli --detached "${app_proper}"` $*"
-    # shellcheck disable=SC2006
-    # trim...
-    detached_mode="`echo "$detached_mode" | sed "$trim"`"
-    # shellcheck disable=SC2006
-    # shellcheck disable=SC2155
-    local option="`java -cp "${jarfile}" $param_cli --option "${app_proper}"` $*"
-    # shellcheck disable=SC2006
-    option="`echo "$option" | sed "$trim"`"
+    flink run \
+    $runOption \
+    $jarfile \
+    --flink.conf $app_proper >>$app_out 2>&1 &
 
-    # shellcheck disable=SC2006
-    # shellcheck disable=SC2155
-    local property_params="`java -cp "${jarfile}" $param_cli --property "${app_proper}"`"
-    # shellcheck disable=SC2006
-    property_params="`echo "$property_params" | sed "$trim"`"
-
-    echo_g "${app_name} Starting by:<${detached_mode}> mode"
-
-    # json all params...
-    local runOption="$option"
-    if [ x"$property_params" != x"" ]; then
-        runOption="$runOption $property_params"
-    fi
-
-    if [ x"$detached_mode" == x"Detached" ] ; then
-        flink run \
-        $runOption \
-        $jarfile \
-        --flink.conf $app_proper
-        echo "${app_name}" > "${APP_TEMP}/.running"
-    else
-        # shellcheck disable=SC2006
-        # shellcheck disable=SC2155
-        local app_log_date=`date "+%Y%m%d_%H%M%S"`
-        local app_out="${APP_LOG}/${app_name}-${app_log_date}.log"
-
-        flink run \
-        $runOption \
-        $jarfile \
-        --flink.conf $app_proper >> $app_out 2>&1 &
-
-        echo "${app_name}" > "${APP_TEMP}/.running"
-        echo_g "${app_name} starting,more detail please log:${app_out}"
-    fi
+    echo "${app_name}" >"${APP_TEMP}/.running"
+    echo_g "${app_name} starting,more detail please log:${app_out}"
+  fi
 }
 
 doStop() {
   # shellcheck disable=SC2155
   # shellcheck disable=SC2034
-  local running_app=$(cat "${APP_TEMP/.running}")
+  local running_app=$(cat "${APP_TEMP/.running/}")
   if [ x"${running_app}" != x"" ]; then
     echo_w "can not found flink job!"
   fi
-  flink list -r|grep "${running_app}"|awk '{print $4}'|xargs flink cancel
+  flink list -r | grep "${running_app}" | awk '{print $4}' | xargs flink cancel
 }
 
 case "$1" in
-    start)
-       shift
-       doStart "$@"
-       exit $?
-        ;;
-    stop)
-      doStop
-      exit $?
-      ;;
-    *)
-      echo_g "Unknown command: $1"
-      echo_g "commands:"
-      echo_g "  start             Start"
-      echo_g "  stop              Stop"
-      echo_g "                    are you running?"
-      exit 1
-    ;;
+start)
+  shift
+  doStart "$@"
+  exit $?
+  ;;
+stop)
+  doStop
+  exit $?
+  ;;
+*)
+  echo_g "Unknown command: $1"
+  echo_g "commands:"
+  echo_g "  start             Start"
+  echo_g "  stop              Stop"
+  echo_g "                    are you running?"
+  exit 1
+  ;;
 esac

@@ -84,7 +84,7 @@ trait FlinkStreaming extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  var context: StreamingContext = _
+  implicit var context: StreamingContext = _
 
   var jobExecutionResult: JobExecutionResult = _
 

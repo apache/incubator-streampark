@@ -31,6 +31,7 @@ public interface MongoResultFunction<T> {
 
     /**
      * 处理查询结果
+     *
      * @param cursor
      * @return
      */

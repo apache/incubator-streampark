@@ -26,28 +26,28 @@
 # Better OS/400 detection: see Bugzilla 31132
 os400=false
 # shellcheck disable=SC2006
-case "`uname`" in
-OS400*) os400=true;;
+case "$(uname)" in
+OS400*) os400=true ;;
 esac
 
 # resolve links - $0 may be a softlink
 PRG="$0"
 
-while [[ -h "$PRG" ]] ; do
+while [[ -L "$PRG" ]]; do
   # shellcheck disable=SC2006
-  ls=`ls -ld "$PRG"`
+  ls=$(ls -ld "$PRG")
   # shellcheck disable=SC2006
-  link=`expr "$ls" : '.*-> \(.*\)$'`
-  if expr "$link" : '/.*' > /dev/null; then
+  link=$(expr "$ls" : '.*-> \(.*\)$')
+  if expr "$link" : '/.*' >/dev/null; then
     PRG="$link"
   else
     # shellcheck disable=SC2006
-    PRG=`dirname "$PRG"`/"$link"
+    PRG=$(dirname "$PRG")/"$link"
   fi
 done
 
 # shellcheck disable=SC2006
-PRGDIR=`dirname "$PRG"`
+PRGDIR=$(dirname "$PRG")
 EXECUTABLE=flink.sh
 
 # Check that target executable exists
