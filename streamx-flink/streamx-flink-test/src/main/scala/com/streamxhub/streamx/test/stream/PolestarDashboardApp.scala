@@ -3,7 +3,7 @@ package com.streamxhub.streamx.test.stream
 import com.streamxhub.streamx.flink.core.scala.sink.ESSink
 import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
 import com.streamxhub.streamx.flink.core.scala.util.ElasticSearchUtils
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
@@ -23,7 +23,7 @@ object PolestarDashboardApp extends FlinkStreaming {
    * @param context
    */
   override def handle(): Unit = {
-    val data = new KafkaSource(context)
+    val data = KafkaSource()
 
     val ds = data.getDataStream[String]()
       .uid("Kafka_Source")
@@ -32,7 +32,7 @@ object PolestarDashboardApp extends FlinkStreaming {
       .filter(_.ymd == now())
       .filter(_.gmv > 0)
       .keyBy(_.timestamp)
-      .boundedOutOfOrdernessWatermark(_.timestamp,Duration.ofMillis(30 * 1000))
+      .boundedOutOfOrdernessWatermark(_.timestamp, Duration.ofMillis(30 * 1000))
       .keyBy(_.client_id)
       .timeWindow(Time.seconds(60))
       .reduce(_ + _)
@@ -46,7 +46,7 @@ object PolestarDashboardApp extends FlinkStreaming {
       )
 
     //数据下沉到es
-    ESSink(context).sink6[OrderEntity](ds)
+    ESSink().sink6[OrderEntity](ds)
   }
 
   def now(fmt: String = "yyyyMMdd"): String = {

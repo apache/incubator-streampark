@@ -42,11 +42,11 @@ import scala.collection.mutable.ArrayBuffer
 
 object HBaseSink {
 
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): HBaseSink = new HBaseSink(ctx, property, parallelism, name, uid)
 
 }
 

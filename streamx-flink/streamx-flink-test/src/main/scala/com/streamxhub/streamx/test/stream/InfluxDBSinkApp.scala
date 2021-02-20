@@ -1,7 +1,7 @@
 package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.flink.core.scala.sink.{InfluxDBSink, InfluxEntity}
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 
@@ -18,7 +18,7 @@ object InfluxDBSinkApp extends FlinkStreaming {
 
     //weather,altitude=1000,area=北 temperature=11,humidity=-4
 
-    InfluxDBSink(context).sink(source,"mydb")(InfluxEntity[Weather](
+    InfluxDBSink().sink(source, "mydb")(InfluxEntity[Weather](
       "mydb",
       "test",
       "autogen",
@@ -52,7 +52,7 @@ class WeatherSource extends SourceFunction[Weather] {
     while (isRunning) {
       val temperature = random.nextInt(100)
       val humidity = random.nextInt(30)
-      val area = List("北","上","广","深")(random.nextInt(4))
+      val area = List("北", "上", "广", "深")(random.nextInt(4))
       val altitude = random.nextInt(10000)
       val order = Weather(temperature, humidity, area, altitude)
       ctx.collect(order)

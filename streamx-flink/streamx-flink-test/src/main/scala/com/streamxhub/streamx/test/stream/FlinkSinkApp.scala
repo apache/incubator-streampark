@@ -2,7 +2,7 @@ package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.flink.core.scala.sink.{RedisMapper, RedisSink}
 import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.connectors.redis.common.mapper.RedisCommand
 import org.json4s.DefaultFormats
@@ -44,7 +44,7 @@ object FlinkSinkApp extends FlinkStreaming {
 
     // Redis sink..................
     //1)定义 RedisSink
-    val sink = RedisSink(context)
+    val sink = RedisSink()
     //2)写Mapper映射
     val personMapper: RedisMapper[Person] = RedisMapper[Person](RedisCommand.HSET, "flink_person", _.id.toString, _.name)
     val userMapper: RedisMapper[User] = RedisMapper[User](RedisCommand.HSET, "flink_user", _.id.toString, _.name)

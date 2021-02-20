@@ -376,7 +376,7 @@ trait FlinkStreamTable extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  var context: StreamTableContext = _
+  implicit var context: StreamTableContext = _
 
   var jobExecutionResult: JobExecutionResult = _
 

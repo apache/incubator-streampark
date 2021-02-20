@@ -40,11 +40,11 @@ import scala.collection.Map
 
 object InfluxDBSink {
 
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): InfluxDBSink = new InfluxDBSink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): InfluxDBSink = new InfluxDBSink(ctx, property, parallelism, name, uid)
 
 }
 

@@ -44,7 +44,7 @@ import scala.util.{Success, Try}
 
 object HBaseSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): HBaseSource = new HBaseSource(ctx, property)
+  def apply(@(transient@param) property: Properties = new Properties())(implicit ctx: StreamingContext): HBaseSource = new HBaseSource(ctx, property)
 
 }
 

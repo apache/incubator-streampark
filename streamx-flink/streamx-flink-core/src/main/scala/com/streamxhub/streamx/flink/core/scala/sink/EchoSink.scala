@@ -40,7 +40,7 @@ import scala.collection.mutable
  */
 object EchoSink {
 
-  def apply[T](@(transient@param) stream: DataStream[T], sinkIdentifier: String): DataStreamSink[T] = {
+  def apply[T](@(transient@param) sinkIdentifier: String)(implicit stream: DataStream[T]): DataStreamSink[T] = {
     stream.addSink(new EchoSinkFunction[T](sinkIdentifier)).name("Echo to Std. Out")
   }
 

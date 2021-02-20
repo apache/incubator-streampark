@@ -202,7 +202,7 @@ trait FlinkTable extends Logger {
 
   final implicit lazy val parameter: ParameterTool = context.parameter
 
-  var context: TableContext = _
+  implicit var context: TableContext = _
 
   def main(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])

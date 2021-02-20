@@ -33,6 +33,7 @@ public interface MongoQueryFunction<T> {
 
     /**
      * 返回一个查询条件
+     *
      * @param last
      * @param collection
      * @return

@@ -40,7 +40,7 @@ import scala.util.{Failure, Success, Try}
 
 object KafkaSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): KafkaSource = new KafkaSource(ctx, property)
+  def apply(@(transient@param) property: Properties = new Properties())(implicit ctx: StreamingContext): KafkaSource = new KafkaSource(ctx, property)
 
   def getSource[T: TypeInformation](ctx: StreamingContext,
                                     property: Properties = new Properties(),

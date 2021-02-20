@@ -50,17 +50,19 @@ object JdbcSink {
    * @param alias :    实例别名(用于区分多个不同的数据库实例...)
    * @return
    */
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             parallelism: Int = 0,
+            alias: String = "",
             name: String = null,
-            uid: String = null)(implicit alias: String = ""): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
 
 }
 
 class JdbcSink(@(transient@param) ctx: StreamingContext,
                parallelism: Int = 0,
+               alias: String = "",
                name: String = null,
-               uid: String = null)(implicit alias: String = "") extends Sink with Logger {
+               uid: String = null) extends Sink with Logger {
 
   /**
    *

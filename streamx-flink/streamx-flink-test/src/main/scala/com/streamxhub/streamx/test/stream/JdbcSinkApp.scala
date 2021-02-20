@@ -2,7 +2,7 @@ package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.flink.core.scala.sink.JdbcSink
 import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder, JdbcSink => JSink}
 
@@ -15,7 +15,7 @@ object JdbcSinkApp extends FlinkStreaming {
     /**
      * 从kafka里读数据.这里的数据是数字或者字母,每次读取1条
      */
-    val source = KafkaSource(context).getDataStream[String]()
+    val source = KafkaSource().getDataStream[String]()
       .uid("kfkSource1")
       .name("kfkSource1")
       .map(x => {
@@ -31,7 +31,7 @@ object JdbcSinkApp extends FlinkStreaming {
      * 2)异常情况: 当从kafka中读取的内容非数字会导致插入失败,kafka的消费的offset会回滚
      * 如: 当前的kafka size为30,offset是30, 手动输入1个字母,此时size为31,写入mysql会报错,kafka的offset依旧是30,不会发生更新.
      */
-    JdbcSink(context, parallelism = 5).towPCSink[String](source)(x => {
+    JdbcSink(parallelism = 5).towPCSink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
 

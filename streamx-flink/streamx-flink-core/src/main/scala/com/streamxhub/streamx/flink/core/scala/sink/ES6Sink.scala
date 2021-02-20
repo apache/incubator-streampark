@@ -50,11 +50,11 @@ import scala.util.{Success, Try}
 
 object ES6Sink {
 
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): ES6Sink = new ES6Sink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): ES6Sink = new ES6Sink(ctx, property, parallelism, name, uid)
 
 }
 

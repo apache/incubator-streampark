@@ -38,11 +38,11 @@ import scala.annotation.meta.param
 import scala.util.Try
 
 object KafkaSink {
-  def apply(@(transient@param) ctx: StreamingContext,
+  def apply(@(transient@param)
             property: Properties = new Properties(),
             parallelism: Int = 0,
             name: String = null,
-            uid: String = null): KafkaSink = new KafkaSink(ctx, property, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): KafkaSink = new KafkaSink(ctx, property, parallelism, name, uid)
 }
 
 class KafkaSink(@(transient@param) val ctx: StreamingContext,

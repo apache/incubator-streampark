@@ -25,16 +25,15 @@
 #  endorsed directory.
 # -----------------------------------------------------------------------------
 
-
 # Make sure prerequisite environment variables are set
 if [[ -z "$JAVA_HOME" && -z "$JRE_HOME" ]]; then
   # shellcheck disable=SC2154
   if ${darwin}; then
     # Bugzilla 54390
-    if [[ -x '/usr/libexec/java_home' ]] ; then
+    if [[ -x '/usr/libexec/java_home' ]]; then
       # shellcheck disable=SC2006
       # shellcheck disable=SC2155
-      export JAVA_HOME=`/usr/libexec/java_home`
+      export JAVA_HOME=$(/usr/libexec/java_home)
     # Bugzilla 37284 (reviewed).
     elif [[ -d "/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home" ]]; then
       export JAVA_HOME="/System/Library/Frameworks/JavaVM.framework/Versions/CurrentJDK/Home"
@@ -42,14 +41,14 @@ if [[ -z "$JAVA_HOME" && -z "$JRE_HOME" ]]; then
   else
     # shellcheck disable=SC2006
     # shellcheck disable=SC2230
-    JAVA_PATH=`which java 2>/dev/null`
+    JAVA_PATH=$(which java 2>/dev/null)
     if [[ "x$JAVA_PATH" != "x" ]]; then
       # shellcheck disable=SC2006
-      JAVA_PATH=`dirname "${JAVA_PATH}" 2>/dev/null`
+      JAVA_PATH=$(dirname "${JAVA_PATH}" 2>/dev/null)
       # shellcheck disable=SC2006
-      JRE_HOME=`dirname "${JAVA_PATH}" 2>/dev/null`
+      JRE_HOME=$(dirname "${JAVA_PATH}" 2>/dev/null)
     fi
-    if [[ "x$JRE_HOME" = "x" ]]; then
+    if [[ "x$JRE_HOME" == "x" ]]; then
       # XXX: Should we try other locations?
       if [[ -x /usr/bin/java ]]; then
         JRE_HOME=/usr
@@ -62,7 +61,7 @@ if [[ -z "$JAVA_HOME" && -z "$JRE_HOME" ]]; then
     exit 1
   fi
 fi
-if [[ -z "$JAVA_HOME" && "$1" = "debug" ]]; then
+if [[ -z "$JAVA_HOME" && "$1" == "debug" ]]; then
   echo "JAVA_HOME should point to a JDK in order to run in debug mode."
   exit 1
 fi
@@ -71,9 +70,9 @@ if [[ -z "$JRE_HOME" ]]; then
 fi
 
 # If we're running under jdb, we need a full jdk.
-if [[ "$1" = "debug" ]] ; then
+if [[ "$1" == "debug" ]]; then
   # shellcheck disable=SC2154
-  if [[ "$os400" = "true" ]]; then
+  if [[ "$os400" == "true" ]]; then
     if [[ ! -x "$JAVA_HOME"/bin/java || ! -x "$JAVA_HOME"/bin/javac ]]; then
       echo "The JAVA_HOME environment variable is not defined correctly"
       echo "This environment variable is needed to run this program"

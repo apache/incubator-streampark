@@ -46,7 +46,7 @@ import scala.util.{Success, Try}
 
 object MongoSource {
 
-  def apply(@(transient@param) ctx: StreamingContext, property: Properties = new Properties()): MongoSource = new MongoSource(ctx, property)
+  def apply(@(transient@param) property: Properties = new Properties())(implicit ctx: StreamingContext): MongoSource = new MongoSource(ctx, property)
 
 }
 

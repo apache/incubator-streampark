@@ -40,7 +40,7 @@ object DataStreamExt {
    * @tparam T
    */
 
-  class DataStream[T: TypeInformation](val dataStream: DStream[T]) {
+  class DataStream[T: TypeInformation](dataStream: DStream[T]) {
 
     /**
      *
@@ -62,7 +62,7 @@ object DataStreamExt {
      *
      * @param sinkIdentifier
      */
-    def echo(sinkIdentifier: String = null): Unit = EchoSink(dataStream, sinkIdentifier)
+    def echo(sinkIdentifier: String = null): Unit = EchoSink(sinkIdentifier)(dataStream)
 
     /**
      * 基于最大延迟时间的Watermark生成
