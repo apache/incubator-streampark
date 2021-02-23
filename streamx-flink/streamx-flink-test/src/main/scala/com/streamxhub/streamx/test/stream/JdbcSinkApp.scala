@@ -24,7 +24,7 @@ object JdbcSinkApp extends FlinkStreaming {
 
 
     /**
-     * 假设这里有一个orders表.有一个字段,id的类型可以是int
+     * 假设这里有一个orders表.有一个字段,id的类型是int
      * 在数据插入的时候制造异常:
      * 1)正确情况: 当从kafka中读取的内容全部是数字时会插入成功,kafka的消费的offset也会更新.
      * 如: 当前kafka size为20,手动输入10个数字,则size为30,然后会将这10个数字写入到Mysql,kafka的offset也会更新

@@ -80,7 +80,7 @@ class JdbcRequest[T: TypeInformation](@(transient@param) private val stream: Dat
  * @tparam R
  */
 
-class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFun: (T, Map[String, _]) => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
+class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T => String, resultFunc: (T, Map[String, _]) => R, jdbc: Properties) extends RichAsyncFunction[T, R] with Logger {
 
   @transient private[this] var client: SQLClient = _
 
@@ -111,9 +111,12 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
             .query(sqlFun(input), new Handler[AsyncResult[ResultSet]] {
               override def handle(event: AsyncResult[ResultSet]): Unit = {
                 if (event.succeeded) {
-                  event.result().getRows().foreach(x => {
-                    resultFuture.complete(Collections.singleton(resultFun(input, x.getMap.asScala.toMap)))
-                  })
+                  val list = event.result().getRows()
+                  if (list.isEmpty) {
+                    resultFuture.complete(Collections.singleton(resultFunc(input, Map.empty[String, R])))
+                  } else {
+                    resultFuture.complete(list.map(x => resultFunc(input, x.getMap.asScala.toMap)))
+                  }
                 } else throw event.cause()
               }
             }).close()
