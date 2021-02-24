@@ -283,8 +283,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
                   require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
                   val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
                   readFlinkConf(flinkConf)
-                case yaml =>
-                  PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
+                case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
               }
             }
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
