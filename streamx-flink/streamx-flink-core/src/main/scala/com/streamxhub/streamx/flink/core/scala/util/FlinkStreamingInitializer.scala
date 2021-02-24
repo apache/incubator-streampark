@@ -122,8 +122,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+    val config = argsMap.get(KEY_APP_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)
