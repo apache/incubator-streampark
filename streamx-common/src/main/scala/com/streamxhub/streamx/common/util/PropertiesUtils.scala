@@ -36,8 +36,8 @@ object PropertiesUtils {
 
   def readFile(filename: String): String = {
     val file = new File(filename)
-    require(file.exists(), s"Yaml file $file does not exist")
-    require(file.isFile, s"Yaml file $file is not a normal file")
+    require(file.exists(), s"file $file does not exist")
+    require(file.isFile, s"file $file is not a normal file")
     val scanner = new Scanner(file)
     val buffer = new StringBuilder
     while (scanner.hasNextLine) {
