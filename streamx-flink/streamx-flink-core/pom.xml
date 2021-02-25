@@ -11,6 +11,12 @@
     <artifactId>streamx-flink-core</artifactId>
     <name>StreamX : Flink Core</name>
 
+    <!--
+    scope:provided 和 optional的区别:
+    optional: 主要用于"可选依赖"的场景,例如该框架实现了很多source和sink,至于是否引入mysql和hbase,取决于用户的情况,如使用了mysql,则需要用户手动导入mysql依赖.
+    provided: 表示的不是依赖可选,它表示这个依赖是必须的,但是这个依赖通常是已经提供的,应用服务不需要额外引入,通常也不用关心
+    -->
+
     <dependencies>
 
         <dependency>
@@ -63,14 +69,14 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- table -->
@@ -78,7 +84,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- 使用Blink Planner -->
@@ -86,7 +92,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!-- 支持一些自定义的消息格式，比如kafka里面消息格式是json的，或者需要自定义函数支持 -->
@@ -94,7 +100,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--clickhouse-->
@@ -102,14 +108,14 @@
             <groupId>ru.yandex.clickhouse</groupId>
             <artifactId>clickhouse-jdbc</artifactId>
             <version>${clickhouse.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--clickhouse async need asynchttpclient -->
         <dependency>
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--flink-connector-->
@@ -117,73 +123,73 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--es sink need httpcomponents -->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.bahir</groupId>
             <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-parquet_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--hbase-->
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <!--influxdb-->
         <dependency>
             <groupId>org.influxdb</groupId>
             <artifactId>influxdb-java</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.2</version>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-jdbc-client</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
-            <scope>provided</scope>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
