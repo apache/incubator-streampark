@@ -22,10 +22,9 @@ package com.streamxhub.streamx.flink.core.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType
+import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
-import com.streamxhub.streamx.flink.core.java.function.SQLFromFunction
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import ApiType.ApiType
 import com.streamxhub.streamx.flink.core.scala.sink.Dialect.Dialect
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
@@ -54,7 +53,7 @@ object JdbcSink {
             parallelism: Int = 0,
             alias: String = "",
             name: String = null,
-            uid: String = null)(implicit ctx: StreamingContext): JdbcSink = new JdbcSink(ctx, parallelism, name, uid)
+            uid: String = null)(implicit ctx: StreamingContext): JdbcSink = new JdbcSink(ctx, parallelism, alias, name, uid)
 
 }
 
