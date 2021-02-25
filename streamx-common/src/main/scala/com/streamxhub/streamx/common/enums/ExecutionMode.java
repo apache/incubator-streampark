@@ -20,32 +20,51 @@
  */
 package com.streamxhub.streamx.common.enums;
 
+
 /**
  * @author benjobs
  */
-public enum DevelopmentMode {
-    CUSTOMCODE("Custom Code", 1),
-    FLINKSQL("Flink SQL", 2);
 
-    String mode;
-    Integer value;
+public enum ExecutionMode {
 
-    DevelopmentMode(String mode, Integer value) {
+    LOCAL(0, "remote"),
+    REMOTE(1, "remote"),
+    YARN_PRE_JOB(2, "yarn-pre-job"),
+    YARN_SESSION(3, "yarn-session"),
+    APPLICATION(4, "yarn-application"),
+    KUBERNETES(5, "kubernetes");
+
+    private Integer mode;
+    private String name;
+
+    ExecutionMode(Integer mode, String name) {
         this.mode = mode;
-        this.value = value;
+        this.name = name;
     }
 
-    public static DevelopmentMode of(Integer value) {
-        for (DevelopmentMode mode : values()) {
-            if (mode.value.equals(value)) {
-                return mode;
+    public static ExecutionMode of(Integer value) {
+        for (ExecutionMode executionMode : values()) {
+            if (executionMode.mode.equals(value)) {
+                return executionMode;
             }
         }
         return null;
     }
 
-    public Integer getValue() {
-        return value;
+    public static ExecutionMode of(String name) {
+        for (ExecutionMode executionMode : values()) {
+            if (executionMode.name.equals(name)) {
+                return executionMode;
+            }
+        }
+        return null;
     }
 
+    public int getMode() {
+        return mode;
+    }
+
+    public String getName() {
+        return name;
+    }
 }

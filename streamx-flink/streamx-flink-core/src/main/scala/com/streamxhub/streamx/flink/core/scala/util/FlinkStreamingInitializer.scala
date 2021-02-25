@@ -21,10 +21,10 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
-import com.streamxhub.streamx.common.enums.ApiType.ApiType
+import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
@@ -33,10 +33,10 @@ import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
+import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.CheckpointingMode
 
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -122,8 +122,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    val config = argsMap.get(KEY_FLINK_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--flink.conf $path \" in main arguments")
+    val config = argsMap.get(KEY_APP_CONF(), null) match {
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)
@@ -277,16 +277,15 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
                * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
                * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
                */
-              val flinkHome = parameter.get(KEY_FLINK_HOME(), null) match {
+              parameter.get(KEY_FLINK_CONF(), null) match {
                 case null | "" =>
-                  logInfo("--flink.home is undefined,now try found from flink-conf.yaml on System env.")
+                  logInfo("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
                   val flinkHome = System.getenv("FLINK_HOME")
                   require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-                  flinkHome
-                case file => file
+                  val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+                  readFlinkConf(flinkConf)
+                case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
               }
-              val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-              readFlinkConf(flinkConf)
             }
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
             val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)

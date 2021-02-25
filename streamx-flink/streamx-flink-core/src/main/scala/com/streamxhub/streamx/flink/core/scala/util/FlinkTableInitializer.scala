@@ -114,9 +114,9 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
    */
   override def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    argsMap.get(KEY_FLINK_CONF(), null) match {
+    argsMap.get(KEY_APP_CONF(), null) match {
       case null | "" =>
-        logWarn("Usage:can't fond config,you can set \"--flink.conf $path \" in main arguments")
+        logWarn("Usage:can't fond config,you can set \"--app.conf $path \" in main arguments")
         ParameterTool.fromSystemProperties().mergeWith(argsMap)
       case file =>
         val configArgs = super.readFlinkConf(file)

@@ -21,8 +21,6 @@
 
 package com.streamxhub.streamx.common.enums;
 
-import java.util.Arrays;
-
 /**
  * classloader.resolve-order
  */
@@ -44,7 +42,12 @@ public enum ResolveOrder {
     }
 
     public static ResolveOrder of(Integer value) {
-        return Arrays.stream(values()).filter((x) -> x.value.equals(value)).findFirst().orElse(null);
+        for (ResolveOrder order : values()) {
+            if (order.value.equals(value)) {
+                return order;
+            }
+        }
+        return null;
     }
 
     public String getName() {
