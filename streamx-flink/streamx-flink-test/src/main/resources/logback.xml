@@ -12,101 +12,101 @@
               value="%d{yyyy-MM-dd HH:mm:ss.SSS} %contextName [%thread] %-5level %logger{36} - %msg%n"/>
 
     <!-- 控制台打印 -->
-    <appender name="STDOUT" class="com.streamxhub.streamx.shade.ch.qos.logback.core.ConsoleAppender">
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder charset="utf-8">
             <pattern>${log.colorPattern}</pattern>
         </encoder>
     </appender>
     <!-- ERROR 输入到文件，按日期和文件大小 -->
-    <appender name="ERROR" class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
         </encoder>
-        <filter class="com.streamxhub.streamx.shade.ch.qos.logback.classic.filter.LevelFilter">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}%d/error.%i.log</fileNamePattern>
             <maxHistory>${MAX_HISTORY}</maxHistory>
-            <timeBasedFileNamingAndTriggeringPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${FILE_SIZE}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
 
     <!-- WARN 输入到文件，按日期和文件大小 -->
-    <appender name="WARN" class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
         </encoder>
-        <filter class="com.streamxhub.streamx.shade.ch.qos.logback.classic.filter.LevelFilter">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>WARN</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}%d/warn.%i.log</fileNamePattern>
             <MAX_HISTORY>${MAX_HISTORY}</MAX_HISTORY>
-            <timeBasedFileNamingAndTriggeringPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${FILE_SIZE}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
 
     <!-- INFO 输入到文件，按日期和文件大小 -->
-    <appender name="INFO" class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
         </encoder>
-        <filter class="com.streamxhub.streamx.shade.ch.qos.logback.classic.filter.LevelFilter">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}%d/info.%i.log</fileNamePattern>
             <MAX_HISTORY>${MAX_HISTORY}</MAX_HISTORY>
-            <timeBasedFileNamingAndTriggeringPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${FILE_SIZE}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <!-- DEBUG 输入到文件，按日期和文件大小 -->
-    <appender name="DEBUG" class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="DEBUG" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
         </encoder>
-        <filter class="com.streamxhub.streamx.shade.ch.qos.logback.classic.filter.LevelFilter">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>DEBUG</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
-        <rollingPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}%d/debug.%i.log</fileNamePattern>
             <MAX_HISTORY>${MAX_HISTORY}</MAX_HISTORY>
             <timeBasedFileNamingAndTriggeringPolicy
-                    class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                    class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${FILE_SIZE}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
     <!-- TRACE 输入到文件，按日期和文件大小 -->
-    <appender name="TRACE" class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.RollingFileAppender">
+    <appender name="TRACE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder charset="utf-8">
             <pattern>${log.pattern}</pattern>
         </encoder>
-        <filter class="com.streamxhub.streamx.shade.ch.qos.logback.classic.filter.LevelFilter">
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>TRACE</level>
             <onMatch>ACCEPT</onMatch>
             <onMismatch>DENY</onMismatch>
         </filter>
         <rollingPolicy
-                class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+                class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
             <fileNamePattern>${LOG_HOME}%d/trace.%i.log</fileNamePattern>
             <MAX_HISTORY>${MAX_HISTORY}</MAX_HISTORY>
-            <timeBasedFileNamingAndTriggeringPolicy class="com.streamxhub.streamx.shade.ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+            <timeBasedFileNamingAndTriggeringPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
                 <maxFileSize>${FILE_SIZE}</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
