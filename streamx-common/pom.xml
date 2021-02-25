@@ -196,6 +196,10 @@
                                     <pattern>org.slf4j</pattern>
                                     <shadedPattern>com.streamxhub.streamx.shade.org.slf4j</shadedPattern>
                                 </relocation>
+                                <relocation>
+                                    <pattern>ch.qos.logback</pattern>
+                                    <shadedPattern>com.streamxhub.streamx.shade.ch.qos.logback</shadedPattern>
+                                </relocation>
                             </relocations>
                         </configuration>
                     </execution>
