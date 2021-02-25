@@ -23,7 +23,7 @@ package com.streamxhub.streamx.common.util
 import org.slf4j.impl.StaticLoggerBinder
 import org.slf4j.{LoggerFactory, Logger => SlfLogger}
 
-trait Logger {
+private[streamx] trait Logger {
 
   @transient private[this] var _logger: SlfLogger = _
 
