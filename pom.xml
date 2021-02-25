@@ -118,6 +118,12 @@
             </dependency>
 
             <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-reflect</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+
+            <dependency>
                 <groupId>com.beachape</groupId>
                 <artifactId>enumeratum_${scala.binary.version}</artifactId>
                 <version>1.6.1</version>
