@@ -25,6 +25,7 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!--logback-->
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
@@ -70,6 +71,7 @@
             <artifactId>flink-statebackend-rocksdb_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -77,6 +79,7 @@
             <artifactId>flink-connector-jdbc_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- table -->
@@ -85,6 +88,7 @@
             <artifactId>flink-table-api-scala-bridge_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- 使用Blink Planner -->
@@ -93,6 +97,7 @@
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!-- 支持一些自定义的消息格式，比如kafka里面消息格式是json的，或者需要自定义函数支持 -->
@@ -101,6 +106,7 @@
             <artifactId>flink-table-common</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--clickhouse-->
@@ -109,6 +115,7 @@
             <artifactId>clickhouse-jdbc</artifactId>
             <version>${clickhouse.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--clickhouse async need asynchttpclient -->
@@ -116,6 +123,7 @@
             <groupId>org.asynchttpclient</groupId>
             <artifactId>async-http-client</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--flink-connector-->
@@ -124,6 +132,7 @@
             <artifactId>flink-connector-kafka_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -131,6 +140,7 @@
             <artifactId>flink-connector-elasticsearch6_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--es sink need httpcomponents -->
@@ -138,12 +148,14 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.bahir</groupId>
             <artifactId>flink-connector-redis_${scala.binary.version}</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -151,6 +163,7 @@
             <artifactId>flink-parquet_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--hbase-->
@@ -158,12 +171,14 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hbase</groupId>
             <artifactId>hbase-client</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <!--influxdb-->
@@ -171,6 +186,7 @@
             <groupId>org.influxdb</groupId>
             <artifactId>influxdb-java</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -178,20 +194,48 @@
             <artifactId>mongo-java-driver</artifactId>
             <version>3.12.2</version>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-jdbc-client</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <optional>true</optional>
+            <scope>provided</scope>
         </dependency>
 
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <relocations>
+                                <relocation>
+                                    <pattern>ch.qos.logback</pattern>
+                                    <shadedPattern>com.streamxhub.streamx.shade.ch.qos.logback</shadedPattern>
+                                </relocation>
+                            </relocations>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
