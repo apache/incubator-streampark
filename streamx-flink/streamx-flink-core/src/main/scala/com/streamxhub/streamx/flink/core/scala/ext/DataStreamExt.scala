@@ -103,6 +103,13 @@ object DataStreamExt {
       dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)))
     }
 
+    /**
+     * 扩展process方法,使其调用更加简单.
+     * @param processFunction
+     * @param onTimerFunction
+     * @tparam R
+     * @return
+     */
     def proc[R: TypeInformation](processFunction: (T, ProcFunc[T, R]#Context, Collector[R]) => Unit,
                                  onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null): DStream[R] = {
 
