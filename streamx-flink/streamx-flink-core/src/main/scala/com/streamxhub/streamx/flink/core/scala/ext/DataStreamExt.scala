@@ -24,7 +24,7 @@ import com.streamxhub.streamx.flink.core.scala.sink.EchoSink
 import org.apache.flink.api.common.eventtime.{SerializableTimestampAssigner, WatermarkStrategy}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.streaming.api.functions.{AssignerWithPeriodicWatermarks, AssignerWithPunctuatedWatermarks, ProcessFunction => ProcFunc}
-import org.apache.flink.streaming.api.scala.{OutputTag, DataStream => DStream}
+import org.apache.flink.streaming.api.scala.{DataStream => DStream, _}
 import org.apache.flink.streaming.api.watermark.Watermark
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.apache.flink.streaming.runtime.operators.util.{AssignerWithPeriodicWatermarksAdapter, AssignerWithPunctuatedWatermarksAdapter}
@@ -101,6 +101,22 @@ object DataStreamExt {
         }
       }
       dataStream.assignTimestampsAndWatermarks(WatermarkStrategy.forGenerator[T](new AssignerWithPunctuatedWatermarksAdapter.Strategy[T](assigner)))
+    }
+
+    def proc[R: TypeInformation](processFunction: (T, ProcFunc[T, R]#Context, Collector[R]) => Unit,
+                                 onTimerFunction: (Long, ProcFunc[T, R]#OnTimerContext, Collector[R]) => Unit = null): DStream[R] = {
+
+      dataStream.process(new ProcFunc[T, R] {
+        override def processElement(value: T, ctx: ProcFunc[T, R]#Context, out: Collector[R]): Unit = processFunction(value, ctx, out)
+
+        override def onTimer(timestamp: Long, ctx: ProcFunc[T, R]#OnTimerContext, out: Collector[R]): Unit = {
+          if (onTimerFunction != null) {
+            onTimerFunction(timestamp, ctx, out)
+          } else {
+            super.onTimer(timestamp, ctx, out)
+          }
+        }
+      })
     }
 
   }
