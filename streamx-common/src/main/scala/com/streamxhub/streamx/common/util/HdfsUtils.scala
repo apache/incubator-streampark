@@ -23,11 +23,11 @@ package com.streamxhub.streamx.common.util
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FSDataInputStream, FSDataOutputStream, FileSystem, FileUtil, Path}
+import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.HAUtil
 import org.apache.hadoop.io.IOUtils
 
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.io.{ByteArrayOutputStream, File, FileWriter}
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
@@ -69,6 +69,10 @@ object HdfsUtils extends Logger {
 
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
+
+  def copyDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
+    FileUtil.listFiles(new File(src)).foreach(path => copyHdfs(path.getAbsolutePath, dst, delSrc, overwrite))
+  }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
