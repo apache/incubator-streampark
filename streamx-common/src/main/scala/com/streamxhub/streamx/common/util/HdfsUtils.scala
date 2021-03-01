@@ -61,7 +61,7 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
-  def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
+  def list(src: String): List[FileStatus] = hdfs.listStatus(getPath(src)).toList
 
   def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
 
@@ -71,7 +71,7 @@ object HdfsUtils extends Logger {
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
 
   def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
-    list(src).foreach(path => copyHdfs(path, dst, delSrc, overwrite))
+    list(src).foreach(x => FileUtil.copy(hdfs, x, hdfs, getPath(dst), delSrc, overwrite, conf))
   }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
