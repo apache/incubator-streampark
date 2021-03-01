@@ -70,7 +70,7 @@ object HdfsUtils extends Logger {
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
 
-  def copyDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
+  def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
     list(src).foreach(path => copyHdfs(path, dst, delSrc, overwrite))
   }
 
