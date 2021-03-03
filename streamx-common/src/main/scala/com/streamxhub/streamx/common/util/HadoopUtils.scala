@@ -53,9 +53,9 @@ object HadoopUtils extends Logger {
   lazy val rmHttpAddress: String = {
     val yarnConf = new YarnConfiguration(HdfsUtils.conf)
     val ids = yarnConf.get("yarn.resourcemanager.ha.rm-ids")
-    if (ids == null) DEFAULT_YARN_RM_HTTP_ADDRESS else {
+    if (ids == null) DEFAULT_YARN_RM_HTTP_ADDRESS
+    else {
       var address = new ArrayBuffer[String](1)
-      address += DEFAULT_YARN_RM_HTTP_ADDRESS
       ids.split(",").foreach(x => {
         if (address.isEmpty) {
           val conf = new YarnConfiguration(yarnConf)
@@ -70,7 +70,7 @@ object HadoopUtils extends Logger {
           }
         }
       })
-      address.last
+      if (address.isEmpty) DEFAULT_YARN_RM_HTTP_ADDRESS else address.head
     }
   }
 
