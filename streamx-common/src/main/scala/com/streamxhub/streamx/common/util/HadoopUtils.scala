@@ -35,6 +35,12 @@ import java.io.{File, IOException}
 
 object HadoopUtils extends Logger {
 
+  def toApplicationId(appId: String): ApplicationId = {
+    require(appId != null)
+    val timestampAndId = appId.split("_")
+    ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
+  }
+
   @throws[IOException]
   @throws[YarnException]
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = {
