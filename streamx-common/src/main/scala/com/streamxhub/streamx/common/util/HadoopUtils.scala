@@ -39,11 +39,7 @@ object HadoopUtils extends Logger {
   @throws[YarnException]
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = {
     val yarnClient = YarnClient.createYarnClient
-    val yarnConf = new YarnConfiguration
-    // disable timeline service as we only query yarn app here.
-    // Otherwise we may hit this kind of ERROR:
-    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-    yarnConf.set("yarn.timeline-service.enabled", "false")
+    val yarnConf = new YarnConfiguration(HdfsUtils.conf)
     yarnClient.init(yarnConf)
     yarnClient.start()
     yarnClient.getApplicationReport(applicationId).getTrackingUrl

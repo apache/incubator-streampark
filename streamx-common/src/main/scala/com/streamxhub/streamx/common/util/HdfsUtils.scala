@@ -46,6 +46,9 @@ object HdfsUtils extends Logger {
     if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
       conf.set("hbase.fs.tmp.dir", "/tmp")
     }
+    // disable timeline service as we only query yarn app here.
+    // Otherwise we may hit this kind of ERROR:
+    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
     conf.set("yarn.timeline-service.enabled", "false")
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
