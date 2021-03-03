@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.flink.common.util
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.common.util.SQLCommand._
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -69,6 +68,7 @@ object SQLCommandUtil extends Logger {
     for (call <- sqlCommands) {
       val sql = call.operands.head
       try {
+        import com.streamxhub.streamx.flink.common.util.SQLCommand._
         call.command match {
           case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
                DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
