@@ -37,7 +37,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object HadoopUtils extends Logger {
 
-  val DEFAULT_YARN_RM_HTTP_ADDRESS = "0.0.0.0:8088"
+  val DEFAULT_YARN_RM_HTTP_ADDRESS = "http://0.0.0.0:8088"
 
   lazy val yarnClient = {
     val yarnClient = YarnClient.createYarnClient
@@ -66,7 +66,7 @@ object HadoopUtils extends Logger {
             CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT)
           val proto = serviceTarget.getProxy(yarnConf, rpcTimeoutForChecks)
           if (proto.getServiceStatus.getState == HAServiceProtocol.HAServiceState.ACTIVE) {
-            address += yarnConf.get(s"yarn.resourcemanager.webapp.address.$x")
+            address += s"http://${yarnConf.get(s"yarn.resourcemanager.webapp.address.$x")}"
           }
         }
       })
