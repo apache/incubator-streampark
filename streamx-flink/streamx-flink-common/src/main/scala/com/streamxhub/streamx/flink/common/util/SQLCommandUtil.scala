@@ -20,13 +20,71 @@
  */
 package com.streamxhub.streamx.flink.common.util
 
+import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.flink.common.util.SQLCommand.{ALTER_DATABASE, ALTER_FUNCTION, ALTER_TABLE, CREATE_CATALOG, CREATE_DATABASE, CREATE_FUNCTION, CREATE_TABLE, CREATE_VIEW, DROP_CATALOG, DROP_DATABASE, DROP_FUNCTION, DROP_TABLE, DROP_VIEW, INSERT_INTO, INSERT_OVERWRITE, SELECT, USE, USE_CATALOG}
 import enumeratum.EnumEntry
+import org.apache.calcite.config.Lex
+import org.apache.calcite.sql.parser.SqlParser
+import org.apache.flink.sql.parser.validate.FlinkSqlConformance
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
+import org.apache.flink.table.api.{EnvironmentSettings, TableException}
+import org.apache.flink.table.planner.calcite.CalciteParser
+import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
+import org.apache.flink.table.planner.utils.TableConfigUtils
 
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
-object SQLCommandUtil {
+object SQLCommandUtil extends Logger {
+
+  private[this] lazy val sqlParserConfig = {
+    val tableEnv = StreamTableEnvironment.create(
+      StreamExecutionEnvironment.getExecutionEnvironment,
+      EnvironmentSettings
+        .newInstance
+        .useBlinkPlanner
+        .inStreamingMode
+        .build
+    )
+    val tableConfig = tableEnv.getConfig
+    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse({
+      val conformance = tableConfig.getSqlDialect match {
+        case HIVE => FlinkSqlConformance.HIVE
+        case DEFAULT => FlinkSqlConformance.DEFAULT
+        case _ => throw new TableException("Unsupported SQL dialect: " + tableConfig.getSqlDialect)
+      }
+      SqlParser.config.withParserFactory(FlinkSqlParserFactories.create(conformance))
+        .withConformance(conformance)
+        .withLex(Lex.JAVA)
+        .withIdentifierMaxLength(256)
+    })
+  }
+
+  def verifySQL(sql: String): Unit = {
+    val sqlCommands = parseSQL(sql)
+    val parser = new CalciteParser(sqlParserConfig)
+    for (call <- sqlCommands) {
+      val sql = call.operands.head
+      try {
+        call.command match {
+          case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
+               DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
+               DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+               SELECT | INSERT_INTO | INSERT_OVERWRITE =>
+            parser.parse(sql)
+          case _ => throw new RuntimeException(s"Unsupported command: ${call.command}")
+        }
+      } catch {
+        case e: RuntimeException => throw e
+        case e: Exception =>
+          e.printStackTrace()
+          throw new RuntimeException(s"flinksql parse error,sql:${call.command}")
+      }
+    }
+  }
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
     require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,sql:$sql")
