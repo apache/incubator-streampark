@@ -24,16 +24,55 @@ package com.streamxhub.streamx.common.util
 
 import com.google.common.io.Files
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.fs.{CommonConfigurationKeys, FileSystem, Path}
+import org.apache.hadoop.ha.HAServiceProtocol
 import org.apache.hadoop.yarn.api.records.ApplicationId
+import org.apache.hadoop.yarn.client.RMHAServiceTarget
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.apache.hadoop.yarn.exceptions.YarnException
 
 import java.io.{File, IOException}
+import scala.collection.mutable.ArrayBuffer
 
 
 object HadoopUtils extends Logger {
+
+  val DEFAULT_YARN_RM_HTTP_ADDRESS = "0.0.0.0:8088"
+
+  lazy val yarnClient = {
+    val yarnClient = YarnClient.createYarnClient
+    val yarnConf = new YarnConfiguration(HdfsUtils.conf)
+    yarnClient.init(yarnConf)
+    yarnClient.start()
+    yarnClient
+  }
+
+  /**
+   * 从yarn源码里抛出来的...
+   */
+  lazy val rmHttpAddress: String = {
+    val yarnConf = new YarnConfiguration(HdfsUtils.conf)
+    val ids = yarnConf.get("yarn.resourcemanager.ha.rm-ids")
+    if (ids == null) DEFAULT_YARN_RM_HTTP_ADDRESS else {
+      var address = new ArrayBuffer[String](1)
+      address += DEFAULT_YARN_RM_HTTP_ADDRESS
+      ids.split(",").foreach(x => {
+        if (address.isEmpty) {
+          val conf = new YarnConfiguration(yarnConf)
+          conf.set(YarnConfiguration.RM_HA_ID, x)
+          val serviceTarget = new RMHAServiceTarget(conf)
+          val rpcTimeoutForChecks = yarnConf.getInt(
+            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT)
+          val proto = serviceTarget.getProxy(yarnConf, rpcTimeoutForChecks)
+          if (proto.getServiceStatus.getState == HAServiceProtocol.HAServiceState.ACTIVE) {
+            address += yarnConf.get(s"yarn.resourcemanager.webapp.address.$x")
+          }
+        }
+      })
+      address.last
+    }
+  }
 
   def toApplicationId(appId: String): ApplicationId = {
     require(appId != null)
@@ -41,13 +80,7 @@ object HadoopUtils extends Logger {
     ApplicationId.newInstance(timestampAndId(1).toLong, timestampAndId.last.toInt)
   }
 
-  @throws[IOException]
-  @throws[YarnException]
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = {
-    val yarnClient = YarnClient.createYarnClient
-    val yarnConf = new YarnConfiguration(HdfsUtils.conf)
-    yarnClient.init(yarnConf)
-    yarnClient.start()
     yarnClient.getApplicationReport(applicationId).getTrackingUrl
   }
 
