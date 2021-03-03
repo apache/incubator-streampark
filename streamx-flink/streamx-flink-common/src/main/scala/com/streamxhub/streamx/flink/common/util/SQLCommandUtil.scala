@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, TableException}
+import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, TableException}
 import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
@@ -75,13 +75,13 @@ object SQLCommandUtil extends Logger {
                DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
                SELECT | INSERT_INTO | INSERT_OVERWRITE =>
             parser.parse(sql)
-          case _ => throw new RuntimeException(s"Unsupported command: ${call.command}")
+          case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
         }
       } catch {
         case e: RuntimeException => throw e
-        case e: Exception =>
+        case e: SqlParserException =>
           e.printStackTrace()
-          throw new RuntimeException(s"flinksql parse error,sql:${call.command}")
+          throw new RuntimeException(s"flinksql parse error,sql:$sql")
       }
     }
   }
