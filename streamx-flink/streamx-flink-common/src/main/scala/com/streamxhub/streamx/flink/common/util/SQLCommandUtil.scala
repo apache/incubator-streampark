@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.common.util
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.common.util.SQLCommand.{ALTER_DATABASE, ALTER_FUNCTION, ALTER_TABLE, CREATE_CATALOG, CREATE_DATABASE, CREATE_FUNCTION, CREATE_TABLE, CREATE_VIEW, DROP_CATALOG, DROP_DATABASE, DROP_FUNCTION, DROP_TABLE, DROP_VIEW, INSERT_INTO, INSERT_OVERWRITE, SELECT, USE, USE_CATALOG}
+import com.streamxhub.streamx.flink.common.util.SQLCommand._
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
