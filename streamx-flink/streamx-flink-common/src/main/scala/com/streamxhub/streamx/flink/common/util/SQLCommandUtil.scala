@@ -77,8 +77,7 @@ object SQLCommandUtil extends Logger {
             parser.parse(sql)
           } catch {
             case e: Exception =>
-              e.printStackTrace()
-              new RuntimeException(s"flinksql parse error,sql:$sql")
+              throw new RuntimeException(s"flinksql parse error,sql:$sql")
             case _ =>
           }
         case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
