@@ -183,7 +183,7 @@ doStart() {
   # shellcheck disable=SC2155
   local jarfile="${APP_LIB}/$(basename "${APP_BASE}").jar"
 
-  local param_cli="com.streamxhub.streamx.common.conf.ParameterCli"
+  local param_cli="com.streamxhub.streamx.common.flink.conf.ParameterCli"
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
   local app_name="$(java -cp "${jarfile}" $param_cli --name "${app_proper}")"

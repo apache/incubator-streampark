@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.util
+package com.streamxhub.streamx.flink.common.util
 
 import enumeratum.EnumEntry
 
