@@ -28,7 +28,7 @@ import org.apache.flink.sql.parser.validate.FlinkSqlConformance
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
-import org.apache.flink.table.api.{EnvironmentSettings, SqlParserException, TableException}
+import org.apache.flink.table.api.{EnvironmentSettings, TableException}
 import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
@@ -67,21 +67,21 @@ object SQLCommandUtil extends Logger {
     val parser = new CalciteParser(sqlParserConfig)
     for (call <- sqlCommands) {
       val sql = call.operands.head
-      try {
-        import com.streamxhub.streamx.flink.common.util.SQLCommand._
-        call.command match {
-          case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
-               DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
-               DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
-               SELECT | INSERT_INTO | INSERT_OVERWRITE =>
+      import com.streamxhub.streamx.flink.common.util.SQLCommand._
+      call.command match {
+        case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
+             DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
+             DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+             SELECT | INSERT_INTO | INSERT_OVERWRITE =>
+          try {
             parser.parse(sql)
-          case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
-        }
-      } catch {
-        case e: RuntimeException => throw e
-        case e: SqlParserException =>
-          e.printStackTrace()
-          throw new RuntimeException(s"flinksql parse error,sql:$sql")
+          } catch {
+            case e: Exception =>
+              e.printStackTrace()
+              new RuntimeException(s"flinksql parse error,sql:$sql")
+            case _ =>
+          }
+        case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
       }
     }
   }
