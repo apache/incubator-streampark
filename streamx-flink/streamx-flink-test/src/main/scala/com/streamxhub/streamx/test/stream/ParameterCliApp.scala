@@ -1,5 +1,7 @@
 package com.streamxhub.streamx.test.stream
 
+import com.streamxhub.streamx.flink.common.conf.ParameterCli
+
 object ParameterCliApp extends App {
 
   /**
