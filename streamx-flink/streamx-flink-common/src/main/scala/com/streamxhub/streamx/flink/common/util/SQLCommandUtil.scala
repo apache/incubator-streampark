@@ -40,26 +40,27 @@ import scala.collection.mutable.ArrayBuffer
 object SQLCommandUtil extends Logger {
 
   private[this] lazy val sqlParserConfig = {
-    val tableEnv = StreamTableEnvironment.create(
+    val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
       EnvironmentSettings
         .newInstance
         .useBlinkPlanner
         .inStreamingMode
         .build
-    )
-    val tableConfig = tableEnv.getConfig
-    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse({
+    ).getConfig
+
+    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ => throw new TableException("Unsupported SQL dialect: " + tableConfig.getSqlDialect)
       }
-      SqlParser.config.withParserFactory(FlinkSqlParserFactories.create(conformance))
+      SqlParser.config
+        .withParserFactory(FlinkSqlParserFactories.create(conformance))
         .withConformance(conformance)
         .withLex(Lex.JAVA)
         .withIdentifierMaxLength(256)
-    })
+    }
   }
 
   def verifySQL(sql: String): Unit = {
