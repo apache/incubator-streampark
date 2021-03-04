@@ -77,7 +77,7 @@ object SQLCommandUtil extends Logger {
           try {
             parser.parse(sql)
           } catch {
-            case _: Exception => throw new RuntimeException(s"Unsupported command,sql:$sql")
+            case _: Exception => throw new RuntimeException(s"sql parse failed,sql:$sql")
             case _ =>
           }
         case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
@@ -90,7 +90,7 @@ object SQLCommandUtil extends Logger {
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
       case x if x.isEmpty =>
-        throw new RuntimeException(s"Unsupported command,must be not empty,sql:$sql")
+        throw new RuntimeException(s"sql parse failed,must be not empty,sql:$sql")
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -99,7 +99,7 @@ object SQLCommandUtil extends Logger {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"Unsupported command,sql:${stmt.toString()}")
+              case _ => throw new RuntimeException(s"sql parse failed,sql:${stmt.toString()}")
             }
             // clear string builder
             stmt.clear()
@@ -107,7 +107,7 @@ object SQLCommandUtil extends Logger {
         }
         calls.toList match {
           case Nil =>
-            throw new RuntimeException(s"Unsupported command,must be endsWith ';',sql:$sql")
+            throw new RuntimeException(s"sql parse failed,must be endsWith ';',sql:$sql")
           case r => r
         }
     }
