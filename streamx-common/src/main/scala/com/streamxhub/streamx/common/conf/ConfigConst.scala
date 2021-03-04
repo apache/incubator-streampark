@@ -62,11 +62,11 @@ object ConfigConst {
 
   val KEY_SPARK_DEBUG_CONF = "spark.debug.conf"
 
-  val KEY_SPARK_MAIN_CLASS="spark.main.class"
+  val KEY_SPARK_MAIN_CLASS = "spark.main.class"
 
-  val KEY_SPARK_APP_NAME="spark.app.name"
+  val KEY_SPARK_APP_NAME = "spark.app.name"
 
-  val KEY_SPARK_BATCH_DURATION ="spark.batch.duration"
+  val KEY_SPARK_BATCH_DURATION = "spark.batch.duration"
 
   // flink
   def KEY_APP_CONF(prefix: String = null): String = if (prefix == null) "app.conf" else s"${prefix}app.conf"
@@ -77,11 +77,11 @@ object ConfigConst {
 
   def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "flink.sql" else s"${prefix}flink.sql"
 
+  def KEY_FLINK_PARALLELISM(prefix: String = null): String = if (prefix == null) "parallelism.default" else s"${prefix}parallelism.default"
+
   val KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX = "flink.deployment.property."
 
   val KEY_FLINK_DEPLOYMENT_OPTION_PREFIX = "flink.deployment.option."
-
-  val KEY_FLINK_PARALLELISM = "parallelism.default"
 
   val KEY_FLINK_APP_NAME = "yarn.application.name"
 

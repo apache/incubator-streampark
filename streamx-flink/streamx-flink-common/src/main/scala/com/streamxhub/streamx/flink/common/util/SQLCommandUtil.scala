@@ -18,22 +18,79 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.util
+package com.streamxhub.streamx.flink.common.util
 
+import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
+import org.apache.calcite.config.Lex
+import org.apache.calcite.sql.parser.SqlParser
+import org.apache.flink.sql.parser.validate.FlinkSqlConformance
+import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
+import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
+import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
+import org.apache.flink.table.api.{EnvironmentSettings, TableException}
+import org.apache.flink.table.planner.calcite.CalciteParser
+import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
+import org.apache.flink.table.planner.utils.TableConfigUtils
 
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
-object SQLCommandUtil {
+object SQLCommandUtil extends Logger {
+
+  private[this] lazy val sqlParserConfig = {
+    val tableConfig = StreamTableEnvironment.create(
+      StreamExecutionEnvironment.getExecutionEnvironment,
+      EnvironmentSettings
+        .newInstance
+        .useBlinkPlanner
+        .inStreamingMode
+        .build
+    ).getConfig
+
+    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
+      val conformance = tableConfig.getSqlDialect match {
+        case HIVE => FlinkSqlConformance.HIVE
+        case DEFAULT => FlinkSqlConformance.DEFAULT
+        case _ => throw new TableException("Unsupported SQL dialect: " + tableConfig.getSqlDialect)
+      }
+      SqlParser.config
+        .withParserFactory(FlinkSqlParserFactories.create(conformance))
+        .withConformance(conformance)
+        .withLex(Lex.JAVA)
+        .withIdentifierMaxLength(256)
+    }
+  }
+
+  def verifySQL(sql: String): Unit = {
+    val sqlCommands = parseSQL(sql)
+    val parser = new CalciteParser(sqlParserConfig)
+    for (call <- sqlCommands) {
+      val sql = call.operands.head
+      import com.streamxhub.streamx.flink.common.util.SQLCommand._
+      call.command match {
+        case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
+             DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
+             DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+             SELECT | INSERT_INTO | INSERT_OVERWRITE =>
+          try {
+            parser.parse(sql)
+          } catch {
+            case _: Exception => throw new RuntimeException(s"sql parse failed,sql:$sql")
+            case _ =>
+          }
+        case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
+      }
+    }
+  }
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
     require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,sql:$sql")
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
       case x if x.isEmpty =>
-        throw new RuntimeException(s"Unsupported command,must be not empty,sql:$sql")
+        throw new RuntimeException(s"sql parse failed,must be not empty,sql:$sql")
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -42,7 +99,7 @@ object SQLCommandUtil {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"Unsupported command,sql:${stmt.toString()}")
+              case _ => throw new RuntimeException(s"sql parse failed,sql:${stmt.toString()}")
             }
             // clear string builder
             stmt.clear()
@@ -50,7 +107,7 @@ object SQLCommandUtil {
         }
         calls.toList match {
           case Nil =>
-            throw new RuntimeException(s"Unsupported command,must be endsWith ';',sql:$sql")
+            throw new RuntimeException(s"sql parse failed,must be endsWith ';',sql:$sql")
           case r => r
         }
     }

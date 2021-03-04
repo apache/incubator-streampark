@@ -23,11 +23,11 @@ package com.streamxhub.streamx.common.util
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FSDataInputStream, FSDataOutputStream, FileSystem, FileUtil, Path}
+import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.HAUtil
 import org.apache.hadoop.io.IOUtils
 
-import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.io.{ByteArrayOutputStream, FileWriter}
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
@@ -46,6 +46,9 @@ object HdfsUtils extends Logger {
     if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
       conf.set("hbase.fs.tmp.dir", "/tmp")
     }
+    // disable timeline service as we only query yarn app here.
+    // Otherwise we may hit this kind of ERROR:
+    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
     conf.set("yarn.timeline-service.enabled", "false")
     conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
     conf.set("fs.hdfs.impl.disable.cache", "true")
@@ -61,7 +64,7 @@ object HdfsUtils extends Logger {
 
   def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
-  def list(src: String): List[String] = hdfs.listStatus(getPath(src)).map(_.getPath.getName).toList
+  def list(src: String): List[FileStatus] = hdfs.listStatus(getPath(src)).toList
 
   def movie(src: String, dst: String): Unit = hdfs.rename(getPath(src), getPath(dst))
 
@@ -69,6 +72,10 @@ object HdfsUtils extends Logger {
 
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
+
+  def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
+    list(src).foreach(x => FileUtil.copy(hdfs, x, hdfs, getPath(dst), delSrc, overwrite, conf))
+  }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))

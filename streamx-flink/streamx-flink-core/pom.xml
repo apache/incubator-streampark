@@ -21,8 +21,8 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common</artifactId>
-            <version>${project.version}</version>
+            <artifactId>streamx-flink-common</artifactId>
+            <version>1.0.0</version>
         </dependency>
 
         <!--flink base-->

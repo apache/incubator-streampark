@@ -27,7 +27,7 @@ import com.streamxhub.streamx.common.util.{Logger, MongoConfig, Utils}
 import com.streamxhub.streamx.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import ApiType.ApiType
-import com.streamxhub.streamx.flink.core.scala.util.FlinkUtils
+import com.streamxhub.streamx.flink.common.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.configuration.Configuration
