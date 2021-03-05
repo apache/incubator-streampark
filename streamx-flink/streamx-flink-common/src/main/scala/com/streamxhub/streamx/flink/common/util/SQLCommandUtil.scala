@@ -94,10 +94,10 @@ object SQLCommandUtil extends Logger {
           try {
             parser.parse(sql)
           } catch {
-            case e: Exception => return SQLError(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql.concat(";"))
+            case e: Exception => return SQLError(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql.trim.replaceFirst(";|$", ";"))
             case _ =>
           }
-        case _ => return SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = sql.concat(";"))
+        case _ => return SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = sql.replaceFirst(";|$", ";"))
       }
     }
     null
