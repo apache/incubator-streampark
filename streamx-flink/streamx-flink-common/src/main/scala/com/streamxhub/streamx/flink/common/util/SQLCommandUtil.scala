@@ -117,9 +117,7 @@ object SQLCommandUtil extends Logger {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(
-                SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.append(";").toString).toErrorString
-              )
+              case _ => throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
             }
             // clear string builder
             stmt.clear()
