@@ -6,6 +6,7 @@ object SQLCommandTest extends App {
 
   val sql =
     """
+      |
       |CREATE TABLE user_log (
       |    user_id VARCHAR,
       |    item_id VARCHAR,
