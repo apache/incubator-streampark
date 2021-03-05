@@ -6,13 +6,13 @@ object SQLCommandTest extends App {
 
   val sql =
     """
-      |CREATE TABLE xuser_log (
+      |CREATE TABLE user_log (
       |    user_id VARCHAR,
       |    item_id VARCHAR,
       |    category_id VARCHAR,
       |    behavior VARCHAR,
       |    ts TIMESTAMP(3)
-      |) WITH (
+      |) WITHx (
       |'connector.type' = 'kafka', -- 使用 kafka connector
       |'connector.version' = 'universal',  -- kafka 版本，universal 支持 0.11 以上的版本
       |'connector.topic' = 'user_behavior',  -- kafka topic
@@ -29,10 +29,10 @@ object SQLCommandTest extends App {
       |    uv BIGINT
       |) WITH (
       |'connector.type' = 'jdbc', -- 使用 jdbc connector
-      |'connector.url' = 'jdbc:mysql://10.2.39.80:3306/test', -- jdbc url
+      |'connector.url' = 'jdbc:mysql://localhost:3306/test', -- jdbc url
       |'connector.table' = 'pvuv_sink', -- 表名
-      |'connector.username' = 'hopsonone', -- 用户名
-      |'connector.password' = 'hopsonone123', -- 密码
+      |'connector.username' = 'root', -- 用户名
+      |'connector.password' = '123456', -- 密码
       |'connector.write.flush.max-rows' = '1' -- 默认5000条，为了演示改为1条
       |);
       |
@@ -47,5 +47,15 @@ object SQLCommandTest extends App {
       |""".stripMargin
 
   val sqlError = SQLCommandUtil.verifySQL(sql)
-  println(sqlError.sql)
+  val exception = sqlError.exception.replaceAll("\r|\n", "")
+  val r = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*"
+
+  if (exception.matches(r)) {
+    val lineAndColumn = exception
+      .replaceAll("^.*\\sat\\sline\\s", "")
+      .replaceAll(",\\scolumn\\s", ",")
+      .replaceAll("\\.(.*)", "")
+    println(lineAndColumn)
+  }
+
 }
