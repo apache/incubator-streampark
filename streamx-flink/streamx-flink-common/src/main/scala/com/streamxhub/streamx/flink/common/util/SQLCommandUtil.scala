@@ -116,10 +116,10 @@ object SQLCommandUtil extends Logger {
           stmt.append("\n").append(line)
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
-              case Some(x) =>
-                calls += x
-              case _ =>
-                throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.append(";").toString).toErrorString)
+              case Some(x) => calls += x
+              case _ => throw new RuntimeException(
+                SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.append(";").toString).toErrorString
+              )
             }
             // clear string builder
             stmt.clear()
