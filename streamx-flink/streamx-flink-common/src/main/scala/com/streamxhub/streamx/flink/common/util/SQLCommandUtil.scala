@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.common.util
 
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
@@ -39,6 +40,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil extends Logger {
 
+
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
@@ -53,7 +55,10 @@ object SQLCommandUtil extends Logger {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
-        case _ => throw new TableException("Unsupported SQL dialect: " + tableConfig.getSqlDialect)
+        case _ =>
+          throw new TableException(
+            ErrorInfo(SQLErrorType.UNSUPPORTED_DIALECT, s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
+          )
       }
       SqlParser.config
         .withParserFactory(FlinkSqlParserFactories.create(conformance))
@@ -77,20 +82,23 @@ object SQLCommandUtil extends Logger {
           try {
             parser.parse(sql)
           } catch {
-            case _: Exception => throw new RuntimeException(s"sql parse failed,sql:$sql")
+            case e: Exception =>
+              throw new RuntimeException(ErrorInfo(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql).toString)
             case _ =>
           }
-        case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
+        case _ =>
+          throw new RuntimeException(ErrorInfo(SQLErrorType.UNSUPPORTED_SQL, sql = sql).toString)
       }
     }
   }
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,sql:$sql")
+    val sqlEmptyError = ErrorInfo(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    require(sql != null && !sql.trim.isEmpty, sqlEmptyError)
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
       case x if x.isEmpty =>
-        throw new RuntimeException(s"sql parse failed,must be not empty,sql:$sql")
+        throw new RuntimeException(sqlEmptyError)
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -98,8 +106,10 @@ object SQLCommandUtil extends Logger {
           stmt.append("\n").append(line)
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
-              case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"sql parse failed,sql:${stmt.toString()}")
+              case Some(x) =>
+                calls += x
+              case _ =>
+                throw new RuntimeException(ErrorInfo(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toString)
             }
             // clear string builder
             stmt.clear()
@@ -107,7 +117,7 @@ object SQLCommandUtil extends Logger {
         }
         calls.toList match {
           case Nil =>
-            throw new RuntimeException(s"sql parse failed,must be endsWith ';',sql:$sql")
+            throw new RuntimeException(ErrorInfo(SQLErrorType.ENDS_WITH, sql = sql).toString)
           case r => r
         }
     }
@@ -131,6 +141,44 @@ object SQLCommandUtil extends Logger {
 
 }
 
+private[this] case class ErrorInfo(
+                                    errorType: SQLErrorType,
+                                    exception: String = null,
+                                    sql: String = null
+                                  ) {
+
+  override def toString: String = {
+    (exception, sql) match {
+      case (null, sql) =>
+        s"""
+           |{
+           |"type":${errorType.errorType},
+           |"sql":$sql
+           |}""".stripMargin
+      case (e, null) =>
+        s"""
+           |{
+           |"type":${errorType.errorType},
+           |"exception":$e
+           |}
+           |""".stripMargin
+      case (null, null) =>
+        s"""
+           |{
+           |"type":${errorType.errorType}
+           |}
+           |""".stripMargin
+      case _ =>
+        s"""
+           |{
+           |"type":${errorType.errorType},
+           |"exception":$exception
+           |"sql":$sql
+           |}
+           |""".stripMargin
+    }
+  }
+}
 
 sealed abstract class SQLCommand(
                                   val name: String,
