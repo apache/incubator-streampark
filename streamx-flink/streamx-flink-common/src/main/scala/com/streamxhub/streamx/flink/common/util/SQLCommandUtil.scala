@@ -108,8 +108,7 @@ object SQLCommandUtil extends Logger {
     require(sql != null && !sql.trim.isEmpty, sqlEmptyError)
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
-      case x if x.isEmpty =>
-        throw new RuntimeException(sqlEmptyError)
+      case x if x.isEmpty => throw new RuntimeException(sqlEmptyError)
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -120,15 +119,14 @@ object SQLCommandUtil extends Logger {
               case Some(x) =>
                 calls += x
               case _ =>
-                throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
+                throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.append(";").toString).toErrorString)
             }
             // clear string builder
             stmt.clear()
           }
         }
         calls.toList match {
-          case Nil =>
-            throw new RuntimeException(SQLError(SQLErrorType.ENDS_WITH, sql = sql).toErrorString)
+          case Nil => throw new RuntimeException(SQLError(SQLErrorType.ENDS_WITH, sql = sql).toErrorString)
           case r => r
         }
     }
