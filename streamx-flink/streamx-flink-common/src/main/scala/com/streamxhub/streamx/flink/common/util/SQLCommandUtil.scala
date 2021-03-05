@@ -40,7 +40,6 @@ import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil extends Logger {
 
-
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
@@ -57,7 +56,7 @@ object SQLCommandUtil extends Logger {
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ =>
           throw new TableException(
-            ErrorInfo(SQLErrorType.UNSUPPORTED_DIALECT, s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
+            SQLError(SQLErrorType.UNSUPPORTED_DIALECT, s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
           )
       }
       SqlParser.config
@@ -68,8 +67,21 @@ object SQLCommandUtil extends Logger {
     }
   }
 
-  def verifySQL(sql: String): Unit = {
-    val sqlCommands = parseSQL(sql)
+  def verifySQL(sql: String): SQLError = {
+    var sqlCommands: List[SQLCommandCall] = List.empty[SQLCommandCall]
+    try {
+      sqlCommands = parseSQL(sql)
+    } catch {
+      case exception: Exception =>
+        val separator = "\001"
+        val error = exception.getLocalizedMessage
+        val array = error.split(separator)
+        return SQLError(
+          SQLErrorType.of(array.head.toInt),
+          if (array(1) == "null") null else array(1),
+          array.last
+        )
+    }
     val parser = new CalciteParser(sqlParserConfig)
     for (call <- sqlCommands) {
       val sql = call.operands.head
@@ -82,18 +94,17 @@ object SQLCommandUtil extends Logger {
           try {
             parser.parse(sql)
           } catch {
-            case e: Exception =>
-              throw new RuntimeException(ErrorInfo(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql).toString)
+            case e: Exception => return SQLError(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql)
             case _ =>
           }
-        case _ =>
-          throw new RuntimeException(ErrorInfo(SQLErrorType.UNSUPPORTED_SQL, sql = sql).toString)
+        case _ => return SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = sql)
       }
     }
+    null
   }
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    val sqlEmptyError = ErrorInfo(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    val sqlEmptyError = SQLError(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(sql != null && !sql.trim.isEmpty, sqlEmptyError)
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
@@ -109,7 +120,7 @@ object SQLCommandUtil extends Logger {
               case Some(x) =>
                 calls += x
               case _ =>
-                throw new RuntimeException(ErrorInfo(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toString)
+                throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
             }
             // clear string builder
             stmt.clear()
@@ -117,7 +128,7 @@ object SQLCommandUtil extends Logger {
         }
         calls.toList match {
           case Nil =>
-            throw new RuntimeException(ErrorInfo(SQLErrorType.ENDS_WITH, sql = sql).toString)
+            throw new RuntimeException(SQLError(SQLErrorType.ENDS_WITH, sql = sql).toErrorString)
           case r => r
         }
     }
@@ -141,43 +152,15 @@ object SQLCommandUtil extends Logger {
 
 }
 
-private[this] case class ErrorInfo(
-                                    errorType: SQLErrorType,
-                                    exception: String = null,
-                                    sql: String = null
-                                  ) {
+case class SQLError(
+                     errorType: SQLErrorType,
+                     exception: String = null,
+                     sql: String = null
+                   ) {
+  //不可见分隔符.
+  private[util] val separator = "\001"
 
-  override def toString: String = {
-    (exception, sql) match {
-      case (null, sql) =>
-        s"""
-           |{
-           |"type":${errorType.errorType},
-           |"sql":$sql
-           |}""".stripMargin
-      case (e, null) =>
-        s"""
-           |{
-           |"type":${errorType.errorType},
-           |"exception":$e
-           |}
-           |""".stripMargin
-      case (null, null) =>
-        s"""
-           |{
-           |"type":${errorType.errorType}
-           |}
-           |""".stripMargin
-      case _ =>
-        s"""
-           |{
-           |"type":${errorType.errorType},
-           |"exception":$exception
-           |"sql":$sql
-           |}
-           |""".stripMargin
-    }
-  }
+  private[util] def toErrorString: String = s"${errorType.errorType}$separator$exception$separator$sql"
 }
 
 sealed abstract class SQLCommand(

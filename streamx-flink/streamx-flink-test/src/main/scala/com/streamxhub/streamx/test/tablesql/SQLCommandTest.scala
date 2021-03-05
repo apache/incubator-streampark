@@ -12,11 +12,11 @@ object SQLCommandTest extends App {
       |    category_id VARCHAR,
       |    behavior VARCHAR,
       |    ts TIMESTAMP(3)
-      |) WITHx (
+      |) WITH (
       |'connector.type' = 'kafka', -- 使用 kafka connector
       |'connector.version' = 'universal',  -- kafka 版本，universal 支持 0.11 以上的版本
       |'connector.topic' = 'user_behavior',  -- kafka topic
-      |"connector.properties.bootstrap.servers"='test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092',
+      |'connector.properties.bootstrap.servers'='test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092',
       |'connector.startup-mode' = 'earliest-offset', -- 从起始 offset 开始读取
       |'update-mode' = 'append',
       |'format.type' = 'json',  -- 数据源格式为 json
@@ -45,11 +45,7 @@ object SQLCommandTest extends App {
       |GROUP BY DATE_FORMAT(ts, 'yyyy-MM-dd HH:00');
       |
       |""".stripMargin
-  try {
-    SQLCommandUtil.verifySQL(sql)
-  } catch {
-    case e: Exception =>
-      val error = e.getLocalizedMessage
-      println(error)
-  }
+
+  val sqlError = SQLCommandUtil.verifySQL(sql)
+  println(sqlError.sql)
 }

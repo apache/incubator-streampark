@@ -47,4 +47,13 @@ public enum SQLErrorType {
         this.errorType = errorType;
     }
 
+    public static SQLErrorType of(Integer errorType) {
+        for (SQLErrorType type : values()) {
+            if (type.errorType == errorType) {
+                return type;
+            }
+        }
+        return null;
+    }
+
 }
