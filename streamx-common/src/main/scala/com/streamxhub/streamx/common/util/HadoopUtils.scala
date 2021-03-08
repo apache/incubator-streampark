@@ -51,6 +51,11 @@ object HadoopUtils extends Logger {
 
   /**
    * 从yarn源码里抛出来的...
+   * @param getLatest:
+   *  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
+   *  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
+   *  此时在调用该方法,只需要传入true即可再次获取一个最新的活跃节点返回
+   * @return
    */
   def rmHttpAddress(getLatest: Boolean = false): String = {
     if (rmHttpAddr == null || getLatest) {
