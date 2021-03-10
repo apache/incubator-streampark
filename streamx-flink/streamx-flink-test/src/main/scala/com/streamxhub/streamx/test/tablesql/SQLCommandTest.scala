@@ -13,15 +13,15 @@ object SQLCommandTest extends App {
       |    category_id VARCHAR,
       |    behavior VARCHAR,
       |    ts TIMESTAMP(3)
-      |) WITHx (
-      |'connector.type' = 'kafka', -- 使用 kafka connector
-      |'connector.version' = 'universal',  -- kafka 版本，universal 支持 0.11 以上的版本
-      |'connector.topic' = 'user_behavior',  -- kafka topic
-      |'connector.properties.bootstrap.servers'='test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092',
-      |'connector.startup-mode' = 'earliest-offset', -- 从起始 offset 开始读取
-      |'update-mode' = 'append',
-      |'format.type' = 'json',  -- 数据源格式为 json
-      |'format.derive-schema' = 'true' -- 从 DDL schema 确定 json 解析规则
+      |) WITH (
+      |connector.type = kafka, -- 使用 kafka connector
+      |connector.version = universal,  -- kafka 版本，universal 支持 0.11 以上的版本
+      |connector.topic = user_behavior,  -- kafka topic
+      |connector.properties.bootstrap.servers=test-hadoop-7:9092,test-hadoop-8:9092,test-hadoop-9:9092,
+      |connector.startup-mode = earliest-offset, -- 从起始 offset 开始读取
+      |update-mode = append,
+      |format.type = 'json,  -- 数据源格式为 json
+      |format.derive-schema = true -- 从 DDL schema 确定 json 解析规则
       |);
       |
       |CREATE TABLE pvuv_sink (
@@ -48,15 +48,6 @@ object SQLCommandTest extends App {
       |""".stripMargin
 
   val sqlError = SQLCommandUtil.verifySQL(sql)
-  val exception = sqlError.exception.replaceAll("\r|\n", "")
-  val r = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*"
-
-  if (exception.matches(r)) {
-    val lineAndColumn = exception
-      .replaceAll("^.*\\sat\\sline\\s", "")
-      .replaceAll(",\\scolumn\\s", ",")
-      .replaceAll("\\.(.*)", "")
-    println(lineAndColumn)
-  }
+  println(sqlError)
 
 }

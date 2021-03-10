@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.flink.common.util
 
-import com.streamxhub.streamx.common.enums.SQLErrorType
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -34,11 +34,14 @@ import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
+import java.util.Scanner
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil extends Logger {
+
+  private[this] val WITH_REGEXP = "WITH\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
 
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
@@ -140,7 +143,35 @@ object SQLCommandUtil extends Logger {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
-        groups(i) = matcher.group(i + 1)
+        groups(i) = {
+          /**
+           * 解决with里的属性参数必须加单引号'的问题,(手指多动一下是可耻的)
+           */
+          val segment = matcher.group(i + 1)
+          val withMatcher = WITH_REGEXP.pattern.matcher(segment)
+          if (!withMatcher.find()) segment else {
+            val withSegment = withMatcher.group()
+            val scanner = new Scanner(withSegment)
+            val buffer = new StringBuffer()
+            while (scanner.hasNextLine) {
+              val line = scanner.nextLine().replaceAll("--(.*)$", "").trim
+              val propReg = "\\s*(.*)\\s*=(.*)(,|)\\s*"
+              if (line.matches(propReg)) {
+                var newLine = line
+                  .replaceAll("^'|^", "'")
+                  .replaceAll("('|)\\s*=\\s*('|)", "' = '")
+                  .replaceAll("('|),$", "',")
+                if (!line.endsWith(",")) {
+                  newLine = newLine.replaceFirst("('|)\\s*$", "'")
+                }
+                buffer.append(newLine).append("\n")
+              } else {
+                buffer.append(line).append("\n")
+              }
+            }
+            segment.replace(withSegment, buffer.toString.trim)
+          }
+        }
       }
       sqlCommand.converter(groups).map(operands => SQLCommandCall(sqlCommand, operands))
     }
