@@ -41,7 +41,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil extends Logger {
 
-  private[this] val WITH_REGEXP = "WITH\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
+  private[this] val WITH_REGEXP = "(WITH|with)\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
 
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
