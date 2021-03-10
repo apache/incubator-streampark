@@ -144,12 +144,12 @@ object SQLCommandUtil extends Logger {
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
         groups(i) = {
-          /**
-           * 解决with里的属性参数必须加单引号'的问题,从此可以不用带'了,更可读(手指多动一下是可耻的,scala语言之父说的.)
-           */
           val segment = matcher.group(i + 1)
           val withMatcher = WITH_REGEXP.pattern.matcher(segment)
           if (!withMatcher.find()) segment else {
+            /**
+             * 解决with里的属性参数必须加单引号'的问题,从此可以不用带'了,更可读(手指多动一下是可耻的,scala语言之父说的.)
+             */
             val withSegment = withMatcher.group()
             val scanner = new Scanner(withSegment)
             val buffer = new StringBuffer()
