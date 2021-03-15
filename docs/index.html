@@ -6,8 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
   <meta name="description" content="Description">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
 
+  <style>
+    :root {
+      /* Reduce the font size */
+      --base-font-size: 14px;
+      /* Change the theme color hue */
+      --theme-hue: 205;
+      /* Change the sidebar bullets */
+      --sidebar-nav-link-before-content: '';
+      --base-font-size: 14px;
+  }
+  </style>
 </head>
 <body>
   <nav>
@@ -15,6 +26,7 @@
     <a href="#/zh-cn/">中文</a>
   </nav>
   <div id="app"></div>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
   <script>
     window.$docsify = {
       loadSidebar: true,
@@ -22,10 +34,23 @@
         '/.*/_sidebar.md': '/_sidebar.md'
       },
       name: 'StreamX',
-      repo: 'streamxhub/streamx'
+      repo: 'streamxhub/streamx',
+      themeable: {
+          readyTransition : true, // default
+          responsiveTables: true  // default
+      }
     }
   </script>
   <!-- Docsify v4 -->
   <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-tabs@1/dist/docsify-tabs.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-copy-code@2/dist/docsify-copy-code.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify-pagination@2/dist/docsify-pagination.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/external-script.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/ga.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/zoom-image.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
 </body>
 </html>
