@@ -43,9 +43,6 @@ body.sticky .sidebar, body.sticky .sidebar-toggle {
     height: 90px !important;
     width: 90px !important;
 }
-.sidebar-toggle .sidebar-toggle-button {
-    top: 90px;
-}
 
 .header h1,
 .header h2,

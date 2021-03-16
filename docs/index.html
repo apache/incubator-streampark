@@ -1,121 +1,138 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Document</title>
-  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
-  <meta name="description" content="Description">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-prolog.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-git.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
-  <script src="assets/js/jquery.min.js"></script>
-  <script src="assets/js/sticky.js"></script>
-  <link rel="stylesheet" href="assets/style.css">
-  <script>
-    const hours = new Date().getHours()
-    if (hours >= 9 && hours <= 24) {
-      document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">')
-    } else {
-      document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">')
-    }
-  </script>
-  <style>
-    :root {
-      --base-font-size: 14px;
-      --theme-hue: 205;
-      --sidebar-nav-link-before-content: '';
-      --content-max-width: 75em;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <meta name="description" content="Description">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-prolog.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-yaml.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-bash.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
+    <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-git.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+    <script src="assets/js/jquery.min.js"></script>
+    <script src="assets/js/sticky.js"></script>
+    <link rel="stylesheet" href="assets/style.css">
+    <script>
+        const hours = new Date().getHours()
+        if (hours >= 9 && hours <= 24) {
+            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">')
+        } else {
+            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">')
+        }
+    </script>
+    <style>
+        :root {
+            --base-font-size: 14px;
+            --theme-hue: 205;
+            --sidebar-nav-link-before-content: '';
+            --content-max-width: 75em;
+        }
+    </style>
 </head>
 <body>
-  <nav>
-  </nav>
-  <div>
+<nav>
+</nav>
+<div>
     <!-- Header Area-->
     <div class="header">
-      <header class="header_area">
-      <div class="main_header_area">
-        <div class="container">
-          <div class="classy-nav-container breakpoint-off">
-            <nav class="classy-navbar justify-content-between">
-              <!-- Logo--><a class="nav-brand" href="index.html">StreamX</a>
-              <!-- Navbar Toggler-->
-              <div class="classy-navbar-toggler">
-                <span class="navbarToggler"><span></span><span></span><span></span></span>
-              </div>
-              <!-- Menu-->
-              <div class="classy-menu">
-                <!-- Close Button-->
-                <div class="classycloseIcon">
-                  <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
+        <header class="header_area">
+            <div class="main_header_area">
+                <!--Container-->
+                <div class="container">
+                    <div class="classy-nav-container breakpoint-off">
+                        <nav class="classy-navbar justify-content-between">
+                            <!-- Logo-->
+                            <a class="nav-brand" href="index.html">StreamX</a>
+                            <!-- Logo End -->
+                            <!-- Navbar Toggler-->
+                            <div class="classy-navbar-toggler">
+                                <span class="navbarToggler"><span></span><span></span><span></span></span>
+                            </div>
+                            <!-- Navbar Toggler End -->
+                            <!-- Menu-->
+                            <div class="classy-menu">
+                                <!-- Close Button-->
+                                <div class="classycloseIcon">
+                                    <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
+                                </div>
+                                <!-- Nav-->
+                                <div class="classynav">
+                                    <!-- corenav -->
+                                    <ul id="corenav">
+                                        <li><a href="#home">首页</a></li>
+                                        <li><a href="#docs">文档</a></li>
+                                        <li><a href="#download">下载</a></li>
+                                        <li><a href="#contact">社区</a></li>
+                                        <li class="cn-dropdown-item has-down">
+                                            <a href="javascript:void(0)">中文</a>
+                                            <ul class="dropdown">
+                                                <li><a href="/en">English</a></li>
+                                            </ul>
+                                        </li>
+                                    </ul>
+                                    <!-- corenav End -->
+                                </div>
+                                <!-- Nav End-->
+                            </div>
+                            <!-- Menu end-->
+                        </nav>
+                    </div>
                 </div>
-                <!-- Nav-->
-                <div class="classynav">
-                  <ul id="corenav">
-                    <li><a href="#home">首页</a></li>
-                    <li><a href="#docs">文档</a></li>
-                    <li><a href="#download">下载</a></li>
-                    <li><a href="#contact">社区</a></li>
-                    <li class="cn-dropdown-item has-down">
-                      <a href="javascript:void(0)">中文</a>
-                      <ul class="dropdown">
-                        <li><a href="/en">English</a></li>
-                      </ul>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </nav>
-          </div>
-        </div>
-      </div>
-    </header>
+                <!--Container End-->
+            </div>
+        </header>
     </div>
 
     <section style="margin-top: 90px">
-      <div id="app"></div>
+        <div id="app"></div>
     </section>
 
-  </div>
-  <script>
+</div>
+<script>
     window.$docsify = {
-      loadNavbar: true,
-      loadSidebar: true,
-      alias: {
-        '/.*/_sidebar.md': '/_sidebar.md'
-      },
-      name: 'StreamX',
-      repo: 'streamxhub/streamx',
-      themeable: {
-          readyTransition : true, // default
-          responsiveTables: true  // default
-      }
+        loadNavbar: true,
+        loadSidebar: true,
+        alias: {
+            '/.*/_sidebar.md': '/_sidebar.md'
+        },
+        name: 'StreamX',
+        repo: 'streamxhub/streamx',
+        themeable: {
+            readyTransition: true, // default
+            responsiveTables: true  // default
+        }
     }
 
     if ($.fn.sticky) {
-      $(".main_header_area").sticky({
-        topSpacing: 0
-      });
+        $(".main_header_area").sticky({
+            topSpacing: 0
+        })
     }
 
-    $(document).ready(()=>{
-      $('body').bind('mousewheel', function() {
-        const h = $('.is-sticky').height()
+    $(document).ready(() => {
+        const h = $('.sticky-wrapper').height()
+        const height = (h == null ? 90 : h)
+        console.table(height)
         $('.sidebar,.sidebar-toggle').css({
-          "margin-top": h ? h : '90' + 'px'
+            "margin-top": height + 'px'
         })
-      })
+
+        $('body').bind('mousewheel', function () {
+            const h = $('.is-sticky').height()
+            const height = (h == null ? 90 : h)
+            $('.sidebar,.sidebar-toggle').css({
+                "margin-top": height + 'px'
+            })
+        })
     })
 
-  </script>
-  <!-- Docsify v4 -->
-  <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
-  <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+</script>
+<!-- Docsify v4 -->
+<script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
 
 </body>
 </html>
