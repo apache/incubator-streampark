@@ -104,32 +104,31 @@ object ConfigConst {
 
   //---state---
 
-  val KEY_FLINK_STATE_CHECKPOINTS_DIR = "state.checkpoints.dir"
+  val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
 
-  val KEY_FLINK_STATE_BACKEND = "state.backend"
+  val KEY_FLINK_STATE_BACKEND = "flink.state.backend.value"
 
-  val KEY_FLINK_STATE_BACKEND_ASYNC = "state.backend.async"
+  val KEY_FLINK_STATE_BACKEND_ASYNC = "flink.state.backend.async"
 
-  val KEY_FLINK_STATE_BACKEND_INCREMENTAL = "state.backend.incremental"
+  val KEY_FLINK_STATE_BACKEND_INCREMENTAL = "flink.state.backend.incremental"
 
-  val KEY_FLINK_STATE_BACKEND_MEMORY = "state.backend.memory"
+  val KEY_FLINK_STATE_BACKEND_MEMORY = "flink.state.backend.memory"
 
-  val KEY_FLINK_STATE_ROCKSDB = "state.backend.rocksdb"
-
+  val KEY_FLINK_STATE_ROCKSDB = "flink.state.backend.rocksdb"
 
   //---restart-strategy---
 
-  val KEY_FLINK_RESTART_STRATEGY = "restart-strategy"
+  val KEY_FLINK_RESTART_STRATEGY = "flink.restart-strategy.value"
 
-  val KEY_FLINK_RESTART_FAILURE_PER_INTERVAL = "restart-strategy.failure-rate.max-failures-per-interval"
+  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL = "flink.restart-strategy.failure-rate.max-failures-per-interval"
 
-  val KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL = "restart-strategy.failure-rate.failure-rate-interval"
+  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL = "flink.restart-strategy.failure-rate.failure-rate-interval"
 
-  val KEY_FLINK_RESTART_FAILURE_RATE_DELAY = "restart-strategy.failure-rate.delay"
+  val KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY = "flink.restart-strategy.failure-rate.delay"
 
-  val KEY_FLINK_RESTART_ATTEMPTS = "restart-strategy.fixed-delay.attempts"
+  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS = "flink.restart-strategy.fixed-delay.attempts"
 
-  val KEY_FLINK_RESTART_DELAY = "restart-strategy.fixed-delay.delay"
+  val KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY = "flink.restart-strategy.fixed-delay.delay"
 
   val KEY_EXECUTION_RUNTIME_MODE = "flink.execution.runtime-mode"
 

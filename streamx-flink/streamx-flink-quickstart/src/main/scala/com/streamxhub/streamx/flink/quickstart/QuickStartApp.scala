@@ -1,4 +1,4 @@
-package com.streamxhub.streamx.quickstart
+package com.streamxhub.streamx.flink.quickstart
 
 import com.streamxhub.streamx.common.util.JsonUtils
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming

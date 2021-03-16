@@ -123,12 +123,16 @@ mysql:
 ```  
 找到上面两项配置修改相关的 `kafka` 和 `mysql` 信息即可.
 
-!> 配置文件是非常重要的概念,会在后续章节中进行详细说明
+?> 配置文件是非常重要的概念,会在后续章节中进行详细说明
 
 ## 测试
 
 准备工作完毕现在启动项目进行本地测试,找到项目主类`com.streamxhub.streamx.quickstart.QuickStartApp` 运行启动,并且加上参数
-`--app.conf $path`,path即为当前项目的配置文件的路径(上面修改的配置文件)如不指定该参数会报错如下:
+`--app.conf $path`,path即为当前项目的配置文件的路径(上面修改的配置文件)
+
+!> 注意: 项目启动时配置文件必须要指定
+
+如不指定该参数会报错如下:
 ```log
 Exception in thread "main" java.lang.ExceptionInInitializerError: 
 [StreamX] Usage:can't fond config,please set "--app.conf $path " in main arguments
@@ -140,61 +144,6 @@ Exception in thread "main" java.lang.ExceptionInInitializerError:
 	at com.streamxhub.streamx.quickstart.QuickStartApp.main(QuickStartApp.scala)
 
 ```
-看到如下信息说明启动成功
-```log
-
-
-                         ▒▓██▓██▒
-                     ▓████▒▒█▓▒▓███▓▒
-                  ▓███▓░░        ▒▒▒▓██▒  ▒
-                ░██▒   ▒▒▓▓█▓▓▒░      ▒████
-                ██▒         ░▒▓███▒    ▒█▒█▒
-                  ░▓█            ███   ▓░▒██
-                    ▓█       ▒▒▒▒▒▓██▓░▒░▓▓█
-                  █░ █   ▒▒░       ███▓▓█ ▒█▒▒▒
-                  ████░   ▒▓█▓      ██▒▒▒ ▓███▒
-               ░▒█▓▓██       ▓█▒    ▓█▒▓██▓ ░█░
-         ▓░▒▓████▒ ██         ▒█    █▓░▒█▒░▒█▒
-        ███▓░██▓  ▓█           █   █▓ ▒▓█▓▓█▒
-      ░██▓  ░█░            █  █▒ ▒█████▓▒ ██▓░▒
-     ███░ ░ █░          ▓ ░█ █████▒░░    ░█░▓  ▓░
-    ██▓█ ▒▒▓▒          ▓███████▓░       ▒█▒ ▒▓ ▓██▓
- ▒██▓ ▓█ █▓█       ░▒█████▓▓▒░         ██▒▒  █ ▒  ▓█▒
- ▓█▓  ▓█ ██▓ ░▓▓▓▓▓▓▓▒              ▒██▓           ░█▒
- ▓█    █ ▓███▓▒░              ░▓▓▓███▓          ░▒░ ▓█
- ██▓    ██▒    ░▒▓▓███▓▓▓▓▓██████▓▒            ▓███  █
-▓███▒ ███   ░▓▓▒░░   ░▓████▓░                  ░▒▓▒  █▓
-█▓▒▒▓▓██  ░▒▒░░░▒▒▒▒▓██▓░                            █▓
-██ ▓░▒█   ▓▓▓▓▒░░  ▒█▓       ▒▓▓██▓    ▓▒          ▒▒▓
-▓█▓ ▓▒█  █▓░  ░▒▓▓██▒            ░▓█▒   ▒▒▒░▒▒▓█████▒
- ██░ ▓█▒█▒  ▒▓▓▒  ▓█                █░      ░░░░   ░█▒
- ▓█   ▒█▓   ░     █░                ▒█              █▓
-  █▓   ██         █░                 ▓▓        ▒█▓▓▓▒█░
-   █▓ ░▓██░       ▓▒                  ▓█▓▒░░░▒▓█░    ▒█
-    ██   ▓█▓░      ▒                    ░▒█▒██▒      ▓▓
-     ▓█▒   ▒█▓▒░                         ▒▒ █▒█▓▒▒░░▒██
-      ░██▒    ▒▓▓▒                     ▓██▓▒█▒ ░▓▓▓▓▒█▓
-        ░▓██▒                          ▓░  ▒█▓█  ░░▒▒▒
-            ▒▓▓▓▓▓▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒▒░░▓▓  ▓░▒█░
-
-                 +----------------------+
-                 +  十步杀一人，千里不留行  +
-                 +  事了拂衣去，深藏功与名  +
-                 +----------------------+
-
-              [StreamX] let's flink|spark easy ô‿ô!
-
-
-
-[StreamX] FlinkStreaming StreamX QuickStart App Starting...
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.cpu.cores required for local execution is not set, setting it to the maximal possible value.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.memory.task.heap.size required for local execution is not set, setting it to the maximal possible value.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.memory.task.off-heap.size required for local execution is not set, setting it to the maximal possible value.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.memory.network.min required for local execution is not set, setting it to its default value 64 mb.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.memory.network.max required for local execution is not set, setting it to its default value 64 mb.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.taskexecutor.TaskExecutorResourceUtils | The configuration option taskmanager.memory.managed.size required for local execution is not set, setting it to its default value 128 mb.
-2021-03-15 23:28:02 | INFO  | main | org.apache.flink.runtime.minicluster.MiniCluster | Starting Flink Mini Cluster
-
-```
+如果没啥意外的话,项目就会在本地启动成功,会看到`kafka`里的数据按照需求成功的写入到`mysql`中
 ## 部署
 当程序开发完成后,本地测试通过后,需要往生成环境发布,

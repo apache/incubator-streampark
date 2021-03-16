@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
+import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
@@ -195,11 +195,11 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * <<<
          * 即:每次异常重启的时间间隔是"2秒",如果在"5分钟"内,失败总次数到达"10次" 则任务失败.
          */
-        val interval = Try(parameter.get(KEY_FLINK_RESTART_FAILURE_PER_INTERVAL).toInt).getOrElse(3)
+        val interval = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL).toInt).getOrElse(3)
 
-        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
+        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
 
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_FAILURE_RATE_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY)).getOrElse(null))
 
         streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
@@ -217,8 +217,8 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * 即:
          * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
          */
-        val attempts = Try(parameter.get(KEY_FLINK_RESTART_ATTEMPTS).toInt).getOrElse(3)
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_DELAY)).getOrElse(null))
+        val attempts = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS).toInt).getOrElse(3)
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY)).getOrElse(null))
 
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
@@ -322,7 +322,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
           val rs = new RocksDBStateBackend(cpDir, incremental)
           /**
-           * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options"/>Flink Rocksdb Config</a>
+           * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html#rocksdb-state-backend"/>Flink Rocksdb Config</a>
            */
           val map = new JavaHashMap[String, Object]()
           val skipKey = List(KEY_FLINK_STATE_BACKEND_ASYNC, KEY_FLINK_STATE_BACKEND_INCREMENTAL, KEY_FLINK_STATE_BACKEND_MEMORY, KEY_FLINK_STATE_ROCKSDB)
