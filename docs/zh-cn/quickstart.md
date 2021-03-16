@@ -3,7 +3,7 @@
 
 ## 起步
 千里之行始于足下,从这一刻开始即将进入StreamX开发的奇妙旅程,我们要做的第一件事就是将项目clone到本地,执行编译,在编译前请确保以下事项
-- 确保本机安装的JDK是`1.8`及以上的版本
+- 确保本机安装的JDK`1.8`及以上的版本
 - 确保本机已经安装了maven
 
 如果准备就绪,就可以clone项目并且执行编译了
@@ -42,7 +42,7 @@ mvn clean install -DskipTests
 从这里开始第一个streamx程序,从最简单的需求入手,这里的需求是从`kafka`读取用户数据写入`mysql`
 ### 需求
 * 从kafka里读取用户的数据写入到mysql中
-* 只要年龄小于30岁的数据
+* 只要年龄小于30岁的用户数据
 * `kafka` 的 `topic`为`test_user` 数据格式如下:
 
 ```json
@@ -105,7 +105,7 @@ case class User(name: String, age: Int, gender: Int, address: String)
 
 ## 配置
 `kafka` 和 `mysql`相关准备工作就绪了,接下来要改项目的配置,找到项目路径下的`assembly/conf/application.yml`
-这里有很多配置项,先不用管,也不用改,现在只关注`kafka`和`mysql`两项配置
+这里有很多配置项,先不用管,也不用改,现在只关注 `kafka` 和 `mysql` 两项配置
 ```yaml
 # kafka source
 kafka.source:
