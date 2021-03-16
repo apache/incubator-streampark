@@ -9,12 +9,13 @@ import org.apache.flink.api.scala._
 object QuickStartApp extends FlinkStreaming {
 
   /**
-   * 假如我们用从kafka里读取用户的数据写入到mysql中,需求如下
-   * 1.从kafka读取用户数据写入到mysql
+   * 假如我们用从kafka里读取用户的数据写入到mysql中,需求如下<br/>
    *
-   * 2. 只要年龄小于30岁的数据
+   * <strong>1.从kafka读取用户数据写入到mysql</strong>
    *
-   * 3. kafka数据格式如下:
+   * <strong>2. 只要年龄小于30岁的数据</strong>
+   *
+   * <strong>3. kafka数据格式如下:</strong>
    * {
    * "name": "benjobs",
    * "age":  "28",
@@ -22,7 +23,7 @@ object QuickStartApp extends FlinkStreaming {
    * "address":  "beijing"
    * }
    *
-   * 4. mysql表DDL如下:
+   * <strong>4. mysql表DDL如下:</strong>
    * create table user(
    * `name` varchar(32),
    * `age` int(3),
@@ -36,7 +37,12 @@ object QuickStartApp extends FlinkStreaming {
       .map(x => JsonUtils.read[User](x.value))
       .filter(_.age < 30)
 
-    JdbcSink().towPCSink[User](source)(user => s"insert into t_user(`name`,`age`,`gender`,`address`) value('${user.name}',${user.age},${user.gender},'${user.address}')")
+    JdbcSink().towPCSink[User](source)(user =>
+      s"""
+        |insert into t_user(`name`,`age`,`gender`,`address`)
+        |value('${user.name}',${user.age},${user.gender},'${user.address}')
+        |""".stripMargin
+    )
   }
 
 }

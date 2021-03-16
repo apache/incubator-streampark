@@ -1,6 +1,28 @@
 <!-- docs/_sidebar.md -->
-* [快速开始](zh-cn/)
-    * [构建项目](zh-cn/quickstart?id=%e6%9e%84%e5%bb%ba%e9%a1%b9%e7%9b%ae)
-    * [起步开发](zh-cn/quickstart?id=%e8%b5%b7%e6%ad%a5%e5%bc%80%e5%8f%91)
-    * [修改配置](zh-cn/quickstart?id=%e5%87%86%e5%a4%87%e5%b7%a5%e4%bd%9c) 
-    * [启动项目](zh-cn/quickstart?id=%e5%90%af%e5%8a%a8%e9%a1%b9%e7%9b%ae) 
+* [快速开始](zh-cn/quickstart?id=%e5%bf%ab%e9%80%9f%e5%bc%80%e5%a7%8b)
+    - [起步](zh-cn/quickstart?id=%e8%b5%b7%e6%ad%a5)
+    - [开发](zh-cn/quickstart?id=%e5%bc%80%e5%8f%91)
+      - [需求](zh-cn/quickstart?id=%e9%9c%80%e6%b1%82)
+      - [代码](zh-cn/quickstart?id=%e4%bb%a3%e7%a0%81)
+    - [配置](zh-cn/quickstart?id=%e9%85%8d%e7%bd%ae) 
+    - [测试](zh-cn/quickstart?id=%e6%b5%8b%e8%af%95) 
+    - [部署](zh-cn/quickstart?id=%e9%83%a8%e7%bd%b2) 
+* 项目配置
+    - [资源参数]()
+    - [状态后端]()
+    - [重启策略]()
+    - [watermark]()
+    - [flink table]()
+* Source & Sink
+    - [kafka]()
+    - [jdbc]()
+    - [hbase]()
+    - [clickHouse]()
+    - [Infixdb]()    
+* 高级扩展
+    - [启动参数]()
+    - [起步开发]()
+    - [修改配置]()
+    - [本地测试]()
+    - [部署项目]()
+* 最佳实践    
