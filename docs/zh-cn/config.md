@@ -97,11 +97,11 @@ flink:
     planner: blink # (blink|old|any)
     mode: streaming #(batch|streaming)
 ```
-上面是关于项目部署和环境相关的完整的配置,这些配置是在`flink`的namespace下进行配置的,分为2大类
+上面是关于项目部署和开发时需要关注的环境相关的完整的配置,这些配置是在`flink`的namespace下进行配置的,分为2大类
 * `deployment`下的配置是项目部署相关的配置
-* 其他是环境和运行时相关的配置
+* 其他是开发时需要关注的环境相关的配置
 
-环境和运行时的配置有5项
+开发时需要关注的环境相关的配置有5项
 * `checkpoints`
 * `watermark`
 * `state`
