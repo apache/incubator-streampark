@@ -12,7 +12,7 @@
 
 ![](http://assets.streamxhub.com/20210317134700.png)
 
-我们会在第一步初始化StreamExecutionEnvironment并配置各种参数,配置的参数大概有以下几类
+`Source`, `Transformation`, `Sink`后续有专门的章节进行讲解,这里我们重点关注StreamExecutionEnvironment初始和配置,我们会在第一步初始化StreamExecutionEnvironment并配置各种参数,配置的参数大概有以下几类
 * Parallelism 默认并行度配置
 * TimeCharacteristic 时间特征配置
 * checkpoint 检查点的相关配置
