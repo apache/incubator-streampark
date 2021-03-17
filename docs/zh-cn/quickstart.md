@@ -43,18 +43,19 @@ mvn clean install -DskipTests
 ### 需求
 * 从kafka里读取用户的数据写入到mysql中
 * 只要年龄小于30岁的用户数据
-* `kafka` 的 `topic`为`test_user` 数据格式如下:
+* `kafka` 的 `topic`为`test_user`
+* 要写入的`mysql`的表为`t_user`
 
+`kafka`的`topic`-`test_user` 的数据格式如下
 ```json
 {
   "name" : "$name",
-  "age": $age,
-  "gender": $gender,
-  "address": "$address"
+  "age" : $age,
+  "gender" : $gender,
+  "address" : "$address"
 }
 ```
-
-* 要写入的`mysql`的表为`t_user`,表结构如下:
+`mysql`表`t_user`结构如下:
 
 ```bash 
 create table user(

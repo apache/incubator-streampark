@@ -12,23 +12,19 @@
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-json.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/prismjs@1/components/prism-git.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/js/docsify-themeable.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/sticky.js"></script>
+    <!-- Production -->
+    <script src="//cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
-    <script>
-        const hours = new Date().getHours()
-        if (hours >= 9 && hours <= 24) {
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">')
-        } else {
-            document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple-dark.css">')
-        }
-    </script>
     <style>
         :root {
             --base-font-size: 14px;
             --theme-hue: 205;
             --sidebar-nav-link-before-content: '';
             --content-max-width: 75em;
+            --base-font-color: #fff
         }
     </style>
 </head>
@@ -49,14 +45,17 @@
                             <!-- Logo End -->
                             <!-- Navbar Toggler-->
                             <div class="classy-navbar-toggler">
-                                <span class="navbarToggler"><span></span><span></span><span></span></span>
+                                <span class="navbarToggler"></span>
                             </div>
                             <!-- Navbar Toggler End -->
                             <!-- Menu-->
                             <div class="classy-menu">
                                 <!-- Close Button-->
                                 <div class="classycloseIcon">
-                                    <div class="cross-wrap"><span class="top"></span><span class="bottom"></span></div>
+                                    <div class="cross-wrap">
+                                        <span class="top"></span>
+                                        <span class="bottom"></span>
+                                    </div>
                                 </div>
                                 <!-- Nav-->
                                 <div class="classynav">
@@ -106,13 +105,14 @@
         }
     }
 
-    if ($.fn.sticky) {
-        $(".main_header_area").sticky({
-            topSpacing: 0
-        })
-    }
-
     $(document).ready(() => {
+
+        if ($.fn.sticky) {
+            $(".main_header_area").sticky({
+                topSpacing: 0
+            })
+        }
+
         const h = $('.sticky-wrapper').height()
         const height = (h == null ? 90 : h)
         console.table(height)
@@ -127,6 +127,7 @@
                 "margin-top": height + 'px'
             })
         })
+
     })
 
 </script>

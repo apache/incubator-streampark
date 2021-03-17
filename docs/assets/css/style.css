@@ -4,7 +4,7 @@
 @import url("font-awesome.min.css");
 
 /* Reboot CSS */
- * {
+* {
     margin: 0;
     padding: 0;
 }
@@ -44,14 +44,34 @@ body.sticky .sidebar, body.sticky .sidebar-toggle {
     width: 90px !important;
 }
 
-.header h1,
-.header h2,
-.header h3,
-.header h4,
-.header h5,
-.header h6 {
-    color: #020710;
-    font-weight: 700;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #344c67 !important;
+    font-weight: 700 !important;
+}
+
+h1 {
+    font-size: 2rem !important;
+}
+
+h2 {
+    font-size: 1.8rem !important;
+}
+
+h3 {
+    font-size: 1.6rem !important;
+}
+
+h4 {
+    font-size: 1.4rem !important;
+}
+
+h5 {
+    font-size: 1.2rem !important;
 }
 
 .header p {
@@ -429,3 +449,126 @@ body.sticky .sidebar, body.sticky .sidebar-toggle {
     background-color: #ffffff;
 }
 
+.markdown-section ol, .markdown-section ul {
+    padding-left: .5rem !important;
+}
+
+.markdown-section ol li:before, .markdown-section ul li:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #49b1f5;
+    color: #fff;
+    cursor: pointer;
+    -webkit-transition: all .3s ease-out;
+    -moz-transition: all .3s ease-out;
+    -o-transition: all .3s ease-out;
+    -ms-transition: all .3s ease-out;
+    transition: all .3s ease-out;
+}
+
+.markdown-section ol, .markdown-section ul {
+    margin-top: .4rem;
+    padding: 0 0 0 .9rem;
+    list-style: none;
+    counter-reset: li;
+}
+
+.markdown-section ul li {
+    position: relative;
+    margin: .3rem 0;
+    padding: .3rem 0rem .1rem 2rem;
+}
+
+.markdown-section ol li {
+    position: relative;
+    margin: .3rem 0;
+    padding: .1rem 1rem .1rem 1.5rem;
+}
+
+.markdown-section ol > li:before {
+    top: 6px;
+    margin-left: .25rem;
+    width: .8rem;
+    height: .8rem;
+    border: .25rem solid #49b1f5;
+    border-radius: .5rem;
+    background: #fff;
+    content: "";
+    line-height: .8rem;
+}
+
+.markdown-section ul > li:before {
+    margin-top: .2rem;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 50%;
+    content: counter(li);
+    counter-increment: li;
+    text-align: center;
+    line-height: 1.6rem;
+    font-weight: 700;
+}
+
+hr {
+    position: relative;
+    margin: 2rem auto;
+    width: calc(100% - 4px);
+    border: 2px dashed #a4d8fa;
+    background: #fff;
+}
+
+hr {
+    box-sizing: content-box;
+    height: 0;
+    overflow: visible;
+}
+
+hr:before {
+    position: absolute;
+    top: -10px;
+    left: 5%;
+    z-index: 1;
+    color: #49b1f5;
+    content: "\f0c4";
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: 20px;
+    -webkit-transition: all 1s ease-in-out;
+    -moz-transition: all 1s ease-in-out;
+    -o-transition: all 1s ease-in-out;
+    -ms-transition: all 1s ease-in-out;
+    transition: all 1s ease-in-out;
+}
+
+.markdown-section h2 {
+    border-width: 1px !important;
+    border-top-style: unset !important;
+    border-left-style: unset !important;
+    border-right-style: unset !important;
+    border-bottom-style: dashed !important;
+    border-color: #49b1f5 !important;
+}
+
+.markdown-section h1:before, .markdown-section h2:before, .markdown-section h3:before, .markdown-section h4:before, .markdown-section h5:before, .markdown-section h6:before {
+    position: relative;
+    left: -2px;
+    color: #f47466;
+    content: "\f0c1   ";
+    font: normal normal normal 14px/1 FontAwesome;
+    font-size: 1.25rem;
+    -webkit-transition: all .2s ease-out;
+    -moz-transition: all .2s ease-out;
+    -o-transition: all .2s ease-out;
+    -ms-transition: all .2s ease-out;
+    transition: all .2s ease-out;
+}
+
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+.markdown-section .table tr td{
+    border: 1px solid #EEEEEE;
+}
