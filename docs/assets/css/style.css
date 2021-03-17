@@ -549,13 +549,19 @@ hr:before {
     border-color: #49b1f5 !important;
 }
 
-.markdown-section h1:before, .markdown-section h2:before, .markdown-section h3:before, .markdown-section h4:before, .markdown-section h5:before, .markdown-section h6:before {
+.markdown-section h1:hover:after,
+.markdown-section h2:hover:after,
+.markdown-section h3:hover:after,
+.markdown-section h4:hover:after,
+.markdown-section h5:hover:after,
+.markdown-section h6:hover:after {
+    cursor: pointer;
     position: relative;
-    left: -2px;
+    left: 5px;
     color: #f47466;
-    content: "\f0c1   ";
+    content: "\f0c1";
     font: normal normal normal 14px/1 FontAwesome;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     -webkit-transition: all .2s ease-out;
     -moz-transition: all .2s ease-out;
     -o-transition: all .2s ease-out;
@@ -570,5 +576,5 @@ hr:before {
 }
 
 .markdown-section .table tr td{
-    border: 1px solid #EEEEEE;
+    border: 1px solid #ddd;
 }
