@@ -265,85 +265,53 @@ Checkpoints 的配置比较简单,按照下面的方式进行配置即可
 
 <script>
 new Vue({
-    el: '.option',
+    el: '.markdown-section',
     data() {
         return {
-          option: [
-             {opt: '-t',longOpt: 'target',desc : '部署方式(目前只支持yarn-per-job,application)',deprecated : false,value : ' yarn-per-job | application '},
-             {opt: '-d',longOpt: 'detached',desc : '是否以detached模式启动',deprecated : false,value : "true | false"},
-             {opt: '-n',longOpt: 'allowNonRestoredState',desc : '从savePoint恢复数据失败时是否允许跳过数据恢复这一步',deprecated : false,value : "true | false"},
-             {opt: '-sae',longOpt: 'shutdownOnAttachedExit',desc : '如任务以"attached"模式启动,在任务停止时是否关闭集群',deprecated : false,value : "true | false"},
-             {opt: '-m',longOpt: 'jobmanager',desc : 'JobManager的连接地址',deprecated : false,value : "yarn-cluster | 连接地址"},
-             {opt: '-p',longOpt: 'parallelism',desc : '程序并行度',deprecated : true, value: 'int'},
-             {opt: '-c',longOpt: 'class',desc : '程序的main方法的全名称',deprecated : true, value : 'String'},
-          ]
-        }
-    }
-});
-
-new Vue({
-    el: '.property',
-    data() {
-        return {
-          property: [
-             {name: '$internal.application.main',desc : '程序的主类(main)的完整类名',required: true},
-             {name: 'yarn.application.name',desc : '程序的名称(YARN中显示的任务名称)',required: true},
-             {name: 'yarn.application.queue',desc : '在YARN中运行的队列名称',required: false},
-             {name: 'taskmanager.numberOfTaskSlots',desc : 'taskmanager Slot的数量',required: false},
-             {name: 'parallelism.default',desc : '程序的并行',required: false}
-          ],
-        }
-    }
-});
-
-new Vue({
-    el: '.memory',
-    data() {
-        return {
-          memory: [
-             {group: 'JVM 堆内存', name: 'jobmanager.memory.heap.size',desc : 'JobManager 的 JVM 堆内存'},
-             {group: '堆外内存',name: 'jobmanager.memory.off-heap.size',desc : 'JobManager 的堆外内存（直接内存或本地内存）'},
-             {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'},
-             {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'},
-             {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-overhead.min',desc : 'Flink JVM 进程的 Metaspace'},
-             {group: 'JVM 开销',name: 'jobmanager.memory.jvm-metaspace.size',desc : '用于其他 JVM 开销的本地内存'},
-             {group: 'JVM 开销',name: 'jobmanager.memory.jvm-overhead.max',desc : '用于其他 JVM 开销的本地内存'},
-             {group: 'JVM 开销',name: 'jobmanager.memory.jvm-overhead.fraction',desc : '用于其他 JVM 开销的本地内存'},
-            {group: '框架堆内存',name: 'taskmanager.memory.framework.heap.size',desc : '用于Flink 框架的 JVM 堆内存（进阶配置）'},
-            {group: '任务堆内存',name: 'taskmanager.memory.task.heap.size',desc : '由Flink管理的用于排序,哈希表,缓存StateBackend的本地内存'},
-            {group: '托管内存',name: 'taskmanager.memory.managed.size',desc : '用于其他 JVM 开销的本地内存'},
-            {group: '托管内存',name: 'taskmanager.memory.managed.fraction',desc : '用于其他 JVM 开销的本地内存'},
-            {group: '框架堆外内存',name: 'taskmanager.memory.framework.off-heap.size',desc : '用于 Flink 框架的堆外内存(直接内存或本地内存)（进阶配置)'},
-            {group: '任务堆外内存',name: 'taskmanager.memory.task.off-heap.size',desc : '用于 Flink 应用的算子及用户代码的堆外内存（直接内存或本地内存'},
-            {group: 'JVM Metaspace',name: 'taskmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'}
-          ],
-        }
-    }
-});
-
-new Vue({
-    el: '.totalMem',
-    data() {
-        return {
-          totalMem: [
-             {group: 'Flink 总内存 ', tm: 'taskmanager.memory.flink.size',jm : 'jobmanager.memory.flink.size'},
-             {group: '进程总内存',tm: 'taskmanager.memory.process.size',jm : 'jobmanager.memory.process.size'}
-          ],
-        }
-    }
-});
-
-new Vue({
-    el: '.checkpoints',
-    data() {
-        return {
-          checkpoints: [
-             {name: 'enable', desc: '是否开启checkpoint',value : 'true | false'},
-             {name: 'interval',desc: 'checkpoint的间隔周期',value : '毫秒'},
-             {name: 'mode',desc: '语义',value : 'EXACTLY_ONCE|'},
-             {name: 'timeout',desc: '超时时间',value : '毫秒'},
-             {name: 'unaligned',desc: '是否非对齐',value : 'true | false'},
-          ],
+            option: [
+                {opt: '-t',longOpt: 'target',desc : '部署方式(目前只支持yarn-per-job,application)',deprecated : false,value : ' yarn-per-job | application '},
+                {opt: '-d',longOpt: 'detached',desc : '是否以detached模式启动',deprecated : false,value : "true | false"},
+                {opt: '-n',longOpt: 'allowNonRestoredState',desc : '从savePoint恢复数据失败时是否允许跳过数据恢复这一步',deprecated : false,value : "true | false"},
+                {opt: '-sae',longOpt: 'shutdownOnAttachedExit',desc : '如任务以"attached"模式启动,在任务停止时是否关闭集群',deprecated : false,value : "true | false"},
+                {opt: '-m',longOpt: 'jobmanager',desc : 'JobManager的连接地址',deprecated : false,value : "yarn-cluster | 连接地址"},
+                {opt: '-p',longOpt: 'parallelism',desc : '程序并行度',deprecated : true, value: 'int'},
+                {opt: '-c',longOpt: 'class',desc : '程序的main方法的全名称',deprecated : true, value : 'String'},
+            ],
+            property: [
+                {name: '$internal.application.main',desc : '程序的主类(main)的完整类名',required: true},
+                {name: 'yarn.application.name',desc : '程序的名称(YARN中显示的任务名称)',required: true},
+                {name: 'yarn.application.queue',desc : '在YARN中运行的队列名称',required: false},
+                {name: 'taskmanager.numberOfTaskSlots',desc : 'taskmanager Slot的数量',required: false},
+                {name: 'parallelism.default',desc : '程序的并行',required: false}
+            ],
+            memory: [
+                {group: 'JVM 堆内存', name: 'jobmanager.memory.heap.size',desc : 'JobManager 的 JVM 堆内存'},
+                {group: '堆外内存',name: 'jobmanager.memory.off-heap.size',desc : 'JobManager 的堆外内存（直接内存或本地内存）'},
+                {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'},
+                {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'},
+                {group: 'JVM Metaspace',name: 'jobmanager.memory.jvm-overhead.min',desc : 'Flink JVM 进程的 Metaspace'},
+                {group: 'JVM 开销',name: 'jobmanager.memory.jvm-metaspace.size',desc : '用于其他 JVM 开销的本地内存'},
+                {group: 'JVM 开销',name: 'jobmanager.memory.jvm-overhead.max',desc : '用于其他 JVM 开销的本地内存'},
+                {group: 'JVM 开销',name: 'jobmanager.memory.jvm-overhead.fraction',desc : '用于其他 JVM 开销的本地内存'},
+                {group: '框架堆内存',name: 'taskmanager.memory.framework.heap.size',desc : '用于Flink 框架的 JVM 堆内存（进阶配置）'},
+                {group: '任务堆内存',name: 'taskmanager.memory.task.heap.size',desc : '由Flink管理的用于排序,哈希表,缓存StateBackend的本地内存'},
+                {group: '托管内存',name: 'taskmanager.memory.managed.size',desc : '用于其他 JVM 开销的本地内存'},
+                {group: '托管内存',name: 'taskmanager.memory.managed.fraction',desc : '用于其他 JVM 开销的本地内存'},
+                {group: '框架堆外内存',name: 'taskmanager.memory.framework.off-heap.size',desc : '用于 Flink 框架的堆外内存(直接内存或本地内存)（进阶配置)'},
+                {group: '任务堆外内存',name: 'taskmanager.memory.task.off-heap.size',desc : '用于 Flink 应用的算子及用户代码的堆外内存（直接内存或本地内存'},
+                {group: 'JVM Metaspace',name: 'taskmanager.memory.jvm-metaspace.size',desc : 'Flink JVM 进程的 Metaspace'}
+            ],
+            totalMem: [
+                {group: 'Flink 总内存 ', tm: 'taskmanager.memory.flink.size',jm : 'jobmanager.memory.flink.size'},
+                {group: '进程总内存',tm: 'taskmanager.memory.process.size',jm : 'jobmanager.memory.process.size'}
+            ],
+            checkpoints: [
+                {name: 'enable', desc: '是否开启checkpoint',value : 'true | false'},
+                {name: 'interval',desc: 'checkpoint的间隔周期',value : '毫秒'},
+                {name: 'mode',desc: '语义',value : ' EXACTLY_ONCE | AT_LEAST_ONCE '},
+                {name: 'timeout',desc: '超时时间',value : '毫秒'},
+                {name: 'unaligned',desc: '是否非对齐',value : 'true | false'},
+            ],
         }
     }
 });
