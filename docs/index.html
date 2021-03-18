@@ -15,16 +15,25 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify-themeable@0/dist/css/theme-simple.css">
     <script src="assets/js/jquery.min.js"></script>
     <script src="assets/js/sticky.js"></script>
+    <script src="assets/js/wow.min.js"></script>
+
     <!-- Production -->
     <script src="//cdn.jsdelivr.net/npm/vue@2/dist/vue.min.js"></script>
     <link rel="stylesheet" href="assets/css/style.css">
     <style>
         :root {
-            --base-font-size: 14px;
+            --base-font-size: 14;
             --theme-hue: 205;
             --sidebar-nav-link-before-content: '';
             --content-max-width: 75em;
-            --base-font-color: #fff
+            --base-font-color: #fff;
+            --cover-background-color: #fff;
+            --cover-link-color: #fff
+        }
+        .cover .cover-main {
+            max-width: unset !important;
+            width: 100%;
+            text-align: left;
         }
     </style>
 </head>
@@ -61,8 +70,8 @@
                                 <div class="classynav">
                                     <!-- corenav -->
                                     <ul id="corenav">
-                                        <li><a href="#home">首页</a></li>
-                                        <li><a href="#docs">文档</a></li>
+                                        <li><a href="#/">首页</a></li>
+                                        <li><a href="#/doc/zh-cn/" class="doc">文档</a></li>
                                         <li><a href="#download">下载</a></li>
                                         <li><a href="#contact">社区</a></li>
                                         <li class="cn-dropdown-item has-down">
@@ -97,6 +106,8 @@
         alias: {
             '/.*/_sidebar.md': '/_sidebar.md'
         },
+        coverpage: true,
+        onlyCover: true,
         name: 'StreamX',
         repo: 'streamxhub/streamx',
         themeable: {
@@ -105,35 +116,11 @@
         }
     }
 
-    $(document).ready(() => {
-
-        if ($.fn.sticky) {
-            $(".main_header_area").sticky({
-                topSpacing: 0
-            })
-        }
-
-        const h = $('.sticky-wrapper').height()
-        const height = (h == null ? 90 : h)
-        console.table(height)
-        $('.sidebar,.sidebar-toggle').css({
-            "margin-top": height + 'px'
-        })
-
-        $('body').bind('mousewheel', function () {
-            const h = $('.is-sticky').height()
-            const height = (h == null ? 90 : h)
-            $('.sidebar,.sidebar-toggle').css({
-                "margin-top": height + 'px'
-            })
-        })
-
-    })
-
 </script>
 <!-- Docsify v4 -->
 <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/docsify@4/lib/plugins/search.js"></script>
+<script src="assets/js/active.js"></script>
 
 </body>
 </html>
