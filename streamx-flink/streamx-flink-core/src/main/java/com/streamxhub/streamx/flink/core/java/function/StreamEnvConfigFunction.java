@@ -35,4 +35,13 @@ public interface StreamEnvConfigFunction {
      * @param parameterTool
      */
     void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+
+    class NoneConfig implements StreamEnvConfigFunction {
+
+        @Override
+        public void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool) {
+
+        }
+    }
 }
+
