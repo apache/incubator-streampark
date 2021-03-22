@@ -55,16 +55,8 @@ public class QuickStartJavaApp {
 
 
         new JdbcSink<JavaUser>(context)
-                .sql((SQLFromFunction<JavaUser>) bean -> String.format(
-                        "insert into t_user(`name`,`age`,`gender`,`address`) " +
-                                "value('%s',%d,%d,'%s')",
-                        bean.name,
-                        bean.age,
-                        bean.gender,
-                        bean.address
-                ))
+                .sql((SQLFromFunction<JavaUser>) JavaUser::toSql)
                 .towPCSink(source);
-
 
         context.start();
     }
@@ -76,6 +68,15 @@ class JavaUser implements Serializable {
     Integer age;
     Integer gender;
     String address;
+
+    public String toSql() {
+        return String.format(
+                "insert into t_user(`name`,`age`,`gender`,`address`) value('%s',%d,%d,'%s')",
+                name,
+                age,
+                gender,
+                address);
+    }
 
 }
 
