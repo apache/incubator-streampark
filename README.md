@@ -222,6 +222,6 @@ kafka.sink:
 
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
-更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
+`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
 
 <img style="width: 250px;" src="http://assets.streamxhub.com/streamx_wechat.png"/>
