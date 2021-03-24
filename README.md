@@ -1,30 +1,82 @@
 # StreamX
 let't flink|spark easy
 
-The flink & spark development scaffolding, encapsulates a series of out-of-the-box source and sink, and standardizes flink & spark development,testing,deployment and monitoring
+## 什么是Streamx?
 
-StreamX consists of two parts, streamx-core and streamx-console,
-Streamx-core (Streamx-flink-core|Streamx-spark-core) is a framework for development. Drawing on the idea of springBoot, the convention is better than the configuration. It provides developers with a list of sources and sinks out of the box,Every API is carefully polished,and expands related methods (only scala is effective), which greatly simplifies The development of flink greatly improves development efficiency and development experience
+大数据实时处理流域 `Apache Spark` 和 后起之秀 `Apache Flink` 是一个伟大的进步,从`Hadoop MapReduce`的刀耕火种时代迈入了高铁快车时代,我们在使用 Flink & Spark 时发现从编程模型,
+启动配置到管理运维都有很多可以抽象共用的地方, 我们将一些好的经验固化下来并结合业内的最佳实践,通过不断努力终于诞生了今天的框架 —— Streamx, 项目的初衷是:让 Flink & Spark开发更简单,
+使用Streamx可以极大降低学习成本和开发门槛, 让你只用关心最核心的业务,Streamx 规范了项目的配置,定义了最佳的编程方式,提供了一系列开箱即用的Connector,标准化了配置、开发、测试、部署、监控、运维的整个过程,
+同时提供`scala`和`java`两套api,其最终目的是打造一个一站式大数据平台,流批一体的解决方案.
+Streamx有两部分组成 —— `Streamx-core` 和 `Streamx-console`
 
-Streamx-console is an independent platform that complements streamx-core. It better manages flink tasks, integrates project compilation, release, startup, savepoint, monitoring, operation and maintenance, etc., which greatly simplifies the operation and maintenance of flink tasks. A development base of the flink platform, it is easy to do secondary development based on it
+#### 消费kafka示例
 
-![console dashboard](https://raw.githubusercontent.com/wolfboys/mycdn/master/img/console-dashboard.jpg)
+```yaml
+kafka.source:
+    bootstrap.servers: kfk1:9092,kfk2:9092,kfk3:9092
+    topic: test_user
+    group.id: user_01
+    auto.offset.reset: earliest
+    enable.auto.commit: true
+```
 
-![job flameGraph](https://raw.githubusercontent.com/wolfboys/mycdn/master/img/job-flameGraph.png)
+```scala
+KafkaSource().getDataStream[String]().print()
+```
+
+## Streamx-core
+
+Streamx-core (Streamx-flink-core|Streamx-spark-core) 是一个开发时的框架,借鉴了SpringBoot的思想,规范了配置文件的格式,按照约定优于配置。为开发者提供了一个开发时 RunTime Content,提供了一个开箱即用的Source和Sink,每一个API都经过了仔细的打磨，并扩展了相关的方法（仅scala）大大简化了flink的开发，提高了开发效率和开发体验
+
+## Streamx-console
+
+Streamx-console 是一个独立的平台，它补充了Streamx-core。较好地管理了flink任务，集成了项目编译、发布、参数配置、启动、savepoint、监控和维护等功能，并且集成了火焰图(flame graph),大大简化了flink任务的操作和维护。该平台本身采用SpringBoot Vue Mybatis开发,提供了简单的租户和权限管理,代码风格充分遵守阿里的开发规范,结构也尽可能的清晰规范,可以作为大数据平台的开发基础，很方便地进行二次开发
+
+![console dashboard](http://assets.streamxhub.com/console-dashboard.jpg)
+
+![job flameGraph](http://assets.streamxhub.com/job-flameGraph.png)
 
 
-## How to Build
+## 如何编译
 
-1. Make sure JDK 8+ and maven is installed on your machine.
-2. Run: `mvn clean install -DskipTests`
+我们要做的第一件事就是将项目clone到本地,执行编译,在编译前请确保以下事项
 
-```shell
-git clone https://github.com/streamxhub/streamx.git
-cd streamx
+* 确保本机安装的JDK`1.8`及以上的版本
+* 确保本机已经安装了maven
+
+如果准备就绪,就可以clone项目并且执行编译了
+
+```bash
+git clone https://github.com/Streamxhub/Streamx.git
+cd Streamx
 mvn clean install -DskipTests
 ```
 
-After the build is completed, the project will be installed in the local maven warehouse and added to the pom.xml file of your own project when using it
+顺利的话就会看到编译成功.
+
+```log
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary for Streamx 1.0.0:
+[INFO]
+[INFO] Streamx ............................................ SUCCESS [  1.882 s]
+[INFO] Streamx : Common ................................... SUCCESS [ 15.700 s]
+[INFO] Streamx : Flink Parent ............................. SUCCESS [  0.032 s]
+[INFO] Streamx : Flink Common ............................. SUCCESS [  8.243 s]
+[INFO] Streamx : Flink Core ............................... SUCCESS [ 17.332 s]
+[INFO] Streamx : Flink Test ............................... SUCCESS [ 42.742 s]
+[INFO] Streamx : Spark Parent ............................. SUCCESS [  0.018 s]
+[INFO] Streamx : Spark Core ............................... SUCCESS [ 12.028 s]
+[INFO] Streamx : Spark Test ............................... SUCCESS [  5.828 s]
+[INFO] Streamx : Spark Cli ................................ SUCCESS [  0.016 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  01:43 min
+[INFO] Finished at: 2021-03-15T17:02:22+08:00
+[INFO] ------------------------------------------------------------------------
+```
+
+编译完成后,项目会安装到本地的maven仓库里,在使用时需要引入pom
 
 ```xml
 <dependency>
@@ -34,11 +86,11 @@ After the build is completed, the project will be installed in the local maven w
 </dependency>
 ```
 
-## Quick Start
+## 快速上手
 
-### 1. Flink Example with StreamX
+现在让我们快速上手一个`Streamx`应用
 
-1. Make sure flink 1.12.0 +
+> 确保flink版本是 1.12.0 +
 
 ```scala
 
@@ -70,8 +122,10 @@ object HelloStreamXApp extends FlinkStreaming {
 
 ```
 
-### 2. Define application.yml
-Define a series of startup information and source and sink information in the configuration file application.yml. The specific format is as follows:
+### 2. 定义配置文件application.yml
+
+在配置文件中定义一系列启动信息以及Connector相关信息,具体格式如下：
+
 ```yaml
 flink:
   deployment: #注意这里的参数一定能要flink启动支持的参数(因为在启动参数解析时使用了严格模式,一个不识别会停止解析),详情和查看flink官网,否则会造成整个参数解析失败,最明显的问题的找不到jar文件
@@ -165,5 +219,11 @@ kafka.sink:
 
 ```
 
-### 3. Run Application
-Start main and with argument " --flink.conf $path/application.yml"
+### 3. 运行程序
+
+启动main方法,并且跟上参数" --flink.conf $path/application.yml"
+
+
+更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
+
+<img style="width: 250px;" src="http://assets.streamxhub.com/streamx_wechat.png"/>

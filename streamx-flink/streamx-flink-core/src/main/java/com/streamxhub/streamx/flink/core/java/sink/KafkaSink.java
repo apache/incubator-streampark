@@ -21,6 +21,7 @@ public class KafkaSink<T> {
     private String uid;
     //---end---
 
+    private String alias;
     private String topic;
     private SerializationSchema<T> serializer;
     private FlinkKafkaPartitioner<T> partitioner;
@@ -48,6 +49,11 @@ public class KafkaSink<T> {
 
     public KafkaSink<T> property(Properties property) {
         this.property = property;
+        return this;
+    }
+
+    public KafkaSink<T> alias(String alias) {
+        this.alias = alias;
         return this;
     }
 
@@ -92,6 +98,6 @@ public class KafkaSink<T> {
         this.topic(topic);
         com.streamxhub.streamx.flink.core.scala.sink.KafkaSink scalaSink = new com.streamxhub.streamx.flink.core.scala.sink.KafkaSink(this.context, this.property, this.parallelism, this.name, this.uid);
         org.apache.flink.streaming.api.scala.DataStream<T> scalaDataStream = new org.apache.flink.streaming.api.scala.DataStream<>(source);
-        return scalaSink.sink(scalaDataStream, this.topic, this.serializer, this.partitioner);
+        return scalaSink.sink(scalaDataStream,this.alias, this.topic, this.serializer, this.partitioner);
     }
 }

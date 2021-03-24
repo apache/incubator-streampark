@@ -42,7 +42,7 @@ object ConfigUtils {
 
   def getKafkaSinkConf(parameter: JavaMap[String, String], topic: String = "", alias: String = ""): Properties = {
     val prefix = KAFKA_SINK_PREFIX + alias
-    val param: ScalaMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"${prefix}.")
+    val param: ScalaMap[String, String] = filterParam(parameter, if (prefix.endsWith(".")) prefix else s"$prefix.")
     if (param.isEmpty) throw new IllegalArgumentException(s"${topic} init error...") else {
       val kafkaProperty = new Properties()
       param.foreach(x => kafkaProperty.put(x._1, x._2.trim))
