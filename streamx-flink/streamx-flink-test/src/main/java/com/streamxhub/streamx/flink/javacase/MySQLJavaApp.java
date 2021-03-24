@@ -3,7 +3,7 @@ package com.streamxhub.streamx.flink.javacase;
 import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.streamx.flink.core.java.sink.JdbcSink;
-import com.streamxhub.streamx.flink.core.java.source.MySQLSource;
+import com.streamxhub.streamx.flink.core.java.source.JdbcSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 
 import com.streamxhub.streamx.flink.core.scala.util.StreamEnvConfig;
@@ -37,7 +37,7 @@ public class MySQLJavaApp {
         prop.put("idleTimeout", "20000");
 
         //读取MySQL数据源
-        DataStream<LogBean> stream = new MySQLSource<LogBean>(context, prop)
+        DataStream<LogBean> stream = new JdbcSource<LogBean>(context, prop)
                 .getDataStream(
                         (SQLQueryFunction<LogBean>) lastOne -> {
                             Thread.sleep(1000);
