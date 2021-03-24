@@ -36,7 +36,6 @@ Streamx-console 是一个独立的平台，它补充了Streamx-core。较好地�
 
 ![job flameGraph](http://assets.streamxhub.com/job-flameGraph.png)
 
-
 ## 如何编译
 
 我们要做的第一件事就是将项目clone到本地,执行编译,在编译前请确保以下事项
@@ -223,7 +222,6 @@ kafka.sink:
 
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
+`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
 
-更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
-
-<img style="width: 250px;" src="http://assets.streamxhub.com/streamx_wechat.png"/>
+<img width="250px" height="250px" src="http://assets.streamxhub.com/streamx_wechat.png"/>
