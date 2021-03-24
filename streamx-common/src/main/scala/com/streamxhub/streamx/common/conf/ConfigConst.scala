@@ -43,6 +43,8 @@ object ConfigConst {
 
   val KEY_JOB_ID = "jobId"
 
+  val KEY_SEMANTIC = "semantic"
+
   /**
    * sign....
    */
@@ -164,8 +166,6 @@ object ConfigConst {
   val KEY_KAFKA_START_FROM_TIMESTAMP = "timestamp"
 
   val REDIS_PREFIX = "redis."
-
-  val KEY_INSTANCE = "instance"
 
   val KEY_ALIAS = "alias"
 

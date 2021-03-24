@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.core.scala.request
 
-import com.streamxhub.streamx.common.conf.ConfigConst.KEY_INSTANCE
+import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_ALIAS, KEY_SEMANTIC}
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger, Utils}
 import com.zaxxer.hikari.{HikariConfig, HikariDataSource}
 import io.vertx.core.json.JsonObject
@@ -89,7 +89,8 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
     System.getProperties().setProperty(DISABLE_DNS_RESOLVER_PROP_NAME, "true")
     val clientConfig = new JsonObject()
     jdbc.foreach(x => clientConfig.put(x._1, x._2))
-    clientConfig.remove(KEY_INSTANCE)
+    clientConfig.remove(KEY_ALIAS)
+    clientConfig.remove(KEY_SEMANTIC)
     //使用HikariCP连接池.
     clientConfig.put("provider_class", classOf[HikariCPDataSourceProvider].getName)
     val vertxOpts = new VertxOptions()

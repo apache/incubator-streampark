@@ -28,7 +28,7 @@ public class MySQLJavaApp {
 
         //定义jdbc信息,也可以从配置文件读取
         Properties prop = new Properties();
-        prop.put(KEY_INSTANCE(), "test");
+        prop.put(KEY_ALIAS(), "test");
         prop.put(KEY_JDBC_DRIVER(), "com.mysql.cj.jdbc.Driver");
         prop.put(KEY_JDBC_URL(), "jdbc:mysql://127.0.0.1:3306/test?useSSL=false&allowPublicKeyRetrieval=true");
         prop.put(KEY_JDBC_USER(), "root");

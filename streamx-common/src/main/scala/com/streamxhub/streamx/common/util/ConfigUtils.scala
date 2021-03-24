@@ -94,8 +94,8 @@ object ConfigUtils {
     }
     val param: ScalaMap[String, String] = filterParam(parameter, fix)
     val properties = new Properties()
-    val instance = if (alias == null || alias.trim == "") "default" else alias
-    properties.put(KEY_INSTANCE, instance)
+    val aliasName = if (alias == null || alias.trim == "") "default" else alias
+    properties.put(KEY_ALIAS, aliasName)
     properties.put(KEY_JDBC_DRIVER, driver)
     param.foreach(x => properties.put(x._1, x._2))
     properties
