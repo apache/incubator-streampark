@@ -36,25 +36,22 @@ import java.util.Properties;
 public class JdbcSource<T> {
 
     private final StreamingContext context;
-    private final Properties jdbc;
+    private Properties jdbc;
+    private String alias = null;
 
     public JdbcSource(StreamingContext context) {
-        this(context, (String) null);
+        this.context = context;
     }
 
-    public JdbcSource(StreamingContext context, String alias) {
-        this.context = context;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
-    }
-
-    public JdbcSource(StreamingContext context, Properties jdbc) {
-        this.context = context;
-        this.jdbc = jdbc;
+    public JdbcSource<T> alias(String alias) {
+        this.alias = alias;
+        return this;
     }
 
     public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
         assert queryFunc != null;
         assert resultFunc != null;
+        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
         JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(jdbc, queryFunc, resultFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }
