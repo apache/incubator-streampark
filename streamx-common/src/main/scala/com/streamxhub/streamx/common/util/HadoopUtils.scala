@@ -39,6 +39,8 @@ object HadoopUtils extends Logger {
 
   val DEFAULT_YARN_RM_HTTP_ADDRESS = "http://0.0.0.0:8088"
 
+  private[this] var rmHttpAddr: String = null
+
   lazy val yarnClient = {
     val yarnClient = YarnClient.createYarnClient
     val yarnConf = new YarnConfiguration(HdfsUtils.conf)
@@ -49,29 +51,42 @@ object HadoopUtils extends Logger {
 
   /**
    * 从yarn源码里抛出来的...
+   *
+   * @param getLatest :
+   *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
+   *                  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
+   *                  此时在调用该方法,只需要传入true即可再次获取一个最新的活跃节点返回
+   * @return
    */
-  lazy val rmHttpAddress: String = {
-    val yarnConf = new YarnConfiguration(HdfsUtils.conf)
-    val ids = yarnConf.get("yarn.resourcemanager.ha.rm-ids")
-    if (ids == null) DEFAULT_YARN_RM_HTTP_ADDRESS
-    else {
-      var address = new ArrayBuffer[String](1)
-      ids.split(",").foreach(x => {
-        if (address.isEmpty) {
-          val conf = new YarnConfiguration(yarnConf)
-          conf.set(YarnConfiguration.RM_HA_ID, x)
-          val serviceTarget = new RMHAServiceTarget(conf)
-          val rpcTimeoutForChecks = yarnConf.getInt(
-            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-            CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT)
-          val proto = serviceTarget.getProxy(yarnConf, rpcTimeoutForChecks)
-          if (proto.getServiceStatus.getState == HAServiceProtocol.HAServiceState.ACTIVE) {
-            address += s"http://${yarnConf.get(s"yarn.resourcemanager.webapp.address.$x")}"
+  def rmHttpAddress(getLatest: Boolean = false): String = {
+    if (rmHttpAddr == null || getLatest) {
+      synchronized {
+        if (rmHttpAddr == null || getLatest) {
+          val yarnConf = new YarnConfiguration(HdfsUtils.conf)
+          val ids = yarnConf.get("yarn.resourcemanager.ha.rm-ids")
+          if (ids == null) DEFAULT_YARN_RM_HTTP_ADDRESS
+          else {
+            var address = new ArrayBuffer[String](1)
+            ids.split(",").foreach(x => {
+              if (address.isEmpty) {
+                val conf = new YarnConfiguration(yarnConf)
+                conf.set(YarnConfiguration.RM_HA_ID, x)
+                val serviceTarget = new RMHAServiceTarget(conf)
+                val rpcTimeoutForChecks = yarnConf.getInt(
+                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT)
+                val proto = serviceTarget.getProxy(yarnConf, rpcTimeoutForChecks)
+                if (proto.getServiceStatus.getState == HAServiceProtocol.HAServiceState.ACTIVE) {
+                  address += s"http://${yarnConf.get(s"yarn.resourcemanager.webapp.address.$x")}"
+                }
+              }
+            })
+            rmHttpAddr = if (address.isEmpty) DEFAULT_YARN_RM_HTTP_ADDRESS else address.head
           }
         }
-      })
-      if (address.isEmpty) DEFAULT_YARN_RM_HTTP_ADDRESS else address.head
+      }
     }
+    rmHttpAddr
   }
 
   def toApplicationId(appId: String): ApplicationId = {

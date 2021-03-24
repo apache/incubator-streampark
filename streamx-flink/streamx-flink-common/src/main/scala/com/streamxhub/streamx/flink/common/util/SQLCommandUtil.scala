@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.flink.common.util
 
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -33,11 +34,14 @@ import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
+import java.util.Scanner
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
 object SQLCommandUtil extends Logger {
+
+  private[this] val WITH_REGEXP = "(WITH|with)\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
 
   private[this] lazy val sqlParserConfig = {
     val tableConfig = StreamTableEnvironment.create(
@@ -53,7 +57,10 @@ object SQLCommandUtil extends Logger {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
-        case _ => throw new TableException("Unsupported SQL dialect: " + tableConfig.getSqlDialect)
+        case _ =>
+          throw new TableException(
+            SQLError(SQLErrorType.UNSUPPORTED_DIALECT, s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
+          )
       }
       SqlParser.config
         .withParserFactory(FlinkSqlParserFactories.create(conformance))
@@ -63,8 +70,21 @@ object SQLCommandUtil extends Logger {
     }
   }
 
-  def verifySQL(sql: String): Unit = {
-    val sqlCommands = parseSQL(sql)
+  def verifySQL(sql: String): SQLError = {
+    var sqlCommands: List[SQLCommandCall] = List.empty[SQLCommandCall]
+    try {
+      sqlCommands = parseSQL(sql)
+    } catch {
+      case exception: Exception =>
+        val separator = "\001"
+        val error = exception.getLocalizedMessage
+        val array = error.split(separator)
+        return SQLError(
+          SQLErrorType.of(array.head.toInt),
+          if (array(1) == "null") null else array(1),
+          array.last
+        )
+    }
     val parser = new CalciteParser(sqlParserConfig)
     for (call <- sqlCommands) {
       val sql = call.operands.head
@@ -77,20 +97,21 @@ object SQLCommandUtil extends Logger {
           try {
             parser.parse(sql)
           } catch {
-            case _: Exception => throw new RuntimeException(s"sql parse failed,sql:$sql")
+            case e: Exception => return SQLError(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql.trim.replaceFirst(";|$", ";"))
             case _ =>
           }
-        case _ => throw new RuntimeException(s"Unsupported command,sql:$sql")
+        case _ => return SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = sql.replaceFirst(";|$", ";"))
       }
     }
+    null
   }
 
   def parseSQL(sql: String): List[SQLCommandCall] = {
-    require(sql != null && !sql.trim.isEmpty, s"Unsupported command,must be not empty,sql:$sql")
+    val sqlEmptyError = SQLError(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    require(sql != null && !sql.trim.isEmpty, sqlEmptyError)
     val lines = sql.split("\\n").filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
-      case x if x.isEmpty =>
-        throw new RuntimeException(s"sql parse failed,must be not empty,sql:$sql")
+      case x if x.isEmpty => throw new RuntimeException(sqlEmptyError)
       case x =>
         val calls = new ArrayBuffer[SQLCommandCall]
         val stmt = new StringBuilder
@@ -99,15 +120,14 @@ object SQLCommandUtil extends Logger {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(s"sql parse failed,sql:${stmt.toString()}")
+              case _ => throw new RuntimeException(SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
             }
             // clear string builder
             stmt.clear()
           }
         }
         calls.toList match {
-          case Nil =>
-            throw new RuntimeException(s"sql parse failed,must be endsWith ';',sql:$sql")
+          case Nil => throw new RuntimeException(SQLError(SQLErrorType.ENDS_WITH, sql = sql).toErrorString)
           case r => r
         }
     }
@@ -123,7 +143,35 @@ object SQLCommandUtil extends Logger {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
-        groups(i) = matcher.group(i + 1)
+        groups(i) = {
+          val segment = matcher.group(i + 1)
+          val withMatcher = WITH_REGEXP.pattern.matcher(segment)
+          if (!withMatcher.find()) segment else {
+            /**
+             * 解决with里的属性参数必须加单引号'的问题,从此可以不用带'了,更可读(手指多动一下是可耻的,scala语言之父说的.)
+             */
+            val withSegment = withMatcher.group()
+            val scanner = new Scanner(withSegment)
+            val buffer = new StringBuffer()
+            while (scanner.hasNextLine) {
+              val line = scanner.nextLine().replaceAll("--(.*)$", "").trim
+              val propReg = "\\s*(.*)\\s*=(.*)(,|)\\s*"
+              if (line.matches(propReg)) {
+                var newLine = line
+                  .replaceAll("^'|^", "'")
+                  .replaceAll("('|)\\s*=\\s*('|)", "' = '")
+                  .replaceAll("('|),$", "',")
+                if (!line.endsWith(",")) {
+                  newLine = newLine.replaceFirst("('|)\\s*$", "'")
+                }
+                buffer.append(newLine).append("\n")
+              } else {
+                buffer.append(line).append("\n")
+              }
+            }
+            segment.replace(withSegment, buffer.toString.trim)
+          }
+        }
       }
       sqlCommand.converter(groups).map(operands => SQLCommandCall(sqlCommand, operands))
     }
@@ -131,6 +179,16 @@ object SQLCommandUtil extends Logger {
 
 }
 
+case class SQLError(
+                     errorType: SQLErrorType,
+                     exception: String = null,
+                     sql: String = null
+                   ) {
+  //不可见分隔符.
+  private[util] val separator = "\001"
+
+  private[util] def toErrorString: String = s"${errorType.errorType}$separator$exception$separator$sql"
+}
 
 sealed abstract class SQLCommand(
                                   val name: String,

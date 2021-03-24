@@ -59,19 +59,19 @@ class HttpSink(@(transient@param) ctx: StreamingContext,
                name: String = null,
                uid: String = null) extends Sink {
 
-  def getSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)
+  def get(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpGet.METHOD_NAME)
 
-  def postSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPost.METHOD_NAME)
+  def post(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPost.METHOD_NAME)
 
-  def patchSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPatch.METHOD_NAME)
+  def patch(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPatch.METHOD_NAME)
 
-  def putSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPut.METHOD_NAME)
+  def put(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpPut.METHOD_NAME)
 
-  def deleteSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpDelete.METHOD_NAME)
+  def delete(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpDelete.METHOD_NAME)
 
-  def optionsSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpOptions.METHOD_NAME)
+  def options(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpOptions.METHOD_NAME)
 
-  def traceSink(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpTrace.METHOD_NAME)
+  def trace(stream: DataStream[String]): DataStreamSink[String] = sink(stream, HttpTrace.METHOD_NAME)
 
   private[this] def sink(stream: DataStream[String], method: String): DataStreamSink[String] = {
     val params = ctx.parameter.toMap.filter(_._1.startsWith(HTTP_SINK_PREFIX)).map(x => x._1.drop(HTTP_SINK_PREFIX.length + 1) -> x._2)

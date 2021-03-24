@@ -18,30 +18,42 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core.java.function;
+package com.streamxhub.streamx.common.enums;
 
-import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-
-/**
- * @author benjobs
- */
-@FunctionalInterface
-public interface StreamEnvConfigFunction {
+public enum SQLErrorType {
     /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
-     *
-     * @param environment
-     * @param parameterTool
+     * 基本检验失败(如为null等)
      */
-    void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    VERIFY_FAILED(1),
+    /**
+     * 语法错误
+     */
+    SYNTAX_ERROR(2),
+    /**
+     * 不支持的方言
+     */
+    UNSUPPORTED_DIALECT(3),
+    /**
+     * 不支持的sql命令
+     */
+    UNSUPPORTED_SQL(4),
+    /**
+     * 非";"结尾
+     */
+    ENDS_WITH(5);
+    public int errorType;
 
-    class NoneConfig implements StreamEnvConfigFunction {
-
-        @Override
-        public void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool) {
-
-        }
+    SQLErrorType(int errorType) {
+        this.errorType = errorType;
     }
-}
 
+    public static SQLErrorType of(Integer errorType) {
+        for (SQLErrorType type : values()) {
+            if (type.errorType == errorType) {
+                return type;
+            }
+        }
+        return null;
+    }
+
+}

@@ -55,6 +55,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * for scala
    *
    * @param stream
+   * @param alias
    * @param topic
    * @param serializationSchema 序列化Scheam,不指定默认使用SimpleStringSchema
    * @param partitioner         指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
@@ -64,12 +65,13 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @return
    */
   def sink[T](stream: DataStream[T],
+              alias: String = "",
               topic: String = "",
               serializationSchema: SerializationSchema[T] = new SimpleStringSchema().asInstanceOf[SerializationSchema[T]],
               partitioner: FlinkKafkaPartitioner[T] = new KafkaEqualityPartitioner[T](ctx.getParallelism)): DataStreamSink[T] = {
 
     val producer = {
-      val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic)
+      val prop = ConfigUtils.getKafkaSinkConf(ctx.parameter.toMap, topic, alias)
       Utils.copyProperties(property, prop)
       val topicId = prop.remove(ConfigConst.KEY_KAFKA_TOPIC).toString
       /**

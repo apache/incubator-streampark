@@ -83,7 +83,7 @@ object DataStreamExt {
      * @param maxTimeLag
      * @return
      */
-    def timeLagWatermarkWatermark(fun: T => Long, maxTimeLag: Time): DStream[T] = {
+    def timeLagWatermark(fun: T => Long, maxTimeLag: Time): DStream[T] = {
       val assigner = new AssignerWithPeriodicWatermarks[T] {
         override def extractTimestamp(element: T, previousElementTimestamp: Long): Long = fun(element)
 
