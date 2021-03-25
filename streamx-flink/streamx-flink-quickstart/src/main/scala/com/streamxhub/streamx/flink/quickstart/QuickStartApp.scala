@@ -37,7 +37,7 @@ object QuickStartApp extends FlinkStreaming {
       .map(x => JsonUtils.read[User](x.value))
       .filter(_.age < 30)
 
-    JdbcSink().towPCSink[User](source)(user =>
+    JdbcSink().sink[User](source)(user =>
       s"""
         |insert into t_user(`name`,`age`,`gender`,`address`)
         |value('${user.name}',${user.age},${user.gender},'${user.address}')
