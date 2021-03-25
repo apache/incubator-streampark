@@ -228,15 +228,15 @@ object JdbcUtils {
    * @return
    */
   def getConnection(prop: Properties): Connection = {
-    val instance = prop(KEY_INSTANCE)
-    val lock = lockMap.getOrElseUpdate(instance, new ReentrantLock())
+    val alias = prop(KEY_ALIAS)
+    val lock = lockMap.getOrElseUpdate(alias, new ReentrantLock())
     try {
       lock.lock()
-      val ds: HikariDataSource = Try(Option(dataSourceHolder(instance))).getOrElse(None) match {
+      val ds: HikariDataSource = Try(Option(dataSourceHolder(alias))).getOrElse(None) match {
         case None =>
           //创建一个数据源对象
           val jdbcConfig = new HikariConfig()
-          prop.filter(_._1 != KEY_INSTANCE).foreach(x => {
+          prop.filter(x => x._1 != KEY_ALIAS && x._1 != KEY_SEMANTIC).foreach(x => {
             Try(Option(jdbcConfig.getClass.getDeclaredField(x._1))).getOrElse(None) match {
               case Some(field) =>
                 field.setAccessible(true)
@@ -266,7 +266,7 @@ object JdbcUtils {
             }
           })
           val ds = new HikariDataSource(jdbcConfig)
-          dataSourceHolder += instance -> ds
+          dataSourceHolder += alias -> ds
           ds
         case Some(x) => x
       }

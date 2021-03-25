@@ -56,7 +56,7 @@ public class QuickStartJavaApp {
 
         new JdbcSink<JavaUser>(context)
                 .sql((SQLFromFunction<JavaUser>) JavaUser::toSql)
-                .towPCSink(source);
+                .sink(source);
 
         context.start();
     }

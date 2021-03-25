@@ -31,10 +31,9 @@ object JdbcSinkApp extends FlinkStreaming {
      * 2)异常情况: 当从kafka中读取的内容非数字会导致插入失败,kafka的消费的offset会回滚
      * 如: 当前的kafka size为30,offset是30, 手动输入1个字母,此时size为31,写入mysql会报错,kafka的offset依旧是30,不会发生更新.
      */
-    JdbcSink(parallelism = 5).towPCSink[String](source)(x => {
+    JdbcSink(parallelism = 5).sink[String](source)(x => {
       s"insert into orders(id,timestamp) values('$x',${System.currentTimeMillis()})"
     }).uid("mysqlSink").name("mysqlSink")
-
 
     /**
      * what fuck....

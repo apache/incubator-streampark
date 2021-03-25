@@ -23,8 +23,6 @@ package com.streamxhub.streamx.flink.core.java.sink;
 import com.streamxhub.streamx.common.util.ConfigUtils;
 import com.streamxhub.streamx.flink.core.java.function.SQLFromFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
-import com.streamxhub.streamx.flink.core.scala.sink.Dialect;
-import com.streamxhub.streamx.flink.core.scala.sink.Jdbc2PCSinkFunction;
 import com.streamxhub.streamx.flink.core.scala.sink.JdbcSinkFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.DataStreamSink;
@@ -39,22 +37,14 @@ public class JdbcSink<T> {
     private final StreamingContext context;
     private Properties jdbc;
     private SQLFromFunction<T> sqlFunc;
-    private String dialect = Dialect.MYSQL().toString().toLowerCase();
     private String alias = "";
 
     public JdbcSink(StreamingContext context) {
         this.context = context;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
-    }
-
-    public JdbcSink<T> dialect(String dialect) {
-        this.dialect = dialect;
-        return this;
     }
 
     public JdbcSink<T> alias(String alias) {
         this.alias = alias;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), dialect, alias);
         return this;
     }
 
@@ -69,12 +59,9 @@ public class JdbcSink<T> {
     }
 
     public DataStreamSink<T> sink(DataStream<T> dataStream) {
+        assert sqlFunc != null;
+        this.jdbc = this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
         JdbcSinkFunction<T> sinkFun = new JdbcSinkFunction<>(this.jdbc, this.sqlFunc);
-        return dataStream.addSink(sinkFun);
-    }
-
-    public DataStreamSink<T> towPCSink(DataStream<T> dataStream) {
-        Jdbc2PCSinkFunction<T> sinkFun = new Jdbc2PCSinkFunction<>(this.jdbc, this.sqlFunc);
         return dataStream.addSink(sinkFun);
     }
 

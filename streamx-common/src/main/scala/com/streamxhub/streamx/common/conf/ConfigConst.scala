@@ -43,6 +43,8 @@ object ConfigConst {
 
   val KEY_JOB_ID = "jobId"
 
+  val KEY_SEMANTIC = "semantic"
+
   /**
    * sign....
    */
@@ -165,14 +167,12 @@ object ConfigConst {
 
   val REDIS_PREFIX = "redis."
 
-  val KEY_INSTANCE = "instance"
-
   val KEY_ALIAS = "alias"
 
   /**
    * about config jdbc...
    */
-  val MYSQL_PREFIX = "mysql."
+  val KEY_JDBC_PREFIX = "jdbc."
   val KEY_JDBC_DRIVER = "driverClassName"
   val KEY_JDBC_DATABASE = "database"
   val KEY_JDBC_URL = "jdbcUrl"

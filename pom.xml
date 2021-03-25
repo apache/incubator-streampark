@@ -40,7 +40,7 @@
         <protobuf.version>2.5.0</protobuf.version>
         <slf4j.version>1.7.25</slf4j.version>
         <logback.version>1.2.3</logback.version>
-        <spotless.version>2.7.0</spotless.version>
+        <spotless.version>2.9.0</spotless.version>
         <grpc.version>1.15.0</grpc.version>
         <gson.version>2.8.5</gson.version>
         <mockito.version>1.10.19</mockito.version>
@@ -398,6 +398,43 @@
                 <artifactId>spotless-maven-plugin</artifactId>
                 <version>${spotless.version}</version>
                 <configuration>
+                    <java>
+                        &lt;!&ndash; These are the defaults, you can override if you want &ndash;&gt;
+                        <includes>
+                            <include>src/main/java/**/*.java</include>
+                            <include>src/test/java/**/*.java</include>
+                        </includes>
+
+                        <importOrder/> &lt;!&ndash; standard import order &ndash;&gt;
+                        <importOrder>  &lt;!&ndash; or a custom ordering &ndash;&gt;
+                            <order>java,javax,org,com,com.diffplug,</order>
+                        </importOrder>
+
+                        <googleJavaFormat>
+                            <version>1.7</version>
+                            <style>GOOGLE</style>
+                        </googleJavaFormat>
+                        <removeUnusedImports/> &lt;!&ndash; self-explanatory &ndash;&gt;
+                        <licenseHeader>
+                            <file>license-header</file>
+                        </licenseHeader>
+                    </java>
+                    <scala>
+                        &lt;!&ndash; These are the defaults, you can override if you want &ndash;&gt;
+                        <includes>
+                            <include>src/main/scala/**/*.scala</include>
+                            <include>src/test/scala/**/*.scala</include>
+                            <include>src/main/scala/**/*.sc</include>
+                            <include>src/test/scala/**/*.sc</include>
+                        </includes>
+
+                        <scalafmt/> &lt;!&ndash; has its own section below &ndash;&gt;
+
+                        <licenseHeader>
+                            <file>license-header</file>
+                            <delimiter>package</delimiter>
+                        </licenseHeader>
+                    </scala>
                     <formats>
                         <format>
                             <includes>
@@ -412,38 +449,16 @@
                             </indent>
                         </format>
                     </formats>
-
-                    <java>
-                        <includes>
-                            <include>src/main/java/**/*.java</include>
-                            <include>src/test/java/**/*.java</include>
-                        </includes>
-                        <googleJavaFormat>
-                            <version>1.7</version>
-                            <style>GOOGLE</style>
-                        </googleJavaFormat>
-                        <importOrder>
-                             \# refers to the static imports
-                            <order>javax,java,scala,org,com,\#</order>
-                        </importOrder>
-                        <removeUnusedImports/>
-                    </java>
-                    <scala>
-                        <includes>
-                            <include>src/main/scala/**/*.scala</include>
-                            <include>src/test/scala/**/*.scala</include>
-                        </includes>
-                    </scala>
                 </configuration>
                 <executions>
-                     <execution>
-                         <id>spotless-check</id>
-                         <phase>validate</phase>
-                         <goals>
-                             <goal>check</goal>
-                         </goals>
-                     </execution>
-                 </executions>
+                    <execution>
+                        <id>spotless-check</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
             -->
 

@@ -19,7 +19,7 @@ object KafkaSourceApp extends FlinkStreaming {
       .uid("kfkSource1")
       .name("kfkSource1")
       .map(x => {
-        x.topic
+        x.value
       })
       .print()
 

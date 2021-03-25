@@ -89,7 +89,7 @@ class FailoverWriter(failoverStorage: FailoverStorageType, properties: Propertie
             try {
               Lock.lock.lock()
               Lock.initialized = true
-              properties.put(KEY_INSTANCE, s"failover-${table}")
+              properties.put(KEY_ALIAS, s"failover-${table}")
               val mysqlConnect = JdbcUtils.getConnection(properties)
               val mysqlTable = mysqlConnect.getMetaData.getTables(null, null, table, Array("TABLE", "VIEW"))
               if (!mysqlTable.next()) {

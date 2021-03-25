@@ -21,12 +21,11 @@
 package com.streamxhub.streamx.flink.core.scala.sink
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
+import com.streamxhub.streamx.common.enums.{ApiType, Semantic}
 import com.streamxhub.streamx.common.util.{ConfigUtils, JdbcUtils, Logger, Utils}
-import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import com.streamxhub.streamx.flink.core.scala.sink.Dialect.Dialect
 import com.streamxhub.streamx.flink.core.java.function.SQLFromFunction
+import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.ExecutionConfig
 import org.apache.flink.api.common.io.RichOutputFormat
 import org.apache.flink.api.common.typeinfo.TypeInformation
@@ -67,28 +66,26 @@ class JdbcSink(@(transient@param) ctx: StreamingContext,
   /**
    *
    * @param stream  : DataStream
-   * @param dialect : 数据库方言
    * @param toSQLFn : 转换成SQL的函数,有用户提供.
    * @tparam T : DataStream里的流的数据类型
    * @return
    */
-  def sink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
-    val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
-    val sink = stream.addSink(sinkFun)
+  def sink[T](stream: DataStream[T])(implicit toSQLFn: T => String): DataStreamSink[T] = {
+    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, alias)
+    val semantic = Semantic.of(prop.getProperty(KEY_SEMANTIC, Semantic.NONE.name()))
+    val sink = semantic match {
+      case Semantic.EXACTLY_ONCE =>
+        val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
+        if (parallelism > 1) {
+          logWarn(s"parallelism:$parallelism, Jdbc Semantic EXACTLY_ONCE,parallelism bust be 1.")
+        }
+        stream.addSink(sinkFun)
+      case _ =>
+        val sinkFun = new JdbcSinkFunction[T](prop, toSQLFn)
+        stream.addSink(sinkFun)
+    }
     afterSink(sink, parallelism, name, uid)
   }
-
-  def towPCSink[T](stream: DataStream[T], dialect: Dialect = Dialect.MYSQL)(implicit toSQLFn: T => String): DataStreamSink[T] = {
-    val prop = ConfigUtils.getJdbcConf(ctx.parameter.toMap, dialect.toString, alias)
-    val sinkFun = new Jdbc2PCSinkFunction[T](prop, toSQLFn)
-    val sink = stream.addSink(sinkFun)
-    if (parallelism > 1) {
-      logWarn(s"parallelism:$parallelism, MySQL towPCSink parallelism bust be 1.")
-    }
-    afterSink(sink, 1, name, uid)
-  }
-
 }
 
 class JdbcSinkFunction[T](apiType: ApiType = ApiType.scala, jdbc: Properties) extends RichSinkFunction[T] with Logger {
@@ -195,12 +192,6 @@ class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: 
 
   override def close(): Unit = sinkFunction.close()
 }
-
-object Dialect extends Enumeration {
-  type Dialect = Value
-  val MYSQL, ORACLE, MSSQL, H2 = Value
-}
-
 
 //-------------Jdbc2PCSinkFunction exactly-once support ---------------------------------------------------------------------------------------
 /**
