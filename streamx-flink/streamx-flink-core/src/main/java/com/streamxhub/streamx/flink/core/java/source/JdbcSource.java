@@ -24,7 +24,6 @@ import com.streamxhub.streamx.common.util.ConfigUtils;
 import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
-import com.streamxhub.streamx.flink.core.scala.sink.Dialect;
 import com.streamxhub.streamx.flink.core.scala.source.JdbcSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
@@ -43,6 +42,17 @@ public class JdbcSource<T> {
         this.context = context;
     }
 
+    /**
+     * 允许手动指定一个jdbc的连接信息
+     *
+     * @param jdbc
+     * @return
+     */
+    public JdbcSource<T> jdbc(Properties jdbc) {
+        this.jdbc = jdbc;
+        return this;
+    }
+
     public JdbcSource<T> alias(String alias) {
         this.alias = alias;
         return this;
@@ -51,7 +61,7 @@ public class JdbcSource<T> {
     public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
         assert queryFunc != null;
         assert resultFunc != null;
-        this.jdbc = ConfigUtils.getJdbcConf(context.parameter().toMap(), Dialect.MYSQL().toString(), alias);
+        this.jdbc = this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
         JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(jdbc, queryFunc, resultFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
     }

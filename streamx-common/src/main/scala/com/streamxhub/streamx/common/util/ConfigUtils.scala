@@ -64,8 +64,6 @@ object ConfigUtils {
     }
   }
 
-  def getMySQLConf(parameter: JavaMap[String, String])(implicit alias: String = ""): Properties = getJdbcConf(parameter, MYSQL_PREFIX, alias)
-
   /**
    *
    * @param parameter
@@ -73,26 +71,25 @@ object ConfigUtils {
    * @param alias
    * @return
    */
-  def getJdbcConf(parameter: JavaMap[String, String], dialect: String, alias: String): Properties = {
-    val prefix = if (dialect.endsWith(".")) dialect.toLowerCase() else s"${dialect.toLowerCase()}."
-    val fix = alias match {
-      case "" | null => prefix
+  def getJdbcConf(parameter: JavaMap[String, String], alias: String): Properties = {
+    val prefix = alias match {
+      case "" | null => KEY_JDBC_PREFIX
       case other =>
-        val aliasList = parameter.getOrElse(s"$prefix$KEY_ALIAS", "").split(SIGN_COMMA)
+        val aliasList = parameter.getOrElse(s"$KEY_JDBC_PREFIX$KEY_ALIAS", "").split(SIGN_COMMA)
         require(aliasList.contains(other))
         s"$prefix$alias".replaceFirst("\\.+$|$", ".")
     }
-    val driver = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_DRIVER", null)
-    val url = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_URL", null)
-    val user = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_USER", null)
-    val password = parameter.toMap.getOrDefault(s"$fix$KEY_JDBC_PASSWORD", null)
+    val driver = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_DRIVER", null)
+    val url = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_URL", null)
+    val user = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_USER", null)
+    val password = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
       case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must be not null")
       case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }
-    val param: ScalaMap[String, String] = filterParam(parameter, fix)
+    val param: ScalaMap[String, String] = filterParam(parameter, prefix)
     val properties = new Properties()
     val aliasName = if (alias == null || alias.trim == "") "default" else alias
     properties.put(KEY_ALIAS, aliasName)

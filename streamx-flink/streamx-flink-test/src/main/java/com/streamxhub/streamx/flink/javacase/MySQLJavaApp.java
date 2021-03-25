@@ -26,7 +26,11 @@ public class MySQLJavaApp {
                         (SQLQueryFunction<OrderInfo>) lastOne -> {
                             //5秒抽取一次
                             Thread.sleep(5000);
-                            Serializable lastOffset = lastOne == null ? "2020-10-10 23:00:00" : lastOne.timestamp;
+
+                            Serializable lastOffset = lastOne == null
+                                    ? "2020-10-10 23:00:00"
+                                    : lastOne.timestamp;
+
                             return String.format(
                                     "select * from t_order " +
                                     "where timestamp > '%s' " +
