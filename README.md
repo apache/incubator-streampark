@@ -3,11 +3,11 @@ let't flink|spark easy
 
 ## 什么是Streamx?
 
-大数据实时处理流域 `Apache Spark` 和 后起之秀 `Apache Flink` 是一个伟大的进步,从`Hadoop MapReduce`的刀耕火种时代迈入了高铁快车时代,我们在使用 Flink & Spark 时发现从编程模型,
-启动配置到管理运维都有很多可以抽象共用的地方, 我们将一些好的经验固化下来并结合业内的最佳实践,通过不断努力终于诞生了今天的框架 —— Streamx, 项目的初衷是:让 Flink & Spark开发更简单,
-使用Streamx可以极大降低学习成本和开发门槛, 让你只用关心最核心的业务,Streamx 规范了项目的配置,定义了最佳的编程方式,提供了一系列开箱即用的Connector,标准化了配置、开发、测试、部署、监控、运维的整个过程,
+大数据实时处理流域 `Apache Spark` 和 后起之秀 `Apache Flink` 是一个伟大的进步,从`Hadoop MapReduce`的刀耕火种时代迈入了高铁快车时代,我们在使用 `Flink` & `Spark` 时发现从编程模型,
+启动配置到管理运维都有很多可以抽象共用的地方, 我们将一些好的经验固化下来并结合业内的最佳实践,通过不断努力终于诞生了今天的框架 —— `Streamx`, 项目的初衷是 —— 让 `Flink` & `Spark`开发更简单,
+使用`Streamx`可以极大降低学习成本和开发门槛, 让你只用关心最核心的业务,`Streamx` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connector`,标准化了配置、开发、测试、部署、监控、运维的整个过程,
 同时提供`scala`和`java`两套api,其最终目的是打造一个一站式大数据平台,流批一体的解决方案.
-Streamx有两部分组成 —— `Streamx-core` 和 `Streamx-console`
+`Streamx`有两部分组成 —— `Streamx-core` 和 `Streamx-console`
 
 #### 消费kafka示例
 
@@ -87,6 +87,9 @@ mvn clean install -DskipTests
 
 ## 快速上手
 
+
+### 1. 代码开发
+
 现在让我们快速上手一个`Streamx`应用
 
 > 确保flink版本是 1.12.0 +
@@ -102,9 +105,9 @@ import org.apache.flink.api.scala._
 
 object HelloStreamXApp extends FlinkStreaming {
 
-  override def handle(context: StreamingContext): Unit = {
+  override def handle(): Unit = {
     //1) source
-    val source = KafkaSource(context).getDataStream[String](topic = "hello")
+    val source = KafkaSource().getDataStream[String](topic = "hello")
       .uid("kfk_source")
       .name("kfk_source")
       .map(_.value)
@@ -159,39 +162,41 @@ flink:
         jvm-overhead.max:
         jvm-overhead.min:
         managed.fraction: 0.4
-  watermark:
-    time.characteristic: EventTime
-    interval: 10000
   checkpoints:
-    unaligned: true
     enable: true
-    interval: 5000
+    interval: 30000
     mode: EXACTLY_ONCE
+    timeout: 300000
+    unaligned: true
+  watermark:
+    interval: 10000
+  # 状态后端
+  state:
+    backend: # see https://ci.apache.org/projects/flink/flink-docs-release-1.12/ops/state/state_backends.html
+      value: filesystem # 保存类型('jobmanager', 'filesystem', 'rocksdb')
+      memory: 5242880 # 针对jobmanager有效,最大内存
+      async: false    # 针对(jobmanager,filesystem)有效,是否开启异步
+      incremental: true #针对rocksdb有效,是否开启增量
+      #rocksdb 的配置参考 https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html#rocksdb-state-backend
+      #rocksdb配置key的前缀去掉:state.backend
+      #rocksdb.block.blocksize:
+    checkpoints.dir: file:///tmp/chkdir
+    savepoints.dir: file:///tmp/chkdir
+    checkpoints.num-retained: 1
+  # 重启策略
+  restart-strategy:
+    value: fixed-delay  #重启策略[(fixed-delay|failure-rate|none)共3个可配置的策略]
+    fixed-delay:
+      attempts: 3
+      delay: 5000
+    failure-rate:
+      max-failures-per-interval:
+      failure-rate-interval:
+      delay:
+  # table
   table:
     planner: blink # (blink|old|any)
     mode: streaming #(batch|streaming)
-
-# restart-strategy
-restart-strategy: failure-rate #(fixed-delay|failure-rate|none共3个可配置的策略)
-# Up to 10 mission failures are allowed within 5 minutes, and restart every 5 seconds after each failure. If the failure rate exceeds this failure rate, the program will exit
-restart-strategy.failure-rate:
-  max-failures-per-interval: 10
-  failure-rate-interval: 5min
-  delay: 5000
-  #failure-rate:
-  #  max-failures-per-interval:
-  #  failure-rate-interval:
-  #  delay:
-  #none:
-
-#state.backend
-state.backend: rocksdb #保存类型(jobmanager,filesystem,rocksdb)
-state.backend.memory: 5242880 #针对jobmanager有效,最大内存
-state.backend.async: false # 针对(jobmanager,filesystem)有效,是否开启异步
-state.backend.incremental: true #针对rocksdb有效,是否开启增量
-#rocksdb config: https://ci.apache.org/projects/flink/flink-docs-release-1.9/ops/config.html#rocksdb-configurable-options
-#state.backend.rocksdb.block.blocksize:
-#....
 
 # source config....
 kafka.source:
@@ -208,7 +213,6 @@ kafka.source:
       #topic2: 0:182,1:183,2:182
       #topic3: 0:192,1:196,2:196
 
-
 kafka.sink:
   bootstrap.servers: kafka1:9092,kafka2:9092,kafka3:9092
   topic: kfk_sink
@@ -222,6 +226,4 @@ kafka.sink:
 
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
-`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/) 或者扫下面的二维码加入用户讨论群
-
-<img width="250px" height="250px" src="http://assets.streamxhub.com/streamx_wechat.png"/>
+`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
