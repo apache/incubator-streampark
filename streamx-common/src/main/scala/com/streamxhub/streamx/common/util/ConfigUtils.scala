@@ -74,10 +74,7 @@ object ConfigUtils {
   def getJdbcConf(parameter: JavaMap[String, String], alias: String): Properties = {
     val prefix = alias match {
       case "" | null => KEY_JDBC_PREFIX
-      case other =>
-        val aliasList = parameter.getOrElse(s"$KEY_JDBC_PREFIX$KEY_ALIAS", "").split(SIGN_COMMA)
-        require(aliasList.contains(other))
-        s"$prefix$alias".replaceFirst("\\.+$|$", ".")
+      case other => s"$KEY_JDBC_PREFIX$other".replaceFirst("\\.+$|$", ".")
     }
     val driver = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_DRIVER", null)
     val url = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_URL", null)
