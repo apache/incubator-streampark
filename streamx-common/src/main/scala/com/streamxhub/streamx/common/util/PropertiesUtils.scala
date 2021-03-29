@@ -69,7 +69,7 @@ object PropertiesUtils {
     }
   }
 
-  def fromYamlText(text: String) = {
+  def fromYamlText(text: String):Map[String,String] = {
     try {
       val map = MMap[String, String]()
       new Yaml()
@@ -81,7 +81,7 @@ object PropertiesUtils {
     }
   }
 
-  def fromPropertiesText(conf: String) = {
+  def fromPropertiesText(conf: String):Map[String,String]  = {
     try {
       val properties = new Properties()
       properties.load(new StringReader(conf))
@@ -92,7 +92,7 @@ object PropertiesUtils {
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(filename: String) = {
+  def fromYamlFile(filename: String):Map[String,String]  = {
     val file = new File(filename)
     require(file.exists(), s"Yaml file $file does not exist")
     require(file.isFile, s"Yaml file $file is not a normal file")

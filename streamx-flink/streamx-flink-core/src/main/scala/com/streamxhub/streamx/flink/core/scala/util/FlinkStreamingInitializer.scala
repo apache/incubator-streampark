@@ -42,6 +42,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
+import scala.collection.Map
 import scala.util.Try
 
 private[scala] object FlinkStreamingInitializer {
@@ -83,6 +84,13 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   var javaStreamEnvConfFunc: StreamEnvConfigFunction = _
 
   val parameter: ParameterTool = initParameter()
+
+  private[this] lazy val defaultFlinkConf: Map[String, String] = {
+    val flinkHome = System.getenv("FLINK_HOME")
+    require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
+    val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+    readFlinkConf(flinkConf)
+  }
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
@@ -179,7 +187,14 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   private[this] def restartStrategy(): Unit = {
-    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse(null)
+    /**
+     * 优先到当前项目的配置下找配置,找不到,则取$FLINK_HOME/conf/flink-conf.yml里的配置
+     */
+    val defaultConf = getFlinkConf()
+    val prefixLen = "flink.".length
+    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse {
+      Try(RestartStrategy.byName(defaultConf("restart-strategy"))).getOrElse(null)
+    }
     strategy match {
       case RestartStrategy.`failure-rate` =>
 
@@ -195,11 +210,20 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * <<<
          * 即:每次异常重启的时间间隔是"2秒",如果在"5分钟"内,失败总次数到达"10次" 则任务失败.
          */
-        val interval = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL).toInt).getOrElse(3)
+        val interval = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL).toInt)
+          .getOrElse(
+            Try(defaultConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_PER_INTERVAL.drop(prefixLen)).toInt).getOrElse(3)
+          )
 
-        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL)).getOrElse(null), (5, TimeUnit.MINUTES))
+        val rateInterval = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL))
+          .getOrElse(
+            Try(defaultConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_RATE_INTERVAL.drop(prefixLen))).getOrElse(null)
+          ), (5, TimeUnit.MINUTES))
 
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY)).getOrElse(null))
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY))
+          .getOrElse(
+            Try(defaultConf(KEY_FLINK_RESTART_STRATEGY_FAILURE_RATE_DELAY.drop(prefixLen))).getOrElse(null)
+          ))
 
         streamEnvironment.getConfig.setRestartStrategy(RestartStrategies.failureRateRestart(
           interval,
@@ -217,8 +241,15 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
          * 即:
          * 任务最大的失败重试次数是5次,每次任务重启的时间间隔是3秒,如果失败次数到达5次,则任务失败退出
          */
-        val attempts = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS).toInt).getOrElse(3)
-        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY)).getOrElse(null))
+        val attempts = Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS).toInt)
+          .getOrElse(
+            Try(defaultConf(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_ATTEMPTS.drop(prefixLen)).toInt).getOrElse(3)
+          )
+
+        val delay = DateUtils.getTimeUnit(Try(parameter.get(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY))
+          .getOrElse(
+            Try(defaultConf(KEY_FLINK_RESTART_STRATEGY_FIXED_DELAY_DELAY.drop(prefixLen))).getOrElse(null)
+          ))
 
         /**
          * 任务执行失败后总共重启 restartAttempts 次,每次重启间隔 delayBetweenAttempts
@@ -266,31 +297,17 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     if (stateBackend != null) {
       val cpDir = if (stateBackend == XStateBackend.jobmanager) null else {
         /**
-         * cpDir如果从配置文件中读取失败(key:state.checkpoints.dir),则尝试从flink-conf.yml中读取..
+         * cpDir如果从配置文件中读取失败(key:flink.state.checkpoints.dir),则尝试从flink-conf.yml中读取..
          */
         parameter.get(KEY_FLINK_STATE_CHECKPOINTS_DIR, null) match {
           //从flink-conf.yaml中读取.
           case null =>
-            logWarn("can't found flink.checkpoints.dir from properties,now try found from flink-conf.yaml")
-            val flinkConf = {
-              /**
-               * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
-               * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
-               */
-              parameter.get(KEY_FLINK_CONF(), null) match {
-                case null | "" =>
-                  logInfo("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
-                  val flinkHome = System.getenv("FLINK_HOME")
-                  require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-                  val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-                  readFlinkConf(flinkConf)
-                case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
-              }
-            }
+            logWarn("can't found flink.state.checkpoints.dir from properties,now try found from flink-conf.yaml")
+            val flinkConf = getFlinkConf()
             //从flink-conf.yaml中读取,key: state.checkpoints.dir
-            val dir = flinkConf(KEY_FLINK_STATE_CHECKPOINTS_DIR)
-            require(dir != null, s"[StreamX] can't found flink.checkpoints.dir from $flinkConf ")
-            logInfo(s"stat.backend: flink.checkpoints.dir found in flink-conf.yaml,$dir")
+            val dir = flinkConf("state.checkpoints.dir")
+            require(dir != null, s"[StreamX] can't found state.checkpoints.dir from $flinkConf ")
+            logInfo(s"stat.backend: state.checkpoints.dir found in flink-conf.yaml,$dir")
             dir
           case dir =>
             logInfo(s"stat.backend: flink.checkpoints.dir found in properties,$dir")
@@ -340,6 +357,19 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         case _ =>
           logError("usage error!!! stat.backend must be (jobmanager|filesystem|rocksdb)")
       }
+    }
+  }
+
+  private[this] def getFlinkConf: Map[String, String] = {
+    /**
+     * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
+     * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
+     */
+    parameter.get(KEY_FLINK_CONF(), null) match {
+      case null | "" =>
+        logInfo("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
+        defaultFlinkConf
+      case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
     }
   }
 
