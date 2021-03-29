@@ -26,8 +26,7 @@ import java.io._
 import java.util.{Properties, Scanner, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.collection.Map
-import scala.collection.mutable.{Map => MMap}
+import scala.collection.mutable.{Map => MutableMap}
 
 /**
  * @author benjobs
@@ -55,7 +54,7 @@ object PropertiesUtils {
             case "" => eachAppendYamlItem(k, x._1, x._2, proper)
             case other => eachAppendYamlItem(s"$other.$k", x._1, x._2, proper)
           }
-        })
+        }).toMap
       case text =>
         val value = text match {
           case null => ""
@@ -65,13 +64,13 @@ object PropertiesUtils {
           case "" => proper += k -> value
           case other => proper += s"$other.$k" -> value
         }
-        proper
+        proper.toMap
     }
   }
 
   def fromYamlText(text: String):Map[String,String] = {
     try {
-      val map = MMap[String, String]()
+      val map = MutableMap[String, String]()
       new Yaml()
         .load(text)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
@@ -98,7 +97,7 @@ object PropertiesUtils {
     require(file.isFile, s"Yaml file $file is not a normal file")
     val inputStream: InputStream = new FileInputStream(file)
     try {
-      val map = MMap[String, String]()
+      val map = MutableMap[String, String]()
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
@@ -111,7 +110,7 @@ object PropertiesUtils {
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(filename: String) = {
+  def fromPropertiesFile(filename: String):Map[String,String] = {
     val file = new File(filename)
     require(file.exists(), s"Properties file $file does not exist")
     require(file.isFile, s"Properties file $file is not a normal file")
@@ -129,10 +128,10 @@ object PropertiesUtils {
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(inputStream: InputStream) = {
+  def fromYamlFile(inputStream: InputStream):Map[String,String] = {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
-      val map = MMap[String, String]()
+      val map = MutableMap[String, String]()
       new Yaml()
         .load(inputStream)
         .asInstanceOf[java.util.Map[String, Map[String, Any]]]
@@ -145,7 +144,7 @@ object PropertiesUtils {
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(inputStream: InputStream) = {
+  def fromPropertiesFile(inputStream: InputStream):Map[String,String] = {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
       val properties = new Properties()
