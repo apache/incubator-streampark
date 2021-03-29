@@ -360,7 +360,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     }
   }
 
-  private[this] def getFlinkConf: Map[String, String] = {
+  private[this] def getFlinkConf(): Map[String, String] = {
     /**
      * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
      * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
