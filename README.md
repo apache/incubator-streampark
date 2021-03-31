@@ -1,13 +1,14 @@
 # StreamX
 let't flink|spark easy
 
-## 什么是Streamx?
 
-大数据实时处理流域 `Apache Spark` 和 后起之秀 `Apache Flink` 是一个伟大的进步,从`Hadoop MapReduce`的刀耕火种时代迈入了高铁快车时代,我们在使用 `Flink` & `Spark` 时发现从编程模型,
-启动配置到管理运维都有很多可以抽象共用的地方, 我们将一些好的经验固化下来并结合业内的最佳实践,通过不断努力终于诞生了今天的框架 —— `Streamx`, 项目的初衷是 —— 让 `Flink` & `Spark`开发更简单,
-使用`Streamx`可以极大降低学习成本和开发门槛, 让你只用关心最核心的业务,`Streamx` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connector`,标准化了配置、开发、测试、部署、监控、运维的整个过程,
-同时提供`scala`和`java`两套api,其最终目的是打造一个一站式大数据平台,流批一体的解决方案.
-`Streamx`有两部分组成 —— `Streamx-core` 和 `Streamx-console`
+> 一个神奇的框架,让Flink开发更简单
+
+## 什么是Streamx?
+&nbsp;&nbsp;&nbsp;&nbsp;大数据技术如今发展的如火如荼,已经呈现欣欣向荣百花齐放的景象,实时处理流域 `Apache Spark` 和 `Apache Flink` 更是一个伟大的进步,尤其后起之秀`Apache Flink`被普遍认为是下一代大数据流计算引擎,我们在使用 `Flink` 时发现从编程模型, 启动配置到运维管理都有很多可以抽象共用的地方,
+我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `Streamx`, 项目的初衷是 —— 让 `Flink` 开发更简单, 使用`Streamx`开发,可以极大降低学习成本和开发门槛,
+让你只用关心最核心的业务,`Streamx` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connector`,标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供`scala`和`java`两套api,
+其最终目的是打造一个一站式大数据平台,流批一体的解决方案
 
 #### 消费kafka示例
 
@@ -24,17 +25,59 @@ kafka.source:
 KafkaSource().getDataStream[String]().print()
 ```
 
-## Streamx-core
+## 组成部分
 
-Streamx-core (Streamx-flink-core|Streamx-spark-core) 是一个开发时的框架,借鉴了SpringBoot的思想,规范了配置文件的格式,按照约定优于配置。为开发者提供了一个开发时 RunTime Content,提供了一个开箱即用的Source和Sink,每一个API都经过了仔细的打磨，并扩展了相关的方法（仅scala）大大简化了flink的开发，提高了开发效率和开发体验
+`Streamx`有三部分组成,`streamx-core`,`streamx-pump` 和 `streamx-console`
 
-## Streamx-console
+### streamx-core
 
-Streamx-console 是一个独立的平台，它补充了Streamx-core。较好地管理了flink任务，集成了项目编译、发布、参数配置、启动、savepoint、监控和维护等功能，并且集成了火焰图(flame graph),大大简化了flink任务的操作和维护。该平台本身采用SpringBoot Vue Mybatis开发,提供了简单的租户和权限管理,代码风格充分遵守阿里的开发规范,结构也尽可能的清晰规范,可以作为大数据平台的开发基础，很方便地进行二次开发
+`streamx-core` 定义是一个开发时框架(好比诸多javaWeb框架,在开发时提供功能供开发者使用),关注编码开发,规范了配置文件,按照约定优于配置的方式进行开发,提供了一个开发时 `RunTime Content`和一系列开箱即用的`Connector`,扩展了`DataStream`相关的方法,融合了`DateStream`和`Flink sql` api,简化繁琐的操作,聚焦业务本身,提高开发效率和开发体验
 
-![console dashboard](http://assets.streamxhub.com/console-dashboard.jpg)
+### streamx-pump
 
-![job flameGraph](http://assets.streamxhub.com/job-flameGraph.png)
+`pump` 是抽水机,水泵的意思,`streamx-pump`的定位是一个数据抽取的组件,类似于`flinkx`,基于`streamx-core`中提供的各种`connector`开发,目的是打造一个方便快捷,开箱即用的大数据实时数据抽取和迁移组件,并且集成到`streamx-console`中,解决实时数据源获取问题,目前在规划中
+
+### streamx-console
+
+`streamx-console` 是一个综合实时数据平台,低代码(`Low Code`)平台,可以较好的管理`Flink`任务,集成了项目编译、发布、参数配置、启动、`savepoint`,火焰图(`flame graph`),`Flink SQL`,监控等诸多功能于一体,大大简化了`Flink`任务的日常操作和维护,融合了诸多最佳实践。旧时王谢堂前燕,飞入寻常百姓家,让大公司有能力研发使用的项目,现在人人可以使用,其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
+,该项目提供了租户和权限管理,代码风格充分遵守阿里的开发规范,结构也尽可能的清晰规范,可以作为大数据平台的开发基础,很方便地进行二次开发,该平台使用到但不仅限以下技术
+* [Apache Flink](http://flink.apache.org)
+* [Apache YARN](http://hadoop.apache.org)
+* [Spring Boot](https://spring.io/projects/spring-boot/)
+* [Mybatis](http://www.mybatis.org)
+* [Mybatis-Plus](http://mp.baomidou.com)
+* [Flame Graph](http://www.brendangregg.com/FlameGraphs)
+* [JVM-Profiler](https://github.com/uber-common/jvm-profiler)
+* [Vue](https://cn.vuejs.org/)
+* [VuePress](https://vuepress.vuejs.org/)
+* [Ant Design of Vue](https://antdv.com/)
+* [ANTD PRO VUE](https://pro.antdv.com/)
+* [xterm.js](https://xtermjs.org/)
+* [Monaco Editor](https://microsoft.github.io/monaco-editor/)
+* ...
+  
+感谢以上优秀的开源项目和很多未提到的优秀开源项目,给予最大的respect,
+特别感谢[Apache Zeppelin](http://zeppelin.apache.org)在开发`NoteBook`模块时从中借鉴了大量思想,
+特别感谢[IntelliJ IDEA](https://www.jetbrains.com/idea/), 感谢[fire-spark](https://github.com/GuoNingNing/fire-spark)项目,早期给予灵感和帮助,
+感谢我老婆在项目开发时给予的支持,照顾我的生活承包家务,给予我足够的时间开发这个项目
+
+<img src="http://assets.streamxhub.com/1617033782727.png" width="80%">
+<img src="http://assets.streamxhub.com/1617033782728.png" width="80%">
+<img src="http://assets.streamxhub.com/1617033782731.png" width="80%">
+
+## 为什么不是...?
+
+### Apache Zeppelin
+
+[Apache Zeppelin](http://zeppelin.apache.org)是一个非常优秀的开源项目,是目前众多开源项目中能找到的屈指可数的支持`Flink`的项目,`Zeppelin`创新型的`notebook`功能,让开发者非常方便的`on line`编程,方便的提交任务,语言层面同时支持`java`,`scala`,`python`,国内阿里的章剑峰大佬也在积极推动该项目,向剑峰大佬致以崇高的敬意,
+但该项目目前貌似没有解决项目的管理和运维方面的痛点,针对比较复杂的项目和大量的任务就有些力不从心了,一般来讲不论是`DataStream`项目还是`Flink SQL`大概都会经历作业的`开发阶段`,`测试阶段`,`项目打包阶段`,`上传到部署服务器阶段`,`启动任务阶段`等这些步骤,这是一个链路很长的步骤,且整个过程耗时比较长,体验不好,
+即使修改了一个符号,项目改完上线都得走上面的流程,我们还希望至少能有一个任务列表的功能,能够方便的管理任务,一眼就可以看到哪些任务正在运行,哪些停止了,任务消耗资源情况,可以在任务列表页面一键`启动`或`停止`任务,并且自动管理`savePoint`,这些问题也是开发者实际开发中会遇到了问题,
+`streamx-console`很好的解决了这些痛点,定位是一个一站式实时数据平台,并且开发了更多令人激动的功能(诸多`Flink SQL WebIDE`,`依赖隔离`,`任务回滚`,`Application启动`,`火焰图`...)
+
+### FlinkX
+
+[FlinkX](http://github.com/DTStack/flinkx) 是基于flink的分布式数据同步工具,实现了多种异构数据源之间高效的数据迁移,定位比较明确,专门用来做数据抽取和迁移,可以作为一个服务组件来使用,`Streamx`关注开发者具体的开发和任务后期的管理,定义有所不同,
+`streamx-pump`模块也在规则中,致力于解决数据源抽取和迁移,并会集成到`streamx-console`中
 
 ## 如何编译
 
@@ -50,7 +93,6 @@ git clone https://github.com/Streamxhub/Streamx.git
 cd Streamx
 mvn clean install -DskipTests
 ```
-
 顺利的话就会看到编译成功.
 
 ```log
@@ -86,7 +128,6 @@ mvn clean install -DskipTests
 ```
 
 ## 快速上手
-
 
 ### 1. 代码开发
 
