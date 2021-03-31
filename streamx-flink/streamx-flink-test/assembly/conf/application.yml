@@ -66,7 +66,7 @@ flink:
     planner: blink # (blink|old|any)
     mode: streaming #(batch|streaming)
 
-mysql:
+jdbc:
   semantic: EXACTLY_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE
   driverClassName: com.mysql.jdbc.Driver
   jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true
@@ -102,7 +102,7 @@ clickhouse.sink:
     retries: 10 #一条记录当插入失败时重试的最大次数
   failover:
     storage: mysql #kafka,hbase,hdfs
-    mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
+    jdbc: # 保存类型为MySQL,将失败的数据保存到MySQL
       jdbcUrl: jdbc:mysql://localhost:3306/test
       username: root
       password: 123322242
@@ -128,7 +128,7 @@ http.sink:
   failover:
     table: record
     storage: mysql #kafka,hbase,hdfs
-    mysql: # 保存类型为MySQL,将失败的数据保存到MySQL
+    jdbc: # 保存类型为MySQL,将失败的数据保存到MySQL
       jdbcUrl: jdbc:mysql://localhost:3306/test
       username: root
       password: 123322242

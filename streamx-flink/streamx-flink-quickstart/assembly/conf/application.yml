@@ -74,7 +74,7 @@ kafka.source:
   auto.offset.reset: earliest
 
 # mysql
-mysql:
+jdbc:
   driverClassName: com.mysql.cj.jdbc.Driver
   jdbcUrl: jdbc:mysql://localhost:3306/test?useSSL=false&allowPublicKeyRetrieval=true
   username: root
