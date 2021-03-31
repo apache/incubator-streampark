@@ -61,9 +61,10 @@ KafkaSource().getDataStream[String]().print()
 特别感谢[IntelliJ IDEA](https://www.jetbrains.com/idea/), 感谢[fire-spark](https://github.com/GuoNingNing/fire-spark)项目,早期给予灵感和帮助,
 感谢我老婆在项目开发时给予的支持,照顾我的生活承包家务,给予我足够的时间开发这个项目
 
-<img src="http://assets.streamxhub.com/1617033782727.png" width="80%">
-<img src="http://assets.streamxhub.com/1617033782728.png" width="80%">
-<img src="http://assets.streamxhub.com/1617033782731.png" width="80%">
+![Streamx Dashboard](http://assets.streamxhub.com/1617033782727.png)
+![Fink SQL WebIDE](http://assets.streamxhub.com/1617033782728.png)
+![Flink Job Flame Graph](http://assets.streamxhub.com/1617033782731.png)
+
 
 ## 为什么不是...?
 
