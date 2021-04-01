@@ -9,15 +9,6 @@ import org.apache.flink.table.descriptors.Csv
 object KafkaTableApp extends FlinkStreamTable {
 
   override def handle(): Unit = {
-    //connect kafka data
-    context
-      .connect(Kafka("hello", KafkaVer.UNIVERSAL))
-      .withFormat(new Csv)
-      .withSchema(
-        "id" -> DataTypes.STRING(),
-        "name" -> DataTypes.STRING()
-      )
-      .createTemporaryTable("kafka2Table")
 
     val ds = context.$fromCollection(
       List(

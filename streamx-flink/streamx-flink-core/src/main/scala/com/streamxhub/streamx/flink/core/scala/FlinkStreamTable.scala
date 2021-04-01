@@ -381,21 +381,28 @@ trait FlinkStreamTable extends Logger {
   var jobExecutionResult: JobExecutionResult = _
 
   def main(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
-    beforeStart()
+    init(args)
+    ready()
     handle()
     jobExecutionResult = context.start()
+    destroy()
+  }
+
+  private[this] def init(args: Array[String]): Unit = {
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
+    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
   }
 
   /**
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(): Unit = {}
+  def ready(): Unit = {}
 
   def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(): Unit
+
+  def destroy(): Unit = {}
 
 }

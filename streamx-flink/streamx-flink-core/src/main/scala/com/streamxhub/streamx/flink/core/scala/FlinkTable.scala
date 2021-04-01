@@ -205,19 +205,26 @@ trait FlinkTable extends Logger {
   implicit var context: TableContext = _
 
   def main(args: Array[String]): Unit = {
-    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    context = new TableContext(FlinkTableInitializer.initTable(args))
-    beforeStart()
+    init(args)
+    ready()
     handle()
     jobExecutionResult = context.start()
+    destroy()
+  }
+
+  private[this] def init(args: Array[String]): Unit = {
+    SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
+    context = new TableContext(FlinkTableInitializer.initTable(args))
   }
 
   /**
    * 用户可覆盖次方法...
    *
    */
-  def beforeStart(): Unit = {}
+  def ready(): Unit = {}
 
   def handle(): Unit
+
+  def destroy(): Unit = {}
 
 }
