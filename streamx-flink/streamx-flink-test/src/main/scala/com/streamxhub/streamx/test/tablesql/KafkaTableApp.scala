@@ -1,7 +1,7 @@
 package com.streamxhub.streamx.test.tablesql
 
+import com.streamxhub.streamx.flink.core.scala.FlinkStreamTable
 import com.streamxhub.streamx.flink.core.scala.table.descriptors.{Kafka, KafkaVer}
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreamTable, StreamTableContext}
 import org.apache.flink.api.scala._
 import org.apache.flink.table.api._
 import org.apache.flink.table.descriptors.Csv
