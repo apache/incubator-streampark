@@ -18,13 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.javacase;
+package com.streamxhub.streamx.flink.javacase.stream;
 
 import com.streamxhub.streamx.flink.core.java.sink.KafkaSink;
 import com.streamxhub.streamx.flink.core.scala.source.KafkaRecord;
 import com.streamxhub.streamx.flink.core.scala.util.StreamEnvConfig;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.java.source.KafkaSource;
+import com.streamxhub.streamx.flink.javacase.bean.LogBean;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.DataStream;

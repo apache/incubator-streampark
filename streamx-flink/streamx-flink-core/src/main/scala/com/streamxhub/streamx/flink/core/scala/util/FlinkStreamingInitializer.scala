@@ -83,7 +83,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   var javaStreamEnvConfFunc: StreamEnvConfigFunction = _
 
-  val parameter: ParameterTool = initParameter()
+  lazy val parameter: ParameterTool = initParameter()
 
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
     val flinkHome = System.getenv("FLINK_HOME")
@@ -192,9 +192,11 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
      */
     val defaultConf = getFlinkConf()
     val prefixLen = "flink.".length
-    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse {
-      Try(RestartStrategy.byName(defaultConf("restart-strategy"))).getOrElse(null)
-    }
+    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY)))
+      .getOrElse(
+        Try(RestartStrategy.byName(defaultConf("restart-strategy"))).getOrElse(null)
+      )
+
     strategy match {
       case RestartStrategy.`failure-rate` =>
 
@@ -367,7 +369,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
      */
     parameter.get(KEY_FLINK_CONF(), null) match {
       case null | "" =>
-        logInfo("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
+        logDebug("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
         defaultFlinkConf
       case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
     }

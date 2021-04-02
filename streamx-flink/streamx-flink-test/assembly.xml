@@ -4,7 +4,6 @@
         <format>tar.gz</format>
     </formats>
     <fileSets>
-
         <fileSet>
             <directory>assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>

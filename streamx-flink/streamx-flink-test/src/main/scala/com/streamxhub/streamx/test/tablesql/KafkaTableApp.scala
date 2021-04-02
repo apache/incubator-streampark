@@ -10,6 +10,16 @@ object KafkaTableApp extends FlinkStreamTable {
 
   override def handle(): Unit = {
 
+    //connect kafka data
+    context
+      .connect(Kafka("hello", KafkaVer.UNIVERSAL))
+      .withFormat(new Csv)
+      .withSchema(
+        "id" -> DataTypes.STRING(),
+        "name" -> DataTypes.STRING()
+      )
+      .createTemporaryTable("kafka2Table")
+
     val ds = context.$fromCollection(
       List(
         "flink,apapche flink",
@@ -71,7 +81,6 @@ object KafkaTableApp extends FlinkStreamTable {
       .groupBy($"id")
       .select($"id", $"id".count as "count")
       .<<[(String, Long)].print("GroupBy ==>")
-
 
   }
 

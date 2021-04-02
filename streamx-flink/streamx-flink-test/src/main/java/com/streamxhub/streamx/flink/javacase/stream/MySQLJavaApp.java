@@ -1,4 +1,4 @@
-package com.streamxhub.streamx.flink.javacase;
+package com.streamxhub.streamx.flink.javacase.stream;
 
 import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
@@ -6,6 +6,7 @@ import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
 import com.streamxhub.streamx.flink.core.java.source.JdbcSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.util.StreamEnvConfig;
+import com.streamxhub.streamx.flink.javacase.bean.OrderInfo;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 
 import java.io.Serializable;
@@ -29,7 +30,7 @@ public class MySQLJavaApp {
 
                             Serializable lastOffset = lastOne == null
                                     ? "2020-10-10 23:00:00"
-                                    : lastOne.timestamp;
+                                    : lastOne.getTimestamp();
 
                             return String.format(
                                     "select * from t_order " +
@@ -42,9 +43,9 @@ public class MySQLJavaApp {
                             List<OrderInfo> result = new ArrayList<>();
                             map.forEach(item -> {
                                 OrderInfo orderInfo = new OrderInfo();
-                                orderInfo.orderId = item.get("order_id").toString();
-                                orderInfo.marketId = item.get("market_id").toString();
-                                orderInfo.timestamp = Long.parseLong(item.get("timestamp").toString());
+                                orderInfo.setOrderId(item.get("order_id").toString());
+                                orderInfo.setMarketId(item.get("market_id").toString());
+                                orderInfo.setTimestamp(Long.parseLong(item.get("timestamp").toString()));
                                 result.add(orderInfo);
                             });
                             return result;

@@ -1,4 +1,4 @@
-package com.streamxhub.streamx.flink.javacase;
+package com.streamxhub.streamx.flink.javacase.bean;
 
 import lombok.Data;
 
