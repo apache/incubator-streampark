@@ -110,7 +110,7 @@ class StreamTableContext(val parameter: ParameterTool,
 
   //...streamEnv api start...
 
-  def $getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv
+  def getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv
 
   def $getCachedFiles: JavaList[tuple.Tuple2[String, DistributedCache.DistributedCacheEntry]] = this.streamEnv.getCachedFiles
 

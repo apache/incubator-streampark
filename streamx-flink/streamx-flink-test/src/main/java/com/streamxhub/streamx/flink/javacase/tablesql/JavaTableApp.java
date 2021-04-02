@@ -18,7 +18,7 @@ public class JavaTableApp {
         });
         StreamTableContext context = new StreamTableContext(javaConfig);
 
-        SingleOutputStreamOperator<JavaEntity> source = context.$getJavaEnv().fromCollection(
+        SingleOutputStreamOperator<JavaEntity> source = context.getJavaEnv().fromCollection(
                 Arrays.asList(
                         "flink,apapche flink",
                         "kafka,apapche kafka",
@@ -27,8 +27,6 @@ public class JavaTableApp {
                         "hadoop,apapche hadoop"
                 )
         ).map((MapFunction<String, JavaEntity>) JavaEntity::new);
-
-        source.print("xxxx");
 
         context.createTemporaryView("mysource", new DataStream<>(source));
 
