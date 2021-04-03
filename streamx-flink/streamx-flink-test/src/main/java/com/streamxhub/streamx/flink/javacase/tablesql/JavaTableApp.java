@@ -33,13 +33,16 @@ public class JavaTableApp {
         Table table = context.from("mysource");
         context.toAppendStream(table, TypeInformation.of(JavaEntity.class)).print();
 
-
+        context.execute("Flink SQl Job");
     }
 
     public static class JavaEntity {
         public String id;
         public String name;
-        public JavaEntity() {}
+
+        public JavaEntity() {
+        }
+
         public JavaEntity(String str) {
             String[] array = str.split(",");
             this.id = array[0];

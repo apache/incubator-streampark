@@ -25,7 +25,7 @@ object MixinTableApp extends FlinkStreamTable {
 
     //kafka to table
     val table1: Table = context.from("mySource")
-    table1.toAppendStream[Entity].print("stream print==>")
+    table1.>>[Entity].print("stream print==>")
 
   }
 }

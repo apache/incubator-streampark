@@ -68,6 +68,11 @@ class StreamTableContext(val parameter: ParameterTool,
                          private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
+   * 一旦 Table 被转化为 DataStream，必须使用 StreamExecutionEnvironment 的 execute 方法执行该 DataStream 作业。
+   */
+  private[scala] var isConvertedToDataStream: Boolean = false
+
+  /**
    * for scala
    *
    * @param args
@@ -98,7 +103,9 @@ class StreamTableContext(val parameter: ParameterTool,
   override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkStreamTable $jobName Starting...")
-    null
+    if (isConvertedToDataStream) {
+      streamEnv.execute(jobName)
+    } else null
   }
 
   private[flink] lazy val sql = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
@@ -240,9 +247,15 @@ class StreamTableContext(val parameter: ParameterTool,
 
   override def createTemporaryView[T](path: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.createTemporaryView(path, dataStream, fields: _*)
 
-  override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = tableEnv.toAppendStream(table)
+  override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = {
+    isConvertedToDataStream = true
+    tableEnv.toAppendStream(table)
+  }
 
-  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = tableEnv.toRetractStream(table)
+  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = {
+    isConvertedToDataStream = true
+    tableEnv.toRetractStream(table)
+  }
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 
