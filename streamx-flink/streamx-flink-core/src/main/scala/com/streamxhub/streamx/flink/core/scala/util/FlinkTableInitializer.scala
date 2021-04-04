@@ -21,17 +21,19 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{ApiType, PlannerType, TableMode}
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.TableMode.TableMode
+import com.streamxhub.streamx.common.enums.{ApiType, PlannerType, TableMode}
+import com.streamxhub.streamx.common.util.{DeflaterUtils, PropertiesUtils}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
 
+import java.io.File
 import scala.collection.JavaConversions._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 private[scala] object FlinkTableInitializer {
 
@@ -199,6 +201,24 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
         case TableMode.streaming => localStreamTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
       }
     }
+
+    parameter.get(KEY_FLINK_SQL()) match {
+      case null =>
+      case param =>
+        if (param == null) {
+          //for streamx-console
+          Try(DeflaterUtils.unzipString(param)) match {
+            case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
+            case Failure(_) =>
+              val sqlFile = new File(param)
+              Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
+                case Success(value) => parameter.mergeWith(ParameterTool.fromMap(value))
+                case Failure(e) => new IllegalArgumentException(s"[StreamX] init sql error.$e")
+              }
+          }
+        }
+    }
+
   }
 
 }

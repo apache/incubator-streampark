@@ -21,9 +21,9 @@
 package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
-import com.streamxhub.streamx.flink.core.scala.util.FlinkTableInitializer
+import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableEnvironment, TableResult}
@@ -37,10 +37,9 @@ import org.apache.flink.table.types.AbstractDataType
 
 import java.lang
 import java.util.Optional
-import scala.util.{Failure, Success, Try}
 
 class TableContext(val parameter: ParameterTool,
-                   private val tableEnv: TableEnvironment) extends TableEnvironment {
+                   private val tableEnv: TableEnvironment) extends TableEnvironment with FlinkTableTrait {
 
 
   /**
@@ -76,12 +75,11 @@ class TableContext(val parameter: ParameterTool,
     tableEnv.execute(jobName)
   }
 
-  private[flink] lazy val sql = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
-    case Success(value) => value
-    case Failure(exception) =>
-      new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
-      null
-  }
+  /**
+   *
+   * @param sql 配置文件中的sql名称,或者一段sql
+   */
+  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 

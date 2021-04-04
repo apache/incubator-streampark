@@ -22,9 +22,9 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.esotericsoftware.kryo.Serializer
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
-import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, StreamEnvConfig}
+import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, StreamEnvConfig}
 import org.apache.flink.api.common.cache.DistributedCache
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.io.{FileInputFormat, FilePathFilter, InputFormat}
@@ -54,7 +54,6 @@ import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 
 import java.util.{Optional, List => JavaList}
-import scala.util.{Failure, Success, Try}
 
 /**
  * 融合了流(stream)和table的api
@@ -65,7 +64,7 @@ import scala.util.{Failure, Success, Try}
  */
 class StreamTableContext(val parameter: ParameterTool,
                          private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment with FlinkTableTrait {
 
   /**
    * 一旦 Table 被转化为 DataStream，必须使用 StreamExecutionEnvironment 的 execute 方法执行该 DataStream 作业。
@@ -108,12 +107,7 @@ class StreamTableContext(val parameter: ParameterTool,
     } else null
   }
 
-  private[flink] lazy val sql = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
-    case Success(value) => value
-    case Failure(exception) =>
-      new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
-      null
-  }
+  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
 
   //...streamEnv api start...
 
