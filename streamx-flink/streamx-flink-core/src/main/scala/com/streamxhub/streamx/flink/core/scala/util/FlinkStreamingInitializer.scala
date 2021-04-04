@@ -43,7 +43,7 @@ import java.util.concurrent.TimeUnit
 import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
 import scala.collection.Map
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 private[scala] object FlinkStreamingInitializer {
 
@@ -131,7 +131,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_APP_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)

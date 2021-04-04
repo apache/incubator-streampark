@@ -33,6 +33,7 @@ import org.apache.flink.table.api.{EnvironmentSettings, TableEnvironment}
 
 import java.io.File
 import scala.collection.JavaConversions._
+import scala.collection.Map
 import scala.util.{Failure, Success, Try}
 
 private[scala] object FlinkTableInitializer {
@@ -110,21 +111,38 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
 
 
   /**
-   * table SQL 下--flink.conf 非必须传入,取决于开发者.
+   * table SQL 下  --conf 非必须传入,取决于开发者.
    *
    * @return
    */
   override def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
-    argsMap.get(KEY_APP_CONF(), null) match {
+    val parameter = argsMap.get(KEY_APP_CONF(), null) match {
       case null | "" =>
-        logWarn("Usage:can't fond config,you can set \"--app.conf $path \" in main arguments")
+        logWarn("Usage:can't fond config,you can set \"--conf $path \" in main arguments")
         ParameterTool.fromSystemProperties().mergeWith(argsMap)
       case file =>
         val configArgs = super.readFlinkConf(file)
         //显示指定的优先级 > 项目配置文件 > 系统配置文件...
         ParameterTool.fromSystemProperties().mergeWith(ParameterTool.fromMap(configArgs)).mergeWith(argsMap)
     }
+    parameter.get(KEY_FLINK_SQL()) match {
+      case null => parameter
+      case param =>
+        //for streamx-console
+        Try(DeflaterUtils.unzipString(param)) match {
+          case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
+          case Failure(_) =>
+            val sqlFile = new File(param)
+            Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
+              case Success(value) => parameter.mergeWith(ParameterTool.fromMap(value))
+              case Failure(e) =>
+                new IllegalArgumentException(s"[StreamX] init sql error.$e")
+                parameter
+            }
+        }
+    }
+
   }
 
   def initTableEnv(tableMode: TableMode): Unit = {
@@ -201,24 +219,6 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
         case TableMode.streaming => localStreamTableEnv.getConfig.getConfiguration.setString(PipelineOptions.NAME, appName)
       }
     }
-
-    parameter.get(KEY_FLINK_SQL()) match {
-      case null =>
-      case param =>
-        if (param == null) {
-          //for streamx-console
-          Try(DeflaterUtils.unzipString(param)) match {
-            case Success(value) => parameter.mergeWith(ParameterTool.fromMap(Map(KEY_FLINK_SQL() -> value)))
-            case Failure(_) =>
-              val sqlFile = new File(param)
-              Try(PropertiesUtils.fromYamlFile(sqlFile.getAbsolutePath)) match {
-                case Success(value) => parameter.mergeWith(ParameterTool.fromMap(value))
-                case Failure(e) => new IllegalArgumentException(s"[StreamX] init sql error.$e")
-              }
-          }
-        }
-    }
-
   }
 
 }

@@ -68,7 +68,7 @@ object PropertiesUtils {
     }
   }
 
-  def fromYamlText(text: String):Map[String,String] = {
+  def fromYamlText(text: String): Map[String, String] = {
     try {
       val map = MutableMap[String, String]()
       new Yaml()
@@ -80,7 +80,7 @@ object PropertiesUtils {
     }
   }
 
-  def fromPropertiesText(conf: String):Map[String,String]  = {
+  def fromPropertiesText(conf: String): Map[String, String] = {
     try {
       val properties = new Properties()
       properties.load(new StringReader(conf))
@@ -91,7 +91,7 @@ object PropertiesUtils {
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(filename: String):Map[String,String]  = {
+  def fromYamlFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"Yaml file $file does not exist")
     require(file.isFile, s"Yaml file $file is not a normal file")
@@ -110,7 +110,7 @@ object PropertiesUtils {
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(filename: String):Map[String,String] = {
+  def fromPropertiesFile(filename: String): Map[String, String] = {
     val file = new File(filename)
     require(file.exists(), s"Properties file $file does not exist")
     require(file.isFile, s"Properties file $file is not a normal file")
@@ -128,7 +128,7 @@ object PropertiesUtils {
   }
 
   /** Load Yaml present in the given file. */
-  def fromYamlFile(inputStream: InputStream):Map[String,String] = {
+  def fromYamlFile(inputStream: InputStream): Map[String, String] = {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
       val map = MutableMap[String, String]()
@@ -144,7 +144,7 @@ object PropertiesUtils {
   }
 
   /** Load properties present in the given file. */
-  def fromPropertiesFile(inputStream: InputStream):Map[String,String] = {
+  def fromPropertiesFile(inputStream: InputStream): Map[String, String] = {
     require(inputStream != null, s"Properties inputStream  must be not null")
     try {
       val properties = new Properties()
