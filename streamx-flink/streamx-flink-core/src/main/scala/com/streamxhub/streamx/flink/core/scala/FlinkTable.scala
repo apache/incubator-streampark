@@ -212,7 +212,7 @@ trait FlinkTable extends Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkTable])
-    context = new TableContext(FlinkTableInitializer.initTable(args))
+    context = new TableContext(FlinkTableInitializer.initTable(args, config))
   }
 
   /**
@@ -220,6 +220,8 @@ trait FlinkTable extends Logger {
    *
    */
   def ready(): Unit = {}
+
+  def config(tableConfig: TableConfig, parameter: ParameterTool): Unit = {}
 
   def handle(): Unit
 

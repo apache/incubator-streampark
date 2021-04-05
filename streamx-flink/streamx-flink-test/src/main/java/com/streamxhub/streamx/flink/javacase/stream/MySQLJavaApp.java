@@ -2,7 +2,6 @@ package com.streamxhub.streamx.flink.javacase.stream;
 
 import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
-import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
 import com.streamxhub.streamx.flink.core.java.source.JdbcSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.util.StreamEnvConfig;
@@ -17,7 +16,7 @@ public class MySQLJavaApp {
 
     public static void main(String[] args) {
 
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, new StreamEnvConfigFunction.NoneConfig());
+        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
 
         StreamingContext context = new StreamingContext(envConfig);
 
@@ -34,8 +33,8 @@ public class MySQLJavaApp {
 
                             return String.format(
                                     "select * from t_order " +
-                                    "where timestamp > '%s' " +
-                                    "order by timestamp asc ",
+                                            "where timestamp > '%s' " +
+                                            "order by timestamp asc ",
                                     lastOffset
                             );
                         },

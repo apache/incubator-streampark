@@ -24,7 +24,7 @@ import com.esotericsoftware.kryo.Serializer
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
-import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, StreamEnvConfig}
+import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, StreamTableEnvConfig}
 import org.apache.flink.api.common.cache.DistributedCache
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.io.{FileInputFormat, FilePathFilter, InputFormat}
@@ -83,7 +83,7 @@ class StreamTableContext(val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
+  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
 
   /**
    * 推荐使用该Api启动任务...
@@ -397,16 +397,18 @@ trait FlinkStreamTable extends Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
+    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, configStream, configTable))
   }
+
+  def configStream(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
+
+  def configTable(tableConfig: TableConfig, parameter: ParameterTool): Unit = {}
 
   /**
    * 用户可覆盖次方法...
    *
    */
   def ready(): Unit = {}
-
-  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(): Unit
 
