@@ -41,7 +41,7 @@ public class QuickStartJavaApp {
 
     public static void main(String[] args) {
 
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, new StreamEnvConfigFunction.NoneConfig());
+        StreamEnvConfig envConfig = new StreamEnvConfig(args, null);
 
         StreamingContext context = new StreamingContext(envConfig);
 

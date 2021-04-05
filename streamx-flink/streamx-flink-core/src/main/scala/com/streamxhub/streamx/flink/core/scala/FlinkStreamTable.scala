@@ -90,16 +90,20 @@ class StreamTableContext(val parameter: ParameterTool,
    *
    * @return
    */
-  def start(): JobExecutionResult = {
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
-      case (null, appName: String) => appName
-      case _ => ""
+  def start(name: String = null): JobExecutionResult = {
+    val appName = name match {
+      case null =>
+        (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+          case (appName: String, _) => appName
+          case (null, appName: String) => appName
+          case _ => ""
+        }
+      case x => x
     }
     execute(appName)
   }
 
-  override def execute(jobName: String): JobExecutionResult = {
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkStreamTable $jobName Starting...")
     if (isConvertedToDataStream) {

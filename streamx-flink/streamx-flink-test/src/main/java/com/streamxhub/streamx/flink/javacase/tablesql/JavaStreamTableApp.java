@@ -26,12 +26,12 @@ public class JavaStreamTableApp {
                 )
         ).map((MapFunction<String, JavaEntity>) JavaEntity::new);
 
-        context.createTemporaryView("mysource", new DataStream<>(source));
+        context.createTemporaryView("mySource", new DataStream<>(source));
 
-        Table table = context.from("mysource");
+        Table table = context.from("mySource");
         context.toAppendStream(table, TypeInformation.of(JavaEntity.class)).print();
 
-        context.execute("Flink SQl Job");
+        context.start("Flink SQl Job");
     }
 
     public static class JavaEntity {

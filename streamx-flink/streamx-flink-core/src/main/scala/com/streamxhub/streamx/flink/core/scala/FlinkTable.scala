@@ -22,8 +22,9 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
+import com.streamxhub.streamx.flink.core.java.function.TableEnvConfigFunction
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
-import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait}
+import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, TableEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableEnvironment, TableResult}
@@ -50,10 +51,10 @@ class TableContext(val parameter: ParameterTool,
   def this(args: (ParameterTool, TableEnvironment)) = this(args._1, args._2)
 
   /**
-   *
+   * for java
    * @param args
    */
-  def this(args: Array[String]) = this(FlinkTableInitializer.initTable(args))
+  def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
 
   /**
    * 推荐使用该Api启动任务...

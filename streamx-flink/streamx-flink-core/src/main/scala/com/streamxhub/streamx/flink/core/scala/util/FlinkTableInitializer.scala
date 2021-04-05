@@ -53,6 +53,19 @@ private[scala] object FlinkTableInitializer {
     (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
   }
 
+  def initJavaTable(args: TableEnvConfig): (ParameterTool, TableEnvironment) = {
+    if (flinkInitializer == null) {
+      this.synchronized {
+        if (flinkInitializer == null) {
+          flinkInitializer = new FlinkTableInitializer(args.args, ApiType.java)
+          flinkInitializer.javaTableEnvConfFunc = args.conf
+          flinkInitializer.initTableEnv(TableMode.batch)
+        }
+      }
+    }
+    (flinkInitializer.parameter, flinkInitializer.tableEnvironment)
+  }
+
   def initStreamTable(args: Array[String], configStream: (StreamExecutionEnvironment, ParameterTool) => Unit = null, configTable: (TableConfig, ParameterTool) => Unit = null): (ParameterTool, StreamExecutionEnvironment, StreamTableEnvironment) = {
     if (flinkInitializer == null) {
       this.synchronized {
@@ -170,16 +183,10 @@ private[this] class FlinkTableInitializer(args: Array[String], apiType: ApiType)
     val mode = Try(TableMode.withName(parameter.get(KEY_FLINK_TABLE_MODE))).getOrElse(tableMode)
     mode match {
       case TableMode.batch =>
-        if (tableMode == TableMode.streaming) {
-          throw new ExceptionInInitializerError("[StreamX] can not use batch mode in StreamTableEnvironment")
-        }
-        logInfo("components should work in batch mode")
+        logInfo(s"components should work in $tableMode mode")
         builder.inBatchMode()
       case TableMode.streaming =>
-        if (tableMode == TableMode.batch) {
-          throw new ExceptionInInitializerError("[StreamX] can not use streaming mode in TableEnvironment")
-        }
-        logInfo("components should work in streaming mode")
+        logInfo(s"components should work in $tableMode mode")
         builder.inStreamingMode()
     }
 
