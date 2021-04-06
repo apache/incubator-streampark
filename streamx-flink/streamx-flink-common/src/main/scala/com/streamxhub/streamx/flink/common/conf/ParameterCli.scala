@@ -7,7 +7,7 @@ import org.apache.commons.cli.{DefaultParser, Options}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
+import scala.util.{Success, Try}
 
 object ParameterCli {
 
@@ -24,10 +24,13 @@ object ParameterCli {
   def read(args: Array[String]): String = {
     val action = args(0)
     val conf = args(1)
-    val map = if (conf.endsWith(".properties")) {
+    val map = Try(if (conf.endsWith(".properties")) {
       PropertiesUtils.fromPropertiesFile(conf)
     } else {
       PropertiesUtils.fromYamlFile(conf)
+    }) match {
+      case Success(value) => value
+      case _ => Map.empty[String, String]
     }
     val programArgs = args.drop(2)
     action match {

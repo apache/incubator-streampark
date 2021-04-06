@@ -8,12 +8,18 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.scala.DataStream;
 import org.apache.flink.table.api.Table;
 
+import java.time.ZoneId;
 import java.util.Arrays;
 
 public class JavaStreamTableApp {
 
     public static void main(String[] args) {
-        StreamTableEnvConfig javaConfig = new StreamTableEnvConfig(args, null, null);
+        StreamTableEnvConfig javaConfig = new StreamTableEnvConfig(args, (environment, parameterTool) -> {
+            environment.getConfig().enableForceAvro();
+        }, (tableConfig, parameterTool) -> {
+            tableConfig.setLocalTimeZone(ZoneId.of("Asia/Shanghai"));
+        });
+
         StreamTableContext context = new StreamTableContext(javaConfig);
 
         SingleOutputStreamOperator<JavaEntity> source = context.getJavaEnv().fromCollection(

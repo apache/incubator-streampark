@@ -40,8 +40,8 @@ public class KafkaJavaApp {
     public static void main(String[] args) {
 
         StreamEnvConfig javaConfig = new StreamEnvConfig(args, (environment, parameterTool) -> {
-            //用户可以给environment设置参数...
             System.out.println("environment argument set...");
+            environment.getConfig().enableForceAvro();
         });
 
         StreamingContext context = new StreamingContext(javaConfig);
