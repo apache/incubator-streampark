@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.enums.{ApiType, RestartStrategy, StateBackend => XStateBackend}
 import com.streamxhub.streamx.common.util._
-import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction
+import com.streamxhub.streamx.flink.core.java.function.{StreamEnvConfigFunction, TableEnvConfigFunction}
 import org.apache.flink.api.common.RuntimeExecutionMode
 import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
@@ -37,6 +37,7 @@ import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.table.api.TableConfig
 
 import java.io.File
 import java.util.concurrent.TimeUnit
@@ -81,9 +82,13 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   var streamEnvConfFunc: (StreamExecutionEnvironment, ParameterTool) => Unit = _
 
+  var tableConfFunc: (TableConfig, ParameterTool) => Unit = _
+
   var javaStreamEnvConfFunc: StreamEnvConfigFunction = _
 
-  val parameter: ParameterTool = initParameter()
+  var javaTableEnvConfFunc: TableEnvConfigFunction = _
+
+  lazy val parameter: ParameterTool = initParameter()
 
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
     val flinkHome = System.getenv("FLINK_HOME")
@@ -131,7 +136,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   private[util] def initParameter(): ParameterTool = {
     val argsMap = ParameterTool.fromArgs(args)
     val config = argsMap.get(KEY_APP_CONF(), null) match {
-      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--app.conf $path \" in main arguments")
+      case null | "" => throw new ExceptionInInitializerError("[StreamX] Usage:can't fond config,please set \"--conf $path \" in main arguments")
       case file => file
     }
     val configArgs = readFlinkConf(config)
@@ -192,9 +197,11 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
      */
     val defaultConf = getFlinkConf()
     val prefixLen = "flink.".length
-    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY))).getOrElse {
-      Try(RestartStrategy.byName(defaultConf("restart-strategy"))).getOrElse(null)
-    }
+    val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY)))
+      .getOrElse(
+        Try(RestartStrategy.byName(defaultConf("restart-strategy"))).getOrElse(null)
+      )
+
     strategy match {
       case RestartStrategy.`failure-rate` =>
 
@@ -367,7 +374,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
      */
     parameter.get(KEY_FLINK_CONF(), null) match {
       case null | "" =>
-        logInfo("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
+        logDebug("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
         defaultFlinkConf
       case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
     }
@@ -376,3 +383,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 }
 
 class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
+
+class StreamTableEnvConfig(val args: Array[String], val streamConfig: StreamEnvConfigFunction, val tableConfig: TableEnvConfigFunction)
+
+class TableEnvConfig(val args: Array[String], val conf: TableEnvConfigFunction)

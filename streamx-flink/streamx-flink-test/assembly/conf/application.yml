@@ -64,7 +64,7 @@ flink:
   # table
   table:
     planner: blink # (blink|old|any)
-    mode: streaming #(batch|streaming)
+    mode: streaming #(streaming|batch)
 
 jdbc:
   semantic: EXACTLY_ONCE # EXACTLY_ONCE|AT_LEAST_ONCE|NONE

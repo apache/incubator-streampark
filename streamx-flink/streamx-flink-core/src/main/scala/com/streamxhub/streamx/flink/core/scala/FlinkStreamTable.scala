@@ -22,9 +22,9 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.esotericsoftware.kryo.Serializer
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{DeflaterUtils, Logger, SystemPropertyUtils}
+import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
-import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, StreamEnvConfig}
+import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, StreamTableEnvConfig}
 import org.apache.flink.api.common.cache.DistributedCache
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
 import org.apache.flink.api.common.io.{FileInputFormat, FilePathFilter, InputFormat}
@@ -54,7 +54,6 @@ import org.apache.flink.table.types.AbstractDataType
 import org.apache.flink.util.SplittableIterator
 
 import java.util.{Optional, List => JavaList}
-import scala.util.{Failure, Success, Try}
 
 /**
  * 融合了流(stream)和table的api
@@ -65,7 +64,12 @@ import scala.util.{Failure, Success, Try}
  */
 class StreamTableContext(val parameter: ParameterTool,
                          private val streamEnv: StreamExecutionEnvironment,
-                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
+                         private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment with FlinkTableTrait {
+
+  /**
+   * 一旦 Table 被转化为 DataStream，必须使用 StreamExecutionEnvironment 的 execute 方法执行该 DataStream 作业。
+   */
+  private[scala] var isConvertedToDataStream: Boolean = false
 
   /**
    * for scala
@@ -79,38 +83,39 @@ class StreamTableContext(val parameter: ParameterTool,
    *
    * @param args
    */
-  def this(args: StreamEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
+  def this(args: StreamTableEnvConfig) = this(FlinkTableInitializer.initJavaStreamTable(args))
 
   /**
    * 推荐使用该Api启动任务...
    *
    * @return
    */
-  def start(): JobExecutionResult = {
-    val appName = (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
-      case (appName: String, _) => appName
-      case (null, appName: String) => appName
-      case _ => ""
+  def start(name: String = null): JobExecutionResult = {
+    val appName = name match {
+      case null =>
+        (parameter.get(KEY_APP_NAME(), null), parameter.get(KEY_FLINK_APP_NAME, null)) match {
+          case (appName: String, _) => appName
+          case (null, appName: String) => appName
+          case _ => ""
+        }
+      case x => x
     }
     execute(appName)
   }
 
-  override def execute(jobName: String): JobExecutionResult = {
+  @deprecated override def execute(jobName: String): JobExecutionResult = {
     println(s"\033[95;1m$LOGO\033[1m\n")
     println(s"[StreamX] FlinkStreamTable $jobName Starting...")
-    null
+    if (isConvertedToDataStream) {
+      streamEnv.execute(jobName)
+    } else null
   }
 
-  private[flink] lazy val sql = Try(DeflaterUtils.unzipString(parameter.get(KEY_FLINK_SQL()))) match {
-    case Success(value) => value
-    case Failure(exception) =>
-      new ExceptionInInitializerError(s"[StreamX] init sql error.$exception")
-      null
-  }
+  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
 
   //...streamEnv api start...
 
-  def $getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv
+  def getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv
 
   def $getCachedFiles: JavaList[tuple.Tuple2[String, DistributedCache.DistributedCacheEntry]] = this.streamEnv.getCachedFiles
 
@@ -240,9 +245,15 @@ class StreamTableContext(val parameter: ParameterTool,
 
   override def createTemporaryView[T](path: String, dataStream: DataStream[T], fields: Expression*): Unit = tableEnv.createTemporaryView(path, dataStream, fields: _*)
 
-  override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = tableEnv.toAppendStream(table)
+  override def toAppendStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[T] = {
+    isConvertedToDataStream = true
+    tableEnv.toAppendStream(table)
+  }
 
-  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = tableEnv.toRetractStream(table)
+  override def toRetractStream[T](table: Table)(implicit info: TypeInformation[T]): DataStream[(Boolean, T)] = {
+    isConvertedToDataStream = true
+    tableEnv.toRetractStream(table)
+  }
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 
@@ -390,16 +401,18 @@ trait FlinkStreamTable extends Logger {
 
   private[this] def init(args: Array[String]): Unit = {
     SystemPropertyUtils.setAppHome(KEY_APP_HOME, classOf[FlinkStreamTable])
-    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, config))
+    context = new StreamTableContext(FlinkTableInitializer.initStreamTable(args, configStream, configTable))
   }
+
+  def configStream(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
+
+  def configTable(tableConfig: TableConfig, parameter: ParameterTool): Unit = {}
 
   /**
    * 用户可覆盖次方法...
    *
    */
   def ready(): Unit = {}
-
-  def config(env: StreamExecutionEnvironment, parameter: ParameterTool): Unit = {}
 
   def handle(): Unit
 

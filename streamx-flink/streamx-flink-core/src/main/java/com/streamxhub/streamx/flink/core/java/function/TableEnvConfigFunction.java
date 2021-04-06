@@ -21,20 +21,20 @@
 package com.streamxhub.streamx.flink.core.java.function;
 
 import org.apache.flink.api.java.utils.ParameterTool;
-import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.table.api.TableConfig;
 
 /**
  * @author benjobs
  */
 @FunctionalInterface
-public interface StreamEnvConfigFunction {
+public interface TableEnvConfigFunction {
     /**
-     * 用于初始化StreamExecutionEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
+     * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
      *
-     * @param environment
+     * @param tableConfig
      * @param parameterTool
      */
-    void configuration(StreamExecutionEnvironment environment, ParameterTool parameterTool);
+    void configuration(TableConfig tableConfig, ParameterTool parameterTool);
 
 }
 

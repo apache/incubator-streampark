@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.core.scala.ext
 
+import com.streamxhub.streamx.flink.core.scala.StreamTableContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream
@@ -30,7 +31,6 @@ import org.apache.flink.table.types.DataType
 
 object TableExt {
 
-
   class Table(val table: FlinkTable) {
     def ->(field: String, fields: String*): FlinkTable = table.as(field, fields: _*)
   }
@@ -39,9 +39,26 @@ object TableExt {
 
     def \\[T: TypeInformation]: DataSet[T] = toDataSet
 
-    def >>[T: TypeInformation]: DataStream[T] = toAppendStream
+    def >>[T: TypeInformation](implicit context: StreamTableContext): DataStream[T] = {
+      context.isConvertedToDataStream = true
+      super.toAppendStream
+    }
 
-    def <<[T: TypeInformation]: DataStream[(Boolean, T)] = toRetractStream
+    def <<[T: TypeInformation](implicit context: StreamTableContext): DataStream[(Boolean, T)] = {
+      context.isConvertedToDataStream = true
+      super.toRetractStream
+    }
+
+    def toAppendStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[T] = {
+      context.isConvertedToDataStream = true
+      super.toAppendStream
+    }
+
+    def toRetractStream[T](implicit typeInfo: TypeInformation[T], context: StreamTableContext): DataStream[(Boolean, T)] = {
+      context.isConvertedToDataStream = true
+      super.toRetractStream
+    }
+
   }
 
   class ConnectTableDescriptor(table: TableDescriptor) {

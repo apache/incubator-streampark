@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.javacase;
+package com.streamxhub.streamx.flink.javacase.stream;
 
 import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
 import com.streamxhub.streamx.flink.core.java.source.KafkaSource;
@@ -35,7 +35,7 @@ public class KafkaSimpleJavaApp {
 
     public static void main(String[] args) {
 
-        StreamEnvConfig envConfig = new StreamEnvConfig(args, new StreamEnvConfigFunction.NoneConfig());
+        StreamEnvConfig envConfig = new StreamEnvConfig(args,null);
 
         StreamingContext context = new StreamingContext(envConfig);
 
