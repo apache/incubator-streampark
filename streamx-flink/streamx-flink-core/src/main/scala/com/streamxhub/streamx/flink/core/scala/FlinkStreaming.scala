@@ -88,7 +88,6 @@ trait FlinkStreaming extends Logger {
 
   var jobExecutionResult: JobExecutionResult = _
 
-
   final def main(args: Array[String]): Unit = {
     init(args)
     ready()
