@@ -31,13 +31,11 @@ import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfi
 
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.util.{Failure, Success, Try}
-
+import java.util.concurrent.locks.ReentrantReadWriteLock
 
 trait FlinkTableTrait extends Logger {
 
-  import java.util.concurrent.locks.ReentrantReadWriteLock
-
-  private val lock = new ReentrantReadWriteLock().writeLock
+  private[this] val lock = new ReentrantReadWriteLock().writeLock
   /**
    * all the available sql config options. see
    * https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html
