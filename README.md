@@ -9,6 +9,7 @@ let't flink|spark easy
 我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `StreamX`, 项目的初衷是 —— 让 `Flink` 开发更简单, 使用`StreamX`开发,可以极大降低学习成本和开发门槛,
 让你只用关心最核心的业务,`StreamX` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connector`,标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供`scala`和`java`两套api,
 其最终目的是打造一个一站式大数据平台,流批一体,湖仓一体的解决方案
+<video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
 #### 消费kafka示例
 
@@ -264,3 +265,115 @@ kafka.sink:
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
 `Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
+
+
+## 安装streamx-console
+
+> streamx-console 是一个综合实时数据平台,低代码(Low Code),Flink Sql平台,可以较好的管理Flink任务,集成了项目编译、发布、参数配置、启动、savepoint,火焰图(flame graph),Flink SQL,监控等诸多功能于一体,大大简化了Flink任务的日常操作和维护,融合了诸多最佳实践。其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
+
+## 如何安装
+
+streamx-console 提供了开箱即用的安装包,安装之前对环境有些要求,具体要求如下
+
+### 环境
+
+* 操作系统	Linux(不支持Window系统)
+* JAVA	    1.8+
+* MySQL	    5.6+
+* Hadoop 	2+ (HDFS,YARN等必须安装,并且配置好相关环境变量)
+* Flink	    1.12.0+ (版本必须是1.12.0或以上版本,并且配置好Flink相关环境变量)
+* Python    2+ (非必须,火焰图功能会用到Python)
+* Perl  o
+
+### 安装
+
+在安装前一定要确保当前部署的机器满足上面环境相关的要求,当前安装的机器必须要有Hadoop环境,安装并配置好了[Flink 1.12.0+](https://www.apache.org/dyn/closer.lua/flink/flink-1.12.0/flink-1.12.0-bin-scala_2.11.tgz),如果准备工作都已就绪,就可以按照了,点击[这里]()下载streamx-console安装包,解包后安装目录如下
+
+```textmate 
+.
+streamx-console-service-1.0.0
+├── bin
+│    ├── flame-graph
+│    ├──   └── *.py                             //火焰图相关功能脚本(内部使用,用户无需关注)
+│    ├── startup.sh                             //启动脚本  
+│    ├── setclasspath.sh                        //java环境变量相关的脚本(内部使用,用户无需关注)
+│    ├── shutdown.sh                            //停止脚本
+│    ├── yaml.sh                                //内部使用解析yaml参数的脚本(内部使用,用户无需关注)
+├── conf                           
+│    ├── application.yaml                       //项目的配置文件(注意不要改动名称)
+│    ├── application-prod.yml                   //项目的配置文件(开发者部署需要改动的文件,注意不要改动名称)
+│    ├── flink-application.template             //flink配置模板(内部使用,用户无需关注)
+│    ├── logback-spring.xml                     //logback
+│    ├── streamx-console.sql                    //工程初始化脚本
+│    └── ...
+├── lib
+│    └── *.jar                                  //项目的jar包
+├── plugins   
+│    ├── streamx-jvm-profiler-1.0.0.jar         //jvm-profiler,火焰图相关功能(内部使用,用户无需关注)
+│    └── streamx-flink-sqlcli-1.0.0.jar         //Flink SQl提交相关功能(内部使用,用户无需关注)
+├── logs                                        //程序log目录
+└── temp                                        //内部使用到的零时路径,不要删除
+```
+
+#### 1.初始化工程SQL
+
+streamx-console要求的数据库是MySQL,版本5.6+以上,如准备就绪则进行下面的操作:
+
+* 创建数据库:`streamx`
+* 执行初始化sql (解包后的`conf/streamx-console.sql`)
+
+#### 2.修改相关的数据库信息
+
+工程SQL初始化完毕,则修改`conf/application-prod.yml`,找到datasource这一项,找到mysql的配置,修改成对应的信息即可,如下
+
+```yaml
+  datasource:
+    dynamic:
+      # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗
+      p6spy: true
+      hikari:
+        connection-timeout: 30000
+        max-lifetime: 1800000
+        max-pool-size: 15
+        min-idle: 5
+        connection-test-query: select 1
+        pool-name: HikariCP-DS-POOL
+      # 配置默认数据源
+      primary: primary
+      datasource:
+        # 数据源-1，名称为 primary
+        primary:
+          username: $user
+          password: $password
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://$host:$port/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
+```
+
+#### 3.启动streamx-console
+
+进入到`bin`下直接执行start.sh即可启动项目,默认端口是 ==10000==,如果没啥意外则会启动成功
+
+```bash
+cd streamx-console-service-1.0.0/bin
+bash start.sh
+```
+相关的日志会输出到 ==streamx-console-service-1.0.0/logs/streamx.out== 里
+
+打开浏览器 输入 ==http://$deploy_host:10000/index.html== 即可登录,登录界面如下
+
+<img src="http://assets.streamxhub.com/1617875805692.jpg"/>
+
+默认密码: <strong> admin / streamx </strong>
+
+## 如何使用
+
+streamx-console定位是流批一体的大数据平台,一站式解决方案,使用起来非常简单,没有复杂的概念和繁琐的操作,标准的Flink程序(安装Flink官方要去的结构和规范)和用`streamx`开发的项目都做了很好的支持,下面我们使用`streamx-quickstart`来快速开启streamx-console之旅
+
+`streamx-quickstart`是StreamX 开发Flink的上手示例程序,具体请查阅[这里](https://github.com/streamxhub/streamx-quickstart.git)
+
+* Github: [https://github.com/streamxhub/streamx-quickstart.git](https://github.com/streamxhub/streamx-quickstart.git)
+* Gitee: [https://gitee.com/benjobs/streamx-quickstart.git](https://gitee.com/benjobs/streamx-quickstart.git)
+
+<video src="http://assets.streamxhub.com/20210408008.mp4" controls="controls" width="100%" height="100%"></video>
+
+更多使用教程和文档后续会更新...
