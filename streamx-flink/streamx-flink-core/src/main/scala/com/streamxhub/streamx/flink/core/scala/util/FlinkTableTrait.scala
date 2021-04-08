@@ -29,9 +29,9 @@ import org.apache.flink.configuration.ConfigOption
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 
+import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.util.{Failure, Success, Try}
-import java.util.concurrent.locks.ReentrantReadWriteLock
 
 trait FlinkTableTrait extends Logger {
 
@@ -116,12 +116,12 @@ trait FlinkTableTrait extends Logger {
           println(r)
         case INSERT_INTO | INSERT_OVERWRITE =>
           try {
-            lock.lock();
+            lock.lock()
             statementSet.addInsertSql(args)
             logInfo(s"${x.command.name}: $args")
           } finally {
             if (lock.isHeldByCurrentThread) {
-              lock.unlock();
+              lock.unlock()
             }
           }
         case CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
@@ -135,7 +135,7 @@ trait FlinkTableTrait extends Logger {
             logInfo(s"${x.command.name}:$args")
           } finally {
             if (lock.isHeldByCurrentThread) {
-              lock.unlock();
+              lock.unlock()
             }
           }
         case SELECT =>
