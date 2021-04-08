@@ -351,15 +351,15 @@ streamx-console要求的数据库是MySQL,版本5.6+以上,如准备就绪则进
 
 #### 3.启动streamx-console
 
-进入到`bin`下直接执行start.sh即可启动项目,默认端口是 ==10000==,如果没啥意外则会启动成功
+进入到`bin`下直接执行start.sh即可启动项目,默认端口是 10000,如果没啥意外则会启动成功
 
 ```bash
 cd streamx-console-service-1.0.0/bin
 bash start.sh
 ```
-相关的日志会输出到 ==streamx-console-service-1.0.0/logs/streamx.out== 里
+相关的日志会输出到 streamx-console-service-1.0.0/logs/streamx.out 里
 
-打开浏览器 输入 ==http://$deploy_host:10000/index.html== 即可登录,登录界面如下
+打开浏览器 输入 http://$deploy_host:10000/index.html 即可登录,登录界面如下
 
 <img src="http://assets.streamxhub.com/1617875805692.jpg"/>
 
