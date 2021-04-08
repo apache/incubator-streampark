@@ -35,6 +35,9 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkTableTrait extends Logger {
 
+  import java.util.concurrent.locks.ReentrantReadWriteLock
+
+  private val lock = new ReentrantReadWriteLock().writeLock
   /**
    * all the available sql config options. see
    * https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html
@@ -69,31 +72,81 @@ trait FlinkTableTrait extends Logger {
 
   private[core] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment): Unit = {
     val flinkSql: String = if (sql == null) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
+    val statementSet = context.createStatementSet()
     //TODO registerHiveCatalog
     SQLCommandUtil.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
       x.command match {
-        case SET =>
-          if (!tableConfigOptions.containsKey(args)) {
-            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
-          }
-          context.getConfig.getConfiguration.setString(args, x.operands(1))
-          logInfo(s"${x.command.name}: $args --> ${x.operands(1)}")
         case USE =>
           context.useDatabase(args)
           logInfo(s"${x.command.name}: $args")
         case USE_CATALOG =>
           context.useCatalog(args)
           logInfo(s"${x.command.name}: $args")
+        case SHOW_CATALOGS =>
+          val catalogs = context.listCatalogs
+          println(s"%table catalog\n${catalogs.mkString("\n")}")
+        case SHOW_DATABASES =>
+          val databases = context.listDatabases
+          println(s"%table database\n${databases.mkString("\n")}")
+        case SHOW_TABLES =>
+          val tables = context.listTables().filter(!_.startsWith("UnnamedTable"))
+          println(s"%table table\n${tables.mkString("\n")}")
+        case SHOW_FUNCTIONS =>
+          val functions = context.listUserDefinedFunctions()
+          println(s"%table function\n ${functions.mkString("\n")}")
+        case SHOW_MODULES =>
+          val modules = context.listModules()
+          println(s"%table modules\n${modules.mkString("\n")}")
+        case SET =>
+          if (!tableConfigOptions.containsKey(args)) {
+            throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
+          }
+          context.getConfig.getConfiguration.setString(args, x.operands(1))
+          logInfo(s"${x.command.name}: $args --> ${x.operands(1)}")
+        case DESC | DESCRIBE =>
+          val schema = context.scan(args).getSchema
+          val builder = new StringBuilder()
+          builder.append("Column\tType\n")
+          for (i <- 0 to schema.getFieldCount) {
+            builder.append(schema.getFieldName(i).get() + "\t" + schema.getFieldDataType(i).get() + "\n")
+          }
+          println(builder)
+        case EXPLAIN =>
+          val tableResult = context.executeSql(sql)
+          val r = tableResult.collect().next().getField(0).toString
+          println(r)
+        case INSERT_INTO | INSERT_OVERWRITE =>
+          try {
+            lock.lock();
+            statementSet.addInsertSql(args)
+            logInfo(s"${x.command.name}: $args")
+          } finally {
+            if (lock.isHeldByCurrentThread) {
+              lock.unlock();
+            }
+          }
+        case CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+             CREATE_CATALOG | DROP_CATALOG |
+             CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
+             CREATE_VIEW | DROP_VIEW |
+             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
+          try {
+            lock.lock()
+            context.executeSql(args)
+            logInfo(s"${x.command.name}:$args")
+          } finally {
+            if (lock.isHeldByCurrentThread) {
+              lock.unlock();
+            }
+          }
         case SELECT =>
           // TODO SELECT
           throw new UnsupportedOperationException(s"[StreamX] Unsupported select operation:$sql")
-        case _ =>
-          context.executeSql(args)
-          logInfo(s"${x.command.name}:$args")
         case _ => throw new Exception(s"[StreamX] Unsupported command: ${x.command}")
       }
     })
+
     logInfo(s"tableSQL: $sql")
   }
 
