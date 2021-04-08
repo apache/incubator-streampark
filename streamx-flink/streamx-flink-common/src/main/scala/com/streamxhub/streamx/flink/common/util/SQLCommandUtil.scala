@@ -360,17 +360,6 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
     }
   )
 
-  case object RESET extends SQLCommand(
-    "reset",
-    "RESET",
-    NO_OPERANDS
-  )
-
-  case object SOURCE extends SQLCommand(
-    "source",
-    "SOURCE\\s+(.*)"
-  )
-
 }
 
 /**

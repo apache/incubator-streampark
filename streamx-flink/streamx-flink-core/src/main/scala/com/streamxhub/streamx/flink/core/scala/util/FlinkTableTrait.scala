@@ -68,9 +68,16 @@ trait FlinkTableTrait extends Logger {
     configOptions
   }
 
-  private[core] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment): Unit = {
+  private[core] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: Unit => String = null): Unit = {
     val flinkSql: String = if (sql == null) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
     val statementSet = context.createStatementSet()
+
+    def callback(r: String): Unit = {
+      callbackFunc match {
+        case null => println(r)
+        case x => x(r)
+      }
+    }
     //TODO registerHiveCatalog
     SQLCommandUtil.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
@@ -83,19 +90,19 @@ trait FlinkTableTrait extends Logger {
           logInfo(s"${x.command.name}: $args")
         case SHOW_CATALOGS =>
           val catalogs = context.listCatalogs
-          println(s"%table catalog\n${catalogs.mkString("\n")}")
+          callback(s"%table catalog\n${catalogs.mkString("\n")}")
         case SHOW_DATABASES =>
           val databases = context.listDatabases
-          println(s"%table database\n${databases.mkString("\n")}")
+          callback(s"%table database\n${databases.mkString("\n")}")
         case SHOW_TABLES =>
           val tables = context.listTables().filter(!_.startsWith("UnnamedTable"))
-          println(s"%table table\n${tables.mkString("\n")}")
+          callback(s"%table table\n${tables.mkString("\n")}")
         case SHOW_FUNCTIONS =>
           val functions = context.listUserDefinedFunctions()
-          println(s"%table function\n ${functions.mkString("\n")}")
+          callback(s"%table function\n ${functions.mkString("\n")}")
         case SHOW_MODULES =>
           val modules = context.listModules()
-          println(s"%table modules\n${modules.mkString("\n")}")
+          callback(s"%table modules\n${modules.mkString("\n")}")
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
@@ -109,11 +116,11 @@ trait FlinkTableTrait extends Logger {
           for (i <- 0 to schema.getFieldCount) {
             builder.append(schema.getFieldName(i).get() + "\t" + schema.getFieldDataType(i).get() + "\n")
           }
-          println(builder)
+          callback(builder.toString())
         case EXPLAIN =>
           val tableResult = context.executeSql(sql)
           val r = tableResult.collect().next().getField(0).toString
-          println(r)
+          callback(r)
         case INSERT_INTO | INSERT_OVERWRITE =>
           try {
             lock.lock()

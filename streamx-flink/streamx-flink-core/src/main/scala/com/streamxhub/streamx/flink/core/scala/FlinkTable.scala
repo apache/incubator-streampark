@@ -22,7 +22,6 @@ package com.streamxhub.streamx.flink.core.scala
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
-import com.streamxhub.streamx.flink.core.java.function.TableEnvConfigFunction
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
 import com.streamxhub.streamx.flink.core.scala.util.{FlinkTableInitializer, FlinkTableTrait, TableEnvConfig}
 import org.apache.flink.api.common.JobExecutionResult
@@ -52,6 +51,7 @@ class TableContext(val parameter: ParameterTool,
 
   /**
    * for java
+   *
    * @param args
    */
   def this(args: TableEnvConfig) = this(FlinkTableInitializer.initJavaTable(args))
@@ -80,7 +80,7 @@ class TableContext(val parameter: ParameterTool,
    *
    * @param sql 配置文件中的sql名称,或者一段sql
    */
-  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
+  def sql(sql: String = null)(implicit callback: Unit => String = null): Unit = super.callSql(sql, parameter, this)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 
