@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.flink.common.util
 
-import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.enums.SQLErrorType
+import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -59,7 +59,9 @@ object SQLCommandUtil extends Logger {
         case DEFAULT => FlinkSqlConformance.DEFAULT
         case _ =>
           throw new TableException(
-            SQLError(SQLErrorType.UNSUPPORTED_DIALECT, s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
+            SQLError(
+              SQLErrorType.UNSUPPORTED_DIALECT,
+              s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
           )
       }
       SqlParser.config
@@ -90,17 +92,30 @@ object SQLCommandUtil extends Logger {
       val sql = call.operands.head
       import com.streamxhub.streamx.flink.common.util.SQLCommand._
       call.command match {
-        case USE | USE_CATALOG | CREATE_CATALOG | DROP_CATALOG | CREATE_DATABASE |
-             DROP_DATABASE | ALTER_DATABASE | CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
-             DROP_VIEW | CREATE_VIEW | CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
-             SELECT | INSERT_INTO | INSERT_OVERWRITE =>
+        case USE | USE_CATALOG | SET |
+             SELECT | INSERT_INTO | INSERT_OVERWRITE |
+             EXPLAIN | DESC | DESCRIBE |
+             SHOW_MODULES | SHOW_FUNCTIONS | SHOW_TABLES | SHOW_DATABASES | SHOW_CATALOGS |
+             CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+             CREATE_CATALOG | DROP_CATALOG |
+             CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
+             CREATE_VIEW | DROP_VIEW |
+             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
           try {
             parser.parse(sql)
           } catch {
-            case e: Exception => return SQLError(SQLErrorType.SYNTAX_ERROR, e.getLocalizedMessage, sql.trim.replaceFirst(";|$", ";"))
-            case _ =>
+            case e: Exception =>
+              return SQLError(
+                SQLErrorType.SYNTAX_ERROR,
+                e.getLocalizedMessage,
+                sql.trim.replaceFirst(";|$", ";")
+              )
+            case _: Throwable =>
           }
-        case _ => return SQLError(SQLErrorType.UNSUPPORTED_SQL, sql = sql.replaceFirst(";|$", ";"))
+        case _ => return SQLError(
+          SQLErrorType.UNSUPPORTED_SQL,
+          sql = sql.replaceFirst(";|$", ";")
+        )
       }
     }
     null
@@ -358,17 +373,6 @@ object SQLCommand extends enumeratum.Enum[SQLCommand] {
       case a if a(0) == null => Some(new Array[String](0))
       case x => Some(Array[String](x(1), x(2)))
     }
-  )
-
-  case object RESET extends SQLCommand(
-    "reset",
-    "RESET",
-    NO_OPERANDS
-  )
-
-  case object SOURCE extends SQLCommand(
-    "source",
-    "SOURCE\\s+(.*)"
   )
 
 }

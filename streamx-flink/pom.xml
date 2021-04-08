@@ -17,7 +17,6 @@
         <module>streamx-flink-common</module>
         <module>streamx-flink-core</module>
         <module>streamx-flink-test</module>
-        <module>streamx-flink-quickstart</module>
     </modules>
 
 </project>
