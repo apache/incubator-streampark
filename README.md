@@ -23,7 +23,7 @@
 **[Change Log](#)** |
 **[Document](http://www.streamxhub.com/zh/doc/)**
 
-**[官网](http://tridiamond.tech)** |
+**[官网](http://www.streamxhub.com)** |
 **[更变日志](#)** |
 **[使用文档](http://www.streamxhub.com/zh/doc)**
 
