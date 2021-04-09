@@ -4,7 +4,7 @@
     <img width="100" src="http://www.streamxhub.com/assets/logo/logo.png" alt="StreamX logo">
   </a>
   <h1>🏳️‍🌈 <b>StreamX 🏳️‍🌈</b></h1>
-  <strong>Let's Flink easy!!!</strong>
+  <strong>Let flink|spark easy!!!</strong>
 </div>
 
 <br/>
@@ -30,7 +30,7 @@
 </div>
 
 # StreamX
-let't flink|spark easy
+let flink|spark easy
 
 > 一个神奇的框架,让Flink开发更简单
 
