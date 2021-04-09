@@ -122,7 +122,7 @@ let flink|spark easy
 您可以通过以下方法向我提供反馈或问题：
 
 - [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
-- [加入官方交流群]()
+- [加入社区](#-加入社区)
 
 ## 💰 Donation
 
@@ -138,5 +138,8 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费, �
 
 ## 💬 加入社区
 
-`Streamx`已正式开源,会进入高速发展模式,如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力, 你可以扫下面的二维码加入官方微信群,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
+`Streamx`已正式开源,会进入高速发展模式,如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力, 你可以扫下面的二维码加入官方微信群,更多相关信息请访问[官网](http://www.streamxhub.com/#/)
+
+<img src="http://assets.streamxhub.com/1617945166259.jpg" alt="扫我加群" width="200"> 
+
 
