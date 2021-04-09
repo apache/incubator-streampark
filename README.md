@@ -20,11 +20,11 @@
 <div align="center">
 
 **[Official Website](http://www.streamxhub.com)** |
-**[Change Log](https://github.com/auroral-ui/hexo-theme-aurora/blob/main/CHANGELOG.md)** |
+**[Change Log](#)** |
 **[Document](http://www.streamxhub.com/zh/doc/)**
 
 **[官网](http://tridiamond.tech)** |
-**[更变日志](https://github.com/auroral-ui/hexo-theme-aurorablob/main/CHANGELOG_CN.md)** |
+**[更变日志](#)** |
 **[使用文档](http://www.streamxhub.com/zh/doc)**
 
 </div>
