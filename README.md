@@ -41,7 +41,7 @@ let't flink|spark easy
 其最终目的是打造一个一站式大数据平台,流批一体,湖仓一体的解决方案
 <video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
-![](https://http://assets.streamxhub.com/1617033782727.png)
+![](http://http://assets.streamxhub.com/1617033782727.png)
 
 ![](http://assets.streamxhub.com/1617033782728.png)
 
