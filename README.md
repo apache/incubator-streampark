@@ -71,8 +71,8 @@ KafkaSource().getDataStream[String]().print()
 * 快捷的日常操作(任务`启动`、`停止`、`savepoint`,从`savepoint`恢复)
 * 支持火焰图
 * 支持`notebook`(在线任务开发)
-* 项目配置和依赖版本化管理  
-* 支持任务备份、回滚(配置回滚)  
+* 项目配置和依赖版本化管理
+* 支持任务备份、回滚(配置回滚)
 * 在线管理依赖(maven pom)和自定义jar
 * 自定义udf、连接器等支持 
 * Flink SQL WebIDE
