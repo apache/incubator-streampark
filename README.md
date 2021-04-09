@@ -1,6 +1,24 @@
+<div align="center">
+  <br/>
+  <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
+    <img width="100" src="http://www.streamxhub.com/assets/logo/logo.png" alt="StreamX logo">
+  </a>
+  <h1>🏳️‍🌈 <b>StreamX 🏳️‍🌈</b></h1>
+  <strong>Let's Flink easy!!!</strong>
+</div>
+
+<br/>
+
+<p align="center">
+  <img src="https://img.shields.io/github/stars/streamxhub/streamx">
+  <img src="https://img.shields.io/github/forks/streamxhub/streamx">
+  <img src="https://img.shields.io/github/issues/streamxhub/streamx">
+  <img src="https://img.shields.io/github/downloads/streamxhub/streamx/total">
+  <img src="https://img.shields.io/github/languages/count/streamxhub/streamx">
+</p>
+
 # StreamX
 let't flink|spark easy
-
 
 > 一个神奇的框架,让Flink开发更简单
 
@@ -28,7 +46,6 @@ let't flink|spark easy
 * Flink SQL WebIDE
 * 支持catalog、hive
 * ***
-
 
 ## 组成部分
 
@@ -78,7 +95,6 @@ let't flink|spark easy
 
 [FlinkX](http://github.com/DTStack/flinkx) 是基于flink的分布式数据同步工具,实现了多种异构数据源之间高效的数据迁移,定位比较明确,专门用来做数据抽取和迁移,可以作为一个服务组件来使用,`StreamX`关注开发阶段和任务后期的管理,定位有所不同,`streamx-pump`模块也在规则中,
 致力于解决数据源抽取和迁移,最终会集成到`streamx-console`中
-
 
 ## 如何编译
 
@@ -267,15 +283,14 @@ kafka.sink:
 
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
-## 安装streamx-console
+## streamx-console
 
 > streamx-console 是一个综合实时数据平台,低代码(Low Code),Flink Sql平台,可以较好的管理Flink任务,集成了项目编译、发布、参数配置、启动、savepoint,火焰图(flame graph),Flink SQL,监控等诸多功能于一体,大大简化了Flink任务的日常操作和维护,融合了诸多最佳实践。其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
 
-## 如何安装
-
+### 如何安装
 streamx-console 提供了开箱即用的安装包,安装之前对环境有些要求,具体要求如下
 
-### 环境
+#### 环境
 
 * 操作系统	Linux(不支持Window系统)
 * JAVA	    1.8+
@@ -285,7 +300,7 @@ streamx-console 提供了开箱即用的安装包,安装之前对环境有些要
 * Python    2+ (非必须,火焰图功能会用到Python)
 * Perl  o
 
-### 安装
+#### 安装
 
 在安装前一定要确保当前部署的机器满足上面环境相关的要求,当前安装的机器必须要有Hadoop环境,安装并配置好了[Flink 1.12.0+](https://www.apache.org/dyn/closer.lua/flink/flink-1.12.0/flink-1.12.0-bin-scala_2.11.tgz),如果准备工作都已就绪,就可以按照了,点击[这里]()下载streamx-console安装包,解包后安装目录如下
 
@@ -315,14 +330,14 @@ streamx-console-service-1.0.0
 └── temp                                        //内部使用到的零时路径,不要删除
 ```
 
-#### 1.初始化工程SQL
+##### 1.初始化工程SQL
 
 streamx-console要求的数据库是MySQL,版本5.6+以上,如准备就绪则进行下面的操作:
 
 * 创建数据库:`streamx`
 * 执行初始化sql (解包后的`conf/streamx-console.sql`)
 
-#### 2.修改相关的数据库信息
+##### 2.修改相关的数据库信息
 
 工程SQL初始化完毕,则修改`conf/application-prod.yml`,找到datasource这一项,找到mysql的配置,修改成对应的信息即可,如下
 
@@ -349,7 +364,7 @@ streamx-console要求的数据库是MySQL,版本5.6+以上,如准备就绪则进
           url: jdbc:mysql://$host:$port/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
 ```
 
-#### 3.启动streamx-console
+##### 3.启动streamx-console
 
 进入到`bin`下直接执行start.sh即可启动项目,默认端口是 10000,如果没啥意外则会启动成功
 
@@ -365,7 +380,7 @@ bash start.sh
 
 默认密码: <strong> admin / streamx </strong>
 
-## 如何使用
+### 如何使用
 
 streamx-console定位是流批一体的大数据平台,一站式解决方案,使用起来非常简单,没有复杂的概念和繁琐的操作,标准的Flink程序(安装Flink官方要去的结构和规范)和用`streamx`开发的项目都做了很好的支持,下面我们使用`streamx-quickstart`来快速开启streamx-console之旅
 
@@ -376,6 +391,28 @@ streamx-console定位是流批一体的大数据平台,一站式解决方案,使
 
 <video src="http://assets.streamxhub.com/20210408008.mp4" controls="controls" width="100%" height="100%"></video>
 
-如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力
+## 🍼 Feedback
 
-`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
+你可以快速的提一个[ISSUES](https://github.com/streamxhub/streamx/issues) ,在提之前,请检查问题后再尝试使用以下联系方式！也许你的问题已经被别人问到了，或者已经被回答了。谢谢！
+
+您可以通过以下方法向我提供反馈或问题：
+
+- [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
+- [加入官方交流群]()
+
+## 💰 Donation
+
+Are you **enjoying this project** ? 👋
+
+StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费, 旧时王谢堂前燕,飞入寻常百姓家,让大公司有能力研发使用的项目,现在人人都可以使用,流批一体,湖仓一体,数据湖是大数据领域的趋势, StreamX现在离这个目标还有一段距离,还需持续投入,相应的资金支持能更好的持续项目的维护和开发。你可以通过下列的方法来赞助 StreamX 的开发, 欢迎捐助,一起来帮我们做的更好! ☀️ 👊
+
+|                                         Wechat 微信支付                                         |                                        Alipay 支付宝支付                                        |
+| :---------------------------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------: |
+| <img src="http://assets.streamxhub.com/1617938114478.jpg" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg" alt="Buy Me A Coffee" width="150"> |
+
+> 所有赞助人将在赞助人名单中显示。
+
+## 💬 加入社区
+
+`Streamx`已正式开源,会进入高速发展模式,如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力, 你可以扫下面的二维码加入官方微信群,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
+
