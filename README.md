@@ -26,6 +26,25 @@ kafka.source:
 KafkaSource().getDataStream[String]().print()
 ```
 
+## Features 🎉🎉🎉
+* 开发脚手架
+* 从任务开发阶段到部署管理全链路支持
+* 一系列开箱即用的connectors
+* 支持项目编译功能(maven 编译)
+* 在线参数配置
+* 支持`Applicaion` 模式, `Yarn-Per-Job`模式启动
+* 快捷的日常操作(任务`启动`、`停止`、`savepoint`,从`savepoint`恢复)
+* 支持火焰图
+* 支持`notebook`(在线任务开发)
+* 项目配置和依赖版本化管理
+* 支持任务备份、回滚(配置回滚)
+* 在线管理依赖(maven pom)和自定义jar
+* 自定义udf、连接器等支持
+* Flink SQL WebIDE
+* 支持catalog、hive
+* ***
+
+
 ## 组成部分
 
 `Streamx`有三部分组成,`streamx-core`,`streamx-pump` 和 `streamx-console`
@@ -60,24 +79,6 @@ KafkaSource().getDataStream[String]().print()
 感谢以上优秀的开源项目和很多未提到的优秀开源项目,给予最大的respect,特别感谢[Apache Zeppelin](http://zeppelin.apache.org)在开发`NoteBook`模块时从中借鉴了大量思想,
 特别感谢[IntelliJ IDEA](https://www.jetbrains.com/idea/), 感谢[fire-spark](https://github.com/GuoNingNing/fire-spark)项目,早期给予的灵感和帮助,
 感谢我老婆在项目开发时给予的支持,悉心照顾我的生活和日常,给予我足够的时间开发这个项目
-
-## Features 🎉🎉🎉
-* 开发脚手架
-* 从任务开发阶段到部署管理全链路支持  
-* 一系列开箱即用的connectors
-* 支持项目编译功能(maven 编译)
-* 在线参数配置
-* 支持`Applicaion` 模式, `Yarn-Per-Job`模式启动
-* 快捷的日常操作(任务`启动`、`停止`、`savepoint`,从`savepoint`恢复)
-* 支持火焰图
-* 支持`notebook`(在线任务开发)
-* 项目配置和依赖版本化管理
-* 支持任务备份、回滚(配置回滚)
-* 在线管理依赖(maven pom)和自定义jar
-* 自定义udf、连接器等支持 
-* Flink SQL WebIDE
-* 支持catalog、hive  
-* ***
 
 ## 为什么不是...? 👻 👻 👻
 
