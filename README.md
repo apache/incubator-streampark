@@ -73,7 +73,7 @@ KafkaSource().getDataStream[String]().print()
 * 支持`notebook`(在线任务开发)
 * 项目配置和依赖版本化管理  
 * 支持任务备份、回滚(配置回滚)  
-* 在线管理依赖(maven pom)和jar(自定义jar)
+* 在线管理依赖(maven pom)和自定义jar
 * 自定义udf、连接器等支持 
 * Flink SQL WebIDE
 * 支持catalog、hive  
