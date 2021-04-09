@@ -281,9 +281,6 @@ kafka.sink:
 
 启动main方法,并且跟上参数" --flink.conf $path/application.yml"
 
-`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
-
-
 ## 安装streamx-console
 
 > streamx-console 是一个综合实时数据平台,低代码(Low Code),Flink Sql平台,可以较好的管理Flink任务,集成了项目编译、发布、参数配置、启动、savepoint,火焰图(flame graph),Flink SQL,监控等诸多功能于一体,大大简化了Flink任务的日常操作和维护,融合了诸多最佳实践。其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
@@ -393,4 +390,6 @@ streamx-console定位是流批一体的大数据平台,一站式解决方案,使
 
 <video src="http://assets.streamxhub.com/20210408008.mp4" controls="controls" width="100%" height="100%"></video>
 
-更多使用教程和文档后续会更新...
+如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力
+
+`Streamx`已正式开源,会进入高速发展模式,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
