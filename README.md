@@ -4,7 +4,7 @@
     <img width="100" src="http://www.streamxhub.com/assets/logo/logo.png" alt="StreamX logo">
   </a>
   <h1>🏳️‍🌈 <b>StreamX 🏳️‍🌈</b></h1>
-  <strong>Let's Flink easy!!!</strong>
+  <strong>Let flink|spark easy!!!</strong>
 </div>
 
 <br/>
@@ -23,21 +23,21 @@
 **[Change Log](#)** |
 **[Document](http://www.streamxhub.com/zh/doc/)**
 
-**[官网](http://tridiamond.tech)** |
+**[官网](http://www.streamxhub.com)** |
 **[更变日志](#)** |
 **[使用文档](http://www.streamxhub.com/zh/doc)**
 
 </div>
 
 # StreamX
-let't flink|spark easy
+let flink|spark easy
 
 > 一个神奇的框架,让Flink开发更简单
 
 ## 🚀 什么是StreamX
-&nbsp;&nbsp;&nbsp;&nbsp;大数据技术如今发展的如火如荼,已经呈现欣欣向荣百花齐放的景象,实时处理流域 `Apache Spark` 和 `Apache Flink` 更是一个伟大的进步,尤其是`Apache Flink`被普遍认为是下一代大数据流计算引擎,我们在使用 `Flink` 时发现从编程模型, 启动配置到运维管理都有很多可以抽象共用的地方,
-我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `StreamX`, 项目的初衷是 —— 让 `Flink` 开发更简单, 使用`StreamX`开发,可以极大降低学习成本和开发门槛,
-让你只用关心最核心的业务,`StreamX` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connector`,标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供`scala`和`java`两套api,
+&nbsp;&nbsp;&nbsp;&nbsp;大数据技术如今发展的如火如荼,已经呈现百花齐放欣欣向荣的景象,实时处理流域 `Apache Spark` 和 `Apache Flink` 更是一个伟大的进步,尤其是`Apache Flink`被普遍认为是下一代大数据流计算引擎,
+我们在使用 `Flink` 时发现从编程模型, 启动配置到运维管理都有很多可以抽象共用的地方, 我们将一些好的经验固化下来并结合业内的最佳实践, 通过不断努力终于诞生了今天的框架 —— `StreamX`, 项目的初衷是 —— 让 `Flink` 开发更简单, 
+使用`StreamX`开发,可以极大降低学习成本和开发门槛, 让开发者只用关心最核心的业务,`StreamX` 规范了项目的配置,鼓励函数式编程,定义了最佳的编程方式,提供了一系列开箱即用的`Connectors`,标准化了配置、开发、测试、部署、监控、运维的整个过程, 提供`scala`和`java`两套api,
 其最终目的是打造一个一站式大数据平台,流批一体,湖仓一体的解决方案
 <video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
@@ -49,7 +49,6 @@ let't flink|spark easy
 
 ## 🎉 Features
 * 开发脚手架
-* 从任务开发阶段到部署管理全链路支持
 * 一系列开箱即用的connectors
 * 支持项目编译功能(maven 编译)
 * 在线参数配置
@@ -63,11 +62,15 @@ let't flink|spark easy
 * 自定义udf、连接器等支持
 * Flink SQL WebIDE
 * 支持catalog、hive
-* ***
+* 从任务`开发`阶段到`部署管理`全链路支持
+* ...
 
 ## 🏳‍🌈 组成部分
 
-`Streamx`有三部分组成,`streamx-core`,`streamx-pump` 和 `streamx-console`
+`Streamx`有三部分组成,分别是`streamx-core`,`streamx-pump` 和 `streamx-console`
+
+![](http://assets.streamxhub.com/streamx1.png)
+
 
 ### 1️⃣ streamx-core
 
@@ -79,8 +82,10 @@ let't flink|spark easy
 
 ### 3️⃣ streamx-console
 
-`streamx-console` 是一个综合实时数据平台,低代码(`Low Code`)平台,可以较好的管理`Flink`任务,集成了项目编译、发布、参数配置、启动、`savepoint`,火焰图(`flame graph`),`Flink SQL`,监控等诸多功能于一体,大大简化了`Flink`任务的日常操作和维护,融合了诸多最佳实践。旧时王谢堂前燕,飞入寻常百姓家,让大公司有能力研发使用的项目,现在人人可以使用,其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
-,该项目提供了租户和权限管理,代码风格充分遵守阿里的开发规范,结构也尽可能的清晰规范,可以作为大数据平台的开发基础,很方便地进行二次开发,该平台使用到但不仅限以下技术
+`streamx-console` 是一个综合实时数据平台,低代码(`Low Code`)平台,可以较好的管理`Flink`任务,集成了项目编译、发布、参数配置、启动、`savepoint`,火焰图(`flame graph`),`Flink SQL`,
+监控等诸多功能于一体,大大简化了`Flink`任务的日常操作和维护,融合了诸多最佳实践。旧时王谢堂前燕,飞入寻常百姓家,让大公司有能力研发使用的项目,现在人人可以使用, 
+其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案,该平台使用但不仅限以下技术:
+
 * [Apache Flink](http://flink.apache.org)
 * [Apache YARN](http://hadoop.apache.org)
 * [Spring Boot](https://spring.io/projects/spring-boot/)
@@ -96,9 +101,8 @@ let't flink|spark easy
 * [Monaco Editor](https://microsoft.github.io/monaco-editor/)
 * ...
 
-感谢以上优秀的开源项目和很多未提到的优秀开源项目,给予最大的respect,特别感谢[Apache Zeppelin](http://zeppelin.apache.org)在开发`NoteBook`模块时从中借鉴了大量思想,
-特别感谢[IntelliJ IDEA](https://www.jetbrains.com/idea/), 感谢[fire-spark](https://github.com/GuoNingNing/fire-spark)项目,早期给予的灵感和帮助,
-感谢我老婆在项目开发时给予的支持,悉心照顾我的生活和日常,给予我足够的时间开发这个项目
+感谢以上优秀的开源项目和很多未提到的优秀开源项目,给予最大的respect,特别感谢[Apache Zeppelin](http://zeppelin.apache.org),[IntelliJ IDEA](https://www.jetbrains.com/idea/), 
+感谢[fire-spark](https://github.com/GuoNingNing/fire-spark)项目,早期给予的灵感和帮助, 感谢我老婆在项目开发时给予的支持,悉心照顾我的生活和日常,给予我足够的时间开发这个项目
 
 ## 👻 为什么不是...❓
 
@@ -121,7 +125,7 @@ let't flink|spark easy
 您可以通过以下方法向我提供反馈或问题：
 
 - [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
-- [加入官方交流群]()
+- [加入社区](#-加入社区)
 
 ## 💰 Donation
 
@@ -135,7 +139,15 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费, �
 
 > 所有赞助人将在赞助人名单中显示。
 
+
+### 🏅 我的赞助
+
+虚席以待,快快来赞助我们吧,你的名字将出现在这里
+
 ## 💬 加入社区
 
-`Streamx`已正式开源,会进入高速发展模式,如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力, 你可以扫下面的二维码加入官方微信群,更多开发相关信息请访问[官网](http://www.streamxhub.com/#/)
+`Streamx`已正式开源,会进入高速发展模式,如果您觉得还不错请在右上角点一下star,帮忙转发,谢谢 🙏🙏🙏 大家的支持是开源最大动力, 你可以扫下面的二维码加入官方微信群,更多相关信息请访问[官网](http://www.streamxhub.com/#/)
+
+<img src="http://assets.streamxhub.com/1617945166259.jpg" alt="扫我加群" width="200"> 
+
 
