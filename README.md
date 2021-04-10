@@ -69,9 +69,8 @@ let flink|spark easy
 
 `Streamx`有三部分组成,分别是`streamx-core`,`streamx-pump` 和 `streamx-console`
 
-<center>
-<img src="http://assets.streamxhub.com/streamx1.png"/><br>
-</center>
+![](http://assets.streamxhub.com/streamx1.png)
+
 
 ### 1️⃣ streamx-core
 
