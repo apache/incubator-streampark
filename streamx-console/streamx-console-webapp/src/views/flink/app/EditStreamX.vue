@@ -844,12 +844,12 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'local', value: 0, disabled: false },
-        { mode: 'remote', value: 1, disabled: false },
+        { mode: 'local', value: 0, disabled: true },
+        { mode: 'remote', value: 1, disabled: true },
         { mode: 'pre-job', value: 2, disabled: false },
-        { mode: 'yarn-session', value: 3, disabled: false },
+        { mode: 'yarn-session', value: 3, disabled: true },
         { mode: 'application', value: 4, disabled: false },
-        { mode: 'kubernetes', value: 5, disabled: false }
+        { mode: 'kubernetes', value: 5, disabled: true }
       ],
       runMaxTagCount: 1,
       totalTagCount: 1,

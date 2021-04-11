@@ -301,6 +301,7 @@
           <a-select-option
             v-for="(o,index) in executionMode"
             :key="`execution_mode_${index}`"
+            :disabled='o.disabled'
             :value="o.value">
             {{ o.mode }}
           </a-select-option>
@@ -669,12 +670,12 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'local', value: 0,disabled: false },
-        { mode: 'remote', value: 1,disabled: false },
-        { mode: 'pre-job', value: 2,disabled: false },
-        { mode: 'yarn-session', value: 3,disabled: false },
-        { mode: 'application', value: 4,disabled: false },
-        { mode: 'kubernetes', value: 5,disabled: false }
+        { mode: 'local', value: 0, disabled: true },
+        { mode: 'remote', value: 1, disabled: true },
+        { mode: 'pre-job', value: 2, disabled: false },
+        { mode: 'yarn-session', value: 3, disabled: true },
+        { mode: 'application', value: 4, disabled: false },
+        { mode: 'kubernetes', value: 5, disabled: true }
       ],
       app: null,
       bigScreenVisible: false,
@@ -1223,7 +1224,7 @@ export default {
       const param = {}
       for (const k in params) {
         const v = params[k]
-        if (v != null && v != undefined) {
+        if (v != null && v !== undefined) {
           param[k] = v
         }
       }
