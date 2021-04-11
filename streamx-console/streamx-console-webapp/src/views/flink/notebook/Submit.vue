@@ -95,8 +95,7 @@ export default {
         {
           env: 'flink',
           introduction: function () {
-            return 'Creates ExecutionEnvironment/StreamExecutionEnvironment/BatchTableEnvironment/StreamTableEnvironment and provides a Scala environment as ' +
-              <a-tag color="#2db7f5" className="tag-note">env</a-tag>
+            return 'Creates ExecutionEnvironment/StreamExecutionEnvironment and provides a Scala environment as env'
           }
         },
         {
@@ -112,15 +111,9 @@ export default {
           }
         },
         {
-          env: 'ssql',
+          env: 'sql',
           introduction: function () {
-            return 'Provides a stream sql environment '
-          }
-        },
-        {
-          env: 'bsql',
-          introduction: function () {
-            return ' Provides a batch sql environment'
+            return 'Provides a StreamTableEnvironment '
           }
         }
       ],
