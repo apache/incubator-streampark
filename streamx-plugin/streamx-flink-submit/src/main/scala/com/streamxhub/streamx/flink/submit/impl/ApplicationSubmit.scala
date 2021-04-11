@@ -33,10 +33,8 @@ import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
-import org.apache.hadoop.fs.Path
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
-import java.io.File
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -94,32 +92,19 @@ object ApplicationSubmit extends YarnSubmitTrait {
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
 
-    /**
-     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
-     */
-    val flinkName = new File(FLINK_HOME).getName
-    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
-    val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
-    val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
-    val flinkHdfsJars = new Path(s"$flinkHdfsHome/jars")
-    val streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS")
-
-    val flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
-      case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
-    }
-
-    val flinkYaml = HdfsUtils.read(s"$flinkHdfsHome/conf/flink-conf.yaml")
-
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
     programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(flinkYaml)
+    programArgs += DeflaterUtils.zipString(workspaceEnv.flinkYaml)
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
 
-    val providedLibs = ListBuffer(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, flinkHdfsJars.toString, streamxPlugin.toString)
+    val providedLibs = ListBuffer(
+      workspaceEnv.flinkHdfsLibs.toString,
+      workspaceEnv.flinkHdfsPlugins.toString,
+      workspaceEnv.flinkHdfsJars.toString,
+      workspaceEnv.streamxPlugin.toString
+    )
 
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
@@ -148,7 +133,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //flinkDistJar
-    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, flinkHdfsDistJar)
+    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, workspaceEnv.flinkHdfsDistJar)
     //pipeline.jars
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
     //execution.target

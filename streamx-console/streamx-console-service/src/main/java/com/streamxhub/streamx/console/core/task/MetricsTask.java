@@ -47,7 +47,7 @@ public class MetricsTask {
     /**
      * hour.
      */
-    @Scheduled(cron = "0 0 * * * ?")
+    //@Scheduled(cron = "0 0 * * * ?")
     public void cleanFlameGraph() {
         // 1) clean file
         String tempPath = WebUtil.getAppDir("temp");

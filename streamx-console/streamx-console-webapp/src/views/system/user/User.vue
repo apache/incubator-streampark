@@ -101,18 +101,21 @@
           type="setting"
           theme="twoTone"
           two-tone-color="#4a9ff5"
+          v-permit="'user:update'"
           @click="edit(record)"
           title="修改用户" />
+        <a-icon
+          type="rollback"
+          style="color: #4a9ff5"
+          @click="resetPassword(record)"
+          v-permit="'user:reset'"
+          title="重置摩玛" />
         <a-icon
           type="eye"
           theme="twoTone"
           two-tone-color="#42b983"
           @click="view(record)"
           title="查看" />
-        <a-badge
-          v-noPermit="'user:update'"
-          status="warning"
-          text="无权限" />
       </template>
     </a-table>
 
@@ -140,7 +143,7 @@ import UserInfo from './UserInfo'
 import UserAdd from './UserAdd'
 import UserEdit from './UserEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
-import { list, remove, $export } from '@/api/user'
+import { list, remove, reset as resetPassword } from '@/api/user'
 
 export default {
   name: 'User',
@@ -293,33 +296,22 @@ export default {
       })
     },
 
-    resetPassword () {
-      if (!this.selectedRowKeys.length) {
-        this.$message.warning('请选择需要重置密码的用户')
-        return
-      }
-      const that = this
-      this.$confirm('this option will be reset password, are yor sure?', 'warning', {
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
-        type: 'warning'
-      }).then(() => {
-        const usernames = []
-        for (const key of that.selectedRowKeys) {
-          usernames.push(that.dataSource[key].username)
+    resetPassword (user) {
+      this.$swal.fire({
+        title: 'reset password, are yor sure?',
+        showCancelButton: true,
+        confirmButtonText: `Yes`,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          resetPassword( {
+            usernames: user.username
+          }).then(() => {
+            this.$swal.fire(
+              'reset password successful, user ['+ user.username + '] new password is streamx666', '',
+              'success'
+            )
+          })
         }
-        that.$put('user/password/reset', {
-          usernames: usernames.join(',')
-        }).then(() => {
-          that.$message.success('reset password successful')
-          that.selectedRowKeys = []
-        })
-      }).catch(() => {
-        that.selectedRowKeys = []
-        this.$message({
-          type: 'info',
-          message: 'cancel delete'
-        })
       })
     },
 

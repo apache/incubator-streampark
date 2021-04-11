@@ -98,14 +98,6 @@ public interface UserService extends IService<User> {
     void updatePassword(String username, String password) throws Exception;
 
     /**
-     * 注册用户
-     *
-     * @param username 用户名
-     * @param password 密码
-     */
-    void regist(String username, String password) throws Exception;
-
-    /**
      * 重置密码
      *
      * @param usernames 用户集合

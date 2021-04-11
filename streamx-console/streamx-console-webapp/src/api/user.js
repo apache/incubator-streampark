@@ -33,6 +33,10 @@ export function update (queryParam) {
   return http.put(api.User.UPDATE, queryParam)
 }
 
+export function reset (queryParam) {
+  return http.put(api.User.RESET, queryParam)
+}
+
 export function get (queryParam) {
   return http.get(api.User.GET, queryParam)
 }

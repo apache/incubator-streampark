@@ -4,6 +4,7 @@
     <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.system.entity.User">
         <id column="USER_ID" jdbcType="DECIMAL" property="userId"/>
         <result column="USERNAME" jdbcType="VARCHAR" property="username"/>
+        <result column="NICK_NAME" jdbcType="VARCHAR" property="nickName"/>
         <result column="PASSWORD" jdbcType="VARCHAR" property="password"/>
         <result column="EMAIL" jdbcType="VARCHAR" property="email"/>
         <result column="MOBILE" jdbcType="VARCHAR" property="mobile"/>
@@ -20,6 +21,7 @@
         SELECT
         u.user_id as userId,
         u.username,
+        u.nick_Name as nickName,
         u.password,
         u.email,
         u.mobile,

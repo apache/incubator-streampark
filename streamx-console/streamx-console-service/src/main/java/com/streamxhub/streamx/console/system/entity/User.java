@@ -58,7 +58,7 @@ public class User implements Serializable {
     public static final String SEX_UNKNOW = "2";
 
     // 默认密码
-    public static final String DEFAULT_PASSWORD = "sqkb666";
+    public static final String DEFAULT_PASSWORD = "streamx666";
 
     @TableId(value = "USER_ID", type = IdType.AUTO)
     private Long userId;

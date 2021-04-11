@@ -20,19 +20,6 @@
  */
 package com.streamxhub.streamx.console.system.service.impl;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
@@ -43,13 +30,23 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.system.dao.UserMapper;
-import com.streamxhub.streamx.console.system.dao.UserRoleMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.entity.UserRole;
 import com.streamxhub.streamx.console.system.service.MenuService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -58,8 +55,6 @@ import com.streamxhub.streamx.console.system.service.UserService;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
-
-    private UserRoleMapper userRoleMapper;
 
     @Autowired
     private UserRoleService userRoleService;
@@ -99,7 +94,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setCreateTime(new Date());
         user.setAvatar(User.DEFAULT_AVATAR);
         String salt = ShaHashUtil.getRandomSalt(26);
-        String password = ShaHashUtil.encrypt(salt, User.DEFAULT_PASSWORD);
+        String password = ShaHashUtil.encrypt(salt, user.getPassword());
         user.setSalt(salt);
         user.setPassword(password);
         save(user);
@@ -115,9 +110,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         user.setPassword(null);
         user.setModifyTime(new Date());
         updateById(user);
-
-        userRoleMapper.delete(new LambdaQueryWrapper<UserRole>().eq(UserRole::getUserId, user.getUserId()));
-
+        userRoleService.deleteUserRolesByUserId(new String[]{user.getUserId().toString()});
         String[] roles = user.getRoleId().split(StringPool.COMMA);
         setUserRoles(user, roles);
     }
@@ -158,29 +151,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void regist(String username, String password) throws Exception {
-        User user = new User();
-        String salt = ShaHashUtil.getRandomSalt(26);
-        password = ShaHashUtil.encrypt(salt, password);
-        user.setSalt(salt);
-        user.setPassword(password);
-        user.setUsername(username);
-        user.setCreateTime(new Date());
-        user.setStatus(User.STATUS_VALID);
-        user.setSex(User.SEX_UNKNOW);
-        user.setAvatar(User.DEFAULT_AVATAR);
-        user.setDescription("注册用户");
-        this.save(user);
-
-        UserRole ur = new UserRole();
-        ur.setUserId(user.getUserId());
-        /** 注册用户角色 ID */
-        ur.setRoleId(2L);
-        this.userRoleMapper.insert(ur);
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
     public void resetPassword(String[] usernames) throws Exception {
         for (String username : usernames) {
             User user = new User();
@@ -209,7 +179,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             UserRole ur = new UserRole();
             ur.setUserId(user.getUserId());
             ur.setRoleId(Long.valueOf(roleId));
-            this.userRoleMapper.insert(ur);
+            this.userRoleService.save(ur);
         });
     }
 }

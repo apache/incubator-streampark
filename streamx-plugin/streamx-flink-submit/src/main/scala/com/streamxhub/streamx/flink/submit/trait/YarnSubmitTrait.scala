@@ -41,7 +41,7 @@ import scala.util.Try
 /**
  * yarn application mode submit
  */
-abstract trait YarnSubmitTrait extends FlinkSubmitTrait {
+ trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   override def doStop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
 

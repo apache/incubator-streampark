@@ -41,7 +41,7 @@ import java.io.File
 import java.lang.{Boolean => JavaBool}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Try
 
 /**
@@ -128,9 +128,10 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     val effectiveConfiguration = new Configuration(executorConfig)
 
     val programArgs = new ArrayBuffer[String]()
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (!x.isEmpty) programArgs += x)
+    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
 
     val flinkYaml = PropertiesUtils.readFile(s"$FLINK_HOME/conf/flink-conf.yaml")
+
     programArgs += PARAM_KEY_FLINK_CONF
     programArgs += DeflaterUtils.zipString(flinkYaml)
     programArgs += PARAM_KEY_APP_NAME
@@ -160,6 +161,10 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
+
+    val providedLibs = ListBuffer(workspaceEnv.flinkHdfsJars.toString)
+
+    effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //execution.target
     effectiveConfiguration.set(DeploymentOptions.TARGET, YarnDeploymentTarget.PER_JOB.getName)
     //yarn application Type

@@ -96,6 +96,7 @@ export default {
     EXECUSER: '/user/execUser',
     LIST: '/user/list',
     UPDATE: '/user/update',
+    RESET: '/user/password/reset',
     GET: '/user/get',
     POST: '/user/post',
     DELETE: '/user/delete',

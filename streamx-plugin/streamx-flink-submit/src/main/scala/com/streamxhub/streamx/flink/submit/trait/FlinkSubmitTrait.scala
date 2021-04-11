@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.{CommandLine, Options}
@@ -30,6 +30,7 @@ import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliArgsException, CliFrontend, CliFrontendParser, CustomCommandLine}
 import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, GlobalConfiguration}
 import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.hadoop.fs.Path
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
@@ -45,6 +46,29 @@ trait FlinkSubmitTrait extends Logger {
     val flinkLocalHome = System.getenv("FLINK_HOME")
     logInfo(s"flinkHome: $flinkLocalHome")
     flinkLocalHome
+  }
+
+  lazy val workspaceEnv: WorkspaceEnv = {
+    /**
+     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+     */
+    val flinkName = new File(FLINK_HOME).getName
+    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
+
+    WorkspaceEnv(
+      flinkName,
+      flinkHdfsHome,
+      flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
+      flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
+      flinkHdfsJars = new Path(s"$flinkHdfsHome/jars"),
+      streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
+      flinkYaml = HdfsUtils.read(s"$flinkHdfsHome/conf/flink-conf.yaml"),
+      flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
+        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
+      }
+    )
   }
 
   private[submit] lazy val flinkDefaultConfiguration: Configuration = {
@@ -226,3 +250,14 @@ trait FlinkSubmitTrait extends Logger {
 
 
 }
+
+case class WorkspaceEnv(
+                         flinkName: String,
+                         flinkHdfsHome: String,
+                         flinkHdfsLibs: Path,
+                         flinkHdfsPlugins: Path,
+                         flinkHdfsJars: Path,
+                         streamxPlugin: Path,
+                         flinkYaml: String,
+                         flinkHdfsDistJar: String
+                       )
