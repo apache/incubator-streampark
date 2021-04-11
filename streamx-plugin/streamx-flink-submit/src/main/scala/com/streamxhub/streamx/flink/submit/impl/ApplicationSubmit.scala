@@ -101,6 +101,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
     val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
     val flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib")
     val flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins")
+    val flinkHdfsJars = new Path(s"$flinkHdfsHome/jars")
     val streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS")
 
     val flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
@@ -118,7 +119,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
 
-    val providedLibs = ListBuffer(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, streamxPlugin.toString)
+    val providedLibs = ListBuffer(flinkHdfsLibs.toString, flinkHdfsPlugins.toString, flinkHdfsJars.toString, streamxPlugin.toString)
 
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>

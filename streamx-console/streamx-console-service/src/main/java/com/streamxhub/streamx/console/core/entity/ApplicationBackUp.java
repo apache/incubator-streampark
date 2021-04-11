@@ -59,7 +59,7 @@ public class ApplicationBackUp {
         this.createTime = new Date();
         this.path = String.format(
                 "%s/%d/%d",
-                ConfigConst.APP_HISTORY(),
+                ConfigConst.APP_BACKUPS(),
                 application.getId(),
                 createTime.getTime()
         );

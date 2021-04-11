@@ -20,20 +20,19 @@
  */
 package com.streamxhub.streamx.console.core.runner;
 
-import java.io.File;
-import java.util.Objects;
-
+import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.util.HdfsUtils;
+import com.streamxhub.streamx.console.base.utils.WebUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
-import lombok.extern.slf4j.Slf4j;
 
-import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.util.HdfsUtils;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import java.io.File;
+import java.util.Objects;
 
 /**
  * @author benjobs
@@ -75,10 +74,10 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.mkdirs(appWorkspace);
             }
 
-            String appHistory = ConfigConst.APP_HISTORY();
-            if (!HdfsUtils.exists(appHistory)) {
-                log.info("mkdir {} starting ...", appHistory);
-                HdfsUtils.mkdirs(appHistory);
+            String appBackups = ConfigConst.APP_BACKUPS();
+            if (!HdfsUtils.exists(appBackups)) {
+                log.info("mkdir {} starting ...", appBackups);
+                HdfsUtils.mkdirs(appBackups);
             }
 
             String appPlugins = ConfigConst.APP_PLUGINS();
@@ -91,6 +90,12 @@ public class EnvInitializeRunner implements ApplicationRunner {
             if (!HdfsUtils.exists(appSavepoints)) {
                 log.info("mkdir {} starting ...", appSavepoints);
                 HdfsUtils.mkdirs(appSavepoints);
+            }
+
+            String appJars = ConfigConst.APP_JARS();
+            if (!HdfsUtils.exists(appJars)) {
+                log.info("mkdir {} starting ...", appJars);
+                HdfsUtils.mkdirs(appJars);
             }
 
             String flinkName = new File(flinkLocalHome).getName();
