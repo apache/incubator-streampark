@@ -20,7 +20,7 @@
 # under the License.
 #
 # -----------------------------------------------------------------------------
-# Control Script for the WEBX Server
+# Control Script for the StreamX Server
 #
 # Environment Variable Prerequisites
 #
