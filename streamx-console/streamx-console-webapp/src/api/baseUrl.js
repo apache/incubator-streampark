@@ -26,8 +26,8 @@ export function baseUrl() {
       url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
       break
     case 'production':
-      url = 'http://test-hadoop-2:10000'
+      url = 'http://pro-hadoop-2:10001'
       break
   }
-  return 'http://test-hadoop-2:10000'
+  return url
 }
