@@ -24,6 +24,8 @@ import java.util.List;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Param;
 
 public interface MenuMapper extends BaseMapper<Menu> {
 
@@ -45,4 +47,7 @@ public interface MenuMapper extends BaseMapper<Menu> {
      * @param menuId menuId
      */
     void deleteMenus(String menuId);
+
+    @Delete("delete from t_role_menu where menu_id = #{menuId}")
+    void deleteRoleMenuByMenuId(@Param("menuId") Long menuId);
 }

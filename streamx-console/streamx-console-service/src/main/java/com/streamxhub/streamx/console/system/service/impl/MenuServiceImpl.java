@@ -20,15 +20,6 @@
  */
 package com.streamxhub.streamx.console.system.service.impl;
 
-import java.util.*;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -40,6 +31,13 @@ import com.streamxhub.streamx.console.system.dao.MenuMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.MenuService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.*;
 
 @Slf4j
 @Service
@@ -113,9 +111,9 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
     public void deleteMeuns(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
             // 查找与这些菜单/按钮关联的用户
-            List<String> userIds = this.baseMapper.findUserIdsByMenuId(String.valueOf(menuId));
+            this.baseMapper.deleteRoleMenuByMenuId(Long.parseLong(menuId));
             // 递归删除这些菜单/按钮
-            this.baseMapper.deleteMenus(menuId);
+            this.baseMapper.deleteById(menuId);
         }
     }
 
