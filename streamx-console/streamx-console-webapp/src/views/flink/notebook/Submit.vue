@@ -1,0 +1,208 @@
+<template>
+
+  <a-card
+    :bordered="false"
+    class="nodebook-submit"
+    :style="{ height: '100%' }">
+    <a-row
+      :gutter="24"
+      type="flex"
+      justify="space-between">
+      <a-col :span="22">
+        <span
+          style="height: 40px;margin-left: 17px;"
+          class="code-prefix"/>
+        <a-form
+          layout="inline"
+          @submit="handleReplSubmit"
+          :form="form"
+          class="env-select">
+          <a-form-item>
+            <a-select
+              style="z-index: 5;width: 100%"
+              default-value="flink"
+              @change="handleChangeEnv">
+              <a-select-option
+                v-for="(e,index) in envs"
+                :value="e.env"
+                :key="index">
+                <div>
+                  {{ e.env }}
+                </div>
+              </a-select-option>
+            </a-select>
+          </a-form-item>
+        </a-form>
+        <div>
+          <span
+            style="height: 100%;margin-left: 17px;"
+            class="code-prefix"/>
+          <span style="margin-left: 15px;color: grey">
+            <slot>{{ introduction }}</slot>
+          </span>
+        </div>
+      </a-col>
+      <a-col
+        :span="2"
+        style="z-index: 2">
+        <a-icon
+          type="play-circle"
+          two-tone-color="#4a9ff5"
+          @click="handleReplSubmit"
+          style="padding-left: 10px;"/>
+        <a-icon
+          type="read"
+          two-tone-color="#4a9ff5"
+          @click="showTutorial = !showTutorial"
+          style="padding-left: 10px;"/>
+        <a-icon
+          type="fullscreen-exit"
+          two-tone-color="#4a9ff5"
+          style="padding-left: 10px;"/>
+      </a-col>
+      <a-col :span="24">
+        <div class="code-box"></div>
+      </a-col>
+    </a-row>
+    <mavon-editor
+      v-if="tutorial && showTutorial"
+      v-model="tutorial"
+      :toolbars-flag="false"
+      :subfield="false"
+      :ishljs="true"
+      :preview="true"
+      style="margin-top: 10px;z-index: 5"
+      default-open="preview"/>
+  </a-card>
+</template>
+
+<script>
+import {mavonEditor} from 'mavon-editor'
+import * as monaco from 'monaco-editor'
+import {submit} from '@api/notebook'
+import 'mavon-editor/dist/css/index.css'
+import {get} from '@api/tutorial'
+
+export default {
+  name: 'Submit',
+  components: {mavonEditor},
+  data() {
+    return {
+      editor: null,
+      code: '',
+      form: null,
+      envs: [
+        {
+          env: 'flink',
+          introduction: function () {
+            return 'Creates ExecutionEnvironment/StreamExecutionEnvironment and provides a Scala environment as env'
+          }
+        },
+        {
+          env: 'pyflink',
+          introduction: function () {
+            return 'Provides a python environment '
+          }
+        },
+        {
+          env: 'ipyflink',
+          introduction: function () {
+            return ' Provides an ipython environment '
+          }
+        },
+        {
+          env: 'sql',
+          introduction: function () {
+            return 'Provides a StreamTableEnvironment '
+          }
+        }
+      ],
+      tutorial: null,
+      toolbars: false,
+      showTutorial: false,
+      env: 'flink',
+      introduction: null,
+      woldCount: '\n%flink.repl.out=true\n' +
+        '%flink.yarn.queue=default\n' +
+        '%flink.execution.mode=yarn\n' +
+        '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
+        'env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
+        '.flatMap(_.split("\\\\s"))\n' +
+        '.map((_, 1))\n' +
+        '.keyBy(0)\n' +
+        '.sum(1)\n' +
+        '.print()\n\n' +
+        'env.execute(\"StreamX NoteBook Job\")\n'
+    }
+  },
+  mounted() {
+    const option = {
+      theme: 'vs', //vs, hc-black, or vs-dark
+      language: 'java',
+      value: this.woldCount,
+      selectOnLineNumbers: false,
+      foldingStrategy: 'indentation', // 代码分小段折叠
+      overviewRulerBorder: false, // 不要滚动条边框
+      autoClosingBrackets: true,
+      tabSize: 2, // tab 缩进长度
+      readOnly: false,
+      inherit: true,
+      scrollBeyondLastLine: false,
+      lineNumbersMinChars: 4,
+      lineHeight: 24,
+      automaticLayout: true,
+      cursorBlinking: 'line',
+      cursorStyle: 'line',
+      cursorWidth: 3,
+      renderFinalNewline: true,
+      renderLineHighlight: 'line',
+      quickSuggestionsDelay: 100,  //代码提示延时
+      scrollbar: {
+        useShadows: false,
+        vertical: 'visible',
+        horizontal: 'visible',
+        horizontalSliderSize: 5,
+        verticalSliderSize: 5,
+        horizontalScrollbarSize: 15,
+        verticalScrollbarSize: 15
+      }
+    }
+    this.editor = monaco.editor.create(document.querySelector('.code-box'), option)
+    this.handleReadmd()
+    this.handleIntroduction()
+    this.form = this.$form.createForm(this)
+  },
+
+  methods: {
+    handleReplSubmit() {
+      const code = this.editor.getValue()
+      console.log(code)
+      submit({
+        env: 'senv',
+        text: code
+      }).then((resp) => {
+        console.log(resp.data)
+      })
+    },
+    handleReadmd() {
+      get({
+        name: 'repl'
+      }).then((resp) => {
+        this.tutorial = resp.data.content
+      })
+    },
+    handleIntroduction() {
+      const env = this.envs.filter((x) => x.env === this.env)[0]
+      this.introduction = env.introduction()
+    },
+    handleChangeEnv(env) {
+      this.env = env
+      this.handleIntroduction()
+    }
+  }
+}
+</script>
+
+<style lang="less">
+@import "Submit";
+</style>

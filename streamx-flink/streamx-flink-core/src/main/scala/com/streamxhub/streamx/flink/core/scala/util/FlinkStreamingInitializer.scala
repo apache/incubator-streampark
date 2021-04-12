@@ -195,7 +195,7 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
     /**
      * 优先到当前项目的配置下找配置,找不到,则取$FLINK_HOME/conf/flink-conf.yml里的配置
      */
-    val defaultConf = getFlinkConf()
+    lazy val defaultConf = getFlinkConf()
     val prefixLen = "flink.".length
     val strategy = Try(RestartStrategy.byName(parameter.get(KEY_FLINK_RESTART_STRATEGY)))
       .getOrElse(

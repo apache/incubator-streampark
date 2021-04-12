@@ -15,6 +15,8 @@
         <module>streamx-common</module>
         <module>streamx-flink</module>
         <module>streamx-spark</module>
+        <module>streamx-console</module>
+        <module>streamx-plugin</module>
     </modules>
 
     <!-- 定义统一版本号-->

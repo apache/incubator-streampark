@@ -263,9 +263,14 @@ object ConfigConst {
 
   val APP_FLINK = "/streamx/flink"
 
-  val APP_HISTORY = "/streamx/history"
+  val APP_BACKUPS = "/streamx/backups"
 
   val APP_SAVEPOINTS = "/streamx/savepoints"
+
+  /**
+   * 存放全局公共的jar
+   */
+  val APP_JARS = "/streamx/jars"
 
   val LOGO =
     """

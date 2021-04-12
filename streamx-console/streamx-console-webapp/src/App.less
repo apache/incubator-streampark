@@ -1,0 +1,38 @@
+#app {
+  height: 100%;
+  .ant-tag {
+    border-radius: 0;
+    font-weight: 700;
+    font-size: 12px;
+    text-align: center;
+    padding: 0 4px;
+    margin-right: 0px;
+    cursor: default;
+  }
+  .ant-table-thead > tr > th {
+    padding: 10px 6px !important;
+    font-size: 14px;
+  }
+
+  .ant-table-thead > tr > td,.ant-table-tbody > tr > td {
+    padding: 10px 6px !important;
+  }
+
+  .ant-input {
+    border-radius: 1px !important;
+  }
+
+  .ant-table-tbody > tr > td {
+    font-size: 13px;
+  }
+
+  .ant-table-tbody > tr > td > .anticon {
+    padding: 5px
+  }
+}
+
+// monaco-aria-container有bug. 和这个类似(https://github.com/openshift/console/pull/2333)
+.monaco-aria-container {
+  top: -999em !important;
+  left: -999em !important;
+}
