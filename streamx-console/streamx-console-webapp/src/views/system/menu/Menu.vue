@@ -64,12 +64,14 @@
                     shape="circle"
                     icon="plus" />
                 </a-popconfirm>
+                <!--
                 <a-button
                   v-permit="'menu:delete'"
                   type="primary"
                   shape="circle"
                   icon="minus"
                   @click="batchDelete" />
+                -->
               </span>
             </a-col>
           </div>
