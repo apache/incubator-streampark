@@ -12,7 +12,7 @@
             </a>
           </div>
           <div class="desc">
-            StreamX, Let's Bigdata easy
+            StreamX, Let flink|spark easy!!!
           </div>
         </div>
         <a-form
@@ -25,10 +25,10 @@
             <a-input
               size="large"
               type="text"
-              placeholder="userName / admin"
+              placeholder="username / admin"
               v-decorator="[
                 'username',
-                {rules: [{ required: true, message: 'please enter userName' }], validateTrigger: 'change'}
+                {rules: [{ required: true, message: 'please enter username' }], validateTrigger: 'change'}
               ]">
               <a-icon
                 slot="prefix"
@@ -42,7 +42,7 @@
               size="large"
               type="password"
               autocomplete="false"
-              placeholder="password / admin"
+              placeholder="password / streamx"
               v-decorator="[
                 'password',
                 {rules: [{ required: true, message: 'please enter password' }], validateTrigger: 'blur'}

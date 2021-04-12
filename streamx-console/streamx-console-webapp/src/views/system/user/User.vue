@@ -121,20 +121,20 @@
 
     <!-- 用户信息查看 -->
     <user-info
-      :user-info-data="userInfo.data"
-      :user-info-visiable="userInfo.visiable"
+      :data="userInfo.data"
+      :visible="userInfo.visible"
       @close="handleUserInfoClose" />
     <!-- 新增用户 -->
     <user-add
       @close="handleUserAddClose"
       @success="handleUserAddSuccess"
-      :user-add-visiable="userAdd.visiable" />
+      :visible="userAdd.visible" />
     <!-- 修改用户 -->
     <user-edit
       ref="userEdit"
       @close="handleUserEditClose"
       @success="handleUserEditSuccess"
-      :user-edit-visiable="userEdit.visiable" />
+      :visible="userEdit.visible" />
   </a-card>
 </template>
 
@@ -151,14 +151,14 @@ export default {
   data () {
     return {
       userInfo: {
-        visiable: false,
+        visible: false,
         data: {}
       },
       userAdd: {
-        visiable: false
+        visible: false
       },
       userEdit: {
-        visiable: false
+        visible: false
       },
       queryParams: {},
       filteredInfo: null,
@@ -229,33 +229,33 @@ export default {
     },
     view (record) {
       this.userInfo.data = record
-      this.userInfo.visiable = true
+      this.userInfo.visible = true
     },
     add () {
-      this.userAdd.visiable = true
+      this.userAdd.visible = true
     },
     handleUserAddClose () {
-      this.userAdd.visiable = false
+      this.userAdd.visible = false
     },
     handleUserAddSuccess () {
-      this.userAdd.visiable = false
-      this.$message.success('新增用户成功，初始密码为adminx123')
+      this.userAdd.visible = false
+      this.$message.success('新增用户成功，初始密码为streamx123')
       this.search()
     },
     edit (record) {
       this.$refs.userEdit.setFormValues(record)
-      this.userEdit.visiable = true
+      this.userEdit.visible = true
     },
     handleUserEditClose () {
-      this.userEdit.visiable = false
+      this.userEdit.visible = false
     },
     handleUserEditSuccess () {
-      this.userEdit.visiable = false
+      this.userEdit.visible = false
       this.$message.success('修改用户成功')
       this.search()
     },
     handleUserInfoClose () {
-      this.userInfo.visiable = false
+      this.userInfo.visible = false
     },
     handleDateChange (value) {
       if (value) {
@@ -353,7 +353,7 @@ export default {
       this.paginationInfo = pagination
       this.filteredInfo = filters
       this.sortedInfo = sorter
-      this.userInfo.visiable = false
+      this.userInfo.visible = false
       this.fetch({
         sortField: sorter.field,
         sortOrder: sorter.order,

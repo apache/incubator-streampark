@@ -6,7 +6,7 @@
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="userEditVisiable"
+    :visible="visible"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form
       :form="form">
@@ -131,7 +131,7 @@ const formItemLayout = {
 export default {
   name: 'UserEdit',
   props: {
-    userEditVisiable: {
+    visible: {
       type: Boolean,
       default: false
     }
@@ -149,11 +149,13 @@ export default {
       loading: false
     }
   },
+
   computed: {
     ...mapState({
       currentUser: state => state.account.user
     })
   },
+
   methods: {
     ...mapMutations({
       setUser: 'account/setUser'
@@ -207,8 +209,8 @@ export default {
     }
   },
   watch: {
-    userEditVisiable () {
-      if (this.userEditVisiable) {
+    visible () {
+      if (this.visible) {
         getRole({ 'pageSize': '9999' }).then((r) => {
           this.roleData = r.rows
         })

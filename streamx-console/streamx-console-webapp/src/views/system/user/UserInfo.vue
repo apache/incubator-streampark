@@ -15,18 +15,18 @@
           shape="square"
           :size="115"
           icon="user"
-          :src="`static/avatar/${userInfoData.avatar}`" />
+          :src="`static/avatar/${data.avatar}`" />
       </a-layout-sider>
       <a-layout-content
         class="user-content-one">
         <p>
           <a-icon
-            type="user" />账户：{{ userInfoData.username }}
+            type="user" />账户：{{ data.username }}
         </p>
         <p
-          :title="userInfoData.roleName">
+          :title="data.roleName">
           <a-icon
-            type="star" />角色：{{ userInfoData.roleName? userInfoData.roleName: '暂无角色' }}
+            type="star" />角色：{{ data.roleName? data.roleName: '暂无角色' }}
         </p>
         <p>
           <a-icon
@@ -34,11 +34,11 @@
         </p>
         <p>
           <a-icon
-            type="phone" />电话：{{ userInfoData.mobile ? userInfoData.mobile : '暂未绑定电话' }}
+            type="phone" />电话：{{ data.mobile ? data.mobile : '暂未绑定电话' }}
         </p>
         <p>
           <a-icon
-            type="mail" />邮箱：{{ userInfoData.email ? userInfoData.email : '暂未绑定邮箱' }}
+            type="mail" />邮箱：{{ data.email ? data.email : '暂未绑定邮箱' }}
         </p>
       </a-layout-content>
       <a-layout-content
@@ -46,19 +46,19 @@
         <p>
           <a-icon
             type="smile"
-            v-if="userInfoData.status === '1'" />
+            v-if="data.status === '1'" />
           <a-icon
             type="frown"
             v-else />状态：
           <template
-            v-if="userInfoData.status === '0'">
+            v-if="data.status === '0'">
             <a-tag
               color="red">
               锁定
             </a-tag>
           </template>
           <template
-            v-else-if="userInfoData.status === '1'">
+            v-else-if="data.status === '1'">
             <a-tag
               color="cyan">
               有效
@@ -66,21 +66,21 @@
           </template>
           <template
             v-else>
-            {{ userInfoData.status }}
+            {{ data.status }}
           </template>
         </p>
         <p>
           <a-icon
-            type="clock-circle" />创建时间：{{ userInfoData.createTime }}
+            type="clock-circle" />创建时间：{{ data.createTime }}
         </p>
         <p>
           <a-icon
-            type="login" />最近登录：{{ userInfoData.lastLoginTime }}
+            type="login" />最近登录：{{ data.lastLoginTime }}
         </p>
         <p
-          :title="userInfoData.description">
+          :title="data.description">
           <a-icon
-            type="message" />描述：{{ userInfoData.description }}
+            type="message" />描述：{{ data.description }}
         </p>
       </a-layout-content>
     </a-layout>
@@ -90,12 +90,12 @@
 export default {
   name: 'UserInfo',
   props: {
-    userInfoVisiable: {
+    visible: {
       type: Boolean,
       require: true,
       default: false
     },
-    userInfoData: {
+    data: {
       type: Object,
       default: () => ({}),
       require: true
@@ -104,13 +104,13 @@ export default {
   computed: {
     show: {
       get: function () {
-        return this.userInfoVisiable
+        return this.visible
       },
       set: function () {
       }
     },
     sex () {
-      switch (this.userInfoData.sex) {
+      switch (this.data.sex) {
         case '0':
           return '男'
         case '1':
@@ -118,7 +118,7 @@ export default {
         case '2':
           return '保密'
         default:
-          return this.userInfoData.sex
+          return this.data.sex
       }
     }
   },

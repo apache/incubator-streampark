@@ -6,7 +6,7 @@
     placement="right"
     :closable="false"
     @close="onClose"
-    :visible="userAddVisiable"
+    :visible="visible"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
     <a-form
       :form="form">
@@ -133,7 +133,7 @@ const formItemLayout = {
 export default {
   name: 'UserAdd',
   props: {
-    userAddVisiable: {
+    visible: {
       type: Boolean,
       default: false
     }
@@ -207,8 +207,8 @@ export default {
     }
   },
   watch: {
-    userAddVisiable () {
-      if (this.userAddVisiable) {
+    visible () {
+      if (this.visible) {
         getRole(
           { 'pageSize': '9999' }
         ).then((r) => {

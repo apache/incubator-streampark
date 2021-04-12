@@ -11,7 +11,7 @@
       slot="content">
       <a-spin
         :spinning="loadding">
-        <a-tabs>
+        <a-tabs v-if="1===2">
           <a-tab-pane
             tab="通知"
             key="1">
@@ -45,7 +45,7 @@
       @click="fetchNotice"
       class="header-notice">
       <a-badge
-        count="12">
+        count="0">
         <a-icon
           style="font-size: 16px; padding: 4px"
           type="bell" />
