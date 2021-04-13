@@ -94,7 +94,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
 
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-    if (submitRequest.flinkHome != null && !submitRequest.flinkHome.isBlank ) {
+    if (submitRequest.flinkHome != null && submitRequest.flinkHome.nonEmpty ) {
       programArgs += PARAM_KEY_FLINK_HOME
       programArgs += submitRequest.flinkHome
     }
