@@ -59,6 +59,7 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -105,6 +106,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private ApplicationContext context;
+
+    private String PROD_ENV_NAME = "prod";
 
     @Autowired
     private ServerUtil serverUtil;
@@ -499,7 +505,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         if (!application.isRunning()) {
                             toEffective(application);
                         }
-                    } catch (ServiceException e){
+                    } catch (ServiceException e) {
                         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
 
@@ -743,6 +749,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean start(Application appParam) throws Exception {
+        checkFlinkEnv();
+
         final Application application = getById(appParam.getId());
         assert application != null;
         //1) 真正执行启动相关的操作..
@@ -862,7 +870,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
+
         SubmitRequest submitInfo = new SubmitRequest(
+                settingService.getEnvFlinkHome(),
                 flinkUserJar,
                 DevelopmentMode.of(application.getJobType()),
                 ExecutionMode.of(application.getExecutionMode()),
@@ -922,6 +932,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             updateById(app);
             FlinkTrackingTask.stopTracking(appParam.getId());
             return false;
+        }
+    }
+
+    private void checkFlinkEnv() {
+        String profiles = context.getEnvironment().getActiveProfiles()[0];
+        if (profiles.equals(PROD_ENV_NAME)) {
+            String flinkLocalHome = settingService.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : settingService.getEnvFlinkHome();
+            if (flinkLocalHome == null) {
+                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+            }
+            String appFlink = ConfigConst.APP_FLINK();
+            if (!HdfsUtils.exists(appFlink)) {
+                log.info("mkdir {} starting ...", appFlink);
+                HdfsUtils.mkdirs(appFlink);
+            }
+            String flinkName = new File(flinkLocalHome).getName();
+            String flinkHome = appFlink.concat("/").concat(flinkName);
+            if (!HdfsUtils.exists(flinkHome)) {
+                log.info("{} is not exists,upload beginning....", flinkHome);
+                HdfsUtils.upload(flinkLocalHome, flinkHome, false, false);
+            }
         }
     }
 

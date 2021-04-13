@@ -29,7 +29,8 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 
-case class SubmitRequest(flinkUserJar: String,
+case class SubmitRequest(flinkHome:String,
+                         flinkUserJar: String,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
                          resolveOrder: ResolveOrder,

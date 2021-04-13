@@ -69,6 +69,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
+    public String getEnvFlinkHome() {
+        return settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+    }
+
+    @Override
     public String getStreamXWorkspace() {
         return settings.get(SettingService.KEY_STREAMX_WORKSPACE).getValue();
     }

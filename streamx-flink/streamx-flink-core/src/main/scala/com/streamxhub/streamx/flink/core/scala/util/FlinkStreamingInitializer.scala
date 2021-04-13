@@ -91,7 +91,10 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   lazy val parameter: ParameterTool = initParameter()
 
   private[this] lazy val defaultFlinkConf: Map[String, String] = {
-    val flinkHome = System.getenv("FLINK_HOME")
+    val flinkHome = parameter.get(KEY_FLINK_HOME()) match {
+      case null => System.getenv("FLINK_HOME")
+      case x => x
+    }
     require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
     val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
     readFlinkConf(flinkConf)
