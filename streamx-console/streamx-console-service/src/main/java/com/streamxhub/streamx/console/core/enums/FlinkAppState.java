@@ -36,80 +36,85 @@ public enum FlinkAppState {
      * Application which is currently deploying.
      */
     DEPLOYING(1),
+
+    /**
+     * Application which is currently deployfailed.
+     */
+    DEPLOYFAILED(2),
     /**
      * Application which is currently deploying.
      */
-    DEPLOYED(2),
+    DEPLOYED(3),
     /**
      * The job has been received by the Dispatcher, and is waiting for the job manager to be
      * created.
      */
-    INITIALIZING(3),
+    INITIALIZING(4),
     /**
      * Job is newly created, no task has started to run.
      */
-    CREATED(4),
+    CREATED(5),
     /**
      * Application which is currently running.
      */
-    STARTING(5),
+    STARTING(6),
 
     /**
      * Application which is currently running.
      */
-    RESTARTING(6),
+    RESTARTING(7),
     /**
      * Some tasks are scheduled or running, some may be pending, some may be finished.
      */
-    RUNNING(7),
+    RUNNING(8),
 
     /**
      * The job has failed and is currently waiting for the cleanup to complete.
      */
-    FAILING(8),
+    FAILING(9),
 
     /**
      * The job has failed with a non-recoverable task failure.
      */
-    FAILED(9),
+    FAILED(10),
 
     /**
      * Job is being cancelled.
      */
-    CANCELLING(10),
+    CANCELLING(11),
 
     /**
      * Job has been cancelled.
      */
-    CANCELED(11),
+    CANCELED(12),
 
     /**
      * All of the job's tasks have successfully finished.
      */
-    FINISHED(12),
+    FINISHED(13),
     /**
      * The job has been suspended which means that it has been stopped but not been removed from a
      * potential HA job store.
      */
-    SUSPENDED(13),
+    SUSPENDED(14),
     /**
      * The job is currently reconciling and waits for task execution report to recover state.
      */
-    RECONCILING(14),
+    RECONCILING(15),
     /**
      * 失联
      */
-    LOST(15),
+    LOST(16),
 
     /**
      * 射影中...
      */
-    MAPPING(16),
+    MAPPING(17),
 
     /**
      * 其他不关心的状态...
      */
-    OTHER(17),
+    OTHER(18),
 
     /**
      * yarn 中检查到被killed

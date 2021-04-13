@@ -168,6 +168,7 @@ public class Application implements Serializable {
         switch (appState) {
             case DEPLOYING:
             case DEPLOYED:
+            case DEPLOYFAILED:
             case CREATED:
             case FINISHED:
             case FAILED:

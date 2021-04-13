@@ -33,6 +33,7 @@ import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.base.utils.WebUtil;
@@ -436,7 +437,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void deploy(Application appParam) {
-        //executorService.submit(() -> {
+        executorService.submit(() -> {
             Application application = getById(appParam.getId());
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
@@ -454,18 +455,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         );
                     }
 
-                    // 2) backup
-                    if (appParam.getBackUp()) {
-                        this.backUpService.backup(application);
-                    }
-
-                    // 3) deploying...
-                    File appHome = application.getAppHome();
-                    HdfsUtils.delete(appHome.getPath());
-
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
+                            // 2) backup
+                            if (appParam.getBackUp()) {
+                                this.backUpService.backup(application);
+                            }
+                            // 3) deploying...
+                            File appHome = application.getAppHome();
+                            HdfsUtils.delete(appHome.getPath());
                             File localJobHome = new File(application.getLocalAppBase(), application.getModule());
                             HdfsUtils.upload(localJobHome.getAbsolutePath(), workspace, false, true);
                             HdfsUtils.movie(workspace.concat("/").concat(application.getModule()), appHome.getPath());
@@ -473,6 +472,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getLatest(application.getId());
                             application.setDependency(flinkSql.getDependency());
+                            application.setBackUp(appParam.getBackUp());
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
@@ -499,6 +499,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         if (!application.isRunning()) {
                             toEffective(application);
                         }
+                    } catch (ServiceException e){
+                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.eq(Application::getId, application.getId());
+
+                        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+                        updateWrapper.set(Application::getState, FlinkAppState.DEPLOYFAILED.getValue());
+
+                        baseMapper.update(application, updateWrapper);
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -507,7 +516,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        //});
+        });
     }
 
     @SneakyThrows
@@ -550,56 +559,71 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String info = String.format("%s:%s,", e.getGroupId(), e.getArtifactId());
                 builder.append(info);
             }));
+
             String exclusions = builder.deleteCharAt(builder.length() - 1).toString();
 
             Long id = application.getId();
             StringBuilder logBuilder = this.tailBuffer.getOrDefault(id, new StringBuilder());
-            Collection<String> dependencyJars = JavaConversions.asJavaCollection(
-                    DependencyUtils.resolveMavenDependencies(
-                            exclusions,
-                            packages,
-                            null,
-                            null,
-                            null,
-                            out -> {
-                                if (tailOutMap.containsKey(id)) {
-                                    if (tailBeginning.containsKey(id)) {
-                                        tailBeginning.remove(id);
-                                        Arrays.stream(logBuilder.toString().split("\n"))
-                                                .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
-                                    } else {
-                                        simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
-                                    }
-                                }
-                                logBuilder.append(out).append("\n");
-                            }
-                    )
-            );
 
-            tailOutMap.remove(id);
-            tailBeginning.remove(id);
-            tailBuffer.remove(id);
+            Collection<String> dependencyJars;
+            try {
+                dependencyJars = JavaConversions.asJavaCollection(DependencyUtils.resolveMavenDependencies(
+                        exclusions,
+                        packages,
+                        null,
+                        null,
+                        null,
+                        out -> {
+                            if (tailOutMap.containsKey(id)) {
+                                if (tailBeginning.containsKey(id)) {
+                                    tailBeginning.remove(id);
+                                    Arrays.stream(logBuilder.toString().split("\n"))
+                                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
+                                } else {
+                                    simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
+                                }
+                            }
+                            logBuilder.append(out).append("\n");
+                        }
+                ));
+            } catch (Throwable e) {
+                simpMessageSendingOperations.convertAndSend("/resp/mvn", e.getMessage());
+                throw new ServiceException("downloadDependency error: " + e.getMessage());
+            } finally {
+                tailOutMap.remove(id);
+                tailBeginning.remove(id);
+                tailBuffer.remove(id);
+            }
+
+            // 2) backup
+            if (application.getBackUp()) {
+                this.backUpService.backup(application);
+            }
 
             for (String x : dependencyJars) {
                 File jar = new File(x);
                 FileUtils.copyFileToDirectory(jar, lib);
             }
+
+            // 3) deploying...
+            File appHome = application.getAppHome();
+            HdfsUtils.delete(appHome.getPath());
+
+            //3) upload jar by pomJar
+            HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+
+            HdfsUtils.upload(jobLocalHome.getAbsolutePath(), workspace, false, true);
+
+            //4) upload jar by uploadJar
+            List<String> jars = application.getDependencyObject().getJar();
+            if (Utils.notEmpty(jars)) {
+                jars.forEach(jar -> {
+                    String src = APP_UPLOADS.concat("/").concat(jar);
+                    HdfsUtils.copyHdfs(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
+                });
+            }
+
         }
-
-        //3) upload jar by pomJar
-        HdfsUtils.delete(application.getAppHome().getAbsolutePath());
-
-        HdfsUtils.upload(jobLocalHome.getAbsolutePath(), workspace, false, true);
-
-        //4) upload jar by uploadJar
-        List<String> jars = application.getDependencyObject().getJar();
-        if (Utils.notEmpty(jars)) {
-            jars.forEach(jar -> {
-                String src = APP_UPLOADS.concat("/").concat(jar);
-                HdfsUtils.copyHdfs(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
-            });
-        }
-
     }
 
     @Override

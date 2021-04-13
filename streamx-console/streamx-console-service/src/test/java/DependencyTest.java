@@ -12,7 +12,7 @@ import scala.collection.JavaConversions;
 public class DependencyTest {
 
     @Test
-    public void resolveMavenDependencies() {
+    public void resolveMavenDependencies() throws Throwable {
         /**
          * <dependency>
          *      <groupId>org.apache.flink</groupId>
@@ -31,9 +31,9 @@ public class DependencyTest {
         List<Application.Pom> dependency = new ArrayList<>();
 
         Application.Pom dept = new Application.Pom();
-        dept.setGroupId("org.apache.hadoop");
-        dept.setArtifactId("hadoop-aliyun");
-        dept.setVersion("3.1.0");
+        dept.setGroupId("org.apache.flink");
+        dept.setArtifactId("flink-java");
+        dept.setVersion("1.11.x");
         dependency.add(dept);
 
         StringBuilder builder = new StringBuilder();
@@ -57,22 +57,25 @@ public class DependencyTest {
             }
         }, 0, 3000);
 
-        Collection<String> jars = JavaConversions.asJavaCollection(
-                DependencyUtils.resolveMavenDependencies(
-                        builder.toString(),
-                        packages,
-                        null,
-                        null,
-                        null,
-                        out -> {
-                            System.err.println("---------->" + out);
-                        }
-                )
-        );
-
-        System.out.println();
-        System.out.println("----------------------------------------------------------------");
-        jars.forEach(System.out::println);
+        try {
+            Collection<String> jars = JavaConversions.asJavaCollection(
+                    DependencyUtils.resolveMavenDependencies(
+                            builder.toString(),
+                            packages,
+                            null,
+                            null,
+                            null,
+                            out -> {
+                                System.err.println("---------->" + out);
+                            }
+                    )
+            );
+            System.out.println();
+            System.out.println("----------------------------------------------------------------");
+            jars.forEach(System.out::println);
+        }catch (Exception e ) {
+            System.out.println(e.getMessage());
+        }
     }
 
 

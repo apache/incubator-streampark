@@ -28,6 +28,11 @@ import java.util.Arrays;
 public enum DeployState {
 
     /**
+     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
+     */
+    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
+
+    /**
      * 不需要重新发布
      */
     NONE(0),
