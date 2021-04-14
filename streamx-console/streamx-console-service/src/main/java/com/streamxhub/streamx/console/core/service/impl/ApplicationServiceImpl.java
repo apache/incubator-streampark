@@ -434,7 +434,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     if (appParam.getRestart()) {
                         this.cancel(appParam);
                     }
-                    
+
                     FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(
                                 application,
@@ -463,6 +463,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getLatest(application.getId());
+                            if (flinkSql == null) {
+                                log.info("latest is null,now getEffective");
+                                flinkSql = flinkSqlService.getEffective(application.getId(),true);
+                            }
+                            assert flinkSql != null;
                             application.setDependency(flinkSql.getDependency());
                             application.setBackUp(appParam.getBackUp());
                             downloadDependency(application);
