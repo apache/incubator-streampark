@@ -213,7 +213,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean upload(MultipartFile file) throws IOException {
-        String uploadFile = Objects.requireNonNull(file.getOriginalFilename()).concat(APP_UPLOADS.concat("/"));
+        String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
         //1)检查文件是否存在,md5是否一致.
         if (HdfsUtils.exists(uploadFile)) {
             String md5 = DigestUtils.md5Hex(file.getInputStream());
