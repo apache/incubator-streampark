@@ -459,7 +459,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                     new UpdateWrapper<Application>()
                                             .lambda()
                                             .eq(Application::getId, application.getId())
-                                            .set(Application::getState, FlinkAppState.DEPLOYING.getValue())
                                             .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
                             );
                             return null;
