@@ -264,7 +264,7 @@
           slot="expandedRowRender"
           class="expanded-table"
           slot-scope="record"
-          v-if="record.state === 8"
+          v-if="record.state === 7"
           row-key="id"
           :columns="innerColumns"
           :data-source="record.expanded"
@@ -308,7 +308,7 @@
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn">
             <span
-              :class="{pointer: record.state === 7 || record.state === 8 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <template
                 v-if="record.deploy === 0"
@@ -377,7 +377,7 @@
           <template v-else>
             <span
               v-if="column.dataIndex === 'jobName'"
-              :class="{pointer: record.state === 7 || record.state === 8 || record['optionState'] === 4 }"
+              :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <template v-if="record.deploy === 0">
                 <ellipsis
@@ -474,7 +474,7 @@
           slot="operation"
           slot-scope="text, record">
           <a-icon
-            v-if="record.state !== 8
+            v-if="record.state !== 7
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
@@ -514,7 +514,7 @@
             title="Cancel this application"
             v-permit="'app:cancel'"
             style="color:#4a9ff5"
-            v-show="record.state === 8 && record['optionState'] === 0"
+            v-show="record.state === 7 && record['optionState'] === 0"
             @click="handleCancel(record)"/>
           <a-icon
             type="eye"
@@ -563,7 +563,7 @@
           @submit="handleDeployOk"
           :form="formDeploy">
           <a-form-item
-            v-if="application && application.state === 8 "
+            v-if="application && application.state === 7 "
             label="restart"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
@@ -1111,8 +1111,6 @@ export default {
 
     handleDeployTitle (deploy) {
       switch (deploy) {
-        case -1:
-          return 'dependency changed,but download dependency failed'
         case 1:
           return 'application is updated,need deploy'
         case 2:
@@ -1213,12 +1211,12 @@ export default {
 
     handleIsStart(app) {
       const status = app.state === 0 ||
-        app.state === 3 ||
-        app.state === 10 ||
+        app.state === 2 ||
+        app.state === 9 ||
+        app.state === 11 ||
         app.state === 12 ||
         app.state === 13 ||
-        app.state === 14 ||
-        app.state === 16 || false
+        app.state === 15 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1464,7 +1462,7 @@ export default {
     },
 
     handleExpandIcon(props) {
-      if (props.record.state === 8) {
+      if (props.record.state === 7) {
         if (props.expanded) {
           return <a class="expand-icon-open" onClick={(e) => {
             props.onExpand(props.record, e)
@@ -1490,7 +1488,7 @@ export default {
     },
 
     handleView(params) {
-      if (params.state === 7 || params.state === 8 || params['optionState'] === 4) {
+      if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
         const url = this.yarn + '/proxy/' + params['appId'] + '/'
         window.open(url)
       }

@@ -67,26 +67,26 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void create(FlinkSql flinkSql, Boolean latest) {
+    public void create(FlinkSql flinkSql) {
         Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
         this.save(flinkSql);
-        this.setLatestOrEffective(latest, flinkSql.getId(), flinkSql.getAppId());
+        this.setLatest(flinkSql.getId(), flinkSql.getAppId());
     }
 
     @Override
     public void setLatestOrEffective(Boolean latest, Long sqlId, Long appId) {
         if (latest) {
-            this.setLatest(appId,sqlId);
+            this.setLatest(sqlId, appId);
         } else {
-            this.toEffective(appId,sqlId);
+            this.toEffective(appId, sqlId);
         }
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void setLatest(Long appId,Long sqlId) {
+    public void setLatest(Long appId, Long sqlId) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getLatest, 0)
                 .eq(FlinkSql::getAppId, appId);
@@ -123,7 +123,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
-    public void toEffective(Long appId,Long sqlId) {
+    public void toEffective(Long appId, Long sqlId) {
         this.baseMapper.clearLatest(appId);
         effectiveService.saveOrUpdate(appId, EffectiveType.FLINKSQL, sqlId);
     }

@@ -313,7 +313,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
-                flinkSqlService.create(flinkSql, true);
+                flinkSqlService.create(flinkSql);
             }
             if (appParam.getConfig() != null) {
                 configService.create(appParam, true);
@@ -400,7 +400,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.removeById(latestFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            flinkSqlService.create(sql, true);
+            flinkSqlService.create(sql);
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
             flinkSqlService.setLatestOrEffective(application.isRunning(), appParam.getSqlId(), appParam.getId());
@@ -492,8 +492,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                         updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                        updateWrapper.set(Application::getState, FlinkAppState.DEPLOYFAILED.getValue());
-
                         baseMapper.update(application, updateWrapper);
                     } catch (Exception e) {
                         e.printStackTrace();

@@ -11,60 +11,57 @@
         v-if="data['state'] === 1"
         class="status-processing-deploying">DEPLOYING</a-tag>
       <a-tag
-         color="#f5222d"
-         v-if="data['state'] === 2">DEPLOYFAILED</a-tag>
-      <a-tag
         color="#108ee9"
-        v-if="data['state'] === 3">DEPLOYED</a-tag>
+        v-if="data['state'] === 2">DEPLOYED</a-tag>
       <a-tag
         color="#738df8"
-        v-if="data['state'] === 4"
+        v-if="data['state'] === 3"
         class="status-processing-initializing">INITIALIZING</a-tag>
       <a-tag
         color="#2f54eb"
-        v-if="data['state'] === 5">CREATED</a-tag>
+        v-if="data['state'] === 4">CREATED</a-tag>
       <a-tag
         color="#1AB58E"
-        v-if="data['state'] === 6"
+        v-if="data['state'] === 5"
         class="status-processing-starting">STARTING</a-tag>
       <a-tag
         color="#13c2c2"
-        v-if="data['state'] === 7"
+        v-if="data['state'] === 6"
         class="status-processing-restarting">RESTARTING</a-tag>
       <a-tag
         color="#52c41a"
-        v-if="data['state'] === 8"
+        v-if="data['state'] === 7"
         class="status-processing-running">RUNNING</a-tag>
       <a-tag
         color="#fa541c"
-        v-if="data['state'] === 9"
+        v-if="data['state'] === 8"
         class="status-processing-failing">FAILING</a-tag>
       <a-tag
         color="#f5222d"
-        v-if="data['state'] === 10">FAILED</a-tag>
+        v-if="data['state'] === 9">FAILED</a-tag>
       <a-tag
         color="#faad14"
-        v-if="data['state'] === 11"
+        v-if="data['state'] === 10"
         class="status-processing-cancelling">CANCELLING</a-tag>
       <a-tag
         color="#fa8c16"
-        v-if="data['state'] === 12">CANCELED</a-tag>
+        v-if="data['state'] === 11">CANCELED</a-tag>
       <a-tag
         color="#1890ff"
-        v-if="data['state'] === 13">FINISHED</a-tag>
+        v-if="data['state'] === 12">FINISHED</a-tag>
       <a-tag
         color="#722ed1"
-        v-if="data['state'] === 14">SUSPENDED</a-tag>
+        v-if="data['state'] === 13">SUSPENDED</a-tag>
       <a-tag
         color="#eb2f96"
-        v-if="data['state'] === 15"
+        v-if="data['state'] === 14"
         class="status-processing-reconciling">RECONCILING</a-tag>
       <a-tag
         color="#000000"
-        v-if="data['state'] === 16">LOST</a-tag>
+        v-if="data['state'] === 15">LOST</a-tag>
       <a-tag
         color="#13c2c2"
-        v-if="data['state'] === 17"
+        v-if="data['state'] === 16"
         class="status-processing-restarting">MAPPING</a-tag>
     </div>
     <div v-else class="app_state">
@@ -73,15 +70,15 @@
         color="#1ABBDC"
         class="status-processing-deploying">DEPLOYING</a-tag>
       <a-tag
-        v-if="data['optionState'] === 3"
+        v-if="data['optionState'] === 2"
         color="#faad14"
         class="status-processing-cancelling">CANCELLING</a-tag>
       <a-tag
-        v-if="data['optionState'] === 4 "
+        v-if="data['optionState'] === 3 "
         color="#1AB58E"
         class="status-processing-starting">STARTING</a-tag>
       <a-tag
-        v-if="data['optionState'] === 5"
+        v-if="data['optionState'] === 4"
         color="#faad14"
         class="status-processing-cancelling">SAVEPOINT</a-tag>
     </div>
@@ -89,7 +86,7 @@
   <span v-else>
     <div
       class="task-tag"
-      v-if="data['state'] === 7 || data['state'] === 8 || data['state'] === 10 || data['optionState'] === 4">
+      v-if="data['state'] === 6 || data['state'] === 7 || data['state'] === 9 || data['optionState'] === 4">
       <a-tooltip
         v-if="data['totalTask']">
         <template slot="title">
