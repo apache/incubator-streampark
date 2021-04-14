@@ -33,8 +33,9 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     /**
      * @param flinkSql
+     * @param latest 是否latest
      */
-    void create(FlinkSql flinkSql);
+    void create(FlinkSql flinkSql,Boolean latest);
 
     /**
      * @param latest true  表示设置新增的的记录为 "latest"<br>
@@ -42,7 +43,7 @@ public interface FlinkSqlService extends IService<FlinkSql> {
      * @param sqlId
      * @param appId
      */
-    void setLatestOrEffective(Boolean latest, Long sqlId, Long appId);
+    void setLatestOrEffective(Boolean latest, Long appId,Long sqlId);
 
     /**
      * @param appParam

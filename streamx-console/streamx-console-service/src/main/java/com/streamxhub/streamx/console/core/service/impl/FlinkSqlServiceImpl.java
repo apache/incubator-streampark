@@ -67,17 +67,17 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void create(FlinkSql flinkSql) {
+    public void create(FlinkSql flinkSql, Boolean latest) {
         Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
         this.save(flinkSql);
-        this.setLatest(flinkSql.getAppId(), flinkSql.getId());
+        this.setLatestOrEffective(latest, flinkSql.getAppId(), flinkSql.getId());
     }
 
     @Override
-    public void setLatestOrEffective(Boolean latest, Long sqlId, Long appId) {
+    public void setLatestOrEffective(Boolean latest, Long appId, Long sqlId) {
         if (latest) {
             this.setLatest(appId, sqlId);
         } else {

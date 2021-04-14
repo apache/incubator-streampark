@@ -308,12 +308,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean create(Application appParam) {
         appParam.setUserId(serverUtil.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
+        appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
-                flinkSqlService.create(flinkSql);
+                flinkSqlService.create(flinkSql, false);
             }
             if (appParam.getConfig() != null) {
                 configService.create(appParam, true);
@@ -400,10 +401,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.removeById(latestFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            flinkSqlService.create(sql);
+            flinkSqlService.create(sql, true);
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
-            flinkSqlService.setLatestOrEffective(application.isRunning(), appParam.getSqlId(), appParam.getId());
+            flinkSqlService.setLatestOrEffective(application.isRunning(),appParam.getId(), appParam.getSqlId());
         }
 
         // 6) 判断 Effective的依赖和当前提交的是否发生变化
@@ -430,39 +431,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     application.setBackUpDescription(appParam.getBackUpDescription());
                     // 1) 需要重启的先停止服务
-                    boolean running = false;
                     if (appParam.getRestart()) {
                         this.cancel(appParam);
-                        running = false;
-                        // 不需要重启的并且未正在运行的,则更改状态为发布中....
-                    } else if (application.isRunning()) {
-                        running = true;
                     }
-                    if (running) {
-                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                            baseMapper.update(
-                                    application,
-                                    new UpdateWrapper<Application>()
-                                            .lambda()
-                                            .eq(Application::getId, application.getId())
-                                            .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                    
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                        baseMapper.update(
+                                application,
+                                new UpdateWrapper<Application>()
+                                        .lambda()
+                                        .eq(Application::getId, application.getId())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
-                            );
-                            return null;
-                        });
-                    } else {
-                        // 不需要重启的并且未正在运行的,则更改状态为发布中....
-                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                            baseMapper.update(
-                                    application,
-                                    new UpdateWrapper<Application>()
-                                            .lambda()
-                                            .eq(Application::getId, application.getId())
-                                            .set(Application::getDeploy, DeployState.DEPLOYING.get())
-                            );
-                            return null;
-                        });
-                    }
+                        );
+                        return null;
+                    });
 
                     try {
                         if (application.isCustomCodeJob()) {
