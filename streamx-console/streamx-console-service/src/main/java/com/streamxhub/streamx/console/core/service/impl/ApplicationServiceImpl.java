@@ -373,71 +373,53 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParam
      */
     private void updateFlinkSqlJob(Application application, Application appParam) {
-        // 1) 第一步获取当前生效的flinkSql
+        // 1) 第一步获取当前正在生效的flinkSql
         FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-
-        // 2) 判断版本是否发生变化
-        boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
 
         //要设置的目标FlinkSql记录
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
         targetFlinkSql.decode();
 
+        // 2) 判断版本是否发生变化
+        boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
+
         // 3) 判断 sql语句是否发生变化
-        boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSQL().trim());
+        boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
 
         // 4) 判断 依赖是否发生变化
         Application.Dependency targetDependency = Application.Dependency.jsonToDependency(targetFlinkSql.getDependency());
         Application.Dependency newDependency = appParam.getDependencyObject();
-        boolean depsDifference = !targetDependency.eq(newDependency);
+        boolean depDifference = !targetDependency.eq(newDependency);
 
-        Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
-        boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
-
-        boolean difference = sqlDifference || depsDifference;
-
-        boolean targetLatest = depsDifference || application.isRunning();
-
-        boolean effectiveLatest = effectiveDepsDifference || application.isRunning();
-
-        if (difference) {
+        //发生了变更
+        if (sqlDifference || depDifference) {
             // 5) 检查是否存在latest版本的记录
             FlinkSql latestFlinkSql = flinkSqlService.getLatest(application.getId());
-            boolean latestSqlDifference = false;
-            boolean latestDepsDifference = false;
+            //存在latest版本的记录则直接删除,只会保留一个latest备选版本,latest备选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个备选版本
             if (latestFlinkSql != null) {
-                latestFlinkSql.decode();
-                latestSqlDifference = !latestFlinkSql.getSql().trim().equals(appParam.getFlinkSQL().trim());
-                Application.Dependency latestDependency = Application.Dependency.jsonToDependency(latestFlinkSql.getDependency());
-                latestDepsDifference = !latestDependency.eq(newDependency);
+                flinkSqlService.removeById(latestFlinkSql.getId());
             }
-
-            //不存在latest版本的记录
-            if (latestFlinkSql == null) {
-                FlinkSql sql = new FlinkSql(appParam);
-                flinkSqlService.create(sql, targetLatest);
-            } else {
-                //和latest不相同.
-                if (latestSqlDifference || latestDepsDifference) {
-                    FlinkSql sql = new FlinkSql(appParam);
-                    flinkSqlService.create(sql, effectiveLatest);
-                }
-            }
+            FlinkSql sql = new FlinkSql(appParam);
+            //当前任务如果正在运行,则设置为"latest",未允许,直接将当前版本扶正
+            flinkSqlService.create(sql, application.isRunning());
         } else if (versionChanged) {
-            flinkSqlService.setLatestOrEffective(effectiveLatest, appParam.getSqlId(), appParam.getId());
+            //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
+            flinkSqlService.setLatestOrEffective(application.isRunning(), appParam.getSqlId(), appParam.getId());
         }
 
-        // 6) 配置文件修改
-        this.configService.update(appParam, application.isRunning());
-
-        // 7) 判断 Effective的依赖和当前提交的是否发生变化
+        // 6) 判断 Effective的依赖和当前提交的是否发生变化
+        // 判断当前正在生效版本的(sql|依赖)和正在提交的依赖是否发生变更
+        Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
+        boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
+        boolean effectiveSqlDifference = !effectiveFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
         if (effectiveDepsDifference) {
             application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
-            this.configService.update(appParam, true);
-        } else if (sqlDifference) {
+        } else if (effectiveSqlDifference) {
             application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
-            this.configService.update(appParam, targetLatest);
         }
+
+        // 7) 配置文件修改
+        this.configService.update(appParam, application.isRunning());
     }
 
 
@@ -525,8 +507,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         });
     }
 
-    @SneakyThrows
-    private void downloadDependency(Application application) {
+    private void downloadDependency(Application application) throws Exception {
         //1) init.
         File jobLocalHome = application.getLocalFlinkSqlBase();
         if (jobLocalHome.exists()) {

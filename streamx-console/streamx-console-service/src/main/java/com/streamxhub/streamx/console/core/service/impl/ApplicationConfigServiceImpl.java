@@ -108,23 +108,31 @@ public class ApplicationConfigServiceImpl
     @Transactional(rollbackFor = {Exception.class})
     public synchronized void update(Application application, Boolean latest) {
         //flink sql job
+        ApplicationConfig latestConfig = getLatest(application.getId());
         if (application.isFlinkSqlJob()) {
-            ApplicationConfig config = getEffective(application.getId());
+            //获取当前正在生效的配置
+            ApplicationConfig effectiveConfig = getEffective(application.getId());
             //删除配置了...
             if (Utils.isEmpty(application.getConfig())) {
-                if (config != null) {
+                if (effectiveConfig != null) {
                     //删除..
                     effectiveService.delete(application.getId(), EffectiveType.CONFIG);
                 }
             } else {
                 //之前没有配置,本次新增了配置...
-                if (config == null) {
+                if (effectiveConfig == null) {
+                    if (latestConfig != null) {
+                        removeById(latestConfig.getId());
+                    }
                     this.create(application, latest);
                 } else {
                     String decode = new String(Base64.getDecoder().decode(application.getConfig()));
                     String encode = DeflaterUtils.zipString(decode.trim());
                     //需要对比两次配置是否一致,
-                    if (!config.getContent().equals(encode)) {
+                    if (!effectiveConfig.getContent().equals(encode)) {
+                        if (latestConfig != null) {
+                            removeById(latestConfig.getId());
+                        }
                         this.create(application, latest);
                     }
                 }
@@ -132,12 +140,16 @@ public class ApplicationConfigServiceImpl
         } else {
             // 可能会重新选择一个配置文件(无configId),也可能基于原有的编辑(有configId).
             Long configId = application.getConfigId();
+            //基于原有的配置编辑...
             if (configId != null) {
                 ApplicationConfig config = this.getById(configId);
                 String decode = new String(Base64.getDecoder().decode(application.getConfig()));
                 String encode = DeflaterUtils.zipString(decode.trim());
                 // create...
                 if (!config.getContent().equals(encode)) {
+                    if (latestConfig != null) {
+                        removeById(latestConfig.getId());
+                    }
                     this.create(application, latest);
                 } else {
                     this.setLatestOrEffective(latest, configId, application.getId());

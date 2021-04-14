@@ -145,7 +145,7 @@ public class Application implements Serializable {
 
     private transient String dependency;
     private transient Long sqlId;
-    private transient String flinkSQL;
+    private transient String flinkSql;
     private transient Boolean backUp;
     private transient Boolean restart;
     private transient String userName;
@@ -185,7 +185,7 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean eqFlinkJob(Application other) {
         if (this.isFlinkSqlJob() && other.isFlinkSqlJob()) {
-            if (this.getFlinkSQL().trim().equals(other.getFlinkSQL().trim())) {
+            if (this.getFlinkSql().trim().equals(other.getFlinkSql().trim())) {
                 return this.getDependencyObject().eq(other.getDependencyObject());
             }
         }

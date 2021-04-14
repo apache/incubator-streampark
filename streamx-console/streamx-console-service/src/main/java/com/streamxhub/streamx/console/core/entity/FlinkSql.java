@@ -66,7 +66,7 @@ public class FlinkSql {
 
     public FlinkSql(Application application) {
         this.appId = application.getId();
-        this.sql = application.getFlinkSQL();
+        this.sql = application.getFlinkSql();
         this.dependency = application.getDependency();
         this.createTime = new Date();
     }
@@ -77,7 +77,7 @@ public class FlinkSql {
 
     public void setToApplication(Application application) {
         String encode = Base64.getEncoder().encodeToString(this.sql.getBytes());
-        application.setFlinkSQL(encode);
+        application.setFlinkSql(encode);
         application.setDependency(this.dependency);
         application.setSqlId(this.id);
     }

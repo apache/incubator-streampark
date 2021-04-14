@@ -18,24 +18,24 @@
           type="info" />
         <a-alert
           v-else
-          message="FlinkSQL"
+          message="flinkSql"
           type="info" />
       </a-form-item>
 
       <template v-if="app.jobType === 2">
 
         <a-form-item
-          v-if="flinkSQLHistory.length > 1"
+          v-if="flinkSqlHistory.length > 1"
           label="History Version"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required">
           <a-select
             @change="handleChangeSQL"
-            v-model="defaultFlinkSQLId"
+            v-model="defaultFlinkSqlId"
             style="width: calc(100% - 50px)">
             <a-select-option
-              v-for="(ver,index) in flinkSQLHistory"
+              v-for="(ver,index) in flinkSqlHistory"
               :value="ver.id"
               :key="`sql_${index}`">
               <div>
@@ -76,10 +76,10 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required"
           style="margin-top: 10px">
-          <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSQL.success"></div>
+          <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSql.success"></div>
           <p class="conf-desc" style="margin-bottom: -25px;margin-top: -5px">
-            <span class="sql-desc" v-if="!controller.flinkSQL.success">
-              {{ controller.flinkSQL.errorMsg }}
+            <span class="sql-desc" v-if="!controller.flinkSql.success">
+              {{ controller.flinkSql.errorMsg }}
             </span>
             <span v-else class="sql-desc" style="color: green">
               successful
@@ -704,7 +704,7 @@
       <template slot="footer">
         <span style="color: red;float: left">
           <ellipsis :length="200">
-            {{ controller.flinkSQL.errorMsg }}
+            {{ controller.flinkSql.errorMsg }}
           </ellipsis>
         </span>
         <a-button
@@ -714,7 +714,7 @@
           Apply
         </a-button>
       </template>
-      <div class="sql-box" id="big-sql" style="width: 100%;" :class="'syntax-' + controller.flinkSQL.success"></div>
+      <div class="sql-box" id="big-sql" style="width: 100%;" :class="'syntax-' + controller.flinkSql.success"></div>
     </a-modal>
 
     <a-modal
@@ -732,7 +732,7 @@
         @submit="handleCompareOk"
         :form="formCompare">
         <a-form-item
-          v-if="flinkSQLHistory.length > 1"
+          v-if="flinkSqlHistory.length > 1"
           label="Version"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
@@ -745,7 +745,7 @@
             class="version-select"
             :max-tag-count="2">
             <a-select-option
-              v-for="(ver,index) in flinkSQLHistory"
+              v-for="(ver,index) in flinkSqlHistory"
               :value="ver.id"
               :key="`sql_${index}`">
               <div>
@@ -859,14 +859,14 @@ export default {
       compareConf: [],
       compareSQL: [],
       defaultConfigId: null,
-      defaultFlinkSQLId: null,
+      defaultFlinkSqlId: null,
       defaultOptions: {},
       isSetConfig: false,
       configOverride: null,
       configId: null,
       configVersions: [],
-      flinkSQLHistory: [],
-      flinkSQL: {},
+      flinkSqlHistory: [],
+      flinkSql: {},
       configSource: [],
       configItems: [],
       totalItems: [],
@@ -910,11 +910,11 @@ export default {
           }
         },
         editor: {
-          flinkSQL: null,
+          flinkSql: null,
           bigScreen: null,
           pom: null
         },
-        flinkSQL: {
+        flinkSql: {
           value: null,
           errorLine: null,
           errorColumn: null,
@@ -995,7 +995,7 @@ export default {
         this.app = resp.data
         if (this.app.jobType === 2) {
           sqlhistory({ id: appId }).then((resp) => {
-            this.flinkSQLHistory = resp.data
+            this.flinkSqlHistory = resp.data
           })
         }
         if (this.app.config && this.app.config.trim() != '') {
@@ -1004,7 +1004,7 @@ export default {
         }
         this.defaultOptions = JSON.parse(this.app.options)
         this.configId = this.app.configId
-        this.defaultFlinkSQLId = this.app['sqlId'] || null
+        this.defaultFlinkSqlId = this.app['sqlId'] || null
         this.handleReset()
         this.handleListConfVersion()
         this.handleConfList()
@@ -1078,7 +1078,7 @@ export default {
     handleInitDependency() {
       this.controller.dependency.jar = new Map()
       this.controller.dependency.pom = new Map()
-      this.handleDependencyJsonToPom(this.flinkSQL.dependency,this.controller.dependency.pom,this.controller.dependency.jar)
+      this.handleDependencyJsonToPom(this.flinkSql.dependency,this.controller.dependency.pom,this.controller.dependency.jar)
       this.handleUpdateDependency()
     },
 
@@ -1215,9 +1215,9 @@ export default {
 
     handleChangeSQL(v) {
       getSQL({ id: v }).then((resp) => {
-        this.flinkSQL = resp.data
-        this.controller.flinkSQL.value = Base64.decode(this.flinkSQL.sql)
-        this.controller.editor.flinkSQL.getModel().setValue(this.controller.flinkSQL.value)
+        this.flinkSql = resp.data
+        this.controller.flinkSql.value = Base64.decode(this.flinkSql.sql)
+        this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.value)
         this.handleInitDependency()
       })
     },
@@ -1343,8 +1343,8 @@ export default {
 
       const params = {
         id: this.app.id,
-        sqlId: this.defaultFlinkSQLId || null,
-        flinkSQL: this.controller.flinkSQL.value,
+        sqlId: this.defaultFlinkSqlId || null,
+        flinkSql: this.controller.flinkSql.value,
         config: config,
         jobName: values.jobName,
         args: values.args || null,
@@ -1516,9 +1516,9 @@ export default {
           'parallelism': this.defaultOptions.parallelism
         })
         if (this.app.jobType === 2) {
-          this.flinkSQL.sql = this.app.flinkSQL || null
-          this.flinkSQL.dependency = this.app.dependency || null
-          initEditor(this,Base64.decode(this.flinkSQL.sql))
+          this.flinkSql.sql = this.app.flinkSql || null
+          this.flinkSql.dependency = this.app.dependency || null
+          initEditor(this,Base64.decode(this.flinkSql.sql))
           this.handleInitDependency()
         }
       })
