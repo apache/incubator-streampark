@@ -327,7 +327,6 @@
                 <a-badge
                   dot
                   :color="record.deploy === -1 ? 'yellow' : (record.deploy <= 2 ? 'red' : 'blue')"
-                  status="processing"
                   :title="handleDeployTitle(record.deploy)">
                   <template v-if="text.length>25">
                     <a-tooltip placement="top">
@@ -365,7 +364,6 @@
                 <a-badge
                   class="close-deploy"
                   @click.stop="handleCleanDeploy(record)"
-                  status="processing"
                   v-permit="'app:clean'">
                   <a-icon
                     slot="count"
@@ -392,7 +390,6 @@
                 <a-badge
                   dot
                   :color="record.deploy <= 2 ? 'red' : 'blue'"
-                  status="processing"
                   :title="handleDeployTitle(record.deploy)">
                   <ellipsis
                     :length="45"
@@ -403,7 +400,6 @@
                 <a-badge
                   class="close-deploy"
                   @click.stop="handleCleanDeploy(record)"
-                  status="processing"
                   v-permit="'app:clean'">
                   <a-icon
                     slot="count"
