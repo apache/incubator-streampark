@@ -42,7 +42,7 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkSubmitTrait extends Logger {
 
-  private[submit] var USER_FLINK_HOME: String
+  private[submit] var USER_FLINK_HOME: String = _
 
   private[submit] lazy val FLINK_HOME = {
     USER_FLINK_HOME match {
