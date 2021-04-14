@@ -400,8 +400,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.removeById(latestFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            //当前任务如果正在运行,则设置为"latest",未允许,直接将当前版本扶正
-            flinkSqlService.create(sql, application.isRunning());
+            flinkSqlService.create(sql, true);
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
             flinkSqlService.setLatestOrEffective(application.isRunning(), appParam.getSqlId(), appParam.getId());
