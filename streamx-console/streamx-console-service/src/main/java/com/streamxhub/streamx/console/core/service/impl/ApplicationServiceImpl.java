@@ -761,6 +761,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
 
         if (application.isCustomCodeJob()) {
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 switch (application.getApplicationType()) {
                     case STREAMX_FLINK:
@@ -810,6 +811,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String sqlDistJar = jars.get(0);
             //2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 //3) plugin
                 String pluginPath = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_PLUGINS());
