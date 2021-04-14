@@ -32,10 +32,10 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
           class="form-required"
           style="margin-top: 10px">
-          <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSQL.success"></div>
+          <div class="sql-box" id="flink-sql" :class="'syntax-' + controller.flinkSql.success"></div>
           <p class="conf-desc" style="margin-bottom: -25px;margin-top: -5px">
-            <span class="sql-desc" v-if="!controller.flinkSQL.success">
-              {{ controller.flinkSQL.errorMsg }}
+            <span class="sql-desc" v-if="!controller.flinkSql.success">
+              {{ controller.flinkSql.errorMsg }}
             </span>
             <span v-else class="sql-desc" style="color: green">
               successful
@@ -610,7 +610,7 @@
       <template slot="footer">
         <span style="color: red;float: left">
           <ellipsis :length="200">
-            {{ controller.flinkSQL.errorMsg }}
+            {{ controller.flinkSql.errorMsg }}
           </ellipsis>
         </span>
         <a-button
@@ -620,7 +620,7 @@
           Apply
         </a-button>
       </template>
-      <div class="sql-box" id="big-sql" style="width: 100%;" :class="'syntax-' + controller.flinkSQL.success"></div>
+      <div class="sql-box" id="big-sql" style="width: 100%;" :class="'syntax-' + controller.flinkSql.success"></div>
     </a-modal>
 
     <Mergely
@@ -720,11 +720,11 @@ export default {
           }
         },
         editor: {
-          flinkSQL: null,
+          flinkSql: null,
           bigScreen: null,
           pom: null
         },
-        flinkSQL: {
+        flinkSql: {
           defaultValue: '',
           value: null,
           errorLine: null,
@@ -812,7 +812,7 @@ export default {
         this.handleInitSQLMode()
       } else {
         this.form.getFieldDecorator('jobType', { initialValue: 'customcode' })
-        this.controller.editor.flinkSQL.getModel().setValue(this.controller.flinkSQL.defaultValue)
+        this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
     },
 
@@ -951,7 +951,7 @@ export default {
     handleBigScreenOk() {
       bigScreenOk(this,function() {
         //设置小输入框的值.
-        this.controller.editor.flinkSQL.getModel().setValue(this.controller.flinkSQL.value)
+        this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.value)
       })
     },
 
@@ -1175,7 +1175,7 @@ export default {
       const params = {
         jobType: 2,
         executionMode: values.executionMode,
-        flinkSQL: this.controller.flinkSQL.value,
+        flinkSql: this.controller.flinkSql.value,
         appType: 1,
         config: config,
         jobName: values.jobName,
