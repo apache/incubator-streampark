@@ -48,7 +48,7 @@ public interface MenuService extends IService<Menu> {
      *
      * @param menuIds menuIds
      */
-    void deleteMeuns(String[] menuIds) throws Exception;
+    void deleteMenus(String[] menuIds) throws Exception;
 
     /**
      * @return

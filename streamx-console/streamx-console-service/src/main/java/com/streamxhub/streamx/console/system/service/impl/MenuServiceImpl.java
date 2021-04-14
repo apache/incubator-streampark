@@ -108,7 +108,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void deleteMeuns(String[] menuIds) throws Exception {
+    public void deleteMenus(String[] menuIds) throws Exception {
         for (String menuId : menuIds) {
             // 查找与这些菜单/按钮关联的用户
             this.baseMapper.deleteRoleMenuByMenuId(Long.parseLong(menuId));

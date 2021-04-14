@@ -87,7 +87,7 @@ public class MenuController extends BaseController {
             throws ServiceException {
         try {
             String[] ids = menuIds.split(StringPool.COMMA);
-            this.menuService.deleteMeuns(ids);
+            this.menuService.deleteMenus(ids);
         } catch (Exception e) {
             message = "删除菜单/按钮失败";
             log.info(message, e);
