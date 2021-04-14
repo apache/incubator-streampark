@@ -430,9 +430,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     application.setBackUpDescription(appParam.getBackUpDescription());
                     // 1) 需要重启的先停止服务
+                    boolean running = false;
                     if (appParam.getRestart()) {
                         this.cancel(appParam);
-                    } else if (!application.isRunning()) {
+                        running = false;
+                        // 不需要重启的并且未正在运行的,则更改状态为发布中....
+                    } else if (application.isRunning()) {
+                        running = true;
+                    }
+
+                    if (running) {
+                        baseMapper.update(application, new UpdateWrapper<Application>()
+                                .lambda()
+                                .eq(Application::getId, application.getId())
+                                .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
+                        );
+                    } else {
                         // 不需要重启的并且未正在运行的,则更改状态为发布中....
                         baseMapper.update(application, new UpdateWrapper<Application>()
                                 .lambda()
