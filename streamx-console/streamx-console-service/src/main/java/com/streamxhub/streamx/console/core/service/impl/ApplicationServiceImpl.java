@@ -427,6 +427,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application appParam) {
         executorService.submit(() -> {
             Application application = getById(appParam.getId());
+            assert application != null;
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     application.setBackUpDescription(appParam.getBackUpDescription());
