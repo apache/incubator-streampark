@@ -570,7 +570,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             logBuilder.append(out).append("\n");
                         }
                 ));
-            } catch (Throwable e) {
+            } catch (Exception e) {
                 simpMessageSendingOperations.convertAndSend("/resp/mvn", e.getMessage());
                 throw new ServiceException("downloadDependency error: " + e.getMessage());
             } finally {
