@@ -424,7 +424,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public void deploy(Application appParam) {
-        //executorService.submit(() -> {
+        executorService.submit(() -> {
             Application application = getById(appParam.getId());
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
@@ -439,25 +439,29 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         running = true;
                     }
                     if (running) {
-                        baseMapper.update(
-                                application,
-                                new UpdateWrapper<Application>()
-                                        .lambda()
-                                        .eq(Application::getId, application.getId())
-                                        .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
-                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(
+                                    application,
+                                    new UpdateWrapper<Application>()
+                                            .lambda()
+                                            .eq(Application::getId, application.getId())
+                                            .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
-                        );
+                            );
+                            return null;
+                        });
                     } else {
                         // 不需要重启的并且未正在运行的,则更改状态为发布中....
-                        baseMapper.update(
-                                application,
-                                new UpdateWrapper<Application>()
-                                        .lambda()
-                                        .eq(Application::getId, application.getId())
-                                        .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
-                        );
-                        return null;
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(
+                                    application,
+                                    new UpdateWrapper<Application>()
+                                            .lambda()
+                                            .eq(Application::getId, application.getId())
+                                            .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                            );
+                            return null;
+                        });
                     }
 
                     try {
@@ -519,7 +523,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        //});
+        });
     }
 
     private void downloadDependency(Application application) throws Exception {
