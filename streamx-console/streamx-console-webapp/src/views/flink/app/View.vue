@@ -324,52 +324,38 @@
                 </template>
               </template>
               <template v-else>
-                <a-badge
-                  dot
-                  :color="record.deploy === -1 ? 'yellow' : (record.deploy <= 2 ? 'red' : 'blue')"
-                  :title="handleDeployTitle(record.deploy)">
-                  <template v-if="text.length>25">
-                    <a-tooltip placement="top">
-                      <template slot="title">
-                        {{ text }}
-                      </template>
-                      <template
-                        v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                        <mark
-                          v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                          :key="i"
-                          class="highlight">
-                          {{ fragment }}
-                        </mark>
-                        <template v-else>
-                          {{ fragment }}
-                        </template>
-                      </template>
-                      ...
-                    </a-tooltip>
-                  </template>
-                  <template v-else>
-                    v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                    <mark
-                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                      :key="i"
-                      class="highlight">
-                      {{ fragment }}
-                    </mark>
-                    <template v-else>
-                      {{ fragment }}
+                <template v-if="text.length>25">
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      {{ text }}
                     </template>
+                    <template
+                      v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      <mark
+                        v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                        :key="i"
+                        class="highlight">
+                        {{ fragment }}
+                      </mark>
+                      <template v-else>
+                        {{ fragment }}
+                      </template>
+                    </template>
+                    ...
+                  </a-tooltip>
+                </template>
+                <template v-else>
+                  v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <mark
+                    v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                    :key="i"
+                    class="highlight">
+                    {{ fragment }}
+                  </mark>
+                  <template v-else>
+                    {{ fragment }}
                   </template>
-                </a-badge>
-                <a-badge
-                  class="close-deploy"
-                  @click.stop="handleCleanDeploy(record)"
-                  v-permit="'app:clean'">
-                  <a-icon
-                    slot="count"
-                    type="close"
-                    style="color: #333"/>
-                </a-badge>
+                </template>
               </template>
             </span>
           </template>
@@ -387,25 +373,11 @@
                 </ellipsis>
               </template>
               <template v-else>
-                <a-badge
-                  dot
-                  :color="record.deploy <= 2 ? 'red' : 'blue'"
-                  :title="handleDeployTitle(record.deploy)">
-                  <ellipsis
-                    :length="45"
-                    tooltip>
-                    {{ text }}
-                  </ellipsis>
-                </a-badge>
-                <a-badge
-                  class="close-deploy"
-                  @click.stop="handleCleanDeploy(record)"
-                  v-permit="'app:clean'">
-                  <a-icon
-                    slot="count"
-                    type="close"
-                    style="color: #333"/>
-                </a-badge>
+                <ellipsis
+                  :length="45"
+                  tooltip>
+                  {{ text }}
+                </ellipsis>
               </template>
             </span>
             <span v-else>
@@ -459,6 +431,15 @@
         </template>
 
         <template
+          slot="deployState"
+          slot-scope="text, record">
+          <State
+            option="deploy"
+            :title="handleDeployTitle(record.deploy)"
+            :data="record"/>
+        </template>
+
+        <template
           slot="customOperation">
           Operation
           <a-button
@@ -485,7 +466,7 @@
             @click="handleMapping(record)"/>
           <svg-icon
             name="deploy"
-            v-show="(record.deploy === 1 || record.deploy === 2) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
+            v-show="(record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
             v-permit="'app:deploy'"
             class="pointer"
             @click.native="handleDeploy(record)"/>
@@ -1034,7 +1015,7 @@ export default {
         scopedSlots: {customRender: 'task'},
         width: 120
       }, {
-        title: 'Status',
+        title: 'Run Status',
         dataIndex: 'state',
         width: 120,
         scopedSlots: {customRender: 'state'},
@@ -1061,6 +1042,11 @@ export default {
         },
         sorter: (a, b) => a.state - b.state,
         sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
+      }, {
+        title: 'Deploy Status',
+        dataIndex: 'deploy',
+        width: 130,
+        scopedSlots: {customRender: 'deployState'}
       }, {
         dataIndex: 'operation',
         key: 'operation',
@@ -1115,16 +1101,18 @@ export default {
         case -1:
           return 'dependency changed,but download dependency failed'
         case 1:
-          return 'application is updated,need deploy'
+          return 'deploying'
         case 2:
-          return 'dependency is updated,need deploy'
+          return 'application is updated,need deploy'
         case 3:
-          return 'config is updated,need restart'
+          return 'dependency is updated,need deploy'
         case 4:
-          return 'flink sql is updated,need restart'
+          return 'config is updated,need restart'
         case 5:
-          return 'application is deployed,need restart'
+          return 'flink sql is updated,need restart'
         case 6:
+          return 'application is deployed,need restart'
+        case 7:
           return 'application is rollbacked,need restart'
       }
     },

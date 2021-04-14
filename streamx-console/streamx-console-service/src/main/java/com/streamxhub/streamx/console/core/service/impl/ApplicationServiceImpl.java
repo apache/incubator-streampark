@@ -446,6 +446,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                         .lambda()
                                         .eq(Application::getId, application.getId())
                                         .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
+
                         );
                     } else {
                         // 不需要重启的并且未正在运行的,则更改状态为发布中....
@@ -456,6 +458,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                         .eq(Application::getId, application.getId())
                                         .set(Application::getState, FlinkAppState.DEPLOYING.getValue())
                                         .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
                         );
                     }
 
@@ -486,14 +489,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             // 重新启动.
                             start(appParam);
                             // 将"需要重新发布"状态清空...
-                            updateWrapper.set(Application::getDeploy, DeployState.NONE.get());
+                            updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                         } else {
                             //正在运行的任务...
                             if (application.isRunning()) {
                                 updateWrapper.set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_DEPLOY.get());
                             } else {
                                 updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                                updateWrapper.set(Application::getDeploy, DeployState.NONE.get());
+                                updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                                 updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
                             }
                         }
@@ -630,7 +633,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @RefreshCache
     public void clean(Application appParam) {
-        appParam.setDeploy(DeployState.NONE.get());
+        appParam.setDeploy(DeployState.DONE.get());
         this.baseMapper.updateDeploy(appParam);
     }
 
