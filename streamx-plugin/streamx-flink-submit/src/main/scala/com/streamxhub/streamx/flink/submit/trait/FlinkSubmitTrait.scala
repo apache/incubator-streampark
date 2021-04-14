@@ -42,10 +42,16 @@ import scala.util.{Failure, Success, Try}
 
 trait FlinkSubmitTrait extends Logger {
 
+  private[submit] var USER_FLINK_HOME: String
+
   private[submit] lazy val FLINK_HOME = {
-    val flinkLocalHome = System.getenv("FLINK_HOME")
-    logInfo(s"flinkHome: $flinkLocalHome")
-    flinkLocalHome
+    USER_FLINK_HOME match {
+      case null =>
+        val flinkLocalHome = System.getenv("FLINK_HOME")
+        logInfo(s"flinkHome: $flinkLocalHome")
+        flinkLocalHome
+      case x => x
+    }
   }
 
   lazy val workspaceEnv: WorkspaceEnv = {
@@ -107,6 +113,7 @@ trait FlinkSubmitTrait extends Logger {
     logInfo(
       s"""
          |"flink submit {" +
+         |      "userFlinkHome" : ${submitRequest.flinkHome},
          |      "appName": ${submitRequest.appName},
          |      "devMode": ${submitRequest.developmentMode.name()},
          |      "execMode": ${submitRequest.executionMode.name()},
@@ -122,6 +129,9 @@ trait FlinkSubmitTrait extends Logger {
          |      "args": ${submitRequest.args}
          |}
          |""".stripMargin)
+    if (USER_FLINK_HOME == null) {
+      USER_FLINK_HOME = submitRequest.flinkHome
+    }
     doSubmit(submitRequest)
   }
 
