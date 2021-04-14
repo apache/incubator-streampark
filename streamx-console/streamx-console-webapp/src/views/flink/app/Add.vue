@@ -301,7 +301,7 @@
           <a-select-option
             v-for="(o,index) in executionMode"
             :key="`execution_mode_${index}`"
-            :disabled='o.disabled'
+            :disabled="o.disabled"
             :value="o.value">
             {{ o.mode }}
           </a-select-option>
