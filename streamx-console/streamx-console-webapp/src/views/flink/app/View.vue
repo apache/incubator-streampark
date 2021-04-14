@@ -326,7 +326,7 @@
               <template v-else>
                 <a-badge
                   dot
-                  :color="record.deploy <= 2 ? 'red' : 'blue'"
+                  :color="record.deploy === -1 ? 'yellow' : (record.deploy <= 2 ? 'red' : 'blue')"
                   :title="handleDeployTitle(record.deploy)">
                   <template v-if="text.length>25">
                     <a-tooltip placement="top">
@@ -888,6 +888,7 @@ import SockJS from 'sockjs-client'
 import {baseUrl} from '@/api/baseUrl'
 import Stomp from 'webstomp-client'
 import SvgIcon from '@/components/SvgIcon'
+import storage from '@/utils/storage'
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1111,6 +1112,8 @@ export default {
 
     handleDeployTitle (deploy) {
       switch (deploy) {
+        case -1:
+          return 'dependency changed,but download dependency failed'
         case 1:
           return 'application is updated,need deploy'
         case 2:
