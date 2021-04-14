@@ -703,7 +703,7 @@ export default {
             verticalScrollbarSize: 15
           }
         },
-        flinkSQL: null,
+        flinkSql: null,
         exception: null
       },
 
@@ -866,7 +866,7 @@ export default {
           this.options = JSON.parse(this.app.options)
           this.$nextTick(() => {
             this.handleConfig()
-            this.handleFlinkSQL()
+            this.handleFlinkSql()
             this.handleSavePoint()
             this.handleBackUps()
             this.handleStartLog()
@@ -882,9 +882,9 @@ export default {
         this.$message.error(error.message)
       })
     },
-    handleFlinkSQL() {
+    handleFlinkSql() {
       if (this.app.jobType === 2) {
-        this.editor.option.value = Base64.decode(this.app.flinkSQL)
+        this.editor.option.value = Base64.decode(this.app.flinkSql)
       }
     },
     handleConfig() {
@@ -1200,9 +1200,9 @@ export default {
       this.activeTab = key
       this.$nextTick(()=>{
         if (this.activeTab === '3') {
-          this.editor.flinkSQL = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
-        } else if (this.editor.flinkSQL) {
-          this.editor.flinkSQL.dispose()
+          this.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
+        } else if (this.editor.flinkSql) {
+          this.editor.flinkSql.dispose()
         }
       })
     },
