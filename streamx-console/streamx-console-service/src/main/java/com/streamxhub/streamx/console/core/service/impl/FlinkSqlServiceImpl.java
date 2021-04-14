@@ -73,13 +73,13 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
         this.save(flinkSql);
-        this.setLatest(flinkSql.getId(), flinkSql.getAppId());
+        this.setLatest(flinkSql.getAppId(), flinkSql.getId());
     }
 
     @Override
     public void setLatestOrEffective(Boolean latest, Long sqlId, Long appId) {
         if (latest) {
-            this.setLatest(sqlId, appId);
+            this.setLatest(appId, sqlId);
         } else {
             this.toEffective(appId, sqlId);
         }
