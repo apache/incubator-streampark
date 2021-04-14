@@ -478,7 +478,7 @@
             @click="handleEdit(record)"
             title="Update application"/>
           <a-icon
-            v-if="record.state === 1 || record['optionState'] === 1"
+            v-if="record.state === 1 || record['deploy'] === 1"
             type="sync"
             style="color:#4a9ff5"
             spin
