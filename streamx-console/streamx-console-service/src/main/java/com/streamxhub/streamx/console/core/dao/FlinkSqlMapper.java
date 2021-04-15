@@ -42,6 +42,6 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
     @Select("select * from t_flink_sql where app_id=#{appId} and candidate=#{candidate}")
     FlinkSql getCandidateByType(@Param("appId") Long appId,@Param("candidate") Integer candidate);
 
-    @Update("update t_flink_sql set candidate=0 where id=#{appId}")
+    @Update("update t_flink_sql set candidate=0 where id=#{id}")
     void cleanCandidate(@Param("id")Long id);
 }
