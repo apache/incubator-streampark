@@ -348,7 +348,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
-                //新增的任务直接成正式版
                 flinkSqlService.create(flinkSql, CandidateType.NEW);
             }
             if (appParam.getConfig() != null) {
@@ -497,19 +496,24 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         executorService.submit(() -> {
             Application application = getById(appParam.getId());
             assert application != null;
+
             try {
                 // 1) 需要重启的先停止服务
                 if (appParam.getRestart()) {
                     this.cancel(appParam);
                 }
-                baseMapper.update(
-                        application,
-                        new UpdateWrapper<Application>()
-                                .lambda()
-                                .eq(Application::getId, application.getId())
-                                .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                FlinkTrackingTask.refreshTracking(application.getId(),()->{
+                    baseMapper.update(
+                            application,
+                            new UpdateWrapper<Application>()
+                                    .lambda()
+                                    .eq(Application::getId, application.getId())
+                                    .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
-                );
+                    );
+                    return null;
+                });
+
                 if (appParam.getBackUpDescription() != null) {
                     application.setBackUpDescription(appParam.getBackUpDescription());
                 }
@@ -553,7 +557,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     }
 
-                    baseMapper.update(application, updateWrapper);
+                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
+                        baseMapper.update(application, updateWrapper);
+                        return null;
+                    });
+
                     //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
                     FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
                     if (!application.isRunning() || flinkSql == null) {
@@ -564,7 +572,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     updateWrapper.eq(Application::getId, application.getId());
                     updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                     updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                    baseMapper.update(application, updateWrapper);
+
+                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
+                        baseMapper.update(application, updateWrapper);
+                        return null;
+                    });
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
