@@ -484,84 +484,86 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application application) {
         executorService.submit(() -> {
             try {
-                // 1) 需要重启的先停止服务
-                if (application.getRestart() != null && application.getRestart()) {
-                    this.cancel(application);
-                }
+                FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                    // 1) 需要重启的先停止服务
+                    if (application.getRestart() != null && application.getRestart()) {
+                        this.cancel(application);
+                    }
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                        baseMapper.update(
+                                application,
+                                new UpdateWrapper<Application>()
+                                        .lambda()
+                                        .eq(Application::getId, application.getId())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
 
-                FlinkTrackingTask.refreshTracking(application.getId(),()->{
-                    baseMapper.update(
-                            application,
-                            new UpdateWrapper<Application>()
-                                    .lambda()
-                                    .eq(Application::getId, application.getId())
-                                    .set(Application::getDeploy, DeployState.DEPLOYING.get())
+                        );
+                        return null;
+                    });
 
-                    );
+                    try {
+                        if (application.isCustomCodeJob()) {
+                            log.info("CustomCodeJob deploying...");
+                            // 2) backup
+                            if (application.getBackUp()) {
+                                this.backUpService.backup(application);
+                            }
+                            // 3) deploying...
+                            File appHome = application.getAppHome();
+                            HdfsUtils.delete(appHome.getPath());
+                            File localJobHome = new File(application.getLocalAppBase(), application.getModule());
+                            HdfsUtils.upload(localJobHome.getAbsolutePath(), workspace, false, true);
+                            HdfsUtils.movie(workspace.concat("/").concat(application.getModule()), appHome.getPath());
+                        } else {
+                            log.info("FlinkSqlJob deploying...");
+                            FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+                            assert flinkSql != null;
+                            application.setDependency(flinkSql.getDependency());
+                            downloadDependency(application);
+                        }
+                        // 4) 更新发布状态,需要重启的应用则重新启动...
+                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.eq(Application::getId, application.getId());
+                        if (application.getRestart() != null && application.getRestart()) {
+                            // 重新启动.
+                            start(application);
+                            // 将"需要重新发布"状态清空...
+                            updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
+                        } else {
+                            //正在运行的任务...
+                            if (application.isRunning()) {
+                                updateWrapper.set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_DEPLOY.get());
+                            } else {
+                                updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                                updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
+                                updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
+                            }
+                        }
+
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(application, updateWrapper);
+                            return null;
+                        });
+
+                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                        FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                        if (!application.isRunning() || flinkSql == null) {
+                            toEffective(application);
+                        }
+                    } catch (ServiceException e) {
+                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.eq(Application::getId, application.getId());
+                        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(application, updateWrapper);
+                            return null;
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return null;
                 });
-
-                try {
-                    if (application.isCustomCodeJob()) {
-                        log.info("CustomCodeJob deploying...");
-                        // 2) backup
-                        if (application.getBackUp()) {
-                            this.backUpService.backup(application);
-                        }
-                        // 3) deploying...
-                        File appHome = application.getAppHome();
-                        HdfsUtils.delete(appHome.getPath());
-                        File localJobHome = new File(application.getLocalAppBase(), application.getModule());
-                        HdfsUtils.upload(localJobHome.getAbsolutePath(), workspace, false, true);
-                        HdfsUtils.movie(workspace.concat("/").concat(application.getModule()), appHome.getPath());
-                    } else {
-                        log.info("FlinkSqlJob deploying...");
-                        FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-                        assert flinkSql != null;
-                        application.setDependency(flinkSql.getDependency());
-                        downloadDependency(application);
-                    }
-                    // 4) 更新发布状态,需要重启的应用则重新启动...
-                    LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
-                    updateWrapper.eq(Application::getId, application.getId());
-                    if (application.getRestart() != null && application.getRestart()) {
-                        // 重新启动.
-                        start(application);
-                        // 将"需要重新发布"状态清空...
-                        updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
-                    } else {
-                        //正在运行的任务...
-                        if (application.isRunning()) {
-                            updateWrapper.set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_DEPLOY.get());
-                        } else {
-                            updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                            updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
-                            updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
-                        }
-                    }
-
-                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
-                        baseMapper.update(application, updateWrapper);
-                        return null;
-                    });
-
-                    //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                    FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
-                    if (!application.isRunning() || flinkSql == null) {
-                        toEffective(application);
-                    }
-                } catch (ServiceException e) {
-                    LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
-                    updateWrapper.eq(Application::getId, application.getId());
-                    updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                    updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
-                        baseMapper.update(application, updateWrapper);
-                        return null;
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
             } catch (Exception e) {
                 e.printStackTrace();
             }
