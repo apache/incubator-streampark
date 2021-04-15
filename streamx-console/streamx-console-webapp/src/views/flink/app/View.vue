@@ -470,13 +470,22 @@
             v-permit="'app:deploy'"
             class="pointer"
             @click.native="handleDeploy(record)"/>
+          <!--已经发布完的项目,不允许再次编辑-->
           <a-icon
+            v-if="record.deploy !== 6"
             v-permit="'app:update'"
             type="setting"
             theme="twoTone"
             two-tone-color="#4a9ff5"
             @click="handleEdit(record)"
             title="Update application"/>
+          <a-icon
+            v-if="record.deploy === 6"
+            v-permit="'app:update'"
+            type="rollback"
+            style="color:#4a9ff5;cursor: pointer"
+            @click="handleRevoke(record)"
+            title="Revoke Deploy"/>
           <a-icon
             v-if="record.state === 1 || record['deploy'] === 1"
             type="sync"
@@ -860,7 +869,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {list, dashboard, cancel, deploy, mapping, start, clean, yarn} from '@api/application'
+import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn} from '@api/application'
 import {lastest, history} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {Terminal} from 'xterm'
@@ -1497,6 +1506,14 @@ export default {
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
+    },
+
+    handleRevoke (app) {
+      revoke({
+        id: app.id
+      }).then((resp)=>{
+
+      })
     },
 
     handleCleanDeploy(app) {

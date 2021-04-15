@@ -69,7 +69,12 @@ public enum DeployState {
     /**
      * 回滚完成,需要重新启动
      */
-    NEED_RESTART_AFTER_ROLLBACK(7);
+    NEED_RESTART_AFTER_ROLLBACK(7),
+
+    /**
+     * 发布的任务已经撤销
+     */
+    REVOKED(8);
 
     int value;
 

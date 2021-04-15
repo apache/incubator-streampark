@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
+import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -34,4 +35,7 @@ public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
     @Select("SELECT * from t_app_backup where app_id=#{appId}")
     IPage<ApplicationBackUp> page(Page<ApplicationBackUp> page, @Param("appId") Long appId);
+
+    @Select("SELECT * from t_app_backup where app_id=#{appId} order by create_time desc limit 1")
+    ApplicationBackUp getLastBackup(@Param("appId")Long appId);
 }

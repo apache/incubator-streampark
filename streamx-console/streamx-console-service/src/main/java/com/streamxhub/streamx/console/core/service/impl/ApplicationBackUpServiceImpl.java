@@ -167,6 +167,15 @@ public class ApplicationBackUpServiceImpl
     }
 
     @Override
+    public void revoke(Application application) {
+        ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
+        assert backup != null;
+        String path = backup.getPath();
+        HdfsUtils.movie(path, application.getAppHome().getAbsolutePath());
+        removeById(backup.getId());
+    }
+
+    @Override
     public Boolean delete(Long id) throws ServiceException {
         ApplicationBackUp backUp = getById(id);
         try {

@@ -77,4 +77,5 @@ public interface ApplicationService extends IService<Application> {
      */
     void toEffective(Application application);
 
+    void revoke(Application app) throws Exception;
 }

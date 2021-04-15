@@ -255,6 +255,36 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
     }
 
+    /**
+     * 撤销发布.
+     *
+     * @param appParma
+     */
+    @Override
+    public void revoke(Application appParma) throws Exception {
+        Application application = getById(appParma.getId());
+        assert application != null;
+
+        //1) 将已经发布到workspace的文件删除
+        HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+
+        //2) 将backup里的文件回滚到workspace
+        backUpService.revoke(application);
+
+        //3) 相关状态恢复
+        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Application::getId, application.getId());
+        updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
+        if (!application.isRunning()) {
+            updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
+        }
+        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+            baseMapper.update(application, updateWrapper);
+            return null;
+        });
+
+    }
+
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
@@ -818,7 +848,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported..." + executionMode);
             }
         } else if (application.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
             assert flinkSql != null;
             this.flinkSqlService.cleanCandidate(flinkSql.getId());
 

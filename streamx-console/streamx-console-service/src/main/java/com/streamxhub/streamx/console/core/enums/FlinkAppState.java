@@ -111,6 +111,9 @@ public enum FlinkAppState {
      */
     OTHER(17),
 
+    //已回滚
+    REVOKED(18),
+
     /**
      * yarn 中检查到被killed
      */
