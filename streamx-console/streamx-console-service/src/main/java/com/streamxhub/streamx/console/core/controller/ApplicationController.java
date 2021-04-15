@@ -115,7 +115,7 @@ public class ApplicationController extends BaseController {
 
     @PostMapping("revoke")
     @RequiresPermissions("app:deploy")
-    public RestResponse revoke(Application app) {
+    public RestResponse revoke(Application app) throws Exception {
         applicationService.revoke(app);
         return RestResponse.create();
     }
