@@ -485,7 +485,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         executorService.submit(() -> {
             try {
                 // 1) 需要重启的先停止服务
-                if (application.getRestart()) {
+                if (application != null && application.getRestart()) {
                     this.cancel(application);
                 }
 
@@ -524,7 +524,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     // 4) 更新发布状态,需要重启的应用则重新启动...
                     LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Application::getId, application.getId());
-                    if (application.getRestart()) {
+                    if (application.getRestart() != null && application.getRestart()) {
                         // 重新启动.
                         start(application);
                         // 将"需要重新发布"状态清空...
