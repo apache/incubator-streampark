@@ -34,7 +34,6 @@ import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.base.utils.AssertUtil;
 import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.base.utils.WebUtil;
@@ -264,7 +263,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void revoke(Application appParma) throws Exception {
         Application application = getById(appParma.getId());
-        AssertUtil.checkNotNull(application);
+        assert application != null;
+
         //1) 将已经发布到workspace的文件删除
         HdfsUtils.delete(application.getAppHome().getAbsolutePath());
 
@@ -493,7 +493,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application appParam) {
         executorService.submit(() -> {
             Application application = getById(appParam.getId());
-            AssertUtil.checkNotNull(application);
+            assert application != null && application.getId() != null;
             try {
                 // 1) 需要重启的先停止服务
                 if (appParam.getRestart()) {
@@ -526,7 +526,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     } else {
                         log.info("FlinkSqlJob deploying...");
                         FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-                        AssertUtil.checkNotNull(flinkSql);
+                        assert flinkSql != null;
                         application.setDependency(flinkSql.getDependency());
                         application.setBackUp(appParam.getBackUp());
                         downloadDependency(application);
@@ -785,7 +785,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public void starting(Application appParam) {
         Application application = getById(appParam.getId());
-        AssertUtil.checkNotNull(application);
+        assert application != null;
         application.setState(FlinkAppState.STARTING.getValue());
         updateById(application);
     }
@@ -798,7 +798,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         checkFlinkEnv();
 
         final Application application = getById(appParam.getId());
-        AssertUtil.checkNotNull(application);
+        assert application != null;
         //1) 真正执行启动相关的操作..
         String workspace = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
 
@@ -812,6 +812,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
 
         if (application.isCustomCodeJob()) {
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 switch (application.getApplicationType()) {
                     case STREAMX_FLINK:
@@ -849,13 +850,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         } else if (application.isFlinkSqlJob()) {
             FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
-            AssertUtil.checkNotNull(flinkSql);
+            assert flinkSql != null;
             this.flinkSqlService.cleanCandidate(flinkSql.getId());
 
             //1) dist_userJar
             File localPlugins = new File(WebUtil.getAppDir("plugins"));
-            AssertUtil.checkArgument(localPlugins.exists());
-
+            assert localPlugins.exists();
             List<String> jars = Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlcli-.*\\.jar")).collect(Collectors.toList());
             if (jars.isEmpty()) {
                 throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlcli jar in " + localPlugins);
@@ -866,6 +866,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String sqlDistJar = jars.get(0);
             //2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 //3) plugin
                 String pluginPath = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_PLUGINS());
