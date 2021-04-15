@@ -452,7 +452,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.cleanCandidate(historyFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            CandidateType type = application.isRunning() ? CandidateType.NEW : CandidateType.NONE;
+            CandidateType type = depDifference || application.isRunning() ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
