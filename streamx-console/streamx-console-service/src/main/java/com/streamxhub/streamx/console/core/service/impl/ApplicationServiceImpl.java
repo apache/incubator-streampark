@@ -357,6 +357,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
             appParam.setBackUp(false);
             appParam.setRestart(false);
+
+            assert appParam.getId() != null;
             deploy(appParam);
             return true;
         }
