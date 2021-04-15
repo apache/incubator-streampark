@@ -485,7 +485,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Application application = getById(appParam.getId());
             assert application != null;
             try {
-                application.setBackUpDescription(appParam.getBackUpDescription());
+                if (appParam.getBackUpDescription() != null) {
+                    application.setBackUpDescription(appParam.getBackUpDescription());
+                }
                 // 1) 需要重启的先停止服务
                 if (appParam.getRestart()) {
                     this.cancel(appParam);
