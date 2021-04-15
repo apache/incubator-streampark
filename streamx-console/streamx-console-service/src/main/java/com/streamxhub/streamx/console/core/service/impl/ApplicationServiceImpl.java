@@ -361,6 +361,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             deploy(appParam);
 
+            //新增的任务直接设置成正式版
+            toEffective(appParam);
+
             return true;
         }
         return false;
