@@ -359,6 +359,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             appParam.setRestart(false);
 
             assert appParam.getId() != null;
+
             deploy(appParam);
             return true;
         }
@@ -495,7 +496,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public void deploy(Application appParam) {
         executorService.submit(() -> {
             Application application = getById(appParam.getId());
-            assert application != null && application.getId() != null;
+            assert application != null;
             try {
                 // 1) 需要重启的先停止服务
                 if (appParam.getRestart()) {
