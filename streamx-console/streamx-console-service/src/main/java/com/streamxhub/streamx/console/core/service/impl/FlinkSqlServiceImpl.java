@@ -68,7 +68,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void create(FlinkSql flinkSql,CandidateType type) {
+    public void create(FlinkSql flinkSql, CandidateType type) {
         Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
@@ -79,15 +79,15 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId) {
-        if (candidateType != CandidateType.NONE) {
-            this.setCandidate(appId, sqlId ,candidateType);
+        if (candidateType != null && candidateType.equals(CandidateType.NONE)) {
+            this.setCandidate(appId, sqlId, candidateType);
         } else {
             this.toEffective(appId, sqlId);
         }
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void setCandidate(Long appId, Long sqlId,CandidateType candidateType) {
+    public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, 0)
                 .eq(FlinkSql::getAppId, appId);

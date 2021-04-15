@@ -371,7 +371,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Application application = getById(appParam.getId());
             //从db中补全jobType到appParam
             appParam.setJobType(application.getJobType());
-
             application.setJobName(appParam.getJobName());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
@@ -452,7 +451,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.cleanCandidate(historyFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            CandidateType type = depDifference || application.isRunning() ? CandidateType.NEW : CandidateType.NONE;
+            CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
@@ -485,14 +484,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Application application = getById(appParam.getId());
             assert application != null;
             try {
-                if (appParam.getBackUpDescription() != null) {
-                    application.setBackUpDescription(appParam.getBackUpDescription());
-                }
                 // 1) 需要重启的先停止服务
                 if (appParam.getRestart()) {
                     this.cancel(appParam);
                 }
-
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     baseMapper.update(
                             application,
@@ -504,6 +499,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     );
                     return null;
                 });
+
+                if (appParam.getBackUpDescription() != null) {
+                    application.setBackUpDescription(appParam.getBackUpDescription());
+                }
 
                 try {
                     if (application.isCustomCodeJob()) {
