@@ -409,6 +409,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
             if (newFlinkSql != null) {
+                //删除候选版本的所有记录
                 flinkSqlService.removeById(newFlinkSql.getId());
             }
             FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
@@ -514,7 +515,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                     FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(application, updateWrapper);
-                        //如果当前任务未运行,则直接将"lastst"的设置为Effective
+                        //如果当前任务未运行,则直接将候选版本的设置为正式版本
                         if (!application.isRunning()) {
                             toEffective(application);
                         }
@@ -817,6 +818,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported..." + executionMode);
             }
         } else if (application.isFlinkSqlJob()) {
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+            assert flinkSql != null;
+            this.flinkSqlService.cleanCandidate(flinkSql.getId());
+
             //1) dist_userJar
             File localPlugins = new File(WebUtil.getAppDir("plugins"));
             assert localPlugins.exists();
