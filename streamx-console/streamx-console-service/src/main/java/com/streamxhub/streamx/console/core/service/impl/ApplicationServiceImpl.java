@@ -485,7 +485,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         executorService.submit(() -> {
             try {
                 // 1) 需要重启的先停止服务
-                if (application != null && application.getRestart()) {
+                if (application.getRestart() != null && application.getRestart()) {
                     this.cancel(application);
                 }
 
