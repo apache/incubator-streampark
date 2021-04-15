@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -171,7 +172,7 @@ public class ApplicationBackUpServiceImpl
         ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
         assert backup != null;
         String path = backup.getPath();
-        HdfsUtils.movie(path, application.getAppHome().getAbsolutePath());
+        HdfsUtils.movie(path, ConfigConst.APP_WORKSPACE());
         removeById(backup.getId());
     }
 
