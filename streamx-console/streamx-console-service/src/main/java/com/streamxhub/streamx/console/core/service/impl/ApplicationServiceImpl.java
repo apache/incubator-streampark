@@ -546,8 +546,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
                     FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(application, updateWrapper);
-                        //如果当前任务未运行,则直接将候选版本的设置为正式版本
-                        if (!application.isRunning()) {
+                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                        FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+                        if (!application.isRunning() || flinkSql == null) {
                             toEffective(application);
                         }
                         return null;
