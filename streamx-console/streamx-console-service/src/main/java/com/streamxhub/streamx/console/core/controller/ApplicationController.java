@@ -108,8 +108,11 @@ public class ApplicationController extends BaseController {
     @PostMapping("deploy")
     @RequiresPermissions("app:deploy")
     public RestResponse deploy(Application app) {
-        app.setBackUp(true);
-        applicationService.deploy(app);
+        Application application = applicationService.getById(app.getId());
+        assert application != null;
+        application.setBackUp(true);
+        application.setBackUpDescription(app.getBackUpDescription());
+        applicationService.deploy(application);
         return RestResponse.create();
     }
 

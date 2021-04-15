@@ -360,6 +360,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             assert appParam.getId() != null;
 
             deploy(appParam);
+
             return true;
         }
         return false;
@@ -478,16 +479,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
 
     @Override
-    public void deploy(Application appParam) {
+    public void deploy(Application application) {
         executorService.submit(() -> {
-            Application application = getById(appParam.getId());
-            assert application != null;
-
             try {
                 // 1) 需要重启的先停止服务
-                if (appParam.getRestart() != null && appParam.getRestart()) {
-                    this.cancel(appParam);
+                if (application.getRestart()) {
+                    this.cancel(application);
                 }
+
                 FlinkTrackingTask.refreshTracking(application.getId(),()->{
                     baseMapper.update(
                             application,
@@ -500,14 +499,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     return null;
                 });
 
-                if (appParam.getBackUpDescription() != null) {
-                    application.setBackUpDescription(appParam.getBackUpDescription());
-                }
                 try {
                     if (application.isCustomCodeJob()) {
                         log.info("CustomCodeJob deploying...");
                         // 2) backup
-                        if (appParam.getBackUp() != null && appParam.getBackUp()) {
+                        if (application.getBackUp()) {
                             this.backUpService.backup(application);
                         }
                         // 3) deploying...
@@ -521,15 +517,14 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
                         assert flinkSql != null;
                         application.setDependency(flinkSql.getDependency());
-                        application.setBackUp(appParam.getBackUp());
                         downloadDependency(application);
                     }
                     // 4) 更新发布状态,需要重启的应用则重新启动...
                     LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Application::getId, application.getId());
-                    if (appParam.getRestart() != null && appParam.getRestart()) {
+                    if (application.getRestart()) {
                         // 重新启动.
-                        start(appParam);
+                        start(application);
                         // 将"需要重新发布"状态清空...
                         updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                     } else {
