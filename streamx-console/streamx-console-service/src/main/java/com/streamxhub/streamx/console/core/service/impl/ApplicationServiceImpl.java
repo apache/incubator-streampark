@@ -439,7 +439,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         boolean depDifference = !targetDependency.eq(newDependency);
 
         //依赖或sql发生了变更
-        boolean hasDeploy = false;
         if (sqlDifference || depDifference) {
             // 5) 检查是否存在新增记录的候选版本
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
@@ -456,34 +455,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql sql = new FlinkSql(appParam);
             CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
-
-            FlinkSql effective = flinkSqlService.getEffective(application.getId(), false);
-
-            //说明新增的记录还未启动,且发生了修改,此时会自定发布任务
-            if (CandidateType.NEW.equals(type) && newFlinkSql != null && effective == null) {
-                deploy(application);
-                hasDeploy = true;
-            }
         } else if (versionChanged) {
             //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
-            CandidateType type = CandidateType.NONE;
-            if (application.isRunning()) {
-                type = CandidateType.HISTORY;
-            }
+            CandidateType type = application.isRunning() ? CandidateType.HISTORY : CandidateType.NONE;
             flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
         }
 
-        if (!hasDeploy) {
-            // 6) 判断 Effective的依赖和当前提交的是否发生变化
-            // 判断当前正在生效版本的(sql|依赖)和正在提交的依赖是否发生变更
-            Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
-            boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
-            boolean effectiveSqlDifference = !effectiveFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
-            if (effectiveDepsDifference) {
-                application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
-            } else if (effectiveSqlDifference) {
-                application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
-            }
+        // 6) 判断 Effective的依赖和当前提交的是否发生变化
+        // 判断当前正在生效版本的(sql|依赖)和正在提交的依赖是否发生变更
+        Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
+        boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
+        boolean effectiveSqlDifference = !effectiveFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
+        if (effectiveDepsDifference) {
+            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
+        } else if (effectiveSqlDifference) {
+            application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
         }
 
         // 7) 配置文件修改
@@ -502,7 +488,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (appParam.getRestart() != null && appParam.getRestart()) {
                     this.cancel(appParam);
                 }
-                FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                FlinkTrackingTask.refreshTracking(application.getId(),()->{
                     baseMapper.update(
                             application,
                             new UpdateWrapper<Application>()
@@ -557,13 +543,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     }
 
-                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
                         baseMapper.update(application, updateWrapper);
                         return null;
                     });
 
                     //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                    FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                    FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
                     if (!application.isRunning() || flinkSql == null) {
                         toEffective(application);
                     }
@@ -572,7 +558,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     updateWrapper.eq(Application::getId, application.getId());
                     updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                     updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
                         baseMapper.update(application, updateWrapper);
                         return null;
                     });
