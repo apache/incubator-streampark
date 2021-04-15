@@ -251,6 +251,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), null);
             if (flinkSql != null) {
                 this.flinkSqlService.toEffective(application.getId(), flinkSql.getId());
+                //清除备选标记.
+                flinkSqlService.cleanCandidate(flinkSql.getId());
             }
         }
     }
