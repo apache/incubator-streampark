@@ -44,9 +44,12 @@ public class FlinkSql {
     private Integer version = 1;
 
     /**
-     * 记录要设置的目标要生效的配置
+     * 候选版本:
+     * 0: 非候选
+     * 1: 新增的记录成为候选版本
+     * 2: 指定历史记录的版本成为候选版本
      */
-    private Boolean latest;
+    private Integer candidate;
 
     @JsonIgnore
     private Date createTime;

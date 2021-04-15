@@ -119,7 +119,8 @@ public class ApplicationBackUpServiceImpl
                         configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
                         // 如FlinkSQL任务则回滚sql语句和依赖
                         if (application.isFlinkSqlJob()) {
-                            flinkSqlService.setLatestOrEffective(true,backParam.getAppId(), backParam.getSqlId());
+                            //TODO rollback
+                            //flinkSqlService.setCandidateOrEffective(true,backParam.getAppId(), backParam.getSqlId());
                         }
                         //
                     } else {

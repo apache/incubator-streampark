@@ -36,9 +36,12 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
     @Select("select max(`version`) as maxVersion from t_flink_sql where app_id=#{appId}")
     Integer getLastVersion(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_sql where app_id=#{appId} and latest=1")
-    FlinkSql getLatest(@Param("appId") Long appId);
+    @Select("select * from t_flink_sql where app_id=#{appId} and candidate>0 ")
+    FlinkSql getCandidate(@Param("appId") Long appId);
 
-    @Update("update t_flink_sql set latest=0 where app_id=#{appId}")
-    void clearLatest(@Param("appId")Long appId);
+    @Select("select * from t_flink_sql where app_id=#{appId} and candidate=#{candidate}")
+    FlinkSql getCandidateByType(@Param("appId") Long appId,@Param("candidate") Integer candidate);
+
+    @Update("update t_flink_sql set candidate=0 where id=#{appId}")
+    void cleanCandidate(@Param("id")Long id);
 }

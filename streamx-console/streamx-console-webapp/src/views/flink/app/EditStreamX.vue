@@ -56,8 +56,8 @@
                   color="cyan"
                   style=";margin-left: 5px;"
                   size="small"
-                  v-if="ver.latest">
-                  Latest
+                  v-if="ver.candidate == 1 || ver.candidate == 2">
+                  Candidate
                 </a-tag>
               </div>
             </a-select-option>
@@ -258,8 +258,8 @@
                     color="cyan"
                     style=";margin-left: 5px;"
                     size="small"
-                    v-if="ver.latest">
-                    Latest
+                    v-if="ver.candidate == 1 || ver.candidate == 2">
+                    Candidate
                   </a-tag>
                 </div>
               </a-select-option>
@@ -326,8 +326,8 @@
                     color="cyan"
                     style=";margin-left: 5px;"
                     size="small"
-                    v-if="ver.latest">
-                    Latest
+                    v-if="ver.candidate == 1 || ver.candidate == 2">
+                    Candidate
                   </a-tag>
                 </div>
               </a-select-option>
@@ -766,8 +766,8 @@
                   color="cyan"
                   style=";margin-left: 5px;"
                   size="small"
-                  v-if="ver.latest">
-                  Latest
+                  v-if="ver.candidate == 1 || ver.candidate == 2">
+                  Candidate
                 </a-tag>
               </div>
             </a-select-option>

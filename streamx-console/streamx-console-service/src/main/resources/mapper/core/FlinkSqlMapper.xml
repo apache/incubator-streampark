@@ -5,7 +5,7 @@
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
         <result column="SQL" jdbcType="LONGVARCHAR" property="sql"/>
-        <result column="LATEST" jdbcType="BOOLEAN" property="latest"/>
+        <result column="CANDIDATE" jdbcType="INTEGER" property="candidate"/>
         <result column="DEPENDENCY" jdbcType="VARCHAR" property="dependency"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>

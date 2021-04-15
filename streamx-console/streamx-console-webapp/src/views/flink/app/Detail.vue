@@ -463,8 +463,8 @@
                   color="cyan"
                   style=";margin-left: 5px;"
                   size="small"
-                  v-if="ver.latest">
-                  Latest
+                  v-if="ver.candidate == 1 || ver.candidate == 2">
+                  Candidate
                 </a-tag>
               </div>
             </a-select-option>
@@ -735,9 +735,9 @@ export default {
             scopedSlots: { customRender: 'effective' }
           },
           {
-            title: 'Latest',
-            dataIndex: 'latest',
-            scopedSlots: { customRender: 'latest' }
+            title: 'Candidate',
+            dataIndex: 'candidate',
+            scopedSlots: { customRender: 'candidate' }
           },
           {
             title: 'Modify Time',
