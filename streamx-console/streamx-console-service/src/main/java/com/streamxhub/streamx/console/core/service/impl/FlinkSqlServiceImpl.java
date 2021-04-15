@@ -79,10 +79,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     public void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId) {
-        if (candidateType != null && candidateType.equals(CandidateType.NONE)) {
-            this.setCandidate(appId, sqlId, candidateType);
-        } else {
+        if (CandidateType.NONE.equals(candidateType)) {
             this.toEffective(appId, sqlId);
+        } else {
+            this.setCandidate(appId, sqlId, candidateType);
         }
     }
 
