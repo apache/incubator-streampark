@@ -274,7 +274,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //3) 相关状态恢复
         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Application::getId, application.getId());
-        updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
+        if (application.isFlinkSqlJob()) {
+            updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+        } else {
+            updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+        }
         if (!application.isRunning()) {
             updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
         }
