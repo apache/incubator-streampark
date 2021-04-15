@@ -457,10 +457,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
 
-            FlinkSql effective = flinkSqlService.getEffective(application.getId(),false);
+            FlinkSql effective = flinkSqlService.getEffective(application.getId(), false);
 
             //说明新增的记录还未启动,且发生了修改,此时会自定发布任务
-            if ( CandidateType.NEW.equals(type) && newFlinkSql != null && effective == null ) {
+            if (CandidateType.NEW.equals(type) && newFlinkSql != null && effective == null) {
                 deploy(application);
                 hasDeploy = true;
             }
@@ -502,8 +502,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (appParam.getRestart() != null && appParam.getRestart()) {
                     this.cancel(appParam);
                 }
-                
-                FlinkTrackingTask.refreshTracking(application.getId(),()->{
+                FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     baseMapper.update(
                             application,
                             new UpdateWrapper<Application>()
@@ -522,7 +521,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     if (application.isCustomCodeJob()) {
                         log.info("CustomCodeJob deploying...");
                         // 2) backup
-                        if (appParam.getBackUp()) {
+                        if (appParam.getBackUp() != null && appParam.getBackUp()) {
                             this.backUpService.backup(application);
                         }
                         // 3) deploying...
@@ -542,7 +541,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     // 4) 更新发布状态,需要重启的应用则重新启动...
                     LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                     updateWrapper.eq(Application::getId, application.getId());
-                    if (appParam.getRestart()) {
+                    if (appParam.getRestart() != null && appParam.getRestart()) {
                         // 重新启动.
                         start(appParam);
                         // 将"需要重新发布"状态清空...
@@ -558,13 +557,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     }
 
-                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(application, updateWrapper);
                         return null;
                     });
 
                     //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
-                    FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+                    FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                     if (!application.isRunning() || flinkSql == null) {
                         toEffective(application);
                     }
@@ -573,8 +572,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     updateWrapper.eq(Application::getId, application.getId());
                     updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                     updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-
-                    FlinkTrackingTask.refreshTracking(application.getId(),()-> {
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                         baseMapper.update(application, updateWrapper);
                         return null;
                     });
@@ -663,7 +661,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             // 2) backup
-            if (application.getBackUp()) {
+            if (application.getBackUp() != null && application.getBackUp()) {
                 this.backUpService.backup(application);
             }
 
