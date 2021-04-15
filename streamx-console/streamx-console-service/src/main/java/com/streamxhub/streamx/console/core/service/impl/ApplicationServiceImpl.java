@@ -499,9 +499,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             try {
                 // 1) 需要重启的先停止服务
-                if (appParam.getRestart()) {
+                if (appParam.getRestart() != null && appParam.getRestart()) {
                     this.cancel(appParam);
                 }
+                
                 FlinkTrackingTask.refreshTracking(application.getId(),()->{
                     baseMapper.update(
                             application,
