@@ -349,7 +349,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
                 //新增的任务直接成正式版
-                flinkSqlService.create(flinkSql, CandidateType.NONE);
+                flinkSqlService.create(flinkSql, CandidateType.NEW);
             }
             if (appParam.getConfig() != null) {
                 //TODO CONFIG
@@ -520,10 +520,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     } else {
                         log.info("FlinkSqlJob deploying...");
                         FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
-                        if (flinkSql == null) {
-                            log.info("candidate is null,now getEffective");
-                            flinkSql = flinkSqlService.getEffective(application.getId(), true);
-                        }
                         assert flinkSql != null;
                         application.setDependency(flinkSql.getDependency());
                         application.setBackUp(appParam.getBackUp());
