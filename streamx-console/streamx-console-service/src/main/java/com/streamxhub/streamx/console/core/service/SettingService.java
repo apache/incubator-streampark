@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Setting;
 
 /**
@@ -52,5 +53,7 @@ public interface SettingService extends IService<Setting> {
     String getMavenRepository();
 
     String getEnvFlinkHome();
+
+    boolean checkWorkspace();
 
 }
