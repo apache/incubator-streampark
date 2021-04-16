@@ -296,30 +296,31 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public Boolean delete(Long appId) {
+    @RefreshCache
+    public Boolean delete(Application app) {
         try {
             //1) 删除flink sql
-            flinkSqlService.removeApp(appId);
+            flinkSqlService.removeApp(app.getId());
 
             //2) 删除 log
-            applicationLogService.removeApp(appId);
+            applicationLogService.removeApp(app.getId());
 
             //3) 删除 config
-            configService.removeApp(appId);
+            configService.removeApp(app.getId());
 
             //4) 删除 effective
-            effectiveService.removeApp(appId);
+            effectiveService.removeApp(app.getId());
 
             //以下涉及到hdfs文件的删除
 
             //5) 删除 backup
-            backUpService.removeApp(appId);
+            backUpService.removeApp(app.getId());
 
             //6) 删除savepoint
-            savePointService.removeApp(appId);
+            savePointService.removeApp(app.getId());
 
             //7) 删除 app
-            removeApp(appId);
+            removeApp(app.getId());
 
             return true;
         } catch (Exception e) {

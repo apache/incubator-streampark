@@ -199,7 +199,7 @@ public class ApplicationController extends BaseController {
 
     @PostMapping("delete")
     public RestResponse delete(Application app) throws ServiceException {
-        Boolean deleted = applicationService.delete(app.getId());
+        Boolean deleted = applicationService.delete(app);
         return RestResponse.create().data(deleted);
     }
 

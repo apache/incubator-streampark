@@ -79,5 +79,5 @@ public interface ApplicationService extends IService<Application> {
 
     void revoke(Application app) throws Exception;
 
-    Boolean delete(Long id);
+    Boolean delete(Application app);
 }
