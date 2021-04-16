@@ -41,6 +41,7 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hadoop.fs.Hdfs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -174,6 +175,12 @@ public class ApplicationBackUpServiceImpl
         String path = backup.getPath();
         HdfsUtils.movie(path, ConfigConst.APP_WORKSPACE());
         removeById(backup.getId());
+    }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+        HdfsUtils.delete(ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString()));
     }
 
     @Override

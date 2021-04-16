@@ -59,4 +59,5 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     String readTemplate();
 
+    void removeApp(Long appId);
 }

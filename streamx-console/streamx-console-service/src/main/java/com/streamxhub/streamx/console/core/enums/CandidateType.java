@@ -24,10 +24,19 @@ import java.util.Arrays;
 
 public enum CandidateType {
 
+    /**
+     * 非候选版本
+     */
     NONE(0),
 
+    /**
+     * 新增的记录成为候选版本
+     */
     NEW(1),
 
+    /**
+     * 历史记录成为候选版本
+     */
     HISTORY(2);
 
     int value;

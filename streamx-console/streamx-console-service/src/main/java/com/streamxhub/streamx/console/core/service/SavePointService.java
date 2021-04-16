@@ -40,4 +40,6 @@ public interface SavePointService extends IService<SavePoint> {
     Boolean delete(Long id) throws ServiceException;
 
     IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
+
+    void removeApp(Long appId);
 }

@@ -197,6 +197,12 @@ public class ApplicationController extends BaseController {
         return RestResponse.create().data(applicationList);
     }
 
+    @PostMapping("delete")
+    public RestResponse delete(Application app) throws ServiceException {
+        Boolean deleted = applicationService.delete(app.getId());
+        return RestResponse.create().data(deleted);
+    }
+
     @PostMapping("deletebak")
     public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
         Boolean deleted = backUpService.delete(backUp.getId());

@@ -44,4 +44,6 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     void rollback(ApplicationBackUp backUp);
 
     void revoke(Application application);
+
+    void removeApp(Long appId);
 }

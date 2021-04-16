@@ -136,4 +136,9 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public void cleanCandidate(Long id) {
         this.baseMapper.cleanCandidate(id);
     }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+    }
 }

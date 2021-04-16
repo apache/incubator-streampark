@@ -520,6 +520,20 @@
             style="color:#4a9ff5"
             @click="handleFlameGraph(record)"
             title="Detail"/>
+
+          <template v-if="handleCanDelete(record)">
+            <a-popconfirm
+              title="Are you sure delete this job ?"
+              cancel-text="No"
+              ok-text="Yes"
+              @confirm="handleDelete(record)">
+              <a-icon
+                type="delete"
+                theme="twoTone"
+                two-tone-color="#4a9ff5" />
+            </a-popconfirm>
+          </template>
+
         </template>
 
       </a-table>
@@ -869,7 +883,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn} from '@api/application'
+import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
 import {lastest, history} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {Terminal} from 'xterm'
@@ -1364,6 +1378,31 @@ export default {
         },
         {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
+    },
+
+    handleCanDelete (app) {
+      return app.state === 0 ||
+        app.state === 2 ||
+        app.state === 9 ||
+        app.state === 11 ||
+        app.state === 12 ||
+        app.state === 15 ||
+        app.state === 19 || false
+    },
+
+    handleDelete(app) {
+      remove({
+        id: app.id
+      }).then((resp)=>{
+        this.$swal.fire({
+          icon: 'success',
+          title: 'delete successful',
+          showConfirmButton: false,
+          timer: 2000
+        }).then((result) => {
+
+        })
+      })
     },
 
     handleSearch(selectedKeys, confirm, dataIndex) {

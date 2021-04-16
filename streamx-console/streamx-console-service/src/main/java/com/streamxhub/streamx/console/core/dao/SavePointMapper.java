@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.dao;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -42,4 +43,7 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
 
     @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=0")
     IPage<SavePoint> page(Page<SavePoint> page, @Param("appId") Long appId);
+
+    @Delete("delete from t_flink_savepoint where app_id=#{appId}")
+    void removeApp(@Param("appId")Long appId);
 }

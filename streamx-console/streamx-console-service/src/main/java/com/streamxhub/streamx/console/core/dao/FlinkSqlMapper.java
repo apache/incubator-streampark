@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -44,4 +45,7 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
 
     @Update("update t_flink_sql set candidate=0 where id=#{id}")
     void cleanCandidate(@Param("id")Long id);
+
+    @Delete("delete from t_flink_sql where app_id=#{appId}")
+    void removeApp(@Param("appId")Long appId);
 }

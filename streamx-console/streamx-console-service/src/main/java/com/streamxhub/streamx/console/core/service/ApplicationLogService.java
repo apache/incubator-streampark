@@ -31,4 +31,7 @@ import com.streamxhub.streamx.console.core.entity.ApplicationLog;
 public interface ApplicationLogService extends IService<ApplicationLog> {
 
     IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
+
+    void removeApp(Long appId);
+
 }

@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -78,5 +79,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         Page<SavePoint> page = new Page<>();
         SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, savePoint.getAppId());
+    }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+        HdfsUtils.delete(ConfigConst.APP_SAVEPOINTS().concat("/").concat(appId.toString()));
     }
 }

@@ -71,4 +71,6 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     void toEffective(Long appId,Long sqlId);
 
     void cleanCandidate(Long id);
+
+    void removeApp(Long appId);
 }

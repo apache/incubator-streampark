@@ -259,4 +259,9 @@ public class ApplicationConfigServiceImpl
         }
         return this.flinkConfTemplate;
     }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+    }
 }

@@ -105,6 +105,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationLogService applicationLogService;
 
     @Autowired
+    private EffectiveService effectiveService;
+
+    @Autowired
     private SettingService settingService;
 
     @Autowired
@@ -289,6 +292,45 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             return null;
         });
 
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
+    public Boolean delete(Long appId) {
+        try {
+            //1) 删除flink sql
+            flinkSqlService.removeApp(appId);
+
+            //2) 删除 log
+            applicationLogService.removeApp(appId);
+
+            //3) 删除 config
+            configService.removeApp(appId);
+
+            //4) 删除 effective
+            effectiveService.removeApp(appId);
+
+            //以下涉及到hdfs文件的删除
+
+            //5) 删除 backup
+            backUpService.removeApp(appId);
+
+            //6) 删除savepoint
+            savePointService.removeApp(appId);
+
+            //7) 删除 app
+            removeApp(appId);
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private void removeApp(Long appId) {
+        removeById(appId);
+        HdfsUtils.delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
     }
 
     @Override
