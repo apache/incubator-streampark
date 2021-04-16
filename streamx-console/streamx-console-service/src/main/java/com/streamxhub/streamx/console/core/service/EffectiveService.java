@@ -38,4 +38,6 @@ public interface EffectiveService extends IService<Effective> {
     Effective get(Long appId, EffectiveType config);
 
     void saveOrUpdate(Long appId, EffectiveType type, Long id);
+
+    void removeApp(Long appId);
 }

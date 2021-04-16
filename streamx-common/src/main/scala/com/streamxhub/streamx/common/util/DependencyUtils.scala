@@ -41,13 +41,13 @@ import java.util.function.Consumer
 
 object DependencyUtils {
 
-  def resolveMavenDependencies(
-                                packagesExclusions: String,
-                                packages: String,
-                                repositories: String,
-                                ivyRepoPath: String,
-                                ivySettingsPath: String,
-                                outCallback: Consumer[String]): List[String] = {
+  @throws[Exception] def resolveMavenDependencies(
+                                                   packagesExclusions: String,
+                                                   packages: String,
+                                                   repositories: String,
+                                                   ivyRepoPath: String,
+                                                   ivySettingsPath: String,
+                                                   outCallback: Consumer[String]): List[String] = {
     val exclusions: Seq[String] = if (Utils.isEmpty(packagesExclusions)) Nil else packagesExclusions.split(",")
 
     // Create the IvySettings, either load from file or build defaults
@@ -322,13 +322,13 @@ object DependencyUtils {
    * @return The comma-delimited path to the jars of the given maven artifacts including their
    *         transitive dependencies
    */
-  def resolveMavenCoordinates(
-                               coordinates: String,
-                               ivySettings: IvySettings,
-                               exclusions: Seq[String] = Nil,
-                               outCallback: Consumer[String],
-                               isTest: Boolean = false
-                             ): List[String] = {
+  @throws[Exception] def resolveMavenCoordinates(
+                                                  coordinates: String,
+                                                  ivySettings: IvySettings,
+                                                  exclusions: Seq[String] = Nil,
+                                                  outCallback: Consumer[String],
+                                                  isTest: Boolean = false
+                                                ): List[String] = {
     if (Utils.isEmpty(coordinates)) List.empty[String] else {
       try {
         setDefaultLogger(outCallback)
@@ -385,7 +385,7 @@ object DependencyUtils {
         clearIvyResolutionFiles(mdId, ivySettings, ivyConfName)
         paths
       } catch {
-        case e: Throwable => throw e
+        case e: Exception => throw e
       }
     }
   }

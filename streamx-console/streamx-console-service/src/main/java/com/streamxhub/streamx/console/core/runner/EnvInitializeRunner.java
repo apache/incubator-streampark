@@ -51,17 +51,6 @@ public class EnvInitializeRunner implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         String profiles = context.getEnvironment().getActiveProfiles()[0];
         if (profiles.equals(PROD_ENV_NAME)) {
-            String flinkLocalHome = System.getenv("FLINK_HOME");
-            if (flinkLocalHome == null) {
-                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
-            }
-
-            String appFlink = ConfigConst.APP_FLINK();
-            if (!HdfsUtils.exists(appFlink)) {
-                log.info("mkdir {} starting ...", appFlink);
-                HdfsUtils.mkdirs(appFlink);
-            }
-
             String appUploads = ConfigConst.APP_UPLOADS();
             if (!HdfsUtils.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
@@ -96,13 +85,6 @@ public class EnvInitializeRunner implements ApplicationRunner {
             if (!HdfsUtils.exists(appJars)) {
                 log.info("mkdir {} starting ...", appJars);
                 HdfsUtils.mkdirs(appJars);
-            }
-
-            String flinkName = new File(flinkLocalHome).getName();
-            String flinkHome = appFlink.concat("/").concat(flinkName);
-            if (!HdfsUtils.exists(flinkHome)) {
-                log.info("{} is not exists,upload beginning....", flinkHome);
-                HdfsUtils.upload(flinkLocalHome, flinkHome, false, false);
             }
 
             File plugins = new File(WebUtil.getAppDir("plugins"));

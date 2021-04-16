@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -47,4 +48,7 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
 
     @Update("update t_flink_config set latest=0 where app_id=#{appId}")
     void clearLatest(@Param("appId")Long appId);
+
+    @Delete("delete from t_flink_config where app_id=#{appId}")
+    void removeApp(@Param("appId")Long appId);
 }

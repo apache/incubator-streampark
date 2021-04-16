@@ -73,6 +73,7 @@ export default {
     CLEAN: '/flink/app/clean',
     BACKUPS: '/flink/app/backups',
     ROLLBACK: '/flink/app/rollback',
+    REVOKE: '/flink/app/revoke',
     STARTLOG: '/flink/app/startlog'
   },
   Config: {
@@ -90,6 +91,7 @@ export default {
   SETTING: {
     GET: '/flink/setting/get',
     ALL: '/flink/setting/all',
+    CHECK: '/flink/setting/check',
     UPDATE: '/flink/setting/update'
   },
   User: {

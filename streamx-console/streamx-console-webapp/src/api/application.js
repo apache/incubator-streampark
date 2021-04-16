@@ -101,6 +101,10 @@ export function rollback (params) {
   return http.post(api.Application.ROLLBACK, params)
 }
 
+export function revoke (params) {
+  return http.post(api.Application.REVOKE, params)
+}
+
 export function startLog (params) {
   return http.post(api.Application.STARTLOG, params)
 }

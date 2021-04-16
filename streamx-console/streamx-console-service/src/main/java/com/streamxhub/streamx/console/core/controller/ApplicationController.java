@@ -108,8 +108,22 @@ public class ApplicationController extends BaseController {
     @PostMapping("deploy")
     @RequiresPermissions("app:deploy")
     public RestResponse deploy(Application app) {
-        app.setBackUp(true);
-        applicationService.deploy(app);
+        Application application = applicationService.getById(app.getId());
+        assert application != null;
+
+        application.setRestart(app.getRestart());
+        application.setSavePointed(app.getSavePointed());
+        application.setAllowNonRestored(app.getAllowNonRestored());
+        application.setBackUp(true);
+        application.setBackUpDescription(app.getBackUpDescription());
+        applicationService.deploy(application);
+        return RestResponse.create();
+    }
+
+    @PostMapping("revoke")
+    @RequiresPermissions("app:deploy")
+    public RestResponse revoke(Application app) throws Exception {
+        applicationService.revoke(app);
         return RestResponse.create();
     }
 
@@ -181,6 +195,12 @@ public class ApplicationController extends BaseController {
     public RestResponse startlog(ApplicationLog applicationLog, RestRequest request) {
         IPage<ApplicationLog> applicationList = applicationLogService.page(applicationLog, request);
         return RestResponse.create().data(applicationList);
+    }
+
+    @PostMapping("delete")
+    public RestResponse delete(Application app) throws ServiceException {
+        Boolean deleted = applicationService.delete(app);
+        return RestResponse.create().data(deleted);
     }
 
     @PostMapping("deletebak")

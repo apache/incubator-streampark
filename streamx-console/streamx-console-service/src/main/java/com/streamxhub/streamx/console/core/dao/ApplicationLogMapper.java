@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.dao;
 
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -36,4 +37,7 @@ public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
 
     @Select("SELECT * from t_flink_log where app_id=#{appId}")
     IPage<ApplicationLog> page(Page<Application> page, @Param("appId") Long appId);
+
+    @Delete("delete from t_flink_log where app_id=#{appId}")
+    void removeApp(@Param("appId")Long appId);
 }

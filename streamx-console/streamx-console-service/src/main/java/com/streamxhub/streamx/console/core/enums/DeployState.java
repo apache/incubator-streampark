@@ -28,39 +28,53 @@ import java.util.Arrays;
 public enum DeployState {
 
     /**
-     * 不需要重新发布
+     * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)
      */
-    NONE(0),
+    NEED_DEPLOY_DOWN_DEPENDENCY_FAILED(-1),
+    /**
+     * 完结
+     */
+    DONE(0),
+
+    /**
+     * 正在部署中
+     */
+    DEPLOYING(1),
 
     /**
      * 程序更新需要重新发布
      */
-    NEED_DEPLOY_AFTER_BUILD(1),
+    NEED_DEPLOY_AFTER_BUILD(2),
 
     /**
      * 依赖更新需要重新发布
      */
-    NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE(2),
+    NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE(3),
 
     /**
      * 配置文件更新需要重新启动
      */
-    NEED_RESTART_AFTER_CONF_UPDATE(3),
+    NEED_RESTART_AFTER_CONF_UPDATE(4),
 
     /**
      * sql更新需要重新启动
      */
-    NEED_RESTART_AFTER_SQL_UPDATE(4),
+    NEED_RESTART_AFTER_SQL_UPDATE(5),
 
     /**
      * 发布完成,需要重新启动.
      */
-    NEED_RESTART_AFTER_DEPLOY(5),
+    NEED_RESTART_AFTER_DEPLOY(6),
 
     /**
      * 回滚完成,需要重新启动
      */
-    NEED_RESTART_AFTER_ROLLBACK(6);
+    NEED_RESTART_AFTER_ROLLBACK(7),
+
+    /**
+     * 发布的任务已经撤销
+     */
+    REVOKED(8);
 
     int value;
 

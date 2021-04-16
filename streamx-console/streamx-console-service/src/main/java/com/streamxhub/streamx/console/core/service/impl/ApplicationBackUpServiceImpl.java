@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -40,6 +41,7 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hadoop.fs.Hdfs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -119,7 +121,8 @@ public class ApplicationBackUpServiceImpl
                         configService.setLatestOrEffective(true, backParam.getId(), backParam.getAppId());
                         // 如FlinkSQL任务则回滚sql语句和依赖
                         if (application.isFlinkSqlJob()) {
-                            flinkSqlService.setLatestOrEffective(true, backParam.getSqlId(), backParam.getAppId());
+                            //TODO rollback
+                            //flinkSqlService.setCandidateOrEffective(true,backParam.getAppId(), backParam.getSqlId());
                         }
                         //
                     } else {
@@ -163,6 +166,21 @@ public class ApplicationBackUpServiceImpl
                 e.printStackTrace();
             }
         });
+    }
+
+    @Override
+    public void revoke(Application application) {
+        ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
+        assert backup != null;
+        String path = backup.getPath();
+        HdfsUtils.movie(path, ConfigConst.APP_WORKSPACE());
+        removeById(backup.getId());
+    }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+        HdfsUtils.delete(ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString()));
     }
 
     @Override

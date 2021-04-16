@@ -11,6 +11,7 @@
             <svg-icon class="avatar" name="workspace" size="large" slot="avatar" v-if="item.key.match(/(.*)workspace(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key.match(/(.*)maven(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key.match(/(.*)address(.*)/g)"></svg-icon>
+            <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key.match(/env.flink(.*)/g)"></svg-icon>
             <span slot="title">
               {{ item.title }}
             </span>

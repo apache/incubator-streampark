@@ -320,6 +320,7 @@ fi
 MAIN="com.streamxhub.streamx.console.StreamXConsole"
 
 JAVA_OPTS="""
+-ea
 -server
 -Xms1024m
 -Xmx1024m

@@ -22,6 +22,8 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -31,6 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -66,6 +69,26 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         } catch (Exception e) {
             return false;
         }
+    }
+
+    @Override
+    public String getEnvFlinkHome() {
+        return settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+    }
+
+    @Override
+    public boolean checkWorkspace() {
+        String workspace = getStreamXWorkspace();
+        if (Utils.isEmpty(workspace)) {
+            return false;
+        }
+        File file = new File(workspace);
+        if(!file.exists()) {
+           if(!file.mkdirs()) {
+               return false;
+           }
+        }
+        return file.canRead() && file.canWrite();
     }
 
     @Override

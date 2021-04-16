@@ -29,6 +29,7 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
+import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -67,33 +68,33 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Override
     @Transactional(rollbackFor = {Exception.class})
-    public void create(FlinkSql flinkSql, Boolean latest) {
+    public void create(FlinkSql flinkSql, CandidateType type) {
         Integer version = this.baseMapper.getLastVersion(flinkSql.getAppId());
         flinkSql.setVersion(version == null ? 1 : version + 1);
         String sql = DeflaterUtils.zipString(flinkSql.getSql());
         flinkSql.setSql(sql);
         this.save(flinkSql);
-        this.setLatestOrEffective(latest, flinkSql.getId(), flinkSql.getAppId());
+        this.setCandidateOrEffective(type, flinkSql.getAppId(), flinkSql.getId());
     }
 
     @Override
-    public void setLatestOrEffective(Boolean latest, Long sqlId, Long appId) {
-        if (latest) {
-            this.setLatest(appId,sqlId);
+    public void setCandidateOrEffective(CandidateType candidateType, Long appId, Long sqlId) {
+        if (CandidateType.NONE.equals(candidateType)) {
+            this.toEffective(appId, sqlId);
         } else {
-            this.toEffective(appId,sqlId);
+            this.setCandidate(appId, sqlId, candidateType);
         }
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public void setLatest(Long appId,Long sqlId) {
+    public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getLatest, 0)
+        updateWrapper.set(FlinkSql::getCandidate, 0)
                 .eq(FlinkSql::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
-        updateWrapper.set(FlinkSql::getLatest, 1)
+        updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
                 .eq(FlinkSql::getId, sqlId);
         this.update(updateWrapper);
     }
@@ -118,13 +119,26 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     }
 
     @Override
-    public FlinkSql getLatest(Long appId) {
-        return baseMapper.getLatest(appId);
+    public FlinkSql getCandidate(Long appId, CandidateType candidateType) {
+        if (candidateType == null) {
+            return baseMapper.getCandidate(appId);
+        } else {
+            return baseMapper.getCandidateByType(appId, candidateType.get());
+        }
     }
 
     @Override
-    public void toEffective(Long appId,Long sqlId) {
-        this.baseMapper.clearLatest(appId);
+    public void toEffective(Long appId, Long sqlId) {
         effectiveService.saveOrUpdate(appId, EffectiveType.FLINKSQL, sqlId);
+    }
+
+    @Override
+    public void cleanCandidate(Long id) {
+        this.baseMapper.cleanCandidate(id);
+    }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
     }
 }

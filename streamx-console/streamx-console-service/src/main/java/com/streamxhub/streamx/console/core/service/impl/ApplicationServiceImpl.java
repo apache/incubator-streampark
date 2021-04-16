@@ -33,6 +33,7 @@ import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.base.utils.WebUtil;
@@ -58,6 +59,7 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -103,7 +105,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ApplicationLogService applicationLogService;
 
     @Autowired
+    private EffectiveService effectiveService;
+
+    @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private ApplicationContext context;
+
+    private String PROD_ENV_NAME = "prod";
 
     @Autowired
     private ServerUtil serverUtil;
@@ -206,7 +216,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean upload(MultipartFile file) throws IOException {
-        String uploadFile = Objects.requireNonNull(file.getOriginalFilename()).concat(APP_UPLOADS.concat("/"));
+        String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
         //1)检查文件是否存在,md5是否一致.
         if (HdfsUtils.exists(uploadFile)) {
             String md5 = DigestUtils.md5Hex(file.getInputStream());
@@ -241,11 +251,89 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.configService.toEffective(application.getId(), config.getId());
         }
         if (application.isFlinkSqlJob()) {
-            FlinkSql flinkSql = flinkSqlService.getLatest(application.getId());
+            FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), null);
             if (flinkSql != null) {
                 this.flinkSqlService.toEffective(application.getId(), flinkSql.getId());
+                //清除备选标记.
+                flinkSqlService.cleanCandidate(flinkSql.getId());
             }
         }
+    }
+
+    /**
+     * 撤销发布.
+     *
+     * @param appParma
+     */
+    @Override
+    public void revoke(Application appParma) throws Exception {
+        Application application = getById(appParma.getId());
+        assert application != null;
+
+        //1) 将已经发布到workspace的文件删除
+        HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+
+        //2) 将backup里的文件回滚到workspace
+        backUpService.revoke(application);
+
+        //3) 相关状态恢复
+        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.eq(Application::getId, application.getId());
+        if (application.isFlinkSqlJob()) {
+            updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+        } else {
+            updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_AFTER_BUILD.get());
+        }
+        if (!application.isRunning()) {
+            updateWrapper.set(Application::getState, FlinkAppState.REVOKED.getValue());
+        }
+        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+            baseMapper.update(application, updateWrapper);
+            return null;
+        });
+
+    }
+
+    @Override
+    @Transactional(rollbackFor = {Exception.class})
+    @RefreshCache
+    public Boolean delete(Application app) {
+        try {
+            //1) 删除flink sql
+            flinkSqlService.removeApp(app.getId());
+
+            //2) 删除 log
+            applicationLogService.removeApp(app.getId());
+
+            //3) 删除 config
+            configService.removeApp(app.getId());
+
+            //4) 删除 effective
+            effectiveService.removeApp(app.getId());
+
+            //以下涉及到hdfs文件的删除
+
+            //5) 删除 backup
+            backUpService.removeApp(app.getId());
+
+            //6) 删除savepoint
+            savePointService.removeApp(app.getId());
+
+            //7) 删除 app
+            removeApp(app.getId());
+
+            FlinkTrackingTask.stopTracking(app.getId());
+
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
+    }
+
+    private void removeApp(Long appId) {
+        removeById(appId);
+        HdfsUtils.delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
     }
 
     @Override
@@ -301,19 +389,25 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean create(Application appParam) {
         appParam.setUserId(serverUtil.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
+        appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
         boolean saved = save(appParam);
         if (saved) {
             if (appParam.isFlinkSqlJob()) {
                 FlinkSql flinkSql = new FlinkSql(appParam);
-                flinkSqlService.create(flinkSql, true);
+                flinkSqlService.create(flinkSql, CandidateType.NEW);
             }
             if (appParam.getConfig() != null) {
-                configService.create(appParam, true);
+                //TODO CONFIG
+                //configService.create(appParam, CandidateType.NEW);
             }
             appParam.setBackUp(false);
             appParam.setRestart(false);
+
+            assert appParam.getId() != null;
+
             deploy(appParam);
+
             return true;
         }
         return false;
@@ -327,7 +421,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             Application application = getById(appParam.getId());
             //从db中补全jobType到appParam
             appParam.setJobType(application.getJobType());
-
             application.setJobName(appParam.getJobName());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
@@ -335,7 +428,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setDescription(appParam.getDescription());
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
-            // Flink SQL job...
+            // Flink Sql job...
             if (application.isFlinkSqlJob()) {
                 updateFlinkSqlJob(application, appParam);
             } else {
@@ -361,144 +454,156 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * 1. flink Sql是否发生更新 <br/>
      * 2. 依赖是否发生更新<br/>
      * 3. 配置参数是否发生更新<br/>
+     * 版本修改的逻辑如下:<br/>
+     * 1)发布必须是手动<br/>
+     * 2) 可以基于任何一个版本进行修改<br>
+     * 3) 如果检查到"依赖","sql","配置文件"三项其中任何一项发生变化,修改保存之后会生成一个新的版本并且标记这个新的版本为"候选版本"<br>
+     * 4) "候选版本"必须要经过重新"发布","发布"的意思是让"候选版本"变成"正式版本" <br>
+     * 5) 在发布时如果发现候选版本和之前版本的依赖发生变化(仅限于依赖发生变化),则会上传候选版本的所有jar文件到工作空间 <br>
+     * 并且自动将上次的正式版本移动到backups区,在下次重启之后选版本会成为正式版本<br>
+     * 6) 注意"候选版本"只会有一个,即:如果已经有一个"候选版本"了,并且任务没有重新启动("候选版本"未变成正式版本) <br>
+     * 此时因为再次编辑又产生一个新的"候选版本",则上一个"候选版本"会自动删除
      *
      * @param application
      * @param appParam
      */
     private void updateFlinkSqlJob(Application application, Application appParam) {
-        // 1) 第一步获取当前生效的flinkSql
+        // 1) 第一步获取正式版本的flinkSql
         FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-
-        // 2) 判断版本是否发生变化
-        boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
 
         //要设置的目标FlinkSql记录
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
         targetFlinkSql.decode();
 
-        // 3) 判断 sql语句是否发生变化
-        boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSQL().trim());
+        // 2) 判断版本是否发生变化
+        boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
+
+        // 3) 判断sql语句是否发生变化
+        boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
 
         // 4) 判断 依赖是否发生变化
         Application.Dependency targetDependency = Application.Dependency.jsonToDependency(targetFlinkSql.getDependency());
         Application.Dependency newDependency = appParam.getDependencyObject();
-        boolean depsDifference = !targetDependency.eq(newDependency);
+        boolean depDifference = !targetDependency.eq(newDependency);
 
+        //依赖或sql发生了变更
+        if (sqlDifference || depDifference) {
+            // 5) 检查是否存在新增记录的候选版本
+            FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+            //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
+            if (newFlinkSql != null) {
+                //删除候选版本的所有记录
+                flinkSqlService.removeById(newFlinkSql.getId());
+            }
+            FlinkSql historyFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.HISTORY);
+            //将已经存在的但是被设置成候选版本的移除候选标记
+            if (historyFlinkSql != null) {
+                flinkSqlService.cleanCandidate(historyFlinkSql.getId());
+            }
+            FlinkSql sql = new FlinkSql(appParam);
+            CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
+            flinkSqlService.create(sql, type);
+        } else if (versionChanged) {
+            //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
+            CandidateType type = application.isRunning() ? CandidateType.HISTORY : CandidateType.NONE;
+            flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
+        }
+
+        // 6) 判断 Effective的依赖和当前提交的是否发生变化
+        // 判断当前正在生效版本的(sql|依赖)和正在提交的依赖是否发生变更
         Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
         boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
-
-        boolean difference = sqlDifference || depsDifference;
-
-        boolean targetLatest = depsDifference || application.isRunning();
-
-        boolean effectiveLatest = effectiveDepsDifference || application.isRunning();
-
-        if (difference) {
-            // 5) 检查是否存在latest版本的记录
-            FlinkSql latestFlinkSql = flinkSqlService.getLatest(application.getId());
-            boolean latestSqlDifference = false;
-            boolean latestDepsDifference = false;
-            if (latestFlinkSql != null) {
-                latestFlinkSql.decode();
-                latestSqlDifference = !latestFlinkSql.getSql().trim().equals(appParam.getFlinkSQL().trim());
-                Application.Dependency latestDependency = Application.Dependency.jsonToDependency(latestFlinkSql.getDependency());
-                latestDepsDifference = !latestDependency.eq(newDependency);
-            }
-
-            //不存在latest版本的记录
-            if (latestFlinkSql == null) {
-                FlinkSql sql = new FlinkSql(appParam);
-                flinkSqlService.create(sql, targetLatest);
-            } else {
-                //和latest不相同.
-                if (latestSqlDifference || latestDepsDifference) {
-                    FlinkSql sql = new FlinkSql(appParam);
-                    flinkSqlService.create(sql, effectiveLatest);
-                }
-            }
-        } else if (versionChanged) {
-            flinkSqlService.setLatestOrEffective(effectiveLatest, appParam.getSqlId(), appParam.getId());
-        }
-
-        // 6) 配置文件修改
-        this.configService.update(appParam, application.isRunning());
-
-        // 7) 判断 Effective的依赖和当前提交的是否发生变化
+        boolean effectiveSqlDifference = !effectiveFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
         if (effectiveDepsDifference) {
             application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
-            this.configService.update(appParam, true);
-        } else if (sqlDifference) {
+        } else if (effectiveSqlDifference) {
             application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
-            this.configService.update(appParam, targetLatest);
         }
+
+        // 7) 配置文件修改
+        this.configService.update(appParam, application.isRunning());
     }
 
 
     @Override
-    public void deploy(Application appParam) {
-        //executorService.submit(() -> {
-            Application application = getById(appParam.getId());
+    public void deploy(Application application) {
+        executorService.submit(() -> {
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                    application.setBackUpDescription(appParam.getBackUpDescription());
                     // 1) 需要重启的先停止服务
-                    if (appParam.getRestart()) {
-                        this.cancel(appParam);
-                    } else if (!application.isRunning()) {
-                        // 不需要重启的并且未正在运行的,则更改状态为发布中....
-                        baseMapper.update(application, new UpdateWrapper<Application>()
-                                .lambda()
-                                .eq(Application::getId, application.getId())
-                                .set(Application::getState, FlinkAppState.DEPLOYING.getValue())
-                                .set(Application::getOptionState, OptionState.DEPLOYING.getValue())
+                    if (application.getRestart() != null && application.getRestart()) {
+                        this.cancel(application);
+                    }
+                    FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                        baseMapper.update(
+                                application,
+                                new UpdateWrapper<Application>()
+                                        .lambda()
+                                        .eq(Application::getId, application.getId())
+                                        .set(Application::getDeploy, DeployState.DEPLOYING.get())
+
                         );
-                    }
-
-                    // 2) backup
-                    if (appParam.getBackUp()) {
-                        this.backUpService.backup(application);
-                    }
-
-                    // 3) deploying...
-                    File appHome = application.getAppHome();
-                    HdfsUtils.delete(appHome.getPath());
+                        return null;
+                    });
 
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
+                            // 2) backup
+                            if (application.getBackUp()) {
+                                this.backUpService.backup(application);
+                            }
+                            // 3) deploying...
+                            File appHome = application.getAppHome();
+                            HdfsUtils.delete(appHome.getPath());
                             File localJobHome = new File(application.getLocalAppBase(), application.getModule());
                             HdfsUtils.upload(localJobHome.getAbsolutePath(), workspace, false, true);
                             HdfsUtils.movie(workspace.concat("/").concat(application.getModule()), appHome.getPath());
                         } else {
                             log.info("FlinkSqlJob deploying...");
-                            FlinkSql flinkSql = flinkSqlService.getLatest(application.getId());
+                            FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
+                            assert flinkSql != null;
                             application.setDependency(flinkSql.getDependency());
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
                         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
-                        if (appParam.getRestart()) {
+                        if (application.getRestart() != null && application.getRestart()) {
                             // 重新启动.
-                            start(appParam);
+                            start(application);
                             // 将"需要重新发布"状态清空...
-                            updateWrapper.set(Application::getDeploy, DeployState.NONE.get());
+                            updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                         } else {
                             //正在运行的任务...
                             if (application.isRunning()) {
                                 updateWrapper.set(Application::getDeploy, DeployState.NEED_RESTART_AFTER_DEPLOY.get());
                             } else {
                                 updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                                updateWrapper.set(Application::getDeploy, DeployState.NONE.get());
+                                updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                                 updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
                             }
                         }
-                        baseMapper.update(application, updateWrapper);
 
-                        //如果当前任务未运行,则直接将"lastst"的设置为Effective
-                        if (!application.isRunning()) {
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(application, updateWrapper);
+                            return null;
+                        });
+
+                        //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
+                        FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+                        if (!application.isRunning() || flinkSql == null) {
                             toEffective(application);
                         }
+                    } catch (ServiceException e) {
+                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                        updateWrapper.eq(Application::getId, application.getId());
+                        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
+                            baseMapper.update(application, updateWrapper);
+                            return null;
+                        });
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -507,11 +612,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        //});
+        });
     }
 
-    @SneakyThrows
-    private void downloadDependency(Application application) {
+    private void downloadDependency(Application application) throws Exception {
         //1) init.
         File jobLocalHome = application.getLocalFlinkSqlBase();
         if (jobLocalHome.exists()) {
@@ -550,62 +654,77 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String info = String.format("%s:%s,", e.getGroupId(), e.getArtifactId());
                 builder.append(info);
             }));
+
             String exclusions = builder.deleteCharAt(builder.length() - 1).toString();
 
             Long id = application.getId();
             StringBuilder logBuilder = this.tailBuffer.getOrDefault(id, new StringBuilder());
-            Collection<String> dependencyJars = JavaConversions.asJavaCollection(
-                    DependencyUtils.resolveMavenDependencies(
-                            exclusions,
-                            packages,
-                            null,
-                            null,
-                            null,
-                            out -> {
-                                if (tailOutMap.containsKey(id)) {
-                                    if (tailBeginning.containsKey(id)) {
-                                        tailBeginning.remove(id);
-                                        Arrays.stream(logBuilder.toString().split("\n"))
-                                                .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
-                                    } else {
-                                        simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
-                                    }
-                                }
-                                logBuilder.append(out).append("\n");
-                            }
-                    )
-            );
 
-            tailOutMap.remove(id);
-            tailBeginning.remove(id);
-            tailBuffer.remove(id);
+            Collection<String> dependencyJars;
+            try {
+                dependencyJars = JavaConversions.asJavaCollection(DependencyUtils.resolveMavenDependencies(
+                        exclusions,
+                        packages,
+                        null,
+                        null,
+                        null,
+                        out -> {
+                            if (tailOutMap.containsKey(id)) {
+                                if (tailBeginning.containsKey(id)) {
+                                    tailBeginning.remove(id);
+                                    Arrays.stream(logBuilder.toString().split("\n"))
+                                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/mvn", x));
+                                } else {
+                                    simpMessageSendingOperations.convertAndSend("/resp/mvn", out);
+                                }
+                            }
+                            logBuilder.append(out).append("\n");
+                        }
+                ));
+            } catch (Exception e) {
+                simpMessageSendingOperations.convertAndSend("/resp/mvn", e.getMessage());
+                throw new ServiceException("downloadDependency error: " + e.getMessage());
+            } finally {
+                tailOutMap.remove(id);
+                tailBeginning.remove(id);
+                tailBuffer.remove(id);
+            }
+
+            // 2) backup
+            if (application.getBackUp() != null && application.getBackUp()) {
+                this.backUpService.backup(application);
+            }
 
             for (String x : dependencyJars) {
                 File jar = new File(x);
                 FileUtils.copyFileToDirectory(jar, lib);
             }
+
+            // 3) deploying...
+            File appHome = application.getAppHome();
+            HdfsUtils.delete(appHome.getPath());
+
+            //3) upload jar by pomJar
+            HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+
+            HdfsUtils.upload(jobLocalHome.getAbsolutePath(), workspace, false, true);
+
+            //4) upload jar by uploadJar
+            List<String> jars = application.getDependencyObject().getJar();
+            if (Utils.notEmpty(jars)) {
+                jars.forEach(jar -> {
+                    String src = APP_UPLOADS.concat("/").concat(jar);
+                    HdfsUtils.copyHdfs(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
+                });
+            }
+
         }
-
-        //3) upload jar by pomJar
-        HdfsUtils.delete(application.getAppHome().getAbsolutePath());
-
-        HdfsUtils.upload(jobLocalHome.getAbsolutePath(), workspace, false, true);
-
-        //4) upload jar by uploadJar
-        List<String> jars = application.getDependencyObject().getJar();
-        if (Utils.notEmpty(jars)) {
-            jars.forEach(jar -> {
-                String src = APP_UPLOADS.concat("/").concat(jar);
-                HdfsUtils.copyHdfs(src, application.getAppHome().getAbsolutePath().concat("/lib"), false, true);
-            });
-        }
-
     }
 
     @Override
     @RefreshCache
     public void clean(Application appParam) {
-        appParam.setDeploy(DeployState.NONE.get());
+        appParam.setDeploy(DeployState.DONE.get());
         this.baseMapper.updateDeploy(appParam);
     }
 
@@ -719,6 +838,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean start(Application appParam) throws Exception {
+
+        checkFlinkEnv();
+
         final Application application = getById(appParam.getId());
         assert application != null;
         //1) 真正执行启动相关的操作..
@@ -734,6 +856,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ExecutionMode executionMode = ExecutionMode.of(application.getExecutionMode());
 
         if (application.isCustomCodeJob()) {
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 switch (application.getApplicationType()) {
                     case STREAMX_FLINK:
@@ -770,6 +893,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 throw new UnsupportedOperationException("Unsupported..." + executionMode);
             }
         } else if (application.isFlinkSqlJob()) {
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
+            assert flinkSql != null;
+            this.flinkSqlService.cleanCandidate(flinkSql.getId());
+
             //1) dist_userJar
             File localPlugins = new File(WebUtil.getAppDir("plugins"));
             assert localPlugins.exists();
@@ -783,6 +910,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String sqlDistJar = jars.get(0);
             //2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
+            assert executionMode != null;
             if (executionMode.equals(ExecutionMode.APPLICATION)) {
                 //3) plugin
                 String pluginPath = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_PLUGINS());
@@ -838,7 +966,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
+
         SubmitRequest submitInfo = new SubmitRequest(
+                settingService.getEnvFlinkHome(),
                 flinkUserJar,
                 DevelopmentMode.of(application.getJobType()),
                 ExecutionMode.of(application.getExecutionMode()),
@@ -898,6 +1028,27 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             updateById(app);
             FlinkTrackingTask.stopTracking(appParam.getId());
             return false;
+        }
+    }
+
+    private void checkFlinkEnv() {
+        String profiles = context.getEnvironment().getActiveProfiles()[0];
+        if (profiles.equals(PROD_ENV_NAME)) {
+            String flinkLocalHome = settingService.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : settingService.getEnvFlinkHome();
+            if (flinkLocalHome == null) {
+                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+            }
+            String appFlink = ConfigConst.APP_FLINK();
+            if (!HdfsUtils.exists(appFlink)) {
+                log.info("mkdir {} starting ...", appFlink);
+                HdfsUtils.mkdirs(appFlink);
+            }
+            String flinkName = new File(flinkLocalHome).getName();
+            String flinkHome = appFlink.concat("/").concat(flinkName);
+            if (!HdfsUtils.exists(flinkHome)) {
+                log.info("{} is not exists,upload beginning....", flinkHome);
+                HdfsUtils.upload(flinkLocalHome, flinkHome, false, false);
+            }
         }
     }
 

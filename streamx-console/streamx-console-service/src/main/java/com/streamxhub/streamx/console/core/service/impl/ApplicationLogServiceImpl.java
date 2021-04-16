@@ -51,4 +51,9 @@ public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper,
         SortUtil.handlePageSort(request, page, "start_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, applicationLog.getAppId());
     }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+    }
 }

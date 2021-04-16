@@ -55,7 +55,6 @@ public class JWTUtil {
             Algorithm algorithm = Algorithm.HMAC256(secret);
             JWTVerifier verifier = JWT.require(algorithm).withClaim("username", username).build();
             verifier.verify(token);
-            log.info("token is valid");
             return true;
         } catch (Exception e) {
             log.info("token is invalid{}", e.getMessage());

@@ -4,6 +4,11 @@
     :bordered="false"
     class="nodebook-submit"
     :style="{ height: '100%' }">
+    <br>
+    <a-alert
+      show-icon
+      message="this is Experimental Features,and only supported ExecutionEnvironment/StreamExecutionEnvironment "
+      type="warning"/><br>
     <a-row
       :gutter="24"
       type="flex"
@@ -125,14 +130,33 @@ export default {
       woldCount: '\n%flink.repl.out=true\n' +
         '%flink.yarn.queue=default\n' +
         '%flink.execution.mode=yarn\n' +
-        '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
-        'env.fromElements("hello world", "hello flink", "hello hadoop")\n' +
-        '.flatMap(_.split("\\\\s"))\n' +
-        '.map((_, 1))\n' +
-        '.keyBy(0)\n' +
-        '.sum(1)\n' +
-        '.print()\n\n' +
-        'env.execute(\"StreamX NoteBook Job\")\n'
+        '%flink.yarn.appName=Socket Window WordCount with StreamX NoteBook\n\n' +
+        '// the host and the port to connect to\n' +
+        'val hostname = "localhost"\n' +
+        'val port = 9999\n' +
+        '\n' +
+        '// get the execution environment\n' +
+        'val env = StreamExecutionEnvironment.getExecutionEnvironment\n' +
+        '\n' +
+        'env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)\n' +
+        '\n' +
+        '// get input data by connecting to the socket\n' +
+        'val text = env.socketTextStream(hostname, port, "\\n")\n' +
+        '\n' +
+        '// parse the data, group it, window it, and aggregate the counts\n' +
+        'val windowCounts = text.flatMap(new FlatMapFunction[String,(String,Long)] {\n' +
+        '    override def flatMap(value: String, out: Collector[(String, Long)]): Unit = {\n' +
+        '       for (word <- value.split("\\\\s")) {\n' +
+        '           out.collect(word,1L)\n' +
+        '       }\n' +
+        '    }\n' +
+        '}).keyBy(0).timeWindow(Time.seconds(5)).reduce(new ReduceFunction[(String,Long)]() {\n' +
+        '    override def reduce(a: (String, Long), b: (String, Long)): (String, Long) = (a._1,a._2 + b._2)\n' +
+        '})\n' +
+        '\n' +
+        '// print the results with a single thread, rather than in parallel\n' +
+        'windowCounts.print.setParallelism(1)\n' +
+        'env.execute("Socket Window WordCount with StreamX NoteBook")\n'
     }
   },
   mounted() {
@@ -176,14 +200,21 @@ export default {
   methods: {
     handleReplSubmit() {
       const code = this.editor.getValue()
-      console.log(code)
-      submit({
-        env: 'senv',
-        text: code
-      }).then((resp) => {
-        console.log(resp.data)
+      this.$swal.fire({
+        icon: 'success',
+        title: 'this features is experimental\ncurrent job is starting...',
+        showConfirmButton: false,
+        timer: 2000
+      }).then((r)=> {
+        submit({
+          env: 'senv',
+          text: code
+        }).then((resp) => {
+          console.log(resp.data)
+        })
       })
     },
+
     handleReadmd() {
       get({
         name: 'repl'

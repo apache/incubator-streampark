@@ -83,6 +83,24 @@
         class="status-processing-cancelling">SAVEPOINT</a-tag>
     </div>
   </span>
+  <span v-else-if="option === 'deploy'" class="app_state">
+    <a-tag
+      v-if="data['deploy'] === -1"
+      color="#f5222d">FAILED</a-tag>
+    <a-tag
+      v-if="data['deploy'] === 0"
+      color="#52c41a">DONE</a-tag>
+    <a-tag
+      v-if="data['deploy'] === 1"
+      class="status-processing-deploying"
+      color="#52c41a">DEPLOYING</a-tag>
+    <a-tag
+      v-if="data['deploy'] === 2 || data['deploy'] === 3"
+      color="#fa8c16">NEED DEPLOY</a-tag>
+    <a-tag
+      v-if="data['deploy'] > 3"
+      color="#fa8c16">NEED RESTART</a-tag>
+  </span>
   <span v-else>
     <div
       class="task-tag"

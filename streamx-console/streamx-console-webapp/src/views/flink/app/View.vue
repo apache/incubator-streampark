@@ -324,52 +324,38 @@
                 </template>
               </template>
               <template v-else>
-                <a-badge
-                  dot
-                  :color="record.deploy <= 2 ? 'red' : 'blue'"
-                  :title="handleDeployTitle(record.deploy)">
-                  <template v-if="text.length>25">
-                    <a-tooltip placement="top">
-                      <template slot="title">
-                        {{ text }}
-                      </template>
-                      <template
-                        v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                        <mark
-                          v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                          :key="i"
-                          class="highlight">
-                          {{ fragment }}
-                        </mark>
-                        <template v-else>
-                          {{ fragment }}
-                        </template>
-                      </template>
-                      ...
-                    </a-tooltip>
-                  </template>
-                  <template v-else>
-                    v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                    <mark
-                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                      :key="i"
-                      class="highlight">
-                      {{ fragment }}
-                    </mark>
-                    <template v-else>
-                      {{ fragment }}
+                <template v-if="text.length>25">
+                  <a-tooltip placement="top">
+                    <template slot="title">
+                      {{ text }}
                     </template>
+                    <template
+                      v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      <mark
+                        v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                        :key="i"
+                        class="highlight">
+                        {{ fragment }}
+                      </mark>
+                      <template v-else>
+                        {{ fragment }}
+                      </template>
+                    </template>
+                    ...
+                  </a-tooltip>
+                </template>
+                <template v-else>
+                  v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  <mark
+                    v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                    :key="i"
+                    class="highlight">
+                    {{ fragment }}
+                  </mark>
+                  <template v-else>
+                    {{ fragment }}
                   </template>
-                </a-badge>
-                <a-badge
-                  class="close-deploy"
-                  @click.stop="handleCleanDeploy(record)"
-                  v-permit="'app:clean'">
-                  <a-icon
-                    slot="count"
-                    type="close"
-                    style="color: #333"/>
-                </a-badge>
+                </template>
               </template>
             </span>
           </template>
@@ -387,25 +373,11 @@
                 </ellipsis>
               </template>
               <template v-else>
-                <a-badge
-                  dot
-                  :color="record.deploy <= 2 ? 'red' : 'blue'"
-                  :title="handleDeployTitle(record.deploy)">
-                  <ellipsis
-                    :length="45"
-                    tooltip>
-                    {{ text }}
-                  </ellipsis>
-                </a-badge>
-                <a-badge
-                  class="close-deploy"
-                  @click.stop="handleCleanDeploy(record)"
-                  v-permit="'app:clean'">
-                  <a-icon
-                    slot="count"
-                    type="close"
-                    style="color: #333"/>
-                </a-badge>
+                <ellipsis
+                  :length="45"
+                  tooltip>
+                  {{ text }}
+                </ellipsis>
               </template>
             </span>
             <span v-else>
@@ -459,6 +431,15 @@
         </template>
 
         <template
+          slot="deployState"
+          slot-scope="text, record">
+          <State
+            option="deploy"
+            :title="handleDeployTitle(record.deploy)"
+            :data="record"/>
+        </template>
+
+        <template
           slot="customOperation">
           Operation
           <a-button
@@ -485,11 +466,13 @@
             @click="handleMapping(record)"/>
           <svg-icon
             name="deploy"
-            v-show="(record.deploy === 1 || record.deploy === 2) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
+            v-show="(record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
             v-permit="'app:deploy'"
             class="pointer"
             @click.native="handleDeploy(record)"/>
+          <!--已经发布完的项目,不允许再次编辑-->
           <a-icon
+            v-if="record.deploy !== 6"
             v-permit="'app:update'"
             type="setting"
             theme="twoTone"
@@ -497,7 +480,14 @@
             @click="handleEdit(record)"
             title="Update application"/>
           <a-icon
-            v-if="record.state === 1"
+            v-if="record.deploy === 6"
+            v-permit="'app:update'"
+            type="rollback"
+            style="color:#4a9ff5;cursor: pointer"
+            @click="handleRevoke(record)"
+            title="Revoke Deploy"/>
+          <a-icon
+            v-if="record.state === 1 || record['deploy'] === 1"
             type="sync"
             style="color:#4a9ff5"
             spin
@@ -530,6 +520,20 @@
             style="color:#4a9ff5"
             @click="handleFlameGraph(record)"
             title="Detail"/>
+
+          <template v-if="handleCanDelete(record)">
+            <a-popconfirm
+              title="Are you sure delete this job ?"
+              cancel-text="No"
+              ok-text="Yes"
+              @confirm="handleDelete(record)">
+              <a-icon
+                type="delete"
+                theme="twoTone"
+                two-tone-color="#4a9ff5" />
+            </a-popconfirm>
+          </template>
+
         </template>
 
       </a-table>
@@ -879,7 +883,7 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {list, dashboard, cancel, deploy, mapping, start, clean, yarn} from '@api/application'
+import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
 import {lastest, history} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {Terminal} from 'xterm'
@@ -888,6 +892,7 @@ import SockJS from 'sockjs-client'
 import {baseUrl} from '@/api/baseUrl'
 import Stomp from 'webstomp-client'
 import SvgIcon from '@/components/SvgIcon'
+import {check} from "@/api/setting"
 
 export default {
   components: {Ellipsis, State, SvgIcon},
@@ -1033,7 +1038,7 @@ export default {
         scopedSlots: {customRender: 'task'},
         width: 120
       }, {
-        title: 'Status',
+        title: 'Run Status',
         dataIndex: 'state',
         width: 120,
         scopedSlots: {customRender: 'state'},
@@ -1060,6 +1065,11 @@ export default {
         },
         sorter: (a, b) => a.state - b.state,
         sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
+      }, {
+        title: 'Deploy Status',
+        dataIndex: 'deploy',
+        width: 130,
+        scopedSlots: {customRender: 'deployState'}
       }, {
         dataIndex: 'operation',
         key: 'operation',
@@ -1111,17 +1121,21 @@ export default {
 
     handleDeployTitle (deploy) {
       switch (deploy) {
+        case -1:
+          return 'dependency changed,but download dependency failed'
         case 1:
-          return 'application is updated,need deploy'
+          return 'deploying'
         case 2:
-          return 'dependency is updated,need deploy'
+          return 'application is updated,need deploy'
         case 3:
-          return 'config is updated,need restart'
+          return 'dependency is updated,need deploy'
         case 4:
-          return 'flink sql is updated,need restart'
+          return 'config is updated,need restart'
         case 5:
-          return 'application is deployed,need restart'
+          return 'flink sql is updated,need restart'
         case 6:
+          return 'application is deployed,need restart'
+        case 7:
           return 'application is rollbacked,need restart'
       }
     },
@@ -1216,7 +1230,8 @@ export default {
         app.state === 11 ||
         app.state === 12 ||
         app.state === 13 ||
-        app.state === 15 || false
+        app.state === 15 ||
+        app.deploy === 0 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1365,6 +1380,31 @@ export default {
       )
     },
 
+    handleCanDelete (app) {
+      return app.state === 0 ||
+        app.state === 2 ||
+        app.state === 9 ||
+        app.state === 11 ||
+        app.state === 12 ||
+        app.state === 15 ||
+        app.state === 19 || false
+    },
+
+    handleDelete(app) {
+      remove({
+        id: app.id
+      }).then((resp)=>{
+        this.$swal.fire({
+          icon: 'success',
+          title: 'delete successful',
+          showConfirmButton: false,
+          timer: 2000
+        }).then((result) => {
+
+        })
+      })
+    },
+
     handleSearch(selectedKeys, confirm, dataIndex) {
       confirm()
       this.searchText = selectedKeys[0]
@@ -1495,7 +1535,18 @@ export default {
     },
 
     handleAdd() {
-      this.$router.push({'path': '/flink/app/add'})
+      check().then((resp) => {
+        const success = resp.data == true || resp.data == 'true'
+        if (success) {
+          this.$router.push({'path': '/flink/app/add'})
+        } else {
+          this.$swal.fire(
+            'Failed',
+            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
+            'error'
+          )
+        }
+      })
     },
 
     handleEdit(app) {
@@ -1505,6 +1556,14 @@ export default {
       } else {
         this.$router.push({'path': '/flink/app/edit_flink'})
       }
+    },
+
+    handleRevoke (app) {
+      revoke({
+        id: app.id
+      }).then((resp)=>{
+
+      })
     },
 
     handleCleanDeploy(app) {

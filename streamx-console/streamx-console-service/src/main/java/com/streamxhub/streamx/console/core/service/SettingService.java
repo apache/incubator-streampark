@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Setting;
 
 /**
@@ -31,6 +32,7 @@ public interface SettingService extends IService<Setting> {
     String KEY_MAVEN_REPOSITORY = "maven.central.repository";
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
     String KEY_STREAMX_WORKSPACE = "streamx.console.workspace";
+    String KEY_ENV_FLINK_HOME = "env.flink.home";
 
     /**
      * @param key
@@ -49,5 +51,9 @@ public interface SettingService extends IService<Setting> {
     String getStreamXAddress();
 
     String getMavenRepository();
+
+    String getEnvFlinkHome();
+
+    boolean checkWorkspace();
 
 }

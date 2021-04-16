@@ -66,4 +66,10 @@ public class SettingController extends BaseController {
         return RestResponse.create().data(updated);
     }
 
+    @PostMapping("check")
+    public RestResponse check() throws Exception {
+        boolean passed = settingService.checkWorkspace();
+        return RestResponse.create().data(passed);
+    }
+
 }

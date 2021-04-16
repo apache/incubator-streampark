@@ -43,7 +43,7 @@ object SQLCommandUtil extends Logger {
 
   private[this] val WITH_REGEXP = "(WITH|with)\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
 
-  private[this] lazy val sqlParserConfig = {
+  private[this] lazy val parser = {
     val tableConfig = StreamTableEnvironment.create(
       StreamExecutionEnvironment.getExecutionEnvironment,
       EnvironmentSettings
@@ -53,7 +53,7 @@ object SQLCommandUtil extends Logger {
         .build
     ).getConfig
 
-    TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
+    val sqlParserConfig = TableConfigUtils.getCalciteConfig(tableConfig).getSqlParserConfig.getOrElse {
       val conformance = tableConfig.getSqlDialect match {
         case HIVE => FlinkSqlConformance.HIVE
         case DEFAULT => FlinkSqlConformance.DEFAULT
@@ -70,6 +70,7 @@ object SQLCommandUtil extends Logger {
         .withLex(Lex.JAVA)
         .withIdentifierMaxLength(256)
     }
+    new CalciteParser(sqlParserConfig)
   }
 
   def verifySQL(sql: String): SQLError = {
@@ -87,7 +88,7 @@ object SQLCommandUtil extends Logger {
           array.last
         )
     }
-    val parser = new CalciteParser(sqlParserConfig)
+
     for (call <- sqlCommands) {
       val sql = call.operands.head
       import com.streamxhub.streamx.flink.common.util.SQLCommand._

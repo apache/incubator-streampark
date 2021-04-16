@@ -18,20 +18,38 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.service;
+package com.streamxhub.streamx.console.core.enums;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.core.entity.ApplicationLog;
+import java.util.Arrays;
 
-/**
- * @author benjobs
- */
-public interface ApplicationLogService extends IService<ApplicationLog> {
+public enum CandidateType {
 
-    IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request);
+    /**
+     * 非候选版本
+     */
+    NONE(0),
 
-    void removeApp(Long appId);
+    /**
+     * 新增的记录成为候选版本
+     */
+    NEW(1),
 
+    /**
+     * 历史记录成为候选版本
+     */
+    HISTORY(2);
+
+    int value;
+
+    CandidateType(int value) {
+        this.value = value;
+    }
+
+    public int get() {
+        return this.value;
+    }
+
+    public static CandidateType of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

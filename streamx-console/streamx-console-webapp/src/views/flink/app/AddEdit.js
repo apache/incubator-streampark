@@ -54,19 +54,19 @@ const globalOption = {
 
 export function initEditor(vue) {
   const controller = vue.controller
-  controller.flinkSQL.value = arguments[1] || controller.flinkSQL.defaultValue
+  controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
   const option = Object.assign({},globalOption)
-  option.value = controller.flinkSQL.value
+  option.value = controller.flinkSql.value
   option.minimap = { enabled: false }
-  controller.editor.flinkSQL = monaco.editor.create(document.querySelector('#flink-sql'), option)
+  controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
   vue.$nextTick(() => {
     const bigScreen = document.querySelector('.big-screen')
     document.querySelector('#flink-sql>.monaco-editor').appendChild(bigScreen)
   })
 
   //输入事件触发...
-  controller.editor.flinkSQL.onDidChangeModelContent(() => {
-    controller.flinkSQL.value = controller.editor.flinkSQL.getValue()
+  controller.editor.flinkSql.onDidChangeModelContent(() => {
+    controller.flinkSql.value = controller.editor.flinkSql.getValue()
     verifySQL(vue)
   })
 
@@ -90,31 +90,31 @@ export function verifySQL(vue) {
   const controller = vue.controller
   const callback = arguments[1] || function(r) {
   }
-  verify({ 'sql': controller.flinkSQL.value }).then((resp) => {
+  verify({ 'sql': controller.flinkSql.value }).then((resp) => {
     const success = resp.data == true || resp.data == 'true'
     if (success) {
-      controller.flinkSQL.success = true
-      controller.flinkSQL.errorMsg = null
-      controller.flinkSQL.errorSQL = null
-      controller.flinkSQL.errorStart = null
-      controller.flinkSQL.errorEnd = null
+      controller.flinkSql.success = true
+      controller.flinkSql.errorMsg = null
+      controller.flinkSql.errorSQL = null
+      controller.flinkSql.errorStart = null
+      controller.flinkSql.errorEnd = null
       syntaxError(vue)
     } else {
-      controller.flinkSQL.success = false
-      controller.flinkSQL.errorLine = resp.line
-      controller.flinkSQL.errorColumn = resp.column
-      controller.flinkSQL.errorSQL = resp.sql
-      controller.flinkSQL.errorStart = resp.start
-      controller.flinkSQL.errorEnd = resp.end
+      controller.flinkSql.success = false
+      controller.flinkSql.errorLine = resp.line
+      controller.flinkSql.errorColumn = resp.column
+      controller.flinkSql.errorSQL = resp.sql
+      controller.flinkSql.errorStart = resp.start
+      controller.flinkSql.errorEnd = resp.end
       switch (resp.type) {
         case 4:
-          controller.flinkSQL.errorMsg = 'Unsupported sql'
+          controller.flinkSql.errorMsg = 'Unsupported sql'
           break
         case 5:
-          controller.flinkSQL.errorMsg = 'SQL is not endWith \';\''
+          controller.flinkSql.errorMsg = 'SQL is not endWith \';\''
           break
         default:
-          controller.flinkSQL.errorMsg = resp.message
+          controller.flinkSql.errorMsg = resp.message
           break
       }
       syntaxError(vue)
@@ -130,14 +130,14 @@ export function syntaxError(vue) {
   const controller = vue.controller
   const editor = controller.visiable.bigScreen
     ? controller.editor.bigScreen
-    : controller.editor.flinkSQL
+    : controller.editor.flinkSql
 
   const model = editor.getModel()
   monaco.editor.setModelMarkers(model, 'sql', [])
-  if (!controller.flinkSQL.success) {
+  if (!controller.flinkSql.success) {
     try {
-      const startFind = model.findMatches(controller.flinkSQL.errorStart)
-      const endFind = model.findMatches(controller.flinkSQL.errorEnd)
+      const startFind = model.findMatches(controller.flinkSql.errorStart)
+      const endFind = model.findMatches(controller.flinkSql.errorEnd)
       const startLineNumber = startFind[0].range.startLineNumber
       let endLineNumber = startLineNumber
       for (let i = 0; i < endFind.length; i++) {
@@ -152,7 +152,7 @@ export function syntaxError(vue) {
           startLineNumber: startLineNumber,
           endLineNumber: endLineNumber + 1,
           severity: monaco.MarkerSeverity.Error,
-          message: controller.flinkSQL.errorMsg
+          message: controller.flinkSql.errorMsg
         }]
       )
     } catch (e) {
@@ -165,7 +165,7 @@ export function bigScreenOpen(vue) {
   controller.visiable.bigScreen = true
   const option = Object.assign({},globalOption)
   vue.$nextTick(() => {
-    option.value = controller.flinkSQL.value
+    option.value = controller.flinkSql.value
     option.minimap = { enabled: true }
     option.language = 'sql'
     const elem = document.querySelector('#big-sql')
@@ -176,12 +176,12 @@ export function bigScreenOpen(vue) {
     controller.editor.bigScreen.onDidChangeModelContent((event) => {
       const value = controller.editor.bigScreen.getValue()
       if (value != '') {
-        controller.flinkSQL.value = value
-        controller.editor.flinkSQL.getModel().setValue(value)
+        controller.flinkSql.value = value
+        controller.editor.flinkSql.getModel().setValue(value)
         verifySQL(vue)
       }
     })
-    if (controller.flinkSQL.value != null && controller.flinkSQL.value.trim() != '') {
+    if (controller.flinkSql.value != null && controller.flinkSql.value.trim() != '') {
       verifySQL(vue)
     }
   })

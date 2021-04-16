@@ -125,7 +125,7 @@ module.exports = {
     port: 10000,
     proxy: {
       '/api/*': {
-        target: 'http://localhost:10001',
+        target: 'http://test-hadoop-1:10000',
         ws: false,
         changeOrigin: true,
         pathRewrite: { '^/api': '' }

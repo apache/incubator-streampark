@@ -74,4 +74,9 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             );
         }
     }
+
+    @Override
+    public void removeApp(Long appId) {
+        baseMapper.removeApp(appId);
+    }
 }

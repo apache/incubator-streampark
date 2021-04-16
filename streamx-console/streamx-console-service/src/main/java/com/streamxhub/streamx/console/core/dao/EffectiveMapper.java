@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.streamxhub.streamx.console.core.entity.Effective;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
@@ -35,4 +36,7 @@ public interface EffectiveMapper extends BaseMapper<Effective> {
 
     @Select("select * from t_flink_effective where app_id=#{appId} and target_type=#{type}")
     Effective get(@Param("appId") Long appId, @Param("type") int type);
+
+    @Delete("delete from t_flink_effective where app_id=#{appId}")
+    void removeApp(@Param("appId")Long appId);
 }
