@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
+import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
@@ -66,7 +67,7 @@ trait FlinkSubmitTrait extends Logger {
       flinkHdfsHome,
       flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
       flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
-      flinkHdfsJars = new Path(s"$flinkHdfsHome/jars"),
+      flinkHdfsJars = new Path(APP_JARS),
       streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
       flinkYaml = HdfsUtils.read(s"$flinkHdfsHome/conf/flink-conf.yaml"),
       flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
