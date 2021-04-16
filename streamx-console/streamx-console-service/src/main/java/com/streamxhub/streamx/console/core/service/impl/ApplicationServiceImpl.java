@@ -322,6 +322,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //7) 删除 app
             removeApp(app.getId());
 
+            FlinkTrackingTask.stopTracking(app.getId());
+
             return true;
         } catch (Exception e) {
             e.printStackTrace();
