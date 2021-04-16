@@ -271,7 +271,18 @@ export default {
     },
 
     handleAdd () {
-      this.$router.push({ 'path': '/flink/project/add' })
+      check().then((resp) => {
+        const success = resp.data == true || resp.data == 'true'
+        if (success) {
+          this.$router.push({ 'path': '/flink/project/add' })
+        } else {
+          this.$swal.fire(
+            'Failed',
+            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
+            'error'
+          )
+        }
+      })
     },
 
     handleSeeLog (project) {
