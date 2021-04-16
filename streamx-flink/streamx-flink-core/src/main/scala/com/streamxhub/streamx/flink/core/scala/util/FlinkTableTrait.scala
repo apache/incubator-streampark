@@ -21,9 +21,10 @@
 package com.streamxhub.streamx.flink.core.scala.util
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_SQL
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.common.util.SQLCommand._
-import com.streamxhub.streamx.flink.common.util.SQLCommandUtil
+import com.streamxhub.streamx.flink.common.util.{SQLCommandUtil, SQLError}
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.ConfigOption
 import org.apache.flink.table.api.TableEnvironment
@@ -70,7 +71,8 @@ trait FlinkTableTrait extends Logger {
 
   private[core] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: Unit => String = null): Unit = {
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
-    require(flinkSql != null && flinkSql.nonEmpty)
+    val sqlEmptyError = SQLError(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    require(flinkSql != null && flinkSql.trim.nonEmpty,sqlEmptyError)
 
     def callback(r: String): Unit = {
       callbackFunc match {
