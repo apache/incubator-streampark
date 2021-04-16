@@ -69,8 +69,8 @@ trait FlinkTableTrait extends Logger {
   }
 
   private[core] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: Unit => String = null): Unit = {
-    val flinkSql: String = if (sql == null) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
-    val statementSet = context.createStatementSet()
+    val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
+    require(flinkSql != null && flinkSql.nonEmpty)
 
     def callback(r: String): Unit = {
       callbackFunc match {
@@ -78,6 +78,9 @@ trait FlinkTableTrait extends Logger {
         case x => x(r)
       }
     }
+
+    val statementSet = context.createStatementSet()
+
     //TODO registerHiveCatalog
     SQLCommandUtil.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
@@ -152,7 +155,7 @@ trait FlinkTableTrait extends Logger {
       }
     })
 
-    logInfo(s"tableSQL: $sql")
+    logInfo(s"flinkSql: $flinkSql")
   }
 
 }
