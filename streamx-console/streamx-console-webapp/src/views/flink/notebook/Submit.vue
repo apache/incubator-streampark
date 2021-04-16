@@ -4,14 +4,15 @@
     :bordered="false"
     class="nodebook-submit"
     :style="{ height: '100%' }">
-    <a-alert
-      show-icon
-      message="this is Experimental Features,and only supported ExecutionEnvironment/StreamExecutionEnvironment "
-      type="warning"/><br>
+
     <a-row
       :gutter="24"
       type="flex"
       justify="space-between">
+      <a-alert
+        show-icon
+        message="this is Experimental Features,and only supported ExecutionEnvironment/StreamExecutionEnvironment "
+        type="warning"/><br>
       <a-col :span="22">
         <span
           style="height: 40px;margin-left: 17px;"
