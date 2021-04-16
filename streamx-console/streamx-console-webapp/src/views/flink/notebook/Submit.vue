@@ -130,7 +130,7 @@ export default {
       woldCount: '\n%flink.repl.out=true\n' +
         '%flink.yarn.queue=default\n' +
         '%flink.execution.mode=yarn\n' +
-        '%flink.yarn.appName=StreamX NoteBook Job\n\n' +
+        '%flink.yarn.appName=Socket Window WordCount with StreamX NoteBook\n\n' +
         '// the host and the port to connect to\n' +
         'val hostname = "localhost"\n' +
         'val port = 9999\n' +
@@ -156,7 +156,7 @@ export default {
         '\n' +
         '// print the results with a single thread, rather than in parallel\n' +
         'windowCounts.print.setParallelism(1)\n' +
-        'env.execute("Socket Window WordCount StreamX NoteBook")\n'
+        'env.execute("Socket Window WordCount with StreamX NoteBook")\n'
     }
   },
   mounted() {
