@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
