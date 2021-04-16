@@ -150,7 +150,7 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费, �
 
 <div align="center">
 
-![Stargazers over time](https://starchart.cc/streamxhub/streamx.svg)]
+![Stargazers over time](https://starchart.cc/streamxhub/streamx.svg)
 
 </div>
 
