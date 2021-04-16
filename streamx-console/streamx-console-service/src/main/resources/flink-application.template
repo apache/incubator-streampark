@@ -1,13 +1,8 @@
 flink:
   deployment:
-    option:
-      target: application
-      detached:
-      shutdownOnAttachedExit:
-      jobmanager:
     property: #@see: https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html
-      $internal.application.main: com.streamxhub.streamx.flink.quickstart.QuickStartApp
-      yarn.application.name: Streamx QuickStart App
+      $internal.application.main:
+      yarn.application.name:
       yarn.application.queue:
       taskmanager.numberOfTaskSlots: 1
       parallelism.default: 2
