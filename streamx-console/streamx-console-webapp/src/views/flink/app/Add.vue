@@ -55,6 +55,11 @@
           style="margin-top: 10px">
           <a-tabs type="card" v-model="controller.activeTab">
             <a-tab-pane
+              key="pom"
+              tab="Maven pom">
+              <div class="pom-box syntax-true" style="height: 300px"></div>
+            </a-tab-pane>
+            <a-tab-pane
               key="jar"
               tab="Upload Jar">
               <a-upload-dragger
@@ -84,11 +89,6 @@
                   </p>
                 </div>
               </a-upload-dragger>
-            </a-tab-pane>
-            <a-tab-pane
-              key="pom"
-              tab="Maven pom">
-              <div class="pom-box syntax-true" style="height: 300px"></div>
             </a-tab-pane>
           </a-tabs>
           <a-button
@@ -698,7 +698,7 @@ export default {
       submitting: false,
       exclusions: new Map(),
       controller: {
-        activeTab: 'jar',
+        activeTab: 'pom',
         tagCount: {
           total: 1,
           run: 1,
