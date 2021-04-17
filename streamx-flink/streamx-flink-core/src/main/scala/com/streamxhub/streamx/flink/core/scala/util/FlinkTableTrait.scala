@@ -157,7 +157,7 @@ trait FlinkTableTrait extends Logger {
       }
     })
 
-    logInfo(s"flinkSql: $flinkSql")
+    logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
 
 }
