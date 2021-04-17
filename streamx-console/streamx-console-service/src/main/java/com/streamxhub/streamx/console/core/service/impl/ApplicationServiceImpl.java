@@ -470,20 +470,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
         targetFlinkSql.decode();
 
-        // 2) 判断版本是否发生变化
-        boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
-
-        // 3) 判断sql语句是否发生变化
+        // 2) 判断sql语句是否发生变化
         boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
 
-        // 4) 判断 依赖是否发生变化
+        // 3) 判断 依赖是否发生变化
         Application.Dependency targetDependency = Application.Dependency.jsonToDependency(targetFlinkSql.getDependency());
         Application.Dependency newDependency = appParam.getDependencyObject();
         boolean depDifference = !targetDependency.eq(newDependency);
 
         //依赖或sql发生了变更
         if (sqlDifference || depDifference) {
-            // 5) 检查是否存在新增记录的候选版本
+            // 4) 检查是否存在新增记录的候选版本
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
             if (newFlinkSql != null) {
@@ -498,23 +495,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql sql = new FlinkSql(appParam);
             CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
-        } else if (versionChanged) {
-            //sql和依赖未发生变更,但是版本号发生了变化,说明只是切换到某个版本了
-            CandidateType type = application.isRunning() ? CandidateType.HISTORY : CandidateType.NONE;
-            flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
+            if (sqlDifference) {
+                application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
+            } else {
+                application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
+            }
+        } else {
+            // 2) 判断版本是否发生变化
+            boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
+            if (versionChanged) {
+                //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
+                CandidateType type = CandidateType.HISTORY;
+                flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
+                //直接回滚到某个历史版本(rollback)
+                application.setDeploy(DeployState.NEED_RESTART.get());
+            }
         }
-
-        // 6) 判断 Effective的依赖和当前提交的是否发生变化
-        // 判断当前正在生效版本的(sql|依赖)和正在提交的依赖是否发生变更
-        Application.Dependency effectiveDependency = Application.Dependency.jsonToDependency(effectiveFlinkSql.getDependency());
-        boolean effectiveDepsDifference = !effectiveDependency.eq(newDependency);
-        boolean effectiveSqlDifference = !effectiveFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
-        if (effectiveDepsDifference) {
-            application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
-        } else if (effectiveSqlDifference) {
-            application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
-        }
-
         // 7) 配置文件修改
         this.configService.update(appParam, application.isRunning());
     }

@@ -66,10 +66,13 @@ public enum DeployState {
      */
     NEED_RESTART_AFTER_DEPLOY(6),
 
+    //需要回滚
+    NEED_RESTART(7),
+
     /**
      * 回滚完成,需要重新启动
      */
-    NEED_RESTART_AFTER_ROLLBACK(7),
+    NEED_RESTART_AFTER_ROLLBACK(8),
 
     /**
      * 发布的任务已经撤销
