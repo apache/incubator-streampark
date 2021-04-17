@@ -851,10 +851,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 //回滚历史版本的任务
                 backUpService.rollbackFlinkSql(application,sql);
             }
-        } else {
-            //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
-            this.toEffective(application);
         }
+
+        //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
+        this.toEffective(application);
 
         //获取一个最新的Effective的配置
         ApplicationConfig applicationConfig = configService.getEffective(application.getId());
