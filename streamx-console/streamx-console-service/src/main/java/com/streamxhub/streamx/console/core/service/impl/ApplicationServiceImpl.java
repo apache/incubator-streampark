@@ -495,7 +495,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             FlinkSql sql = new FlinkSql(appParam);
             CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
-            if (sqlDifference) {
+            if (depDifference) {
                 application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
             } else {
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
