@@ -567,7 +567,6 @@
           @submit="handleDeployOk"
           :form="formDeploy">
           <a-form-item
-            v-if="1===2"
             v-if="application && application.state === 7 "
             label="restart"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
