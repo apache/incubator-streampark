@@ -1230,8 +1230,7 @@ export default {
         app.state === 11 ||
         app.state === 12 ||
         app.state === 13 ||
-        app.state === 15 ||
-        app.deploy === 0 || false
+        app.state === 15 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
