@@ -46,7 +46,7 @@ trait FlinkSubmitTrait extends Logger {
 
   private[submit] lazy val FLINK_HOME = {
     USER_FLINK_HOME match {
-      case null =>
+      case null | x if x.trim.isEmpty =>
         val flinkLocalHome = System.getenv("FLINK_HOME")
         logInfo(s"flinkHome: $flinkLocalHome")
         flinkLocalHome
