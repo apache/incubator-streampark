@@ -75,6 +75,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Manifest;
+import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
 /**
@@ -508,7 +509,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 CandidateType type = CandidateType.HISTORY;
                 flinkSqlService.setCandidateOrEffective(type, appParam.getId(), appParam.getSqlId());
                 //直接回滚到某个历史版本(rollback)
-                application.setDeploy(DeployState.NEED_RESTART.get());
+                application.setDeploy(DeployState.NEED_ROLLBACK.get());
             }
         }
         // 7) 配置文件修改
@@ -840,8 +841,20 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         String appConf, flinkUserJar;
 
-        //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
-        this.toEffective(application);
+        //回滚任务.
+        if (application.isNeedRollback()) {
+            if (application.isFlinkSqlJob()) {
+                FlinkSql sql = flinkSqlService.getCandidate(application.getId(),CandidateType.HISTORY);
+                assert sql != null;
+                //先备份当前的任务.
+                backUpService.backup(application);
+                //回滚历史版本的任务
+                backUpService.rollbackFlinkSql(application,sql);
+            }
+        } else {
+            //2) 将lastst的设置为Effective的,(此时才真正变成当前生效的)
+            this.toEffective(application);
+        }
 
         //获取一个最新的Effective的配置
         ApplicationConfig applicationConfig = configService.getEffective(application.getId());

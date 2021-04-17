@@ -37,9 +37,6 @@ import com.streamxhub.streamx.common.conf.ConfigConst;
 public class ApplicationBackUp {
     private Long id;
     private Long appId;
-    /**
-     * 当 jobType为2时该值为FlinkSQL的id
-     */
     private Long sqlId;
     private Long configId;
     private String path;

@@ -33,6 +33,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
+import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
@@ -305,6 +306,11 @@ public class Application implements Serializable {
     @JsonIgnore
     public boolean isRunning() {
         return FlinkAppState.RUNNING.getValue() == this.getState();
+    }
+
+    @JsonIgnore
+    public boolean isNeedRollback() {
+        return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
     }
 
     @Data

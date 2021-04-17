@@ -67,7 +67,7 @@ public enum DeployState {
     NEED_RESTART_AFTER_DEPLOY(6),
 
     //需要回滚
-    NEED_RESTART(7),
+    NEED_ROLLBACK(7),
 
     /**
      * 回滚完成,需要重新启动

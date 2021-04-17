@@ -42,4 +42,7 @@ public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
     @Delete("delete from t_app_backup where app_id=#{appId}")
     void removeApp(@Param("appId")Long appId);
+
+    @Select("SELECT * from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
+    ApplicationBackUp getFlinkSqlBackup(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
 }

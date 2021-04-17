@@ -32,10 +32,7 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper;
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
-import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
-import com.streamxhub.streamx.console.core.entity.Effective;
+import com.streamxhub.streamx.console.core.entity.*;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.*;
@@ -181,6 +178,42 @@ public class ApplicationBackUpServiceImpl
     public void removeApp(Long appId) {
         baseMapper.removeApp(appId);
         HdfsUtils.delete(ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString()));
+    }
+
+    @Override
+    public void rollbackFlinkSql(Application application,FlinkSql sql) {
+        ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(),sql.getId());
+        assert backUp != null;
+
+        if (!HdfsUtils.exists(backUp.getPath())) {
+            return;
+        }
+
+        executorService.execute(() -> {
+            try {
+                FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
+                    // 回滚 config 和 sql
+                    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
+                    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
+
+                    // 2) 删除当前项目
+                    HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+                    try {
+                        // 5)将备份的文件copy到有效项目目录下.
+                        HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
+                    } catch (Exception e) {
+                        throw e;
+                    }
+                    return null;
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
+        return baseMapper.getFlinkSqlBackup(appId,sqlId);
     }
 
     @Override
