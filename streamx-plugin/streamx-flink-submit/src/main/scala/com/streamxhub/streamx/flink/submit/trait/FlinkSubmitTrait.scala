@@ -120,7 +120,7 @@ trait FlinkSubmitTrait extends Logger {
          |      "resolveOrder": ${submitRequest.resolveOrder.getName},
          |      "appConf": ${submitRequest.appConf},
          |      "applicationType": ${submitRequest.applicationType},
-         |      "savePint": ${submitRequest.savePoint},
+         |      "savePoint": ${submitRequest.savePoint},
          |      "flameGraph": ${submitRequest.flameGraph != null},
          |      "userJar": ${submitRequest.flinkUserJar},
          |      "option": ${submitRequest.option},

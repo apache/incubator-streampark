@@ -401,13 +401,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 //TODO CONFIG
                 //configService.create(appParam, CandidateType.NEW);
             }
-            appParam.setBackUp(false);
-            appParam.setRestart(false);
-
             assert appParam.getId() != null;
-
             deploy(appParam);
-
             return true;
         }
         return false;
@@ -531,7 +526,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             try {
                 FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                     // 1) 需要重启的先停止服务
-                    if (application.getRestart() != null && application.getRestart()) {
+                    if (application.getRestart()) {
                         this.cancel(application);
                     }
                     FlinkTrackingTask.refreshTracking(application.getId(), () -> {
@@ -564,12 +559,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
                             assert flinkSql != null;
                             application.setDependency(flinkSql.getDependency());
+                            log.info("FlinkSqlJob deploying...");
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
                         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
-                        if (application.getRestart() != null && application.getRestart()) {
+                        if (application.getRestart()) {
                             // 重新启动.
                             start(application);
                             // 将"需要重新发布"状态清空...
@@ -691,7 +687,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
 
             // 2) backup
-            if (application.getBackUp() != null && application.getBackUp()) {
+            if (application.getBackUp()) {
                 this.backUpService.backup(application);
             }
 

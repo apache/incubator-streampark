@@ -110,10 +110,6 @@ public class ApplicationController extends BaseController {
     public RestResponse deploy(Application app) {
         Application application = applicationService.getById(app.getId());
         assert application != null;
-
-        application.setRestart(app.getRestart());
-        application.setSavePointed(app.getSavePointed());
-        application.setAllowNonRestored(app.getAllowNonRestored());
         application.setBackUp(true);
         application.setBackUpDescription(app.getBackUpDescription());
         applicationService.deploy(application);

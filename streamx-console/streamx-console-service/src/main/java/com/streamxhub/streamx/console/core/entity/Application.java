@@ -39,6 +39,8 @@ import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -146,17 +148,18 @@ public class Application implements Serializable {
     private transient String dependency;
     private transient Long sqlId;
     private transient String flinkSql;
-    private transient Boolean backUp;
-    private transient Boolean restart;
+
+    private transient Boolean backUp = false;
+    private transient Boolean restart = false;
     private transient String userName;
     private transient String config;
     private transient Long configId;
     private transient String confPath;
     private transient Integer format;
     private transient String savePoint;
-    private transient Boolean savePointed;
-    private transient Boolean drain;
-    private transient Boolean allowNonRestored;
+    private transient Boolean savePointed = false;
+    private transient Boolean drain = false;
+    private transient Boolean allowNonRestored = false;
     private transient String projectName;
     private transient String createTimeFrom;
     private transient String createTimeTo;

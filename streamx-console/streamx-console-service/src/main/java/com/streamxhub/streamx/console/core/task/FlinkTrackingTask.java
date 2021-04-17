@@ -211,7 +211,7 @@ public class FlinkTrackingTask {
                         }
                         /**
                          * 进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
-                         * 需清空savepint.
+                         * 需清空savepoint.
                          */
                         cleanSavepoint(application);
                         cleanOptioning(optionState, key);
@@ -303,7 +303,7 @@ public class FlinkTrackingTask {
                     }
                 }
                 /**
-                 * 当前状态为running,且savePintCache里有当前任务,说明该任务正在做savepoint
+                 * 当前状态为running,且savePointCache里有当前任务,说明该任务正在做savepoint
                  */
                 if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
                     application.setOptionState(OptionState.SAVEPOINTING.getValue());
