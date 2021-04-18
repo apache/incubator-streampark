@@ -474,7 +474,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         ChangedType changedType = effectiveFlinkSql.checkChange(targetFlinkSql);
 
         //依赖或sql发生了变更
-        if (!ChangedType.NONE.equals(changedType)) {
+        if (changedType.hasChanged()) {
             // 4) 检查是否存在新增记录的候选版本
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
@@ -488,9 +488,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.cleanCandidate(historyFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            CandidateType type = (changedType.isDependencyChange() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
+            CandidateType type = (changedType.isDependencyChanged() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
-            if (changedType.isDependencyChange()) {
+            if (changedType.isDependencyChanged()) {
                 application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
             } else {
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());

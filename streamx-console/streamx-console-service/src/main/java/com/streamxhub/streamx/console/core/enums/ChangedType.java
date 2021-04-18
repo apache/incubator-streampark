@@ -22,6 +22,10 @@ package com.streamxhub.streamx.console.core.enums;
 
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
+
 public enum ChangedType {
     /**
      * 未发生变化
@@ -58,19 +62,23 @@ public enum ChangedType {
         return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
     }
 
-    public boolean isNoChange() {
+    public boolean noChanged() {
         return this.value == NONE.value;
     }
 
-    public boolean isSqlChange() {
+    public boolean hasChanged() {
+        return this.value != NONE.value;
+    }
+
+    public boolean isSqlChanged() {
         return this.value == SQL.value;
     }
 
-    public boolean isDependencyChange() {
+    public boolean isDependencyChanged() {
         return this.value == DEPENDENCY.value;
     }
 
-    public boolean isAllChange() {
+    public boolean isAllChanged() {
         return this.value == ALL.value;
     }
 
