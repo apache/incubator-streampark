@@ -207,6 +207,11 @@ public class ApplicationBackUpServiceImpl
         }
     }
 
+    @Override
+    public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
+        return baseMapper.isFlinkSqlBacked(appId,sqlId);
+    }
+
     private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
         return baseMapper.getFlinkSqlBackup(appId,sqlId);
     }

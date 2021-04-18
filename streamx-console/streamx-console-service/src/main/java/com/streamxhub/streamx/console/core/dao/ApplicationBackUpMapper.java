@@ -45,4 +45,7 @@ public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
 
     @Select("SELECT * from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
     ApplicationBackUp getFlinkSqlBackup(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
+
+    @Select("select count(1) as counter from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
+    boolean isFlinkSqlBacked(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
 }

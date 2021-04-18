@@ -53,6 +53,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Autowired
     private EffectiveService effectiveService;
 
+    @Autowired
     private ApplicationBackUpService backUpService;
 
     /**
@@ -150,7 +151,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
         assert sql != null;
         //先备份当前的任务.
-        if (!isBacked(sql)) {
+        if (!isFlinkSqlBacked(sql)) {
             log.info("current job version:{}, Backing up...",sql.getVersion());
             backUpService.backup(application);
         } else {
@@ -160,7 +161,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         backUpService.rollbackFlinkSql(application, sql);
     }
 
-    private boolean isBacked(FlinkSql sql) {
-        return baseMapper.isBacked(sql.getAppId(), sql.getId()) > 0;
+    private boolean isFlinkSqlBacked(FlinkSql sql) {
+        return backUpService.isFlinkSqlBacked(sql.getAppId(), sql.getId());
     }
 }

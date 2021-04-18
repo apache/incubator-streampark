@@ -49,4 +49,6 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     void removeApp(Long appId);
 
     void rollbackFlinkSql(Application application,FlinkSql sql);
+
+    boolean isFlinkSqlBacked(Long appId, Long sqlId);
 }
