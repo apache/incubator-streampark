@@ -41,6 +41,10 @@ public class ApplicationBackUp {
     private Long configId;
     private String path;
     private String description;
+    /**
+     * 备份时的版本号.
+     */
+    private Integer version;
     private Date createTime;
 
     private transient boolean backup;

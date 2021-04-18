@@ -246,12 +246,19 @@ public class ApplicationBackUpServiceImpl
             }
 
             //2) FlinkSQL任务需要备份sql和依赖.
+            int version = 1;
             if (application.isFlinkSqlJob()) {
-                Effective effective = effectiveService.get(application.getId(), EffectiveType.FLINKSQL);
-                assert effective != null;
-                application.setSqlId(effective.getTargetId());
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+                assert flinkSql != null;
+                application.setSqlId(flinkSql.getId());
+                version = flinkSql.getVersion();
+            } else if(config != null){
+                version = config.getVersion();
             }
+            
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
+            applicationBackUp.setVersion(version);
+
             this.save(applicationBackUp);
             HdfsUtils.mkdirs(applicationBackUp.getPath());
             HdfsUtils.movie(appHome.getPath(), applicationBackUp.getPath());
