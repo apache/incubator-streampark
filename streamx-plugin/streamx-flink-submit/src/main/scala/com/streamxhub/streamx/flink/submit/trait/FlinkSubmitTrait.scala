@@ -104,7 +104,6 @@ trait FlinkSubmitTrait extends Logger {
 
   private[submit] lazy val PARAM_KEY_FLINK_HOME = KEY_FLINK_HOME("--")
   private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
-  private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
   private[submit] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")

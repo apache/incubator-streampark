@@ -98,8 +98,6 @@ object ApplicationSubmit extends YarnSubmitTrait {
       programArgs += PARAM_KEY_FLINK_HOME
       programArgs += submitRequest.flinkHome
     }
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(workspaceEnv.flinkYaml)
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
 

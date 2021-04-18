@@ -130,12 +130,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
 
-    val flinkYaml = PropertiesUtils.readFile(s"$FLINK_HOME/conf/flink-conf.yaml")
-
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(flinkYaml)
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
+
+    if (submitRequest.flinkHome != null && submitRequest.flinkHome.nonEmpty ) {
+      programArgs += PARAM_KEY_FLINK_HOME
+      programArgs += submitRequest.flinkHome
+    }
 
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>
