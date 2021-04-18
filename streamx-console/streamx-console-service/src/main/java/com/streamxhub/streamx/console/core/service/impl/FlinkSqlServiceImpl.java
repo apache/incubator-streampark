@@ -150,8 +150,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public void rollback(Application application) {
         FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
         assert sql != null;
-        //先备份当前的任务.
-        if (!isFlinkSqlBacked(sql)) {
+
+        //检查并备份当前的任务.
+        FlinkSql effectiveSql = getEffective(application.getId(),false);
+        assert effectiveSql != null;
+        if (!isFlinkSqlBacked(effectiveSql)) {
             log.info("current job version:{}, Backing up...",sql.getVersion());
             backUpService.backup(application);
         } else {
