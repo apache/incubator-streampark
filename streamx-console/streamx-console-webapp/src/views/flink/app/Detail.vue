@@ -300,6 +300,16 @@
               class="detail-table"
               @change="handleTableChange">
               <template
+                slot="version"
+                slot-scope="text, record">
+                <a-button
+                  type="primary"
+                  shape="circle"
+                  size="small">
+                  {{ record.version }}
+                </a-button>
+              </template>
+              <template
                 slot="createTime"
                 slot-scope="text, record">
                 <a-icon
@@ -788,6 +798,12 @@ export default {
             title: 'Description',
             dataIndex: 'description',
             width: '30%'
+          },
+          {
+            title: 'Version',
+            dataIndex: 'version',
+            width: '10%',
+            scopedSlots: { customRender: 'version' }
           },
           {
             title: 'Backup Time',
