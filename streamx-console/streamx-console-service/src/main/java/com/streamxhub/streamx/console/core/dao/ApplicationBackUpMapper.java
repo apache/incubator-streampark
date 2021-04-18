@@ -24,7 +24,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
-import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
@@ -47,5 +46,5 @@ public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
     ApplicationBackUp getFlinkSqlBackup(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
 
     @Select("select count(1) as counter from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
-    boolean isFlinkSqlBacked(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
+    Integer isFlinkSqlBacked(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
 }

@@ -180,8 +180,8 @@ public class ApplicationBackUpServiceImpl
     }
 
     @Override
-    public void rollbackFlinkSql(Application application,FlinkSql sql) {
-        ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(),sql.getId());
+    public void rollbackFlinkSql(Application application, FlinkSql sql) {
+        ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
         if (!HdfsUtils.exists(backUp.getPath())) {
             return;
@@ -209,11 +209,11 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-        return baseMapper.isFlinkSqlBacked(appId,sqlId);
+        return baseMapper.isFlinkSqlBacked(appId, sqlId) > 0;
     }
 
     private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
-        return baseMapper.getFlinkSqlBackup(appId,sqlId);
+        return baseMapper.getFlinkSqlBackup(appId, sqlId);
     }
 
     @Override
