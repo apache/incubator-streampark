@@ -465,6 +465,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void updateFlinkSqlJob(Application application, Application appParam) {
         // 1) 第一步获取正式版本的flinkSql
         FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
+        assert effectiveFlinkSql != null;
 
         //要设置的目标FlinkSql记录
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
@@ -472,6 +473,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //2) 判断sql和依赖是否发生变化
         ChangedType changedType = effectiveFlinkSql.checkChange(targetFlinkSql);
+
+        log.info("updateFlinkSqlJob changedType: {}",changedType);
 
         //依赖或sql发生了变更
         if (changedType.hasChanged()) {

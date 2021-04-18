@@ -91,8 +91,8 @@ public class FlinkSql {
         boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
         // 2) 判断 依赖是否发生变化
         Application.Dependency thisDependency = Application.Dependency.jsonToDependency(this.getDependency());
-        Application.Dependency newDependency = Application.Dependency.jsonToDependency(target.getDependency());
-        boolean depDifference = !thisDependency.eq(newDependency);
+        Application.Dependency targetDependency = Application.Dependency.jsonToDependency(target.getDependency());
+        boolean depDifference = !thisDependency.eq(targetDependency);
         if (sqlDifference && depDifference) {
             return ChangedType.ALL;
         }

@@ -63,23 +63,38 @@ public enum ChangedType {
     }
 
     public boolean noChanged() {
-        return this.value == NONE.value;
+        return this.equals(NONE);
     }
 
     public boolean hasChanged() {
-        return this.value != NONE.value;
+        return this.equals(NONE);
     }
 
     public boolean isSqlChanged() {
-        return this.value == SQL.value;
+        return this.equals(SQL);
     }
 
     public boolean isDependencyChanged() {
-        return this.value == DEPENDENCY.value;
+        return this.equals(DEPENDENCY);
     }
 
     public boolean isAllChanged() {
-        return this.value == ALL.value;
+        return this.equals(ALL);
     }
 
+    @Override
+    public String toString() {
+        switch (this) {
+            case NONE:
+                return "[NONE], nothing to changed";
+            case DEPENDENCY:
+                return "[DEPENDENCY], Dependency is changed";
+            case SQL:
+                return "[SQL], Flink Sql is changed";
+            case ALL:
+                return "[ALL], Dependency and Flink Sql all changed";
+            default:
+                return null;
+        }
+    }
 }
