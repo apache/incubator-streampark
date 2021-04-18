@@ -67,7 +67,7 @@ public enum ChangedType {
     }
 
     public boolean hasChanged() {
-        return this.equals(NONE);
+        return !noChanged();
     }
 
     public boolean isSqlChanged() {
