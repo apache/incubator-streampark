@@ -463,24 +463,22 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParam
      */
     private void updateFlinkSqlJob(Application application, Application appParam) {
-        // 1) 第一步获取正式版本的flinkSql
-        FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
-        assert effectiveFlinkSql != null;
+        //1) 获取copy的源FlinkSql
+        FlinkSql copySourceFlinkSql = flinkSqlService.getById(appParam.getSqlId());
+        assert copySourceFlinkSql != null;
+        copySourceFlinkSql.decode();
 
-        //要设置的目标FlinkSql记录
-        FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
-        assert targetFlinkSql != null;
-        targetFlinkSql.decode();
-        targetFlinkSql.setDependency(appParam.getDependency());
+        //当前提交的FlinkSql记录
+        FlinkSql targetFlinkSql = new FlinkSql(appParam);
 
         //2) 判断sql和依赖是否发生变化
-        ChangedType changedType = effectiveFlinkSql.checkChange(targetFlinkSql);
+        ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
 
         log.info("updateFlinkSqlJob changedType: {}",changedType);
 
         //依赖或sql发生了变更
         if (changedType.hasChanged()) {
-            // 4) 检查是否存在新增记录的候选版本
+            // 3) 检查是否存在新增记录的候选版本
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
             if (newFlinkSql != null) {
@@ -502,6 +500,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             }
         } else {
             // 2) 判断版本是否发生变化
+            //获取正式版本的flinkSql
+            FlinkSql effectiveFlinkSql = flinkSqlService.getEffective(application.getId(), true);
+            assert effectiveFlinkSql != null;
             boolean versionChanged = !effectiveFlinkSql.getId().equals(appParam.getSqlId());
             if (versionChanged) {
                 //sql和依赖未发生变更,但是版本号发生了变化,说明是回滚到某个版本了
@@ -514,7 +515,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         // 7) 配置文件修改
         this.configService.update(appParam, application.isRunning());
     }
-
 
     @Override
     public void deploy(Application application) {
