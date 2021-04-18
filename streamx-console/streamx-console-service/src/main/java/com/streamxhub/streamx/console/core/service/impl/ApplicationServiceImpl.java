@@ -469,7 +469,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         //要设置的目标FlinkSql记录
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
+        assert targetFlinkSql != null;
         targetFlinkSql.decode();
+        targetFlinkSql.setDependency(appParam.getDependency());
 
         //2) 判断sql和依赖是否发生变化
         ChangedType changedType = effectiveFlinkSql.checkChange(targetFlinkSql);
