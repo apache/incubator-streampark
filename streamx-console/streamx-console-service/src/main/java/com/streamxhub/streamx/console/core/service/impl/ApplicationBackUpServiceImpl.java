@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -209,7 +211,10 @@ public class ApplicationBackUpServiceImpl
 
     @Override
     public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
-        return baseMapper.isFlinkSqlBacked(appId, sqlId) > 0;
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<ApplicationBackUp>().lambda();
+        queryWrapper.eq(ApplicationBackUp::getAppId, appId)
+                .eq(ApplicationBackUp::getSqlId,sqlId);
+        return baseMapper.selectCount(queryWrapper) > 0;
     }
 
     private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
