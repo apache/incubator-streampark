@@ -90,15 +90,6 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
 
   lazy val parameter: ParameterTool = initParameter()
 
-  private[this] lazy val defaultFlinkConf: Map[String, String] = {
-    val flinkHome = parameter.get(KEY_FLINK_HOME()) match {
-      case null => System.getenv("FLINK_HOME")
-      case x => x
-    }
-    require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-    val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-    readFlinkConf(flinkConf)
-  }
 
   private[this] var localStreamEnv: StreamExecutionEnvironment = _
 
@@ -375,11 +366,16 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
      * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
      * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
      */
-    parameter.get(KEY_FLINK_CONF(), null) match {
+    parameter.get(KEY_FLINK_HOME(), null) match {
       case null | "" =>
-        logDebug("--flink.conf is undefined,now try found from flink-conf.yaml on System env.")
-        defaultFlinkConf
-      case yaml => PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(yaml))
+        logDebug("--flink.home is undefined,now try found from flink-conf.yaml on System env.")
+        val flinkHome = System.getenv("FLINK_HOME")
+        require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
+        val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
+        readFlinkConf(flinkConf)
+      case flinkHome =>
+        val flinkConf = PropertiesUtils.readFile(s"$flinkHome/conf/flink-conf.yaml")
+        readFlinkConf(flinkConf)
     }
   }
 

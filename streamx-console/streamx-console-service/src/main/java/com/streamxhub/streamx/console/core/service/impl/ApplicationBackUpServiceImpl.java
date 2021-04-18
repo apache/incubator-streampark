@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -32,16 +34,12 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper;
-import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
-import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
-import com.streamxhub.streamx.console.core.entity.Effective;
+import com.streamxhub.streamx.console.core.entity.*;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hadoop.fs.Hdfs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -184,6 +182,46 @@ public class ApplicationBackUpServiceImpl
     }
 
     @Override
+    public void rollbackFlinkSql(Application application, FlinkSql sql) {
+        ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
+        assert backUp != null;
+        if (!HdfsUtils.exists(backUp.getPath())) {
+            return;
+        }
+        try {
+            FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
+                // 回滚 config 和 sql
+                effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
+                effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
+
+                // 2) 删除当前项目
+                HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+                try {
+                    // 5)将备份的文件copy到有效项目目录下.
+                    HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
+                } catch (Exception e) {
+                    throw e;
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public boolean isFlinkSqlBacked(Long appId, Long sqlId) {
+        LambdaQueryWrapper<ApplicationBackUp> queryWrapper = new QueryWrapper<ApplicationBackUp>().lambda();
+        queryWrapper.eq(ApplicationBackUp::getAppId, appId)
+                .eq(ApplicationBackUp::getSqlId,sqlId);
+        return baseMapper.selectCount(queryWrapper) > 0;
+    }
+
+    private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
+        return baseMapper.getFlinkSqlBackup(appId, sqlId);
+    }
+
+    @Override
     public Boolean delete(Long id) throws ServiceException {
         ApplicationBackUp backUp = getById(id);
         try {
@@ -208,15 +246,23 @@ public class ApplicationBackUpServiceImpl
             }
 
             //2) FlinkSQL任务需要备份sql和依赖.
+            int version = 1;
             if (application.isFlinkSqlJob()) {
-                Effective effective = effectiveService.get(application.getId(), EffectiveType.FLINKSQL);
-                assert effective != null;
-                application.setSqlId(effective.getTargetId());
+                FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(),false);
+                assert flinkSql != null;
+                application.setSqlId(flinkSql.getId());
+                version = flinkSql.getVersion();
+            } else if(config != null){
+                version = config.getVersion();
             }
+            
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
+            applicationBackUp.setVersion(version);
+
             this.save(applicationBackUp);
             HdfsUtils.mkdirs(applicationBackUp.getPath());
             HdfsUtils.movie(appHome.getPath(), applicationBackUp.getPath());
         }
     }
+
 }

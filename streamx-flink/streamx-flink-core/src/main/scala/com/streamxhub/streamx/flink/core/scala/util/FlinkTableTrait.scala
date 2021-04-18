@@ -81,8 +81,6 @@ trait FlinkTableTrait extends Logger {
       }
     }
 
-    val statementSet = context.createStatementSet()
-
     //TODO registerHiveCatalog
     SQLCommandUtil.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
@@ -126,17 +124,8 @@ trait FlinkTableTrait extends Logger {
           val tableResult = context.executeSql(sql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE =>
-          try {
-            lock.lock()
-            statementSet.addInsertSql(args)
-            logInfo(s"${x.command.name}: $args")
-          } finally {
-            if (lock.isHeldByCurrentThread) {
-              lock.unlock()
-            }
-          }
-        case CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
+        case INSERT_INTO | INSERT_OVERWRITE |
+             CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
              CREATE_CATALOG | DROP_CATALOG |
              CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
              CREATE_VIEW | DROP_VIEW |
@@ -157,7 +146,7 @@ trait FlinkTableTrait extends Logger {
       }
     })
 
-    logInfo(s"flinkSql: $flinkSql")
+    logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
 
 }

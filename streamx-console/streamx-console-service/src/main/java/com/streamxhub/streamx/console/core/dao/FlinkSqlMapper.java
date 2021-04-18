@@ -48,4 +48,5 @@ public interface FlinkSqlMapper extends BaseMapper<FlinkSql> {
 
     @Delete("delete from t_flink_sql where app_id=#{appId}")
     void removeApp(@Param("appId")Long appId);
+
 }

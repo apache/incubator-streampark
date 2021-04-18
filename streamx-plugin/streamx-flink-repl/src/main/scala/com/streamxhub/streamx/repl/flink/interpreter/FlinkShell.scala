@@ -93,7 +93,7 @@ object FlinkShell extends Logger {
   private[this] def createYarnSessionCluster(config: Config, flinkConfig: Configuration, flinkShims: FlinkShims) = {
     flinkConfig.setBoolean(DeploymentOptions.ATTACHED, true)
     val (clusterConfig, clusterClient) = config.yarnConfig match {
-      case Some(_) => {
+      case Some(_) =>
         val executorConfig = {
           val effectiveConfig = new Configuration(flinkConfig)
           val args = parseArgList(config, YarnDeploymentTarget.SESSION)
@@ -107,7 +107,8 @@ object FlinkShell extends Logger {
           executorConfig.set(DeploymentOptions.TARGET, YarnDeploymentTarget.SESSION.getName)
 
           /**
-           * 如部署的环境未设置环境变量"FLINK_LIB_DIR",则一定要指定本地的Flink dist jar位置,不然yarn启动报错(错误: 找不到或无法加载主类 org.apache.flink.yarn.entrypoint.YarnSessionClusterEntrypoint)
+           * 如部署的环境未设置环境变量"FLINK_LIB_DIR"<br>
+           * 则一定要指定本地的Flink dist jar位置,不然yarn启动报错(错误: 找不到或无法加载主类 org.apache.flink.yarn.entrypoint.YarnSessionClusterEntrypoint)
            */
           val flinkLocalHome = System.getenv("FLINK_HOME")
           val flinkDistJar = new File(s"$flinkLocalHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
@@ -127,7 +128,6 @@ object FlinkShell extends Logger {
         finally clusterDescriptor.close()
 
         (executorConfig, Some(clusterClient))
-      }
       case None => (flinkConfig, None)
     }
     val effectiveConfig = clusterClient match {

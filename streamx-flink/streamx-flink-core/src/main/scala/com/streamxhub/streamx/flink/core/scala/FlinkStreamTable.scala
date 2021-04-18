@@ -111,7 +111,9 @@ class StreamTableContext(val parameter: ParameterTool,
     } else null
   }
 
-  def sql(sql: String = null)(implicit callback:Unit => String = null): Unit = super.callSql(sql, parameter, this)
+  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
+
+  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback:Unit => String = null): Unit = super.callSql(sql, parameter, this)
 
   //...streamEnv api start...
 

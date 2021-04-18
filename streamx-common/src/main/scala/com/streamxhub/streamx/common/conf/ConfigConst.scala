@@ -75,8 +75,6 @@ object ConfigConst {
 
   def KEY_FLINK_HOME(prefix: String = null): String = if (prefix == null) "flink.home" else s"${prefix}flink.home"
 
-  def KEY_FLINK_CONF(prefix: String = null): String = if (prefix == null) "flink.conf" else s"${prefix}flink.conf"
-
   def KEY_APP_NAME(prefix: String = null): String = if (prefix == null) "app.name" else s"${prefix}app.name"
 
   def KEY_FLINK_SQL(prefix: String = null): String = if (prefix == null) "sql" else s"${prefix}sql"

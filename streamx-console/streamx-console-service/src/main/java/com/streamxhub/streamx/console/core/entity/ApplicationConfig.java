@@ -44,7 +44,8 @@ public class ApplicationConfig {
     private Long appId;
 
     /**
-     * 1)yaml 2)prop
+     * 1)yaml <br>
+     * 2)prop
      */
     private Integer format;
 

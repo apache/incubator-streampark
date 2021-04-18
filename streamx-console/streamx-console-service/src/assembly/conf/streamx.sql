@@ -11,6 +11,7 @@ CREATE TABLE `t_app_backup` (
   `APP_ID` bigint(20) DEFAULT NULL,
   `SQL_ID` bigint(20) DEFAULT NULL,
   `CONFIG_ID` bigint(20) DEFAULT NULL,
+  `VERSION` int(10) DEFAULT NULL,
   `PATH` varchar(255) DEFAULT NULL,
   `DESCRIPTION` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
@@ -36,7 +37,7 @@ CREATE TABLE `t_flame_graph` (
   PRIMARY KEY (`ID`) USING BTREE,
   KEY `INX_TIME` (`TIMELINE`) USING BTREE,
   KEY `INX_APPID` (`APP_ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1379910128636960771 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Records of t_flame_graph
@@ -84,13 +85,13 @@ CREATE TABLE `t_flink_app` (
   PRIMARY KEY (`ID`) USING BTREE,
   KEY `INX_STATE` (`STATE`) USING BTREE,
   KEY `INX_TRACK` (`TRACKING`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1381548268640436226 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1383720958407139331 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Records of t_flink_app
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_app` VALUES (1381548268640436225, 2, 4, NULL, 'Flink Sql Test', NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, NULL, 1, NULL, NULL, '2', NULL, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-04-12 18:02:30', 0, NULL, NULL);
+INSERT INTO `t_flink_app` VALUES (1383720958407139330, 2, 4, NULL, 'Flink Sql', NULL, NULL, NULL, '', '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, 'application_1608425563635_146822', 1, 6609957, 'fee72e948e804b8e2aeec20db6a19183', '7', '', 'Flink Sql', 0, 0, 1024, 1024, 1, 1, 1, 0, 0, 1, '2021-04-18 17:55:59', 3, '2021-04-18 18:31:56', NULL);
 COMMIT;
 
 -- ----------------------------
@@ -106,7 +107,7 @@ CREATE TABLE `t_flink_config` (
   `CONTENT` text NOT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB AUTO_INCREMENT=1383318218421993474 DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Records of t_flink_config
@@ -126,13 +127,12 @@ CREATE TABLE `t_flink_effective` (
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`) USING BTREE,
   UNIQUE KEY `UN_INX` (`APP_ID`,`TARGET_TYPE`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1381548275443597314 DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- ----------------------------
 -- Records of t_flink_effective
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_effective` VALUES (1381548275443597313, 1381548268640436225, 2, 1381548268724322305, NULL);
 COMMIT;
 
 -- ----------------------------
@@ -180,7 +180,7 @@ CREATE TABLE `t_flink_project` (
 -- Records of t_flink_project
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/benjobs/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, '2021-04-08 05:01:02', '2021-04-12 17:59:36', 'streamx-quickstart', 1);
+INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/benjobs/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, '2021-04-08 05:01:02', '2021-04-17 11:47:39', 'streamx-quickstart', 1);
 COMMIT;
 
 -- ----------------------------
@@ -194,7 +194,7 @@ CREATE TABLE `t_flink_savepoint` (
   `SAVE_POINT` varchar(255) DEFAULT NULL,
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1379910126837604354 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 -- ----------------------------
 -- Records of t_flink_savepoint
@@ -212,7 +212,7 @@ CREATE TABLE `t_flink_sql` (
   `SQL` text,
   `DEPENDENCY` text,
   `VERSION` int(20) DEFAULT NULL,
-  `LATEST` tinyint(1) NOT NULL DEFAULT '0',
+  `CANDIDATE` int(1) NOT NULL DEFAULT '0',
   `CREATE_TIME` datetime DEFAULT NULL,
   PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -221,7 +221,6 @@ CREATE TABLE `t_flink_sql` (
 -- Records of t_flink_sql
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_flink_sql` VALUES (1381548268724322305, 1381548268640436225, 'eNqNVM9PGkEUvu9fMbeFhsUF+kuMBwQUEgEDa5uezMAusrow25lZLLeaGGNbrR5o05q20dRGDw320miBpv8Mu9BT/4XO7ig/atN0b+973/fezPvebDyfjClJoMTmFpPAIhpeMdAq8AmAfV6oq+BBLB9PxfIBD9SpVr0BliDVVhFu3EgUtQqs6whPopQAJZ1JFpRYZskX8Qt+8DCtpFhXsYRqNa1EEQ7ShqmJYBaI67C8DsUAkCTQ+/6j3zwDHgKG1HFVXcNERzVPaNV0N4QGE7tqLus/23Heff7V3R2mgdM8d3Y3gRwMhUCv86l3+bx/uMV5EydCpl7ild3BXF9torrHGReZGJkaprpGgkWEKKEYmkEmd1uLsyLVCJUqUEXIlO5Fp+XpcGAcun8TmvYgMTDehFCIqWVKVaTymWkQG7orQuUy0ejV9DovB18v7NMXgKPA7j5l0eC8Y++/FkTLVJmLoxrQNLWa6jYqI1yFdOTIGmET5rd2Xn1x9lpO+8A56trd/d5lG7jZoUbVMJuyREoVrQo9McUWq8KPAxKJRcBzoH/csluHnhoMTj86Hw4Gp1v2zlvBPyMI8fEtNetWfYXotfWrNVXp5HaZdTCXXkhnFR5a1+G/12xNLZYmtswF/r5kFjaGkmi1QR4b0akpA5WgUUGERiMR+e6Uaxkv59VhkomusGjwtsPLcPLg+Mw+2JtoxpalBqucjdkKcSI7obNz8QfXhIRsIKx63FA4EgmHw7fDXGCfb/ePNsfZG5i95WDZsEglWIVPJIw2CFd6/vzsvBm0Tu7Isuy8P2bvhXnba2873Wb/pO00v7EwxBKePelsIZlXAJtxbuSOUEguJuMK8yDBvFuZz+UzMcVHSQCIDfZJmYykqiCVisqy6Gcmum7Fc8tZxXfLD2IFVmiEJNIFJZ2NK9e/JI9g1YX5fC4z/GsJC/nc8hKYe/Q/DWeE30u2w2Q=', '{\"pom\":[{\"groupId\":\"mysql\",\"artifactId\":\"mysql-connector-java\",\"version\":\"5.1.48\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-sql-connector-kafka_2.12\",\"version\":\"1.12.0\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-connector-jdbc_2.11\",\"version\":\"1.12.0\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-json\",\"version\":\"1.12.0\",\"exclusions\":[]}]}', 1, 0, '2021-04-12 18:02:30');
 COMMIT;
 
 -- ----------------------------
@@ -423,8 +422,9 @@ CREATE TABLE `t_setting` (
 -- Records of t_setting
 -- ----------------------------
 BEGIN;
+INSERT INTO `t_setting` VALUES ('env.flink.home', NULL, 'Flink Home', 'Flink Home');
 INSERT INTO `t_setting` VALUES ('maven.central.repository', '', 'Maven Central Repository', 'Maven 私服地址');
-INSERT INTO `t_setting` VALUES ('streamx.console.webapp.address', 'http://test-hadoop-2:10001', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
+INSERT INTO `t_setting` VALUES ('streamx.console.webapp.address', 'http://test-hadoop-2:10000', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
 INSERT INTO `t_setting` VALUES ('streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等');
 COMMIT;
 
@@ -457,7 +457,7 @@ CREATE TABLE `t_user` (
 -- Records of t_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-12 18:06:31', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
+INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-18 09:57:19', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
 COMMIT;
 
 -- ----------------------------

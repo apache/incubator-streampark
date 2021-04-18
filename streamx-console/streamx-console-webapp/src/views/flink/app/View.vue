@@ -546,7 +546,7 @@
             slot="icon"
             type="upload"
             style="color: green"/>
-          Deploy Application
+          Launch Application
         </template>
         <template
           slot="footer">
@@ -615,7 +615,7 @@
             :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-textarea
               rows="3"
-              placeholder="The backup description for the application,so that it can be retrieved when the version is rolled back"
+              placeholder="Before launching the new version, the current task will be backed up. Please enter the backup information of the current task"
               v-decorator="['description',{ rules: [{ required: true, message: 'Please enter a backup description' } ]}]"/>
           </a-form-item>
         </a-form>
@@ -1126,15 +1126,15 @@ export default {
         case 1:
           return 'deploying'
         case 2:
-          return 'application is updated,need deploy'
+          return 'application is updated,need relaunch'
         case 3:
-          return 'dependency is updated,need deploy'
+          return 'dependency is updated,need relaunch'
         case 4:
           return 'config is updated,need restart'
         case 5:
           return 'flink sql is updated,need restart'
         case 6:
-          return 'application is deployed,need restart'
+          return 'application is deployed to workspace,need restart'
         case 7:
           return 'application is rollbacked,need restart'
       }
@@ -1230,8 +1230,7 @@ export default {
         app.state === 11 ||
         app.state === 12 ||
         app.state === 13 ||
-        app.state === 15 ||
-        app.deploy === 0 || false
+        app.state === 15 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 

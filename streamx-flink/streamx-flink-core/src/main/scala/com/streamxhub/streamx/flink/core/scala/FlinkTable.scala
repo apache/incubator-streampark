@@ -80,7 +80,9 @@ class TableContext(val parameter: ParameterTool,
    *
    * @param sql 配置文件中的sql名称,或者一段sql
    */
-  def sql(sql: String = null)(implicit callback: Unit => String = null): Unit = super.callSql(sql, parameter, this)
+  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
+
+  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback:Unit => String = null): Unit = super.callSql(sql, parameter, this)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 

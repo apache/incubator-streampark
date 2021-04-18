@@ -78,5 +78,49 @@ public class FlinkInterpreterTest {
 
     }
 
+    @Test
+    public void testStream() {
+        String code = "\n" +
+                "%flink.execution.mode=yarn\n" +
+                "// the host and the port to connect to\n" +
+                "val hostname = \"test-hadoop-2\"\n" +
+                "val port = 9999\n" +
+                "\n" +
+                "// get the execution environment\n" +
+                "val env = StreamExecutionEnvironment.getExecutionEnvironment\n" +
+                "env.setStreamTimeCharacteristic(TimeCharacteristic.ProcessingTime)\n" +
+                "\n" +
+                "// get input data by connecting to the socket\n" +
+                "val text = env.socketTextStream(hostname, port, \"\\n\")\n" +
+                "\n" +
+                "// parse the data, group it, window it, and aggregate the counts\n" +
+                "val windowCounts = text.flatMap(new FlatMapFunction[String,(String,Long)] {\n" +
+                "    override def flatMap(value: String, out: Collector[(String, Long)]): Unit = {\n" +
+                "       for (word <- value.split(\"\\\\s\")) {\n" +
+                "           out.collect(word,1L)\n" +
+                "       }\n" +
+                "    }\n" +
+                "}).keyBy(0).timeWindow(Time.seconds(5)).reduce(new ReduceFunction[(String,Long)]() {\n" +
+                "    override def reduce(a: (String, Long), b: (String, Long)): (String, Long) = (a._1,a._2 + b._2)\n" +
+                "})\n" +
+                "\n" +
+                "// print the results with a single thread, rather than in parallel\n" +
+                "windowCounts.print.setParallelism(1)\n" +
+                "env.execute(\"Socket Window WordCount with StreamX NoteBook\")\n";
+
+        try {
+            InterpreterOutput out = new InterpreterOutput(line -> {
+
+            });
+            interpreter.open();
+            InterpreterResult result = interpreter.interpret(code, out);
+            System.out.println(out);
+            System.out.println(result.code());
+            interpreter.close();
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
+    }
+
 
 }

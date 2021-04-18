@@ -26,6 +26,7 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
+import com.streamxhub.streamx.console.core.entity.FlinkSql;
 
 /**
  * @author benjobs
@@ -46,4 +47,8 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
     void revoke(Application application);
 
     void removeApp(Long appId);
+
+    void rollbackFlinkSql(Application application,FlinkSql sql);
+
+    boolean isFlinkSqlBacked(Long appId, Long sqlId);
 }

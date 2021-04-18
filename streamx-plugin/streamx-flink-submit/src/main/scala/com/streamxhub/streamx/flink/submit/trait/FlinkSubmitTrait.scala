@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
@@ -46,12 +45,12 @@ trait FlinkSubmitTrait extends Logger {
   private[submit] var USER_FLINK_HOME: String = _
 
   private[submit] lazy val FLINK_HOME = {
-    USER_FLINK_HOME match {
-      case null =>
-        val flinkLocalHome = System.getenv("FLINK_HOME")
-        logInfo(s"flinkHome: $flinkLocalHome")
-        flinkLocalHome
-      case x => x
+    if (Utils.isEmpty(USER_FLINK_HOME)) {
+      val flinkLocalHome = System.getenv("FLINK_HOME")
+      logInfo(s"flinkHome: $flinkLocalHome")
+      flinkLocalHome
+    } else {
+      USER_FLINK_HOME
     }
   }
 
@@ -67,7 +66,7 @@ trait FlinkSubmitTrait extends Logger {
       flinkHdfsHome,
       flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
       flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
-      flinkHdfsJars = new Path(APP_JARS),
+      flinkHdfsJars = new Path( s"${HdfsUtils.getDefaultFS}$APP_JARS"),
       streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
       flinkYaml = HdfsUtils.read(s"$flinkHdfsHome/conf/flink-conf.yaml"),
       flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
@@ -105,7 +104,6 @@ trait FlinkSubmitTrait extends Logger {
 
   private[submit] lazy val PARAM_KEY_FLINK_HOME = KEY_FLINK_HOME("--")
   private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
-  private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")
   private[submit] lazy val PARAM_KEY_FLINK_PARALLELISM = KEY_FLINK_PARALLELISM("--")
@@ -121,7 +119,7 @@ trait FlinkSubmitTrait extends Logger {
          |      "resolveOrder": ${submitRequest.resolveOrder.getName},
          |      "appConf": ${submitRequest.appConf},
          |      "applicationType": ${submitRequest.applicationType},
-         |      "savePint": ${submitRequest.savePoint},
+         |      "savePoint": ${submitRequest.savePoint},
          |      "flameGraph": ${submitRequest.flameGraph != null},
          |      "userJar": ${submitRequest.flinkUserJar},
          |      "option": ${submitRequest.option},

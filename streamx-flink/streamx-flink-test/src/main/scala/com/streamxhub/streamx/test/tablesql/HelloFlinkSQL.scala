@@ -29,5 +29,6 @@ object HelloFlinkSQL extends FlinkStreamTable {
      * 一行胜千言
      */
     context.sql("sql")
+
   }
 }
