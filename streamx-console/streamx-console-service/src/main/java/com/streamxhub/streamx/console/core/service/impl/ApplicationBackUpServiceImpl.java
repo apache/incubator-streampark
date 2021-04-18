@@ -38,7 +38,6 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hadoop.fs.Hdfs;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -248,4 +247,5 @@ public class ApplicationBackUpServiceImpl
             HdfsUtils.movie(appHome.getPath(), applicationBackUp.getPath());
         }
     }
+
 }

@@ -75,7 +75,6 @@ import java.util.*;
 import java.util.concurrent.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.jar.Manifest;
-import java.util.prefs.BackingStoreException;
 import java.util.stream.Collectors;
 
 /**
@@ -471,16 +470,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         FlinkSql targetFlinkSql = flinkSqlService.getById(appParam.getSqlId());
         targetFlinkSql.decode();
 
-        // 2) 判断sql语句是否发生变化
-        boolean sqlDifference = !targetFlinkSql.getSql().trim().equals(appParam.getFlinkSql().trim());
-
-        // 3) 判断 依赖是否发生变化
-        Application.Dependency targetDependency = Application.Dependency.jsonToDependency(targetFlinkSql.getDependency());
-        Application.Dependency newDependency = appParam.getDependencyObject();
-        boolean depDifference = !targetDependency.eq(newDependency);
+        //2) 判断sql和依赖是否发生变化
+        ChangedType changedType = effectiveFlinkSql.checkChange(targetFlinkSql);
 
         //依赖或sql发生了变更
-        if (sqlDifference || depDifference) {
+        if (!ChangedType.NONE.equals(changedType)) {
             // 4) 检查是否存在新增记录的候选版本
             FlinkSql newFlinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
             //存在新增记录的候选版本则直接删除,只会保留一个候选版本,新增候选版本在没有生效的情况下,如果再次编辑,下个记录进来,则删除上个候选版本
@@ -494,9 +488,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.cleanCandidate(historyFlinkSql.getId());
             }
             FlinkSql sql = new FlinkSql(appParam);
-            CandidateType type = (depDifference || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
+            CandidateType type = (changedType.isDependencyChange() || application.isRunning()) ? CandidateType.NEW : CandidateType.NONE;
             flinkSqlService.create(sql, type);
-            if (depDifference) {
+            if (changedType.isDependencyChange()) {
                 application.setDeploy(DeployState.NEED_DEPLOY_AFTER_DEPENDENCY_UPDATE.get());
             } else {
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_SQL_UPDATE.get());
@@ -844,12 +838,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //回滚任务.
         if (application.isNeedRollback()) {
             if (application.isFlinkSqlJob()) {
-                FlinkSql sql = flinkSqlService.getCandidate(application.getId(),CandidateType.HISTORY);
-                assert sql != null;
-                //先备份当前的任务.
-                backUpService.backup(application);
-                //回滚历史版本的任务
-                backUpService.rollbackFlinkSql(application,sql);
+                flinkSqlService.rollback(application);
             }
         }
 

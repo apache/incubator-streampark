@@ -23,6 +23,7 @@ package com.streamxhub.streamx.console.core.entity;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.streamxhub.streamx.console.core.enums.ChangedType;
 import lombok.Data;
 import net.minidev.json.annotate.JsonIgnore;
 
@@ -83,6 +84,25 @@ public class FlinkSql {
         application.setFlinkSql(encode);
         application.setDependency(this.dependency);
         application.setSqlId(this.id);
+    }
+
+    public ChangedType checkChange(FlinkSql target) {
+        // 1) 判断sql语句是否发生变化
+        boolean sqlDifference = !this.getSql().trim().equals(target.getSql().trim());
+        // 2) 判断 依赖是否发生变化
+        Application.Dependency thisDependency = Application.Dependency.jsonToDependency(this.getDependency());
+        Application.Dependency newDependency = Application.Dependency.jsonToDependency(target.getDependency());
+        boolean depDifference = !thisDependency.eq(newDependency);
+        if (sqlDifference && depDifference) {
+            return ChangedType.ALL;
+        }
+        if (sqlDifference) {
+            return ChangedType.SQL;
+        }
+        if (depDifference) {
+            return ChangedType.DEPENDENCY;
+        }
+        return ChangedType.NONE;
     }
 
     public void base64Encode() {

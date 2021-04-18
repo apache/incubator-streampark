@@ -31,6 +31,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import lombok.extern.slf4j.Slf4j;
@@ -52,8 +53,10 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Autowired
     private EffectiveService effectiveService;
 
+    private ApplicationBackUpService backUpService;
+
     /**
-     * @param appParam
+     * @param appId
      * @param decode
      * @return
      */
@@ -140,5 +143,24 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public void removeApp(Long appId) {
         baseMapper.removeApp(appId);
+    }
+
+    @Override
+    public void rollback(Application application) {
+        FlinkSql sql = getCandidate(application.getId(), CandidateType.HISTORY);
+        assert sql != null;
+        //先备份当前的任务.
+        if (!isBacked(sql)) {
+            log.info("current job version:{}, Backing up...",sql.getVersion());
+            backUpService.backup(application);
+        } else {
+            log.info("current job version:{}, already backed",sql.getVersion());
+        }
+        //回滚历史版本的任务
+        backUpService.rollbackFlinkSql(application, sql);
+    }
+
+    private boolean isBacked(FlinkSql sql) {
+        return baseMapper.isBacked(sql.getAppId(), sql.getId()) > 0;
     }
 }

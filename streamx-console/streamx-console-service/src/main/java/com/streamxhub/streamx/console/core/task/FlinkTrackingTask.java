@@ -295,6 +295,7 @@ public class FlinkTrackingTask {
                         case NEED_RESTART_AFTER_SQL_UPDATE:
                         case NEED_RESTART_AFTER_ROLLBACK:
                         case NEED_RESTART_AFTER_DEPLOY:
+                        case NEED_ROLLBACK:
                             //清空需要重新启动的状态.
                             application.setDeploy(DeployState.DONE.get());
                             break;
