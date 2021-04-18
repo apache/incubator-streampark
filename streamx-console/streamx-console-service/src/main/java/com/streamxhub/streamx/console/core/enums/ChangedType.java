@@ -20,8 +20,6 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
-import lombok.val;
-
 import java.util.Arrays;
 
 public enum ChangedType {
