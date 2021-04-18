@@ -797,7 +797,7 @@ export default {
           {
             title: 'Description',
             dataIndex: 'description',
-            width: '30%'
+            width: '20%'
           },
           {
             title: 'Version',
