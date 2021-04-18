@@ -184,32 +184,28 @@ public class ApplicationBackUpServiceImpl
     public void rollbackFlinkSql(Application application,FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(),sql.getId());
         assert backUp != null;
-
         if (!HdfsUtils.exists(backUp.getPath())) {
             return;
         }
+        try {
+            FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
+                // 回滚 config 和 sql
+                effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
+                effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
 
-        executorService.execute(() -> {
-            try {
-                FlinkTrackingTask.refreshTracking(backUp.getAppId(), () -> {
-                    // 回滚 config 和 sql
-                    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.CONFIG, backUp.getId());
-                    effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
-
-                    // 2) 删除当前项目
-                    HdfsUtils.delete(application.getAppHome().getAbsolutePath());
-                    try {
-                        // 5)将备份的文件copy到有效项目目录下.
-                        HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
-                    } catch (Exception e) {
-                        throw e;
-                    }
-                    return null;
-                });
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        });
+                // 2) 删除当前项目
+                HdfsUtils.delete(application.getAppHome().getAbsolutePath());
+                try {
+                    // 5)将备份的文件copy到有效项目目录下.
+                    HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
+                } catch (Exception e) {
+                    throw e;
+                }
+                return null;
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private ApplicationBackUp getFlinkSqlBackup(Long appId, Long sqlId) {
