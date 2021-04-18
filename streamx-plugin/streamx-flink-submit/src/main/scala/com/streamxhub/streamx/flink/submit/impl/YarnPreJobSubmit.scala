@@ -97,7 +97,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         val jobGraph = PackagedProgramUtils.createJobGraph(
           packagedProgram,
           flinkConfig,
-          1,
+          getParallelism(submitRequest),
           false
         )
         logInfo("|------------------------------<<jobId>>------------------------------|")
