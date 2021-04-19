@@ -23,6 +23,8 @@ package com.streamxhub.streamx.console.core.service.impl;
 import java.util.concurrent.*;
 
 import com.streamxhub.streamx.common.util.ThreadUtils;
+import com.streamxhub.streamx.console.core.service.SettingService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +42,9 @@ import com.streamxhub.streamx.repl.flink.interpreter.InterpreterResult;
 @Service
 public class NoteBookServiceImpl implements NoteBookService {
 
+    @Autowired
+    private SettingService settingService;
+
     private ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
             200,
@@ -56,7 +61,7 @@ public class NoteBookServiceImpl implements NoteBookService {
         executorService.execute(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
             try {
-                interpreter.open();
+                interpreter.open(settingService.getEnvFlinkHome());
                 InterpreterOutput out = new InterpreterOutput(log::info);
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 log.info("repl submit code:" + result.code());

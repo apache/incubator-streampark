@@ -21,7 +21,7 @@
 
 package com.streamxhub.streamx.repl.flink.interpreter
 
-import com.streamxhub.streamx.common.util.{ClassLoaderUtils, DependencyUtils, HadoopUtils}
+import com.streamxhub.streamx.common.util.{ClassLoaderUtils, DependencyUtils, HadoopUtils, Utils}
 import com.streamxhub.streamx.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
 import com.streamxhub.streamx.repl.flink.shims.FlinkShims
 import org.apache.commons.lang3.StringUtils
@@ -71,6 +71,7 @@ class FlinkScalaInterpreter(properties: Properties) {
   private var mode: ExecutionMode.Value = _
   private var batchEnv: ExecutionEnvironment = _
   private var streamEnv: StreamExecutionEnvironment = _
+  var flinkHome:String = _
   var flinkShims: FlinkShims = _
   var jmWebUrl: String = _
   var replacedJMWebUrl: String = _
@@ -80,8 +81,8 @@ class FlinkScalaInterpreter(properties: Properties) {
   var userUdfJars: Seq[String] = _
   var userCodeJarFile: File = _
 
-  def open(): Unit = {
-    val config = initFlinkConfig()
+  def open(flinkHome:String): Unit = {
+    val config = initFlinkConfig(flinkHome)
     createFlinkILoop(config)
     val modifiers = new ArrayBuffer[String]
     modifiers + "@transient"
@@ -92,8 +93,17 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.streamEnv.registerJobListener(jobListener)
   }
 
-  private def initFlinkConfig(): Config = {
-    val flinkHome = System.getenv("FLINK_HOME")
+  private def initFlinkConfig(flinkHome:String): Config = {
+    this.flinkHome = {
+      if (Utils.isEmpty(flinkHome)) {
+        val flinkLocalHome = System.getenv("FLINK_HOME")
+        require(flinkLocalHome != null)
+        logInfo(s"flinkHome: $flinkLocalHome")
+        flinkLocalHome
+      } else {
+        flinkHome
+      }
+    }
     require(flinkHome != null)
     val flinkConfDir = sys.env.getOrElse("FLINK_CONF_DIR", s"$flinkHome/conf")
     val hadoopConfDir = sys.env.getOrElse("HADOOP_CONF_DIR", "")
