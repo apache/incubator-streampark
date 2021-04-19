@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.metrics.flink;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.streamxhub.streamx.common.util.HdfsUtils;
+import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -33,13 +34,9 @@ import java.util.List;
 @Data
 public class CheckPoints implements Serializable {
 
-    private Counts counts;
-
     private List<CheckPoint> history;
 
     private Latest latest;
-
-    private Object summary;
 
     @Data
     public static class CheckPoint implements Serializable {
@@ -64,27 +61,10 @@ public class CheckPoints implements Serializable {
         @JsonProperty("state_size")
         private Long stateSize;
 
-        @JsonProperty("processed_data")
-        private Long processedData;
-
-        @JsonProperty("persisted_data")
-        private Long persistedData;
-
-        @JsonProperty("num_subtasks")
-        private Integer numSubtasks;
-
-        @JsonProperty("num_acknowledged_subtasks")
-        private Integer numAcknowledgedSubtasks;
-
         @JsonProperty("end_to_end_duration")
         private Long endToEndDuration;
 
         private Boolean discarded;
-
-        private Object tasks;
-
-        @JsonProperty("alignment_buffered")
-        private Long alignmentBuffered;
 
         public boolean isCompleted() {
             return "COMPLETED".equals(this.status);
@@ -93,23 +73,17 @@ public class CheckPoints implements Serializable {
         public String getPath() {
             return this.externalPath.replaceFirst("^hdfs:",HdfsUtils.getDefaultFS());
         }
-    }
 
-    @Data
-    public static class Counts implements Serializable {
-        private Integer completed;
-        private Integer failed;
-        @JsonProperty("in_progress")
-        private Integer inProgress;
-        private Integer restored;
-        private Integer total;
+        public CheckPointType getCheckPointType() {
+            if ("CHECKPOINT".equals(this.checkpointType)) {
+                return CheckPointType.CHECKPOINT;
+            }
+            return CheckPointType.SAVEPOINT;
+        }
     }
 
     @Data
     public static class Latest implements Serializable {
         private CheckPoint completed;
-        private Object failed;
-        private Object restored;
-        private Object savepoint;
     }
 }
