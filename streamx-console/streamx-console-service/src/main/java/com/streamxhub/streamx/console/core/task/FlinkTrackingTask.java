@@ -25,10 +25,9 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
-import com.streamxhub.streamx.console.core.enums.DeployState;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.enums.OptionState;
-import com.streamxhub.streamx.console.core.enums.StopFrom;
+import com.streamxhub.streamx.console.core.entity.SavePoint;
+import com.streamxhub.streamx.console.core.enums.*;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
@@ -41,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,6 +107,8 @@ public class FlinkTrackingTask {
     private SavePointService savePointService;
 
     private static ApplicationService applicationService;
+
+    private static final Map<String, Long> checkPointMap = new ConcurrentHashMap<>();
 
     private static final Map<Long, OptionState> optioning = new ConcurrentHashMap<>();
     /**
@@ -233,127 +235,194 @@ public class FlinkTrackingTask {
     private void getFromFlinkRestApi(Application application, StopFrom stopFrom) throws Exception {
         JobsOverview jobsOverview = application.httpJobsOverview();
         Optional<JobsOverview.Job> optional = jobsOverview.getJobs().stream().findFirst();
-        assert optional.isPresent();
-        JobsOverview.Job jobOverview = optional.get();
 
-        FlinkAppState currentState = FlinkAppState.of(jobOverview.getState());
+        if (optional.isPresent()) {
 
-        if (!FlinkAppState.OTHER.equals(currentState)) {
+            JobsOverview.Job jobOverview = optional.get();
+            FlinkAppState currentState = FlinkAppState.of(jobOverview.getState());
 
-            OptionState optionState = optioning.get(application.getId());
+            if (!FlinkAppState.OTHER.equals(currentState)) {
 
-            // 1) jobId以restapi返回的状态为准
-            application.setJobId(jobOverview.getId());
-            application.setTotalTask(jobOverview.getTasks().getTotal());
-            application.setOverview(jobOverview.getTasks());
+                OptionState optionState = optioning.get(application.getId());
 
-            // 2) duration
-            long startTime = jobOverview.getStartTime();
-            long endTime = jobOverview.getEndTime();
-            if (application.getStartTime() == null) {
-                application.setStartTime(new Date(startTime));
-            } else if (startTime != application.getStartTime().getTime()) {
-                application.setStartTime(new Date(startTime));
-            }
-            if (endTime != -1) {
-                if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
-                    application.setEndTime(new Date(endTime));
-                }
-            }
-            application.setDuration(jobOverview.getDuration());
+                // 1) set info from JobOverview
+                handleJobOverview(application, jobOverview);
 
-            // 3) overview,刚启动第一次获取Overview信息.
-            if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
-                try {
-                    Overview override = application.httpOverview();
-                    if (override.getSlotsTotal() > 0) {
-                        STARTING_CACHE.invalidate(application.getId());
-                        application.setTotalTM(override.getTaskmanagers());
-                        application.setTotalSlot(override.getSlotsTotal());
-                        application.setAvailableSlot(override.getSlotsAvailable());
-                    }
-                } catch (Exception e) {
-                    throw e;
-                }
-            }
+                //2) CheckPoints
+                handleCheckPoints(application);
 
-            // 4) savePoint obsolete check and NEED_START check
-            if (currentState.equals(FlinkAppState.RUNNING)) {
-                /**
-                 * 上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
-                 * 则:job之前一下状态需要请求重启状态:
-                 * NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
-                 * NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
-                 * NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
-                 * NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
-                 */
-                if (OptionState.STARTING.equals(optionState)) {
-                    DeployState deployState = DeployState.of(application.getDeploy());
-                    //如果任务更新后需要重新启动 或 发布后需要重新启动
-                    switch (deployState) {
-                        case NEED_RESTART_AFTER_CONF_UPDATE:
-                        case NEED_RESTART_AFTER_SQL_UPDATE:
-                        case NEED_RESTART_AFTER_ROLLBACK:
-                        case NEED_RESTART_AFTER_DEPLOY:
-                        case NEED_ROLLBACK:
-                            //清空需要重新启动的状态.
-                            application.setDeploy(DeployState.DONE.get());
-                            break;
-                        default:
-                            break;
-                    }
-                }
-                /**
-                 * 当前状态为running,且savePointCache里有当前任务,说明该任务正在做savepoint
-                 */
-                if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
-                    application.setOptionState(OptionState.SAVEPOINTING.getValue());
+                // 2) savePoint obsolete check and NEED_START check
+                if (currentState.equals(FlinkAppState.RUNNING)) {
+                    handleRunningState(application, optionState, currentState);
                 } else {
-                    application.setOptionState(OptionState.NONE.getValue());
+                    handleNotRunState(application, optionState, currentState, stopFrom);
                 }
+            }
+
+        }
+
+    }
+
+    /**
+     * 基本信息回写等处理
+     *
+     * @param application
+     * @param jobOverview
+     * @throws IOException
+     */
+    private void handleJobOverview(Application application, JobsOverview.Job jobOverview) throws IOException {
+        // 1) jobId以restapi返回的状态为准
+        application.setJobId(jobOverview.getId());
+        application.setTotalTask(jobOverview.getTasks().getTotal());
+        application.setOverview(jobOverview.getTasks());
+
+        // 2) duration
+        long startTime = jobOverview.getStartTime();
+        long endTime = jobOverview.getEndTime();
+        if (application.getStartTime() == null) {
+            application.setStartTime(new Date(startTime));
+        } else if (startTime != application.getStartTime().getTime()) {
+            application.setStartTime(new Date(startTime));
+        }
+        if (endTime != -1) {
+            if (application.getEndTime() == null || endTime != application.getEndTime().getTime()) {
+                application.setEndTime(new Date(endTime));
+            }
+        }
+        application.setDuration(jobOverview.getDuration());
+
+        // 3) overview,刚启动第一次获取Overview信息.
+        if (STARTING_CACHE.getIfPresent(application.getId()) != null) {
+            Overview override = application.httpOverview();
+            if (override.getSlotsTotal() > 0) {
+                STARTING_CACHE.invalidate(application.getId());
+                application.setTotalTM(override.getTaskmanagers());
+                application.setTotalSlot(override.getSlotsTotal());
+                application.setAvailableSlot(override.getSlotsAvailable());
+            }
+        }
+    }
+
+    /**
+     * 获取最新的checkPoint
+     *
+     * @param application
+     * @throws IOException
+     */
+    private void handleCheckPoints(Application application) throws IOException {
+        CheckPoints checkPoints = application.httpCheckpoints();
+        if (checkPoints != null) {
+            CheckPoints.Latest latest = checkPoints.getLatest();
+            CheckPoints.CheckPoint checkPoint = latest.getCompleted();
+            if (checkPoint != null && checkPoint.isCompleted()) {
+                Long latestId = checkPointMap.get(application.getJobId());
+                if (latestId == null || latestId < checkPoint.getId()) {
+                    SavePoint savePoint = new SavePoint();
+                    savePoint.setAppId(application.getId());
+                    savePoint.setLastest(true);
+                    savePoint.setType(CheckPointType.CHECKPOINT.get());
+                    savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
+                    savePoint.setCreateTime(new Date());
+                    savePoint.setSavePoint(checkPoint.getPath());
+                    savePointService.save(savePoint);
+                    checkPointMap.put(application.getJobId(), checkPoint.getId());
+                }
+            }
+        }
+    }
+
+    /**
+     * 当前任务正在运行,一系列状态处理.
+     *
+     * @param application
+     * @param optionState
+     * @param currentState
+     */
+    private void handleRunningState(Application application, OptionState optionState, FlinkAppState currentState) {
+        /**
+         * 上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
+         * 则:job之前一下状态需要请求重启状态:
+         * NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
+         * NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
+         * NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)
+         * NEED_RESTART_AFTER_DEPLOY(任务重新发布后需要回滚)
+         */
+        if (OptionState.STARTING.equals(optionState)) {
+            DeployState deployState = DeployState.of(application.getDeploy());
+            //如果任务更新后需要重新启动 或 发布后需要重新启动
+            switch (deployState) {
+                case NEED_RESTART_AFTER_CONF_UPDATE:
+                case NEED_RESTART_AFTER_SQL_UPDATE:
+                case NEED_RESTART_AFTER_ROLLBACK:
+                case NEED_RESTART_AFTER_DEPLOY:
+                case NEED_ROLLBACK:
+                    //清空需要重新启动的状态.
+                    application.setDeploy(DeployState.DONE.get());
+                    break;
+                default:
+                    break;
+            }
+        }
+        // 当前状态为running,且savePointCache里有当前任务,说明该任务正在做savepoint
+        if (SAVEPOINT_CACHE.getIfPresent(application.getId()) != null) {
+            application.setOptionState(OptionState.SAVEPOINTING.getValue());
+        } else {
+            application.setOptionState(OptionState.NONE.getValue());
+        }
+        application.setState(currentState.getValue());
+        trackingCache.put(application.getId(), application);
+        cleanOptioning(optionState, application.getId());
+    }
+
+
+    /**
+     * 当前任务未运行,状态处理
+     *
+     * @param application
+     * @param optionState
+     * @param currentState
+     * @param stopFrom
+     */
+    private void handleNotRunState(Application application,
+                                   OptionState optionState,
+                                   FlinkAppState currentState,
+                                   StopFrom stopFrom) {
+        switch (currentState) {
+            case CANCELLING:
+                cancelingCache.put(application.getId(), DEFAULT_FLAG_BYTE);
+                cleanSavepoint(application);
                 application.setState(currentState.getValue());
                 trackingCache.put(application.getId(), application);
-                cleanOptioning(optionState, application.getId());
-            } else {
-                switch (currentState) {
-                    case CANCELLING:
-                        cancelingCache.put(application.getId(), DEFAULT_FLAG_BYTE);
-                        cleanSavepoint(application);
-                        application.setState(currentState.getValue());
-                        trackingCache.put(application.getId(), application);
-                        break;
-                    case CANCELED:
-                        log.info("flinkTrackingTask getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!", currentState.name());
-                        cleanSavepoint(application);
-                        application.setState(currentState.getValue());
-                        if (StopFrom.NONE.equals(stopFrom)) {
-                            log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
-                            savePointService.obsolete(application.getId());
-                        }
-                        //清理stopFrom
-                        stopFromCache.invalidate(application.getId());
-                        //持久化application并且移除跟踪监控
-                        persistentAndClean(application);
-                        cleanOptioning(optionState, application.getId());
-                        break;
-                    case FAILED:
-                        cleanSavepoint(application);
-                        //清理stopFrom
-                        stopFromCache.invalidate(application.getId());
-                        application.setState(FlinkAppState.FAILED.getValue());
-                        //持久化application并且移除跟踪监控
-                        persistentAndClean(application);
-                        break;
-                    case RESTARTING:
-                        log.info("flinkTrackingTask getFromFlinkRestApi, job state {},add to starting", currentState.name());
-                        STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
-                        break;
-                    default:
-                        application.setState(currentState.getValue());
-                        trackingCache.put(application.getId(), application);
+                break;
+            case CANCELED:
+                log.info("flinkTrackingTask getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!", currentState.name());
+                cleanSavepoint(application);
+                application.setState(currentState.getValue());
+                if (StopFrom.NONE.equals(stopFrom)) {
+                    log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
+                    savePointService.obsolete(application.getId());
                 }
-            }
-
+                //清理stopFrom
+                stopFromCache.invalidate(application.getId());
+                //持久化application并且移除跟踪监控
+                persistentAndClean(application);
+                cleanOptioning(optionState, application.getId());
+                break;
+            case FAILED:
+                cleanSavepoint(application);
+                //清理stopFrom
+                stopFromCache.invalidate(application.getId());
+                application.setState(FlinkAppState.FAILED.getValue());
+                //持久化application并且移除跟踪监控
+                persistentAndClean(application);
+                break;
+            case RESTARTING:
+                log.info("flinkTrackingTask getFromFlinkRestApi, job state {},add to starting", currentState.name());
+                STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
+                break;
+            default:
+                application.setState(currentState.getValue());
+                trackingCache.put(application.getId(), application);
         }
     }
 
@@ -443,6 +512,7 @@ public class FlinkTrackingTask {
         persistent(application);
         stopTracking(application.getId());
     }
+
 
     /**
      * <p><strong>1分钟往数据库同步一次状态</strong></p></br>

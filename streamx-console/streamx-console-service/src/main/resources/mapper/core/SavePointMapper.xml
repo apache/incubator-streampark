@@ -5,7 +5,9 @@
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="LASTEST" jdbcType="BOOLEAN" property="lastest"/>
+        <result column="TYPE" jdbcType="INTEGER" property="type"/>
         <result column="SAVE_POINT" jdbcType="VARCHAR" property="savePoint"/>
+        <result column="TRIGGER_TIME" jdbcType="DATE" property="triggerTime"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>
 </mapper>

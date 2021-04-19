@@ -33,16 +33,14 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
-import com.streamxhub.streamx.console.core.enums.ChangedType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -257,6 +255,18 @@ public class Application implements Serializable {
         } catch (IOException e) {
             String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId);
             return httpGetDoResult(url, Overview.class);
+        }
+    }
+
+    @JsonIgnore
+    public CheckPoints httpCheckpoints() throws IOException {
+        String format = "%s/proxy/%s/jobs/%s/checkpoints";
+        try {
+            String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
+        } catch (IOException e) {
+            String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
         }
     }
 

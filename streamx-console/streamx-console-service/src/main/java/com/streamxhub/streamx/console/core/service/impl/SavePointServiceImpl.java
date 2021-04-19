@@ -20,16 +20,10 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.common.conf.ConfigConst;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -39,6 +33,10 @@ import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author benjobs
@@ -52,6 +50,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
+    }
+
+    @Override
+    public boolean save(SavePoint entity) {
+        this.obsolete(entity.getAppId());
+        return super.save(entity);
     }
 
     @Override

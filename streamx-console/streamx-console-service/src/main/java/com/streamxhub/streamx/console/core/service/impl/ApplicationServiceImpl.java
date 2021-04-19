@@ -445,7 +445,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     /**
-     *
      * 更新 FlinkSql 类型的作业.要考虑3个方面<br/>
      * 1. flink Sql是否发生更新 <br/>
      * 2. 依赖是否发生更新<br/>
@@ -466,7 +465,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //2) 判断sql和依赖是否发生变化
         ChangedType changedType = copySourceFlinkSql.checkChange(targetFlinkSql);
 
-        log.info("updateFlinkSqlJob changedType: {}",changedType);
+        log.info("updateFlinkSqlJob changedType: {}", changedType);
 
         //依赖或sql发生了变更
         if (changedType.hasChanged()) {
@@ -782,12 +781,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 );
                 if (appParam.getSavePointed() && savePointDir != null) {
                     SavePoint savePoint = new SavePoint();
+                    Date now = new Date();
                     savePoint.setSavePoint(savePointDir);
                     savePoint.setAppId(application.getId());
                     savePoint.setLastest(true);
-                    savePoint.setCreateTime(new Date());
-                    // 之前的配置设置为已过期
-                    savePointService.obsolete(application.getId());
+                    savePoint.setType(CheckPointType.SAVEPOINT.get());
+                    savePoint.setTriggerTime(now);
+                    savePoint.setCreateTime(now);
                     savePointService.save(savePoint);
                 }
             } catch (Exception e) {

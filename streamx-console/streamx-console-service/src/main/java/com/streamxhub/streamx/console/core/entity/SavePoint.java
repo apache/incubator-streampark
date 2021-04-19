@@ -41,7 +41,15 @@ public class SavePoint {
 
     private Boolean lastest;
 
+    /**
+     * 1) checkPoint <br>
+     * 2) savePoint
+     */
+    private Integer type;
+
     private String savePoint;
+
+    private Date triggerTime;
 
     private Date createTime;
 }
