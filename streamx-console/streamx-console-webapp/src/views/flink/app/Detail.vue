@@ -317,6 +317,23 @@
                 {{ record.createTime }}
               </template>
               <template
+                slot="type"
+                slot-scope="text, record">
+                <div
+                  class="app_state">
+                  <a-tag
+                    color="#545454"
+                    v-if="record['type'] === 0">
+                    Check Point
+                  </a-tag>
+                  <a-tag
+                    color="#0C7EF2"
+                    v-if="record['type'] === 1">
+                    Save Point
+                  </a-tag>
+                </div>
+              </template>
+              <template
                 slot="operation"
                 slot-scope="text, record">
                 <a-icon
@@ -765,7 +782,7 @@ export default {
         ],
         savePoints: [
           {
-            title: 'SavePoint',
+            title: 'Path',
             dataIndex: 'savePoint',
             width: '50%'
           },
@@ -773,6 +790,11 @@ export default {
             title: 'Trigger Time',
             dataIndex: 'createTime',
             scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Type',
+            dataIndex: 'type',
+            scopedSlots: { customRender: 'type' }
           },
           {
             title: 'Lastest',

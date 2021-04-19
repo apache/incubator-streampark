@@ -660,7 +660,7 @@
               v-decorator="['savePoint']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> restore the application from savepoint</span>
+              style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
@@ -697,7 +697,7 @@
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> restore the application from savepoint</span>
+              style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
