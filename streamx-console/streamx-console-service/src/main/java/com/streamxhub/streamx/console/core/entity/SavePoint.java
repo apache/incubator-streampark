@@ -47,7 +47,7 @@ public class SavePoint {
      */
     private Integer type;
 
-    private String savePoint;
+    private String path;
 
     private Date triggerTime;
 
