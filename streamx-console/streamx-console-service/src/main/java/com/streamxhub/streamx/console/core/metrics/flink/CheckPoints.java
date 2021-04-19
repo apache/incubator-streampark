@@ -35,9 +35,11 @@ public class CheckPoints implements Serializable {
 
     private Counts counts;
 
-    private List<CheckPoints> history;
+    private List<CheckPoint> history;
 
     private Latest latest;
+
+    private Object summary;
 
     @Data
     public static class CheckPoint implements Serializable {
@@ -79,6 +81,8 @@ public class CheckPoints implements Serializable {
 
         private Boolean discarded;
 
+        private Object tasks;
+
         @JsonProperty("alignment_buffered")
         private Long alignmentBuffered;
 
@@ -104,8 +108,8 @@ public class CheckPoints implements Serializable {
     @Data
     public static class Latest implements Serializable {
         private CheckPoint completed;
-        private CheckPoint failed;
-        private CheckPoint restored;
-        private CheckPoint savepoint;
+        private Object failed;
+        private Object restored;
+        private Object savepoint;
     }
 }

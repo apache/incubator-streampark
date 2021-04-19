@@ -261,13 +261,20 @@ public class Application implements Serializable {
     @JsonIgnore
     public CheckPoints httpCheckpoints() throws IOException {
         String format = "%s/proxy/%s/jobs/%s/checkpoints";
+        String result;
         try {
             String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
-        } catch (IOException e) {
+            result = HttpClientUtils.httpGetRequest(url);
+        } catch (Exception e) {
             String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
+            result = HttpClientUtils.httpGetRequest(url);
         }
+        if (result != null) {
+            result = result.replaceAll("\"@class\":\"[a-zA-Z]+\",", "");
+            ObjectMapper mapper = new ObjectMapper();
+            return mapper.readValue(new StringReader(result), CheckPoints.class);
+        }
+        return null;
     }
 
     @JsonIgnore

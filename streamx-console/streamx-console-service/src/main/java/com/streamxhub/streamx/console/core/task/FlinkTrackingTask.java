@@ -114,14 +114,14 @@ public class FlinkTrackingTask {
     /**
      * 10秒之内
      */
-    private final Long optionInterval = 1000L * 10;
+    private final Long OPTION_INTERVAL = 1000L * 10;
 
-    private final Long startingInterval = 1000L * 30;
+    private final Long STARTING_INTERVAL = 1000L * 30;
 
     /**
      * 正常5秒钟获取一次信息
      */
-    private final Long trackInterval = 1000L * 5;
+    private final Long TRACK_INTERVAL = 1000L * 5;
 
     private Long lastTrackTime = 0L;
 
@@ -168,10 +168,10 @@ public class FlinkTrackingTask {
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
         if (lastTrackTime == null || !optioning.isEmpty()) {
             tracking();
-        } else if (System.currentTimeMillis() - lastOptionTime <= optionInterval) {
+        } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
             tracking();
-        } else if (System.currentTimeMillis() - lastTrackTime >= trackInterval) {
+        } else if (System.currentTimeMillis() - lastTrackTime >= TRACK_INTERVAL) {
             //3) 正常信息获取,判断本次时间和上次时间是否间隔5秒(正常监控信息获取,每5秒一次)
             tracking();
         }
@@ -200,7 +200,7 @@ public class FlinkTrackingTask {
                      */
                     if (optionState == null
                             || !optionState.equals(OptionState.STARTING)
-                            || now - optioningTime >= startingInterval) {
+                            || now - optioningTime >= STARTING_INTERVAL) {
                         //非正在手动映射appId
                         if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                             log.error("flinkTrackingTask getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint obsoleted!");
@@ -242,25 +242,21 @@ public class FlinkTrackingTask {
             FlinkAppState currentState = FlinkAppState.of(jobOverview.getState());
 
             if (!FlinkAppState.OTHER.equals(currentState)) {
-
-                OptionState optionState = optioning.get(application.getId());
-
                 // 1) set info from JobOverview
                 handleJobOverview(application, jobOverview);
 
                 //2) CheckPoints
                 handleCheckPoints(application);
 
-                // 2) savePoint obsolete check and NEED_START check
+                //3) savePoint obsolete check and NEED_START check
+                OptionState optionState = optioning.get(application.getId());
                 if (currentState.equals(FlinkAppState.RUNNING)) {
                     handleRunningState(application, optionState, currentState);
                 } else {
                     handleNotRunState(application, optionState, currentState, stopFrom);
                 }
             }
-
         }
-
     }
 
     /**
@@ -430,7 +426,6 @@ public class FlinkTrackingTask {
      * <p><strong>到 yarn中查询job的历史记录,说明flink任务已经停止,任务的最终状态为"CANCELED"</strong>
      *
      * @param application
-     * @param index
      * @param stopFrom
      */
     private void getFromYarnRestApi(Application application, StopFrom stopFrom) throws Exception {
