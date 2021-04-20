@@ -254,12 +254,12 @@
                 <div
                   class="app_state">
                   <a-tag
-                    color="#545454"
+                    color="#0C7EF2"
                     v-if="record['type'] === 0">
                     Check Point
                   </a-tag>
                   <a-tag
-                    color="#0C7EF2"
+                    color="#52c41a"
                     v-if="record['type'] === 1">
                     Save Point
                   </a-tag>

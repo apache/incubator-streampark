@@ -81,7 +81,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
         Page<SavePoint> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        SortUtil.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, savePoint.getAppId());
     }
 
