@@ -21,8 +21,8 @@
 import api from './index'
 import http from '@/utils/request'
 
-export function lastest (params) {
-  return http.post(api.SavePoint.LASTEST, params)
+export function latest (params) {
+  return http.post(api.SavePoint.LATEST, params)
 }
 
 export function history (params) {

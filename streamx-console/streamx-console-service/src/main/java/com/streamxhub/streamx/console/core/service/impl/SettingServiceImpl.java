@@ -23,7 +23,6 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -83,10 +82,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             return false;
         }
         File file = new File(workspace);
-        if(!file.exists()) {
-           if(!file.mkdirs()) {
-               return false;
-           }
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                return false;
+            }
         }
         return file.canRead() && file.canWrite();
     }
@@ -104,5 +103,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getMavenRepository() {
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
+    }
+
+    @Override
+    public Integer getCheckpointThreshold() {
+        String threshold = settings.get(SettingService.KEY_CHECKPOINT_THRESHOLD).getValue();
+        return Integer.parseInt(threshold);
     }
 }

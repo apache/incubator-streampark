@@ -48,7 +48,7 @@ export default {
     FLAMEGRAPH: '/metrics/flamegraph'
   },
   SavePoint: {
-    LASTEST: '/flink/savepoint/lastest',
+    LATEST: '/flink/savepoint/latest',
     HISTORY: '/flink/savepoint/history',
     DELETE: '/flink/savepoint/delete'
   },

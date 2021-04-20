@@ -242,19 +242,36 @@
               :loading="pager.savePoints.loading"
               class="detail-table">
               <template
-                slot="createTime"
+                slot="triggerTime"
                 slot-scope="text, record">
                 <a-icon
                   type="clock-circle" />
-                {{ record.createTime }}
+                {{ record.triggerTime }}
               </template>
               <template
-                slot="lastest"
+                slot="type"
+                slot-scope="text, record">
+                <div
+                  class="app_state">
+                  <a-tag
+                    color="#0C7EF2"
+                    v-if="record['type'] === 0">
+                    Check Point
+                  </a-tag>
+                  <a-tag
+                    color="#52c41a"
+                    v-if="record['type'] === 1">
+                    Save Point
+                  </a-tag>
+                </div>
+              </template>
+              <template
+                slot="latest"
                 slot-scope="text, record">
                 <a-tag
                   color="green"
-                  v-if="record.lastest">
-                  lastest
+                  v-if="record.latest">
+                  Latest
                 </a-tag>
               </template>
               <template
@@ -263,7 +280,7 @@
                 <a-icon
                   type="copy"
                   style="color:#4a9ff5"
-                  v-clipboard:copy="record.savePoint"
+                  v-clipboard:copy="record.path"
                   v-clipboard:success="handleCopySuccess"
                   v-clipboard:error="handleCopyError" />
                 <a-popconfirm
@@ -308,13 +325,6 @@
                   size="small">
                   {{ record.version }}
                 </a-button>
-              </template>
-              <template
-                slot="createTime"
-                slot-scope="text, record">
-                <a-icon
-                  type="clock-circle" />
-                {{ record.createTime }}
               </template>
               <template
                 slot="operation"
@@ -765,19 +775,25 @@ export default {
         ],
         savePoints: [
           {
-            title: 'SavePoint',
-            dataIndex: 'savePoint',
-            width: '50%'
+            title: 'Path',
+            dataIndex: 'path',
+            width: '45%'
           },
           {
             title: 'Trigger Time',
-            dataIndex: 'createTime',
-            scopedSlots: { customRender: 'createTime' }
+            dataIndex: 'triggerTime',
+            scopedSlots: { customRender: 'triggerTime' },
+            width: 250
           },
           {
-            title: 'Lastest',
-            dataIndex: 'lastest',
-            scopedSlots: { customRender: 'lastest' }
+            title: 'Type',
+            dataIndex: 'type',
+            scopedSlots: { customRender: 'type' }
+          },
+          {
+            title: 'Latest',
+            dataIndex: 'latest',
+            scopedSlots: { customRender: 'latest' }
           },
           {
             title: 'Operation',

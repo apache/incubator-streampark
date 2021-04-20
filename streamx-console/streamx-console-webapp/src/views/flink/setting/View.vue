@@ -12,6 +12,7 @@
             <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key.match(/(.*)maven(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key.match(/(.*)address(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key.match(/env.flink(.*)/g)"></svg-icon>
+            <svg-icon class="avatar" name="threshold" size="large" slot="avatar" v-if="item.key.match(/(.*)checkpoint.threshold$/g)"></svg-icon>
             <span slot="title">
               {{ item.title }}
             </span>

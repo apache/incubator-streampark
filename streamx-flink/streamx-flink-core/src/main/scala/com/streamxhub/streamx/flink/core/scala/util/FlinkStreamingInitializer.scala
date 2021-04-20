@@ -362,21 +362,9 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   private[this] def getFlinkConf(): Map[String, String] = {
-    /**
-     * 优先从启动参数传入的flink.home中读取flink-conf.yaml配置文件
-     * 如果未传入则读取当前机器环境变量FLINK_HOME下的flink-conf.yaml配置文件..
-     */
-    parameter.get(KEY_FLINK_HOME(), null) match {
-      case null | "" =>
-        logDebug("--flink.home is undefined,now try found from flink-conf.yaml on System env.")
-        val flinkHome = System.getenv("FLINK_HOME")
-        require(flinkHome != null, "[StreamX] FLINK_HOME is not defined in your system.")
-        val flinkConf = s"$flinkHome/conf/flink-conf.yaml"
-        readFlinkConf(flinkConf)
-      case flinkHome =>
-        val flinkConf = PropertiesUtils.readFile(s"$flinkHome/conf/flink-conf.yaml")
-        readFlinkConf(flinkConf)
-    }
+    val flinkConf = parameter.get(KEY_FLINK_CONF(), null)
+    require(flinkConf != null)
+    PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))
   }
 
 }

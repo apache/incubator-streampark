@@ -26,30 +26,27 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
+import com.streamxhub.streamx.console.base.utils.JsonUtils;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
-import com.streamxhub.streamx.console.core.enums.ChangedType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
-import java.io.StringReader;
 import java.util.*;
 
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
@@ -261,11 +258,22 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public CheckPoints httpCheckpoints() throws IOException {
+        String format = "%s/proxy/%s/jobs/%s/checkpoints";
+        try {
+            String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
+        } catch (IOException e) {
+            String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
+        }
+    }
+
+    @JsonIgnore
     private <T> T httpGetDoResult(String url, Class<T> clazz) throws IOException {
         String result = HttpClientUtils.httpGetRequest(url);
         if (result != null) {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readValue(new StringReader(result), clazz);
+            return JsonUtils.read(result, clazz);
         }
         return null;
     }
@@ -278,8 +286,7 @@ public class Application implements Serializable {
     @JsonIgnore
     @SneakyThrows
     public Map<String, Object> getOptionMap() {
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, Object> map = mapper.readValue(getOptions(), Map.class);
+        Map<String, Object> map = JsonUtils.read(getOptions(), Map.class);
         map.entrySet().removeIf(entry -> entry.getValue() == null);
         return map;
     }
@@ -323,11 +330,8 @@ public class Application implements Serializable {
         @SneakyThrows
         public static Dependency jsonToDependency(String dependency) {
             if (dependency != null) {
-                ObjectMapper mapper = new ObjectMapper();
-                return mapper.readValue(
-                        dependency,
-                        new TypeReference<Dependency>() {
-                        });
+                return JsonUtils.read(dependency, new TypeReference<Dependency>() {
+                });
             }
             return new Dependency();
         }

@@ -23,6 +23,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{DeflaterUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
+import com.streamxhub.streamx.flink.submit.impl.ApplicationSubmit.workspaceEnv
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine
@@ -132,11 +133,8 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
-
-    if (submitRequest.flinkHome != null && submitRequest.flinkHome.nonEmpty ) {
-      programArgs += PARAM_KEY_FLINK_HOME
-      programArgs += submitRequest.flinkHome
-    }
+    programArgs += PARAM_KEY_FLINK_CONF
+    programArgs += DeflaterUtils.zipString(workspaceEnv.flinkYaml)
 
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>

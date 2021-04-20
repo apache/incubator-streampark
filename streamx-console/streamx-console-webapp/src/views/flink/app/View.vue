@@ -660,11 +660,11 @@
               v-decorator="['savePoint']"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> restore the application from savepoint</span>
+              style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
-            v-if="savePoint && !lastestSavePoint "
+            v-if="savePoint && !latestSavePoint "
             label="savepoint"
             style="margin-bottom: 10px"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
@@ -697,7 +697,7 @@
               v-decorator="['savepoint',{ rules: [{ required: true } ]}]"/>
             <span
               class="conf-switch"
-              style="color:darkgrey"> restore the application from savepoint</span>
+              style="color:darkgrey"> restore the application from savepoint or latest checkpoint</span>
           </a-form-item>
 
           <a-form-item
@@ -884,7 +884,7 @@ import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
 import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
-import {lastest, history} from '@api/savepoint'
+import {latest, history} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
@@ -932,7 +932,7 @@ export default {
       flameGraph: false,
       restart: false,
       application: null,
-      lastestSavePoint: null,
+      latestSavePoint: null,
       historySavePoint: null,
       allowNonRestoredState: false,
       searchText: '',
@@ -1240,12 +1240,12 @@ export default {
     handleStart(app) {
       if (this.optionApps.starting.get(app.id) === undefined || app['optionState'] === 0) {
         this.application = app
-        lastest({
+        latest({
           appId: this.application.id
         }).then((resp) => {
-          this.lastestSavePoint = resp.data || null
+          this.latestSavePoint = resp.data || null
           this.startVisible = true
-          if (!this.lastestSavePoint) {
+          if (!this.latestSavePoint) {
             history({
               appId: this.application.id,
               pageNum: 1,
@@ -1280,7 +1280,7 @@ export default {
           const id = this.application.id
           const savePointed = this.savePoint
           const flameGraph = this.flameGraph
-          const savePoint = savePointed ? (values['savepoint'] || this.lastestSavePoint.savePoint) : null
+          const savePoint = savePointed ? (values['savepoint'] || this.latestSavePoint.savePoint) : null
           const allowNonRestoredState = this.allowNonRestoredState
           this.optionApps.starting.set(id, new Date().getTime())
           this.handleMapUpdate('starting')

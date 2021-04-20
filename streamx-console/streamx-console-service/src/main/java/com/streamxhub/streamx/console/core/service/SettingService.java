@@ -33,6 +33,7 @@ public interface SettingService extends IService<Setting> {
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
     String KEY_STREAMX_WORKSPACE = "streamx.console.workspace";
     String KEY_ENV_FLINK_HOME = "env.flink.home";
+    String KEY_CHECKPOINT_THRESHOLD = "streamx.console.checkpoint.threshold";
 
     /**
      * @param key
@@ -55,5 +56,7 @@ public interface SettingService extends IService<Setting> {
     String getEnvFlinkHome();
 
     boolean checkWorkspace();
+
+    Integer getCheckpointThreshold();
 
 }

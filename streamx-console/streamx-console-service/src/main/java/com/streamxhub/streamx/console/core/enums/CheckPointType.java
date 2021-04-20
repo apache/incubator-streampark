@@ -18,29 +18,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.service;
+package com.streamxhub.streamx.console.core.enums;
 
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.core.entity.SavePoint;
+import java.io.Serializable;
+import java.util.Arrays;
 
-/**
- * @author benjobs
- */
-public interface SavePointService extends IService<SavePoint> {
-    /**
-     * @param appId
-     */
-    void obsolete(Long appId);
+public enum CheckPointType implements Serializable {
+    CHECKPOINT(0),
+    SAVEPOINT(1);
 
-    SavePoint getLatest(Long id);
+    int value;
 
-    Boolean delete(Long id) throws ServiceException;
+    public int get() {
+        return this.value;
+    }
 
-    IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
+    CheckPointType(int value) {
+        this.value = value;
+    }
 
-    void removeApp(Long appId);
-
+    public static CheckPointType of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
 }

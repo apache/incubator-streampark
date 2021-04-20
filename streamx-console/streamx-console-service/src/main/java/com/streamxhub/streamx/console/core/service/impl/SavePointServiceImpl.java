@@ -20,16 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.streamxhub.streamx.common.conf.ConfigConst;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -39,6 +35,14 @@ import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import com.streamxhub.streamx.console.core.service.SettingService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author benjobs
@@ -49,14 +53,40 @@ import com.streamxhub.streamx.console.core.service.SavePointService;
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
         implements SavePointService {
 
+
+    @Autowired
+    private SettingService settingService;
+
     @Override
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
     }
 
     @Override
-    public SavePoint getLastest(Long id) {
-        return this.baseMapper.getLastest(id);
+    public boolean save(SavePoint entity) {
+        this.expire(entity);
+        this.obsolete(entity.getAppId());
+        return super.save(entity);
+    }
+
+    private void expire(SavePoint entity) {
+        Integer threshold = settingService.getCheckpointThreshold();
+        LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
+        queryWrapper.select(SavePoint::getTriggerTime)
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .orderByDesc(SavePoint::getTriggerTime)
+                .last("limit 0," + threshold + 1);
+
+        List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
+        if (savePointList.size() > threshold) {
+            SavePoint savePoint = savePointList.get(threshold);
+            this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
+        }
+    }
+
+    @Override
+    public SavePoint getLatest(Long id) {
+        return this.baseMapper.getLatest(id);
     }
 
     @Override
@@ -64,8 +94,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (CommonUtil.notEmpty(savePoint.getSavePoint())) {
-                HdfsUtils.delete(savePoint.getSavePoint());
+            if (CommonUtil.notEmpty(savePoint.getPath())) {
+                HdfsUtils.delete(savePoint.getPath());
             }
             removeById(id);
             return true;
@@ -77,7 +107,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
         Page<SavePoint> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        SortUtil.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, savePoint.getAppId());
     }
 

@@ -40,10 +40,10 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     logInfo("Using Scala: " + scalaVersionString)
   }
 
-  @throws[Exception] def open(): Unit = {
+  @throws[Exception] def open(flinkHome:String): Unit = {
     checkScalaVersion()
     this.interpreter = new FlinkScalaInterpreter(properties)
-    this.interpreter.open()
+    this.interpreter.open(flinkHome)
   }
 
   @throws[Exception] def close(): Unit = if (this.interpreter != null) this.interpreter.close()

@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.{CommandLine, Options}
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliArgsException, CliFrontend, CliFrontendParser, CustomCommandLine}
@@ -34,6 +35,7 @@ import org.apache.hadoop.fs.Path
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
+import java.nio.charset.Charset
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -47,6 +49,7 @@ trait FlinkSubmitTrait extends Logger {
   private[submit] lazy val FLINK_HOME = {
     if (Utils.isEmpty(USER_FLINK_HOME)) {
       val flinkLocalHome = System.getenv("FLINK_HOME")
+      require(flinkLocalHome != null)
       logInfo(s"flinkHome: $flinkLocalHome")
       flinkLocalHome
     } else {
@@ -68,7 +71,12 @@ trait FlinkSubmitTrait extends Logger {
       flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
       flinkHdfsJars = new Path( s"${HdfsUtils.getDefaultFS}$APP_JARS"),
       streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
-      flinkYaml = HdfsUtils.read(s"$flinkHdfsHome/conf/flink-conf.yaml"),
+      flinkYaml = {
+        // 特别注意的是:不论是手动指定了FLINK_HOME还是使用部署机上的FLINK_HOME,这里默认的配置都是以生效的FLINK_HOME/conf/flink-conf.yaml来读取配置参数.
+        val config = new File(s"$FLINK_HOME/conf/flink-conf.yaml")
+        require(config.exists() && config.isFile)
+        FileUtils.readFileToString(config, Charset.defaultCharset())
+      },
       flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
         case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
@@ -102,7 +110,7 @@ trait FlinkSubmitTrait extends Logger {
     }
   }
 
-  private[submit] lazy val PARAM_KEY_FLINK_HOME = KEY_FLINK_HOME("--")
+  private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
   private[submit] lazy val PARAM_KEY_APP_CONF = KEY_APP_CONF("--")
   private[submit] lazy val PARAM_KEY_APP_NAME = KEY_APP_NAME("--")

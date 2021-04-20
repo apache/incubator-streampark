@@ -30,20 +30,25 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 
+import java.util.Date;
+
 /**
  * @author benjobs
  */
 public interface SavePointMapper extends BaseMapper<SavePoint> {
 
-    @Update("update t_flink_savepoint set lastest=0 where app_id=#{appId}")
+    @Update("update t_flink_savepoint set latest=0 where app_id=#{appId}")
     void obsolete(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=1")
-    SavePoint getLastest(@Param("appId") Long appId);
+    @Select("select * from t_flink_savepoint where app_id=#{appId} and latest=1")
+    SavePoint getLatest(@Param("appId") Long appId);
 
-    @Select("select * from t_flink_savepoint where app_id=#{appId} and lastest=0")
+    @Select("select * from t_flink_savepoint where app_id=#{appId}")
     IPage<SavePoint> page(Page<SavePoint> page, @Param("appId") Long appId);
 
     @Delete("delete from t_flink_savepoint where app_id=#{appId}")
     void removeApp(@Param("appId")Long appId);
+
+    @Delete("delete from t_flink_savepoint where app_id=#{appId} and trigger_time < #{trigger}")
+    void expire(@Param("appId")Long appId,@Param("trigger") Date triggerTime);
 }

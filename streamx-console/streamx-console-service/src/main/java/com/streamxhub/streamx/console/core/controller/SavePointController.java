@@ -49,9 +49,9 @@ public class SavePointController extends BaseController {
     @Autowired
     private SavePointService savePointService;
 
-    @PostMapping("lastest")
-    public RestResponse lastest(Long appId) {
-        SavePoint savePoint = savePointService.getLastest(appId);
+    @PostMapping("latest")
+    public RestResponse latest(Long appId) {
+        SavePoint savePoint = savePointService.getLatest(appId);
         return RestResponse.create().data(savePoint);
     }
 

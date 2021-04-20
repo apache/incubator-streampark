@@ -31,6 +31,8 @@ public class FlinkInterpreterTest {
 
     private FlinkInterpreter interpreter;
 
+    private String FLINK_HOME = System.getenv("FLINK_HOME");
+
     @Before
     public void setUp() {
         Properties p = new Properties();
@@ -55,7 +57,7 @@ public class FlinkInterpreterTest {
 
             });
 
-            interpreter.open();
+            interpreter.open(FLINK_HOME);
 
             InterpreterResult result = interpreter.interpret(
                     "val data = env.fromElements(\"hello world\", \"hello flink\", \"hello hadoop\")\n" +
@@ -112,7 +114,7 @@ public class FlinkInterpreterTest {
             InterpreterOutput out = new InterpreterOutput(line -> {
 
             });
-            interpreter.open();
+            interpreter.open(FLINK_HOME);
             InterpreterResult result = interpreter.interpret(code, out);
             System.out.println(out);
             System.out.println(result.code());

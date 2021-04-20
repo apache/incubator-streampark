@@ -39,9 +39,17 @@ public class SavePoint {
 
     private Long appId;
 
-    private Boolean lastest;
+    private Boolean latest;
 
-    private String savePoint;
+    /**
+     * 1) checkPoint <br>
+     * 2) savePoint
+     */
+    private Integer type;
+
+    private String path;
+
+    private Date triggerTime;
 
     private Date createTime;
 }
