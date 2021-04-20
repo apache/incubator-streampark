@@ -59,8 +59,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     @Override
-    public SavePoint getLastest(Long id) {
-        return this.baseMapper.getLastest(id);
+    public SavePoint getLatest(Long id) {
+        return this.baseMapper.getLatest(id);
     }
 
     @Override

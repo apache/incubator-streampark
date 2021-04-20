@@ -35,7 +35,7 @@ public interface SavePointService extends IService<SavePoint> {
      */
     void obsolete(Long appId);
 
-    SavePoint getLastest(Long id);
+    SavePoint getLatest(Long id);
 
     Boolean delete(Long id) throws ServiceException;
 

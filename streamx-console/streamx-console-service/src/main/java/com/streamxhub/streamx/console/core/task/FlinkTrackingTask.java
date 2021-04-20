@@ -315,7 +315,7 @@ public class FlinkTrackingTask {
                 if (latestId == null || latestId < checkPoint.getId()) {
                     SavePoint savePoint = new SavePoint();
                     savePoint.setAppId(application.getId());
-                    savePoint.setLastest(true);
+                    savePoint.setLatest(true);
                     savePoint.setType(checkPoint.getCheckPointType().get());
                     savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                     savePoint.setCreateTime(new Date());

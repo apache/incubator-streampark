@@ -784,7 +784,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     Date now = new Date();
                     savePoint.setPath(savePointDir);
                     savePoint.setAppId(application.getId());
-                    savePoint.setLastest(true);
+                    savePoint.setLatest(true);
                     savePoint.setType(CheckPointType.SAVEPOINT.get());
                     savePoint.setTriggerTime(now);
                     savePoint.setCreateTime(now);
@@ -918,7 +918,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         String savePointDir = null;
         if (appParam.getSavePointed()) {
             if (appParam.getSavePoint() == null) {
-                SavePoint savePoint = savePointService.getLastest(appParam.getId());
+                SavePoint savePoint = savePointService.getLatest(appParam.getId());
                 if (savePoint != null) {
                     savePointDir = savePoint.getPath();
                 }

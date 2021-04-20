@@ -249,12 +249,12 @@
                 {{ record.createTime }}
               </template>
               <template
-                slot="lastest"
+                slot="latest"
                 slot-scope="text, record">
                 <a-tag
                   color="green"
-                  v-if="record.lastest">
-                  lastest
+                  v-if="record.latest">
+                  Latest
                 </a-tag>
               </template>
               <template
@@ -310,11 +310,11 @@
                 </a-button>
               </template>
               <template
-                slot="createTime"
+                slot="triggerTime"
                 slot-scope="text, record">
                 <a-icon
                   type="clock-circle" />
-                {{ record.createTime }}
+                {{ record.triggerTime }}
               </template>
               <template
                 slot="type"
@@ -783,13 +783,14 @@ export default {
         savePoints: [
           {
             title: 'Path',
-            dataIndex: 'savePoint',
-            width: '50%'
+            dataIndex: 'path',
+            width: '40%'
           },
           {
             title: 'Trigger Time',
-            dataIndex: 'createTime',
-            scopedSlots: { customRender: 'createTime' }
+            dataIndex: 'triggerTime',
+            scopedSlots: { customRender: 'triggerTime' },
+            width: '20%'
           },
           {
             title: 'Type',
@@ -797,9 +798,9 @@ export default {
             scopedSlots: { customRender: 'type' }
           },
           {
-            title: 'Lastest',
-            dataIndex: 'lastest',
-            scopedSlots: { customRender: 'lastest' }
+            title: 'Latest',
+            dataIndex: 'latest',
+            scopedSlots: { customRender: 'latest' }
           },
           {
             title: 'Operation',

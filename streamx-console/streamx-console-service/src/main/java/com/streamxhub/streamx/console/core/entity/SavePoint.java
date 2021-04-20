@@ -39,7 +39,7 @@ public class SavePoint {
 
     private Long appId;
 
-    private Boolean lastest;
+    private Boolean latest;
 
     /**
      * 1) checkPoint <br>
