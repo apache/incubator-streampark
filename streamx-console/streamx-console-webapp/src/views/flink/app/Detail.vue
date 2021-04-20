@@ -280,7 +280,7 @@
                 <a-icon
                   type="copy"
                   style="color:#4a9ff5"
-                  v-clipboard:copy="record.savePoint"
+                  v-clipboard:copy="record.path"
                   v-clipboard:success="handleCopySuccess"
                   v-clipboard:error="handleCopyError" />
                 <a-popconfirm
