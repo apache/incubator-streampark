@@ -892,7 +892,7 @@ import SockJS from 'sockjs-client'
 import {baseUrl} from '@/api/baseUrl'
 import Stomp from 'webstomp-client'
 import SvgIcon from '@/components/SvgIcon'
-import {check} from "@/api/setting"
+import {check} from '@/api/setting'
 
 export default {
   components: {Ellipsis, State, SvgIcon},

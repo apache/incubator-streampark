@@ -85,9 +85,17 @@
               successful
             </span>
           </p>
+
+          <a-icon
+            class='format-sql'
+            type='align-left'
+            title='Format SQL'
+            @click.native='handleFormatSql()'/>
+
           <a-icon
             class="big-screen"
             type="fullscreen"
+            title="Full Screen"
             two-tone-color="#4a9ff5"
             @click="handleBigScreenOpen()" />
         </a-form-item>
@@ -699,7 +707,9 @@
         <svg-icon name="flinksql" size="middle"/>&nbsp; {{ controller.modal.bigScreen.title }}
       </template>
       <template slot="closeIcon">
-        <a-icon type="fullscreen-exit" @click="handleBigScreenClose"/>
+        <a-icon
+          type="fullscreen-exit"
+          @click="handleBigScreenClose"/>
       </template>
       <template slot="footer">
         <span style="color: red;float: left">
@@ -707,6 +717,13 @@
             {{ controller.flinkSql.errorMsg }}
           </ellipsis>
         </span>
+        <a-button
+          key="submit"
+          type="primary"
+          title='Format SQL'
+          @click="handleFormatSql()">
+          <a-icon type='align-left'/>
+        </a-button>
         <a-button
           key="submit"
           type="primary"
@@ -812,6 +829,7 @@ import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
+import { format } from 'sql-formatter'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -828,7 +846,7 @@ import { toPomString } from './Pom'
 
 export default {
   name: 'EditStreamX',
-  components: { Mergely, Different, Ellipsis,SvgIcon },
+  components: { Mergely, Different, Ellipsis, SvgIcon },
   data() {
     return {
       strategy: 1,
@@ -1060,6 +1078,16 @@ export default {
             callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
           }
         })
+      }
+    },
+
+    handleFormatSql() {
+      const sql = this.controller.flinkSql.value
+      const foramtSql = format(sql)
+      if (this.controller.visiable.bigScreen) {
+        this.controller.editor.bigScreen.getModel().setValue(foramtSql)
+      } else {
+        this.controller.editor.flinkSql.getModel().setValue(foramtSql)
       }
     },
 
@@ -1335,7 +1363,7 @@ export default {
       }
 
       let config = this.configOverride
-      if (config != null && config != undefined && config.trim() != '') {
+      if (config != null && config.trim() !== '') {
         config = Base64.encode(config)
       } else {
         config = null

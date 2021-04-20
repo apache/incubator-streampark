@@ -29,7 +29,7 @@
           v-decorator="[ 'type', {rules: [{ required: true, message: 'Project Type is required'}]} ]">
           <a-select-option
             v-for="p in options.types"
-            :disabled='p.id === 2'
+            :disabled="p.id === 2"
             :key="p.id"
             :value="p.id">
             {{ p.name }}
@@ -51,7 +51,7 @@
           v-decorator="[ 'repository', {rules: [{ required: true, message: 'CVS is required'}]} ]">
           <a-select-option
             v-for="p in options.repository"
-            :disabled='p.id === 2'
+            :disabled="p.id === 2"
             :key="p.id"
             :value="p.id">
             {{ p.name }}
