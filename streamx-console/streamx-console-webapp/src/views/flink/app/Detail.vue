@@ -777,13 +777,13 @@ export default {
           {
             title: 'Path',
             dataIndex: 'path',
-            width: '50%'
+            width: '45%'
           },
           {
             title: 'Trigger Time',
             dataIndex: 'triggerTime',
             scopedSlots: { customRender: 'triggerTime' },
-            width: 200
+            width: 250
           },
           {
             title: 'Type',
