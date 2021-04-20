@@ -7,6 +7,7 @@
     <flinksql v-if="name==='flinksql'"></flinksql>
     <maven v-if="name==='maven'"></maven>
     <workspace v-if="name==='workspace'"></workspace>
+    <threshold v-if="name==='threshold'"></threshold>
     <http v-if="name==='http'"></http>
     <deploy v-if="name==='deploy'"></deploy>
     <stream v-if="name==='stream'"></stream>
@@ -14,11 +15,11 @@
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace} from '@/core/icons'
+import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold} from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream},
+  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold},
   props: {
     name: {
       type: String,

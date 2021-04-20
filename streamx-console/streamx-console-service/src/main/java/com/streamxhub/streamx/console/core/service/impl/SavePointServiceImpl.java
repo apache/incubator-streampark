@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -33,10 +35,14 @@ import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 /**
  * @author benjobs
@@ -47,6 +53,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
         implements SavePointService {
 
+
+    @Autowired
+    private SettingService settingService;
+
     @Override
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
@@ -54,8 +64,24 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     public boolean save(SavePoint entity) {
+        this.expire(entity);
         this.obsolete(entity.getAppId());
         return super.save(entity);
+    }
+
+    private void expire(SavePoint entity) {
+        Integer threshold = settingService.getCheckpointThreshold();
+        LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
+        queryWrapper.select(SavePoint::getTriggerTime)
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .orderByDesc(SavePoint::getTriggerTime)
+                .last("limit 0," + threshold + 1);
+
+        List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
+        if (savePointList.size() > threshold) {
+            SavePoint savePoint = savePointList.get(threshold);
+            this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
+        }
     }
 
     @Override

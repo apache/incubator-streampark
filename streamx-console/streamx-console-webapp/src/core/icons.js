@@ -16,6 +16,6 @@ import workspace from '@/assets/icons/workspace.svg?inline'
 import http from '@/assets/icons/http.svg?inline'
 import deploy from '@/assets/icons/deploy.svg?inline'
 import stream from '@/assets/icons/stream.svg?inline'
+import threshold from '@/assets/icons/threshold.svg?inline'
 
-
-export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream }
+export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold }
