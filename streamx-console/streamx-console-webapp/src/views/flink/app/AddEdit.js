@@ -60,8 +60,12 @@ export function initEditor(vue) {
   option.minimap = { enabled: false }
   controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
   vue.$nextTick(() => {
+    const formatSql = document.querySelector('.format-sql')
     const bigScreen = document.querySelector('.big-screen')
-    document.querySelector('#flink-sql>.monaco-editor').appendChild(bigScreen)
+    const editorEl = document.querySelector('#flink-sql>.monaco-editor')
+    editorEl.appendChild(formatSql)
+    console.table(formatSql)
+    editorEl.appendChild(bigScreen)
   })
 
   //输入事件触发...

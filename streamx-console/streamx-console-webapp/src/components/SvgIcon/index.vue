@@ -11,15 +11,16 @@
     <http v-if="name==='http'"></http>
     <deploy v-if="name==='deploy'"></deploy>
     <stream v-if="name==='stream'"></stream>
+    <format v-if="name==='format'"></format>
   </span>
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold} from '@/core/icons'
+import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format} from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold},
+  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format},
   props: {
     name: {
       type: String,
@@ -36,7 +37,7 @@ export default {
 <style scoped>
 .svg-icon-default > svg {
   height: 1em !important;
-  max-width: 14px !important;
+  max-width: 15px !important;
   font-weight: normal;
 }
 

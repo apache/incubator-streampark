@@ -33,7 +33,7 @@
         label="Password"
         v-bind="formItemLayout">
         <a-input-password
-          placeholder='input password'
+          placeholder="input password"
           v-decorator="['password',{rules: [
             { required: true, message: 'password is required'},
             { min: 8, message: 'Password length cannot be less than 8 characters'}

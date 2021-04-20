@@ -35,6 +35,7 @@
     "nprogress": "^0.2.0",
     "qs": "^6.9.6",
     "sockjs-client": "^1.5.0",
+    "sql-formatter": "^4.0.2",
     "stompjs": "^2.3.3",
     "viser-vue": "^2.3.3",
     "vue": "^2.6.12",

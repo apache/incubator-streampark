@@ -84,17 +84,28 @@
 
 .app_controller,.bigScreen-sql-model {
 
+  .format-sql {
+    color: dimgrey;
+    z-index: 99;
+    position: absolute;
+    top: 5px;
+    float: right;
+    right: 50px;
+    cursor: pointer;
+    font-weight: bold;
+  }
+
   .big-screen {
     color: dimgrey;
     z-index: 99;
     position: absolute;
-    top: 12px;
+    top: 5px;
     float: right;
     right: 20px;
     cursor: pointer;
   }
 
-  .big-screen:hover {
+  .big-screen:hover,.format-sql:hover {
     color: #1890ff;
   }
 
