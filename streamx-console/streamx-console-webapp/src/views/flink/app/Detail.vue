@@ -242,11 +242,28 @@
               :loading="pager.savePoints.loading"
               class="detail-table">
               <template
-                slot="createTime"
+                slot="triggerTime"
                 slot-scope="text, record">
                 <a-icon
                   type="clock-circle" />
-                {{ record.createTime }}
+                {{ record.triggerTime }}
+              </template>
+              <template
+                slot="type"
+                slot-scope="text, record">
+                <div
+                  class="app_state">
+                  <a-tag
+                    color="#545454"
+                    v-if="record['type'] === 0">
+                    Check Point
+                  </a-tag>
+                  <a-tag
+                    color="#0C7EF2"
+                    v-if="record['type'] === 1">
+                    Save Point
+                  </a-tag>
+                </div>
               </template>
               <template
                 slot="latest"
@@ -308,30 +325,6 @@
                   size="small">
                   {{ record.version }}
                 </a-button>
-              </template>
-              <template
-                slot="triggerTime"
-                slot-scope="text, record">
-                <a-icon
-                  type="clock-circle" />
-                {{ record.triggerTime }}
-              </template>
-              <template
-                slot="type"
-                slot-scope="text, record">
-                <div
-                  class="app_state">
-                  <a-tag
-                    color="#545454"
-                    v-if="record['type'] === 0">
-                    Check Point
-                  </a-tag>
-                  <a-tag
-                    color="#0C7EF2"
-                    v-if="record['type'] === 1">
-                    Save Point
-                  </a-tag>
-                </div>
               </template>
               <template
                 slot="operation"
@@ -784,13 +777,13 @@ export default {
           {
             title: 'Path',
             dataIndex: 'path',
-            width: '40%'
+            width: '50%'
           },
           {
             title: 'Trigger Time',
             dataIndex: 'triggerTime',
             scopedSlots: { customRender: 'triggerTime' },
-            width: '20%'
+            width: 200
           },
           {
             title: 'Type',
