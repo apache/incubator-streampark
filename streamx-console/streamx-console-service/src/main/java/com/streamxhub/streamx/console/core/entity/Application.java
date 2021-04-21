@@ -92,6 +92,11 @@ public class Application implements Serializable {
 
     private Integer optionState;
 
+    /**
+     * checkPoint 保留的最大条数
+     */
+    private Integer cpThreshold;
+
     private String args;
     /**
      * 应用程序模块
@@ -104,6 +109,7 @@ public class Application implements Serializable {
     private String dynamicOptions;
     private Integer appType;
     private Boolean flameGraph;
+
     /**
      * 是否需要跟踪监控状态
      */

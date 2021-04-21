@@ -32,6 +32,7 @@
         <result column="JM_MEMORY" jdbcType="INTEGER" property="jmMemory"/>
         <result column="TM_MEMORY" jdbcType="INTEGER" property="tmMemory"/>
         <result column="OPTION_STATE" jdbcType="INTEGER" property="optionState"/>
+        <result column="CP_THRESHOLD" jdbcType="INTEGER" property="cpThreshold"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
     </resultMap>

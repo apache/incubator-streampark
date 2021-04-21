@@ -105,9 +105,4 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
     }
 
-    @Override
-    public Integer getCheckpointThreshold() {
-        String threshold = settings.get(SettingService.KEY_CHECKPOINT_THRESHOLD).getValue();
-        return Integer.parseInt(threshold);
-    }
 }
