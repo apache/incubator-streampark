@@ -20,6 +20,7 @@
  */
 import monaco from '@/views/flink/app/Monaco.xml'
 import { verify } from '@/api/flinksql'
+import { format } from 'sql-formatter'
 
 const globalOption = {
   theme: 'vs', //vs, hc-black, or vs-dark
@@ -189,6 +190,16 @@ export function bigScreenOpen(vue) {
       verifySQL(vue)
     }
   })
+}
+
+export function formatSql(vue) {
+  const sql = vue.controller.flinkSql.value
+  const foramtSql = format(sql)
+  if (vue.controller.visiable.bigScreen) {
+    vue.controller.editor.bigScreen.getModel().setValue(foramtSql)
+  } else {
+    vue.controller.editor.flinkSql.getModel().setValue(foramtSql)
+  }
 }
 
 export function bigScreenOk(vue,callback) {

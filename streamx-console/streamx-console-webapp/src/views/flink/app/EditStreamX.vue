@@ -87,10 +87,10 @@
           </p>
 
           <a-icon
-            class='format-sql'
-            type='align-left'
-            title='Format SQL'
-            @click.native='handleFormatSql()'/>
+            class="format-sql"
+            type="align-left"
+            title="Format SQL"
+            @click.native="handleFormatSql"/>
 
           <a-icon
             class="big-screen"
@@ -729,14 +729,12 @@
           </ellipsis>
         </span>
         <a-button
-          key="submit"
           type="primary"
           title='Format SQL'
-          @click="handleFormatSql()">
+          @click="handleFormatSql">
           <a-icon type='align-left'/>
         </a-button>
         <a-button
-          key="submit"
           type="primary"
           @click="handleBigScreenOk">
           Apply
@@ -805,13 +803,11 @@
       <template
         slot="footer">
         <a-button
-          key="back"
           @click="handleCompareCancel">
           Close
         </a-button>
         <a-button
-          key="submit"
-          type="primary"
+          type="compare"
           @click="handleCompareOk">
           Compare
         </a-button>
@@ -840,7 +836,6 @@ import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
-import { format } from 'sql-formatter'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -850,6 +845,7 @@ import {
   bigScreenOk,
   bigScreenClose,
   applyPom,
+  formatSql,
   updateDependency
 } from './AddEdit'
 
@@ -1093,13 +1089,7 @@ export default {
     },
 
     handleFormatSql() {
-      const sql = this.controller.flinkSql.value
-      const foramtSql = format(sql)
-      if (this.controller.visiable.bigScreen) {
-        this.controller.editor.bigScreen.getModel().setValue(foramtSql)
-      } else {
-        this.controller.editor.flinkSql.getModel().setValue(foramtSql)
-      }
+      formatSql(this)
     },
 
     handleBigScreenOpen() {

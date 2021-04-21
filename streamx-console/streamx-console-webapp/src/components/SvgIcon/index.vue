@@ -12,15 +12,19 @@
     <deploy v-if="name==='deploy'"></deploy>
     <stream v-if="name==='stream'"></stream>
     <format v-if="name==='format'"></format>
+    <dingding v-if="name==='dingding'"></dingding>
+    <mail v-if="name==='mail'"></mail>
+    <sms v-if="name==='sms'"></sms>
+    <wechat v-if="name==='wechat'"></wechat>
   </span>
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format} from '@/core/icons'
+import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat } from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format},
+  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat},
   props: {
     name: {
       type: String,

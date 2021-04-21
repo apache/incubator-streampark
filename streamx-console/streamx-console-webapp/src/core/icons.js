@@ -18,5 +18,9 @@ import deploy from '@/assets/icons/deploy.svg?inline'
 import stream from '@/assets/icons/stream.svg?inline'
 import threshold from '@/assets/icons/threshold.svg?inline'
 import format from '@/assets/icons/format.svg?inline'
+import dingding from '@/assets/icons/dingding.svg?inline'
+import mail from '@/assets/icons/mail.svg?inline'
+import sms from '@/assets/icons/sms.svg?inline'
+import wechat from '@/assets/icons/wechat.svg?inline'
 
-export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold,format }
+export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold,format,dingding,mail,sms,wechat }
