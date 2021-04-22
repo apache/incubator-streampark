@@ -429,6 +429,18 @@
       </a-form-item>
 
       <a-form-item
+        label="Fault Alert Email"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter email,separate multiple emails with comma(,)"
+          v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+          <svg-icon name="mail" slot="prefix"/>
+        </a-input>
+      </a-form-item>
+
+      <a-form-item
         label="Configuration"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -1346,6 +1358,7 @@ export default {
         resolveOrder: values.resolveOrder,
         executionMode: values.executionMode,
         cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description
       }
       this.handleUpdateApp(params)
@@ -1383,6 +1396,7 @@ export default {
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         executionMode: values.executionMode,
         description: values.description || null
       }
@@ -1543,7 +1557,8 @@ export default {
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
-          'cpThreshold': this.app.cpThreshold
+          'cpThreshold': this.app.cpThreshold,
+          'alertEmail': this.app.alertEmail
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
