@@ -22,5 +22,9 @@ import dingding from '@/assets/icons/dingding.svg?inline'
 import mail from '@/assets/icons/mail.svg?inline'
 import sms from '@/assets/icons/sms.svg?inline'
 import wechat from '@/assets/icons/wechat.svg?inline'
+import host from '@/assets/icons/host.svg?inline'
+import keys from '@/assets/icons/keys.svg?inline'
+import port from '@/assets/icons/port.svg?inline'
+import ssl from '@/assets/icons/ssl.svg?inline'
 
-export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold,format,dingding,mail,sms,wechat }
+export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold,format,dingding,mail,sms,wechat,host,keys,port,ssl }

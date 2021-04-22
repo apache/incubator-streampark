@@ -16,15 +16,19 @@
     <mail v-if="name==='mail'"></mail>
     <sms v-if="name==='sms'"></sms>
     <wechat v-if="name==='wechat'"></wechat>
+    <host v-if="name==='host'"></host>
+    <keys v-if="name==='keys'"></keys>
+    <port v-if="name==='port'"></port>
+    <ssl v-if="name==='ssl'"></ssl>
   </span>
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat } from '@/core/icons'
+import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl } from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat},
+  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl},
   props: {
     name: {
       type: String,
