@@ -39,10 +39,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author benjobs
@@ -119,10 +116,17 @@ public class AlertServiceImpl implements AlertService {
     }
 
     private String getHtmlMessage(Application application, FlinkAppState appState) throws Exception {
+        long duration;
+        if (application.getEndTime() == null) {
+            duration = System.currentTimeMillis() - application.getStartTime().getTime();
+        } else {
+            duration = application.getEndTime().getTime() - application.getStartTime().getTime();
+        }
+        duration = duration / 1000 / 60;
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
                 "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "End Time: " + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "Duration: " + DateUtils.toRichTimeDuration(application.getEndTime().getTime() - application.getStartTime().getTime()) + "<br><br>" +
+                "End Time: " + DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br><br>" +
                 "please check it,Thank you for using StreamX<br><br>" +
                 "Best Wishes!!";
 
