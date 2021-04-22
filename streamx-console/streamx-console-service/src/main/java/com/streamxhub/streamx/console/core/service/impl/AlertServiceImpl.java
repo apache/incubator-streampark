@@ -89,6 +89,7 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public void alert(Application application, FlinkAppState appState) {
+        log.info("Email Alert:{} is {}", application.getJobName(), appState.name());
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
         }
