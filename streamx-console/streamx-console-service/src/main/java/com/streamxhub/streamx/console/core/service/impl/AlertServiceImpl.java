@@ -112,7 +112,7 @@ public class AlertServiceImpl implements AlertService {
                     htmlEmail.addTo(application.getAlertEmail().split(","));
                     htmlEmail.send();
                 } catch (Exception e) {
-                    e.printStackTrace(System.err);
+                   e.printStackTrace();
                 }
             }
         }
