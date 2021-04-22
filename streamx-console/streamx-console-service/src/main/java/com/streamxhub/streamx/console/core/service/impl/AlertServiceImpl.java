@@ -122,9 +122,10 @@ public class AlertServiceImpl implements AlertService {
         } else {
             duration = application.getEndTime().getTime() - application.getStartTime().getTime();
         }
+        duration = duration / 1000 / 60;
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
                 "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "End Time: " + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "End Time: " + DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
                 "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br><br>" +
                 "please check it,Thank you for using StreamX<br><br>" +
                 "Best Wishes!!";
