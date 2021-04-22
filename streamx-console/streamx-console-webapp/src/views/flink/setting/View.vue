@@ -10,7 +10,7 @@
           <a-list-item-meta style="width: 50%">
             <svg-icon class="avatar" name="workspace" size="large" slot="avatar" v-if="item.key.match(/(.*)workspace(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key.match(/(.*)maven(.*)/g)"></svg-icon>
-            <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key.match(/(.*)address(.*)/g)"></svg-icon>
+            <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key.match(/(.*)webapp.address(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key.match(/env.flink(.*)/g)"></svg-icon>
             <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key==='alert.email.host'"></svg-icon>
             <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key==='alert.email.port'"></svg-icon>
