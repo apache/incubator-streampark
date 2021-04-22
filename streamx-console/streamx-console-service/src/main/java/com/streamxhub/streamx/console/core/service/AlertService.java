@@ -18,38 +18,21 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.entity;
+package com.streamxhub.streamx.console.core.service;
 
-
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
-import java.io.Serializable;
+import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
 /**
  * @author benjobs
  */
-@Data
-@TableName("t_setting")
-@Slf4j
-public class Setting implements Serializable {
+public interface AlertService {
 
-    @TableField("`NUM`")
-    private Integer num;
-
-    @TableField("`TITLE`")
-    private String title;
-
-    @TableField("`key`")
-    private String key;
-
-    @TableField("`value`")
-    private String value;
-
-    private String description;
-    private transient boolean editable = false;
-    private transient boolean submitting = false;
+    /**
+     * alert
+     *
+     * @param application
+     */
+    void alert(Application application, FlinkAppState appState);
 
 }

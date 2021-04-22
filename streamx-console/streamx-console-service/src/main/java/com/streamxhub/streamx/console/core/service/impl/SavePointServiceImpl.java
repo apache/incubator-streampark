@@ -34,6 +34,7 @@ import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,7 +56,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
 
     @Autowired
-    private SettingService settingService;
+    private ApplicationService settingService;
 
     @Override
     public void obsolete(Long appId) {
@@ -70,8 +71,8 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
-        Integer threshold = settingService.getCheckpointThreshold();
         LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
+        Integer threshold = entity.getCpThreshold();
         queryWrapper.select(SavePoint::getTriggerTime)
                 .eq(SavePoint::getAppId, entity.getAppId())
                 .orderByDesc(SavePoint::getTriggerTime)

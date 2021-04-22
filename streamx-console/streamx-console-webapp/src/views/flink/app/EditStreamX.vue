@@ -87,10 +87,10 @@
           </p>
 
           <a-icon
-            class='format-sql'
-            type='align-left'
-            title='Format SQL'
-            @click.native='handleFormatSql()'/>
+            class="format-sql"
+            type="align-left"
+            title="Format SQL"
+            @click.native="handleFormatSql"/>
 
           <a-icon
             class="big-screen"
@@ -418,6 +418,29 @@
       </a-form-item>
 
       <a-form-item
+        label="CheckPoint Threshold"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="Checkpoints keep Max size"
+          v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
+      </a-form-item>
+
+      <a-form-item
+        label="Fault Alert Email"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter email,separate multiple emails with comma(,)"
+          v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+          <svg-icon name="mail" slot="prefix"/>
+        </a-input>
+      </a-form-item>
+
+      <a-form-item
         label="Configuration"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -718,14 +741,12 @@
           </ellipsis>
         </span>
         <a-button
-          key="submit"
           type="primary"
-          title='Format SQL'
-          @click="handleFormatSql()">
-          <a-icon type='align-left'/>
+          title="Format SQL"
+          @click="handleFormatSql">
+          <a-icon type="align-left"/>
         </a-button>
         <a-button
-          key="submit"
           type="primary"
           @click="handleBigScreenOk">
           Apply
@@ -794,13 +815,11 @@
       <template
         slot="footer">
         <a-button
-          key="back"
           @click="handleCompareCancel">
           Close
         </a-button>
         <a-button
-          key="submit"
-          type="primary"
+          type="compare"
           @click="handleCompareOk">
           Compare
         </a-button>
@@ -829,7 +848,6 @@ import Mergely from './Mergely'
 import Different from './Different'
 import configOptions from './Option'
 import SvgIcon from '@/components/SvgIcon'
-import { format } from 'sql-formatter'
 
 const Base64 = require('js-base64').Base64
 import {
@@ -839,6 +857,7 @@ import {
   bigScreenOk,
   bigScreenClose,
   applyPom,
+  formatSql,
   updateDependency
 } from './AddEdit'
 
@@ -862,11 +881,11 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
+        { mode: 'application', value: 4, disabled: false },
+        { mode: 'pre-job', value: 2, disabled: false },
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
-        { mode: 'pre-job', value: 2, disabled: false },
         { mode: 'yarn-session', value: 3, disabled: true },
-        { mode: 'application', value: 4, disabled: false },
         { mode: 'kubernetes', value: 5, disabled: true }
       ],
       runMaxTagCount: 1,
@@ -1082,13 +1101,7 @@ export default {
     },
 
     handleFormatSql() {
-      const sql = this.controller.flinkSql.value
-      const foramtSql = format(sql)
-      if (this.controller.visiable.bigScreen) {
-        this.controller.editor.bigScreen.getModel().setValue(foramtSql)
-      } else {
-        this.controller.editor.flinkSql.getModel().setValue(foramtSql)
-      }
+      formatSql(this)
     },
 
     handleBigScreenOpen() {
@@ -1344,6 +1357,8 @@ export default {
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
         executionMode: values.executionMode,
+        cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description
       }
       this.handleUpdateApp(params)
@@ -1380,6 +1395,8 @@ export default {
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         executionMode: values.executionMode,
         description: values.description || null
       }
@@ -1540,8 +1557,8 @@ export default {
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
-          'slot': this.defaultOptions.slot,
-          'parallelism': this.defaultOptions.parallelism
+          'cpThreshold': this.app.cpThreshold,
+          'alertEmail': this.app.alertEmail
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null

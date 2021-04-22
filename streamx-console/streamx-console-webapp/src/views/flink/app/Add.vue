@@ -42,8 +42,15 @@
             </span>
           </p>
           <a-icon
+            class="format-sql"
+            type="align-left"
+            title="Format SQL"
+            @click.native="handleFormatSql"/>
+
+          <a-icon
             class="big-screen"
             type="fullscreen"
+            title="Full Screen"
             two-tone-color="#4a9ff5"
             @click="handleBigScreenOpen()" />
         </a-form-item>
@@ -331,6 +338,101 @@
       </a-form-item>
 
       <a-form-item
+        label="CheckPoint Threshold"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="Checkpoints keep Max size"
+          v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
+      </a-form-item>
+
+      <!--告警方式-->
+      <template>
+        <a-form-item
+          v-if="1===2"
+          label="Fault Alert Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="Alert Type"
+            mode="multiple"
+            @change="handleAlertType"
+            v-decorator="[ 'alertType', {rules: [{ required: true, message: 'Alert Type is required' }] }]">
+            <a-select-option
+              v-for="(o,index) in alertTypes"
+              :key="`alertType_${index}`"
+              :disabled="o.disabled"
+              :value="o.value">
+              <svg-icon role="img" v-if="o.value === 1" name="mail"/>
+              <svg-icon role="img" v-if="o.value === 2" name="sms"/>
+              <svg-icon role="img" v-if="o.value === 3" name="dingding"/>
+              <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+
+        <a-form-item
+          label="Fault Alert Email"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter email,separate multiple emails with comma(,)"
+            v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+            <svg-icon name="mail" slot="prefix"/>
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1"
+          label="SMS"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter mobile number"
+            v-decorator="[ 'alertSms', {rules: [{ required: true, message: 'mobile number is required' }]} ]" />
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(2)>-1"
+          label="SMS Template"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-textarea
+            rows="4"
+            placeholder="Please enter sms template"
+            v-decorator="['alertSmsTemplate', {rules: [{ required: true, message: 'SMS Template is required' }]} ]" />
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(3)>-1"
+          label="DingTask Url"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTask Url"
+            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]" />
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(3)>-1"
+          label="DingTask User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTask receive user"
+            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]" />
+        </a-form-item>
+
+      </template>
+
+      <a-form-item
         label="Run Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -614,7 +716,12 @@
           </ellipsis>
         </span>
         <a-button
-          key="submit"
+          type="primary"
+          title="Format SQL"
+          @click="handleFormatSql">
+          <a-icon type="align-left"/>
+        </a-button>
+        <a-button
           type="primary"
           @click="handleBigScreenOk">
           Apply
@@ -647,6 +754,7 @@ import {
   bigScreenOpen,
   bigScreenOk,
   bigScreenClose,
+  formatSql,
   applyPom,
   updateDependency
 } from './AddEdit'
@@ -683,6 +791,14 @@ export default {
       switchDefaultValue: true,
       config: null,
       isSetConfig: false,
+      alert: true,
+      alertTypes: [
+        {name: 'E-mail', value: 1, disabled: false},
+        {name: 'SMS', value: 2,disabled: true},
+        {name: 'Ding Ding Task', value: 3,disabled: true},
+        {name: 'Wechat', value: 4,disabled: true},
+      ],
+      alertType: [],
       configOverride: null,
       configSource: [],
       configItems: [],
@@ -803,6 +919,7 @@ export default {
       })
       this.form.getFieldDecorator('resolveOrder', { initialValue: 0 })
       this.form.getFieldDecorator('executionMode', { initialValue: 4 })
+      this.form.getFieldDecorator('cpThreshold', { initialValue: 10 })
     },
 
     handleJobType(value) {
@@ -853,6 +970,17 @@ export default {
 
     handleProcess(item) {
       this.totalItems = item
+    },
+
+    handleAlert() {
+      this.alert = !this.alert
+      if (!this.alert) {
+        this.alertType = []
+      }
+    },
+
+    handleAlertType(item) {
+      this.alertType = item
     },
 
     handleJobName(confFile) {
@@ -942,6 +1070,10 @@ export default {
 
     handleUpdateDependency() {
       updateDependency(this)
+    },
+
+    handleFormatSql() {
+      formatSql(this)
     },
 
     handleBigScreenOpen() {
@@ -1127,6 +1259,8 @@ export default {
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
+        cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description
       }
       if (this.appType === 1) {
@@ -1184,6 +1318,8 @@ export default {
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description || null
       }
       this.handleCreateApp(params)

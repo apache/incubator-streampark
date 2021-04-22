@@ -92,6 +92,14 @@ public class Application implements Serializable {
 
     private Integer optionState;
 
+    /**
+     * checkPoint 保留的最大条数
+     */
+    private Integer cpThreshold;
+
+    //失败告警的通知邮箱
+    private String alertEmail;
+
     private String args;
     /**
      * 应用程序模块
@@ -104,6 +112,7 @@ public class Application implements Serializable {
     private String dynamicOptions;
     private Integer appType;
     private Boolean flameGraph;
+
     /**
      * 是否需要跟踪监控状态
      */
@@ -126,7 +135,6 @@ public class Application implements Serializable {
      */
     @TableField("TOTAL_TM")
     private Integer totalTM;
-
 
     private Integer totalSlot;
     private Integer availableSlot;

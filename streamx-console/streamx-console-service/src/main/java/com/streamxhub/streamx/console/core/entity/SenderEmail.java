@@ -20,36 +20,15 @@
  */
 package com.streamxhub.streamx.console.core.entity;
 
-
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
 
-import java.io.Serializable;
-
-/**
- * @author benjobs
- */
 @Data
-@TableName("t_setting")
-@Slf4j
-public class Setting implements Serializable {
+public class SenderEmail {
 
-    @TableField("`NUM`")
-    private Integer num;
-
-    @TableField("`TITLE`")
-    private String title;
-
-    @TableField("`key`")
-    private String key;
-
-    @TableField("`value`")
-    private String value;
-
-    private String description;
-    private transient boolean editable = false;
-    private transient boolean submitting = false;
+    private String smtpHost;
+    private Integer smtpPort;
+    private String email;
+    private String password;
+    private boolean ssl;
 
 }

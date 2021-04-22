@@ -24,6 +24,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
+import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -91,6 +92,28 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
+    public SenderEmail getSenderEmail() {
+        try {
+            String host = settings.get(SettingService.KEY_ALERT_EMAIL_HOST).getValue();
+            String port = settings.get(SettingService.KEY_ALERT_EMAIL_PORT).getValue();
+            String email = settings.get(SettingService.KEY_ALERT_EMAIL_ADDRESS).getValue();
+            String password = settings.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getValue();
+            String ssl = settings.get(SettingService.KEY_ALERT_EMAIL_SSL).getValue();
+
+            SenderEmail senderEmail = new SenderEmail();
+            senderEmail.setSmtpHost(host);
+            senderEmail.setSmtpPort(Integer.parseInt(port));
+            senderEmail.setEmail(email);
+            senderEmail.setPassword(password);
+            senderEmail.setSsl(Boolean.parseBoolean(ssl));
+            return senderEmail;
+        } catch (Exception e) {
+            log.warn("Fault Alert Email is not set.");
+        }
+        return null;
+    }
+
+    @Override
     public String getStreamXWorkspace() {
         return settings.get(SettingService.KEY_STREAMX_WORKSPACE).getValue();
     }
@@ -105,9 +128,4 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
     }
 
-    @Override
-    public Integer getCheckpointThreshold() {
-        String threshold = settings.get(SettingService.KEY_CHECKPOINT_THRESHOLD).getValue();
-        return Integer.parseInt(threshold);
-    }
 }

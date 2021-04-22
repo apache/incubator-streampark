@@ -127,6 +127,29 @@
       </a-form-item>
 
       <a-form-item
+        label="CheckPoint Threshold"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="Checkpoints keep Max size"
+          v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
+      </a-form-item>
+
+      <a-form-item
+        label="Fault Alert Email"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter email,separate multiple emails with comma(,)"
+          v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+          <svg-icon name="mail" slot="prefix"/>
+        </a-input>
+      </a-form-item>
+
+      <a-form-item
         label="Run Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -562,6 +585,8 @@ export default {
               args: values.args,
               options: JSON.stringify(options),
               dynamicOptions: values.dynamicOptions,
+              cpThreshold: values.cpThreshold,
+              alertEmail: values.alertEmail,
               description: values.description
             }
             this.handleUpdateApp(params)
@@ -627,8 +652,8 @@ export default {
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
-          'slot': this.defaultOptions.slot,
-          'parallelism': this.defaultOptions.parallelism
+          'cpThreshold': this.app.cpThreshold,
+          'alertEmail': this.app.alertEmail
         })
       })
 
