@@ -112,7 +112,7 @@ public class AlertServiceImpl implements AlertService {
                     htmlEmail.addTo(application.getAlertEmail().split(","));
                     htmlEmail.send();
                 } catch (Exception e) {
-                   e.printStackTrace();
+                    e.printStackTrace();
                 }
             }
         }
@@ -122,7 +122,7 @@ public class AlertServiceImpl implements AlertService {
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
                 "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
                 "End Time: " + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration()) + "<br><br>" +
+                "Duration: " + DateUtils.toRichTimeDuration(application.getEndTime().getTime() - application.getStartTime().getTime()) + "<br><br>" +
                 "please check it,Thank you for using StreamX<br><br>" +
                 "Best Wishes!!";
 
