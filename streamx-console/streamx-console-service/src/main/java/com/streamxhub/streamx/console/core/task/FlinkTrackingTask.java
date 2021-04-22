@@ -211,7 +211,7 @@ public class FlinkTrackingTask {
                             if (StopFrom.NONE.equals(stopFrom)) {
                                 savePointService.obsolete(application.getId());
                                 application.setState(FlinkAppState.LOST.getValue());
-                                alertService.alert(application,FlinkAppState.LOST);
+                                alertService.alert(application, FlinkAppState.LOST);
                             } else {
                                 application.setState(FlinkAppState.CANCELED.getValue());
                             }
@@ -224,6 +224,11 @@ public class FlinkTrackingTask {
                         cleanOptioning(optionState, key);
                         application.setEndTime(new Date());
                         this.persistentAndClean(application);
+
+                        FlinkAppState appState = FlinkAppState.of(application.getState());
+                        if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
+                            alertService.alert(application, FlinkAppState.of(application.getState()));
+                        }
                     }
                 }
             }
@@ -403,7 +408,7 @@ public class FlinkTrackingTask {
                 if (StopFrom.NONE.equals(stopFrom)) {
                     log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
-                    alertService.alert(application,FlinkAppState.CANCELED);
+                    alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
                 stopFromCache.invalidate(application.getId());
@@ -418,7 +423,7 @@ public class FlinkTrackingTask {
                 application.setState(FlinkAppState.FAILED.getValue());
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
-                alertService.alert(application,FlinkAppState.FAILED);
+                alertService.alert(application, FlinkAppState.FAILED);
                 break;
             case RESTARTING:
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {},add to starting", currentState.name());
@@ -437,7 +442,7 @@ public class FlinkTrackingTask {
      * @param stopFrom
      */
     private void getFromYarnRestApi(Application application, StopFrom stopFrom) throws Exception {
-        log.debug("flinkTrackingTask getFromYarnRestApi starting...");
+        log.info("flinkTrackingTask getFromYarnRestApi starting...");
         OptionState optionState = optioning.get(application.getId());
 
         /**
@@ -480,6 +485,10 @@ public class FlinkTrackingTask {
                     //能运行到这一步,说明到YARN REST api中成功查询到信息
                     cleanOptioning(optionState, application.getId());
                     this.persistentAndClean(application);
+
+                    if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
+                        alertService.alert(application, flinkAppState);
+                    }
                 } catch (Exception e) {
                     log.error("flinkTrackingTask getFromYarnRestApi error:{}", e);
                     throw e;
