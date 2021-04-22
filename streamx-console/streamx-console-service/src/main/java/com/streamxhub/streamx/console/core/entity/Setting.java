@@ -35,6 +35,10 @@ import java.io.Serializable;
 @TableName("t_setting")
 @Slf4j
 public class Setting implements Serializable {
+
+    @TableField("`NUM`")
+    private Integer num;
+
     @TableField("`TITLE`")
     private String title;
 

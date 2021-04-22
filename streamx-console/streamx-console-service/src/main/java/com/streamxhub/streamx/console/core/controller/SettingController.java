@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Setting;
@@ -49,7 +51,8 @@ public class SettingController extends BaseController {
     @PostMapping("all")
     @RequiresPermissions("setting:view")
     public RestResponse all() {
-        List<Setting> setting = settingService.list();
+        LambdaQueryWrapper<Setting> query = new QueryWrapper<Setting>().lambda().orderByAsc(Setting::getNum);
+        List<Setting> setting = settingService.list(query);
         return RestResponse.create().data(setting);
     }
 
