@@ -33,6 +33,12 @@ public interface SettingService extends IService<Setting> {
     String KEY_MAVEN_REPOSITORY = "maven.central.repository";
     String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
     String KEY_STREAMX_WORKSPACE = "streamx.console.workspace";
+
+    String KEY_ALERT_EMAIL_HOST = "alert.email.host";
+    String KEY_ALERT_EMAIL_PORT = "alert.email.port";
+    String KEY_ALERT_EMAIL_ADDRESS = "alert.email.address";
+    String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
+
     String KEY_ENV_FLINK_HOME = "env.flink.home";
 
     /**

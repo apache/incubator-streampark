@@ -403,6 +403,7 @@ public class FlinkTrackingTask {
                 if (StopFrom.NONE.equals(stopFrom)) {
                     log.info("flinkTrackingTask getFromFlinkRestApi, job cancel is not form streamX,savePoint obsoleted!");
                     savePointService.obsolete(application.getId());
+                    alertService.alert(application,FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
                 stopFromCache.invalidate(application.getId());

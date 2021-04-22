@@ -85,37 +85,40 @@ public class AlertServiceImpl implements AlertService {
             log.error("email.html not found!");
             throw new ExceptionInInitializerError("email.html not found!");
         }
-        this.senderEmail = settingService.getSenderEmail();
-        assert this.senderEmail != null;
     }
 
     @Override
     public void alert(Application application, FlinkAppState appState) {
-        //发送邮件
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                HtmlEmail htmlEmail = new HtmlEmail();
-                htmlEmail.setCharset("UTF-8");
-                htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
-                htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
-                htmlEmail.setFrom(this.senderEmail.getEmail());
-                htmlEmail.setSubject("StreamX Alert: [ " + application.getJobName() + " ] is " + appState.name());
-                String html = getHtmlMessage(application, appState);
-                htmlEmail.setHtmlMsg(html);
-                htmlEmail.addTo(application.getAlertEmail().split(","));
-                htmlEmail.send();
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
+        if (this.senderEmail == null) {
+            this.senderEmail = settingService.getSenderEmail();
+        }
+        if (this.senderEmail != null) {
+            //发送邮件
+            if (Utils.notEmpty(application.getAlertEmail())) {
+                try {
+                    HtmlEmail htmlEmail = new HtmlEmail();
+                    htmlEmail.setCharset("UTF-8");
+                    htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+                    htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+                    htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
+                    htmlEmail.setFrom(this.senderEmail.getEmail());
+                    htmlEmail.setSubject("StreamX Alert: [ " + application.getJobName() + " ] is " + appState.name());
+                    String html = getHtmlMessage(application, appState);
+                    htmlEmail.setHtmlMsg(html);
+                    htmlEmail.addTo(application.getAlertEmail().split(","));
+                    htmlEmail.send();
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
             }
         }
     }
 
     private String getHtmlMessage(Application application, FlinkAppState appState) throws Exception {
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "\n" +
-                "Start Time:" + DateUtils.format(application.getStartTime(),DateUtils.fullFormat(),TimeZone.getDefault()) + "\n" +
-                "End Time:" + DateUtils.format(application.getEndTime(),DateUtils.fullFormat(),TimeZone.getDefault()) + "\n" +
-                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration())  + "\n" +
+                "Start Time:" + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "\n" +
+                "End Time:" + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "\n" +
+                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration()) + "\n" +
                 "please check it, Thank you for using StreamX\n\n\n" +
                 "Best Wishes!!";
 
