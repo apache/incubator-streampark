@@ -24,6 +24,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
+import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -88,6 +89,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             }
         }
         return file.canRead() && file.canWrite();
+    }
+
+    @Override
+    public SenderEmail getSenderEmail() {
+        return null;
     }
 
     @Override

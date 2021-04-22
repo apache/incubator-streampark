@@ -42,10 +42,10 @@
             </span>
           </p>
           <a-icon
-            class='format-sql'
-            type='align-left'
-            title='Format SQL'
-            @click.native='handleFormatSql'/>
+            class="format-sql"
+            type="align-left"
+            title="Format SQL"
+            @click.native="handleFormatSql"/>
 
           <a-icon
             class="big-screen"
@@ -348,22 +348,11 @@
           v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
       </a-form-item>
 
-      <a-form-item
-        label="Fault Alarm"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-switch
-          checked-children="ON"
-          un-checked-children="OFF"
-          default-checked
-          @change="handleAlert"
-          v-decorator="[ 'alert',{rules: [{ required: true }]}]" />
-      </a-form-item>
-
       <!--告警方式-->
-      <template v-if="alert">
+      <template>
         <a-form-item
-          label="Alert Type"
+          v-if="1===2"
+          label="Fault Alert Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-select
@@ -374,40 +363,31 @@
             <a-select-option
               v-for="(o,index) in alertTypes"
               :key="`alertType_${index}`"
+              :disabled="o.disabled"
               :value="o.value">
-              <svg-icon role="img" v-if="o.value === 1" name="dingding"/>
-              <svg-icon role="img" v-if="o.value === 2" name="wechat"/>
-              <svg-icon role="img" v-if="o.value === 3" name="sms"/>
-              <svg-icon role="img" v-if="o.value === 4" name="mail"/>
-              {{o.name}}
+              <svg-icon role="img" v-if="o.value === 1" name="mail"/>
+              <svg-icon role="img" v-if="o.value === 2" name="sms"/>
+              <svg-icon role="img" v-if="o.value === 3" name="dingding"/>
+              <svg-icon role="img" v-if="o.value === 4" name="wechat"/>
+              {{ o.name }}
             </a-select-option>
           </a-select>
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(1)>-1"
-          label="DingTask Url"
+          label="Fault Alert Email"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
-            placeholder="Please enter DingTask Url"
-            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]" />
+            placeholder="Please enter email,separate multiple emails with comma(,)"
+            v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+            <svg-icon name="mail" slot="prefix"/>
+          </a-input>
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(1)>-1"
-          label="DingTask User"
-          :label-col="{lg: {span: 5}, sm: {span: 7}}"
-          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-          <a-input
-            type="text"
-            placeholder="Please enter DingTask receive user"
-            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]" />
-        </a-form-item>
-
-        <a-form-item
-          v-if="alertType.indexOf(3)>-1"
+          v-if="alertType.indexOf(2)>-1"
           label="SMS"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -418,7 +398,7 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(3)>-1"
+          v-if="alertType.indexOf(2)>-1"
           label="SMS Template"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -429,14 +409,25 @@
         </a-form-item>
 
         <a-form-item
-          v-if="alertType.indexOf(4)>-1"
-          label="Email"
+          v-if="alertType.indexOf(3)>-1"
+          label="DingTask Url"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
-            placeholder="Please enter email"
-            v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]" />
+            placeholder="Please enter DingTask Url"
+            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]" />
+        </a-form-item>
+
+        <a-form-item
+          v-if="alertType.indexOf(3)>-1"
+          label="DingTask User"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter DingTask receive user"
+            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]" />
         </a-form-item>
 
       </template>
@@ -726,9 +717,9 @@
         </span>
         <a-button
           type="primary"
-          title='Format SQL'
+          title="Format SQL"
           @click="handleFormatSql">
-          <a-icon type='align-left'/>
+          <a-icon type="align-left"/>
         </a-button>
         <a-button
           type="primary"
@@ -802,10 +793,10 @@ export default {
       isSetConfig: false,
       alert: true,
       alertTypes: [
-        {name: 'Ding Ding Task', value: 1},
-        {name: 'Wechat', value: 2},
-        {name: 'SMS', value: 3},
-        {name: 'E-mail', value: 4},
+        {name: 'E-mail', value: 1, disabled: false},
+        {name: 'SMS', value: 2,disabled: true},
+        {name: 'Ding Ding Task', value: 3,disabled: true},
+        {name: 'Wechat', value: 4,disabled: true},
       ],
       alertType: [],
       configOverride: null,
@@ -1269,6 +1260,7 @@ export default {
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description
       }
       if (this.appType === 1) {
@@ -1327,6 +1319,7 @@ export default {
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
+        alertEmail: values.alertEmail,
         description: values.description || null
       }
       this.handleCreateApp(params)

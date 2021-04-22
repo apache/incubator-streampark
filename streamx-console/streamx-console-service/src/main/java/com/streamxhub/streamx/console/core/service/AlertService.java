@@ -20,42 +20,19 @@
  */
 package com.streamxhub.streamx.console.core.service;
 
-import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.core.entity.SenderEmail;
-import com.streamxhub.streamx.console.core.entity.Setting;
+import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
 /**
  * @author benjobs
  */
-public interface SettingService extends IService<Setting> {
-
-    String KEY_MAVEN_REPOSITORY = "maven.central.repository";
-    String KEY_STREAMX_ADDRESS = "streamx.console.webapp.address";
-    String KEY_STREAMX_WORKSPACE = "streamx.console.workspace";
-    String KEY_ENV_FLINK_HOME = "env.flink.home";
+public interface AlertService {
 
     /**
-     * @param key
-     * @return
+     * alert
+     *
+     * @param application
      */
-    Setting get(String key);
+    void alert(Application application, FlinkAppState appState);
 
-    /**
-     * @param setting
-     * @return
-     */
-    boolean update(Setting setting);
-
-    String getStreamXWorkspace();
-
-    String getStreamXAddress();
-
-    String getMavenRepository();
-
-    String getEnvFlinkHome();
-
-    boolean checkWorkspace();
-
-    SenderEmail getSenderEmail();
 }

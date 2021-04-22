@@ -730,9 +730,9 @@
         </span>
         <a-button
           type="primary"
-          title='Format SQL'
+          title="Format SQL"
           @click="handleFormatSql">
-          <a-icon type='align-left'/>
+          <a-icon type="align-left"/>
         </a-button>
         <a-button
           type="primary"

@@ -1,0 +1,134 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+package com.streamxhub.streamx.console.core.service.impl;
+
+import com.streamxhub.streamx.common.util.DateUtils;
+import com.streamxhub.streamx.common.util.HadoopUtils;
+import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.service.AlertService;
+import com.streamxhub.streamx.console.core.service.SettingService;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.mail.HtmlEmail;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.StringWriter;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TimeZone;
+
+/**
+ * @author benjobs
+ */
+@Slf4j
+@Service
+public class AlertServiceImpl implements AlertService {
+
+    private Template template;
+
+    @Autowired
+    private SettingService settingService;
+
+    private SenderEmail senderEmail;
+
+    @PostConstruct
+    public void initConfig() throws Exception {
+        Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
+        String template = "email.html";
+        Enumeration<URL> urls = ClassLoader.getSystemResources(template);
+        if (urls != null) {
+            if (!urls.hasMoreElements()) {
+                urls = Thread.currentThread().getContextClassLoader().getResources(template);
+            }
+        }
+        if (urls != null) {
+            while (urls.hasMoreElements()) {
+                URL url = urls.nextElement();
+                if (url.getPath().contains(".jar")) {
+                    configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
+                } else {
+                    File file = new File(url.getPath());
+                    configuration.setDirectoryForTemplateLoading(file.getParentFile());
+                }
+                configuration.setDefaultEncoding("UTF-8");
+                this.template = configuration.getTemplate(template);
+                break;
+            }
+        } else {
+            log.error("email.html not found!");
+            throw new ExceptionInInitializerError("email.html not found!");
+        }
+        this.senderEmail = settingService.getSenderEmail();
+        assert this.senderEmail != null;
+    }
+
+    @Override
+    public void alert(Application application, FlinkAppState appState) {
+        //发送邮件
+        if (Utils.notEmpty(application.getAlertEmail())) {
+            try {
+                HtmlEmail htmlEmail = new HtmlEmail();
+                htmlEmail.setCharset("UTF-8");
+                htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+                htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
+                htmlEmail.setFrom(this.senderEmail.getEmail());
+                htmlEmail.setSubject("StreamX Alert: [ " + application.getJobName() + " ] is " + appState.name());
+                String html = getHtmlMessage(application, appState);
+                htmlEmail.setHtmlMsg(html);
+                htmlEmail.addTo(application.getAlertEmail().split(","));
+                htmlEmail.send();
+            } catch (Exception e) {
+                e.printStackTrace(System.err);
+            }
+        }
+    }
+
+    private String getHtmlMessage(Application application, FlinkAppState appState) throws Exception {
+        String content = "Job [" + application.getJobName() + "] is " + appState.name() + "\n" +
+                "Start Time:" + DateUtils.format(application.getStartTime(),DateUtils.fullFormat(),TimeZone.getDefault()) + "\n" +
+                "End Time:" + DateUtils.format(application.getEndTime(),DateUtils.fullFormat(),TimeZone.getDefault()) + "\n" +
+                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration())  + "\n" +
+                "please check it, Thank you for using StreamX\n\n\n" +
+                "Best Wishes!!";
+
+        Map<String, String> root = new HashMap<>();
+        root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));
+        root.put("message", content);
+        String format = "%s/proxy/%s/";
+        String url = String.format(format, HadoopUtils.rmHttpAddress(false), application.getAppId());
+        root.put("link", url);
+
+        StringWriter writer = new StringWriter();
+        template.process(root, writer);
+        return writer.toString();
+    }
+
+}

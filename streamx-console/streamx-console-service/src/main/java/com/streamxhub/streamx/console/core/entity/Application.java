@@ -97,6 +97,9 @@ public class Application implements Serializable {
      */
     private Integer cpThreshold;
 
+    //失败告警的通知邮箱
+    private String alertEmail;
+
     private String args;
     /**
      * 应用程序模块
@@ -132,7 +135,6 @@ public class Application implements Serializable {
      */
     @TableField("TOTAL_TM")
     private Integer totalTM;
-
 
     private Integer totalSlot;
     private Integer availableSlot;
