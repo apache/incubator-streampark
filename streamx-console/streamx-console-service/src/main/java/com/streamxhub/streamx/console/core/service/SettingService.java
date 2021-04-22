@@ -38,6 +38,7 @@ public interface SettingService extends IService<Setting> {
     String KEY_ALERT_EMAIL_PORT = "alert.email.port";
     String KEY_ALERT_EMAIL_ADDRESS = "alert.email.address";
     String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
+    String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
 
     String KEY_ENV_FLINK_HOME = "env.flink.home";
 

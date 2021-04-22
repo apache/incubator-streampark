@@ -98,11 +98,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             String port = settings.get(SettingService.KEY_ALERT_EMAIL_PORT).getValue();
             String address = settings.get(SettingService.KEY_ALERT_EMAIL_ADDRESS).getValue();
             String password = settings.get(SettingService.KEY_ALERT_EMAIL_PASSWORD).getValue();
+            String ssl = settings.get(SettingService.KEY_ALERT_EMAIL_SSL).getValue();
+
             SenderEmail senderEmail = new SenderEmail();
             senderEmail.setSmtpHost(host);
             senderEmail.setSmtpPort(Integer.parseInt(port));
             senderEmail.setSmtpHost(address);
             senderEmail.setPassword(password);
+            senderEmail.setSsl(Boolean.parseBoolean(ssl));
             return senderEmail;
         } catch (Exception e) {
             log.warn("Fault Alert Email is not set.");

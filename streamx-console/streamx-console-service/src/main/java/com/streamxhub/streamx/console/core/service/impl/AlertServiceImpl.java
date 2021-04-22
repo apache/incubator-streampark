@@ -99,9 +99,12 @@ public class AlertServiceImpl implements AlertService {
                     HtmlEmail htmlEmail = new HtmlEmail();
                     htmlEmail.setCharset("UTF-8");
                     htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-                    htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
                     htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
                     htmlEmail.setFrom(this.senderEmail.getEmail());
+                    if (this.senderEmail.isSsl()) {
+                        htmlEmail.setSSLOnConnect(true);
+                        htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+                    }
                     htmlEmail.setSubject("StreamX Alert: [ " + application.getJobName() + " ] is " + appState.name());
                     String html = getHtmlMessage(application, appState);
                     htmlEmail.setHtmlMsg(html);

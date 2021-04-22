@@ -29,5 +29,6 @@ public class SenderEmail {
     private Integer smtpPort;
     private String email;
     private String password;
+    private boolean ssl;
 
 }
