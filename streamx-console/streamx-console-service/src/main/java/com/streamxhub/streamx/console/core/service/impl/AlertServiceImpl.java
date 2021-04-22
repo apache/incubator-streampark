@@ -118,11 +118,11 @@ public class AlertServiceImpl implements AlertService {
     }
 
     private String getHtmlMessage(Application application, FlinkAppState appState) throws Exception {
-        String content = "Job [" + application.getJobName() + "] is " + appState.name() + "\n" +
-                "Start Time:" + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "\n" +
-                "End Time:" + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "\n" +
-                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration()) + "\n" +
-                "please check it, Thank you for using StreamX\n\n\n" +
+        String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
+                "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "End Time: " + DateUtils.format(application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "Duration: " + DateUtils.toRichTimeDuration(application.getDuration()) + "<br><br>" +
+                "please check it,Thank you for using StreamX<br><br>" +
                 "Best Wishes!!";
 
         Map<String, String> root = new HashMap<>();
