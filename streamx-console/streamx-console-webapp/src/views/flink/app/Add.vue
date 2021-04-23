@@ -381,7 +381,8 @@
           <a-input
             type="text"
             placeholder="Please enter email,separate multiple emails with comma(,)"
-            v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+            allowClear
+            v-decorator="[ 'alertEmail' ]">
             <svg-icon name="mail" slot="prefix"/>
           </a-input>
         </a-form-item>
@@ -1260,9 +1261,10 @@ export default {
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
-        alertEmail: values.alertEmail,
+        alertEmail: values.alertEmail || null,
         description: values.description
       }
+
       if (this.appType === 1) {
         const configVal = this.form.getFieldValue('config')
         params['format'] = configVal.endsWith('.properties') ? 2 : 1

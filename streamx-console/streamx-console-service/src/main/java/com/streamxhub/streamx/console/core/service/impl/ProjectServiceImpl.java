@@ -374,15 +374,15 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return false;
     }
 
-    private void gitWorkTree(Long id, File workTree, String spance) {
+    private void gitWorkTree(Long id, File workTree, String space) {
         File[] files = workTree.listFiles();
         for (File file : Objects.requireNonNull(files)) {
             if (!file.getName().startsWith(".git")) {
                 if (file.isFile()) {
-                    tailBuffer.get(id).append(spance).append("/").append(file.getName()).append("\n");
+                    tailBuffer.get(id).append(space).append("/").append(file.getName()).append("\n");
                 } else if (file.isDirectory()) {
-                    tailBuffer.get(id).append(spance).append("/").append(file.getName()).append("\n");
-                    gitWorkTree(id, file, spance.concat("/").concat(file.getName()));
+                    tailBuffer.get(id).append(space).append("/").append(file.getName()).append("\n");
+                    gitWorkTree(id, file, space.concat("/").concat(file.getName()));
                 }
             }
         }
