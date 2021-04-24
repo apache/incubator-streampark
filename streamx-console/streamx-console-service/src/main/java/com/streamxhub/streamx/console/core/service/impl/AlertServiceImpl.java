@@ -130,7 +130,7 @@ public class AlertServiceImpl implements AlertService {
 
         if (appState.equals(FlinkAppState.FAILED)) {
             if (application.getRestartCount() > 0) {
-                content += "Restart: <strong>" + application.getRestartCount() + "</strong>/" + application.getRestartSize() + "<br><br>";
+                content += "Restart: <strong><span style='red'>" + application.getRestartCount() + "</span>/" + application.getRestartSize() + "</strong>/<br><br>";
             }
         }
         content += "please check it,Thank you for using StreamX<br><br>Best Wishes!!";
