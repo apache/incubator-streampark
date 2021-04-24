@@ -22,11 +22,17 @@
 export function baseUrl() {
   let url = ''
   switch (process.env.NODE_ENV) {
-    case 'development':
+    //混合打包(production)
+    case 'production':
       url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
       break
-    case 'production':
-      url = 'http://pro-hadoop-2:10001'
+    //前后端分离(production)
+    case 'detached':
+      url = 'http://test-hadoop-2:10001'
+      break
+    //测试阶段的测试地址(dev)
+    case 'development':
+      url = 'http://test-hadoop-2:10000'
       break
   }
   return url

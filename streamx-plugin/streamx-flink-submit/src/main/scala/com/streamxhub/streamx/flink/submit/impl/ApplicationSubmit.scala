@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.CommandLine
@@ -38,7 +38,6 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import scala.tools.nsc.classpath.FileUtils
 import scala.util.Try
 
 /**

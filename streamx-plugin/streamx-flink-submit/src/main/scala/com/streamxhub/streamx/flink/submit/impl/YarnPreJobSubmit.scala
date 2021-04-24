@@ -21,9 +21,8 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.DevelopmentMode
-import com.streamxhub.streamx.common.util.{DeflaterUtils, PropertiesUtils}
+import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.impl.ApplicationSubmit.workspaceEnv
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine

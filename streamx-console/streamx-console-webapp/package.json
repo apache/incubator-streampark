@@ -7,7 +7,7 @@
     "build": "vue-cli-service build",
     "build:dev": "vue-cli-service --mode=development build",
     "build:prod": "vue-cli-service --mode=production build",
-    "build:preview": "vue-cli-service build --mode preview",
+    "build:detached": "vue-cli-service --mode=detached build",
     "lint": "vue-cli-service lint",
     "lint:nofix": "vue-cli-service lint --no-fix",
     "test:unit": "vue-cli-service test:unit",

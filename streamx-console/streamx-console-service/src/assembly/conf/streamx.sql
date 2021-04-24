@@ -1,3 +1,19 @@
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : localhost
+ Source Server Type    : MySQL
+ Source Server Version : 80017
+ Source Host           : localhost:3306
+ Source Schema         : streamx
+
+ Target Server Type    : MySQL
+ Target Server Version : 80017
+ File Encoding         : 65001
+
+ Date: 24/04/2021 19:42:11
+*/
+
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
@@ -65,6 +81,8 @@ CREATE TABLE `t_flink_app` (
   `DURATION` bigint(20) DEFAULT NULL,
   `JOB_ID` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `STATE` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `RESTART_SIZE` int(1) DEFAULT NULL,
+  `RESTART_COUNT` int(1) DEFAULT NULL,
   `DYNAMIC_OPTIONS` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
   `DESCRIPTION` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `ALERT_EMAIL` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
@@ -330,7 +348,7 @@ CREATE TABLE `t_role` (
 -- Records of t_role
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2017-12-27 16:23:11', '2021-04-22 09:35:44', 'admin');
+INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2020-12-10 12:00:56', '2021-04-22 09:35:44', 'admin');
 INSERT INTO `t_role` VALUES (142, 'developer', '普通开发者', '2021-04-11 19:02:56', '2021-04-12 00:00:14', NULL);
 COMMIT;
 
@@ -465,7 +483,7 @@ CREATE TABLE `t_user` (
 -- Records of t_user
 -- ----------------------------
 BEGIN;
-INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-22 09:37:13', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
+INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-24 19:32:36', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
 COMMIT;
 
 -- ----------------------------
