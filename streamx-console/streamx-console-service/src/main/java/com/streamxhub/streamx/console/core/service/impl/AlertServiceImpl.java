@@ -66,7 +66,7 @@ public class AlertServiceImpl implements AlertService {
             }
         }
         if (urls != null) {
-            while (urls.hasMoreElements()) {
+            if (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if (url.getPath().contains(".jar")) {
                     configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
@@ -76,7 +76,6 @@ public class AlertServiceImpl implements AlertService {
                 }
                 configuration.setDefaultEncoding("UTF-8");
                 this.template = configuration.getTemplate(template);
-                break;
             }
         } else {
             log.error("email.html not found!");
