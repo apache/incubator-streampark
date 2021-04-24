@@ -126,9 +126,14 @@ public class AlertServiceImpl implements AlertService {
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
                 "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
                 "End Time: " + DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br><br>" +
-                "please check it,Thank you for using StreamX<br><br>" +
-                "Best Wishes!!";
+                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br><br>";
+
+        if (appState.equals(FlinkAppState.FAILED)) {
+            if (application.getRestartCount() > 0) {
+                content += "Restart: <strong>" + application.getRestartCount() + "</strong>/" + application.getRestartSize() + "<br>";
+            }
+        }
+        content += "please check it,Thank you for using StreamX<br><br>Best Wishes!!";
 
         Map<String, String> root = new HashMap<>();
         root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));

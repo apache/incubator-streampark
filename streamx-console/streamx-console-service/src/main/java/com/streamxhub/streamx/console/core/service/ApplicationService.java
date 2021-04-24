@@ -44,7 +44,7 @@ public interface ApplicationService extends IService<Application> {
 
     void starting(Application app);
 
-    boolean start(Application app) throws Exception;
+    boolean start(Application app,boolean auto) throws Exception;
 
     String getYarnName(Application app);
 

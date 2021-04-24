@@ -348,6 +348,17 @@
           v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
       </a-form-item>
 
+      <a-form-item
+        label="Fault Restart Size"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="restart max size"
+          v-decorator="['restartSize', {rules: [{ required: true, message: 'Restart max size is required'}]}]" />
+      </a-form-item>
+
       <!--告警方式-->
       <template>
         <a-form-item
@@ -921,6 +932,7 @@ export default {
       this.form.getFieldDecorator('resolveOrder', { initialValue: 0 })
       this.form.getFieldDecorator('executionMode', { initialValue: 4 })
       this.form.getFieldDecorator('cpThreshold', { initialValue: 10 })
+      this.form.getFieldDecorator('restartSize', { initialValue: 3 })
     },
 
     handleJobType(value) {
@@ -1261,6 +1273,7 @@ export default {
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
+        restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description
       }
@@ -1321,6 +1334,7 @@ export default {
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
+        restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null
       }
