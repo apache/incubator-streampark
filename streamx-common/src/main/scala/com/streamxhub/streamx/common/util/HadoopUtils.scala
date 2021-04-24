@@ -50,7 +50,7 @@ object HadoopUtils extends Logger {
   }
 
   /**
-   * 从yarn源码里抛出来的...
+   * 从yarn源码里刨出来的...
    *
    * @param getLatest :
    *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,

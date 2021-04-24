@@ -24,6 +24,7 @@ package com.streamxhub.streamx.plugin.profiling.reporter;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import scalaj.http.Http;
 import scalaj.http.HttpResponse;
@@ -51,7 +52,7 @@ public class HttpReporter implements Reporter {
 
   @Override
   public void doArguments(Map<String, List<String>> parsedArgs) {
-    id = Long.parseLong(ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID).trim());
+    id = Long.parseLong(Objects.requireNonNull(ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_ID)).trim());
     token = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TOKEN);
     url = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_URL);
     type = ArgumentUtils.getArgumentSingleValue(parsedArgs, ARG_TYPE);
@@ -60,13 +61,13 @@ public class HttpReporter implements Reporter {
   @Override
   public void report(String profilerName, Map<String, Object> metrics) {
     String json = Utils.toJsonString(metrics);
-    Map<String, Object> param = new HashMap<>();
+    Map<String, Object> param = new HashMap<>(5);
     param.put("id", id);
     param.put("type", type);
     param.put("token", token);
     param.put("profiler", profilerName);
     param.put("metric", Utils.zipString(json));
-    HttpResponse response =
+    HttpResponse<String> response =
         Http.apply(url)
             .timeout(1000, 5000)
             .header("content-type", "application/json;charset=UTF-8")
