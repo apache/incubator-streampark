@@ -141,7 +141,7 @@
         <dependency>
             <groupId>org.apache.shiro</groupId>
             <artifactId>shiro-spring</artifactId>
-            <version>1.7.0</version>
+            <version>1.4.0</version>
         </dependency>
 
         <!-- spring cache -->
@@ -384,7 +384,7 @@
                             <goal>install-node-and-npm</goal>
                         </goals>
                         <configuration>
-                            <nodeVersion>v14.16.0</nodeVersion>
+                            <nodeVersion>v14.16.1</nodeVersion>
                             <npmVersion>6.14.11</npmVersion>
                         </configuration>
                     </execution>

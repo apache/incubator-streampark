@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -38,9 +39,11 @@ import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.Project;
 import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.util.CollectionUtils;
 import org.eclipse.jgit.api.*;
 import org.eclipse.jgit.internal.storage.file.FileRepository;
 import org.eclipse.jgit.lib.StoredConfig;
@@ -61,8 +64,7 @@ import java.util.concurrent.*;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
-        implements ProjectService {
+public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project> implements ProjectService {
 
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
@@ -72,6 +74,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Autowired
     private ApplicationMapper applicationMapper;
+    @Autowired
+    private ApplicationService applicationService;
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -106,8 +110,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public boolean delete(String id) {
-        return false;
+    public RestResponse update(Project project) {
+        QueryWrapper<Project> queryWrapper = new QueryWrapper<>();
+        queryWrapper.lambda().eq(Project::getId, project.getId());
+        int count = count(queryWrapper);
+        RestResponse response = RestResponse.create();
+        if (count >0) {
+            project.setDate(new Date());
+            boolean status = updateById(project);
+            if (status) {
+                return response.message("项目更新成功").data(true);
+            } else {
+                return response.message("项目更新失败").data(false);
+            }
+        } else {
+            return response.message("该名称的项目不存在").data(false);
+        }
+    }
+
+
+    @Override
+    public RestResponse delete(String id) {
+        LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
+        queryWrapper.eq(Application::getProjectId, id).and(item -> item.eq(Application::getState, "0"));
+        List<Application> applicationList = applicationService.list(queryWrapper);
+        RestResponse response = RestResponse.create();
+        if (CollectionUtils.isEmpty(applicationList)) {
+            boolean status = removeById(id);
+            if (status) {
+                return response.message("删除项目成功").data(true);
+            } else {
+                return response.message("添加项目失败").data(false);
+            }
+        } else {
+            return response.message("该项目下有应用没删除,请先删除项目下的应用").data(false);
+        }
     }
 
     @Override
@@ -307,7 +344,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         .setRef(project.getBranches())
                         .call();
 
-                log.info("git {} was isCloned,pull starting...",project.getUrl());
+                log.info("git {} was isCloned,pull starting...", project.getUrl());
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 
@@ -332,7 +369,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 );
 
             } else {
-                log.info("git {} is new,clone starting...",project.getUrl());
+                log.info("git {} is new,clone starting...", project.getUrl());
                 tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
                 CloneCommand cloneCommand = Git.cloneRepository()
                         .setURI(project.getUrl())
