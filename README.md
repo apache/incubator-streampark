@@ -64,7 +64,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 
 ## 🏳‍🌈 组成部分
 
-`Streamx` consists of three parts,`streamx-core`,`streamx-pump` 和 `streamx-console`
+`Streamx` consists of three parts,`streamx-core`,`streamx-pump` and `streamx-console`
 
 ![](http://assets.streamxhub.com/streamx1.png)
 
