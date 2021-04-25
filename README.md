@@ -144,11 +144,14 @@ Thank you to all our backers!
 
 [StreamX]((http://www.streamxhub.com/#/)) enters the high-speed development stage, we need your contribution.
 
+
 <div align="center">
+
   ![Stargazers over time](https://starchart.cc/streamxhub/streamx.svg)
+
 </div>
 
 <div align="center">
-  <img src="http://assets.streamxhub.com/1617945166259.jpg" alt="Join the Group" width="200"> 
+  <img src="http://assets.streamxhub.com/1619345456249.jpg" alt="Join the Group" width="200"> 
 </div>
 
