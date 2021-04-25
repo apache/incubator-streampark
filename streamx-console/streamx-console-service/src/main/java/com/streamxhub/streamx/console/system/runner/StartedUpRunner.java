@@ -83,7 +83,7 @@ public class StartedUpRunner implements ApplicationRunner {
             log.info("            _\\ \\ / __// __// -_)/ _ `//  ' \\ _>  <       ");
             log.info("           /___/ \\__//_/   \\__/ \\_,_//_/_/_//_/|_|       ");
             log.info("                                                            ");
-            log.info("            [StreamX] let's flink|spark easy ô‿ô!           ");
+            log.info("            [StreamX] Make Flink|Spark easier ô‿ô!           ");
             log.info("                                                            ");
             log.info("            StreamX 启动完毕，时间：" + LocalDateTime.now());
         }
