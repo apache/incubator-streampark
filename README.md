@@ -62,7 +62,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 * Full support from task `development` to `deployment`
 * ...
 
-## 🏳‍🌈 组成部分
+## 🏳‍🌈 Components
 
 `Streamx` consists of three parts,`streamx-core`,`streamx-pump` and `streamx-console`
 
