@@ -143,7 +143,7 @@
 
 <script>
 
-import { create } from '@api/project'
+import { create} from '@api/project'
 
 export default {
   name: 'BaseForm',

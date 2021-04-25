@@ -23,6 +23,7 @@ package com.streamxhub.streamx.console.core.controller;
 import java.util.List;
 import java.util.Map;
 
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -57,6 +58,12 @@ public class ProjectController extends BaseController {
         return projectService.create(project);
     }
 
+    @PostMapping("update")
+    @RequiresPermissions("project:update")
+    public RestResponse update(Project project) {
+        return projectService.update(project);
+    }
+
     @PostMapping("build")
     @RequiresPermissions("project:build")
     public RestResponse build(Long id) throws Exception {
@@ -73,8 +80,7 @@ public class ProjectController extends BaseController {
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     public RestResponse delete(String id) {
-        boolean result = projectService.delete(id);
-        return RestResponse.create().message(result ? "删除成功" : "删除失败");
+        return projectService.delete(id);
     }
 
     @PostMapping("modules")

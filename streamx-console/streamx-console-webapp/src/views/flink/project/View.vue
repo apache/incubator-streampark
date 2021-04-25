@@ -157,7 +157,9 @@
               v-permit="'project:delete'"
               theme="twoTone"
               two-tone-color="#4a9ff5"
-              style="width:30px;" />
+              style="width:30px;"
+              @click="handleRemove(item)"
+              />
           </div>
         </a-list-item>
       </a-list>
@@ -182,7 +184,7 @@
   </div>
 </template>
 <script>
-import { build, list } from '@api/project'
+import { build, list, remove } from '@api/project'
 import { check } from '@api/setting'
 import Ellipsis from '@comp/Ellipsis'
 import SockJS from 'sockjs-client'
@@ -291,6 +293,13 @@ export default {
       this.$nextTick(function () {
         this.handleOpenWS(project)
       })
+    },
+    handleRemove(project) {
+        remove({id: project.id}).then((resp) => {
+                   console.log(resp)
+                  }).catch((error) => {
+                    this.$message.error(error.message)
+                  })
     },
 
     handleOpenWS (project) {

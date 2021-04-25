@@ -83,7 +83,7 @@ object YarnUtils {
    */
   def isContains(appName: String): Boolean = {
     val client = getYarnClient()
-    val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName == appName)
+    val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName.equals(appName))
     client.close()
     contains
   }
