@@ -228,6 +228,13 @@ public class FlinkTrackingTask {
                         FlinkAppState appState = FlinkAppState.of(application.getState());
                         if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
                             alertService.alert(application, FlinkAppState.of(application.getState()));
+                            if (appState.equals(FlinkAppState.FAILED)) {
+                                try {
+                                    applicationService.start(application,true);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     }
                 }
@@ -393,7 +400,7 @@ public class FlinkTrackingTask {
     private void handleNotRunState(Application application,
                                    OptionState optionState,
                                    FlinkAppState currentState,
-                                   StopFrom stopFrom) {
+                                   StopFrom stopFrom) throws Exception {
         switch (currentState) {
             case CANCELLING:
                 cancelingCache.put(application.getId(), DEFAULT_FLAG_BYTE);
@@ -424,6 +431,7 @@ public class FlinkTrackingTask {
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
                 alertService.alert(application, FlinkAppState.FAILED);
+                applicationService.start(application,true);
                 break;
             case RESTARTING:
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {},add to starting", currentState.name());
@@ -488,10 +496,12 @@ public class FlinkTrackingTask {
 
                     if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
                         alertService.alert(application, flinkAppState);
+                        if (flinkAppState.equals(FlinkAppState.FAILED)) {
+                            applicationService.start(application,true);
+                        }
                     }
                 } catch (Exception e) {
-                    log.error("flinkTrackingTask getFromYarnRestApi error:{}", e);
-                    throw e;
+                    throw new RuntimeException("flinkTrackingTask getFromYarnRestApi error,",e);
                 }
             }
         }

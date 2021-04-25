@@ -555,7 +555,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
                             // 重新启动.
-                            start(application);
+                            start(application, false);
                             // 将"需要重新发布"状态清空...
                             updateWrapper.set(Application::getDeploy, DeployState.DONE.get());
                         } else {
@@ -822,12 +822,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
-    public boolean start(Application appParam) throws Exception {
+    public boolean start(Application appParam, boolean auto) throws Exception {
 
         checkFlinkEnv();
 
         final Application application = getById(appParam.getId());
+        //手动启动的,将reStart清空
         assert application != null;
+
+        if (!auto) {
+            application.setRestartCount(0);
+        } else {
+            if (application.getRestartCount() >= application.getRestartSize()) {
+                return false;
+            }
+            application.setRestartCount(application.getRestartCount() + 1);
+        }
+
         //1) 真正执行启动相关的操作..
         String workspace = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_WORKSPACE());
 

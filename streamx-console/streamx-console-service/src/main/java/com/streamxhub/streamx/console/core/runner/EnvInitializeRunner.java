@@ -75,10 +75,10 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.mkdirs(appPlugins);
             }
 
-            String appSavepoints = ConfigConst.APP_SAVEPOINTS();
-            if (!HdfsUtils.exists(appSavepoints)) {
-                log.info("mkdir {} starting ...", appSavepoints);
-                HdfsUtils.mkdirs(appSavepoints);
+            String appSavePoints = ConfigConst.APP_SAVEPOINTS();
+            if (!HdfsUtils.exists(appSavePoints)) {
+                log.info("mkdir {} starting ...", appSavePoints);
+                HdfsUtils.mkdirs(appSavePoints);
             }
 
             String appJars = ConfigConst.APP_JARS();

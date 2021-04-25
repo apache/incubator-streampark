@@ -429,13 +429,25 @@
       </a-form-item>
 
       <a-form-item
+        label="Fault Restart Size"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-number
+          :min="1"
+          :step="1"
+          placeholder="restart max size"
+          v-decorator="['restartSize', {rules: [{ required: true, message: 'Restart max size is required'}]}]" />
+      </a-form-item>
+
+      <a-form-item
         label="Fault Alert Email"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="text"
           placeholder="Please enter email,separate multiple emails with comma(,)"
-          v-decorator="[ 'alertEmail', {rules: [{ required: true, message: 'email is required' }]} ]">
+          allowClear
+          v-decorator="[ 'alertEmail' ]">
           <svg-icon name="mail" slot="prefix"/>
         </a-input>
       </a-form-item>
@@ -1358,7 +1370,8 @@ export default {
         resolveOrder: values.resolveOrder,
         executionMode: values.executionMode,
         cpThreshold: values.cpThreshold,
-        alertEmail: values.alertEmail,
+        restartSize: values.restartSize,
+        alertEmail: values.alertEmail || null,
         description: values.description
       }
       this.handleUpdateApp(params)
@@ -1396,7 +1409,8 @@ export default {
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
         cpThreshold: values.cpThreshold,
-        alertEmail: values.alertEmail,
+        restartSize: values.restartSize,
+        alertEmail: values.alertEmail|| null,
         executionMode: values.executionMode,
         description: values.description || null
       }
@@ -1558,6 +1572,7 @@ export default {
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
           'cpThreshold': this.app.cpThreshold,
+          'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail
         })
         if (this.app.jobType === 2) {

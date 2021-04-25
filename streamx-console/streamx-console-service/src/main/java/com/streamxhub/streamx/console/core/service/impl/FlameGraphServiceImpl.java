@@ -58,7 +58,9 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
     @Override
     public String generateFlameGraph(FlameGraph flameGraph) throws IOException {
         List<FlameGraph> flameGraphList = this.baseMapper.getFlameGraph(
-                flameGraph.getAppId(), flameGraph.getStart(), flameGraph.getEnd()
+                flameGraph.getAppId(),
+                flameGraph.getStart(),
+                flameGraph.getEnd()
         );
         if (CommonUtil.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();

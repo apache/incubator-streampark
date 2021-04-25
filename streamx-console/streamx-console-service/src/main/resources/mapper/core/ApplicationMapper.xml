@@ -22,6 +22,8 @@
         <result column="END_TIME" jdbcType="DATE" property="endTime"/>
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
+        <result column="RESTART_SIZE" jdbcType="INTEGER" property="restartSize"/>
+        <result column="RESTART_COUNT" jdbcType="INTEGER" property="restartCount"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
         <result column="FLAME_GRAPH" jdbcType="BOOLEAN" property="flameGraph"/>
         <result column="RESOLVE_ORDER" jdbcType="INTEGER" property="resolveOrder"/>

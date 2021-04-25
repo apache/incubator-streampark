@@ -66,7 +66,7 @@ public class AlertServiceImpl implements AlertService {
             }
         }
         if (urls != null) {
-            while (urls.hasMoreElements()) {
+            if (urls.hasMoreElements()) {
                 URL url = urls.nextElement();
                 if (url.getPath().contains(".jar")) {
                     configuration.setClassLoaderForTemplateLoading(Thread.currentThread().getContextClassLoader(), "");
@@ -76,7 +76,6 @@ public class AlertServiceImpl implements AlertService {
                 }
                 configuration.setDefaultEncoding("UTF-8");
                 this.template = configuration.getTemplate(template);
-                break;
             }
         } else {
             log.error("email.html not found!");
@@ -126,9 +125,14 @@ public class AlertServiceImpl implements AlertService {
         String content = "Job [" + application.getJobName() + "] is " + appState.name() + "<br>" +
                 "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
                 "End Time: " + DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
-                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br><br>" +
-                "please check it,Thank you for using StreamX<br><br>" +
-                "Best Wishes!!";
+                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br>";
+
+        if (appState.equals(FlinkAppState.FAILED)) {
+            if (application.getRestartCount() > 0) {
+                content += "Restart: <strong><span style='color:red'>" + application.getRestartCount() + "</span>/" + application.getRestartSize() + "</strong><br><br>";
+            }
+        }
+        content += "please check it,Thank you for using StreamX<br><br>Best Wishes!!";
 
         Map<String, String> root = new HashMap<>();
         root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));

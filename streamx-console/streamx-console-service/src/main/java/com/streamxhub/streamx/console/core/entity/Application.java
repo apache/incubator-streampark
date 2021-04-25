@@ -90,6 +90,16 @@ public class Application implements Serializable {
      */
     private Integer deploy;
 
+    /**
+     * 任务失败后的最大重启次数.
+     */
+    private Integer restartSize;
+
+    /**
+     * 已经重启的次数
+     */
+    private Integer restartCount;
+
     private Integer optionState;
 
     /**
