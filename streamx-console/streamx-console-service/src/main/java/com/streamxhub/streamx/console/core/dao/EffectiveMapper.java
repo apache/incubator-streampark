@@ -31,7 +31,7 @@ import org.apache.ibatis.annotations.Select;
  */
 public interface EffectiveMapper extends BaseMapper<Effective> {
 
-    @Select("delete from t_flink_effective where app_id=#{appId} and target_type=#{type}")
+    @Delete("delete from t_flink_effective where app_id=#{appId} and target_type=#{type}")
     void delete(@Param("appId") Long appId, @Param("type") int type);
 
     @Select("select * from t_flink_effective where app_id=#{appId} and target_type=#{type}")
