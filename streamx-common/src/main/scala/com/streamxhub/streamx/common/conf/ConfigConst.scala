@@ -315,7 +315,7 @@ object ConfigConst {
       |         /___/ \__//_/   \__/ \_,_//_/_/_//_/|_|
       |
       |
-      |          [StreamX] let's flink|spark easy ô‿ô!
+      |          [StreamX] Make Flink|Spark easier ô‿ô!
       |
       |""".stripMargin
 
