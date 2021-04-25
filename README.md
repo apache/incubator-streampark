@@ -64,7 +64,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 
 ## 🏳‍🌈 组成部分
 
-`Streamx` consists of three parts,`streamx-core`,`streamx-pump` 和 `streamx-console`
+`Streamx` consists of three parts,`streamx-core`,`streamx-pump` and `streamx-console`
 
 ![](http://assets.streamxhub.com/streamx1.png)
 
@@ -144,11 +144,15 @@ Thank you to all our backers!
 
 [StreamX]((http://www.streamxhub.com/#/)) enters the high-speed development stage, we need your contribution.
 
+
 <div align="center">
+
   ![Stargazers over time](https://starchart.cc/streamxhub/streamx.svg)
+
 </div>
 
 <div align="center">
-  <img src="http://assets.streamxhub.com/1617945166259.jpg" alt="Join the Group" width="200"> 
+  <img src="http://assets.streamxhub.com/1619345456249.jpg" alt="Join the Group" width="200"><br>
+  <span>join us</span>
 </div>
 

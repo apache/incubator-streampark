@@ -436,7 +436,7 @@
           :min="1"
           :step="1"
           placeholder="restart max size"
-          v-decorator="['restartSize', {rules: [{ required: true, message: 'Restart max size is required'}]}]" />
+          v-decorator="['restartSize']" />
       </a-form-item>
 
       <a-form-item

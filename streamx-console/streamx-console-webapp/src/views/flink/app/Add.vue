@@ -356,7 +356,7 @@
           :min="1"
           :step="1"
           placeholder="restart max size"
-          v-decorator="['restartSize', {rules: [{ required: true, message: 'Restart max size is required'}]}]" />
+          v-decorator="['restartSize']" />
       </a-form-item>
 
       <!--告警方式-->
@@ -932,7 +932,7 @@ export default {
       this.form.getFieldDecorator('resolveOrder', { initialValue: 0 })
       this.form.getFieldDecorator('executionMode', { initialValue: 4 })
       this.form.getFieldDecorator('cpThreshold', { initialValue: 10 })
-      this.form.getFieldDecorator('restartSize', { initialValue: 3 })
+      this.form.getFieldDecorator('restartSize', { initialValue: 0 })
     },
 
     handleJobType(value) {
