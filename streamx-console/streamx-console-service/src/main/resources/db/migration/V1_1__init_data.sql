@@ -1,24 +1,9 @@
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
--- Records of t_flink_app
--- ----------------------------
-INSERT INTO `t_flink_app` VALUES (1381548268640436225, 2, 4, NULL, 'Flink Sql Test', NULL, NULL, NULL, NULL, '{\"jobmanager.memory.process.size\":\"1024mb\",\"taskmanager.memory.process.size\":\"1024mb\",\"parallelism.default\":1,\"taskmanager.numberOfTaskSlots\":1}', 1, NULL, 1, NULL, NULL, '2', NULL, NULL, 0, 0, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, '2021-04-12 18:02:30', 0, NULL, NULL);
-
--- ----------------------------
--- Records of t_flink_effective
--- ----------------------------
-INSERT INTO `t_flink_effective` VALUES (1381548275443597313, 1381548268640436225, 2, 1381548268724322305, NULL);
-
--- ----------------------------
 -- Records of t_flink_project
 -- ----------------------------
-INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/benjobs/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, '2021-04-08 05:01:02', '2021-04-12 17:59:36', 'streamx-quickstart', 1);
-
--- ----------------------------
--- Records of t_flink_sql
--- ----------------------------
-INSERT INTO `t_flink_sql` VALUES (1381548268724322305, 1381548268640436225, 'eNqNVM9PGkEUvu9fMbeFhsUF+kuMBwQUEgEDa5uezMAusrow25lZLLeaGGNbrR5o05q20dRGDw320miBpv8Mu9BT/4XO7ig/atN0b+973/fezPvebDyfjClJoMTmFpPAIhpeMdAq8AmAfV6oq+BBLB9PxfIBD9SpVr0BliDVVhFu3EgUtQqs6whPopQAJZ1JFpRYZskX8Qt+8DCtpFhXsYRqNa1EEQ7ShqmJYBaI67C8DsUAkCTQ+/6j3zwDHgKG1HFVXcNERzVPaNV0N4QGE7tqLus/23Heff7V3R2mgdM8d3Y3gRwMhUCv86l3+bx/uMV5EydCpl7ild3BXF9torrHGReZGJkaprpGgkWEKKEYmkEmd1uLsyLVCJUqUEXIlO5Fp+XpcGAcun8TmvYgMTDehFCIqWVKVaTymWkQG7orQuUy0ejV9DovB18v7NMXgKPA7j5l0eC8Y++/FkTLVJmLoxrQNLWa6jYqI1yFdOTIGmET5rd2Xn1x9lpO+8A56trd/d5lG7jZoUbVMJuyREoVrQo9McUWq8KPAxKJRcBzoH/csluHnhoMTj86Hw4Gp1v2zlvBPyMI8fEtNetWfYXotfWrNVXp5HaZdTCXXkhnFR5a1+G/12xNLZYmtswF/r5kFjaGkmi1QR4b0akpA5WgUUGERiMR+e6Uaxkv59VhkomusGjwtsPLcPLg+Mw+2JtoxpalBqucjdkKcSI7obNz8QfXhIRsIKx63FA4EgmHw7fDXGCfb/ePNsfZG5i95WDZsEglWIVPJIw2CFd6/vzsvBm0Tu7Isuy8P2bvhXnba2873Wb/pO00v7EwxBKePelsIZlXAJtxbuSOUEguJuMK8yDBvFuZz+UzMcVHSQCIDfZJmYykqiCVisqy6Gcmum7Fc8tZxXfLD2IFVmiEJNIFJZ2NK9e/JI9g1YX5fC4z/GsJC/nc8hKYe/Q/DWeE30u2w2Q=', '{\"pom\":[{\"groupId\":\"mysql\",\"artifactId\":\"mysql-connector-java\",\"version\":\"5.1.48\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-sql-connector-kafka_2.12\",\"version\":\"1.12.0\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-connector-jdbc_2.11\",\"version\":\"1.12.0\",\"exclusions\":[]},{\"groupId\":\"org.apache.flink\",\"artifactId\":\"flink-json\",\"version\":\"1.12.0\",\"exclusions\":[]}]}', 1, 0, '2021-04-12 18:02:30');
+INSERT INTO `t_flink_project` VALUES (1, 'streamx-quickstart', 'https://gitee.com/benjobs/streamx-quickstart.git', 'main', NULL, NULL, NULL, 1, 1, '2021-04-08 05:01:02', '2021-04-17 11:47:39', 'streamx-quickstart', 1);
 
 -- ----------------------------
 -- Records of t_flink_tutorial
@@ -73,12 +58,30 @@ INSERT INTO `t_menu` VALUES (209, 1, 'User Profile', '/user/profile', 'system/us
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
-INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2017-12-27 16:23:11', '2021-04-11 23:59:52', 'admin');
+INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2020-12-10 12:00:56', '2021-04-22 09:35:44', 'admin');
 INSERT INTO `t_role` VALUES (142, 'developer', '普通开发者', '2021-04-11 19:02:56', '2021-04-12 00:00:14', NULL);
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
+INSERT INTO `t_role_menu` VALUES (142, 197);
+INSERT INTO `t_role_menu` VALUES (142, 198);
+INSERT INTO `t_role_menu` VALUES (142, 199);
+INSERT INTO `t_role_menu` VALUES (142, 200);
+INSERT INTO `t_role_menu` VALUES (142, 185);
+INSERT INTO `t_role_menu` VALUES (142, 201);
+INSERT INTO `t_role_menu` VALUES (142, 202);
+INSERT INTO `t_role_menu` VALUES (142, 203);
+INSERT INTO `t_role_menu` VALUES (142, 205);
+INSERT INTO `t_role_menu` VALUES (142, 206);
+INSERT INTO `t_role_menu` VALUES (142, 204);
+INSERT INTO `t_role_menu` VALUES (142, 188);
+INSERT INTO `t_role_menu` VALUES (142, 191);
+INSERT INTO `t_role_menu` VALUES (142, 192);
+INSERT INTO `t_role_menu` VALUES (142, 193);
+INSERT INTO `t_role_menu` VALUES (142, 194);
+INSERT INTO `t_role_menu` VALUES (142, 183);
+INSERT INTO `t_role_menu` VALUES (142, 209);
 INSERT INTO `t_role_menu` VALUES (1, 1);
 INSERT INTO `t_role_menu` VALUES (1, 3);
 INSERT INTO `t_role_menu` VALUES (1, 11);
@@ -120,36 +123,24 @@ INSERT INTO `t_role_menu` VALUES (1, 206);
 INSERT INTO `t_role_menu` VALUES (1, 207);
 INSERT INTO `t_role_menu` VALUES (1, 208);
 INSERT INTO `t_role_menu` VALUES (1, 209);
-INSERT INTO `t_role_menu` VALUES (142, 197);
-INSERT INTO `t_role_menu` VALUES (142, 198);
-INSERT INTO `t_role_menu` VALUES (142, 199);
-INSERT INTO `t_role_menu` VALUES (142, 200);
-INSERT INTO `t_role_menu` VALUES (142, 185);
-INSERT INTO `t_role_menu` VALUES (142, 201);
-INSERT INTO `t_role_menu` VALUES (142, 202);
-INSERT INTO `t_role_menu` VALUES (142, 203);
-INSERT INTO `t_role_menu` VALUES (142, 205);
-INSERT INTO `t_role_menu` VALUES (142, 206);
-INSERT INTO `t_role_menu` VALUES (142, 204);
-INSERT INTO `t_role_menu` VALUES (142, 188);
-INSERT INTO `t_role_menu` VALUES (142, 191);
-INSERT INTO `t_role_menu` VALUES (142, 192);
-INSERT INTO `t_role_menu` VALUES (142, 193);
-INSERT INTO `t_role_menu` VALUES (142, 194);
-INSERT INTO `t_role_menu` VALUES (142, 183);
-INSERT INTO `t_role_menu` VALUES (142, 209);
 
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-INSERT INTO `t_setting` VALUES ('maven.central.repository', '', 'Maven Central Repository', 'Maven 私服地址');
-INSERT INTO `t_setting` VALUES ('streamx.console.webapp.address', 'http://test-hadoop-2:10001', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
-INSERT INTO `t_setting` VALUES ('streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等');
+INSERT INTO `t_setting` VALUES (7, 'alert.email.address', NULL, 'Alert  Email Sender', '用来发送告警邮箱的mail');
+INSERT INTO `t_setting` VALUES (5, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host');
+INSERT INTO `t_setting` VALUES (8, 'alert.email.password', NULL, 'Alert Email Password', '发送告警的邮箱的密码');
+INSERT INTO `t_setting` VALUES (6, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port');
+INSERT INTO `t_setting` VALUES (9, 'alert.email.ssl', NULL, 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL');
+INSERT INTO `t_setting` VALUES (1, 'env.flink.home', '/usr/local/flink-1.12.0', 'Flink Home', 'Flink Home');
+INSERT INTO `t_setting` VALUES (2, 'maven.central.repository', '', 'Maven Central Repository', 'Maven 私服地址');
+INSERT INTO `t_setting` VALUES (4, 'streamx.console.webapp.address', 'http://test-hadoop-2:10000', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
+INSERT INTO `t_setting` VALUES (3, 'streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等');
 
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
-INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-12 18:06:31', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
+INSERT INTO `t_user` VALUES (1, 'admin', '', 'ats6sdxdqf8vsqjtz0utj461wr', '829b009a6b9cc8ea486a4abbc38e56529f3c6f4c9c6fcd3604b41b1d6eca1a57', 1, 'benjobs@qq.com', '18500193260', '1', '2017-12-27 15:47:19', '2019-08-09 15:42:57', '2021-04-24 19:32:36', '0', 'author。', 'ubnKSIfAJTxIgXOKlciN.png', '1');
 
 -- ----------------------------
 -- Records of t_user_role
