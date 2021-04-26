@@ -26,7 +26,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.*;
+import com.streamxhub.streamx.console.core.enums.DeployState;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.enums.StopFrom;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
@@ -80,7 +83,8 @@ import java.util.concurrent.*;
 public class FlinkTrackingTask {
 
     /**
-     * 记录任务是否需要savePoint,只有在RUNNING状态下才会真正使用,如检查到任务正在运行,且需要savepoin,则设置该任务的状态为"savepoint"
+     * 记录任务是否需要savePoint<br>
+     * 只有在RUNNING状态下才会真正使用,如检查到任务正在运行,且需要savePoint,则设置该任务的状态为"savepoint"<br>
      */
     private static final Cache<Long, Byte> SAVEPOINT_CACHE = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
@@ -92,14 +96,14 @@ public class FlinkTrackingTask {
     /**
      * 跟踪任务列表
      */
-    private static Cache<Long, Application> trackingCache = null;
+    private static final Map<Long, Application> TRACKING_MAP = new ConcurrentHashMap<>(0);
 
     /**
-     * StopFrom: 用来记录任务是从streamx web管理端停止的还是其他方式停止,
-     * 如从streamx web 管理端停止可以知道在停止任务时是否做savepoint,如做了savepoint,则将该savepoint设置为最后有效的savepoint,下次启动时,自动选择从该savepoint
-     * 如:其他方式停止则,无法知道是否savepoint,直接将所有的savepoint设置为过期,任务再次启动时需要手动指定
+     * StopFrom: 用来记录任务是从StreamX web管理端停止的还是其他方式停止<br>
+     * 如从StreamX web管理端停止可以知道在停止任务时是否做savepoint,如做了savepoint,则将该savepoint设置为最后有效的savepoint,下次启动时,自动选择从该savepoint<br>
+     * 如:其他方式停止则,无法知道是否savepoint,直接将所有的savepoint设置为过期,任务再次启动时需要手动指定<br>
      */
-    private static final Cache<Long, StopFrom> STOP_FROM_CACHE = Caffeine.newBuilder().build();
+    private static final Map<Long, StopFrom> STOP_FROM_MAP = new ConcurrentHashMap<>(0);
 
     /**
      * 检查到正在canceling的任务放到该cache中,过期时间为10秒(2次任务监控轮询的时间).
@@ -114,9 +118,9 @@ public class FlinkTrackingTask {
 
     private static ApplicationService applicationService;
 
-    private static final Map<String, Long> checkPointMap = new ConcurrentHashMap<>();
+    private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>();
 
-    private static final Map<Long, OptionState> optioning = new ConcurrentHashMap<>();
+    private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>();
     /**
      * 10秒之内
      */
@@ -152,16 +156,13 @@ public class FlinkTrackingTask {
 
     @PostConstruct
     public void initialization() {
-        trackingCache = Caffeine.newBuilder()
-                .expireAfterWrite(10, TimeUnit.MINUTES)
-                .build(k -> applicationService.getById(k));
-        getAllApplications().forEach((app) -> trackingCache.put(app.getId(), app));
+        getAllApplications().forEach((app) -> TRACKING_MAP.put(app.getId(), app));
     }
 
     @PreDestroy
     public void ending() {
         log.info("flinkTrackingTask StreamXConsole will be shutdown,persistent application to database.");
-        trackingCache.asMap().forEach((k, v) -> persistent(v));
+        TRACKING_MAP.forEach((k, v) -> persistent(v));
     }
 
     /**
@@ -172,7 +173,7 @@ public class FlinkTrackingTask {
     @Scheduled(fixedDelay = 1000)
     public void execute() {
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
-        if (lastTrackTime == null || !optioning.isEmpty()) {
+        if (lastTrackTime == null || !OPTIONING.isEmpty()) {
             tracking();
         } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
@@ -186,9 +187,9 @@ public class FlinkTrackingTask {
     private void tracking() {
         Long now = System.currentTimeMillis();
         lastTrackTime = now;
-        trackingCache.asMap().forEach((key, application) -> executor.execute(() -> {
-            final StopFrom stopFrom = STOP_FROM_CACHE.getIfPresent(key) == null ? StopFrom.NONE : STOP_FROM_CACHE.getIfPresent(key);
-            final OptionState optionState = optioning.get(key);
+        TRACKING_MAP.forEach((key, application) -> executor.execute(() -> {
+            final StopFrom stopFrom = STOP_FROM_MAP.getOrDefault(key, null) == null ? StopFrom.NONE : STOP_FROM_MAP.get(key);
+            final OptionState optionState = OPTIONING.get(key);
             try {
                 // 1) 到flink的REST Api中查询状态
                 assert application.getId() != null;
@@ -232,7 +233,7 @@ public class FlinkTrackingTask {
                             alertService.alert(application, FlinkAppState.of(application.getState()));
                             if (appState.equals(FlinkAppState.FAILED)) {
                                 try {
-                                    applicationService.start(application,true);
+                                    applicationService.start(application, true);
                                 } catch (Exception e) {
                                     e.printStackTrace();
                                 }
@@ -268,7 +269,7 @@ public class FlinkTrackingTask {
                 handleCheckPoints(application);
 
                 //3) savePoint obsolete check and NEED_START check
-                OptionState optionState = optioning.get(application.getId());
+                OptionState optionState = OPTIONING.get(application.getId());
                 if (currentState.equals(FlinkAppState.RUNNING)) {
                     handleRunningState(application, optionState, currentState);
                 } else {
@@ -330,7 +331,7 @@ public class FlinkTrackingTask {
             CheckPoints.Latest latest = checkPoints.getLatest();
             CheckPoints.CheckPoint checkPoint = latest.getCompleted();
             if (checkPoint != null && checkPoint.isCompleted()) {
-                Long latestId = checkPointMap.get(application.getJobId());
+                Long latestId = CHECK_POINT_MAP.get(application.getJobId());
                 if (latestId == null || latestId < checkPoint.getId()) {
                     SavePoint savePoint = new SavePoint();
                     savePoint.setAppId(application.getId());
@@ -341,7 +342,7 @@ public class FlinkTrackingTask {
                     savePoint.setPath(checkPoint.getPath());
                     savePoint.setCpThreshold(application.getCpThreshold());
                     savePointService.save(savePoint);
-                    checkPointMap.put(application.getJobId(), checkPoint.getId());
+                    CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
                 }
             }
         }
@@ -386,7 +387,7 @@ public class FlinkTrackingTask {
             application.setOptionState(OptionState.NONE.getValue());
         }
         application.setState(currentState.getValue());
-        trackingCache.put(application.getId(), application);
+        TRACKING_MAP.put(application.getId(), application);
         cleanOptioning(optionState, application.getId());
     }
 
@@ -408,7 +409,7 @@ public class FlinkTrackingTask {
                 cancelingCache.put(application.getId(), DEFAULT_FLAG_BYTE);
                 cleanSavepoint(application);
                 application.setState(currentState.getValue());
-                trackingCache.put(application.getId(), application);
+                TRACKING_MAP.put(application.getId(), application);
                 break;
             case CANCELED:
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {}, stop tracking and delete stopFrom!", currentState.name());
@@ -420,7 +421,7 @@ public class FlinkTrackingTask {
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
-                STOP_FROM_CACHE.invalidate(application.getId());
+                STOP_FROM_MAP.remove(application.getId());
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
                 cleanOptioning(optionState, application.getId());
@@ -428,12 +429,12 @@ public class FlinkTrackingTask {
             case FAILED:
                 cleanSavepoint(application);
                 //清理stopFrom
-                STOP_FROM_CACHE.invalidate(application.getId());
+                STOP_FROM_MAP.remove(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
                 alertService.alert(application, FlinkAppState.FAILED);
-                applicationService.start(application,true);
+                applicationService.start(application, true);
                 break;
             case RESTARTING:
                 log.info("flinkTrackingTask getFromFlinkRestApi, job state {},add to starting", currentState.name());
@@ -441,7 +442,7 @@ public class FlinkTrackingTask {
                 break;
             default:
                 application.setState(currentState.getValue());
-                trackingCache.put(application.getId(), application);
+                TRACKING_MAP.put(application.getId(), application);
         }
     }
 
@@ -453,7 +454,7 @@ public class FlinkTrackingTask {
      */
     private void getFromYarnRestApi(Application application, StopFrom stopFrom) throws Exception {
         log.debug("flinkTrackingTask getFromYarnRestApi starting...");
-        OptionState optionState = optioning.get(application.getId());
+        OptionState optionState = OPTIONING.get(application.getId());
 
         /**
          * 上一次的状态为canceling(在获取信息时flink restServer还未关闭为canceling)
@@ -499,11 +500,11 @@ public class FlinkTrackingTask {
                     if (flinkAppState.equals(FlinkAppState.FAILED) || flinkAppState.equals(FlinkAppState.LOST)) {
                         alertService.alert(application, flinkAppState);
                         if (flinkAppState.equals(FlinkAppState.FAILED)) {
-                            applicationService.start(application,true);
+                            applicationService.start(application, true);
                         }
                     }
                 } catch (Exception e) {
-                    throw new RuntimeException("flinkTrackingTask getFromYarnRestApi error,",e);
+                    throw new RuntimeException("flinkTrackingTask getFromYarnRestApi error,", e);
                 }
             }
         }
@@ -513,7 +514,7 @@ public class FlinkTrackingTask {
     private void cleanOptioning(OptionState optionState, Long key) {
         if (optionState != null) {
             lastOptionTime = System.currentTimeMillis();
-            optioning.remove(key);
+            OPTIONING.remove(key);
         }
     }
 
@@ -546,7 +547,7 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000 * 60)
     public void persistent() {
-        trackingCache.asMap().forEach((k, v) -> persistent(v));
+        TRACKING_MAP.forEach((k, v) -> persistent(v));
     }
 
     // ===============================  static public method...
@@ -558,16 +559,16 @@ public class FlinkTrackingTask {
     public static void setOptionState(Long appId, OptionState state) {
         log.info("flinkTrackingTask setOptioning");
         optioningTime = System.currentTimeMillis();
-        optioning.put(appId, state);
+        OPTIONING.put(appId, state);
         //从streamx停止
         if (state.equals(OptionState.CANCELLING)) {
-            STOP_FROM_CACHE.put(appId, StopFrom.STREAMX);
+            STOP_FROM_MAP.put(appId, StopFrom.STREAMX);
         }
     }
 
     public static void addTracking(Application application) {
         log.info("flinkTrackingTask add app to tracking,appId:{}", application.getId());
-        trackingCache.put(application.getId(), application);
+        TRACKING_MAP.put(application.getId(), application);
         STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
     }
 
@@ -584,11 +585,11 @@ public class FlinkTrackingTask {
      */
     public static Object refreshTracking(Long appId, Callable callable) throws Exception {
         log.info("flinkTrackingTask flushing app,appId:{}", appId);
-        Application application = trackingCache.getIfPresent(appId);
+        Application application = TRACKING_MAP.get(appId);
         if (application != null) {
             persistent(application);
             Object result = callable.call();
-            trackingCache.put(appId, applicationService.getById(appId));
+            TRACKING_MAP.put(appId, applicationService.getById(appId));
             return result;
         }
         return callable.call();
@@ -597,7 +598,7 @@ public class FlinkTrackingTask {
     public static void refreshTracking(Runnable runnable) {
         log.info("flinkTrackingTask flushing all application starting");
         getAllTrackingApp().values().forEach(app -> {
-            Application application = trackingCache.getIfPresent(app.getId());
+            Application application = TRACKING_MAP.get(app.getId());
             if (application != null) {
                 persistent(application);
             }
@@ -606,8 +607,8 @@ public class FlinkTrackingTask {
         runnable.run();
 
         getAllApplications().forEach((app) -> {
-            if (trackingCache.getIfPresent(app.getId()) != null) {
-                trackingCache.put(app.getId(), app);
+            if (TRACKING_MAP.get(app.getId()) != null) {
+                TRACKING_MAP.put(app.getId(), app);
             }
         });
         log.info("flinkTrackingTask flushing all application end!");
@@ -615,14 +616,14 @@ public class FlinkTrackingTask {
 
     public static void stopTracking(Long appId) {
         log.info("flinkTrackingTask stop app,appId:{}", appId);
-        trackingCache.invalidate(appId);
+        TRACKING_MAP.remove(appId);
     }
 
-    public static ConcurrentMap<Long, Application> getAllTrackingApp() {
-        return trackingCache.asMap();
+    public static Map<Long, Application> getAllTrackingApp() {
+        return TRACKING_MAP;
     }
 
     public static Application getTracking(Long appId) {
-        return trackingCache.getIfPresent(appId);
+        return TRACKING_MAP.get(appId);
     }
 }

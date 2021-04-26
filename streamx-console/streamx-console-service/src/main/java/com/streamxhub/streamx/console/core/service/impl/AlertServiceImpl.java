@@ -134,7 +134,7 @@ public class AlertServiceImpl implements AlertService {
         }
         content += "please check it,Thank you for using StreamX<br><br>Best Wishes!!";
 
-        Map<String, String> root = new HashMap<>();
+        Map<String, String> root = new HashMap<>(3);
         root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));
         root.put("message", content);
         String format = "%s/proxy/%s/";
