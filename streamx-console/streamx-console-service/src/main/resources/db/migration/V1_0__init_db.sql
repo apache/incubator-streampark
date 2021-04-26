@@ -167,7 +167,7 @@ CREATE TABLE `t_flink_sql` (
                                `SQL` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
                                `DEPENDENCY` text CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci,
                                `VERSION` int(20) DEFAULT NULL,
-                               `Candidate` int(1) NOT NULL DEFAULT '0',
+                               `CANDIDATE` int(1) NOT NULL DEFAULT '0',
                                `CREATE_TIME` datetime DEFAULT NULL,
                                PRIMARY KEY (`ID`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
