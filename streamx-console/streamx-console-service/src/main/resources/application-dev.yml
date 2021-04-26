@@ -34,6 +34,8 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+  flyway:
+    enabled: true
 
 management.endpoints.web.exposure.include: [ 'httptrace', 'metrics' ]
 

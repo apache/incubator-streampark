@@ -36,6 +36,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -75,6 +76,7 @@ import java.util.concurrent.*;
  */
 @Slf4j
 @Component
+@DependsOn({"flyway", "flywayInitializer"})
 public class FlinkTrackingTask {
 
     /**

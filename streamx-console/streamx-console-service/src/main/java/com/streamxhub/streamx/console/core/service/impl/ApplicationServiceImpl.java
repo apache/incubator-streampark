@@ -60,6 +60,7 @@ import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -83,6 +84,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
+@DependsOn({"flyway", "flywayInitializer"})
 public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Application>
         implements ApplicationService {
 
