@@ -99,7 +99,7 @@ public class FlinkTrackingTask {
      * 如从streamx web 管理端停止可以知道在停止任务时是否做savepoint,如做了savepoint,则将该savepoint设置为最后有效的savepoint,下次启动时,自动选择从该savepoint
      * 如:其他方式停止则,无法知道是否savepoint,直接将所有的savepoint设置为过期,任务再次启动时需要手动指定
      */
-    private static final Cache<Long, StopFrom> stopFromCache = Caffeine.newBuilder().build();
+    private static final Cache<Long, StopFrom> STOP_FROM_CACHE = Caffeine.newBuilder().build();
 
     /**
      * 检查到正在canceling的任务放到该cache中,过期时间为10秒(2次任务监控轮询的时间).
@@ -187,7 +187,7 @@ public class FlinkTrackingTask {
         Long now = System.currentTimeMillis();
         lastTrackTime = now;
         trackingCache.asMap().forEach((key, application) -> executor.execute(() -> {
-            final StopFrom stopFrom = stopFromCache.getIfPresent(key) == null ? StopFrom.NONE : stopFromCache.getIfPresent(key);
+            final StopFrom stopFrom = STOP_FROM_CACHE.getIfPresent(key) == null ? StopFrom.NONE : STOP_FROM_CACHE.getIfPresent(key);
             final OptionState optionState = optioning.get(key);
             try {
                 // 1) 到flink的REST Api中查询状态
@@ -420,7 +420,7 @@ public class FlinkTrackingTask {
                     alertService.alert(application, FlinkAppState.CANCELED);
                 }
                 //清理stopFrom
-                stopFromCache.invalidate(application.getId());
+                STOP_FROM_CACHE.invalidate(application.getId());
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
                 cleanOptioning(optionState, application.getId());
@@ -428,7 +428,7 @@ public class FlinkTrackingTask {
             case FAILED:
                 cleanSavepoint(application);
                 //清理stopFrom
-                stopFromCache.invalidate(application.getId());
+                STOP_FROM_CACHE.invalidate(application.getId());
                 application.setState(FlinkAppState.FAILED.getValue());
                 //持久化application并且移除跟踪监控
                 persistentAndClean(application);
@@ -452,7 +452,7 @@ public class FlinkTrackingTask {
      * @param stopFrom
      */
     private void getFromYarnRestApi(Application application, StopFrom stopFrom) throws Exception {
-        log.info("flinkTrackingTask getFromYarnRestApi starting...");
+        log.debug("flinkTrackingTask getFromYarnRestApi starting...");
         OptionState optionState = optioning.get(application.getId());
 
         /**
@@ -561,7 +561,7 @@ public class FlinkTrackingTask {
         optioning.put(appId, state);
         //从streamx停止
         if (state.equals(OptionState.CANCELLING)) {
-            stopFromCache.put(appId, StopFrom.STREAMX);
+            STOP_FROM_CACHE.put(appId, StopFrom.STREAMX);
         }
     }
 
