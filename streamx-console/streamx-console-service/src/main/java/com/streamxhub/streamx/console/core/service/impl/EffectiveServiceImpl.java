@@ -44,7 +44,11 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
 
     @Override
     public void delete(Long appId, EffectiveType effectiveType) {
-        baseMapper.delete(appId, effectiveType.getType());
+        Wrapper<Effective> queryWrapper = new QueryWrapper<Effective>()
+                .lambda()
+                .eq(Effective::getAppId, appId)
+                .eq(Effective::getTargetType, effectiveType.getType());
+        baseMapper.delete(queryWrapper);
     }
 
     @Override
