@@ -327,23 +327,24 @@ public class FlinkTrackingTask {
      */
     private void handleCheckPoints(Application application) throws IOException {
         CheckPoints checkPoints = application.httpCheckpoints();
-        log.info("checkPoints====>:{}",checkPoints);
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
-            CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-            if (checkPoint != null && checkPoint.isCompleted()) {
-                Long latestId = CHECK_POINT_MAP.get(application.getJobId());
-                if (latestId == null || latestId < checkPoint.getId()) {
-                    SavePoint savePoint = new SavePoint();
-                    savePoint.setAppId(application.getId());
-                    savePoint.setLatest(true);
-                    savePoint.setType(checkPoint.getCheckPointType().get());
-                    savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                    savePoint.setCreateTime(new Date());
-                    savePoint.setPath(checkPoint.getPath());
-                    savePoint.setCpThreshold(application.getCpThreshold());
-                    savePointService.save(savePoint);
-                    CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
+            if (latest != null ) {
+                CheckPoints.CheckPoint checkPoint = latest.getCompleted();
+                if (checkPoint != null && checkPoint.isCompleted()) {
+                    Long latestId = CHECK_POINT_MAP.get(application.getJobId());
+                    if (latestId == null || latestId < checkPoint.getId()) {
+                        SavePoint savePoint = new SavePoint();
+                        savePoint.setAppId(application.getId());
+                        savePoint.setLatest(true);
+                        savePoint.setType(checkPoint.getCheckPointType().get());
+                        savePoint.setPath(checkPoint.getPath());
+                        savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
+                        savePoint.setCreateTime(new Date());
+                        savePoint.setCpThreshold(application.getCpThreshold());
+                        savePointService.save(savePoint);
+                        CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
+                    }
                 }
             }
         }
