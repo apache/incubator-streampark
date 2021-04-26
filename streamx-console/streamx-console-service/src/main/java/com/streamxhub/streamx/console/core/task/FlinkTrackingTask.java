@@ -327,6 +327,7 @@ public class FlinkTrackingTask {
      */
     private void handleCheckPoints(Application application) throws IOException {
         CheckPoints checkPoints = application.httpCheckpoints();
+        log.info("checkPoints====>:",checkPoints);
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
             CheckPoints.CheckPoint checkPoint = latest.getCompleted();
