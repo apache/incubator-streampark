@@ -426,6 +426,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
             application.setAlertEmail(appParam.getAlertEmail());
+            application.setCpThreshold(appParam.getCpThreshold());
+            application.setRestartSize(appParam.getRestartSize());
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {
                 updateFlinkSqlJob(application, appParam);
@@ -556,6 +558,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
+                            application.setSavePointed(true);
                             // 重新启动.
                             start(application, false);
                             // 将"需要重新发布"状态清空...
@@ -839,6 +842,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 return false;
             }
             application.setRestartCount(application.getRestartCount() + 1);
+            application.setSavePointed(true);
         }
 
         //1) 真正执行启动相关的操作..
