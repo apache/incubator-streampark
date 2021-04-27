@@ -51,4 +51,7 @@ public interface SavePointMapper extends BaseMapper<SavePoint> {
 
     @Delete("delete from t_flink_savepoint where app_id=#{appId} and trigger_time < #{trigger}")
     void expire(@Param("appId")Long appId,@Param("trigger") Date triggerTime);
+
+    @Delete("delete from t_flink_savepoint where app_id=#{appId} and type = 1")
+    void expireAll(@Param("appId")Long appId);
 }

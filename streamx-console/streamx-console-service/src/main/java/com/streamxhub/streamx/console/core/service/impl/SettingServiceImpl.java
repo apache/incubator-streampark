@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
@@ -50,6 +51,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         implements SettingService {
 
+
+    private Map<String,String> flinkYaml;
+
     @Override
     public Setting get(String key) {
         return baseMapper.get(key);
@@ -61,6 +65,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public void initSetting() {
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getKey(), x));
+        String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+        assert flinkLocalHome != null;
+        String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
+        this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
     }
 
     @Override
@@ -77,6 +85,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getEnvFlinkHome() {
         return settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+    }
+
+    @Override
+    public Map<String, String> getFlinkDefaultConfig() {
+        return flinkYaml;
     }
 
     @Override

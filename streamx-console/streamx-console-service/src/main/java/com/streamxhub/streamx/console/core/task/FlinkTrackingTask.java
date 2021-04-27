@@ -341,7 +341,6 @@ public class FlinkTrackingTask {
                         savePoint.setPath(checkPoint.getExternalPath());
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
-                        savePoint.setCpThreshold(application.getCpThreshold());
                         savePointService.save(savePoint);
                         CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
                     }

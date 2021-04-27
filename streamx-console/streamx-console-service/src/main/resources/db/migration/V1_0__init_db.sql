@@ -60,7 +60,6 @@ CREATE TABLE `t_flink_app` (
                                `ALERT_EMAIL` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
                                `RESOLVE_ORDER` smallint(1) DEFAULT NULL,
                                `FLAME_GRAPH` tinyint(1) DEFAULT '0',
-                               `CP_THRESHOLD` int(10) DEFAULT NULL,
                                `JM_MEMORY` int(10) DEFAULT NULL,
                                `TM_MEMORY` int(255) DEFAULT NULL,
                                `TOTAL_TASK` int(10) DEFAULT NULL,

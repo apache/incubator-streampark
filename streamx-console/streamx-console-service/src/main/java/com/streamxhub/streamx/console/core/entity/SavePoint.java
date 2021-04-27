@@ -52,6 +52,4 @@ public class SavePoint {
     private Date triggerTime;
 
     private Date createTime;
-
-    private transient Integer cpThreshold;
 }

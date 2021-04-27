@@ -445,7 +445,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
             application.setAlertEmail(appParam.getAlertEmail());
-            application.setCpThreshold(appParam.getCpThreshold());
             application.setRestartSize(appParam.getRestartSize());
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {

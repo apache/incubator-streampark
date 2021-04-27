@@ -102,11 +102,6 @@ public class Application implements Serializable {
 
     private Integer optionState;
 
-    /**
-     * checkPoint 保留的最大条数
-     */
-    private Integer cpThreshold;
-
     //失败告警的通知邮箱
     private String alertEmail;
 
