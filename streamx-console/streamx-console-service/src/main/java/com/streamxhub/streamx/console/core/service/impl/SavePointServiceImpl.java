@@ -65,14 +65,14 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     private void expire(SavePoint entity) {
         LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
-        Integer threshold = entity.getCpThreshold();
+        int threshold = entity.getCpThreshold() - 1;
         queryWrapper.select(SavePoint::getTriggerTime)
                 .eq(SavePoint::getAppId, entity.getAppId())
                 .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + threshold + 1);
+                .last("limit 0," + threshold);
 
         List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-        if (savePointList.size() > threshold) {
+        if (savePointList.size() > threshold ) {
             SavePoint savePoint = savePointList.get(threshold);
             this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
         }
