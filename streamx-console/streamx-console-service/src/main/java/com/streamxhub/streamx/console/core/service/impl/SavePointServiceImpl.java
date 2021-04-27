@@ -80,6 +80,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
                     .eq(SavePoint::getAppId, entity.getAppId())
+                    .eq(SavePoint::getType,CheckPointType.CHECKPOINT.get())
                     .orderByDesc(SavePoint::getTriggerTime)
                     .last("limit 0," + cpThreshold);
 
