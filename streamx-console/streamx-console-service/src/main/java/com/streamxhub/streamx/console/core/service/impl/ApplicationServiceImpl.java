@@ -419,16 +419,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
             if (!appParam.eqJobParam(application)) {
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                log.info("eqJobParam====>{}",DeployState.NEED_RESTART_AFTER_CONF_UPDATE);
             } else if (application.isStreamXJob()) {
                 ApplicationConfig config = configService.getEffective(application.getId());
                 if (config != null) {
                     if (!appParam.getConfigId().equals(config.getId())) {
-                        log.info("getConfigId {} eq config.getId {}",appParam.getConfigId(),config.getId());
                         application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                    }else if(!config.getContent().equals(appParam.getConfig())) {
-                        log.info("Content {} eq appParam config {}",config.getContent(),appParam.getConfig());
-                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                    }else {
+                        String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
+                        String encode = DeflaterUtils.zipString(decode.trim());
+                        if(!config.getContent().equals(encode)) {
+                            application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                        }
                     }
                 }
             }
