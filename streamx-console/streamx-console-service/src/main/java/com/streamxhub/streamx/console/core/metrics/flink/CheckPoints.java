@@ -70,10 +70,6 @@ public class CheckPoints implements Serializable {
             return "COMPLETED".equals(this.status);
         }
 
-        public String getPath() {
-            return this.externalPath.replaceFirst("^hdfs:",HdfsUtils.getDefaultFS());
-        }
-
         public CheckPointType getCheckPointType() {
             if ("CHECKPOINT".equals(this.checkpointType)) {
                 return CheckPointType.CHECKPOINT;
