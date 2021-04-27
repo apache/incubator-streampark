@@ -424,10 +424,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 if (config != null) {
                     if (!appParam.getConfigId().equals(config.getId())) {
                         application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                    }else {
+                    } else {
                         String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
                         String encode = DeflaterUtils.zipString(decode.trim());
-                        if(!config.getContent().equals(encode)) {
+                        if (!config.getContent().equals(encode)) {
                             application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
                         }
                     }
@@ -802,7 +802,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         appParam.getSavePointed(),
                         appParam.getDrain()
                 );
-                if (appParam.getSavePointed() && savePointDir != null) {
+                if (savePointDir != null) {
+                    log.info("savePoint path:{}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();
                     savePoint.setPath(savePointDir);

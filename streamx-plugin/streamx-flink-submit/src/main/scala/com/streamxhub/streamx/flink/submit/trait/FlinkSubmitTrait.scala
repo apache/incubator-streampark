@@ -148,8 +148,8 @@ trait FlinkSubmitTrait extends Logger {
          |"flink stop {" +
          |      "appId": $appId,
          |      "jobId": $jobStringId,
-         |      "savePoint": savePoint},
-         |      "drain": drain
+         |      "savePoint": $savePoint,
+         |      "drain": $drain
          |}
          |""".stripMargin)
     doStop(appId, jobStringId, savePoint, drain)
