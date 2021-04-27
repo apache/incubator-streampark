@@ -29,7 +29,6 @@ import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -52,7 +51,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         implements SettingService {
 
 
-    private Map<String,String> flinkYaml;
+    private Map<String, String> flinkYaml;
 
     @Override
     public Setting get(String key) {
@@ -65,6 +64,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public void initSetting() {
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getKey(), x));
+        this.initDefaultConfig();
+    }
+
+    private void initDefaultConfig() {
         String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
         assert flinkLocalHome != null;
         String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
@@ -76,6 +79,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         try {
             this.baseMapper.updateByKey(setting);
             settings.get(setting.getKey()).setValue(setting.getValue());
+            if (setting.getKey().equals(SettingService.KEY_ENV_FLINK_HOME)) {
+                this.initDefaultConfig();
+            }
             return true;
         } catch (Exception e) {
             return false;
