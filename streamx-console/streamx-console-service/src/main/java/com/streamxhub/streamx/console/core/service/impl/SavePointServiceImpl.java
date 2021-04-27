@@ -27,7 +27,6 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
-import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -35,6 +34,7 @@ import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
+import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 /**
@@ -69,9 +70,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
-        int cpThreshold = Integer.parseInt(settingService.getFlinkDefaultConfig().getOrDefault("state.checkpoints.num-retained","1"));
-        cpThreshold = cpThreshold - 1;
-        if(cpThreshold  == 0) {
+        int cpThreshold = Integer.parseInt(settingService.getFlinkDefaultConfig().getOrDefault("state.checkpoints.num-retained", "1"));
+        if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
+            cpThreshold = cpThreshold - 1;
+        }
+        if (cpThreshold == 0) {
             this.baseMapper.expireAll(entity.getAppId());
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
@@ -81,7 +84,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                     .last("limit 0," + cpThreshold);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-            if ( !savePointList.isEmpty() && savePointList.size() >= cpThreshold) {
+            if (!savePointList.isEmpty() && savePointList.size() >= cpThreshold) {
                 SavePoint savePoint = savePointList.get(cpThreshold - 1);
                 this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
             }
