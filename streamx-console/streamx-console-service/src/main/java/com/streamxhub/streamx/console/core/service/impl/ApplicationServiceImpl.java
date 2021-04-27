@@ -420,11 +420,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (!appParam.eqJobParam(application)) {
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
             } else if (application.isStreamXJob()) {
-                ApplicationConfig config = configService.getLatest(application.getId());
-                if (!appParam.getConfigId().equals(config.getId())) {
-                    application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                }else if(!config.getContent().equals(appParam.getConfig())) {
-                    application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                ApplicationConfig config = configService.getEffective(application.getId());
+                if (config != null) {
+                    if (!appParam.getConfigId().equals(config.getId())) {
+                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                    }else if(!config.getContent().equals(appParam.getConfig())) {
+                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                    }
                 }
             }
             //从db中补全jobType到appParam
