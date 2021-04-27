@@ -345,6 +345,7 @@ public class Application implements Serializable {
      * @param other
      * @return
      */
+    @JsonIgnore
     public boolean eqJobParam(Application other) {
         //1) Resolve Order 是否发生变化
         //2) Execution Mode 是否发生变化
