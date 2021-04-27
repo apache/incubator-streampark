@@ -24,9 +24,8 @@ import java.io.Serializable;
 import java.util.Arrays;
 
 public enum CheckPointType implements Serializable {
-    CHECKPOINT(0),
-    SAVEPOINT(1);
-
+    CHECKPOINT(1),
+    SAVEPOINT(2);
     int value;
 
     public int get() {
