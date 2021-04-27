@@ -70,6 +70,7 @@ public class CheckPoints implements Serializable {
             return "COMPLETED".equals(this.status);
         }
 
+
         public CheckPointType getCheckPointType() {
             if ("CHECKPOINT".equals(this.checkpointType)) {
                 return CheckPointType.CHECKPOINT;
