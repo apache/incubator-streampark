@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
-import com.streamxhub.streamx.common.util.{ExceptionUtils, HdfsUtils}
+import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.SubmitRequest
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
@@ -41,7 +41,7 @@ import scala.util.Try
 /**
  * yarn application mode submit
  */
- trait YarnSubmitTrait extends FlinkSubmitTrait {
+trait YarnSubmitTrait extends FlinkSubmitTrait {
 
   override def doStop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
 
