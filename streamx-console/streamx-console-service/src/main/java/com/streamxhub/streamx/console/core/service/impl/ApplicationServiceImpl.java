@@ -421,13 +421,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
             } else if (application.isStreamXJob()) {
                 ApplicationConfig config = configService.getLatest(application.getId());
-                if (config != null) {
-                    if (appParam.getConfig() == null) {
-                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                    } else if (appParam.getConfigId() != null && !appParam.getConfigId().equals(config.getId())) {
-                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
-                    }
-                } else if (appParam.getConfig() != null || appParam.getConfigId() != null) {
+                if (!appParam.getConfigId().equals(config.getId())) {
+                    application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                }else if(!config.getContent().equals(appParam.getConfig())) {
                     application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
                 }
             }
