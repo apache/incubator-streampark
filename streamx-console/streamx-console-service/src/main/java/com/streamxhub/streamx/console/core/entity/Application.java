@@ -339,6 +339,69 @@ public class Application implements Serializable {
         return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
     }
 
+    /**
+     * 参数对比,主要是对比Flink运行时相关的参数是否发生了变化
+     *
+     * @param other
+     * @return
+     */
+    public boolean eqJobParam(Application other) {
+        //1) Resolve Order 是否发生变化
+        //2) Execution Mode 是否发生变化
+        //3) Parallelism 是否发生变化
+        //4) Task Slots 是否发生变化
+        //5) Options 是否发生变化
+        //6) Dynamic Option 是否发生变化
+        //7) Program Args 是否发生变化
+        if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
+                !this.getExecutionMode().equals(other.getExecutionMode())) {
+            return false;
+        }
+
+        if (this.getOptions() != null) {
+            if (other.getOptions() != null) {
+                if (!this.getOptions().trim().equals(other.getOptions().trim())) {
+                    Map<String, Object> optMap = this.getOptionMap();
+                    Map<String, Object> otherMap = other.getOptionMap();
+                    if (optMap.size() != otherMap.size()) {
+                        return false;
+                    }
+                    for (Map.Entry<String, Object> entry : optMap.entrySet()) {
+                        if (!entry.getValue().equals(otherMap.get(entry.getKey()))) {
+                            return false;
+                        }
+                    }
+                }
+            } else {
+                return false;
+            }
+        } else if (other.getOptions() != null) {
+            return false;
+        }
+
+        if (this.getDynamicOptions() != null) {
+            if (other.getDynamicOptions() != null) {
+                if (!this.getDynamicOptions().equals(other.getDynamicOptions())) {
+                    return false;
+                }
+            } else {
+                return false;
+            }
+        } else if (other.getDynamicOptions() != null) {
+            return false;
+        }
+
+        if (this.getArgs() != null) {
+            if (other.getArgs() != null) {
+                return this.getArgs().equals(other.getArgs());
+            } else {
+                return false;
+            }
+        } else {
+            return other.getArgs() == null;
+        }
+    }
+
     @Data
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
