@@ -62,7 +62,7 @@ import scala.util.Try
     val savePointDir = getOptionFromDefaultFlinkConfig(
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
-        .defaultValue(s"${HdfsUtils.getDefaultFS}$APP_SAVEPOINTS")
+        .defaultValue(s"hdfs://$APP_SAVEPOINTS")
     )
 
     val savepointPathFuture = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {

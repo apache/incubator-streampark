@@ -338,7 +338,7 @@ public class FlinkTrackingTask {
                         savePoint.setAppId(application.getId());
                         savePoint.setLatest(true);
                         savePoint.setType(checkPoint.getCheckPointType().get());
-                        savePoint.setPath(checkPoint.getExternalPath());
+                        savePoint.setPath(checkPoint.getPath());
                         savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
                         savePoint.setCreateTime(new Date());
                         savePointService.save(savePoint);

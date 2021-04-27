@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.console.core.metrics.flink;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import lombok.Data;
 
@@ -76,6 +75,10 @@ public class CheckPoints implements Serializable {
                 return CheckPointType.CHECKPOINT;
             }
             return CheckPointType.SAVEPOINT;
+        }
+
+        public String getPath() {
+            return this.getExternalPath().replaceFirst("^hdfs:", "hdfs://");
         }
     }
 
