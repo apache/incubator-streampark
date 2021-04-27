@@ -382,7 +382,7 @@ public class Application implements Serializable {
 
         if (this.getDynamicOptions() != null) {
             if (other.getDynamicOptions() != null) {
-                if (!this.getDynamicOptions().equals(other.getDynamicOptions())) {
+                if (!this.getDynamicOptions().trim().equals(other.getDynamicOptions().trim())) {
                     return false;
                 }
             } else {
@@ -394,7 +394,7 @@ public class Application implements Serializable {
 
         if (this.getArgs() != null) {
             if (other.getArgs() != null) {
-                return this.getArgs().equals(other.getArgs());
+                return this.getArgs().trim().equals(other.getArgs().trim());
             } else {
                 return false;
             }
