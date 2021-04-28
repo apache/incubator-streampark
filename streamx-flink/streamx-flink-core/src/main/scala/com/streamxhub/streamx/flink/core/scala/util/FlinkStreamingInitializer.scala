@@ -362,9 +362,17 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
   }
 
   private[this] def getFlinkConf(): Map[String, String] = {
-    val flinkConf = parameter.get(KEY_FLINK_CONF(), null)
-    require(flinkConf != null)
-    PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))
+    parameter.get(KEY_FLINK_CONF(), null) match {
+      case null =>
+        //通过脚本启动..
+        val flinkHome = System.getenv("FLINK_HOME")
+        require(flinkHome != null)
+        logInfo(s"flinkHome: $flinkHome")
+        PropertiesUtils.fromYamlFile(s"$flinkHome/conf/flink-conf.yaml")
+      case flinkConf =>
+        //从StreamXConsole后端传递过来的.
+        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))
+    }
   }
 
 }
