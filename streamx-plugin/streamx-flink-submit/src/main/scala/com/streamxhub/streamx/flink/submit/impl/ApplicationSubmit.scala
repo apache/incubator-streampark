@@ -30,7 +30,7 @@ import org.apache.flink.client.cli.{CustomCommandLine, ExecutionConfigAccessor, 
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.PackagedProgramUtils
-import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
+import org.apache.flink.configuration.{CheckpointingOptions, ConfigOption, Configuration, DeploymentOptions, PipelineOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.yarn.api.records.ApplicationId
@@ -145,6 +145,10 @@ object ApplicationSubmit extends YarnSubmitTrait {
     effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
+
+    //state.checkpoints.num-retained
+    val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
+    effectiveConfiguration.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
     logInfo("----------------------------------------------------------------------")
     logInfo(s"Effective executor configuration: $effectiveConfiguration ")
