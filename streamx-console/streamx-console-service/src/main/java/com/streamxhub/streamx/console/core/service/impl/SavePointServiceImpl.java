@@ -84,7 +84,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                     .last("limit 0," + cpThreshold);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-            if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
+            if (!savePointList.isEmpty() && savePointList.size() == cpThreshold) {
                 SavePoint savePoint = savePointList.get(cpThreshold - 1);
                 this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
             }
