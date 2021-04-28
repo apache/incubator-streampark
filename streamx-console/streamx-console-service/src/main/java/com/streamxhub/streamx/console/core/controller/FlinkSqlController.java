@@ -67,7 +67,7 @@ public class FlinkSqlController extends BaseController {
                     .put("end", end);
             //语法异常
             if (sqlError.errorType().equals(SQLErrorType.SYNTAX_ERROR)) {
-                String exception = sqlError.exception().replaceAll("\r|\n", "");
+                String exception = sqlError.exception().replaceAll("[\r\n]", "");
                 if (exception.matches(SQL_SPARSE_FAILED_REGEXP)) {
                     String[] lineColumn = exception
                             .replaceAll("^.*\\sat\\sline\\s", "")

@@ -51,8 +51,7 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
-        implements SavePointService {
+public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
 
     @Autowired
     private SettingService settingService;
@@ -80,12 +79,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
                     .eq(SavePoint::getAppId, entity.getAppId())
-                    .eq(SavePoint::getType,CheckPointType.CHECKPOINT.get())
+                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
                     .orderByDesc(SavePoint::getTriggerTime)
                     .last("limit 0," + cpThreshold);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-            if (!savePointList.isEmpty() && savePointList.size() >= cpThreshold) {
+            if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
                 SavePoint savePoint = savePointList.get(cpThreshold - 1);
                 this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
             }
