@@ -145,7 +145,6 @@ object ApplicationSubmit extends YarnSubmitTrait {
     effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
-
     //state.checkpoints.num-retained
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     effectiveConfiguration.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
