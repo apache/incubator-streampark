@@ -38,7 +38,7 @@ INSERT INTO `t_menu` VALUES (190, 183, 'Add Project', '/flink/project/add', 'fli
 INSERT INTO `t_menu` VALUES (191, 183, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, '2020-08-20 09:56:47', '2020-10-12 08:04:26');
 INSERT INTO `t_menu` VALUES (192, 183, 'Notebook', '/flink/notebook/view', 'flink/notebook/Submit', 'notebook:submit', 'read', '0', '1', 3, '2020-09-07 17:10:57', '2020-11-09 15:19:57');
 INSERT INTO `t_menu` VALUES (193, 183, 'Edit Flink App', '/flink/app/edit_flink', 'flink/app/EditFlink', 'app:update', '', '0', '0', NULL, '2020-09-10 16:03:49', '2020-10-12 08:04:51');
-INSERT INTO `t_menu` VALUES (194, 183, 'Edit Streamx App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, '2020-09-22 21:11:51', '2020-10-12 08:04:43');
+INSERT INTO `t_menu` VALUES (194, 183, 'Edit StreamX App', '/flink/app/edit_streamx', 'flink/app/EditStreamX', 'app:update', '', '0', '0', NULL, '2020-09-22 21:11:51', '2020-10-12 08:04:43');
 INSERT INTO `t_menu` VALUES (195, 184, 'build', NULL, NULL, 'project:build', NULL, '1', '1', NULL, '2020-09-30 14:18:38', '2020-10-11 10:38:48');
 INSERT INTO `t_menu` VALUES (196, 184, 'delete', NULL, NULL, 'project:delete', NULL, '1', '1', NULL, '2020-09-30 14:21:10', '2020-10-11 10:38:57');
 INSERT INTO `t_menu` VALUES (197, 185, 'mapping', NULL, NULL, 'app:mapping', NULL, '1', '1', NULL, '2020-09-30 14:33:32', '2020-10-11 10:39:05');
@@ -132,7 +132,7 @@ INSERT INTO `t_setting` VALUES (5, 'alert.email.host', NULL, 'Alert Email Smtp H
 INSERT INTO `t_setting` VALUES (8, 'alert.email.password', NULL, 'Alert Email Password', '发送告警的邮箱的密码');
 INSERT INTO `t_setting` VALUES (6, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port');
 INSERT INTO `t_setting` VALUES (9, 'alert.email.ssl', NULL, 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL');
-INSERT INTO `t_setting` VALUES (1, 'env.flink.home', '/usr/local/flink-1.12.0', 'Flink Home', 'Flink Home');
+INSERT INTO `t_setting` VALUES (1, 'env.flink.home', NULL, 'Flink Home', 'Flink Home');
 INSERT INTO `t_setting` VALUES (2, 'maven.central.repository', '', 'Maven Central Repository', 'Maven 私服地址');
 INSERT INTO `t_setting` VALUES (4, 'streamx.console.webapp.address', 'http://test-hadoop-2:10000', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
 INSERT INTO `t_setting` VALUES (3, 'streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等');
