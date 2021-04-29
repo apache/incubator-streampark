@@ -37,6 +37,8 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
+
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Try
 
@@ -127,6 +129,14 @@ object ApplicationSubmit extends YarnSubmitTrait {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += s"$defParallelism"
     }
+
+    flinkDefaultConfiguration.keySet().foreach(x=>{
+      flinkDefaultConfiguration.getString(x,null) match {
+        case v if v != null => effectiveConfiguration.setString(x, v)
+        case _ =>
+      }
+    })
+
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
