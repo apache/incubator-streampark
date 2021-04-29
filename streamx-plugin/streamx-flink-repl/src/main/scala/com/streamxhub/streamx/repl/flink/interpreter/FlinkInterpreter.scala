@@ -21,8 +21,6 @@
 package com.streamxhub.streamx.repl.flink.interpreter
 
 import com.streamxhub.streamx.common.util.{ClassLoaderUtils, Logger}
-import org.apache.zeppelin.interpreter.InterpreterContext
-import org.slf4j.LoggerFactory
 
 import java.util.Properties
 
@@ -32,7 +30,6 @@ import java.util.Properties
  */
 class FlinkInterpreter(properties: Properties) extends Logger {
 
-  private lazy val LOGGER = LoggerFactory.getLogger(classOf[FlinkScalaInterpreter])
   private var interpreter: FlinkScalaInterpreter = _
 
   private def checkScalaVersion(): Unit = {
@@ -56,28 +53,14 @@ class FlinkInterpreter(properties: Properties) extends Logger {
     })
   }
 
-  @throws[Exception] def cancel(context: InterpreterContext): Unit = {
-    this.interpreter.cancel(context)
-  }
-
   private[flink] def getExecutionEnvironment = this.interpreter.getExecutionEnvironment()
 
   private[flink] def getStreamExecutionEnvironment = this.interpreter.getStreamExecutionEnvironment()
-
-  private[flink] def getJobManager = this.interpreter.getJobManager
 
   private[flink] def getDefaultParallelism: Int = this.interpreter.defaultParallelism
 
   def getFlinkScalaShellLoader: ClassLoader = interpreter.getFlinkScalaShellLoader
 
   private[flink] def getFlinkConfiguration = this.interpreter.getConfiguration
-
-  def setSavepointIfNecessary(context: InterpreterContext): Unit = {
-    this.interpreter.setSavepointPathIfNecessary(context)
-  }
-
-  def setParallelismIfNecessary(context: InterpreterContext): Unit = {
-    this.interpreter.setParallelismIfNecessary(context)
-  }
 
 }

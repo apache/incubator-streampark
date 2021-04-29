@@ -32,7 +32,6 @@ import org.apache.flink.api.scala.{ExecutionEnvironment, FlinkILoop}
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.core.execution.{JobClient, JobListener}
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 import org.apache.flink.streaming.api.TimeCharacteristic
 import org.apache.flink.streaming.api.environment.{StreamExecutionEnvironmentFactory, StreamExecutionEnvironment => JStreamExecutionEnvironment}
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
@@ -40,7 +39,6 @@ import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.conf.{Configuration => HdfsConfig}
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.hadoop.yarn.api.records.ApplicationId
-import org.apache.zeppelin.interpreter.InterpreterContext
 import org.slf4j.LoggerFactory
 
 import java.io.{BufferedReader, File, IOException}
@@ -71,11 +69,11 @@ class FlinkScalaInterpreter(properties: Properties) {
   private var mode: ExecutionMode.Value = _
   private var batchEnv: ExecutionEnvironment = _
   private var streamEnv: StreamExecutionEnvironment = _
+  var jobClient: JobClient = _
   var flinkHome:String = _
   var flinkShims: FlinkShims = _
   var jmWebUrl: String = _
   var replacedJMWebUrl: String = _
-  var jobManager: JobManager = _
   var defaultParallelism = 1
   var userJars: Seq[String] = _
   var userUdfJars: Seq[String] = _
@@ -86,9 +84,24 @@ class FlinkScalaInterpreter(properties: Properties) {
     createFlinkILoop(config)
     val modifiers = new ArrayBuffer[String]
     modifiers + "@transient"
-    this.jobManager = new JobManager(jmWebUrl, replacedJMWebUrl)
     // register JobListener
-    val jobListener = new FlinkJobListener()
+    val jobListener = new JobListener() {
+      override def onJobSubmitted(jobClient: JobClient, e: Throwable): Unit = {
+        if (e != null) {
+          LOGGER.warn("Fail to submit job")
+        } else {
+          FlinkScalaInterpreter.this.jobClient = jobClient
+        }
+      }
+
+      override def onJobExecuted(jobExecutionResult: JobExecutionResult, e: Throwable): Unit = {
+        if (e != null) {
+          LOGGER.warn("Fail to execute job")
+        } else {
+          logInfo(s"Job ${jobExecutionResult.getJobID} is executed with time ${jobExecutionResult.getNetRuntime(TimeUnit.SECONDS)} seconds")
+        }
+      }
+    }
     this.batchEnv.registerJobListener(jobListener)
     this.streamEnv.registerJobListener(jobListener)
   }
@@ -408,70 +421,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     }
   }
 
-  /**
-   * Set execution.savepoint.path in the following order:
-   *
-   * 1. Use savepoint path stored in paragraph config, this is recorded by zeppelin when paragraph is canceled,
-   * 2. Use checkpoint path stored in pararaph config, this is recorded by zeppelin in flink job progress poller.
-   * 3. Use local property 'execution.savepoint.path' if user set it.
-   * 4. Otherwise remove 'execution.savepoint.path' when user didn't specify it in %flink.conf
-   *
-   * @param context
-   */
-  def setSavepointPathIfNecessary(context: InterpreterContext): Unit = {
-    val savepointPath = context.getConfig.getOrDefault(JobManager.SAVEPOINT_PATH, "").toString
-    val resumeFromSavepoint = context.getBooleanLocalProperty(JobManager.RESUME_FROM_SAVEPOINT, false)
-    if (!StringUtils.isBlank(savepointPath) && resumeFromSavepoint) {
-      logInfo(s"Resume job from savepoint , savepointPath = $savepointPath")
-      configuration.setString(SavepointConfigOptions.SAVEPOINT_PATH.key(), savepointPath)
-      return
-    }
-
-    val checkpointPath = context.getConfig.getOrDefault(JobManager.LATEST_CHECKPOINT_PATH, "").toString
-    val resumeFromLatestCheckpoint = context.getBooleanLocalProperty(JobManager.RESUME_FROM_CHECKPOINT, false)
-    if (!StringUtils.isBlank(checkpointPath) && resumeFromLatestCheckpoint) {
-      logInfo(s"Resume job from checkpoint , checkpointPath = ${checkpointPath}")
-      configuration.setString(SavepointConfigOptions.SAVEPOINT_PATH.key(), checkpointPath)
-      return
-    }
-
-    val userSavepointPath = context.getLocalProperties.getOrDefault(
-      SavepointConfigOptions.SAVEPOINT_PATH.key(), "")
-    if (!StringUtils.isBlank(userSavepointPath)) {
-      logInfo(s"Resume job from user set savepoint , savepointPath = $userSavepointPath")
-      configuration.setString(SavepointConfigOptions.SAVEPOINT_PATH.key(), checkpointPath)
-      return
-    }
-
-    val userSettingSavepointPath = properties.getProperty(SavepointConfigOptions.SAVEPOINT_PATH.key())
-    if (StringUtils.isBlank(userSettingSavepointPath)) {
-      // remove SAVEPOINT_PATH when user didn't set it via %flink.conf
-      configuration.removeConfig(SavepointConfigOptions.SAVEPOINT_PATH)
-    }
-  }
-
-  def setParallelismIfNecessary(context: InterpreterContext): Unit = {
-    val parallelismStr = context.getLocalProperties.get("parallelism")
-    if (!StringUtils.isBlank(parallelismStr)) {
-      val parallelism = parallelismStr.toInt
-      this.streamEnv.setParallelism(parallelism)
-      this.batchEnv.setParallelism(parallelism)
-    }
-    val maxParallelismStr = context.getLocalProperties.get("maxParallelism")
-    if (!StringUtils.isBlank(maxParallelismStr)) {
-      val maxParallelism = maxParallelismStr.toInt
-      streamEnv.setParallelism(maxParallelism)
-    }
-  }
-
-  def cancel(context: InterpreterContext): Unit = {
-    jobManager.cancelJob(context)
-  }
-
-  def getProgress(context: InterpreterContext): Int = {
-    jobManager.getJobProgress(context.getParagraphId)
-  }
-
   def close(): Unit = {
     logInfo("Closing FlinkScalaInterpreter")
     if (properties.getProperty("flink.interpreter.close.shutdown_cluster", "true").toBoolean) {
@@ -505,9 +454,11 @@ class FlinkScalaInterpreter(properties: Properties) {
       flinkILoop.closeInterpreter()
       flinkILoop = null
     }
-    if (jobManager != null) {
-      jobManager.shutdown()
+
+    if (jobClient != null) {
+      jobClient.cancel()
     }
+
   }
 
   def getExecutionEnvironment(): ExecutionEnvironment = this.batchEnv
@@ -558,8 +509,6 @@ class FlinkScalaInterpreter(properties: Properties) {
     })
   }
 
-  def getJobManager = this.jobManager
-
   def getFlinkScalaShellLoader: ClassLoader = new URLClassLoader(Array(getUserCodeJarFile().toURL) ++ userJars.map(e => new File(e).toURL))
 
   def getUserCodeJarFile(): File = {
@@ -582,42 +531,6 @@ class FlinkScalaInterpreter(properties: Properties) {
   def getFlinkILoop = flinkILoop
 
   def getFlinkShims = flinkShims
-
-  class FlinkJobListener extends JobListener {
-    override def onJobSubmitted(jobClient: JobClient, e: Throwable): Unit = {
-      if (e != null) {
-        LOGGER.warn("Fail to submit job")
-      } else {
-        InterpreterContext.get() match {
-          case null =>
-            LOGGER.warn(s"Job ${jobClient.getJobID} is submitted but unable to associate this job to paragraph,as InterpreterContext is null")
-          case _ =>
-            logInfo(s"Job ${jobClient.getJobID} is submitted for paragraph ${InterpreterContext.get.getParagraphId}")
-            jobManager.addJob(InterpreterContext.get(), jobClient)
-            if (jmWebUrl != null) {
-              jobManager.sendFlinkJobUrl(InterpreterContext.get())
-            } else {
-              LOGGER.error("Unable to link JobURL, because JobManager weburl is null")
-            }
-        }
-      }
-    }
-
-    override def onJobExecuted(jobExecutionResult: JobExecutionResult, e: Throwable): Unit = {
-      if (e != null) {
-        LOGGER.warn("Fail to execute job")
-      } else {
-        logInfo(s"Job ${jobExecutionResult.getJobID} is executed with time ${jobExecutionResult.getNetRuntime(TimeUnit.SECONDS)} seconds")
-      }
-      if (InterpreterContext.get() != null) {
-        jobManager.removeJob(InterpreterContext.get().getParagraphId)
-      } else {
-        if (e == null) {
-          LOGGER.warn(s"Unable to remove this job ${jobExecutionResult.getJobID}, as InterpreterContext is null")
-        }
-      }
-    }
-  }
 
   def replaceYarnAddress(webURL: String, yarnAddress: String): String = {
     val pattern = "(https?://.*:\\d+)(.*)".r
