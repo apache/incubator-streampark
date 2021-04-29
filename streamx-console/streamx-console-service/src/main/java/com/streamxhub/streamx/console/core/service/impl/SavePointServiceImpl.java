@@ -34,8 +34,11 @@ import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
+import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,8 +51,10 @@ import java.util.List;
 @Slf4j
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
-public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint>
-        implements SavePointService {
+public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint> implements SavePointService {
+
+    @Autowired
+    private SettingService settingService;
 
     @Override
     public void obsolete(Long appId) {
@@ -64,17 +69,25 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
-        LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
-        Integer threshold = entity.getCpThreshold();
-        queryWrapper.select(SavePoint::getTriggerTime)
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + threshold + 1);
+        int cpThreshold = Integer.parseInt(settingService.getFlinkDefaultConfig().getOrDefault("state.checkpoints.num-retained", "1"));
+        if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
+            cpThreshold = cpThreshold - 1;
+        }
+        if (cpThreshold == 0) {
+            this.baseMapper.expireAll(entity.getAppId());
+        } else {
+            LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
+            queryWrapper.select(SavePoint::getTriggerTime)
+                    .eq(SavePoint::getAppId, entity.getAppId())
+                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
+                    .orderByDesc(SavePoint::getTriggerTime)
+                    .last("limit 0," + cpThreshold + 1);
 
-        List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
-        if (savePointList.size() > threshold) {
-            SavePoint savePoint = savePointList.get(threshold);
-            this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
+            List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
+            if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
+                SavePoint savePoint = savePointList.get(cpThreshold - 1);
+                this.baseMapper.expire(entity.getAppId(), savePoint.getTriggerTime());
+            }
         }
     }
 

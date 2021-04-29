@@ -22,13 +22,13 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -50,6 +50,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         implements SettingService {
 
+
+    private Map<String, String> flinkYaml;
+
     @Override
     public Setting get(String key) {
         return baseMapper.get(key);
@@ -61,6 +64,14 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public void initSetting() {
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getKey(), x));
+        this.initDefaultConfig();
+    }
+
+    private void initDefaultConfig() {
+        String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+        assert flinkLocalHome != null;
+        String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
+        this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
     }
 
     @Override
@@ -68,6 +79,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         try {
             this.baseMapper.updateByKey(setting);
             settings.get(setting.getKey()).setValue(setting.getValue());
+            if (setting.getKey().equals(SettingService.KEY_ENV_FLINK_HOME)) {
+                this.initDefaultConfig();
+            }
             return true;
         } catch (Exception e) {
             return false;
@@ -77,6 +91,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getEnvFlinkHome() {
         return settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+    }
+
+    @Override
+    public Map<String, String> getFlinkDefaultConfig() {
+        return flinkYaml;
     }
 
     @Override

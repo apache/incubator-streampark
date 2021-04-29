@@ -23,10 +23,18 @@ package com.streamxhub.streamx.console.core.enums;
 import java.io.Serializable;
 import java.util.Arrays;
 
+/**
+ * @author benjobs
+ */
 public enum CheckPointType implements Serializable {
-    CHECKPOINT(0),
-    SAVEPOINT(1);
-
+    /**
+     * CHECKPOINT
+     */
+    CHECKPOINT(1),
+    /**
+     * SAVEPOINT
+     */
+    SAVEPOINT(2);
     int value;
 
     public int get() {

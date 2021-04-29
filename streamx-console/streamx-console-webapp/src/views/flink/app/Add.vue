@@ -338,17 +338,6 @@
       </a-form-item>
 
       <a-form-item
-        label="CheckPoint Threshold"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input-number
-          :min="1"
-          :step="1"
-          placeholder="Checkpoints keep Max size"
-          v-decorator="['cpThreshold', {rules: [{ required: true, message: 'CheckPoint Threshold is required'}]}]" />
-      </a-form-item>
-
-      <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -931,7 +920,6 @@ export default {
       })
       this.form.getFieldDecorator('resolveOrder', { initialValue: 0 })
       this.form.getFieldDecorator('executionMode', { initialValue: 4 })
-      this.form.getFieldDecorator('cpThreshold', { initialValue: 10 })
       this.form.getFieldDecorator('restartSize', { initialValue: 0 })
     },
 
@@ -1272,7 +1260,6 @@ export default {
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
-        cpThreshold: values.cpThreshold,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description
@@ -1333,7 +1320,6 @@ export default {
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
-        cpThreshold: values.cpThreshold,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null

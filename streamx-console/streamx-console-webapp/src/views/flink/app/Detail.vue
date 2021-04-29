@@ -255,12 +255,12 @@
                   class="app_state">
                   <a-tag
                     color="#0C7EF2"
-                    v-if="record['type'] === 0">
+                    v-if="record['type'] === 1">
                     Check Point
                   </a-tag>
                   <a-tag
                     color="#52c41a"
-                    v-if="record['type'] === 1">
+                    v-if="record['type'] === 2">
                     Save Point
                   </a-tag>
                 </div>

@@ -21,9 +21,10 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
+
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -61,6 +62,8 @@ public interface SettingService extends IService<Setting> {
     String getMavenRepository();
 
     String getEnvFlinkHome();
+
+    Map<String,String> getFlinkDefaultConfig();
 
     boolean checkWorkspace();
 

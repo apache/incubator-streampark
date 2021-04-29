@@ -677,10 +677,10 @@
               <a-select-option
                 v-for="(k ,i) in historySavePoint"
                 :key="i"
-                :value="k.savePoint">
+                :value="k.path">
                 <template>
                   <span style="color:#108ee9">
-                    {{ k.savePoint.substr(k.savePoint.lastIndexOf('-') + 1) }}
+                    {{ k.path.substr(k.path.lastIndexOf('-') + 1) }}
                   </span>
                   <span
                     style="float: right; color: darkgrey">
@@ -1253,7 +1253,7 @@ export default {
             }).then((resp) => {
               this.historySavePoint = []
               resp.data.records.forEach(x => {
-                if (x.savePoint) {
+                if (x.path) {
                   this.historySavePoint.push(x)
                 }
               })

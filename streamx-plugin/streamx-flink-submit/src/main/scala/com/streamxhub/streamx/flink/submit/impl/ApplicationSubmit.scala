@@ -30,13 +30,15 @@ import org.apache.flink.client.cli.{CustomCommandLine, ExecutionConfigAccessor, 
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.PackagedProgramUtils
-import org.apache.flink.configuration.{Configuration, DeploymentOptions, PipelineOptions}
+import org.apache.flink.configuration.{CheckpointingOptions, ConfigOption, Configuration, DeploymentOptions, PipelineOptions}
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
+
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Try
 
@@ -127,6 +129,15 @@ object ApplicationSubmit extends YarnSubmitTrait {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += s"$defParallelism"
     }
+
+    //flink-conf.yaml配置
+    flinkDefaultConfiguration.keySet().foreach(x=>{
+      flinkDefaultConfiguration.getString(x,null) match {
+        case v if v != null => effectiveConfiguration.setString(x, v)
+        case _ =>
+      }
+    })
+
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
@@ -145,6 +156,9 @@ object ApplicationSubmit extends YarnSubmitTrait {
     effectiveConfiguration.set(YarnConfigOptions.APPLICATION_TYPE, submitRequest.applicationType)
     //arguments...
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
+    //state.checkpoints.num-retained
+    val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
+    effectiveConfiguration.set(retainedOption, flinkDefaultConfiguration.get(retainedOption))
 
     logInfo("----------------------------------------------------------------------")
     logInfo(s"Effective executor configuration: $effectiveConfiguration ")

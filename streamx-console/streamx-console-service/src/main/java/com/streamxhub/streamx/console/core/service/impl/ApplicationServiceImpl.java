@@ -416,16 +416,36 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     public boolean update(Application appParam) {
         try {
             Application application = getById(appParam.getId());
+            //检查任务相关的参数是否发生变化,发生变化则设置需要重启的状态
+            if (!appParam.eqJobParam(application)) {
+                application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+            } else if (application.isStreamXJob()) {
+                ApplicationConfig config = configService.getEffective(application.getId());
+                if (config != null) {
+                    if (!appParam.getConfigId().equals(config.getId())) {
+                        application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                    } else {
+                        String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));
+                        String encode = DeflaterUtils.zipString(decode.trim());
+                        if (!config.getContent().equals(encode)) {
+                            application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
+                        }
+                    }
+                }
+            }
             //从db中补全jobType到appParam
             appParam.setJobType(application.getJobType());
+            //以下参数发生变化,需要重新任务才能生效
             application.setJobName(appParam.getJobName());
             application.setArgs(appParam.getArgs());
             application.setOptions(appParam.getOptions());
             application.setDynamicOptions(appParam.getDynamicOptions());
-            application.setDescription(appParam.getDescription());
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
+            //以下参数发生改变不影响正在运行的任务
+            application.setDescription(appParam.getDescription());
             application.setAlertEmail(appParam.getAlertEmail());
+            application.setRestartSize(appParam.getRestartSize());
             // Flink Sql job...
             if (application.isFlinkSqlJob()) {
                 updateFlinkSqlJob(application, appParam);
@@ -436,8 +456,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.setJar(appParam.getJar());
                     application.setMainClass(appParam.getMainClass());
                 }
-                //程序配置已更新需要重启生效
-                application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
             }
             baseMapper.updateById(application);
             return true;
@@ -556,6 +574,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
+                            application.setSavePointed(true);
                             // 重新启动.
                             start(application, false);
                             // 将"需要重新发布"状态清空...
@@ -782,7 +801,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         appParam.getSavePointed(),
                         appParam.getDrain()
                 );
-                if (appParam.getSavePointed() && savePointDir != null) {
+                if (savePointDir != null) {
+                    log.info("savePoint path:{}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();
                     savePoint.setPath(savePointDir);
@@ -839,6 +859,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 return false;
             }
             application.setRestartCount(application.getRestartCount() + 1);
+            application.setSavePointed(true);
         }
 
         //1) 真正执行启动相关的操作..
