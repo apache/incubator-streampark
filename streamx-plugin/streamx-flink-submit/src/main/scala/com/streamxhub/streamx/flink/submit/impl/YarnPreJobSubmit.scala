@@ -23,6 +23,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
+import com.streamxhub.streamx.flink.submit.impl.ApplicationSubmit.flinkDefaultConfiguration
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine
@@ -155,6 +156,15 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       programArgs += PARAM_KEY_FLINK_PARALLELISM
       programArgs += s"$parallelism"
     }
+
+    //flink-conf.yaml配置
+    flinkDefaultConfiguration.keySet().foreach(x=>{
+      flinkDefaultConfiguration.getString(x,null) match {
+        case v if v != null => effectiveConfiguration.setString(x, v)
+        case _ =>
+      }
+    })
+
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
