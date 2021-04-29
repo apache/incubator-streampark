@@ -130,6 +130,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
       programArgs += s"$defParallelism"
     }
 
+    //flink-conf.yaml配置
     flinkDefaultConfiguration.keySet().foreach(x=>{
       flinkDefaultConfiguration.getString(x,null) match {
         case v if v != null => effectiveConfiguration.setString(x, v)
