@@ -106,15 +106,15 @@ class FlinkScalaInterpreter(properties: Properties) {
     this.streamEnv.registerJobListener(jobListener)
   }
 
-  private def initFlinkConfig(flinkHome:String): Config = {
+  private def initFlinkConfig(flink:String): Config = {
     this.flinkHome = {
-      if (Utils.isEmpty(flinkHome)) {
+      if (Utils.isEmpty(flink)) {
         val flinkLocalHome = System.getenv("FLINK_HOME")
         require(flinkLocalHome != null)
         logInfo(s"flinkHome: $flinkLocalHome")
         flinkLocalHome
       } else {
-        flinkHome
+        flink
       }
     }
     require(flinkHome != null)
