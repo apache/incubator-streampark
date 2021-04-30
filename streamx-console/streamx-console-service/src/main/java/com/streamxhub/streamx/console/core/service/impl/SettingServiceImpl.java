@@ -64,14 +64,19 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public void initSetting() {
         List<Setting> settingList = super.list();
         settingList.forEach(x -> settings.put(x.getKey(), x));
-        this.initDefaultConfig();
     }
 
     private void initDefaultConfig() {
-        String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
-        assert flinkLocalHome != null;
-        String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
-        this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
+        if (settings.isEmpty()) {
+            synchronized (SettingServiceImpl.class) {
+                if (settings.isEmpty()) {
+                    String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+                    assert flinkLocalHome != null;
+                    String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
+                    this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
+                }
+            }
+        }
     }
 
     @Override
@@ -95,6 +100,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public Map<String, String> getFlinkDefaultConfig() {
+        this.initDefaultConfig();
         return flinkYaml;
     }
 

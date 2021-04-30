@@ -44,14 +44,14 @@ public class FlinkInterpreterTest {
     }
 
     @After
-    public void tearDown() throws Exception {
+    public void testDown() throws Exception {
         if (interpreter != null) {
             interpreter.close();
         }
     }
 
     @Test
-    public void testWordCount() throws Exception {
+    public void testWordCount() {
         try {
             InterpreterOutput out = new InterpreterOutput(line -> {
 
@@ -70,7 +70,7 @@ public class FlinkInterpreterTest {
                             "\n" +
                             "env.execute()\n", out);
 
-            System.out.println(out.toString());
+            System.out.println(out);
 
             System.out.println(result.code());
             interpreter.close();
@@ -114,7 +114,6 @@ public class FlinkInterpreterTest {
             InterpreterOutput out = new InterpreterOutput(line -> {
 
             });
-            interpreter.open(FLINK_HOME);
             InterpreterResult result = interpreter.interpret(code, out);
             System.out.println(out);
             System.out.println(result.code());

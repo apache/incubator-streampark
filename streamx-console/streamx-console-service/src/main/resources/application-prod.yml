@@ -3,6 +3,9 @@ server:
 
 spring:
   application.name: streamx
+  devtools:
+    restart:
+      enabled: false
   servlet:
     multipart:
       enabled: true

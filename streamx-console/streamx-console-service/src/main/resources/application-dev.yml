@@ -3,6 +3,10 @@ server:
 
 spring:
   application.name: streamx
+  devtools:
+    restart:
+      enabled: true
+      exclude: logs/**,static/**,temp/**
   servlet:
     multipart:
       enabled: true
