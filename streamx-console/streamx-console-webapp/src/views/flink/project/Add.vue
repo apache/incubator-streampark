@@ -199,9 +199,9 @@ export default {
         exists({ name: value }).then((resp) => {
           const flag = resp.data
           if (flag) {
-            callback()
-          } else {
             callback(new Error('The Project Name is already exists. Please check'))
+          } else {
+            callback()
           }
         })
       }
