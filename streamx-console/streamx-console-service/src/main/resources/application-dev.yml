@@ -1,8 +1,19 @@
 server:
   port: 10001
+  # 下面是配置undertow作为服务器的参数
+  undertow:
+    buffer-size: 1024
+    direct-buffers: true
+    threads:
+      io: 4
+      worker: 20
 
 spring:
   application.name: streamx
+  devtools:
+    restart:
+      enabled: true
+      exclude: logs/**,static/**,temp/**
   servlet:
     multipart:
       enabled: true

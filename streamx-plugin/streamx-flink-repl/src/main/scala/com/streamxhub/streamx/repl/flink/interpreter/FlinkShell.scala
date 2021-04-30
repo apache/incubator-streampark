@@ -85,7 +85,7 @@ object FlinkShell extends Logger {
     (effectiveConfig, clusterClient)
   }
 
-  def getCliFrontend(effectiveConfig: Configuration, config: Config) = {
+  def getCliFrontend(effectiveConfig: Configuration, config: Config): CliFrontend = {
     val configDir = config.configDir.getOrElse(CliFrontend.getConfigurationDirectoryFromEnv)
     new CliFrontend(effectiveConfig, CliFrontend.loadCustomCommandLines(effectiveConfig, configDir))
   }

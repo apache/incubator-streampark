@@ -36,7 +36,7 @@ import java.util.Properties;
  */
 public class HBaseQuery extends Scan implements Serializable {
 
-    private String table;
+    private final String table;
     private volatile Table htable;
     private transient Scan scan;
     private transient Get get;

@@ -1145,7 +1145,7 @@ export default {
       if (!value) {
         callback(new Error('Application Name is required'))
       } else {
-        exists({ jobName: value.jobName }).then((resp) => {
+        exists({ jobName: value }).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
