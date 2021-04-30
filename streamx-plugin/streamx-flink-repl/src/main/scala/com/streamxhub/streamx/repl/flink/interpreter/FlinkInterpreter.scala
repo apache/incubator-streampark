@@ -33,8 +33,11 @@ class FlinkInterpreter(properties: Properties) extends Logger {
   private var interpreter: FlinkScalaInterpreter = _
 
   private def checkScalaVersion(): Unit = {
-    val scalaVersionString = scala.util.Properties.versionString
-    logInfo("Using Scala: " + scalaVersionString)
+    val scalaVersion = scala.util.Properties.versionString
+    logInfo("Using Scala: " + scalaVersion)
+    if (!scalaVersion.contains("version 2.11")) {
+      throw new ExceptionInInitializerError(s"Unsupported scala version: $scalaVersion Only scala 2.11 is supported")
+    }
   }
 
   @throws[Exception] def open(flinkHome:String): Unit = {
