@@ -18,7 +18,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
         <hadoop.version>2.6.0</hadoop.version>
-        <scala.version>2.11.8</scala.version>
+        <scala.version>2.11.12</scala.version>
         <junit.version>4.13.1</junit.version>
         <frontend.project.name>streamx-console-webapp</frontend.project.name>
         <env>dev</env>
