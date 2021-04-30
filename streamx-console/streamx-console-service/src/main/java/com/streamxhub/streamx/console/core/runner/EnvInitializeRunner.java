@@ -69,12 +69,6 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.mkdirs(appBackups);
             }
 
-            String appPlugins = ConfigConst.APP_PLUGINS();
-            if (!HdfsUtils.exists(appPlugins)) {
-                log.info("mkdir {} starting ...", appPlugins);
-                HdfsUtils.mkdirs(appPlugins);
-            }
-
             String appSavePoints = ConfigConst.APP_SAVEPOINTS();
             if (!HdfsUtils.exists(appSavePoints)) {
                 log.info("mkdir {} starting ...", appSavePoints);
@@ -87,12 +81,18 @@ public class EnvInitializeRunner implements ApplicationRunner {
                 HdfsUtils.mkdirs(appJars);
             }
 
+            String appPlugins = ConfigConst.APP_PLUGINS();
+            if (HdfsUtils.exists(appPlugins)) {
+                HdfsUtils.delete(appPlugins);
+            }
+            HdfsUtils.mkdirs(appPlugins);
+
             File plugins = new File(WebUtil.getAppDir("plugins"));
             for (File file : Objects.requireNonNull(plugins.listFiles())) {
                 String plugin = appPlugins.concat("/").concat(file.getName());
                 if (!HdfsUtils.exists(plugin)) {
                     log.info("load plugin:{} to {}", file.getName(), appPlugins);
-                    HdfsUtils.upload(file.getAbsolutePath(), appPlugins, false, false);
+                    HdfsUtils.upload(file.getAbsolutePath(), appPlugins, false, true);
                 }
             }
         } else {
