@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -275,6 +276,19 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
+    public boolean checkExists(Project project) {
+        if (project.getId() != null) {
+            Project proj = getById(project.getId());
+            if (proj.getName().equals(project.getName())) {
+                return false;
+            }
+        }
+        LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
+                .eq(Project::getName, project.getName());
+        return this.baseMapper.selectCount(wrapper) > 0;
+    }
+
+    @Override
     public List<Map<String, Object>> listConf(Project project) {
         try {
             File file = new File(project.getAppBase(), project.getModule());
@@ -307,7 +321,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                         .setRef(project.getBranches())
                         .call();
 
-                log.info("git {} was isCloned,pull starting...",project.getUrl());
+                log.info("git {} was isCloned,pull starting...", project.getUrl());
 
                 tailBuffer.get(project.getId()).append(project.getLog4PullStart());
 
@@ -332,7 +346,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 );
 
             } else {
-                log.info("git {} is new,clone starting...",project.getUrl());
+                log.info("git {} is new,clone starting...", project.getUrl());
                 tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
                 CloneCommand cloneCommand = Git.cloneRepository()
                         .setURI(project.getUrl())

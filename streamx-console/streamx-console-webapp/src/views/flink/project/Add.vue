@@ -12,7 +12,7 @@
         <a-input
           type="text"
           placeholder="the project name"
-          v-decorator="['name',{ rules: [{ required: true, message: 'Project Name is required'} ]}]" />
+          v-decorator="['name',{ rules: [{ validator: handleCheckName,required: true}]}]" />
       </a-form-item>
 
       <a-form-item
@@ -95,12 +95,6 @@
         label="Branches"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="Branches of the this project"
-          default-value="main"
-          v-decorator="['branches',{ rules: [{ required: true } ]}]" />
-
         <a-select
           mode="combobox"
           @focus="handleBranches"
@@ -156,7 +150,7 @@
 
 <script>
 
-import { create,branches,gitcheck } from '@api/project'
+import { create,branches,gitcheck,exists } from '@api/project'
 
 export default {
   name: 'BaseForm',
@@ -176,9 +170,7 @@ export default {
       }
     }
   },
-  mounted () {
-    this.select()
-  },
+
   beforeMount () {
     this.form = this.$form.createForm(this)
   },
@@ -199,6 +191,22 @@ export default {
     handleSchema () {
       console.log(this.url)
     },
+
+    handleCheckName(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('The Project Name is required'))
+      } else {
+        exists({ name: value }).then((resp) => {
+          const flag = resp.data
+          if (flag) {
+            callback()
+          } else {
+            callback(new Error('The Project Name is already exists. Please check'))
+          }
+        })
+      }
+    },
+
     // handler
     handleSubmit: function (e) {
       e.preventDefault()
@@ -244,6 +252,15 @@ export default {
                   this.$message.error(error.message)
                 })
               }
+            } else {
+              this.$swal.fire(
+                'Failed',
+                (resp.data === 1?
+                  'not authorized:username and password is required'
+                  : 'authentication error,please check username and password'
+                ),
+                'error'
+              )
             }
           })
         }

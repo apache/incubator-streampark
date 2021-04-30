@@ -29,6 +29,10 @@ export function gitcheck (params) {
   return http.post(api.Project.GITCHECK, params)
 }
 
+export function exists (params) {
+  return http.post(api.Project.EXISTS, params)
+}
+
 export function create (params) {
   return http.post(api.Project.CREATE, params)
 }

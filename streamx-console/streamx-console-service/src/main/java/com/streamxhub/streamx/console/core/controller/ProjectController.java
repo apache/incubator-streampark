@@ -81,6 +81,12 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(error.getType());
     }
 
+    @PostMapping("exists")
+    public RestResponse exists(Project project) {
+        boolean exists = projectService.checkExists(project);
+        return RestResponse.create().data(exists);
+    }
+
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
     public RestResponse delete(String id) {

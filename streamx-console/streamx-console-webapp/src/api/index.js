@@ -30,6 +30,7 @@ export default {
   Project: {
     BRANCHES: '/flink/project/branches',
     GITCHECK: '/flink/project/gitcheck',
+    EXISTS: '/flink/project/exists',
     CREATE: '/flink/project/create',
     BUILD: '/flink/project/build',
     LIST: '/flink/project/list',

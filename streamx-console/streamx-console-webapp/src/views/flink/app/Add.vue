@@ -1142,7 +1142,7 @@ export default {
     },
 
     handleCheckJobName(rule, value, callback) {
-      if (!value) {
+      if (value === null || value === undefined || value === '') {
         callback(new Error('Application Name is required'))
       } else {
         exists({ jobName: value }).then((resp) => {
