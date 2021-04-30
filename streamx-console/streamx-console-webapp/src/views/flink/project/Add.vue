@@ -72,17 +72,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Branches"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="Branches of the this project"
-          default-value="main"
-          v-decorator="['branches',{ rules: [{ required: true } ],initialValue:'main'}]" />
-      </a-form-item>
-
-      <a-form-item
         label="UserName"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -100,6 +89,30 @@
           type="password"
           placeholder="Password for this project"
           v-decorator="['password']" />
+      </a-form-item>
+
+      <a-form-item
+        label="Branches"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Branches of the this project"
+          default-value="main"
+          v-decorator="['branches',{ rules: [{ required: true } ]}]" />
+
+        <a-select
+          mode="combobox"
+          @focus="handleBranches"
+          allow-clear
+          v-decorator="['branches',{ rules: [{ required: true } ]}]">
+          <a-select-option
+            v-for="(k ,i) in brancheList"
+            :key="i"
+            :value="k">
+            {{ k }}
+          </a-select-option>
+        </a-select>
       </a-form-item>
 
       <a-form-item
@@ -143,13 +156,14 @@
 
 <script>
 
-import { create } from '@api/project'
+import { create,branches,gitcheck } from '@api/project'
 
 export default {
   name: 'BaseForm',
   data () {
     return {
       schema: 'ssh',
+      brancheList: [],
       options: {
         repository: [
           { id: 1, name: 'GitHub/GitLab', default: true },
@@ -190,31 +204,65 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          create({
-            name: values.name,
+          gitcheck({
             url: values.url,
-            repository: values.repository,
-            type: values.type,
             branches: values.branches,
-            username: values.username,
-            password: values.password,
-            pom: values.pom,
-            description: values.description
+            username: values.username || null,
+            password: values.password || null,
           }).then((resp) => {
-            const created = resp.data
-            if (created) {
-              this.$router.push({ path: '/flink/project' })
-            } else {
-              this.$notification.error({
-                message: 'Project save failed',
-                description: resp['message']
-              })
+            if ( resp.data === 0 ) {
+              this.handleBranches()
+              if (this.brancheList.indexOf(values.branches) === -1) {
+                this.$swal.fire(
+                  'Failed',
+                  'branch does not exist,or check [url,username,password]:)',
+                  'error'
+                )
+              } else {
+                create({
+                  name: values.name,
+                  url: values.url,
+                  repository: values.repository,
+                  type: values.type,
+                  branches: values.branches,
+                  username: values.username,
+                  password: values.password,
+                  pom: values.pom,
+                  description: values.description
+                }).then((resp) => {
+                  const created = resp.data
+                  if (created) {
+                    this.$router.push({ path: '/flink/project' })
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      'Project save failed:)' + resp['message'],
+                      'error'
+                    )
+                  }
+                }).catch((error) => {
+                  this.$message.error(error.message)
+                })
+              }
             }
-          }).catch((error) => {
-            this.$message.error(error.message)
           })
         }
       })
+    },
+
+    handleBranches() {
+      const form = this.form
+      if (form.getFieldValue('url')) {
+        branches({
+          url: form.getFieldValue('url'),
+          username: form.getFieldValue('username') || null ,
+          password: form.getFieldValue('password') || null
+        }).then((resp) => {
+          this.brancheList = resp.data
+        }).catch((error) => {
+          this.$message.error(error.message)
+        })
+      }
     },
 
     handleGoBack () {

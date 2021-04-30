@@ -21,6 +21,14 @@
 import api from './index'
 import http from '@/utils/request'
 
+export function branches (params) {
+  return http.post(api.Project.BRANCHES, params)
+}
+
+export function gitcheck (params) {
+  return http.post(api.Project.GITCHECK, params)
+}
+
 export function create (params) {
   return http.post(api.Project.CREATE, params)
 }

@@ -20,22 +20,24 @@
  */
 package com.streamxhub.streamx.console.core.entity;
 
-import java.io.File;
-import java.io.Serializable;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
-import com.streamxhub.streamx.console.core.service.SettingService;
-import org.eclipse.jgit.transport.CredentialsProvider;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
-
-import lombok.Data;
-
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.console.base.utils.CommonUtil;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
+import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
+import com.streamxhub.streamx.console.core.service.SettingService;
+import lombok.Data;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.lib.Ref;
+import org.eclipse.jgit.transport.CredentialsProvider;
+import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+
+import java.io.File;
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * @author benjobs
@@ -146,6 +148,52 @@ public class Project implements Serializable {
     }
 
     @JsonIgnore
+    public List<String> getAllBranches() {
+        try {
+            Collection<Ref> refList;
+            if (CommonUtil.notEmpty(username, password)) {
+                UsernamePasswordCredentialsProvider pro = new UsernamePasswordCredentialsProvider(username, password);
+                refList = Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(pro).call();
+            } else {
+                refList = Git.lsRemoteRepository().setRemote(url).call();
+            }
+            List<String> branchList = new ArrayList<>(4);
+            for (Ref ref : refList) {
+                String refName = ref.getName();
+                if (refName.startsWith("refs/heads/")) {
+                    String branchName = refName.replace("refs/heads/", "");
+                    branchList.add(branchName);
+                }
+            }
+            return branchList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return Collections.emptyList();
+    }
+
+    @JsonIgnore
+    public GitAuthorizedError gitCheck() {
+        try {
+            if (CommonUtil.notEmpty(username, password)) {
+                UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
+                Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(credentialsProvider).call();
+            } else {
+                Git.lsRemoteRepository().setRemote(url).call();
+            }
+            return GitAuthorizedError.SUCCESS;
+        } catch (Exception e) {
+            String err = e.getMessage();
+            if (err.contains("not authorized")) {
+                return GitAuthorizedError.ERROR;
+            } else if (err.contains("Authentication is required")) {
+                return GitAuthorizedError.REQUIRED;
+            }
+            return GitAuthorizedError.UNKNOW;
+        }
+    }
+
+    @JsonIgnore
     public boolean isCloned() {
         File repository = getGitRepository();
         return repository.exists();
@@ -198,4 +246,5 @@ public class Project implements Serializable {
     private String getLogHeader(String header) {
         return "---------------------------------[ " + header + " ]---------------------------------\n";
     }
+
 }

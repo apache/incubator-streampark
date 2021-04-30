@@ -28,6 +28,8 @@ export default {
     SIGNOUT: '/passport/signout'
   },
   Project: {
+    BRANCHES: '/flink/project/branches',
+    GITCHECK: '/flink/project/gitcheck',
     CREATE: '/flink/project/create',
     BUILD: '/flink/project/build',
     LIST: '/flink/project/list',

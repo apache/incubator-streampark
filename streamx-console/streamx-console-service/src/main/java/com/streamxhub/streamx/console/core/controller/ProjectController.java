@@ -20,9 +20,14 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
-import java.util.List;
-import java.util.Map;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.streamx.console.base.controller.BaseController;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.entity.Project;
+import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
+import com.streamxhub.streamx.console.core.service.ProjectService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -30,14 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.streamx.console.base.controller.BaseController;
-import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.core.entity.Project;
-import com.streamxhub.streamx.console.core.service.ProjectService;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -68,6 +67,18 @@ public class ProjectController extends BaseController {
     public RestResponse list(Project project, RestRequest restRequest) {
         IPage<Project> page = projectService.page(project, restRequest);
         return RestResponse.create().data(page);
+    }
+
+    @PostMapping("branches")
+    public RestResponse branches(Project project) {
+        List<String> branches = project.getAllBranches();
+        return RestResponse.create().data(branches);
+    }
+
+    @PostMapping("gitcheck")
+    public RestResponse gitCheck(Project project) {
+        GitAuthorizedError error = project.gitCheck();
+        return RestResponse.create().data(error.getType());
     }
 
     @PostMapping("delete")
