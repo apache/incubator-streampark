@@ -1,6 +1,5 @@
 server:
   port: 10000
-  # 下面是配置undertow作为服务器的参数
   undertow:
     buffer-size: 1024
     direct-buffers: true
@@ -21,7 +20,7 @@ spring:
   datasource:
     dynamic:
       # 是否开启 SQL日志输出，生产环境建议关闭，有性能损耗
-      p6spy: true
+      p6spy: false
       hikari:
         connection-timeout: 30000
         max-lifetime: 1800000
@@ -40,7 +39,6 @@ spring:
           url: jdbc:mysql://localhost:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
   aop.proxy-target-class: true
   messages.encoding: utf-8
-
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
