@@ -226,11 +226,13 @@ export default {
             password: values.password || null,
           }).then((resp) => {
             if ( resp.data === 0 ) {
-              this.handleBranches()
+              if (this.brancheList.length === 0) {
+                this.handleBranches()
+              }
               if (this.brancheList.indexOf(values.branches) === -1) {
                 this.$swal.fire(
                   'Failed',
-                  'branch does not exist,or check [url,username,password]:)',
+                  'branch [' + values.branches + '] does not exist\nor authentication error,please check',
                   'error'
                 )
               } else {
@@ -283,7 +285,6 @@ export default {
         const password = form.getFieldValue('password') || null
         const userNull = username === null || username === undefined || username === ''
         const passNull = password === null || password === undefined || password === ''
-        this.brancheList = []
         if ( (userNull && passNull) || (!userNull && !passNull) ) {
           branches({
             url: url,
