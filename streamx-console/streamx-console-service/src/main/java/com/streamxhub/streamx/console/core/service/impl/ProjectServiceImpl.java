@@ -117,12 +117,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         if (count > 0) {
             return false;
         }
-        boolean deleted = project.delete();
-        if (deleted) {
+        try {
+            project.delete();
             removeById(id);
             return true;
+        } catch (IOException e) {
+            return false;
         }
-        return false;
     }
 
     @Override

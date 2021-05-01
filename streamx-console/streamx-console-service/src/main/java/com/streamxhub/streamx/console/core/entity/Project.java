@@ -30,12 +30,14 @@ import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
+import org.apache.commons.io.FileUtils;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
 
@@ -147,10 +149,10 @@ public class Project implements Serializable {
         return new File(home, ".git");
     }
 
-
-    public boolean delete() {
+    @JsonIgnore
+    public void delete() throws IOException {
         File file = getGitRepository();
-        return file.delete();
+        FileUtils.deleteDirectory(file);
     }
 
     @JsonIgnore
