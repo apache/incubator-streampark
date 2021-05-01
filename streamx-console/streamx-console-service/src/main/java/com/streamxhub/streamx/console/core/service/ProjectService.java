@@ -37,7 +37,7 @@ public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);
 
-    boolean delete(String id);
+    boolean delete(Long id);
 
     IPage<Project> page(Project project, RestRequest restRequest);
 
@@ -56,4 +56,5 @@ public interface ProjectService extends IService<Project> {
     List<Application> getApplications(Project project);
 
     boolean checkExists(Project project);
+
 }

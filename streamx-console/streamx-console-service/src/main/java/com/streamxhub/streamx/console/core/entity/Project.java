@@ -147,6 +147,12 @@ public class Project implements Serializable {
         return new File(home, ".git");
     }
 
+
+    public boolean delete() {
+        File file = getGitRepository();
+        return file.delete();
+    }
+
     @JsonIgnore
     public List<String> getAllBranches() {
         try {

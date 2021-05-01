@@ -75,6 +75,13 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(branches);
     }
 
+    @PostMapping("delete")
+    @RequiresPermissions("project:delete")
+    public RestResponse delete(Long id) {
+        Boolean deleted = projectService.delete(id);
+        return RestResponse.create().data(deleted);
+    }
+
     @PostMapping("gitcheck")
     public RestResponse gitCheck(Project project) {
         GitAuthorizedError error = project.gitCheck();
@@ -85,13 +92,6 @@ public class ProjectController extends BaseController {
     public RestResponse exists(Project project) {
         boolean exists = projectService.checkExists(project);
         return RestResponse.create().data(exists);
-    }
-
-    @PostMapping("delete")
-    @RequiresPermissions("project:delete")
-    public RestResponse delete(String id) {
-        boolean result = projectService.delete(id);
-        return RestResponse.create().message(result ? "删除成功" : "删除失败");
     }
 
     @PostMapping("modules")

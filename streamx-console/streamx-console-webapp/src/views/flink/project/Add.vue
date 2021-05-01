@@ -68,6 +68,7 @@
           :addon-before="schema"
           placeholder="The Repository URL for this project"
           @change="handleSchema"
+          @blur="handleBranches"
           v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
       </a-form-item>
 
@@ -78,6 +79,7 @@
         <a-input
           type="text"
           placeholder="UserName for this project"
+          @blur="handleBranches"
           v-decorator="['username']" />
       </a-form-item>
 
@@ -87,6 +89,7 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="password"
+          @blur="handleBranches"
           placeholder="Password for this project"
           v-decorator="['password']" />
       </a-form-item>
@@ -96,9 +99,10 @@
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
-          mode="combobox"
-          @focus="handleBranches"
-          :loading="searchBranche"
+          show-search
+          placeholder="Select a branche"
+          option-filter-prop="children"
+          :filter-option="filterOption"
           allow-clear
           v-decorator="['branches',{ rules: [{ required: true } ]}]">
           <a-select-option
@@ -152,6 +156,7 @@
 <script>
 
 import { create,branches,gitcheck,exists } from '@api/project'
+import user from "@/store/modules/user";
 
 export default {
   name: 'BaseForm',
@@ -272,11 +277,19 @@ export default {
     handleBranches() {
       this.searchBranche = true
       const form = this.form
-      if (form.getFieldValue('url')) {
+      const url = form.getFieldValue('url')
+      if (url) {
+        const username = form.getFieldValue('username') || null
+        const password = form.getFieldValue('password') || null
+        const userNull = username === null || username === undefined || username === ''
+        const passNull = password === null || password === undefined || password === ''
+        if ( (!userNull && passNull) || (userNull && !passNull) ) {
+          return
+        }
         branches({
-          url: form.getFieldValue('url'),
-          username: form.getFieldValue('username') || null ,
-          password: form.getFieldValue('password') || null
+          url: url,
+          username: username ,
+          password: password
         }).then((resp) => {
           this.brancheList = resp.data
           this.searchBranche = false

@@ -107,7 +107,21 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     }
 
     @Override
-    public boolean delete(String id) {
+    @Transactional(rollbackFor = {Exception.class})
+    public boolean delete(Long id) {
+        Project project = getById(id);
+        assert project != null;
+        LambdaQueryWrapper<Application> queryWrapper = new QueryWrapper<Application>().lambda();
+        queryWrapper.eq(Application::getProjectId, id);
+        Integer count = applicationMapper.selectCount(queryWrapper);
+        if (count > 0) {
+            return false;
+        }
+        boolean deleted = project.delete();
+        if (deleted) {
+            removeById(id);
+            return true;
+        }
         return false;
     }
 
