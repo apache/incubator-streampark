@@ -283,20 +283,20 @@ export default {
         const password = form.getFieldValue('password') || null
         const userNull = username === null || username === undefined || username === ''
         const passNull = password === null || password === undefined || password === ''
-        if ( (!userNull && passNull) || (userNull && !passNull) ) {
-          return
+        this.brancheList = []
+        if ( (userNull && passNull) || (!userNull && !passNull) ) {
+          branches({
+            url: url,
+            username: username ,
+            password: password
+          }).then((resp) => {
+            this.brancheList = resp.data
+            this.searchBranche = false
+          }).catch((error) => {
+            this.searchBranche = false
+            this.$message.error(error.message)
+          })
         }
-        branches({
-          url: url,
-          username: username ,
-          password: password
-        }).then((resp) => {
-          this.brancheList = resp.data
-          this.searchBranche = false
-        }).catch((error) => {
-          this.searchBranche = false
-          this.$message.error(error.message)
-        })
       }
     },
 
