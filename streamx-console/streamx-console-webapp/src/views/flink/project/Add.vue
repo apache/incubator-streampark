@@ -98,6 +98,7 @@
         <a-select
           mode="combobox"
           @focus="handleBranches"
+          :loading="searchBranche"
           allow-clear
           v-decorator="['branches',{ rules: [{ required: true } ]}]">
           <a-select-option
@@ -158,6 +159,7 @@ export default {
     return {
       schema: 'ssh',
       brancheList: [],
+      searchBranche: false,
       options: {
         repository: [
           { id: 1, name: 'GitHub/GitLab', default: true },
@@ -256,8 +258,8 @@ export default {
               this.$swal.fire(
                 'Failed',
                 (resp.data === 1?
-                  'not authorized:username and password is required'
-                  : 'authentication error,please check username and password'
+                  'not authorized!\rusername and password is required'
+                  : 'authentication error!\nplease check username and password'
                 ),
                 'error'
               )
@@ -268,6 +270,7 @@ export default {
     },
 
     handleBranches() {
+      this.searchBranche = true
       const form = this.form
       if (form.getFieldValue('url')) {
         branches({
@@ -276,7 +279,9 @@ export default {
           password: form.getFieldValue('password') || null
         }).then((resp) => {
           this.brancheList = resp.data
+          this.searchBranche = false
         }).catch((error) => {
+          this.searchBranche = false
           this.$message.error(error.message)
         })
       }
