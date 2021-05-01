@@ -253,7 +253,7 @@ export default {
                   } else {
                     this.$swal.fire(
                       'Failed',
-                      'Project save failed:)<br>' + resp['message'],
+                      'Project save failed ..>﹏<.. <br><br>' + resp['message'],
                       'error'
                     )
                   }
@@ -265,8 +265,8 @@ export default {
               this.$swal.fire(
                 'Failed',
                 (resp.data === 1?
-                  'not authorized:)<br>username and password is required'
-                  : 'authentication error:)<br>please check username and password'
+                  'not authorized ..>﹏<.. <br><br> username and password is required'
+                  : 'authentication error ..>﹏<.. <br><br> please check username and password'
                 ),
                 'error'
               )
