@@ -166,8 +166,7 @@ public class Project implements Serializable {
                 }
             }
             return branchList;
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignored) {
         }
         return Collections.emptyList();
     }
