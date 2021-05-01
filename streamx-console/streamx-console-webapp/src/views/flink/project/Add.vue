@@ -232,7 +232,7 @@ export default {
               if (this.brancheList.indexOf(values.branches) === -1) {
                 this.$swal.fire(
                   'Failed',
-                  'branch [' + values.branches + '] does not exist\nor authentication error,please check',
+                  'branch [' + values.branches + '] does not exist<br>or authentication error,please check',
                   'error'
                 )
               } else {
@@ -253,7 +253,7 @@ export default {
                   } else {
                     this.$swal.fire(
                       'Failed',
-                      'Project save failed:)' + resp['message'],
+                      'Project save failed:)<br>' + resp['message'],
                       'error'
                     )
                   }
@@ -265,8 +265,8 @@ export default {
               this.$swal.fire(
                 'Failed',
                 (resp.data === 1?
-                  'not authorized!\rusername and password is required'
-                  : 'authentication error!\nplease check username and password'
+                  'not authorized:)<br>username and password is required'
+                  : 'authentication error:)<br>please check username and password'
                 ),
                 'error'
               )
