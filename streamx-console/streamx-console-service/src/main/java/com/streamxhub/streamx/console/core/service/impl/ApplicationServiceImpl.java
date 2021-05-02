@@ -401,11 +401,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 }
             }
         }  else {
-            if (YarnUtils.isContains(appParam.getJobName())) {
-                return AppExistsState.IN_YARN;
-            }
             if (inDB) {
                 return AppExistsState.IN_DB;
+            }
+            if (YarnUtils.isContains(appParam.getJobName())) {
+                return AppExistsState.IN_YARN;
             }
         }
         return AppExistsState.NO;
