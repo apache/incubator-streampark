@@ -373,7 +373,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
-        boolean inYarn = YarnUtils.isContains(appParam.getJobName());
         boolean inDB = this.baseMapper.selectCount(
                 new QueryWrapper<Application>().lambda()
                         .eq(Application::getJobName, appParam.getJobName())) > 0;
@@ -397,12 +396,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     state.equals(FlinkAppState.CANCELED) ||
                     state.equals(FlinkAppState.LOST) ||
                     state.equals(FlinkAppState.KILLED)) {
-                if (inYarn) {
+                if (YarnUtils.isContains(appParam.getJobName())) {
                     return AppExistsState.IN_YARN;
                 }
             }
         }  else {
-            if (inYarn) {
+            if (YarnUtils.isContains(appParam.getJobName())) {
                 return AppExistsState.IN_YARN;
             }
             if (inDB) {
