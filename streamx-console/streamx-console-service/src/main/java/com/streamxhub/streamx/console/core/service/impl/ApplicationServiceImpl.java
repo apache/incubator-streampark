@@ -387,7 +387,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 return AppExistsState.IN_DB;
             }
 
-            FlinkAppState state = FlinkAppState.of(appParam.getState());
+            FlinkAppState state = FlinkAppState.of(app.getState());
             //当前任务已停止的状态
             if (state.equals(FlinkAppState.ADDED) ||
                     state.equals(FlinkAppState.DEPLOYED) ||
