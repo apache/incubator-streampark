@@ -307,13 +307,18 @@
           slot="filterRender"
           slot-scope="text, record, index, column">
           <!--有条件搜索-->
-          <template v-if="searchText && searchedColumn">
+          <template v-if="searchText && searchedColumn === column.dataIndex">
             <span
               :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <template
                 v-if="record.deploy === 0"
-                v-for="(fragment, i) in text.trim().substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                v-for="(fragment, i) in
+                  text
+                    .toString()
+                    .substr(0,25)
+                    .toString()
+                    .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark
                   v-if="fragment.toLowerCase() === searchText.toLowerCase()"
                   :key="i"
@@ -331,7 +336,12 @@
                       {{ text }}
                     </template>
                     <template
-                      v-for="(fragment, i) in text.substr(0,25).toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                      v-for="(fragment, i) in
+                        text
+                          .toString()
+                          .substr(0,25)
+                          .toString()
+                          .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                       <mark
                         v-if="fragment.toLowerCase() === searchText.toLowerCase()"
                         :key="i"
@@ -347,7 +357,10 @@
                 </template>
                 <template
                   v-else
-                  v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                  v-for="(fragment, i) in
+                    text
+                      .toString()
+                      .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                   <mark
                     v-if="fragment.toLowerCase() === searchText.toLowerCase()"
                     :key="i"
@@ -993,12 +1006,11 @@ export default {
           filterIcon: 'filterIcon',
           customRender: 'filterRender'
         },
-        onFilter: (value, record) => {
+        onFilter: (value, record) =>
           record.jobName
             .toString()
             .toLowerCase()
-            .includes(value.toLowerCase())
-        },
+            .includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: visible => {
           if (visible) {
             setTimeout(() => {
@@ -1014,13 +1026,7 @@ export default {
         filters: [
           {text: 'Custom Code', value: 1},
           {text: 'Flink SQL', value: 2}
-        ],
-        filteredValue: filteredInfo.state || null,
-        onFilter: (value, record) => {
-          return record.state === value
-        },
-        sorter: (a, b) => a.state - b.state,
-        sortOrder: sortedInfo.columnKey === 'jobType' && sortedInfo.order
+        ]
       }, {
         title: 'Start Time',
         dataIndex: 'startTime',
@@ -1060,13 +1066,7 @@ export default {
           {text: 'FINISHED', value: 12},
           {text: 'LOST', value: 15},
           {text: 'MAPPING', value: 16}
-        ],
-        filteredValue: filteredInfo.state || null,
-        onFilter: (value, record) => {
-          return record.state === value
-        },
-        sorter: (a, b) => a.state - b.state,
-        sortOrder: sortedInfo.columnKey === 'state' && sortedInfo.order
+        ]
       }, {
         title: 'Deploy Status',
         dataIndex: 'deploy',
@@ -1432,8 +1432,18 @@ export default {
     handleTableChange(pagination, filters, sorter) {
       this.sortedInfo = sorter
       this.paginationInfo = pagination
-      this.queryParams['sortField'] = sorter.field
-      this.queryParams['sortOrder'] = sorter.order
+      if (filters['jobType']) {
+        this.queryParams['jobTypeArray'] = filters['jobType']
+      }
+      if (filters['state']) {
+        this.queryParams['stateArray'] = filters['state']
+      }
+      if (sorter.field) {
+        this.queryParams['sortField'] = sorter.field
+      }
+      if (sorter.order) {
+        this.queryParams['sortOrder'] = sorter.order
+      }
       this.handleFetch(true)
     },
 

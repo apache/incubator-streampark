@@ -156,7 +156,6 @@
 <script>
 
 import { create,branches,gitcheck,exists } from '@api/project'
-import user from "@/store/modules/user";
 
 export default {
   name: 'BaseForm',
