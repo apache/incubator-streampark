@@ -290,6 +290,7 @@
           </a-button>
           <a-button
             size="small"
+            icon="rest"
             style="width: 90px"
             @click="() => handleReset(clearFilters)">
             Reset
@@ -344,7 +345,8 @@
                     ...
                   </a-tooltip>
                 </template>
-                <template v-else>
+                <template
+                  v-else
                   v-for="(fragment, i) in text.trim().toString().split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                   <mark
                     v-if="fragment.toLowerCase() === searchText.toLowerCase()"
