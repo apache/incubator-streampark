@@ -1054,18 +1054,12 @@ export default {
           {text: 'ADDED', value: 0},
           {text: 'DEPLOYING', value: 1},
           {text: 'DEPLOYED', value: 2},
-          {text: 'INITIALIZING', value: 3},
           {text: 'CREATED', value: 4},
           {text: 'STARTING', value: 5},
-          {text: 'RESTARTING', value: 6},
           {text: 'RUNNING', value: 7},
-          {text: 'FAILING', value: 8},
           {text: 'FAILED', value: 9},
-          {text: 'CANCELLING', value: 10},
           {text: 'CANCELED', value: 11},
-          {text: 'FINISHED', value: 12},
-          {text: 'LOST', value: 15},
-          {text: 'MAPPING', value: 16}
+          {text: 'LOST', value: 15}
         ]
       }, {
         title: 'Deploy Status',
