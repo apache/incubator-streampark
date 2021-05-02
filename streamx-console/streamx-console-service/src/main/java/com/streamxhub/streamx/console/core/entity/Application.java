@@ -161,6 +161,9 @@ public class Application implements Serializable {
     private transient Long sqlId;
     private transient String flinkSql;
 
+    private transient Integer[] stateArray;
+    private transient Integer[] jobTypeArray;
+
     private transient Boolean backUp = false;
     private transient Boolean restart = false;
     private transient String userName;

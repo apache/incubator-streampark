@@ -49,6 +49,12 @@
             <if test="application.jobType != null and application.jobType != ''">
                 AND t.job_type = #{application.jobType}
             </if>
+            <if test="application.jobTypeArray != null and application.jobTypeArray.length>0">
+                AND t.job_type IN
+                <foreach item="item" index="index" collection="application.jobTypeArray" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
+            </if>
             <if test="application.executionMode != null and application.executionMode != ''">
                 AND t.execution_mode = #{application.executionMode}
             </if>
@@ -63,6 +69,12 @@
             </if>
             <if test="application.state != null and application.state != ''">
                 AND t.state = #{application.state}
+            </if>
+            <if test="application.stateArray != null and application.stateArray.length>0">
+                AND t.state IN
+                <foreach item="item" index="index" collection="application.stateArray" open="("  close=")" separator=",">
+                    #{item}
+                </foreach>
             </if>
         </where>
     </select>

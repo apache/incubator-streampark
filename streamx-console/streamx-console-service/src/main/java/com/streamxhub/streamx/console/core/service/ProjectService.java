@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.service;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public interface ProjectService extends IService<Project> {
 
     RestResponse create(Project project);
 
-    boolean delete(String id);
+    boolean delete(Long id);
 
     IPage<Project> page(Project project, RestRequest restRequest);
 
@@ -54,5 +55,7 @@ public interface ProjectService extends IService<Project> {
     String getAppConfPath(Long id, String module);
 
     List<Application> getApplications(Project project);
+
+    boolean checkExists(Project project);
 
 }

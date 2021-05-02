@@ -12,7 +12,7 @@
         <a-input
           type="text"
           placeholder="the project name"
-          v-decorator="['name',{ rules: [{ required: true, message: 'Project Name is required'} ]}]" />
+          v-decorator="['name',{ rules: [{ validator: handleCheckName,required: true}]}]" />
       </a-form-item>
 
       <a-form-item
@@ -68,18 +68,8 @@
           :addon-before="schema"
           placeholder="The Repository URL for this project"
           @change="handleSchema"
+          @blur="handleBranches"
           v-decorator="['url',{ rules: [{ required: true, message: 'Repository URL is required'} ]}]" />
-      </a-form-item>
-
-      <a-form-item
-        label="Branches"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="Branches of the this project"
-          default-value="main"
-          v-decorator="['branches',{ rules: [{ required: true } ],initialValue:'main'}]" />
       </a-form-item>
 
       <a-form-item
@@ -89,6 +79,7 @@
         <a-input
           type="text"
           placeholder="UserName for this project"
+          @blur="handleBranches"
           v-decorator="['username']" />
       </a-form-item>
 
@@ -98,8 +89,29 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="password"
+          @blur="handleBranches"
           placeholder="Password for this project"
           v-decorator="['password']" />
+      </a-form-item>
+
+      <a-form-item
+        label="Branches"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          show-search
+          placeholder="Select a branche"
+          option-filter-prop="children"
+          :filter-option="filterOption"
+          allow-clear
+          v-decorator="['branches',{ rules: [{ required: true } ]}]">
+          <a-select-option
+            v-for="(k ,i) in brancheList"
+            :key="i"
+            :value="k">
+            {{ k }}
+          </a-select-option>
+        </a-select>
       </a-form-item>
 
       <a-form-item
@@ -143,13 +155,15 @@
 
 <script>
 
-import { create } from '@api/project'
+import { create,branches,gitcheck,exists } from '@api/project'
 
 export default {
   name: 'BaseForm',
   data () {
     return {
       schema: 'ssh',
+      brancheList: [],
+      searchBranche: false,
       options: {
         repository: [
           { id: 1, name: 'GitHub/GitLab', default: true },
@@ -162,9 +176,7 @@ export default {
       }
     }
   },
-  mounted () {
-    this.select()
-  },
+
   beforeMount () {
     this.form = this.$form.createForm(this)
   },
@@ -185,36 +197,107 @@ export default {
     handleSchema () {
       console.log(this.url)
     },
+
+    handleCheckName(rule, value, callback) {
+      if (value === null || value === undefined || value === '') {
+        callback(new Error('The Project Name is required'))
+      } else {
+        exists({ name: value }).then((resp) => {
+          const flag = resp.data
+          if (flag) {
+            callback(new Error('The Project Name is already exists. Please check'))
+          } else {
+            callback()
+          }
+        })
+      }
+    },
+
     // handler
     handleSubmit: function (e) {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          create({
-            name: values.name,
+          gitcheck({
             url: values.url,
-            repository: values.repository,
-            type: values.type,
             branches: values.branches,
-            username: values.username,
-            password: values.password,
-            pom: values.pom,
-            description: values.description
+            username: values.username || null,
+            password: values.password || null,
           }).then((resp) => {
-            const created = resp.data
-            if (created) {
-              this.$router.push({ path: '/flink/project' })
+            if ( resp.data === 0 ) {
+              if (this.brancheList.length === 0) {
+                this.handleBranches()
+              }
+              if (this.brancheList.indexOf(values.branches) === -1) {
+                this.$swal.fire(
+                  'Failed',
+                  'branch [' + values.branches + '] does not exist<br>or authentication error,please check',
+                  'error'
+                )
+              } else {
+                create({
+                  name: values.name,
+                  url: values.url,
+                  repository: values.repository,
+                  type: values.type,
+                  branches: values.branches,
+                  username: values.username,
+                  password: values.password,
+                  pom: values.pom,
+                  description: values.description
+                }).then((resp) => {
+                  const created = resp.data
+                  if (created) {
+                    this.$router.push({ path: '/flink/project' })
+                  } else {
+                    this.$swal.fire(
+                      'Failed',
+                      'Project save failed ..>﹏<.. <br><br>' + resp['message'],
+                      'error'
+                    )
+                  }
+                }).catch((error) => {
+                  this.$message.error(error.message)
+                })
+              }
             } else {
-              this.$notification.error({
-                message: 'Project save failed',
-                description: resp['message']
-              })
+              this.$swal.fire(
+                'Failed',
+                (resp.data === 1?
+                  'not authorized ..>﹏<.. <br><br> username and password is required'
+                  : 'authentication error ..>﹏<.. <br><br> please check username and password'
+                ),
+                'error'
+              )
             }
-          }).catch((error) => {
-            this.$message.error(error.message)
           })
         }
       })
+    },
+
+    handleBranches() {
+      this.searchBranche = true
+      const form = this.form
+      const url = form.getFieldValue('url')
+      if (url) {
+        const username = form.getFieldValue('username') || null
+        const password = form.getFieldValue('password') || null
+        const userNull = username === null || username === undefined || username === ''
+        const passNull = password === null || password === undefined || password === ''
+        if ( (userNull && passNull) || (!userNull && !passNull) ) {
+          branches({
+            url: url,
+            username: username ,
+            password: password
+          }).then((resp) => {
+            this.brancheList = resp.data
+            this.searchBranche = false
+          }).catch((error) => {
+            this.searchBranche = false
+            this.$message.error(error.message)
+          })
+        }
+      }
     },
 
     handleGoBack () {

@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -373,16 +373,42 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      */
     @Override
     public AppExistsState checkExists(Application appParam) {
-        boolean inYarn = YarnUtils.isContains(appParam.getJobName());
-        if (!inYarn) {
-            LambdaQueryWrapper<Application> queryWrapper = new LambdaQueryWrapper<>();
-            queryWrapper.eq(Application::getJobName, appParam.getJobName());
-            int count = this.baseMapper.selectCount(queryWrapper);
-            if (count == 0) {
+        boolean inDB = this.baseMapper.selectCount(
+                new QueryWrapper<Application>().lambda()
+                        .eq(Application::getJobName, appParam.getJobName())) > 0;
+
+        if (appParam.getId() != null) {
+            Application app = getById(appParam.getId());
+            if (app.getJobName().equals(appParam.getJobName())) {
                 return AppExistsState.NO;
             }
+
+            if (inDB) {
+                return AppExistsState.IN_DB;
+            }
+
+            FlinkAppState state = FlinkAppState.of(app.getState());
+            //当前任务已停止的状态
+            if (state.equals(FlinkAppState.ADDED) ||
+                    state.equals(FlinkAppState.DEPLOYED) ||
+                    state.equals(FlinkAppState.CREATED) ||
+                    state.equals(FlinkAppState.FAILED) ||
+                    state.equals(FlinkAppState.CANCELED) ||
+                    state.equals(FlinkAppState.LOST) ||
+                    state.equals(FlinkAppState.KILLED)) {
+                if (YarnUtils.isContains(appParam.getJobName())) {
+                    return AppExistsState.IN_YARN;
+                }
+            }
+        }  else {
+            if (inDB) {
+                return AppExistsState.IN_DB;
+            }
+            if (YarnUtils.isContains(appParam.getJobName())) {
+                return AppExistsState.IN_YARN;
+            }
         }
-        return inYarn ? AppExistsState.IN_YARN : AppExistsState.IN_DB;
+        return AppExistsState.NO;
     }
 
     @SneakyThrows

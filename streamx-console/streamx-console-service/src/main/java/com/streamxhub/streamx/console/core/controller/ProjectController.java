@@ -20,9 +20,14 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
-import java.util.List;
-import java.util.Map;
-
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.streamx.console.base.controller.BaseController;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
+import com.streamxhub.streamx.console.core.entity.Project;
+import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
+import com.streamxhub.streamx.console.core.service.ProjectService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -30,14 +35,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.extern.slf4j.Slf4j;
-
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.streamx.console.base.controller.BaseController;
-import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.core.entity.Project;
-import com.streamxhub.streamx.console.core.service.ProjectService;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -70,11 +69,29 @@ public class ProjectController extends BaseController {
         return RestResponse.create().data(page);
     }
 
+    @PostMapping("branches")
+    public RestResponse branches(Project project) {
+        List<String> branches = project.getAllBranches();
+        return RestResponse.create().data(branches);
+    }
+
     @PostMapping("delete")
     @RequiresPermissions("project:delete")
-    public RestResponse delete(String id) {
-        boolean result = projectService.delete(id);
-        return RestResponse.create().message(result ? "删除成功" : "删除失败");
+    public RestResponse delete(Long id) {
+        Boolean deleted = projectService.delete(id);
+        return RestResponse.create().data(deleted);
+    }
+
+    @PostMapping("gitcheck")
+    public RestResponse gitCheck(Project project) {
+        GitAuthorizedError error = project.gitCheck();
+        return RestResponse.create().data(error.getType());
+    }
+
+    @PostMapping("exists")
+    public RestResponse exists(Project project) {
+        boolean exists = projectService.checkExists(project);
+        return RestResponse.create().data(exists);
     }
 
     @PostMapping("modules")

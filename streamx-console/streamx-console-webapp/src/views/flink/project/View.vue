@@ -152,13 +152,21 @@
               theme="twoTone"
               two-tone-color="#4a9ff5"
               style="width:30px;" />
-            <a-icon
-              type="delete"
-              v-permit="'project:delete'"
-              theme="twoTone"
-              two-tone-color="#4a9ff5"
-              style="width:30px;" />
+
+            <a-popconfirm
+              title="Are you sure delete this project ?"
+              cancel-text="No"
+              ok-text="Yes"
+              @confirm="handleDelete(item)">
+              <a-icon
+                type="delete"
+                v-permit="'project:delete'"
+                theme="twoTone"
+                two-tone-color="#4a9ff5"
+                style="width:30px;"/>
+            </a-popconfirm>
           </div>
+
         </a-list-item>
       </a-list>
     </a-card>
@@ -182,7 +190,7 @@
   </div>
 </template>
 <script>
-import { build, list } from '@api/project'
+import { build, list,remove } from '@api/project'
 import { check } from '@api/setting'
 import Ellipsis from '@comp/Ellipsis'
 import SockJS from 'sockjs-client'
@@ -279,6 +287,29 @@ export default {
           this.$swal.fire(
             'Failed',
             'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
+            'error'
+          )
+        }
+      })
+    },
+
+    handleDelete(item) {
+      remove({
+        id: item.id
+      }).then((resp) => {
+        if ( resp.data ) {
+          this.$swal.fire({
+            icon: 'success',
+            title: 'delete successful',
+            showConfirmButton: false,
+            timer: 2000
+          }).then((result) => {
+            this.handleFetch(this.queryParams, true)
+          })
+        } else {
+          this.$swal.fire(
+            'Failed',
+            'Please check if any application belongs to this project',
             'error'
           )
         }

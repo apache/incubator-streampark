@@ -65,8 +65,11 @@ object HadoopUtils extends Logger {
           val yarnConf = new YarnConfiguration(HdfsUtils.conf)
           val ids = yarnConf.get("yarn.resourcemanager.ha.rm-ids")
           if (ids == null) {
-            rmHttpAddr = s"http://${yarnConf.get("yarn.resourcemanager.webapp.address")}"
-            require(rmHttpAddr != null,"yarn.resourcemanager.ha.rm-ids and yarn.resourcemanager.webapp.address all null,please check yarn-site.xml")
+            yarnConf.get("yarn.resourcemanager.webapp.address") match {
+              case null =>
+                throw new ExceptionInInitializerError("yarn.resourcemanager.ha.rm-ids and yarn.resourcemanager.webapp.address all null,please check yarn-site.xml")
+              case x => rmHttpAddr = s"http://$x"
+            }
           } else {
             var address = new ArrayBuffer[String](1)
             ids.split(",").foreach(x => {
