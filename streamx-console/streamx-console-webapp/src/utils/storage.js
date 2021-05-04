@@ -1,4 +1,4 @@
-import config from '/config/defaultSettings'
+import config from '@/config/defaultSettings'
 
 const storage = {
   /**

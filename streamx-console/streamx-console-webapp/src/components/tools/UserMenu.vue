@@ -118,7 +118,6 @@
 <script>
 import NoticeIcon from '@/components/NoticeIcon'
 import SvgIcon from '@/components/SvgIcon'
-import darkTheme from '../../../config/dark'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { password } from '@api/user'
@@ -209,7 +208,7 @@ export default {
       alert(this.themeDark)
       this.themeDark = !this.themeDark
       if ( this.themeDark ) {
-        window.less.modifyVars(darkTheme).catch(error => {
+        window.less.modifyVars({}).catch(error => {
           message.error(`Failed to update theme`)
         })
       } else {
