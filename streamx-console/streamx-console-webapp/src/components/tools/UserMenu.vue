@@ -2,20 +2,20 @@
   <div
     class="user-wrapper">
     <div class="content-box">
-      <svg-icon name="theme" @click.native="handleChangeTheme()"/>
+      <a-icon
+        :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
+        type="dashboard"
+        @click.native="handleChangeTheme(false)"/>
       <a
         href="http://www.streamxhub.com/zh/doc/"
         target="_blank">
         <span
           class="action">
           <a-icon
-            style="color:#1890ff"
+            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
             type="question-circle-o" />
         </span>
       </a>
-      <notice-icon
-        style="color:#1890ff"
-        class="action" />
       <a-dropdown>
         <span
           style="margin-top: -10px"
@@ -122,6 +122,7 @@ import SvgIcon from '@/components/SvgIcon'
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { password } from '@api/user'
 import themeUtil from '@/utils/themeUtil'
+import storage from '@/utils/storage'
 
 export default {
   name: 'UserMenu',
@@ -148,6 +149,10 @@ export default {
 
   beforeMount() {
     this.formPassword = this.$form.createForm(this)
+  },
+
+  mounted() {
+    this.handleChangeTheme(true)
   },
 
   methods: {
@@ -206,10 +211,21 @@ export default {
     },
 
     handleChangeTheme() {
-      this.themeDark = !this.themeDark
-      const theme = this.themeDark ? 'night': 'light'
+      let theme
+      if(arguments[0]) {
+        theme = storage.get('THEME') || 'dark'
+        this.themeDark = theme === 'night'
+      } else {
+        this.themeDark = !this.themeDark
+        theme = this.themeDark ? 'night': 'dark'
+        storage.set('THEME',theme)
+      }
       const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
       themeUtil.changeThemeColor(null, theme).then(closeMessage)
+      //i have no idea...
+      $('.ant-layout-header').css({
+        'background': this.themeDark ? '#141414':'unset'
+      })
     },
 
     handleConfirmBlur(e) {
