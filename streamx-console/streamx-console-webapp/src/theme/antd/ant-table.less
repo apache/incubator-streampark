@@ -1,0 +1,22 @@
+
+.ant-table-thead{
+  tr{
+    th{
+      &.ant-table-column-has-actions{
+        &.ant-table-column-has-sorters:hover{
+          background-color: @background-color-base;
+        }
+        &.ant-table-column-has-filters{
+          &:hover{
+            .anticon-filter, .anticon-filter:hover{
+              background-color: @background-color-base;
+            }
+          }
+          .anticon-filter.ant-table-filter-open{
+            background-color: @background-color-base;
+          }
+        }
+      }
+    }
+  }
+}

@@ -121,6 +121,7 @@ import SvgIcon from '@/components/SvgIcon'
 
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { password } from '@api/user'
+import themeUtil from '@/utils/themeUtil'
 
 export default {
   name: 'UserMenu',
@@ -205,17 +206,10 @@ export default {
     },
 
     handleChangeTheme() {
-      alert(this.themeDark)
       this.themeDark = !this.themeDark
-      if ( this.themeDark ) {
-        window.less.modifyVars({}).catch(error => {
-          message.error(`Failed to update theme`)
-        })
-      } else {
-        window.less.modifyVars({}).catch(error => {
-          message.error(`Failed to update theme`)
-        })
-      }
+      const theme = this.themeDark ? 'night': 'light'
+      const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
+      themeUtil.changeThemeColor(null, theme).then(closeMessage)
     },
 
     handleConfirmBlur(e) {
