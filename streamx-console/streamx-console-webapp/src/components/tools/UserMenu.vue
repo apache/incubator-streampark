@@ -1,8 +1,8 @@
 <template>
   <div
     class="user-wrapper">
-    <div
-      class="content-box">
+    <div class="content-box">
+      <svg-icon name="theme" @click.native="handleChangeTheme()"/>
       <a
         href="http://www.streamxhub.com/zh/doc/"
         target="_blank">
@@ -117,13 +117,17 @@
 
 <script>
 import NoticeIcon from '@/components/NoticeIcon'
+import SvgIcon from '@/components/SvgIcon'
+import darkTheme from '../../../config/dark'
+
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { password } from '@api/user'
 
 export default {
   name: 'UserMenu',
   components: {
-    NoticeIcon
+    NoticeIcon,
+    SvgIcon
   },
 
   data() {
@@ -131,6 +135,7 @@ export default {
       passwordVisible: false,
       formPassword: null,
       confirmDirty: false,
+      themeDark: false
     }
   },
 
@@ -200,6 +205,20 @@ export default {
         }, 1000)
     },
 
+    handleChangeTheme() {
+      alert(this.themeDark)
+      this.themeDark = !this.themeDark
+      if ( this.themeDark ) {
+        window.less.modifyVars(darkTheme).catch(error => {
+          message.error(`Failed to update theme`)
+        })
+      } else {
+        window.less.modifyVars({}).catch(error => {
+          message.error(`Failed to update theme`)
+        })
+      }
+    },
+
     handleConfirmBlur(e) {
       const value = e.target.value
       this.confirmDirty = this.confirmDirty || !!value
@@ -225,3 +244,4 @@ export default {
   }
 }
 </script>
+<style scoped lang="less"></style>
