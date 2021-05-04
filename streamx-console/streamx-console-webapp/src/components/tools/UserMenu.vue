@@ -2,10 +2,15 @@
   <div
     class="user-wrapper">
     <div class="content-box">
-      <a-icon
-        :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
-        type="dashboard"
-        @click.native="handleChangeTheme(false)"/>
+      <a>
+        <span
+          class="action">
+          <a-icon
+            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
+            type="dashboard"
+            @click.native="handleChangeTheme(false)"/>
+        </span>
+      </a>
       <a
         href="http://www.streamxhub.com/zh/doc/"
         target="_blank">
