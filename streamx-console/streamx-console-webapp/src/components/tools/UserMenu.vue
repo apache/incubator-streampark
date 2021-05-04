@@ -1,21 +1,26 @@
 <template>
   <div
     class="user-wrapper">
-    <div
-      class="content-box">
+    <div class="content-box">
+      <a>
+        <span
+          class="action">
+          <a-icon
+            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
+            type="dashboard"
+            @click.native="handleChangeTheme(false)"/>
+        </span>
+      </a>
       <a
         href="http://www.streamxhub.com/zh/doc/"
         target="_blank">
         <span
           class="action">
           <a-icon
-            style="color:#1890ff"
+            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
             type="question-circle-o" />
         </span>
       </a>
-      <notice-icon
-        style="color:#1890ff"
-        class="action" />
       <a-dropdown>
         <span
           style="margin-top: -10px"
@@ -117,13 +122,18 @@
 
 <script>
 import NoticeIcon from '@/components/NoticeIcon'
+import SvgIcon from '@/components/SvgIcon'
+
 import { mapState, mapGetters, mapActions } from 'vuex'
 import { password } from '@api/user'
+import themeUtil from '@/utils/themeUtil'
+import storage from '@/utils/storage'
 
 export default {
   name: 'UserMenu',
   components: {
-    NoticeIcon
+    NoticeIcon,
+    SvgIcon
   },
 
   data() {
@@ -131,6 +141,7 @@ export default {
       passwordVisible: false,
       formPassword: null,
       confirmDirty: false,
+      themeDark: false
     }
   },
 
@@ -143,6 +154,10 @@ export default {
 
   beforeMount() {
     this.formPassword = this.$form.createForm(this)
+  },
+
+  mounted() {
+    this.handleChangeTheme(true)
   },
 
   methods: {
@@ -200,6 +215,24 @@ export default {
         }, 1000)
     },
 
+    handleChangeTheme() {
+      let theme
+      if(arguments[0]) {
+        theme = storage.get('THEME') || 'dark'
+        this.themeDark = theme === 'night'
+      } else {
+        this.themeDark = !this.themeDark
+        theme = this.themeDark ? 'night': 'dark'
+        storage.set('THEME',theme)
+      }
+      const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
+      themeUtil.changeThemeColor(null, theme).then(closeMessage)
+      //i have no idea...
+      $('.ant-layout-header').css({
+        'background': this.themeDark ? '#141414':'unset'
+      })
+    },
+
     handleConfirmBlur(e) {
       const value = e.target.value
       this.confirmDirty = this.confirmDirty || !!value
@@ -225,3 +258,4 @@ export default {
   }
 }
 </script>
+<style scoped lang="less"></style>

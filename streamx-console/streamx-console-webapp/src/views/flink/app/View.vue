@@ -3,13 +3,8 @@
     <a-row :gutter="24" class="dashboard">
       <template v-if="dashBigScreen">
         <a-col class="gutter-row" :span="6">
-          <a-skeleton
-            v-if="dashLoading"
-            class="gutter-box"
-            :loading="dashLoading"
-            active/>
-          <div class="gutter-box" v-if="!dashLoading">
-            <a-card :bordered="false" class="dash-statistic">
+          <div class="gutter-box">
+            <a-card :loading="dashLoading" :bordered="false" class="dash-statistic">
               <a-statistic
                 title="Available Task Slots"
                 :value="metrics.availableSlot"
@@ -31,13 +26,8 @@
           </div>
         </a-col>
         <a-col class="gutter-row" :span="6">
-          <a-skeleton
-            v-if="dashLoading"
-            class="gutter-box"
-            :loading="dashLoading"
-            active/>
-          <div class="gutter-box" v-if="!dashLoading">
-            <a-card :bordered="false" class="dash-statistic">
+          <div class="gutter-box">
+            <a-card :loading="dashLoading" :bordered="false" class="dash-statistic">
               <a-statistic
                 title="Running Jobs"
                 :value="metrics['runningJob']"
@@ -58,15 +48,8 @@
           </div>
         </a-col>
         <a-col class="gutter-row" :span="6">
-          <a-skeleton
-            v-if="dashLoading"
-            class="gutter-box"
-            :loading="dashLoading"
-            active/>
-          <div
-            class="gutter-box"
-            v-if="!dashLoading">
-            <a-card :bordered="false" class="dash-statistic">
+          <div class="gutter-box">
+            <a-card :loading="dashLoading" :bordered="false" class="dash-statistic">
               <a-statistic
                 title="JobManager Memory"
                 :value="metrics.jmMemory"
@@ -86,15 +69,9 @@
         <a-col
           class="gutter-row"
           :span="6">
-          <a-skeleton
-            v-if="dashLoading"
-            class="gutter-box"
-            :loading="dashLoading"
-            active/>
-          <div
-            class="gutter-box"
-            v-if="!dashLoading">
+          <div class="gutter-box">
             <a-card
+              :loading="dashLoading"
               :bordered="false"
               class="dash-statistic">
               <a-statistic

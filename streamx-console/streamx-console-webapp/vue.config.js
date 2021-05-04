@@ -23,34 +23,49 @@ const path = require('path')
 const webpack = require('webpack')
 const MonacoWebpackPlugin = require('monaco-editor-webpack-plugin')
 
+const ThemeColorReplacer = require('webpack-theme-color-replacer')
+const {getThemeColors, modifyVars} = require('./src/utils/themeUtil')
+const {resolveCss} = require('./src/utils/theme-color-replacer-extend')
+const CompressionWebpackPlugin = require('compression-webpack-plugin')
+const productionGzipExtensions = ['js', 'css']
+const isProd = process.env.NODE_ENV === 'production'
+
+
 function resolve (dir) {
   return path.join(__dirname, dir)
 }
 
 // vue.config.js
 module.exports = {
-  publicPath: '/',
-  productionSourceMap: false,
-  /*
-    Vue-cli3:
-    Crashed when using Webpack `import()` #2463
-    https://github.com/vuejs/vue-cli/issues/2463
 
-   */
-  /*
-  pages: {
-    index: {
-      entry: 'src/main.js',
-      chunks: ['chunk-vendors', 'chunk-common', 'index']
+  devServer: {
+    // development server port 8000
+    port: 10000,
+    proxy: {
+      '/api/!*': {
+        target: 'http://test-hadoop-1:10000',
+        ws: false,
+        changeOrigin: true,
+        pathRewrite: { '^/api': '' }
+      }
     }
   },
-  */
+
+  pluginOptions: {
+    'style-resources-loader': {
+      preProcessor: 'less',
+      patterns: [path.resolve(__dirname, './src/theme/theme.less')],
+    }
+  },
+
   configureWebpack: {
-    resolve: {
+
+    resolve : {
       alias: {
         'jQuery':	path.join(__dirname, 'node_modules', 'jquery')
       }
     },
+
     plugins: [
       // Ignore all locale files of moment.js
       new webpack.IgnorePlugin(/^\.\/locale$/, /moment$/),
@@ -59,7 +74,13 @@ module.exports = {
         jQuery: 'jquery',
         'windows.jQuery': 'jquery',
       }),
-      new MonacoWebpackPlugin()
+      new MonacoWebpackPlugin(),
+      new ThemeColorReplacer({
+        fileName: 'css/theme-colors-[contenthash:8].css',
+        matchColors: getThemeColors(),
+        injectCss: true,
+        resolveCss
+      })
     ]
   },
 
@@ -88,52 +109,31 @@ module.exports = {
       .options({
         name: 'assets/[name].[hash:8].[ext]'
       })
-    /* svgRule.oneOf('inline')
-      .resourceQuery(/inline/)
-      .use('vue-svg-loader')
-      .loader('vue-svg-loader')
-      .end()
-      .end()
-      .oneOf('external')
-      .use('file-loader')
-      .loader('file-loader')
-      .options({
-        name: 'assets/[name].[hash:8].[ext]'
-      })
-    */
+
+    // 生产环境下关闭css压缩的 colormin 项，因为此项优化与主题色替换功能冲突
+    if (isProd) {
+      config.plugin('optimize-css')
+        .tap(args => {
+          args[0].cssnanoOptions.preset[1].colormin = false
+          return args
+        })
+    }
   },
 
   css: {
     loaderOptions: {
       less: {
-        modifyVars: {
-          /* less 变量覆盖，用于自定义 ant design 主题 */
-
-          /*
-          'primary-color': '#F5222D',
-          'link-color': '#F5222D',
-          */
-          'border-radius-base': '2px'
-        },
-        javascriptEnabled: true
-      }
-    }
-  },
-
-  devServer: {
-    // development server port 8000
-    port: 10000,
-    proxy: {
-      '/api/!*': {
-        target: 'http://test-hadoop-1:10000',
-        ws: false,
-        changeOrigin: true,
-        pathRewrite: { '^/api': '' }
+        lessOptions: {
+          modifyVars: modifyVars(),
+          javascriptEnabled: true
+        }
       }
     }
   },
 
   lintOnSave: undefined,
   // babel-loader no-ignore node_modules/*
-  transpileDependencies: []
+  transpileDependencies: [],
+  publicPath: '/',
+  productionSourceMap: false
 }
