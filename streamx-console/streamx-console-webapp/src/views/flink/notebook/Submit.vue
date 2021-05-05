@@ -87,6 +87,7 @@ import * as monaco from 'monaco-editor'
 import {submit} from '@api/notebook'
 import 'mavon-editor/dist/css/index.css'
 import {get} from '@api/tutorial'
+import storage from '@/utils/storage'
 
 export default {
   name: 'Submit',
@@ -161,7 +162,7 @@ export default {
   },
   mounted() {
     const option = {
-      theme: 'vs', //vs, hc-black, or vs-dark
+      theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
       language: 'java',
       value: this.woldCount,
       selectOnLineNumbers: false,

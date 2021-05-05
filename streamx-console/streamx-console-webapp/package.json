@@ -73,7 +73,9 @@
     "vue-particles": "^1.0.9",
     "vue-svg-icon-loader": "^2.1.1",
     "vue-template-compiler": "^2.5.22",
-    "webpack-theme-color-replacer": "1.3.18"
+    "webpack-theme-color-replacer": "1.3.18",
+    "style-resources-loader": "^1.3.2",
+    "vue-cli-plugin-style-resources-loader": "^0.1.4"
   },
   "__npminstall_done": false
 }

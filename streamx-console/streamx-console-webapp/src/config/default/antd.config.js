@@ -15,6 +15,7 @@ const ANTD = {
       menuColors: ['#151515', '#1f1f1f', '#1e1e1e'],
     }
   },
+
   theme: {
     dark: {
       'layout-body-background': '#f0f2f5',
@@ -26,8 +27,9 @@ const ANTD = {
       'text-color-secondary': 'rgba(0, 0, 0, 0.45)',
       'shadow-color': 'rgba(0, 0, 0, 0.15)',
       'border-color-split': '#f0f0f0',
+      'border-color-base': '#d9d9d9',
       'background-color-light': '#fafafa',
-      'background-color-base': '#f5f5f5',
+      'background-color-base': '#e6f7ff',
       'table-selected-row-bg': '#fafafa',
       'table-expanded-row-bg': '#fbfbfb',
       'checkbox-check-color': '#fff',
@@ -47,8 +49,9 @@ const ANTD = {
       'text-color-secondary': 'rgba(0, 0, 0, 0.45)',
       'shadow-color': 'rgba(0, 0, 0, 0.15)',
       'border-color-split': '#f0f0f0',
+      'border-color-base': '#d9d9d9',
       'background-color-light': '#fafafa',
-      'background-color-base': '#f5f5f5',
+      'background-color-base': '#e6f7ff',
       'table-selected-row-bg': '#fafafa',
       'table-expanded-row-bg': '#fbfbfb',
       'checkbox-check-color': '#fff',
@@ -68,11 +71,8 @@ const ANTD = {
       'text-color-secondary': 'rgba(255, 255, 255, 0.45)',
       'shadow-color': 'rgba(255, 255, 255, 0.15)',
       'border-color-split': '#303030',
-      'border-color-base': '#303030',
-      'input-border-color': '#303030',
-      'border-color':'#303030',
+      'border-color-base': '#494949',
       'background-color-light': '#ffffff0a',
-      'input-number-handler-border-color': '#303030',
       'background-color-base': '#2a2a2a',
       'table-selected-row-bg': '#ffffff0a',
       'table-expanded-row-bg': '#ffffff0b',
