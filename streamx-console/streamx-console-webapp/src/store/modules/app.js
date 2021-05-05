@@ -32,10 +32,6 @@ const app = {
       state.sidebar = type
       storage.set(SIDEBAR_TYPE, type)
     },
-    CLOSE_SIDEBAR: (state) => {
-      storage.set(SIDEBAR_TYPE, true)
-      state.sidebar = false
-    },
     TOGGLE_DEVICE: (state, device) => {
       state.device = device
     },
@@ -80,38 +76,11 @@ const app = {
     setSidebar ({ commit }, type) {
       commit('SET_SIDEBAR_TYPE', type)
     },
-    CloseSidebar ({ commit }) {
-      commit('CLOSE_SIDEBAR')
-    },
     ToggleDevice ({ commit }, device) {
       commit('TOGGLE_DEVICE', device)
     },
-    ToggleTheme ({ commit }, theme) {
-      commit('TOGGLE_THEME', theme)
-    },
-    ToggleLayoutMode ({ commit }, mode) {
-      commit('TOGGLE_LAYOUT_MODE', mode)
-    },
-    ToggleFixedHeader ({ commit }, fixedHeader) {
-      if (!fixedHeader) {
-        commit('TOGGLE_FIXED_HEADER_HIDDEN', false)
-      }
-      commit('TOGGLE_FIXED_HEADER', fixedHeader)
-    },
-    ToggleFixSiderbar ({ commit }, fixSiderbar) {
-      commit('TOGGLE_FIXED_SIDERBAR', fixSiderbar)
-    },
-    ToggleFixedHeaderHidden ({ commit }, show) {
-      commit('TOGGLE_FIXED_HEADER_HIDDEN', show)
-    },
-    ToggleContentWidth ({ commit }, type) {
-      commit('TOGGLE_CONTENT_WIDTH', type)
-    },
     ToggleColor ({ commit }, color) {
       commit('TOGGLE_COLOR', color)
-    },
-    ToggleWeak ({ commit }, weakFlag) {
-      commit('TOGGLE_WEAK', weakFlag)
     },
     ToggleMultiTab ({ commit }, bool) {
       commit('TOGGLE_MULTI_TAB', bool)
