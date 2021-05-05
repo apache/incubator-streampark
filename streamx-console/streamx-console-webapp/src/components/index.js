@@ -33,15 +33,11 @@ import IconSelector from '@/components/IconSelector'
 import ExceptionPage from '@/components/Exception'
 
 export {
-  AvatarList,
   Trend,
-  CountDown,
   Ellipsis,
   FooterToolbar,
   NumberInfo,
   DescriptionList,
-  // 兼容写法，请勿继续使用
-  DescriptionList as DetailList,
   Tree,
   STable,
   MultiTab,

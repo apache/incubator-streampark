@@ -29,6 +29,24 @@
   .ant-table-tbody > tr > td > .anticon {
     padding: 5px
   }
+
+  .ant-table-thead > tr > th.ant-table-column-has-actions.ant-table-column-has-filters:hover .anticon-filter:hover,
+  .ant-table-thead > tr > th.ant-table-column-has-actions.ant-table-column-has-filters:hover .ant-table-filter-icon:hover {
+    background: @background-color-base;
+  }
+
+  .ant-table-thead > tr > th.ant-table-column-has-actions.ant-table-column-has-filters .anticon-filter.ant-table-filter-open,
+  .ant-table-thead > tr > th.ant-table-column-has-actions.ant-table-column-has-filters .ant-table-filter-icon.ant-table-filter-open {
+    background: @background-color-base;
+  }
+
+  .ant-table-tbody> tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td,
+  .ant-table-tbody> tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td,
+  .ant-table-thead> tr.ant-table-row-hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td,
+  .ant-table-thead> tr:hover:not(.ant-table-expanded-row):not(.ant-table-row-selected) > td {
+    background-color: @background-color-base;
+  }
+
 }
 
 // monaco-aria-container有bug. 和这个类似(https://github.com/openshift/console/pull/2333)

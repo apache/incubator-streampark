@@ -71,6 +71,7 @@
 
 <script>
 import monaco from './Monaco.yaml'
+import storage from '@/utils/storage'
 
 export default {
   name: 'Mergely',
@@ -89,36 +90,6 @@ export default {
       compareMode: false,
       title: 'edit configuration',
       editor: null,
-      option: {
-        theme: 'vs', //vs, hc-black, or vs-dark
-        language: 'yaml',
-        selectOnLineNumbers: false,
-        foldingStrategy: 'indentation', // 代码分小段折叠
-        overviewRulerBorder: false, // 不要滚动条边框
-        autoClosingBrackets: true,
-        tabSize: 2, // tab 缩进长度
-        readOnly: false,
-        inherit: true,
-        scrollBeyondLastLine: false,
-        lineNumbersMinChars: 5,
-        lineHeight: 24,
-        automaticLayout: true,
-        cursorBlinking: 'line',
-        cursorStyle: 'line',
-        cursorWidth: 3,
-        renderFinalNewline: true,
-        renderLineHighlight: 'all',
-        quickSuggestionsDelay: 100,  //代码提示延时
-        scrollbar: {
-          useShadows: false,
-          vertical: 'visible',
-          horizontal: 'visible',
-          horizontalSliderSize: 5,
-          verticalSliderSize: 5,
-          horizontalScrollbarSize: 15,
-          verticalScrollbarSize: 15
-        }
-      },
       changed: false,
       originalValue: null,
       targetValue: null,
@@ -128,6 +99,38 @@ export default {
   },
 
   methods: {
+    getOption() {
+       return {
+          theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+          language: 'yaml',
+          selectOnLineNumbers: false,
+          foldingStrategy: 'indentation', // 代码分小段折叠
+          overviewRulerBorder: false, // 不要滚动条边框
+          autoClosingBrackets: true,
+          tabSize: 2, // tab 缩进长度
+          readOnly: false,
+          inherit: true,
+          scrollBeyondLastLine: false,
+          lineNumbersMinChars: 5,
+          lineHeight: 24,
+          automaticLayout: true,
+          cursorBlinking: 'line',
+          cursorStyle: 'line',
+          cursorWidth: 3,
+          renderFinalNewline: true,
+          renderLineHighlight: 'all',
+          quickSuggestionsDelay: 100,  //代码提示延时
+          scrollbar: {
+            useShadows: false,
+            vertical: 'visible',
+            horizontal: 'visible',
+            horizontalSliderSize: 5,
+            verticalSliderSize: 5,
+            horizontalScrollbarSize: 15,
+            verticalScrollbarSize: 15
+          }
+        }
+    },
 
     handleNext() {
       this.visibleDiff = true
@@ -145,7 +148,7 @@ export default {
       }
       this.$nextTick(() => {
         if (this.editor == null) {
-          this.editor = monaco.editor.create(document.querySelector('#monaco_config'), this.option)
+          this.editor = monaco.editor.create(document.querySelector('#monaco_config'), this.getOption())
           this.editor.onDidChangeModelContent((event) => {
             // 第一次
             if (this.targetValue) {
@@ -180,7 +183,7 @@ export default {
         this.handleHeight(elem, 100)
         const originalModel = monaco.editor.createModel(original, 'yaml')
         const modifiedModel = monaco.editor.createModel(modified, 'yaml')
-        const diffEditor = monaco.editor.createDiffEditor(elem, this.option)
+        const diffEditor = monaco.editor.createDiffEditor(elem, this.getOption())
         diffEditor.setModel({
           original: originalModel,
           modified: modifiedModel

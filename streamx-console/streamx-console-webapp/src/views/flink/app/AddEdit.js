@@ -23,41 +23,43 @@ import { verify } from '@/api/flinksql'
 import { format } from 'sql-formatter'
 import storage from '@/utils/storage'
 
-const globalOption = {
-  theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
-  language: 'sql',
-  selectOnLineNumbers: false,
-  foldingStrategy: 'indentation', // 代码分小段折叠
-  overviewRulerBorder: false, // 不要滚动条边框
-  autoClosingBrackets: true,
-  tabSize: 2, // tab 缩进长度
-  readOnly: false,
-  inherit: true,
-  scrollBeyondLastLine: false,
-  lineNumbersMinChars: 5,
-  lineHeight: 24,
-  automaticLayout: true,
-  cursorBlinking: 'line',
-  cursorStyle:'line',
-  cursorWidth: 3,
-  renderFinalNewline: true,
-  renderLineHighlight: 'all',
-  quickSuggestionsDelay: 100,  //代码提示延时
-  scrollbar: {
-    useShadows: false,
-    vertical: 'visible',
-    horizontal: 'visible',
-    horizontalSliderSize: 5,
-    verticalSliderSize: 5,
-    horizontalScrollbarSize: 15,
-    verticalScrollbarSize: 15
+export function globalOption() {
+  return {
+    theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+    language: 'sql',
+    selectOnLineNumbers: false,
+    foldingStrategy: 'indentation', // 代码分小段折叠
+    overviewRulerBorder: false, // 不要滚动条边框
+    autoClosingBrackets: true,
+    tabSize: 2, // tab 缩进长度
+    readOnly: false,
+    inherit: true,
+    scrollBeyondLastLine: false,
+    lineNumbersMinChars: 5,
+    lineHeight: 24,
+    automaticLayout: true,
+    cursorBlinking: 'line',
+    cursorStyle:'line',
+    cursorWidth: 3,
+    renderFinalNewline: true,
+    renderLineHighlight: 'all',
+    quickSuggestionsDelay: 100,  //代码提示延时
+    scrollbar: {
+      useShadows: false,
+      vertical: 'visible',
+      horizontal: 'visible',
+      horizontalSliderSize: 5,
+      verticalSliderSize: 5,
+      horizontalScrollbarSize: 15,
+      verticalScrollbarSize: 15
+    }
   }
 }
 
 export function initEditor(vue) {
   const controller = vue.controller
   controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
-  const option = Object.assign({},globalOption)
+  const option = Object.assign({},globalOption())
   option.value = controller.flinkSql.value
   option.minimap = { enabled: false }
   controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
@@ -66,7 +68,6 @@ export function initEditor(vue) {
     const bigScreen = document.querySelector('.big-screen')
     const editorEl = document.querySelector('#flink-sql>.monaco-editor')
     editorEl.appendChild(formatSql)
-    console.table(formatSql)
     editorEl.appendChild(bigScreen)
   })
 
@@ -77,7 +78,7 @@ export function initEditor(vue) {
   })
 
   //pom
-  const pomOption = Object.assign({},globalOption)
+  const pomOption = Object.assign({},globalOption())
   pomOption.language = 'xml'
   pomOption.value = controller.pom.defaultValue
   pomOption.minimap = { enabled: false }
@@ -169,7 +170,7 @@ export function syntaxError(vue) {
 export function bigScreenOpen(vue) {
   const controller = vue.controller
   controller.visiable.bigScreen = true
-  const option = Object.assign({},globalOption)
+  const option = Object.assign({},globalOption())
   vue.$nextTick(() => {
     option.value = controller.flinkSql.value
     option.minimap = { enabled: true }

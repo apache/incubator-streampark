@@ -15,6 +15,13 @@ body {
   }
 }
 
+.ant-menu-dark .ant-menu-item-selected {
+  .anticon, span {
+    color: unset !important;
+  }
+}
+
+
 .layout.ant-layout {
   height: auto;
   overflow-x: hidden;
@@ -586,7 +593,7 @@ body {
 
 /*定义滑块 内阴影+圆角*/
 ::-webkit-scrollbar-thumb {
-  background-color: #e7e7e7  /*滚动条的背景颜色*/
+  background-color: @background-color-base  /*滚动条的背景颜色*/
 }
 
 .ant-radio-button-wrapper:first-child {
@@ -598,7 +605,7 @@ body {
 }
 
 .margin-view-overlays {
-  border-right: 1px solid rgba(222, 222, 222, .8);
+  border-right: 1px solid @border-color-base;
 }
 
 .monaco-editor .margin-view-overlays .current-line-margin,.current-line,.current-line-both {
