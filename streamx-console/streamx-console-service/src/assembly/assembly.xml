@@ -11,7 +11,7 @@
             <excludes>
                 <exclude>com.streamxhub.streamx:streamx-jvm-profiler</exclude>
                 <exclude>com.streamxhub.streamx:streamx-flink-sqlclient</exclude>
-                <exclude>jakarta.servlet:jakarta.servlet-api</exclude>
+                <exclude>javax.servlet:servlet-api</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
