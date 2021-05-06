@@ -74,7 +74,9 @@ export function initEditor(vue) {
   //输入事件触发...
   controller.editor.flinkSql.onDidChangeModelContent(() => {
     controller.flinkSql.value = controller.editor.flinkSql.getValue()
-    verifySQL(vue)
+    if(sqlNotEmpty(vue)) {
+      verifySQL(vue)
+    }
   })
 
   //pom
@@ -130,7 +132,6 @@ export function verifySQL(vue) {
   }).catch((error) => {
     //vue.$message.error(error.message)
   })
-
 }
 
 export function syntaxError(vue) {
@@ -182,13 +183,14 @@ export function bigScreenOpen(vue) {
     controller.editor.bigScreen = monaco.editor.create(elem, option)
     controller.editor.bigScreen.onDidChangeModelContent((event) => {
       const value = controller.editor.bigScreen.getValue()
-      if (value != '') {
+      if (value.trim() !== '') {
         controller.flinkSql.value = value
         controller.editor.flinkSql.getModel().setValue(value)
         verifySQL(vue)
       }
     })
-    if (controller.flinkSql.value != null && controller.flinkSql.value.trim() != '') {
+
+    if(sqlNotEmpty(vue)) {
       verifySQL(vue)
     }
   })
@@ -204,22 +206,30 @@ export function formatSql(vue) {
   }
 }
 
+export function sqlNotEmpty(vue) {
+  return vue.controller.flinkSql.value != null && vue.controller.flinkSql.value.trim() !== ''
+}
+
 export function bigScreenOk(vue,callback) {
   const controller = vue.controller
-  verifySQL(vue, (success) => {
-    if (success) {
-      //销毁
-      controller.editor.bigScreen.dispose()
-      controller.visiable.bigScreen = false
-      if (callback) {
-        callback()
+  if (sqlNotEmpty(vue)) {
+    verifySQL(vue, (success) => {
+      if (success) {
+        //销毁
+        controller.editor.bigScreen.dispose()
+        controller.visiable.bigScreen = false
+        if (callback) {
+          callback()
+        }
       }
-    }
-  })
+    })
+  }
 }
 
 export function bigScreenClose(vue) {
-  verifySQL(vue)
+  if (sqlNotEmpty(vue)) {
+    verifySQL(vue)
+  }
 }
 
 export function applyPom(vue) {

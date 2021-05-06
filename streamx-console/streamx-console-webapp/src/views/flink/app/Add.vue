@@ -1228,11 +1228,16 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (this.jobType === 'sql') {
-          verifySQL(this,(success) => {
-            if (!success) {
-              return
-            }
-          })
+          if (this.controller.flinkSql.value == null || this.controller.flinkSql.value.trim() === '') {
+            this.controller.flinkSql.success = true
+            this.controller.flinkSql.errorMsg = null
+          } else {
+            verifySQL(this,(success) => {
+              if (!success) {
+                return
+              }
+            })
+          }
         }
         if (!err) {
           if (!this.submitting) {
