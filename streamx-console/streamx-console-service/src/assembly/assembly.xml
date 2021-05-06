@@ -13,6 +13,7 @@
                 <exclude>com.streamxhub.streamx:streamx-flink-sqlclient</exclude>
                 <exclude>javax.servlet:servlet-api</exclude>
                 <exclude>jakarta.servlet:jakarta.servlet-api</exclude>
+                <exclude>*:guice-servlet</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
