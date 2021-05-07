@@ -227,10 +227,6 @@ export default {
         const closeMessage = this.$message.loading(`您选择了主题模式 ${_theme}, 正在切换...`)
         themeUtil.changeThemeColor(null, _theme).then(closeMessage)
       }
-      //i have no idea...
-      $('.ant-layout-header').css({
-        'background': this.themeDark ? '#141414':'unset'
-      })
     },
 
     handleConfirmBlur(e) {
