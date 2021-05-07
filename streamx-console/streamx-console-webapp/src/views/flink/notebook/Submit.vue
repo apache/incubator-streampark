@@ -8,7 +8,7 @@
     <a-alert
       show-icon
       message="this is Experimental Features,and only supported ExecutionEnvironment/StreamExecutionEnvironment "
-      type="warning"/><br>
+      type="info"/><br>
     <a-row
       :gutter="24"
       type="flex"
