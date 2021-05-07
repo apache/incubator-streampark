@@ -219,14 +219,15 @@ export default {
       let theme
       if(arguments[0]) {
         theme = storage.get('THEME') || 'dark'
-        this.themeDark = theme === 'night'
+        this.themeDark = theme === 'dark'
+        themeUtil.changeThemeColor(null, theme)
       } else {
         this.themeDark = !this.themeDark
-        theme = this.themeDark ? 'night': 'dark'
+        theme = this.themeDark ? 'dark': 'light'
         storage.set('THEME',theme)
+        const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
+        themeUtil.changeThemeColor(null, theme).then(closeMessage)
       }
-      const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
-      themeUtil.changeThemeColor(null, theme).then(closeMessage)
       //i have no idea...
       $('.ant-layout-header').css({
         'background': this.themeDark ? '#141414':'unset'

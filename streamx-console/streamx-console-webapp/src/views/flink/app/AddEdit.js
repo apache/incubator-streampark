@@ -22,9 +22,9 @@ import monaco from '@/views/flink/app/Monaco.xml'
 import { verify } from '@/api/flinksql'
 import { format } from 'sql-formatter'
 
-export function globalOption() {
+export function globalOption(vue) {
   return {
-    theme: this.ideTheme(),
+    theme: vue.ideTheme(),
     language: 'sql',
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // 代码分小段折叠
@@ -58,7 +58,7 @@ export function globalOption() {
 export function initEditor(vue) {
   const controller = vue.controller
   controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
-  const option = Object.assign({},globalOption())
+  const option = Object.assign({},globalOption(vue))
   option.value = controller.flinkSql.value
   option.minimap = { enabled: false }
   controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
@@ -79,7 +79,7 @@ export function initEditor(vue) {
   })
 
   //pom
-  const pomOption = Object.assign({},globalOption())
+  const pomOption = Object.assign({},globalOption(vue))
   pomOption.language = 'xml'
   pomOption.value = controller.pom.defaultValue
   pomOption.minimap = { enabled: false }
@@ -99,7 +99,7 @@ export function verifySQL(vue) {
   const callback = arguments[1] || function(r) {
   }
   verify({ 'sql': controller.flinkSql.value }).then((resp) => {
-    const success = resp.data == true || resp.data == 'true'
+    const success = resp.data === true || resp.data === 'true'
     if (success) {
       controller.flinkSql.success = true
       controller.flinkSql.errorMsg = null
@@ -170,7 +170,7 @@ export function syntaxError(vue) {
 export function bigScreenOpen(vue) {
   const controller = vue.controller
   controller.visiable.bigScreen = true
-  const option = Object.assign({},globalOption())
+  const option = Object.assign({},globalOption(vue))
   vue.$nextTick(() => {
     option.value = controller.flinkSql.value
     option.minimap = { enabled: true }

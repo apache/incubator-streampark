@@ -409,7 +409,6 @@ export default {
 }
 
 .list-content-item {
-  color: rgba(0, 0, 0, .45);
   display: inline-block;
   vertical-align: middle;
   font-size: 14px;
@@ -428,7 +427,6 @@ export default {
 
 .gutter-box {
   padding: 10px 20px;
-  background: #fff;
   color: rgba(0, 0, 0, 0.65);
   font-size: 14px;
   font-variant: tabular-nums;

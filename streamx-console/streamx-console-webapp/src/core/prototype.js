@@ -16,7 +16,7 @@ Vue.prototype.randomNum = function (minNum, maxNum) {
 }
 
 Vue.prototype.ideTheme = function () {
-  return storage.get('THEME') === 'night' ? 'vs-dark' : 'vs'
+  return storage.get('THEME') === 'dark' ? 'vs-dark' : 'vs'
 }
 
 String.prototype.trim = function () {

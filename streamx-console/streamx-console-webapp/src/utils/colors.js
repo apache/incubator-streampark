@@ -7,13 +7,13 @@ const themeMode = ADMIN.theme.mode
 
 // 获取 ant design 色系
 function getAntdColors(color, mode) {
-  const options = mode && (mode == themeMode.NIGHT) ? { theme: 'dark' } : undefined
+  const options = mode && (mode === themeMode.LIGHT) ? { theme: 'dark' } : undefined
   return generate(color, options)
 }
 
 // 获取功能性颜色
 function getFunctionalColors(mode) {
-  const options = mode && (mode == themeMode.NIGHT) ? {theme: 'dark'} : undefined
+  const options = mode && (mode === themeMode.LIGHT) ? {theme: 'dark'} : undefined
   let {success, warning, error} = ANTD.primary
   const  {success: s1, warning: w1, error: e1} = Config.theme
   success = success && s1
@@ -31,9 +31,9 @@ function getFunctionalColors(mode) {
 
 // 获取菜单色系
 function getMenuColors(color, mode) {
-  if (mode == themeMode.NIGHT) {
-    return ANTD.primary.night.menuColors
-  } else if (color == ANTD.primary.color) {
+  if (mode === themeMode.LIGHT) {
+    return ANTD.primary.light.menuColors
+  } else if (color === ANTD.primary.color) {
     return ANTD.primary.dark.menuColors
   } else {
     return [varyColor.darken(color, 0.93), varyColor.darken(color, 0.83), varyColor.darken(color, 0.73)]
@@ -80,15 +80,15 @@ function toNum3(color) {
 }
 
 function isHex(color) {
-  return color.length >= 4 && color[0] == '#'
+  return color.length >= 4 && color[0] === '#'
 }
 
 function isRgb(color) {
-  return color.length >= 10 && color.slice(0, 3) == 'rgb'
+  return color.length >= 10 && color.slice(0, 3) === 'rgb'
 }
 
 function isRgba(color) {
-  return color.length >= 13 && color.slice(0, 4) == 'rgba'
+  return color.length >= 13 && color.slice(0, 4) === 'rgba'
 }
 
 module.exports = {
