@@ -82,6 +82,9 @@ const app = {
     ToggleColor ({ commit }, color) {
       commit('TOGGLE_COLOR', color)
     },
+    ChangeTheme ({ commit }, theme) {
+      commit('TOGGLE_THEME', theme)
+    },
     ToggleMultiTab ({ commit }, bool) {
       commit('TOGGLE_MULTI_TAB', bool)
     }

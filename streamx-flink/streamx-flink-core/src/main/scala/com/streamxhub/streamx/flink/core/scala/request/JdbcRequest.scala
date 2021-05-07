@@ -86,7 +86,7 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
 
   override def open(parameters: Configuration): Unit = {
     super.open(parameters)
-    System.getProperties().setProperty(DISABLE_DNS_RESOLVER_PROP_NAME, "true")
+    System.getProperties.setProperty(DISABLE_DNS_RESOLVER_PROP_NAME, "true")
     val clientConfig = new JsonObject()
     jdbc.foreach(x => clientConfig.put(x._1, x._2))
     clientConfig.remove(KEY_ALIAS)

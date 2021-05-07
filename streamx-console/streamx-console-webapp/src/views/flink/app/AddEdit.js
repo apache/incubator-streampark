@@ -21,11 +21,10 @@
 import monaco from '@/views/flink/app/Monaco.xml'
 import { verify } from '@/api/flinksql'
 import { format } from 'sql-formatter'
-import storage from '@/utils/storage'
 
-export function globalOption() {
+export function globalOption(vue) {
   return {
-    theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+    theme: vue.ideTheme(),
     language: 'sql',
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // 代码分小段折叠
@@ -59,7 +58,7 @@ export function globalOption() {
 export function initEditor(vue) {
   const controller = vue.controller
   controller.flinkSql.value = arguments[1] || controller.flinkSql.defaultValue
-  const option = Object.assign({},globalOption())
+  const option = Object.assign({},globalOption(vue))
   option.value = controller.flinkSql.value
   option.minimap = { enabled: false }
   controller.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), option)
@@ -74,11 +73,13 @@ export function initEditor(vue) {
   //输入事件触发...
   controller.editor.flinkSql.onDidChangeModelContent(() => {
     controller.flinkSql.value = controller.editor.flinkSql.getValue()
-    verifySQL(vue)
+    if(sqlNotEmpty(vue)) {
+      verifySQL(vue)
+    }
   })
 
   //pom
-  const pomOption = Object.assign({},globalOption())
+  const pomOption = Object.assign({},globalOption(vue))
   pomOption.language = 'xml'
   pomOption.value = controller.pom.defaultValue
   pomOption.minimap = { enabled: false }
@@ -98,7 +99,7 @@ export function verifySQL(vue) {
   const callback = arguments[1] || function(r) {
   }
   verify({ 'sql': controller.flinkSql.value }).then((resp) => {
-    const success = resp.data == true || resp.data == 'true'
+    const success = resp.data === true || resp.data === 'true'
     if (success) {
       controller.flinkSql.success = true
       controller.flinkSql.errorMsg = null
@@ -130,7 +131,6 @@ export function verifySQL(vue) {
   }).catch((error) => {
     //vue.$message.error(error.message)
   })
-
 }
 
 export function syntaxError(vue) {
@@ -170,7 +170,7 @@ export function syntaxError(vue) {
 export function bigScreenOpen(vue) {
   const controller = vue.controller
   controller.visiable.bigScreen = true
-  const option = Object.assign({},globalOption())
+  const option = Object.assign({},globalOption(vue))
   vue.$nextTick(() => {
     option.value = controller.flinkSql.value
     option.minimap = { enabled: true }
@@ -182,13 +182,14 @@ export function bigScreenOpen(vue) {
     controller.editor.bigScreen = monaco.editor.create(elem, option)
     controller.editor.bigScreen.onDidChangeModelContent((event) => {
       const value = controller.editor.bigScreen.getValue()
-      if (value != '') {
+      if (value.trim() !== '') {
         controller.flinkSql.value = value
         controller.editor.flinkSql.getModel().setValue(value)
         verifySQL(vue)
       }
     })
-    if (controller.flinkSql.value != null && controller.flinkSql.value.trim() != '') {
+
+    if(sqlNotEmpty(vue)) {
       verifySQL(vue)
     }
   })
@@ -204,22 +205,30 @@ export function formatSql(vue) {
   }
 }
 
+export function sqlNotEmpty(vue) {
+  return vue.controller.flinkSql.value != null && vue.controller.flinkSql.value.trim() !== ''
+}
+
 export function bigScreenOk(vue,callback) {
   const controller = vue.controller
-  verifySQL(vue, (success) => {
-    if (success) {
-      //销毁
-      controller.editor.bigScreen.dispose()
-      controller.visiable.bigScreen = false
-      if (callback) {
-        callback()
+  if (sqlNotEmpty(vue)) {
+    verifySQL(vue, (success) => {
+      if (success) {
+        //销毁
+        controller.editor.bigScreen.dispose()
+        controller.visiable.bigScreen = false
+        if (callback) {
+          callback()
+        }
       }
-    }
-  })
+    })
+  }
 }
 
 export function bigScreenClose(vue) {
-  verifySQL(vue)
+  if (sqlNotEmpty(vue)) {
+    verifySQL(vue)
+  }
 }
 
 export function applyPom(vue) {

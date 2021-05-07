@@ -952,12 +952,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //1) dist_userJar
             File localPlugins = new File(WebUtil.getAppDir("plugins"));
             assert localPlugins.exists();
-            List<String> jars = Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlcli-.*\\.jar")).collect(Collectors.toList());
+            List<String> jars = Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar")).collect(Collectors.toList());
             if (jars.isEmpty()) {
-                throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlcli jar in " + localPlugins);
+                throw new IllegalArgumentException("[StreamX] can no found streamx-flink-sqlclient jar in " + localPlugins);
             }
             if (jars.size() > 1) {
-                throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlcli jar in " + localPlugins);
+                throw new IllegalArgumentException("[StreamX] found multiple streamx-flink-sqlclient jar in " + localPlugins);
             }
             String sqlDistJar = jars.get(0);
             //2) appConfig

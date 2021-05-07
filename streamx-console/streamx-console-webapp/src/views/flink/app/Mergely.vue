@@ -71,7 +71,6 @@
 
 <script>
 import monaco from './Monaco.yaml'
-import storage from '@/utils/storage'
 
 export default {
   name: 'Mergely',
@@ -101,7 +100,7 @@ export default {
   methods: {
     getOption() {
        return {
-          theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+          theme: this.ideTheme(),
           language: 'yaml',
           selectOnLineNumbers: false,
           foldingStrategy: 'indentation', // 代码分小段折叠

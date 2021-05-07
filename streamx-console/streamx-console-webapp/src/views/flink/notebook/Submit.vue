@@ -8,7 +8,7 @@
     <a-alert
       show-icon
       message="this is Experimental Features,and only supported ExecutionEnvironment/StreamExecutionEnvironment "
-      type="warning"/><br>
+      type="info"/><br>
     <a-row
       :gutter="24"
       type="flex"
@@ -162,7 +162,7 @@ export default {
   },
   mounted() {
     const option = {
-      theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+      theme: this.ideTheme(),
       language: 'java',
       value: this.woldCount,
       selectOnLineNumbers: false,
@@ -196,6 +196,20 @@ export default {
     this.handleReadmd()
     this.handleIntroduction()
     this.form = this.$form.createForm(this)
+  },
+
+  computed: {
+    myTheme() {
+      return this.$store.state.app.theme
+    }
+  },
+
+  watch: {
+    myTheme() {
+      this.editor.updateOptions({
+        theme: this.ideTheme()
+      })
+    }
   },
 
   methods: {
