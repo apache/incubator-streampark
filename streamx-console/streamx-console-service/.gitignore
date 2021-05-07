@@ -1,5 +1,3 @@
-.mvn
-target
-*.iml
-mvn*
-log
+# War
+
+static/
