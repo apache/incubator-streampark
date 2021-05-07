@@ -19,6 +19,7 @@
  * under the License.
  */
 import * as monaco from 'monaco-editor'
+import storage from '@/utils/storage'
 
 
 // Register a new language
@@ -36,7 +37,7 @@ monaco.languages.setMonarchTokensProvider('log', {
 
 
 monaco.editor.defineTheme('log', {
-  base: this.ideTheme(),
+  base: storage.get('THEME') === 'dark' ? 'vs-dark' : 'vs',
   inherit: false,
   rules: [
     { token: 'log-info', foreground: '808080' },

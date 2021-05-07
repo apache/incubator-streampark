@@ -5,18 +5,15 @@ Vue.prototype.randomNum = function (minNum, maxNum) {
   switch (arguments.length) {
     case 1:
       return parseInt(Math.random() * minNum + 1)
-      break
     case 2:
       return parseInt(Math.random() * (maxNum - minNum + 1) + minNum)
-      break
     default:
       return 0
-      break
   }
 }
 
 Vue.prototype.ideTheme = function () {
-  return storage.get('THEME') === 'dark' ? 'vs-dark' : 'vs'
+  return storage.get('THEME') === 'night' ? 'vs-dark' : 'vs'
 }
 
 String.prototype.trim = function () {

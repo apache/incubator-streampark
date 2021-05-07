@@ -219,11 +219,11 @@ export default {
       let theme
       if(arguments[0]) {
         theme = storage.get('THEME') || 'dark'
-        this.themeDark = theme === 'dark'
+        this.themeDark = theme === 'night'
         themeUtil.changeThemeColor(null, theme)
       } else {
         this.themeDark = !this.themeDark
-        theme = this.themeDark ? 'dark': 'light'
+        theme = this.themeDark ? 'night': 'dark'
         storage.set('THEME',theme)
         const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
         themeUtil.changeThemeColor(null, theme).then(closeMessage)

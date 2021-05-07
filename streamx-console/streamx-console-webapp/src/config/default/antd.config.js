@@ -9,12 +9,15 @@ const ANTD = {
       menuColors: ['#000c17', '#001529', '#002140']
     },
     dark: {
+      menuColors: ['#000c17', '#001529', '#002140']
+    },
+    night: {
       menuColors: ['#151515', '#1f1f1f', '#1e1e1e'],
     }
   },
 
   theme: {
-    light: {
+    dark: {
       'layout-body-background': '#f0f2f5',
       'body-background': '#fff',
       'component-background': '#fff',
@@ -36,7 +39,29 @@ const ANTD = {
       'menu-dark-arrow-color': '#fefefe',
       'btn-primary-color': '#fff',
     },
-    dark: {
+    light: {
+      'layout-body-background': '#f0f2f5',
+      'body-background': '#fff',
+      'component-background': '#fff',
+      'heading-color': 'rgba(0, 0, 0, 0.85)',
+      'text-color': 'rgba(0, 0, 0, 0.65)',
+      'text-color-inverse': '#fff',
+      'text-color-secondary': 'rgba(0, 0, 0, 0.45)',
+      'shadow-color': 'rgba(0, 0, 0, 0.15)',
+      'border-color-split': '#f0f0f0',
+      'border-color-base': '#d9d9d9',
+      'background-color-light': '#fafafa',
+      'background-color-base': '#e6f7ff',
+      'table-selected-row-bg': '#fafafa',
+      'table-expanded-row-bg': '#fbfbfb',
+      'checkbox-check-color': '#fff',
+      'disabled-color': 'rgba(0, 0, 0, 0.25)',
+      'menu-dark-color': 'rgba(1, 1, 1, 0.65)',
+      'menu-dark-highlight-color': '#fefefe',
+      'menu-dark-arrow-color': '#fefefe',
+      'btn-primary-color': '#fff',
+    },
+    night: {
       'layout-body-background': '#000',
       'body-background': '#141414',
       'component-background': '#141414',

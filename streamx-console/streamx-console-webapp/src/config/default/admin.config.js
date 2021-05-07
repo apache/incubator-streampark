@@ -3,7 +3,8 @@ const ADMIN = {
   theme: {
     mode: {
       DARK: 'dark',
-      LIGHT: 'light'
+      LIGHT: 'light',
+      NIGHT: 'night'
     }
   },
   layout: {
