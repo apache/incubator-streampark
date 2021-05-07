@@ -162,7 +162,7 @@ export default {
   },
   mounted() {
     const option = {
-      theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+      theme: this.ideTheme(),
       language: 'java',
       value: this.woldCount,
       selectOnLineNumbers: false,

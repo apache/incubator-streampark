@@ -694,7 +694,7 @@ export default {
 
       editor: {
         option: {
-          theme: 'vs', //vs, hc-black, or vs-dark
+          theme: this.ideTheme(),
           language: 'sql',
           selectOnLineNumbers: false,
           foldingStrategy: 'indentation', // 代码分小段折叠
@@ -1248,35 +1248,34 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
 .desc-item {
   padding-top: 20px;
 }
 
->>> .syntax-true {
-  border: 1px solid rgba(222, 222, 222, .8)
+.syntax-true {
+  border: 1px solid @border-color-base
 }
 
->>> .ant-tabs-nav .ant-tabs-tab-active {
+.ant-tabs-nav .ant-tabs-tab-active {
   font-weight: unset !important;
-  background-color: #f0f2f5;
+  background-color: @background-color-base;
 }
 
->>> .ant-tabs-nav .ant-tabs-tab {
+.ant-tabs-nav .ant-tabs-tab {
   margin: 0 32px 0 0;
   padding: 8px 15px;
 }
 
 .app-bar {
-  background-color: #f0f2f5;
-  color: rgba(0, 0, 0, 0.65);
+  background-color: @background-color-base;
   height: 100%;
   font-weight: normal;
   margin: 0 32px 0 0;
   padding: 8px 12px;
 }
 
->>> .ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {
+.ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {
   padding: 10px 24px;
 }
 
@@ -1284,7 +1283,7 @@ export default {
   margin-top: unset !important;
 }
 
-.detail-table >>> .ant-table-thead > tr > td, .detail-table >>> .ant-table-tbody > tr > td {
+.detail-table .ant-table-thead > tr > td, .detail-table .ant-table-tbody > tr > td {
   padding: 9px 9px !important;
 }
 

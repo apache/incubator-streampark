@@ -20,6 +20,7 @@
  */
 import * as monaco from 'monaco-editor'
 
+
 // Register a new language
 monaco.languages.register({ id: 'log' })
 monaco.languages.setMonarchTokensProvider('log', {
@@ -33,8 +34,9 @@ monaco.languages.setMonarchTokensProvider('log', {
   }
 })
 
+
 monaco.editor.defineTheme('log', {
-  base: 'vs',
+  base: this.ideTheme(),
   inherit: false,
   rules: [
     { token: 'log-info', foreground: '808080' },

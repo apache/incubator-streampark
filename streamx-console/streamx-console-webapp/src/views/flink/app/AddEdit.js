@@ -21,11 +21,10 @@
 import monaco from '@/views/flink/app/Monaco.xml'
 import { verify } from '@/api/flinksql'
 import { format } from 'sql-formatter'
-import storage from '@/utils/storage'
 
 export function globalOption() {
   return {
-    theme: storage.get('THEME') === 'night' ? 'hc-black' : 'vs', //vs, hc-black, or vs-dark
+    theme: this.ideTheme(),
     language: 'sql',
     selectOnLineNumbers: false,
     foldingStrategy: 'indentation', // 代码分小段折叠

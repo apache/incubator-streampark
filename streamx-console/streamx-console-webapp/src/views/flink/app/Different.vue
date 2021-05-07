@@ -59,7 +59,7 @@ export default {
       original: null,
       modified : null,
       option: {
-        theme: 'vs', //vs, hc-black, or vs-dark
+        theme: this.ideTheme(),
         language: 'yaml',
         selectOnLineNumbers: false,
         foldingStrategy: 'indentation', // 代码分小段折叠
