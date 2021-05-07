@@ -198,6 +198,20 @@ export default {
     this.form = this.$form.createForm(this)
   },
 
+  computed: {
+    myTheme() {
+      return this.$store.state.app.theme
+    }
+  },
+
+  watch: {
+    myTheme() {
+      this.editor.updateOptions({
+        theme: this.ideTheme()
+      })
+    }
+  },
+
   methods: {
     handleReplSubmit() {
       const code = this.editor.getValue()

@@ -986,6 +986,9 @@ export default {
       return function(items) {
         return this.options.filter(x => items.includes(x.key))
       }
+    },
+    myTheme() {
+      return this.$store.state.app.theme
     }
   },
 
@@ -1609,8 +1612,17 @@ export default {
       })
     }
 
-  }
+  },
 
+  watch: {
+    myTheme() {
+      if (this.app.jobType === 2) {
+        this.controller.editor.flinkSql.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+    }
+  },
 }
 </script>
 <style lang='less'>

@@ -19,8 +19,6 @@
  * under the License.
  */
 // pro components
-import AvatarList from '@/components/AvatarList'
-import CountDown from '@/components/CountDown'
 import Ellipsis from '@/components/Ellipsis'
 import FooterToolbar from '@/components/FooterToolbar'
 import NumberInfo from '@/components/NumberInfo'

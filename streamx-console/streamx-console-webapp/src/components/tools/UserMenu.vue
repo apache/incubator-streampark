@@ -124,10 +124,9 @@
 import NoticeIcon from '@/components/NoticeIcon'
 import SvgIcon from '@/components/SvgIcon'
 
-import { mapState, mapGetters, mapActions } from 'vuex'
+import { mapState, mapActions } from 'vuex'
 import { password } from '@api/user'
 import themeUtil from '@/utils/themeUtil'
-import storage from '@/utils/storage'
 
 export default {
   name: 'UserMenu',
@@ -148,7 +147,8 @@ export default {
   computed: {
     ...mapState({
       // 动态主路由
-      userName: state => state.user.name
+      userName: state => state.user.name,
+      myTheme: state => state.app.theme
     })
   },
 
@@ -161,8 +161,7 @@ export default {
   },
 
   methods: {
-    ...mapActions(['SignOut']),
-    ...mapGetters(['nickname', 'avatar']),
+    ...mapActions(['SignOut','ChangeTheme']),
     handleLogout () {
       const that = this
       this.$confirm({
@@ -216,17 +215,17 @@ export default {
     },
 
     handleChangeTheme() {
-      let theme
+      let _theme
       if(arguments[0]) {
-        theme = storage.get('THEME') || 'dark'
-        this.themeDark = theme === 'night'
-        themeUtil.changeThemeColor(null, theme)
+        _theme = this.myTheme || 'dark'
+        this.themeDark = _theme === 'dark'
+        themeUtil.changeThemeColor(null, _theme)
       } else {
         this.themeDark = !this.themeDark
-        theme = this.themeDark ? 'night': 'dark'
-        storage.set('THEME',theme)
-        const closeMessage = this.$message.loading(`您选择了主题模式 ${theme}, 正在切换...`)
-        themeUtil.changeThemeColor(null, theme).then(closeMessage)
+        _theme = this.themeDark ? 'dark': 'light'
+        this.ChangeTheme(_theme)
+        const closeMessage = this.$message.loading(`您选择了主题模式 ${_theme}, 正在切换...`)
+        themeUtil.changeThemeColor(null, _theme).then(closeMessage)
       }
       //i have no idea...
       $('.ant-layout-header').css({
