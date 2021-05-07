@@ -21,15 +21,16 @@
     <port v-if="name==='port'"></port>
     <ssl v-if="name==='ssl'"></ssl>
     <theme v-if="name==='theme'"></theme>
+    <question v-if="name==='question'"></question>
   </span>
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme } from '@/core/icons'
+import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme,question } from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme},
+  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme,question},
   props: {
     name: {
       type: String,
@@ -48,6 +49,11 @@ export default {
   height: 1em !important;
   max-width: 15px !important;
   font-weight: normal;
+}
+
+.svg-icon-small > svg {
+  max-height: 20px !important;
+  max-width: 20px !important;
 }
 
 .svg-icon-middle > svg {
