@@ -1,9 +1,15 @@
-# Created by .ignore support plugin (hsz.mobi)
+# IDEA
 .idea/
 *.iml
+
+# VSCode
+.vscode
+
+# Maven
 target/
-deployTo21.sh
+
+# Log
+*.log*
+
+# OS
 .DS_Store
-metastore_db
-/logs/2020-02-06/
-streamx-console/streamx-console-webapp/package-lock.json
