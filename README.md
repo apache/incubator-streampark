@@ -124,7 +124,7 @@ You can quickly submit an issue. Before submitting, please check the problem and
 You can contact us or ask questions via:
 
 - [New an issue](https://github.com/streamxhub/streamx/issues/new)
-- [Join us](#💬-Join-us)
+- [Join us](#-Join-us)
 
 ## 💰 Donation
 
