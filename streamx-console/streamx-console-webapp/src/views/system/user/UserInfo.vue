@@ -131,11 +131,11 @@ export default {
 </script>
 <style lang="less" scoped>
   .user-info {
-    background: #fff;
+    background: @body-background;
     padding: 0 10px 10px 10px;
   }
   .user-info-side {
-    background: #fff;
+    background-color: @component-background
   }
   .user-info-side {
     max-width: 10rem !important;
