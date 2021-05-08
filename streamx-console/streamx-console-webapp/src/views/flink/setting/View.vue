@@ -37,7 +37,12 @@
                 </div>
               </template>
               <template v-else>
-                <a-switch :defaultChecked="item.value === 'true'" @change="handleSwitch(item)" />
+                <a-switch
+                  checked-children="ON"
+                  un-checked-children="OFF"
+                  style="float: right;margin-right: 30px"
+                  :default-checked="item.value === 'true'"
+                  @change="handleSwitch(item)" />
               </template>
             </div>
           </div>
@@ -100,7 +105,7 @@ export default {
     handleSwitch(setting) {
       update({
         key: setting.key,
-        value: !setting.value
+        value: setting.value !== 'true'
       }).then((resp) => {
         this.handleAll()
       })
