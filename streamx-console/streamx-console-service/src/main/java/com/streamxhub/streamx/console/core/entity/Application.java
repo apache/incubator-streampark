@@ -235,8 +235,13 @@ public class Application implements Serializable {
     public AppInfo httpYarnAppInfo() throws Exception {
         if (appId != null) {
             String format = "%s/ws/v1/cluster/apps/%s";
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
-            return httpGetDoResult(url, AppInfo.class);
+            try {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+                return httpGetDoResult(url, AppInfo.class);
+            } catch (IOException e) {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                return httpGetDoResult(url, AppInfo.class);
+            }
         }
         return null;
     }
@@ -245,8 +250,13 @@ public class Application implements Serializable {
     public JobsOverview httpJobsOverview() throws Exception {
         if (appId != null) {
             String format = "%s/proxy/%s/jobs/overview";
-            String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
-            return httpGetDoResult(url, JobsOverview.class);
+            try {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+                return httpGetDoResult(url, JobsOverview.class);
+            } catch (IOException e) {
+                String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+                return httpGetDoResult(url, JobsOverview.class);
+            }
         }
         return null;
     }
@@ -254,16 +264,25 @@ public class Application implements Serializable {
     @JsonIgnore
     public Overview httpOverview() throws IOException {
         String format = "%s/proxy/%s/overview";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
-        return httpGetDoResult(url, Overview.class);
+        try {
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId);
+            return httpGetDoResult(url, Overview.class);
+        } catch (IOException e) {
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId);
+            return httpGetDoResult(url, Overview.class);
+        }
     }
 
     @JsonIgnore
     public CheckPoints httpCheckpoints() throws IOException {
         String format = "%s/proxy/%s/jobs/%s/checkpoints";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId, jobId);
-        return httpGetDoResult(url, CheckPoints.class);
-
+        try {
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(false), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
+        } catch (IOException e) {
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(true), appId, jobId);
+            return httpGetDoResult(url, CheckPoints.class);
+        }
     }
 
     @JsonIgnore

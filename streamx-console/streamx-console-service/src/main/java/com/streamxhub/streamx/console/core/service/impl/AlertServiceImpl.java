@@ -138,7 +138,7 @@ public class AlertServiceImpl implements AlertService {
         root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));
         root.put("message", content);
         String format = "%s/proxy/%s/";
-        String url = String.format(format, HadoopUtils.getRMWebAppURL(), application.getAppId());
+        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
         root.put("link", url);
 
         StringWriter writer = new StringWriter();
