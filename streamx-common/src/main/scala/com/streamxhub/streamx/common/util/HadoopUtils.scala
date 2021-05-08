@@ -140,6 +140,9 @@ object HadoopUtils extends Logger {
           }
           buffer.append(":").append(address.getPort)
           rmHttpAddr = buffer.toString
+          println("---------------------------")
+          println(s"-----------${rmHttpAddr}----------------")
+          println("---------------------------")
         }
       }
     }
