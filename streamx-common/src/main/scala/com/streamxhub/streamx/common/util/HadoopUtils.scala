@@ -26,12 +26,14 @@ import com.google.common.io.Files
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FileSystem, Path}
+import org.apache.hadoop.net.NetUtils
 import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
-import org.apache.hadoop.yarn.conf.YarnConfiguration
-import org.apache.hadoop.yarn.webapp.util.WebAppUtils
+import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
 
 import java.io.{File, IOException}
+import java.net.InetAddress
+import scala.util.{Success, Try}
 
 
 object HadoopUtils extends Logger {
@@ -70,9 +72,33 @@ object HadoopUtils extends Logger {
     yarnClient
   }
 
-  def getRMWebAppURL(): String =  {
-    if(rmHttpAddr == null) {
-      rmHttpAddr =  WebAppUtils.getResolvedRemoteRMWebAppURLWithScheme (conf)
+  def getRMWebAppURL(): String = {
+    if (rmHttpAddr == null) {
+      val rmId: String = if (HAUtil.isHAEnabled(conf)) HAUtil.getRMHAIds(conf).toArray().head.asInstanceOf[String] else null
+
+      val url = if (YarnConfiguration.useHttps(conf)) {
+        val key = "yarn.resourcemanager.webapp.https.address"
+        val name = if (rmId == null) key else HAUtil.addSuffix(key, rmId)
+        conf.getSocketAddr(name, "0.0.0.0:8090", 8090)
+      } else {
+        val key = "yarn.resourcemanager.webapp.address"
+        val name = if (rmId == null) key else HAUtil.addSuffix(key, rmId)
+        conf.getSocketAddr(name, "0.0.0.0:8088", 8088)
+      }
+
+      val address = NetUtils.getConnectAddress(url)
+      val buffer = new StringBuilder
+      val resolved = address.getAddress
+      if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
+        buffer.append(address.getHostName)
+      } else {
+        Try(InetAddress.getLocalHost.getCanonicalHostName) match {
+          case Success(value) => buffer.append(value)
+          case _ => buffer.append(address.getHostName)
+        }
+      }
+      buffer.append(":").append(address.getPort)
+      rmHttpAddr = buffer.toString
     }
     rmHttpAddr
   }
