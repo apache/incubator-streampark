@@ -128,7 +128,7 @@ object HadoopUtils extends Logger {
             }
           }
           val address = NetUtils.getConnectAddress(inetSocketAddress)
-          val buffer = new StringBuilder
+          val buffer = new StringBuilder(if (useHttps) "https://" else "http://")
           val resolved = address.getAddress
           if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
             buffer.append(address.getHostName)
@@ -140,9 +140,6 @@ object HadoopUtils extends Logger {
           }
           buffer.append(":").append(address.getPort)
           rmHttpAddr = buffer.toString
-          println("---------------------------")
-          println(s"-----------${rmHttpAddr}----------------")
-          println("---------------------------")
         }
       }
     }
