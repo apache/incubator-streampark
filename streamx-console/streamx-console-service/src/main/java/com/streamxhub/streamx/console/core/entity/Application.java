@@ -235,13 +235,8 @@ public class Application implements Serializable {
     public AppInfo httpYarnAppInfo() throws Exception {
         if (appId != null) {
             String format = "%s/ws/v1/cluster/apps/%s";
-            try {
-                String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            } catch (IOException e) {
-                String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId);
-                return httpGetDoResult(url, AppInfo.class);
-            }
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
+            return httpGetDoResult(url, AppInfo.class);
         }
         return null;
     }
@@ -250,13 +245,8 @@ public class Application implements Serializable {
     public JobsOverview httpJobsOverview() throws Exception {
         if (appId != null) {
             String format = "%s/proxy/%s/jobs/overview";
-            try {
-                String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId);
-                return httpGetDoResult(url, JobsOverview.class);
-            } catch (IOException e) {
-                String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId);
-                return httpGetDoResult(url, JobsOverview.class);
-            }
+            String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
+            return httpGetDoResult(url, JobsOverview.class);
         }
         return null;
     }
@@ -264,25 +254,16 @@ public class Application implements Serializable {
     @JsonIgnore
     public Overview httpOverview() throws IOException {
         String format = "%s/proxy/%s/overview";
-        try {
-            String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId);
-            return httpGetDoResult(url, Overview.class);
-        } catch (IOException e) {
-            String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId);
-            return httpGetDoResult(url, Overview.class);
-        }
+        String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId);
+        return httpGetDoResult(url, Overview.class);
     }
 
     @JsonIgnore
     public CheckPoints httpCheckpoints() throws IOException {
         String format = "%s/proxy/%s/jobs/%s/checkpoints";
-        try {
-            String url = String.format(format, HadoopUtils.rmHttpAddress(false), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
-        } catch (IOException e) {
-            String url = String.format(format, HadoopUtils.rmHttpAddress(true), appId, jobId);
-            return httpGetDoResult(url, CheckPoints.class);
-        }
+        String url = String.format(format, HadoopUtils.getRMWebAppURL(), appId, jobId);
+        return httpGetDoResult(url, CheckPoints.class);
+
     }
 
     @JsonIgnore
@@ -353,7 +334,7 @@ public class Application implements Serializable {
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
         if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-                !this.getExecutionMode().equals(other.getExecutionMode())) {
+            !this.getExecutionMode().equals(other.getExecutionMode())) {
             return false;
         }
 
@@ -464,10 +445,10 @@ public class Application implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                    "groupId='" + groupId + '\'' +
-                    ", artifactId='" + artifactId + '\'' +
-                    ", version='" + version + '\'' +
-                    '}';
+                "groupId='" + groupId + '\'' +
+                ", artifactId='" + artifactId + '\'' +
+                ", version='" + version + '\'' +
+                '}';
         }
 
         private String getGav() {
