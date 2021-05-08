@@ -250,28 +250,28 @@
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-common</artifactId>
-            <version>${flink.hadoop.version}</version>
+            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-hdfs</artifactId>
-            <version>${flink.hadoop.version}</version>
+            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-common</artifactId>
-            <version>${flink.hadoop.version}</version>
+            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-yarn-client</artifactId>
-            <version>${flink.hadoop.version}</version>
+            <version>${hadoop.version}</version>
             <scope>provided</scope>
         </dependency>
 
