@@ -6,6 +6,7 @@
         <result column="TITLE" jdbcType="VARCHAR" property="title"/>
         <result column="KEY" jdbcType="VARCHAR" property="key"/>
         <result column="VALUE" jdbcType="VARCHAR" property="value"/>
+        <result column="TYPE" jdbcType="INTEGER" property="type"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
     </resultMap>
 </mapper>

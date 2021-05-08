@@ -7,7 +7,7 @@ function getThemeColors(color, $theme) {
   const _color = color || theme.color
   const mode = $theme || theme.mode
   const replaceColors = getThemeToggleColors(_color, mode)
-  const themeColors = [
+  return [
     ...replaceColors.mainColors,
     ...replaceColors.subColors,
     ...replaceColors.menuColors,
@@ -17,13 +17,11 @@ function getThemeColors(color, $theme) {
     ...replaceColors.functionalColors.warning,
     ...replaceColors.functionalColors.error
   ]
-  return themeColors
 }
 
 function changeThemeColor(newColor, $theme) {
   const theme = $theme === 'dark' ? 'night': 'dark'
-  const promise = client.changer.changeColor({ newColors: getThemeColors(newColor, theme) })
-  return promise
+  return client.changer.changeColor({ newColors: getThemeColors(newColor, theme) })
 }
 
 function modifyVars(color) {
@@ -66,38 +64,8 @@ function modifyVars(color) {
   }
 }
 
-function loadLocalTheme(localSetting) {
-  if (localSetting && localSetting.theme) {
-    let { color, mode } = localSetting.theme
-    color = color || theme.color
-    mode = mode || theme.mode
-    changeThemeColor(color, mode)
-  }
-}
-
-/**
- * 获取本地保存的配置
- * @param load {boolean} 是否加载配置中的主题
- * @returns {Object}
- */
-function getLocalSetting(loadTheme) {
-  let localSetting = {}
-  try {
-    const localSettingStr = localStorage.getItem(process.env.VUE_APP_SETTING_KEY)
-    localSetting = JSON.parse(localSettingStr)
-  } catch (e) {
-    console.error(e)
-  }
-  if (loadTheme) {
-    loadLocalTheme(localSetting)
-  }
-  return localSetting
-}
-
 module.exports = {
   getThemeColors,
   changeThemeColor,
-  modifyVars,
-  loadLocalTheme,
-  getLocalSetting
+  modifyVars
 }

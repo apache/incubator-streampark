@@ -48,6 +48,8 @@ public class Setting implements Serializable {
     @TableField("`value`")
     private String value;
 
+    private Integer type;
+
     private String description;
     private transient boolean editable = false;
     private transient boolean submitting = false;
