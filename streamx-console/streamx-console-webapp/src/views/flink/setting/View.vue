@@ -26,17 +26,27 @@
           </a-list-item-meta>
           <div class="list-content" style="width: 50%">
             <div class="list-content-item" style="width: 100%">
-              <input
-                v-if="item.editable"
-                :value="item.value"
-                :class="item.key.replace(/\./g,'_')"
-                class="ant-input"/>
-              <div v-else style="width: 100%;text-align: right">
-                {{ item.value }}
-              </div>
+              <template v-if="item.type === 1">
+                <input
+                  v-if="item.editable"
+                  :value="item.value"
+                  :class="item.key.replace(/\./g,'_')"
+                  class="ant-input"/>
+                <div v-else style="width: 100%;text-align: right">
+                  {{ item.value }}
+                </div>
+              </template>
+              <template v-else>
+                <a-switch
+                  checked-children="ON"
+                  un-checked-children="OFF"
+                  style="float: right;margin-right: 30px"
+                  :default-checked="item.value === 'true'"
+                  @change="handleSwitch(item)" />
+              </template>
             </div>
           </div>
-          <div slot="actions">
+          <div slot="actions" v-if="item.type === 1">
             <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
             <a v-else @click="handleSubmit(item)">Submit</a>
           </div>
@@ -92,6 +102,14 @@ export default {
       })
     },
 
+    handleSwitch(setting) {
+      update({
+        key: setting.key,
+        value: setting.value !== 'true'
+      }).then((resp) => {
+        this.handleAll()
+      })
+    }
   }
 
 }

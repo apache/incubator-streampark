@@ -27,6 +27,29 @@ import keys from '@/assets/icons/keys.svg?inline'
 import port from '@/assets/icons/port.svg?inline'
 import ssl from '@/assets/icons/ssl.svg?inline'
 import theme from '@/assets/icons/theme.svg?inline'
+import question from '@/assets/icons/question.svg?inline'
 
-
-export { analyse,flink,flinksql,fql,spark,maven,workspace,http,deploy,stream,threshold,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme }
+export {
+  analyse,
+  flink,
+  flinksql,
+  fql,
+  spark,
+  maven,
+  workspace,
+  http,
+  deploy,
+  stream,
+  threshold,
+  format,
+  dingding,
+  mail,
+  sms,
+  wechat,
+  host,
+  keys,
+  port,
+  ssl,
+  theme,
+  question
+}

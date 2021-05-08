@@ -1,25 +1,14 @@
 <template>
   <div
     class="user-wrapper">
-    <div class="content-box">
+    <div class="content-box header-icon">
       <a>
-        <span
-          class="action">
-          <a-icon
-            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
-            type="dashboard"
-            @click.native="handleChangeTheme(false)"/>
-        </span>
+        <svg-icon name="theme" size="small" class="icon" @click.native="handleChangeTheme(false)"></svg-icon>
       </a>
       <a
         href="http://www.streamxhub.com/zh/doc/"
         target="_blank">
-        <span
-          class="action">
-          <a-icon
-            :style="{color: themeDark ? 'rgba(255,255,255, 0.45)' : 'rgba(0,0,0, 0.55)' }"
-            type="question-circle-o" />
-        </span>
+        <svg-icon name="question" size="small" class="icon"></svg-icon>
       </a>
       <a-dropdown>
         <span
@@ -254,4 +243,18 @@ export default {
   }
 }
 </script>
-<style scoped lang="less"></style>
+<style lang="less">
+.header-icon {
+  .icon {
+    margin-left: 3px;
+    margin-right: 3px;
+    vertical-align: -0.175em;
+    & > svg {
+      & > path {
+        fill: @text-color;
+      }
+    }
+  }
+}
+
+</style>

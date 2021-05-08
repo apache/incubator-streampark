@@ -147,7 +147,7 @@ public class ApplicationController extends BaseController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(HadoopUtils.rmHttpAddress(false));
+        return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
     }
 
     @PostMapping("name")

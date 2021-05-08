@@ -21,8 +21,6 @@
 package com.streamxhub.streamx.common.util
 
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.lang.StringUtils
-import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs._
 import org.apache.hadoop.hdfs.HAUtil
 import org.apache.hadoop.io.IOUtils
@@ -32,39 +30,13 @@ import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
 
-  /**
-   * 
-   * 注意:加载hadoop配置文件,有两种方式:<br>
-   * 1) 将hadoop的core-site.xml,hdfs-site.xml,yarn-site.xml copy到 resources下<br>
-   * 2) 项目在启动时动态加载 $HADOOP_HOME/etc/hadoop下的配置 到 classpath中<br>
-   * 推荐第二种方法,不用copy配置文件.<br>
-   *
-   */
-  lazy val conf: Configuration = {
-    val conf = new Configuration()
-    if (StringUtils.isBlank(conf.get("hadoop.tmp.dir"))) {
-      conf.set("hadoop.tmp.dir", "/tmp")
-    }
-    if (StringUtils.isBlank(conf.get("hbase.fs.tmp.dir"))) {
-      conf.set("hbase.fs.tmp.dir", "/tmp")
-    }
-    // disable timeline service as we only query yarn app here.
-    // Otherwise we may hit this kind of ERROR:
-    // java.lang.ClassNotFoundException: com.sun.jersey.api.client.config.ClientConfig
-    conf.set("yarn.timeline-service.enabled", "false")
-    conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem")
-    conf.set("fs.hdfs.impl.disable.cache", "true")
-    conf
-  }
-
-
-  lazy val hdfs: FileSystem = Try(FileSystem.get(conf)) match {
+  lazy val hdfs: FileSystem = Try(FileSystem.get(HadoopUtils.conf)) match {
     case Success(fs) => fs
     case Failure(e) => new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
       null
   }
 
-  def getDefaultFS: String = conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
+  def getDefaultFS: String = HadoopUtils.conf.get(FileSystem.FS_DEFAULT_NAME_KEY)
 
   def list(src: String): List[FileStatus] = hdfs.listStatus(getPath(src)).toList
 
@@ -73,10 +45,10 @@ object HdfsUtils extends Logger {
   def mkdirs(path: String): Unit = hdfs.mkdirs(getPath(path))
 
   def copyHdfs(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, conf)
+    FileUtil.copy(hdfs, getPath(src), hdfs, getPath(dst), delSrc, overwrite, HadoopUtils.conf)
 
   def copyHdfsDir(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit = {
-    list(src).foreach(x => FileUtil.copy(hdfs, x, hdfs, getPath(dst), delSrc, overwrite, conf))
+    list(src).foreach(x => FileUtil.copy(hdfs, x, hdfs, getPath(dst), delSrc, overwrite, HadoopUtils.conf))
   }
 
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =

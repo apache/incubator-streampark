@@ -127,16 +127,15 @@ INSERT INTO `t_role_menu` VALUES (1, 209);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
-INSERT INTO `t_setting` VALUES (7, 'alert.email.address', NULL, 'Alert  Email Sender', '用来发送告警邮箱的mail');
-INSERT INTO `t_setting` VALUES (5, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host');
-INSERT INTO `t_setting` VALUES (8, 'alert.email.password', NULL, 'Alert Email Password', '发送告警的邮箱的密码');
-INSERT INTO `t_setting` VALUES (6, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port');
-INSERT INTO `t_setting` VALUES (9, 'alert.email.ssl', NULL, 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL');
-INSERT INTO `t_setting` VALUES (1, 'env.flink.home', NULL, 'Flink Home', 'Flink Home');
-INSERT INTO `t_setting` VALUES (2, 'maven.central.repository', '', 'Maven Central Repository', 'Maven 私服地址');
-INSERT INTO `t_setting` VALUES (4, 'streamx.console.webapp.address', 'http://test-hadoop-2:10000', 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口');
-INSERT INTO `t_setting` VALUES (3, 'streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等');
-
+INSERT INTO `t_setting` VALUES (1, 'env.flink.home', NULL, 'Flink Home', 'Flink Home', 1);
+INSERT INTO `t_setting` VALUES (2, 'maven.central.repository', NULL, 'Maven Central Repository', 'Maven 私服地址', 1);
+INSERT INTO `t_setting` VALUES (3, 'streamx.console.webapp.address', NULL, 'StreamX Webapp address', 'StreamX Console Web 应用程序 HTTP 端口', 1);
+INSERT INTO `t_setting` VALUES (4, 'streamx.console.workspace', '/streamx/workspace', 'StreamX Console Workspace', 'StreamX Console 的工作空间,用于存放项目源码,编译后的项目等', 1);
+INSERT INTO `t_setting` VALUES (5, 'alert.email.host', NULL, 'Alert Email Smtp Host', '告警邮箱Smtp Host', 1);
+INSERT INTO `t_setting` VALUES (6, 'alert.email.port', NULL, 'Alert Email Smtp Port', '告警邮箱的Smtp Port', 1);
+INSERT INTO `t_setting` VALUES (7, 'alert.email.address', NULL, 'Alert  Email Sender', '用来发送告警邮箱的mail', 1);
+INSERT INTO `t_setting` VALUES (8, 'alert.email.password', NULL, 'Alert Email Password', '发送告警的邮箱的密码', 1);
+INSERT INTO `t_setting` VALUES (9, 'alert.email.ssl', 'false', 'Alert Email Is SSL', '发送告警的邮箱是否开启SSL', 2);
 -- ----------------------------
 -- Records of t_user
 -- ----------------------------
