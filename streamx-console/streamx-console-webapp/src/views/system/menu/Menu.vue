@@ -85,7 +85,6 @@
         :columns="columns"
         :key="key"
         :data-source="dataSource"
-        :expand-icon="expandIcon"
         :pagination="pagination"
         :loading="loading"
         :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
@@ -100,12 +99,11 @@
         <template
           slot="operation"
           slot-scope="text, record">
-          <a-icon
+          <svg-icon
             v-permit="'menu:update'"
-            type="setting"
-            theme="twoTone"
-            two-tone-color="#4a9ff5"
-            @click="edit(record)"
+            name="edit"
+            border
+            @click.native="edit(record)"
             title="修改" />
           <a-badge
             v-noPermit="'menu:update'"
@@ -147,12 +145,13 @@ import MenuAdd from './MenuAdd'
 import MenuEdit from './MenuEdit'
 import ButtonAdd from './ButtonAdd'
 import ButtonEdit from './ButtonEdit'
+import SvgIcon from '@/components/SvgIcon'
 
 import { list, remove } from '@/api/menu'
 
 export default {
   name: 'Menu',
-  components: { ButtonAdd, ButtonEdit, RangeDate, MenuAdd, MenuEdit },
+  components: { ButtonAdd, ButtonEdit, RangeDate, MenuAdd, MenuEdit, SvgIcon },
   data () {
     return {
       advanced: false,

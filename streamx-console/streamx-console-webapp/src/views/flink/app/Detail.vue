@@ -189,17 +189,16 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <a-icon
-                  type="eye"
-                  theme="twoTone"
-                  two-tone-color="#4a9ff5"
-                  @click="handleConfDetail(record)"
+                <svg-icon
+                  name="see"
+                  border
+                  @click.native="handleConfDetail(record)"
                   title="detail" />
-                <a-icon
-                  type="swap"
-                  style="color: #4a9ff5"
+                <svg-icon
+                  name="swap"
+                  border
                   v-if="configVersions.length>1"
-                  @click="handleCompare(record)"
+                  @click.native="handleCompare(record)"
                   title="compare" />
                 <a-popconfirm
                   v-if="!record.effective"
@@ -207,11 +206,10 @@
                   cancel-text="No"
                   ok-text="Yes"
                   @confirm="handleDeleteConf(record)">
-                  <a-icon
-                    type="delete"
-                    v-permit="'conf:delete'"
-                    theme="twoTone"
-                    two-tone-color="#4a9ff5" />
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'conf:delete'" />
                 </a-popconfirm>
               </template>
             </a-table>
@@ -277,9 +275,9 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <a-icon
-                  type="copy"
-                  style="color:#4a9ff5"
+                <svg-icon
+                  name="copy"
+                  border
                   v-clipboard:copy="record.path"
                   v-clipboard:success="handleCopySuccess"
                   v-clipboard:error="handleCopyError" />
@@ -288,11 +286,10 @@
                   cancel-text="No"
                   ok-text="Yes"
                   @confirm="handleDeleteSavePoint(record)">
-                  <a-icon
-                    type="delete"
-                    v-permit="'savepoint:delete'"
-                    theme="twoTone"
-                    two-tone-color="#4a9ff5" />
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'savepoint:delete'"/>
                 </a-popconfirm>
               </template>
             </a-table>
@@ -329,22 +326,20 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <a-icon
-                  type="rollback"
+                <svg-icon
+                  name="rollback"
+                  border
                   v-permit="'backup:rollback'"
-                  @click="handleRollback(record)"
-                  style="color:#4a9ff5;cursor: pointer"/>
+                  @click.native="handleRollback(record)"/>
                 <a-popconfirm
                   title="Are you sure delete?"
                   cancel-text="No"
                   ok-text="Yes"
                   @confirm="handleDeleteBackUp(record)">
-                  <a-icon
-                    type="delete"
-                    v-permit="'backup:delete'"
-                    theme="twoTone"
-                    style="cursor: pointer"
-                    two-tone-color="#4a9ff5" />
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'backup:delete'"/>
                 </a-popconfirm>
               </template>
             </a-table>
@@ -394,12 +389,10 @@
               <template
                 slot="operation"
                 slot-scope="text, record">
-                <a-icon
+                <svg-icon
                   v-if="!record.success"
-                  type="eye"
-                  theme="twoTone"
-                  two-tone-color="#4a9ff5"
-                  @click="handleException(record)"
+                  name="eye"
+                  @click.native="handleException(record)"
                   title="查看" />
               </template>
             </a-table>
@@ -414,9 +407,8 @@
       v-if="compareVisible">
       <template
         slot="title">
-        <a-icon
-          type="swap"
-          style="color: #4a9ff5"/>
+        <svg-icon
+          name="swap"/>
         Compare Config
       </template>
       <template
@@ -501,8 +493,8 @@
       @ok="handleExpClose">
       <template
         slot="title">
-        <a-icon
-          type="code"
+        <svg-icon
+          name="code"
           style="color:RED" />&nbsp; Exception Info
       </template>
       <template
@@ -525,10 +517,9 @@
       on-ok="handleRollbackOk">
       <template
         slot="title">
-        <a-icon
+        <svg-icon
           slot="icon"
-          type="rollback"
-          style="color: green"/>
+          name="rollback"/>
         Rollback Backup
       </template>
 
@@ -599,6 +590,7 @@ import Mergely from './Mergely'
 import Different from './Different'
 import notification from 'ant-design-vue/lib/notification'
 import monaco from '@/views/flink/app/Monaco.log'
+import SvgIcon from '@/components/SvgIcon'
 
 const Base64 = require('js-base64').Base64
 configOptions.push(
@@ -613,7 +605,7 @@ configOptions.push(
 )
 
 export default {
-  components: { State, Mergely ,Different },
+  components: {SvgIcon, State, Mergely ,Different },
   data() {
     return {
       app: null,

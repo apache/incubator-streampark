@@ -74,7 +74,6 @@
       :data-source="dataSource"
       :pagination="pagination"
       :loading="loading"
-      :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 900 }"
       @change="handleTableChange">
       <template
@@ -98,18 +97,16 @@
       <template
         slot="operation"
         slot-scope="text, record">
-        <a-icon
+        <svg-icon
           v-permit="'role:update'"
-          type="setting"
-          theme="twoTone"
-          two-tone-color="#4a9ff5"
-          @click="edit(record)"
+          name="edit"
+          border
+          @click.native="edit(record)"
           title="修改角色" />
-        <a-icon
-          type="eye"
-          theme="twoTone"
-          two-tone-color="#42b983"
-          @click="view(record)"
+        <svg-icon
+          name="see"
+          border
+          @click.native="view(record)"
           title="查看" />
       </template>
     </a-table>
@@ -138,11 +135,13 @@ import RangeDate from '@/components/DateTime/RangeDate'
 import RoleAdd from './RoleAdd'
 import RoleInfo from './RoleInfo'
 import RoleEdit from './RoleEdit'
-import { list, remove, $export } from '@/api/role'
+import SvgIcon from '@/components/SvgIcon'
+
+import { list, remove } from '@/api/role'
 
 export default {
   name: 'Role',
-  components: { RangeDate, RoleInfo, RoleAdd, RoleEdit },
+  components: { RangeDate, RoleInfo, RoleAdd, RoleEdit, SvgIcon },
   data () {
     return {
       advanced: false,

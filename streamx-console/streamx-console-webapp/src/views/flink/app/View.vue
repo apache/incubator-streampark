@@ -446,37 +446,40 @@
         <template
           slot="operation"
           slot-scope="text, record">
-          <a-icon
+          <svg-icon
+            name="mapping"
+            border
             v-if="record.state !== 7
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
               && record['optionState'] === 0"
             v-permit="'app:mapping'"
-            type="deployment-unit"
-            style="color:#4a9ff5"
-            @click="handleMapping(record)"/>
+            @click.native="handleMapping(record)"/>
           <svg-icon
             name="deploy"
+            border
             v-show="(record.deploy === 2 || record.deploy === 3) && record.state !== 1 && (optionApps.deploy.get(record.id) === undefined || record['optionState'] === 0)"
             v-permit="'app:deploy'"
             class="pointer"
             @click.native="handleDeploy(record)"/>
           <!--已经发布完的项目,不允许再次编辑-->
-          <a-icon
+          <svg-icon
+            name="edit"
+            border
             v-if="record.deploy !== 6"
             v-permit="'app:update'"
             type="setting"
             theme="twoTone"
             two-tone-color="#4a9ff5"
-            @click="handleEdit(record)"
+            @click.native="handleEdit(record)"
             title="Update application"/>
-          <a-icon
+          <svg-icon
+            name="rollback"
+            border
             v-if="record.deploy === 6"
             v-permit="'app:update'"
-            type="rollback"
-            style="color:#4a9ff5;cursor: pointer"
-            @click="handleRevoke(record)"
+            @click.native="handleRevoke(record)"
             title="Revoke Deploy"/>
           <a-icon
             v-if="record.state === 1 || record['deploy'] === 1"
@@ -484,33 +487,31 @@
             style="color:#4a9ff5"
             spin
             @click="handleSeeLog(record)"/>
-          <a-icon
-            type="play-circle"
+          <svg-icon
+            name="play"
+            border
             v-show="handleIsStart(record)"
             v-permit="'app:start'"
-            theme="twoTone"
-            two-tone-color="#4a9ff5"
-            @click="handleStart(record)"/>
-          <a-icon
-            type="poweroff"
+            @click.native="handleStart(record)"/>
+          <svg-icon
+            name="shutdown"
+            border
             title="Cancel this application"
             v-permit="'app:cancel'"
-            style="color:#4a9ff5"
             v-show="record.state === 7 && record['optionState'] === 0"
-            @click="handleCancel(record)"/>
-          <a-icon
-            type="eye"
+            @click.native="handleCancel(record)"/>
+          <svg-icon
+            name="see"
+            border
             v-permit="'app:detail'"
-            theme="twoTone"
-            two-tone-color="#4a9ff5"
-            @click="handleDetail(record)"
+            @click.native="handleDetail(record)"
             title="Detail"/>
-          <a-icon
+          <svg-icon
+            name="flame"
+            border
             v-if="record.flameGraph"
-            type="picture"
             v-permit="'app:flameGraph'"
-            style="color:#4a9ff5"
-            @click="handleFlameGraph(record)"
+            @click.native="handleFlameGraph(record)"
             title="Detail"/>
 
           <template v-if="handleCanDelete(record)">
@@ -519,10 +520,7 @@
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleDelete(record)">
-              <a-icon
-                type="delete"
-                theme="twoTone"
-                two-tone-color="#4a9ff5" />
+              <svg-icon name="remove" border/>
             </a-popconfirm>
           </template>
 
@@ -534,10 +532,9 @@
         on-ok="handleDeployOk">
         <template
           slot="title">
-          <a-icon
+          <svg-icon
             slot="icon"
-            type="upload"
-            style="color: green"/>
+            name="upload"/>
           Launch Application
         </template>
         <template
@@ -617,10 +614,9 @@
         on-ok="handleStartOk">
         <template
           slot="title">
-          <a-icon
+          <svg-icon
             slot="icon"
-            type="play-circle"
-            style="color: green"/>
+            name="play"/>
           Start application
         </template>
 
@@ -729,9 +725,9 @@
         on-ok="handleStopOk">
         <template
           slot="title">
-          <a-icon
+          <svg-icon
             slot="icon"
-            type="poweroff"
+            name="shutdown"
             style="color: red"/>
           Stop application
         </template>
@@ -790,9 +786,9 @@
         on-ok="handleMappingOk">
         <template
           slot="title">
-          <a-icon
+          <svg-icon
             slot="icon"
-            type="deployment-unit"
+            name="mapping"
             style="color: green"/>
           Mapping application
         </template>

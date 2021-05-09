@@ -28,6 +28,22 @@ import port from '@/assets/icons/port.svg?inline'
 import ssl from '@/assets/icons/ssl.svg?inline'
 import theme from '@/assets/icons/theme.svg?inline'
 import question from '@/assets/icons/question.svg?inline'
+import remove from '@/assets/icons/remove.svg?inline'
+import edit from '@/assets/icons/edit.svg?inline'
+import mapping from '@/assets/icons/mapping.svg?inline'
+import pause from '@/assets/icons/pause.svg?inline'
+import play from '@/assets/icons/play.svg?inline'
+import see from '@/assets/icons/see.svg?inline'
+import shutdown from '@/assets/icons/shutdown.svg?inline'
+import thunderbolt from '@/assets/icons/shutdown.svg?inline'
+import rollback from '@/assets/icons/rollback.svg?inline'
+import upload from '@/assets/icons/upload.svg?inline'
+import plus from '@/assets/icons/plus.svg?inline'
+import flame from '@/assets/icons/flame.svg?inline'
+import code from '@/assets/icons/code.svg?inline'
+import copy from '@/assets/icons/copy.svg?inline'
+import swap from '@/assets/icons/swap.svg?inline'
+import resetpass from '@/assets/icons/resetpass.svg?inline'
 
 export {
   analyse,
@@ -51,5 +67,21 @@ export {
   port,
   ssl,
   theme,
-  question
+  question,
+  remove,
+  edit,
+  mapping,
+  pause,
+  play,
+  see,
+  shutdown,
+  thunderbolt,
+  rollback,
+  upload,
+  plus,
+  flame,
+  code,
+  copy,
+  swap,
+  resetpass
 }
