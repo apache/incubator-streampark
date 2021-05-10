@@ -172,15 +172,15 @@ doStart() {
       shift
       # shellcheck disable=SC2034
       yaml=$(echo "$1" | awk -F 'conf/' '{print $2}')
+      shift
     fi
-    shift
 
     if [ "$1" == "--sql" ]; then
       shift
       # shellcheck disable=SC2034
       sql=$(echo "$1" | awk -F 'conf/' '{print $2}')
+      shift
     fi
-    shift
   fi
 
   local app_proper=""
