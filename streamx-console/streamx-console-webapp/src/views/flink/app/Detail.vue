@@ -391,7 +391,8 @@
                 slot-scope="text, record">
                 <svg-icon
                   v-if="!record.success"
-                  name="eye"
+                  name="see"
+                  border
                   @click.native="handleException(record)"
                   title="查看" />
               </template>
