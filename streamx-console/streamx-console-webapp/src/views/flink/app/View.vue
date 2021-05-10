@@ -534,7 +534,7 @@
           slot="title">
           <svg-icon
             slot="icon"
-            name="upload"/>
+            name="deploy"/>
           Launch Application
         </template>
         <template

@@ -11,7 +11,7 @@
 
     <template slot="title">
       <template>
-        <a-icon type="deployment-unit"/>
+        <svg-icon name="swap"/>
         Original
         version
         <a-button
@@ -46,9 +46,11 @@
 
 <script>
 import monaco from './Monaco.yaml'
+import SvgIcon from '@/components/SvgIcon'
 
 export default {
   name: 'Different',
+  components: {SvgIcon},
   data() {
     return {
       visiable: false,
@@ -66,7 +68,7 @@ export default {
         overviewRulerBorder: false, // 不要滚动条边框
         autoClosingBrackets: true,
         tabSize: 2, // tab 缩进长度
-        readOnly: false,
+        readOnly: true,
         inherit: true,
         scrollBeyondLastLine: false,
         lineNumbersMinChars: 5,

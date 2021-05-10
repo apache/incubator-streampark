@@ -9,12 +9,12 @@
     class="drawer-conf">
     <template slot="title">
       <template>
-        <a-icon
-          v-if="!visibleDiff"
-          type="setting"/>
-        <a-icon
+        <svg-icon
+          v-if="readOnly"
+          name="see"/>
+        <svg-icon
           v-else
-          type="deployment-unit"/>
+          name="edit"/>
         {{ title }}
       </template>
     </template>
@@ -71,9 +71,10 @@
 
 <script>
 import monaco from './Monaco.yaml'
-
+import SvgIcon from '@/components/SvgIcon'
 export default {
   name: 'Mergely',
+  components: {SvgIcon},
   props: {
     visiable: {
       type: Boolean,
@@ -107,7 +108,7 @@ export default {
           overviewRulerBorder: false, // 不要滚动条边框
           autoClosingBrackets: true,
           tabSize: 2, // tab 缩进长度
-          readOnly: false,
+          readOnly: this.readOnly,
           inherit: true,
           scrollBeyondLastLine: false,
           lineNumbersMinChars: 5,
