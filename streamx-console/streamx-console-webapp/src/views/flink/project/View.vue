@@ -143,11 +143,6 @@
               <svg-icon
                 name="thunderbolt"/>
             </a-popconfirm>
-
-            <svg-icon
-              name="edit"
-              v-permit="'project:update'"/>
-
             <a-popconfirm
               title="Are you sure delete this project ?"
               cancel-text="No"
@@ -156,7 +151,7 @@
               <svg-icon
                 name="remove"
                 v-permit="'project:delete'"
-                style="width:30px;"/>
+                style="margin-left:10px;"/>
             </a-popconfirm>
           </div>
 

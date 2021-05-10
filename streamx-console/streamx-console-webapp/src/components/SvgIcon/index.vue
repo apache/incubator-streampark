@@ -153,7 +153,7 @@ export default {
 .svg-icon-border {
   background: @border-color-split;
   border-radius: 50% ;
-  margin-left: 3px;
+  margin-left: 2px;
 }
 
 .svg-icon-small > svg {

@@ -1044,7 +1044,7 @@ export default {
         key: 'operation',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 150
+        width: 160
       }]
     }
   },
