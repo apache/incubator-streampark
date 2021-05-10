@@ -58,7 +58,7 @@ public class StreamXConsoleAspect {
     @Around(value = "response()")
     public RestResponse response(ProceedingJoinPoint joinPoint) {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.info("restResponse aspect, method:{}", methodSignature.getName());
+        log.debug("restResponse aspect, method:{}", methodSignature.getName());
         RestResponse response;
         try {
             response = (RestResponse) joinPoint.proceed();
@@ -75,7 +75,7 @@ public class StreamXConsoleAspect {
     @Around("refreshCache()")
     public Object refreshCache(ProceedingJoinPoint joinPoint) throws Throwable {
         MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
-        log.info("refreshCache aspect, method:{}", methodSignature.getName());
+        log.debug("refreshCache aspect, method:{}", methodSignature.getName());
         Object[] args = joinPoint.getArgs();
         Object param = args[0];
         Long appId;
