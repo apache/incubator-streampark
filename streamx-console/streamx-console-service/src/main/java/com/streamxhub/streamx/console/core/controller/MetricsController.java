@@ -54,7 +54,7 @@ public class MetricsController {
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {
             if (jvmProfiler != null && jvmProfiler.getProfiler().equals(STACKTRACE_PROFILER_NAME)) {
-                log.debug("id:{},token:{},type:{}", jvmProfiler.getId(), jvmProfiler.getToken(), jvmProfiler.getType());
+                log.info("id:{},token:{},type:{}", jvmProfiler.getId(), jvmProfiler.getToken(), jvmProfiler.getType());
                 FlameGraph flameGraph = new FlameGraph();
                 flameGraph.setAppId(jvmProfiler.getId());
                 flameGraph.setProfiler(jvmProfiler.getProfiler());
