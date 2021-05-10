@@ -65,7 +65,6 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-input
           type="text"
-          :addon-before="schema"
           placeholder="The Repository URL for this project"
           @change="handleSchema"
           @blur="handleBranches"
@@ -161,7 +160,6 @@ export default {
   name: 'BaseForm',
   data () {
     return {
-      schema: 'ssh',
       brancheList: [],
       searchBranche: false,
       options: {
