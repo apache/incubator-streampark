@@ -33,10 +33,10 @@ import org.apache.flink.configuration.{Configuration, CoreOptions}
 import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
-import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
+import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.TableConfig
 
 import java.io.File
@@ -163,11 +163,12 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
     }
 
-    /**
-     * 1.12版本中废弃....
-     * val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.EventTime)
-     * localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
-     */
+    //兼容1.12和之前的版本(TimeCharacteristic在1.12版本中废弃)
+    if (classOf[TimeCharacteristic].getDeclaredAnnotation(classOf[Deprecated]) == null) {
+      val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.ProcessingTime)
+      localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
+    }
+
     val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)
     localStreamEnv.setRuntimeMode(executionMode)
 

@@ -200,24 +200,24 @@ doStart() {
   local param_cli="com.streamxhub.streamx.flink.common.conf.ParameterCli"
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local app_name="$(java -cp "${jarfile}" $param_cli --name "${app_proper}")"
+  local app_name="$(java -cp "${jarfile}" $param_cli --name "$app_proper")"
 
   local trim="s/^[ \s]\{1,\}//g;s/[ \s]\{1,\}$//g"
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local detached_mode="$(java -cp "${jarfile}" $param_cli --detached "${app_proper}") $*"
+  local detached_mode="$(java -cp "${jarfile}" $param_cli --detached "$app_proper")"
   # shellcheck disable=SC2006
   # trim...
   detached_mode="$(echo "$detached_mode" | sed "$trim")"
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local option="$(java -cp "${jarfile}" $param_cli --option "${app_proper}") $*"
+  local option="$(java -cp "${jarfile}" $param_cli --option "$app_proper") $*"
   # shellcheck disable=SC2006
   option="$(echo "$option" | sed "$trim")"
 
   # shellcheck disable=SC2006
   # shellcheck disable=SC2155
-  local property_params="$(java -cp "${jarfile}" $param_cli --property "${app_proper}")"
+  local property_params="$(java -cp "${jarfile}" $param_cli --property "$app_proper")"
   # shellcheck disable=SC2006
   property_params="$(echo "$property_params" | sed "$trim")"
 

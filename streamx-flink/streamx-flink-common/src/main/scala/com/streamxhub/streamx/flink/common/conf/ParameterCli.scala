@@ -27,7 +27,7 @@ import org.apache.commons.cli.{DefaultParser, Options}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.util.{Success, Try}
+import scala.util.{Failure, Success, Try}
 
 object ParameterCli {
 
@@ -57,13 +57,18 @@ object ParameterCli {
       case "--option" =>
         val option = getOption(map, programArgs)
         val buffer = new StringBuffer()
-        val line = parser.parse(flinkOptions, option, false)
-        line.getOptions.foreach(x => {
-          buffer.append(s" -${x.getOpt}")
-          if (x.hasArg) {
-            buffer.append(s" ${x.getValue()}")
-          }
-        })
+        Try {
+          val line = parser.parse(flinkOptions, option, false)
+          line.getOptions.foreach(x => {
+            buffer.append(s" -${x.getOpt}")
+            if (x.hasArg) {
+              buffer.append(s" ${x.getValue()}")
+            }
+          })
+        } match {
+          case Failure(exception) => exception.printStackTrace()
+          case _ =>
+        }
         map.getOrElse(optionMain, null) match {
           case null =>
           case mainClass => buffer.append(s" -c $mainClass")
@@ -108,14 +113,19 @@ object ParameterCli {
     args match {
       case Array() =>
       case array =>
-        val line = parser.parse(flinkOptions, array, false)
-        line.getOptions.foreach(x => {
-          if (x.hasArg) {
-            optionMap += s"-${x.getLongOpt}".trim -> x.getValue()
-          } else {
-            optionMap += s"-${x.getLongOpt}".trim -> true
-          }
-        })
+        Try {
+          val line = parser.parse(flinkOptions, array, false)
+          line.getOptions.foreach(x => {
+            if (x.hasArg) {
+              optionMap += s"-${x.getLongOpt}".trim -> x.getValue()
+            } else {
+              optionMap += s"-${x.getLongOpt}".trim -> true
+            }
+          })
+        } match {
+          case Failure(e) => e.printStackTrace()
+          case _ =>
+        }
     }
     val array = new ArrayBuffer[String]
     optionMap.foreach(x => {
