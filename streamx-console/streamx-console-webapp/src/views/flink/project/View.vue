@@ -140,30 +140,18 @@
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleBuild(item)">
-              <a-icon
-                type="thunderbolt"
-                theme="twoTone"
-                two-tone-color="#4a9ff5" />
+              <svg-icon
+                name="thunderbolt"/>
             </a-popconfirm>
-
-            <a-icon
-              type="edit"
-              v-permit="'project:update'"
-              theme="twoTone"
-              two-tone-color="#4a9ff5"
-              style="width:30px;" />
-
             <a-popconfirm
               title="Are you sure delete this project ?"
               cancel-text="No"
               ok-text="Yes"
               @confirm="handleDelete(item)">
-              <a-icon
-                type="delete"
+              <svg-icon
+                name="remove"
                 v-permit="'project:delete'"
-                theme="twoTone"
-                two-tone-color="#4a9ff5"
-                style="width:30px;"/>
+                style="margin-left:10px;"/>
             </a-popconfirm>
           </div>
 
@@ -179,7 +167,7 @@
       :footer="null"
       @ok="handleClose">
       <template slot="title">
-        <a-icon type="code" />&nbsp;
+        <svg-icon name="code" />&nbsp;
         {{ controller.consoleName }}
       </template>
       <div

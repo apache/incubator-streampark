@@ -1,5 +1,5 @@
 <template>
-  <span :class="'svg-icon-'.concat(size)" class="anticon">
+  <span :class="'svg-icon-'.concat(size).concat(border? ' svg-icon-border':'')" class="anticon">
     <analyse v-if="name==='analyse'"></analyse>
     <flink v-if="name==='flink'"></flink>
     <spark v-if="name==='spark'"></spark>
@@ -22,15 +22,109 @@
     <ssl v-if="name==='ssl'"></ssl>
     <theme v-if="name==='theme'"></theme>
     <question v-if="name==='question'"></question>
+    <remove v-if="name==='remove'"></remove>
+    <edit v-if="name==='edit'"></edit>
+    <mapping v-if="name==='mapping'"></mapping>
+    <pause v-if="name==='pause'"></pause>
+    <play v-if="name==='play'"></play>
+    <see v-if="name==='see'"></see>
+    <shutdown v-if="name==='shutdown'"></shutdown>
+    <thunderbolt v-if="name==='thunderbolt'"></thunderbolt>
+    <rollback v-if="name==='rollback'"></rollback>
+    <upload v-if="name==='upload'"></upload>
+    <plus v-if="name==='plus'"></plus>
+    <flame v-if="name==='flame'"></flame>
+    <code v-if="name==='code'"></code>
+    <copy v-if="name==='copy'"></copy>
+    <swap v-if="name==='swap'"></swap>
+    <resetpass v-if="name==='resetpass'"></resetpass>
   </span>
 </template>
 
 <script>
-import {analyse,deploy, flink, flinksql, fql, http, maven, spark, stream, workspace, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme,question } from '@/core/icons'
+import {
+  analyse,
+  deploy,
+  flink,
+  flinksql,
+  fql,
+  http,
+  maven,
+  spark,
+  stream,
+  workspace,
+  threshold,
+  format,
+  dingding,
+  mail,
+  sms,
+  wechat,
+  host,
+  keys,
+  port,
+  ssl,
+  theme,
+  question,
+  remove,
+  edit,
+  mapping,
+  pause,
+  play,
+  see,
+  shutdown,
+  thunderbolt,
+  rollback,
+  upload,
+  plus,
+  flame,
+  code,
+  copy,
+  swap,
+  resetpass
+} from '@/core/icons'
 
 export default {
   name: 'SvgIcon',
-  components: {analyse,flink, flinksql, fql, spark, maven, workspace, http, deploy, stream, threshold ,format,dingding,mail,sms,wechat,host,keys,port,ssl,theme,question},
+  components: {
+    analyse,
+    deploy,
+    flink,
+    flinksql,
+    fql,
+    http,
+    maven,
+    spark,
+    stream,
+    workspace,
+    threshold,
+    format,
+    dingding,
+    mail,
+    sms,
+    wechat,
+    host,
+    keys,
+    port,
+    ssl,
+    theme,
+    question,
+    remove,
+    edit,
+    mapping,
+    pause,
+    play,
+    see,
+    shutdown,
+    thunderbolt,
+    rollback,
+    upload,
+    plus,
+    flame,
+    code,
+    copy,
+    swap,
+    resetpass
+  },
   props: {
     name: {
       type: String,
@@ -39,16 +133,27 @@ export default {
     size: {
       type: String,
       default: 'default'
+    },
+    border: {
+      type: Boolean,
+      default: false
     }
   }
 }
 </script>
 
-<style scoped>
+<style scoped lang="less">
+
 .svg-icon-default > svg {
-  height: 1em !important;
-  max-width: 15px !important;
-  font-weight: normal;
+  height: 1.05em !important;
+  max-width: 1.05em !important;
+  cursor: pointer;
+}
+
+.svg-icon-border {
+  background: @border-color-split;
+  border-radius: 50% ;
+  margin-left: 2px;
 }
 
 .svg-icon-small > svg {

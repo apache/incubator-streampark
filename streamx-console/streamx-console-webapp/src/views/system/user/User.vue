@@ -55,12 +55,6 @@
                 icon="plus"
                 v-permit="'user:add'"
                 @click="add" />
-              <a-button
-                v-permit="'user:delete'"
-                type="primary"
-                shape="circle"
-                icon="minus"
-                @click="batchDelete" />
             </span>
           </a-col>
         </a-row>
@@ -74,7 +68,6 @@
       :data-source="dataSource"
       :pagination="pagination"
       :loading="loading"
-      :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
       :scroll="{ x: 900 }"
       @change="handleTableChange">
       <template
@@ -97,25 +90,30 @@
       <template
         slot="operation"
         slot-scope="text, record">
-        <a-icon
-          type="setting"
-          theme="twoTone"
-          two-tone-color="#4a9ff5"
+        <svg-icon
+          name="edit"
+          border
           v-permit="'user:update'"
-          @click="edit(record)"
+          @click.native="edit(record)"
           title="修改用户" />
-        <a-icon
-          type="rollback"
-          style="color: #4a9ff5"
-          @click="resetPassword(record)"
-          v-permit="'user:reset'"
-          title="重置摩玛" />
-        <a-icon
-          type="eye"
-          theme="twoTone"
-          two-tone-color="#42b983"
-          @click="view(record)"
+        <svg-icon
+          name="see"
+          border
+          @click.native="view(record)"
           title="查看" />
+        <svg-icon
+          name="resetpass"
+          border
+          @click.native="resetPassword(record)"
+          v-permit="'user:reset'"
+          title="reset password" />
+        <a-popconfirm
+          title="Are you sure delete this user ?"
+          cancel-text="No"
+          ok-text="Yes"
+          @confirm="handleDelete(record)">
+          <svg-icon name="remove" border/>
+        </a-popconfirm>
       </template>
     </a-table>
 
@@ -143,11 +141,13 @@ import UserInfo from './UserInfo'
 import UserAdd from './UserAdd'
 import UserEdit from './UserEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
+import SvgIcon from '@/components/SvgIcon'
+
 import { list, remove, reset as resetPassword } from '@/api/user'
 
 export default {
   name: 'User',
-  components: { UserInfo, UserAdd, UserEdit, RangeDate },
+  components: { UserInfo, UserAdd, UserEdit, RangeDate, SvgIcon },
   data () {
     return {
       userInfo: {
@@ -165,7 +165,6 @@ export default {
       sortedInfo: null,
       paginationInfo: null,
       dataSource: [],
-      selectedRowKeys: [],
       loading: false,
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
@@ -224,9 +223,6 @@ export default {
     this.fetch()
   },
   methods: {
-    onSelectChange (selectedRowKeys) {
-      this.selectedRowKeys = selectedRowKeys
-    },
     view (record) {
       this.userInfo.data = record
       this.userInfo.visible = true
@@ -263,36 +259,12 @@ export default {
         this.queryParams.createTimeTo = value[1]
       }
     },
-    batchDelete () {
-      if (!this.selectedRowKeys.length) {
-        this.$message.warning('请选择需要删除的记录')
-        return
-      }
-      const that = this
-      this.$confirm({
-        title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        centered: true,
-        onOk () {
-          const userIds = []
-          for (const key of that.selectedRowKeys) {
-            userIds.push(that.dataSource[key].userId)
-          }
-          remove({
-            userIds: userIds.join(',')
-          }).then(() => {
-            that.$message.success('delete successful')
-            that.selectedRowKeys = []
-            that.search()
-          })
-        },
-        onCancel () {
-          that.selectedRowKeys = []
-          that.$message.info('cancel delete')
-        }
+    handleDelete (record) {
+      remove({
+        userIds: record.userId
+      }).then(() => {
+        this.$message.success('delete successful')
+        this.search()
       })
     },
 
@@ -331,8 +303,6 @@ export default {
       })
     },
     reset () {
-      // 取消选中
-      this.selectedRowKeys = []
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {
