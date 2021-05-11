@@ -74,5 +74,5 @@ public interface SettingService extends IService<Setting> {
 
     String getFlinkYaml();
 
-    void sync() throws IOException;
+    void syncFlinkConf() throws IOException;
 }

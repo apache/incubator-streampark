@@ -71,7 +71,7 @@ public class SettingController extends BaseController {
 
     @PostMapping("sync")
     public RestResponse sync() throws IOException {
-        settingService.sync();
+        settingService.syncFlinkConf();
         return RestResponse.create();
     }
 

@@ -93,7 +93,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             this.baseMapper.updateByKey(setting);
             settings.get(setting.getKey()).setValue(setting.getValue());
             if (setting.getKey().equals(SettingService.KEY_ENV_FLINK_HOME)) {
-                this.initDefaultConfig();
+                this.syncFlinkConf();
             }
             return true;
         } catch (Exception e) {
@@ -170,7 +170,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public void sync() throws IOException {
+    public void syncFlinkConf() throws IOException {
         String flinkLocalHome = getEffectiveFlinkHome();
         String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
         this.flinkYamlString = FileUtils.readFileToString(new File(yaml), Charset.defaultCharset());
