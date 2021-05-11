@@ -127,7 +127,7 @@ public class ApplicationController extends BaseController {
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
         applicationService.starting(app);
-        boolean started = applicationService.start(app,false);
+        boolean started = applicationService.start(app, false);
         return RestResponse.create().data(started);
     }
 

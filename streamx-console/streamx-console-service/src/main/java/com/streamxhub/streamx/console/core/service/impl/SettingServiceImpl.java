@@ -29,6 +29,7 @@ import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -36,6 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,7 +50,7 @@ import java.util.concurrent.ConcurrentHashMap;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 @DependsOn({"flyway", "flywayInitializer"})
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-        implements SettingService {
+    implements SettingService {
 
 
     private Map<String, String> flinkYaml;
@@ -58,7 +60,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         return baseMapper.get(key);
     }
 
-    private volatile Map<String, Setting> settings = new ConcurrentHashMap<>();
+    private final Map<String, Setting> settings = new ConcurrentHashMap<>();
 
     @PostConstruct
     public void initSetting() {
@@ -139,6 +141,21 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             log.warn("Fault Alert Email is not set.");
         }
         return null;
+    }
+
+    @Override
+    public Setting getFlink() throws IOException {
+        Setting setting = new Setting();
+        String flinkHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+        assert flinkHome != null;
+
+        File yaml = new File(flinkHome.concat("/conf/flink-conf.yaml"));
+        assert yaml.exists();
+
+        String confYaml = FileUtils.readFileToString(yaml);
+        setting.setFlinkHome(flinkHome);
+        setting.setFlinkConf(confYaml);
+        return setting;
     }
 
     @Override

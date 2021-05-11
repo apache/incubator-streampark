@@ -69,7 +69,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     private void expire(SavePoint entity) {
-        int cpThreshold = Integer.parseInt(settingService.getFlinkDefaultConfig().getOrDefault("state.checkpoints.num-retained", "1"));
+        int cpThreshold = Integer.parseInt(
+            settingService
+                .getFlinkDefaultConfig()
+                .getOrDefault("state.checkpoints.num-retained", "1")
+        );
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
             cpThreshold = cpThreshold - 1;
         }
@@ -78,10 +82,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
-                    .eq(SavePoint::getAppId, entity.getAppId())
-                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                    .orderByDesc(SavePoint::getTriggerTime)
-                    .last("limit 0," + cpThreshold + 1);
+                .eq(SavePoint::getAppId, entity.getAppId())
+                .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
+                .orderByDesc(SavePoint::getTriggerTime)
+                .last("limit 0," + cpThreshold + 1);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
             if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {

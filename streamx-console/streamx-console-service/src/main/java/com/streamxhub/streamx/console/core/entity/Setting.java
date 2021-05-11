@@ -54,4 +54,7 @@ public class Setting implements Serializable {
     private transient boolean editable = false;
     private transient boolean submitting = false;
 
+    private transient String flinkHome;
+    private transient String flinkConf;
+
 }

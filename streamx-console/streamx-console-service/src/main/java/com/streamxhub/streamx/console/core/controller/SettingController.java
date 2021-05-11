@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -61,6 +62,13 @@ public class SettingController extends BaseController {
         Setting setting = settingService.get(key);
         return RestResponse.create().data(setting);
     }
+
+    @PostMapping("getflink")
+    public RestResponse getFlink() throws IOException {
+        Setting setting = settingService.getFlink();
+        return RestResponse.create().data(setting);
+    }
+
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")

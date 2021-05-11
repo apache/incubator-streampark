@@ -20,16 +20,16 @@
  */
 package com.streamxhub.streamx.console.core.service;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -44,7 +44,7 @@ public interface ApplicationService extends IService<Application> {
 
     void starting(Application app);
 
-    boolean start(Application app,boolean auto) throws Exception;
+    boolean start(Application app, boolean auto) throws Exception;
 
     String getYarnName(Application app);
 
