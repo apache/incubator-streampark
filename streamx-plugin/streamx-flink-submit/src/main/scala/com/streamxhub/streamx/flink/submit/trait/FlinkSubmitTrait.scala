@@ -36,6 +36,7 @@ import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 import scala.util.{Failure, Success, Try}
 
 trait FlinkSubmitTrait extends Logger {
