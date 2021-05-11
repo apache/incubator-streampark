@@ -30,7 +30,7 @@ object LocalSubmit extends FlinkSubmitTrait {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 
-  override def doStop(appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
+  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 }

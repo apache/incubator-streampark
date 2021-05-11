@@ -43,7 +43,7 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  override def doStop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
 
     val jobID = getJobID(jobStringId)
 
@@ -60,6 +60,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     val savePointDir = getOptionFromDefaultFlinkConfig(
+      flinkHome,
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
         .defaultValue(s"hdfs://$APP_SAVEPOINTS")
@@ -74,7 +75,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     if (savepointPathFuture == null) null else try {
-      val clientTimeout = getOptionFromDefaultFlinkConfig(ClientOptions.CLIENT_TIMEOUT)
+      val clientTimeout = getOptionFromDefaultFlinkConfig(flinkHome, ClientOptions.CLIENT_TIMEOUT)
       savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
     } catch {
       case e: Exception =>
@@ -100,7 +101,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
       Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
     } else {
-      val parallelism = flinkDefaultConfiguration.getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
+      val parallelism = submitRequest.flinkDefaultConfiguration.getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
       if (parallelism == -1) null else parallelism
     }
   }

@@ -23,7 +23,6 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.impl.ApplicationSubmit.flinkDefaultConfiguration
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine
@@ -54,13 +53,12 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     val commandLine = getEffectiveCommandLine(
       submitRequest,
-      customCommandLines,
       "-t" -> YarnDeploymentTarget.PER_JOB.getName,
       "-m" -> "yarn-cluster",
       "-c" -> submitRequest.appMain
     )
 
-    val activeCommandLine = validateAndGetActiveCommandLine(customCommandLines, commandLine)
+    val activeCommandLine = validateAndGetActiveCommandLine(submitRequest.customCommandLines, commandLine)
     val flinkConfig = getEffectiveConfiguration(submitRequest, activeCommandLine, commandLine)
 
     val clusterClientServiceLoader = new DefaultClusterClientServiceLoader
@@ -68,13 +66,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     val clusterDescriptor = {
       val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[YarnClusterDescriptor]
-      val flinkDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
-        case array if array.length == 1 => s"$FLINK_HOME/lib/${array.head}"
-        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
+      val flinkDistJar = new File(s"${submitRequest.flinkHome}/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in ${submitRequest.flinkHome}/lib")
+        case array if array.length == 1 => s"${submitRequest.flinkHome}/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in ${submitRequest.flinkHome}/lib,[${more.mkString(",")}]")
       }
       clusterDescriptor.setLocalJarPath(new HadoopPath(flinkDistJar))
-      clusterDescriptor.addShipFiles(List(new File(s"$FLINK_HOME/plugins")))
+      clusterDescriptor.addShipFiles(List(new File(s"${submitRequest.flinkHome}/plugins")))
       clusterDescriptor
     }
 
@@ -158,8 +156,8 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     }
 
     //flink-conf.yaml配置
-    flinkDefaultConfiguration.keySet().foreach(x=>{
-      flinkDefaultConfiguration.getString(x,null) match {
+    submitRequest.flinkDefaultConfiguration.keySet().foreach(x => {
+      submitRequest.flinkDefaultConfiguration.getString(x, null) match {
         case v if v != null => effectiveConfiguration.setString(x, v)
         case _ =>
       }
@@ -170,7 +168,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
 
-    val providedLibs = ListBuffer(workspaceEnv.flinkHdfsJars.toString)
+    val providedLibs = ListBuffer(submitRequest.workspaceEnv.flinkHdfsJars.toString)
 
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //execution.target

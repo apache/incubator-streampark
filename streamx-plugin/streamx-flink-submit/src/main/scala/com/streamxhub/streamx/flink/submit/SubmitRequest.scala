@@ -24,13 +24,19 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, ResolveOrder}
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import com.streamxhub.streamx.flink.submit.`trait`.WorkspaceEnv
+import org.apache.flink.client.cli.CliFrontend
+import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.flink.configuration.{Configuration, GlobalConfiguration}
+import org.apache.hadoop.fs.Path
 
+import java.io.File
 import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 
-case class SubmitRequest(flinkHome:String,
-                         flinkYaml:String,
+case class SubmitRequest(flinkHome: String,
+                         flinkYaml: String,
                          flinkUserJar: String,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,
@@ -88,6 +94,50 @@ case class SubmitRequest(flinkHome:String,
             .map(x => x._1.drop(other.length) -> x._2)
         }
       }
+    }
+  }
+
+  private[submit] lazy val workspaceEnv = {
+    /**
+     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
+     */
+    val flinkName = new File(flinkHome).getName
+    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
+    WorkspaceEnv(
+      flinkName,
+      flinkHdfsHome,
+      flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
+      flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
+      flinkHdfsJars = new Path(s"${HdfsUtils.getDefaultFS}$APP_JARS"),
+      streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
+      flinkHdfsDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
+        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
+        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
+      }
+    )
+  }
+
+  private[submit] lazy val flinkDefaultConfiguration: Configuration = {
+    GlobalConfiguration.loadConfiguration(s"$flinkHome/conf")
+  }
+
+  private[submit] lazy val customCommandLines = {
+    // 1. find the configuration directory
+    val configurationDirectory = s"$flinkHome/conf"
+    // 2. load the custom command lines
+    val customCommandLines = loadCustomCommandLines(flinkDefaultConfiguration, configurationDirectory)
+    new CliFrontend(flinkDefaultConfiguration, customCommandLines)
+    customCommandLines
+  }
+
+  private[submit] lazy val jvmProfilerJar: String = {
+    val pluginsPath = System.getProperty("app.home").concat("/plugins")
+    val pluginsDir = new File(pluginsPath)
+    pluginsDir.list().filter(_.matches("streamx-jvm-profiler-.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found streamx-jvm-profiler jar in $pluginsPath")
+      case array if array.length == 1 => array.head
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple streamx-jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
     }
   }
 

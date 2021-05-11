@@ -30,7 +30,7 @@ object KubernetesSubmit extends FlinkSubmitTrait {
     throw new UnsupportedOperationException("Unsupported Kubernetes Submit ")
   }
 
-  override def doStop(appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
+  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
     throw new UnsupportedOperationException("Unsupported Kubernetes Submit ")
   }
 }

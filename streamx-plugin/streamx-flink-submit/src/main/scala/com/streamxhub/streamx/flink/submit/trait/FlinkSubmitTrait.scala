@@ -21,21 +21,17 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{HdfsUtils, Logger, Utils}
+import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.{CommandLine, Options}
-import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.flink.api.common.JobID
-import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
-import org.apache.flink.client.cli.{CliArgsException, CliFrontend, CliFrontendParser, CustomCommandLine}
-import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, GlobalConfiguration}
+import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, CustomCommandLine}
+import org.apache.flink.configuration.{ConfigOption, CoreOptions, GlobalConfiguration}
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.hadoop.fs.Path
 
-import java.io.File
 import java.lang.{Boolean => JavaBool}
-import java.nio.charset.Charset
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -43,66 +39,6 @@ import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
 trait FlinkSubmitTrait extends Logger {
-
-  private[submit] var USER_FLINK_HOME: String = _
-
-  private[submit] lazy val FLINK_HOME = {
-    if (Utils.isEmpty(USER_FLINK_HOME)) {
-      val flinkLocalHome = System.getenv("FLINK_HOME")
-      require(flinkLocalHome != null)
-      logInfo(s"flinkHome: $flinkLocalHome")
-      flinkLocalHome
-    } else {
-      USER_FLINK_HOME
-    }
-  }
-
-  lazy val workspaceEnv: WorkspaceEnv = {
-    /**
-     * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
-     */
-    val flinkName = new File(FLINK_HOME).getName
-    val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
-
-    WorkspaceEnv(
-      flinkName,
-      flinkHdfsHome,
-      flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
-      flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
-      flinkHdfsJars = new Path( s"${HdfsUtils.getDefaultFS}$APP_JARS"),
-      streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
-      flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
-        case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
-        case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
-        case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $FLINK_HOME/lib,[${more.mkString(",")}]")
-      }
-    )
-  }
-
-  private[submit] lazy val flinkDefaultConfiguration: Configuration = {
-    require(FLINK_HOME != null)
-    //获取flink的配置
-    GlobalConfiguration.loadConfiguration(s"$FLINK_HOME/conf")
-  }
-
-  private[submit] lazy val customCommandLines = {
-    // 1. find the configuration directory
-    val configurationDirectory = s"$FLINK_HOME/conf"
-    // 2. load the custom command lines
-    val customCommandLines = loadCustomCommandLines(flinkDefaultConfiguration, configurationDirectory)
-    new CliFrontend(flinkDefaultConfiguration, customCommandLines)
-    customCommandLines
-  }
-
-  private[submit] lazy val jvmProfilerJar: String = {
-    val pluginsPath = System.getProperty("app.home").concat("/plugins")
-    val pluginsDir = new File(pluginsPath)
-    pluginsDir.list().filter(_.matches("streamx-jvm-profiler-.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found streamx-jvm-profiler jar in $pluginsPath")
-      case array if array.length == 1 => array.head
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple streamx-jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
-    }
-  }
 
   private[submit] lazy val PARAM_KEY_FLINK_CONF = KEY_FLINK_CONF("--")
   private[submit] lazy val PARAM_KEY_FLINK_SQL = KEY_FLINK_SQL("--")
@@ -130,39 +66,37 @@ trait FlinkSubmitTrait extends Logger {
          |      "args": ${submitRequest.args}
          |}
          |""".stripMargin)
-    if (USER_FLINK_HOME == null) {
-      USER_FLINK_HOME = submitRequest.flinkHome
-    }
     doSubmit(submitRequest)
   }
 
-  def stop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  def stop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     logInfo(
       s"""
          |"flink stop {" +
+         |      "flinkHome" :$flinkHome,
          |      "appId": $appId,
          |      "jobId": $jobStringId,
          |      "savePoint": $savePoint,
          |      "drain": $drain
          |}
          |""".stripMargin)
-    doStop(appId, jobStringId, savePoint, drain)
+    doStop(flinkHome, appId, jobStringId, savePoint, drain)
   }
 
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
-  def doStop(appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String
+  def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
     case Success(id) => id
     case Failure(e) => throw new CliArgsException(e.getMessage)
   }
 
-
   //----------Public Method end ------------------
   private[submit] def getEffectiveCommandLine(submitRequest: SubmitRequest,
-                                              customCommandLines: JavaList[CustomCommandLine],
                                               otherParam: (String, String)*): CommandLine = {
+
+    val customCommandLines = submitRequest.customCommandLines
     //merge options....
     val customCommandLineOptions = new Options
     for (customCommandLine <- customCommandLines) {
@@ -214,7 +148,7 @@ trait FlinkSubmitTrait extends Logger {
         /**
          * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
          */
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/${submitRequest.jvmProfilerJar}=$param"
       }
 
       if (submitRequest.option != null && submitRequest.option.trim.nonEmpty) {
@@ -258,8 +192,9 @@ trait FlinkSubmitTrait extends Logger {
     throw new IllegalStateException("No valid command-line found.")
   }
 
-  private[submit] def getOptionFromDefaultFlinkConfig[T](option: ConfigOption[T]): T = flinkDefaultConfiguration.get(option)
-
+  private[submit] def getOptionFromDefaultFlinkConfig[T](flinkHome: String, option: ConfigOption[T]): T = {
+    GlobalConfiguration.loadConfiguration(s"$flinkHome/conf").get(option)
+  }
 
 }
 

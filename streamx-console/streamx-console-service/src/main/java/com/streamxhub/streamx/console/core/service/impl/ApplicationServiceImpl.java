@@ -821,6 +821,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         executorService.submit(() -> {
             try {
                 String savePointDir = FlinkSubmit.stop(
+                    settingService.getEffectiveFlinkHome(),
                     ExecutionMode.of(application.getExecutionMode()),
                     application.getAppId(),
                     application.getJobId(),

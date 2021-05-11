@@ -37,12 +37,12 @@ object FlinkSubmit {
     }
   }
 
-  def stop(executionMode: ExecutionMode, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  def stop(flinkHome: String, executionMode: ExecutionMode, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     executionMode match {
       case ExecutionMode.APPLICATION | ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION =>
-        YarnPreJobSubmit.stop(appId, jobStringId, savePoint, drain)
-      case ExecutionMode.LOCAL => LocalSubmit.stop(appId, jobStringId, savePoint, drain)
-      case ExecutionMode.KUBERNETES => KubernetesSubmit.stop(appId, jobStringId, savePoint, drain)
+        YarnPreJobSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
+      case ExecutionMode.LOCAL => LocalSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
+      case ExecutionMode.KUBERNETES => KubernetesSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
       case _ => throw new UnsupportedOperationException(s"Unsupported ${executionMode} Submit ")
     }
   }
