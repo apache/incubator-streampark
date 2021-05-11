@@ -9,7 +9,7 @@
     <s-menu
       :collapsed="collapsed"
       :menu="menu"
-      :theme="theme"
+      theme="dark"
       :mode="mode"
       @select="onSelect"
       style="padding: 16px 0px;" />

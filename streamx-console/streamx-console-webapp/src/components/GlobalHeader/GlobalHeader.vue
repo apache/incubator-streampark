@@ -38,7 +38,7 @@
                 v-if="device !== 'mobile'"
                 mode="horizontal"
                 :menu="menus"
-                :theme="theme" />
+                theme="dark" />
               <a-icon
                 v-else
                 class="trigger"

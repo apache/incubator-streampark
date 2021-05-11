@@ -5,14 +5,14 @@
     <a-drawer
       v-if="isMobile()"
       placement="left"
-      :wrap-class-name="`drawer-sider ${navTheme}`"
+      wrap-class-name="drawer-sider dark"
       :closable="false"
       :visible="collapsed"
       @close="drawerClose">
       <side-menu
         mode="inline"
         :menus="menus"
-        :theme="navTheme"
+        theme="dark"
         :collapsed="false"
         :collapsible="true"
         @menuSelect="menuSelect" />
@@ -22,7 +22,7 @@
       v-else-if="isSideMenu()"
       mode="inline"
       :menus="menus"
-      :theme="navTheme"
+      theme="dark"
       :collapsed="collapsed"
       :collapsible="true" />
 
@@ -33,7 +33,7 @@
       <global-header
         :mode="layoutMode"
         :menus="menus"
-        :theme="navTheme"
+        theme="dark"
         :collapsed="collapsed"
         :device="device"
         @toggle="toggle" />

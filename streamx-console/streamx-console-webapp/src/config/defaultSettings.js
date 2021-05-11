@@ -1,7 +1,6 @@
 /**
  * 项目默认配置项
  * primaryColor - 默认主题色
- * navTheme - sidebar theme ['dark', 'light'] 两种主题
  * colorWeak - 色盲模式
  * layout - 整体布局方式 ['sidemenu', 'topmenu'] 两种布局
  * fixedHeader - 固定 Header : boolean
@@ -15,8 +14,8 @@
 
 export default {
   primaryColor: '#1890FF', // primary color of ant design
-  navTheme: 'dark', // theme for nav menu
   layout: 'sidemenu', // nav menu position: sidemenu or topmenu
+  theme: 'dark',
   contentWidth: 'Fixed', // layout of content: Fluid or Fixed, only works when layout is topmenu
   fixedHeader: false, // sticky header
   fixSiderbar: false, // sticky siderbar

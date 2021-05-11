@@ -17,7 +17,7 @@ import config from '@/config/defaultSettings'
 
 export default function Initializer () {
   store.commit('SET_SIDEBAR_TYPE', storage.get(SIDEBAR_TYPE, true))
-  store.commit('TOGGLE_THEME', storage.get(DEFAULT_THEME, config.navTheme))
+  store.commit('TOGGLE_THEME', storage.get(DEFAULT_THEME, config.theme))
   store.commit('TOGGLE_LAYOUT_MODE', storage.get(DEFAULT_LAYOUT_MODE, config.layout))
   store.commit('TOGGLE_FIXED_HEADER', storage.get(DEFAULT_FIXED_HEADER, config.fixedHeader))
   store.commit('TOGGLE_FIXED_SIDERBAR', storage.get(DEFAULT_FIXED_SIDEMENU, config.fixSiderbar))
@@ -27,6 +27,5 @@ export default function Initializer () {
   store.commit('TOGGLE_COLOR', storage.get(DEFAULT_COLOR, config.primaryColor))
   store.commit('TOGGLE_MULTI_TAB', storage.get(DEFAULT_MULTI_TAB, config.multiTab))
   store.commit('SET_TOKEN', storage.get(TOKEN))
-
   // last step
 }
