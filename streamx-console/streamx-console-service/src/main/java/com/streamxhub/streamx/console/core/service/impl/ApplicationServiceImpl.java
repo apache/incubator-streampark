@@ -1020,7 +1020,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
 
         SubmitRequest submitInfo = new SubmitRequest(
-            settingService.getEnvFlinkHome(),
+            settingService.getEffectiveFlinkHome(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),
             ExecutionMode.of(application.getExecutionMode()),
@@ -1086,7 +1086,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private void checkFlinkEnv() {
         String profiles = context.getEnvironment().getActiveProfiles()[0];
         if (profiles.equals(PROD_ENV_NAME)) {
-            String flinkLocalHome = settingService.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : settingService.getEnvFlinkHome();
+            String flinkLocalHome = settingService.getEffectiveFlinkHome();
             if (flinkLocalHome == null) {
                 throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
             }

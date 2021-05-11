@@ -63,7 +63,7 @@ public interface SettingService extends IService<Setting> {
 
     String getMavenRepository();
 
-    String getEnvFlinkHome();
+    String getEffectiveFlinkHome();
 
     Map<String, String> getFlinkDefaultConfig();
 

@@ -61,7 +61,7 @@ public class NoteBookServiceImpl implements NoteBookService {
         executorService.execute(() -> {
             FlinkInterpreter interpreter = new FlinkInterpreter(content.getProperties());
             try {
-                interpreter.open(settingService.getEnvFlinkHome());
+                interpreter.open(settingService.getEffectiveFlinkHome());
                 InterpreterOutput out = new InterpreterOutput(log::info);
                 InterpreterResult result = interpreter.interpret(content.getCode(), out);
                 log.info("repl submit code:" + result.code());

@@ -72,7 +72,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         if (settings.isEmpty()) {
             synchronized (SettingServiceImpl.class) {
                 if (settings.isEmpty()) {
-                    String flinkLocalHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+                    String flinkLocalHome = getEffectiveFlinkHome();
                     assert flinkLocalHome != null;
                     String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
                     this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
@@ -95,9 +95,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         }
     }
 
-    @Override
-    public String getEnvFlinkHome() {
-        return settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+    private String getEnvFlinkHome() {
+        String flinkHome = settings.get(SettingService.KEY_ENV_FLINK_HOME).getValue();
+        return Utils.isEmpty(flinkHome) ? null : flinkHome;
     }
 
     @Override
@@ -146,7 +146,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public Setting getFlink() throws IOException {
         Setting setting = new Setting();
-        String flinkHome = this.getEnvFlinkHome() == null ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+        String flinkHome = getEffectiveFlinkHome();
         assert flinkHome != null;
 
         File yaml = new File(flinkHome.concat("/conf/flink-conf.yaml"));
@@ -156,6 +156,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         setting.setFlinkHome(flinkHome);
         setting.setFlinkConf(confYaml);
         return setting;
+    }
+
+    @Override
+    public String getEffectiveFlinkHome() {
+       return Utils.isEmpty(this.getEnvFlinkHome()) ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
     }
 
     @Override
