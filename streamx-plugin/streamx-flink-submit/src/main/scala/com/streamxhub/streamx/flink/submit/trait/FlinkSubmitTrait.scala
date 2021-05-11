@@ -31,6 +31,7 @@ import org.apache.flink.configuration.{ConfigOption, CoreOptions, GlobalConfigur
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.hadoop.fs.Path
 
+import java.io.File
 import java.lang.{Boolean => JavaBool}
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
@@ -149,7 +150,7 @@ trait FlinkSubmitTrait extends Logger {
         /**
          * 不要问我javaagent路径为什么这么写,魔鬼在细节中.
          */
-        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/${submitRequest.jvmProfilerJar}=$param"
+        array += s"-D${CoreOptions.FLINK_TM_JVM_OPTIONS.key()}=-javaagent:$$PWD/plugins/$jvmProfilerJar=$param"
       }
 
       if (submitRequest.option != null && submitRequest.option.trim.nonEmpty) {
@@ -191,6 +192,16 @@ trait FlinkSubmitTrait extends Logger {
       if (isActive) return cli
     }
     throw new IllegalStateException("No valid command-line found.")
+  }
+
+  private[submit] lazy val jvmProfilerJar: String = {
+    val pluginsPath = System.getProperty("app.home").concat("/plugins")
+    val pluginsDir = new File(pluginsPath)
+    pluginsDir.list().filter(_.matches("streamx-jvm-profiler-.*\\.jar")) match {
+      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found streamx-jvm-profiler jar in $pluginsPath")
+      case array if array.length == 1 => array.head
+      case more => throw new IllegalArgumentException(s"[StreamX] found multiple streamx-jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
+    }
   }
 
   private[submit] def getOptionFromDefaultFlinkConfig[T](flinkHome: String, option: ConfigOption[T]): T = {

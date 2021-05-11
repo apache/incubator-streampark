@@ -131,14 +131,4 @@ case class SubmitRequest(flinkHome: String,
     customCommandLines
   }
 
-  private[submit] lazy val jvmProfilerJar: String = {
-    val pluginsPath = System.getProperty("app.home").concat("/plugins")
-    val pluginsDir = new File(pluginsPath)
-    pluginsDir.list().filter(_.matches("streamx-jvm-profiler-.*\\.jar")) match {
-      case Array() => throw new IllegalArgumentException(s"[StreamX] can no found streamx-jvm-profiler jar in $pluginsPath")
-      case array if array.length == 1 => array.head
-      case more => throw new IllegalArgumentException(s"[StreamX] found multiple streamx-jvm-profiler jar in $pluginsPath,[${more.mkString(",")}]")
-    }
-  }
-
 }
