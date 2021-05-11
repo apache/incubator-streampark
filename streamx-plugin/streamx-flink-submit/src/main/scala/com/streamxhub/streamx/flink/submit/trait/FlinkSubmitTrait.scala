@@ -71,12 +71,6 @@ trait FlinkSubmitTrait extends Logger {
       flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
       flinkHdfsJars = new Path( s"${HdfsUtils.getDefaultFS}$APP_JARS"),
       streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
-      flinkYaml = {
-        // 特别注意的是:不论是手动指定了FLINK_HOME还是使用部署机上的FLINK_HOME,这里默认的配置都是以生效的FLINK_HOME/conf/flink-conf.yaml来读取配置参数.
-        val config = new File(s"$FLINK_HOME/conf/flink-conf.yaml")
-        require(config.exists() && config.isFile)
-        FileUtils.readFileToString(config, Charset.defaultCharset())
-      },
       flinkHdfsDistJar = new File(s"$FLINK_HOME/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $FLINK_HOME/lib")
         case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
@@ -276,6 +270,5 @@ case class WorkspaceEnv(
                          flinkHdfsPlugins: Path,
                          flinkHdfsJars: Path,
                          streamxPlugin: Path,
-                         flinkYaml: String,
                          flinkHdfsDistJar: String
                        )

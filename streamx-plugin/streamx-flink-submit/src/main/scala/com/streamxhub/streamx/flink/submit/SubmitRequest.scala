@@ -30,6 +30,7 @@ import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 
 case class SubmitRequest(flinkHome:String,
+                         flinkYaml:String,
                          flinkUserJar: String,
                          developmentMode: DevelopmentMode,
                          executionMode: ExecutionMode,

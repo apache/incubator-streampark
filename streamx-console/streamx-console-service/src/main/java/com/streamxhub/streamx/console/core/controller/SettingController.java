@@ -69,6 +69,11 @@ public class SettingController extends BaseController {
         return RestResponse.create().data(setting);
     }
 
+    @PostMapping("sync")
+    public RestResponse sync() throws IOException {
+        settingService.sync();
+        return RestResponse.create();
+    }
 
     @PostMapping("update")
     @RequiresPermissions("setting:update")

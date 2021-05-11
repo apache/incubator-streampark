@@ -66,16 +66,20 @@
       title="Flink Conf"
       @close="handleClose()">
       <a-col style="font-size: 0.9rem">
-        <div>
-          Flink Home:
-          <div style="padding: 10px 0">
-            {{ flinkHome }}
-          </div>
+        <div style="padding-bottom: 15px">
+          Flink Home: &nbsp;&nbsp; {{ flinkHome }}
         </div>
         <div>
           Flink Conf:
-          <div style="padding: 10px 0">
+          <div style="padding: 15px 0">
             <div id="conf"></div>
+            <a-button
+              type="primary"
+              style="float:right;margin-top: 10px;margin-right: 130px"
+              @click="handleSync">
+              <a-icon type="sync" />
+              Sync Conf
+            </a-button>
           </div>
         </div>
       </a-col>
@@ -84,7 +88,7 @@
 </template>
 
 <script>
-import {all, get, update, getFlink } from '@api/setting'
+import {all, sync, update, getFlink } from '@api/setting'
 import SvgIcon from '@/components/SvgIcon'
 import monaco from '@/views/flink/app/Monaco.yaml'
 
@@ -116,7 +120,7 @@ export default {
         overviewRulerBorder: false, // 不要滚动条边框
         autoClosingBrackets: true,
         tabSize: 2, // tab 缩进长度
-        readOnly: this.readOnly,
+        readOnly: true,
         inherit: true,
         scrollBeyondLastLine: false,
         lineNumbersMinChars: 5,
@@ -167,6 +171,17 @@ export default {
       })
     },
 
+    handleSync () {
+      sync({}).then((resp)=>{
+        this.$swal.fire({
+            icon: 'success',
+            title: 'Flink default conf sync successful!',
+            showConfirmButton: false,
+            timer: 2000
+          })
+      })
+    },
+
     handleFlinkConf () {
       this.visiable = true
       getFlink({}).then((resp)=>{
@@ -181,7 +196,7 @@ export default {
         this.editor = monaco.editor.create(document.querySelector('#conf'), this.getOption())
         this.$nextTick(() => {
           const elem = document.querySelector('#conf')
-          this.handleHeight(elem, 130)
+          this.handleHeight(elem, 210)
         })
       }
       this.$nextTick(()=>{
@@ -191,6 +206,11 @@ export default {
 
     handleClose() {
       this.visiable = false
+    },
+
+    handleHeight(elem, h) {
+      const height = document.documentElement.offsetHeight || document.body.offsetHeight
+      $(elem).css('height', (height - h) + 'px')
     },
 
     handleSwitch(setting) {

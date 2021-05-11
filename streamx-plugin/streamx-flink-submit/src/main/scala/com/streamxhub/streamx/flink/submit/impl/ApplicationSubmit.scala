@@ -98,7 +98,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
 
     programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(workspaceEnv.flinkYaml)
+    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
 

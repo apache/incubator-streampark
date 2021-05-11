@@ -23,7 +23,6 @@ package com.streamxhub.streamx.console.core.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
-import lombok.Setter;
 
 import java.io.IOException;
 import java.util.Map;
@@ -72,4 +71,8 @@ public interface SettingService extends IService<Setting> {
     SenderEmail getSenderEmail();
 
     Setting getFlink() throws IOException;
+
+    String getFlinkYaml();
+
+    void sync() throws IOException;
 }

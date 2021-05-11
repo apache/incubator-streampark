@@ -61,6 +61,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         this.baseMapper.obsolete(appId);
     }
 
+
     @Override
     public boolean save(SavePoint entity) {
         this.expire(entity);
@@ -74,9 +75,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
                 .getFlinkDefaultConfig()
                 .getOrDefault("state.checkpoints.num-retained", "1")
         );
+
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
             cpThreshold = cpThreshold - 1;
         }
+
         if (cpThreshold == 0) {
             this.baseMapper.expireAll(entity.getAppId());
         } else {

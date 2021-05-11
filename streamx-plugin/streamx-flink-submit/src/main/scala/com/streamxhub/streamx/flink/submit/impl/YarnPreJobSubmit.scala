@@ -134,7 +134,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     programArgs += PARAM_KEY_APP_NAME
     programArgs += submitRequest.effectiveAppName
     programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(workspaceEnv.flinkYaml)
+    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
 
     submitRequest.developmentMode match {
       case DevelopmentMode.FLINKSQL =>

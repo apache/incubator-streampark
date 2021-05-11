@@ -28,6 +28,7 @@ import com.streamxhub.streamx.console.core.dao.SettingMapper;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.springframework.context.annotation.DependsOn;
@@ -38,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,8 +54,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     implements SettingService {
 
-
     private Map<String, String> flinkYaml;
+
+    private String flinkYamlString = null;
 
     @Override
     public Setting get(String key) {
@@ -68,14 +71,17 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         settingList.forEach(x -> settings.put(x.getKey(), x));
     }
 
+    @SneakyThrows
     private void initDefaultConfig() {
         if (settings.isEmpty()) {
             synchronized (SettingServiceImpl.class) {
                 if (settings.isEmpty()) {
                     String flinkLocalHome = getEffectiveFlinkHome();
                     assert flinkLocalHome != null;
-                    String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
-                    this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
+                    File yaml = new File(flinkLocalHome.concat("/conf/flink-conf.yaml"));
+                    assert yaml.exists();
+                    this.flinkYamlString = FileUtils.readFileToString(yaml, Charset.defaultCharset());
+                    this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml.getAbsolutePath()));
                 }
             }
         }
@@ -152,15 +158,28 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         File yaml = new File(flinkHome.concat("/conf/flink-conf.yaml"));
         assert yaml.exists();
 
-        String confYaml = FileUtils.readFileToString(yaml);
+        String confYaml = FileUtils.readFileToString(yaml, Charset.defaultCharset());
         setting.setFlinkHome(flinkHome);
         setting.setFlinkConf(confYaml);
         return setting;
     }
 
     @Override
+    public String getFlinkYaml() {
+        return this.flinkYamlString;
+    }
+
+    @Override
+    public void sync() throws IOException {
+        String flinkLocalHome = getEffectiveFlinkHome();
+        String yaml = flinkLocalHome.concat("/conf/flink-conf.yaml");
+        this.flinkYamlString = FileUtils.readFileToString(new File(yaml), Charset.defaultCharset());
+        this.flinkYaml = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlFile(yaml));
+    }
+
+    @Override
     public String getEffectiveFlinkHome() {
-       return Utils.isEmpty(this.getEnvFlinkHome()) ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
+        return Utils.isEmpty(this.getEnvFlinkHome()) ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
     }
 
     @Override

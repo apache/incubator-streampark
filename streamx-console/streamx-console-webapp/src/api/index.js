@@ -96,6 +96,7 @@ export default {
     ALL: '/flink/setting/all',
     CHECK: '/flink/setting/check',
     GETFLINK: '/flink/setting/getflink',
+    SYNC: '/flink/setting/sync',
     UPDATE: '/flink/setting/update'
   },
   User: {
