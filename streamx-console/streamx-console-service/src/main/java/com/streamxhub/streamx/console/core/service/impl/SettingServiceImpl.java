@@ -79,7 +79,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             File yaml = new File(flinkLocalHome.concat("/conf/flink-conf.yaml"));
             assert yaml.exists();
             this.flinkYamlString = FileUtils.readFileToString(yaml, Charset.defaultCharset());
-            this.flinkYamlMap = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(flinkYamlString));
+            this.flinkYamlMap = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(this.flinkYamlString));
         }
     }
 
@@ -158,7 +158,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public Map<String, String> getFlinkDefaultConfig() {
         this.loadDefaultConfig();
-        return flinkYamlMap;
+        return this.flinkYamlMap;
     }
 
     @Override
