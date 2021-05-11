@@ -49,7 +49,7 @@ trait FlinkSubmitTrait extends Logger {
   @throws[Exception] def submit(submitRequest: SubmitRequest): SubmitResponse = {
     logInfo(
       s"""
-         |"flink submit {" +
+         |"flink submit {"
          |      "userFlinkHome" : ${submitRequest.flinkHome},
          |      "appName": ${submitRequest.appName},
          |      "devMode": ${submitRequest.developmentMode.name()},
@@ -72,7 +72,7 @@ trait FlinkSubmitTrait extends Logger {
   def stop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     logInfo(
       s"""
-         |"flink stop {" +
+         |"flink stop {"
          |      "flinkHome" :$flinkHome,
          |      "appId": $appId,
          |      "jobId": $jobStringId,
