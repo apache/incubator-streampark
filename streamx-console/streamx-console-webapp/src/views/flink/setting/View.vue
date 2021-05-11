@@ -185,7 +185,7 @@ export default {
         })
       }
       this.$nextTick(()=>{
-        this.editor.getModel().setValue(this.originalValue)
+        this.editor.getModel().setValue(this.flinkConf)
       })
     },
 
