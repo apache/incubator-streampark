@@ -25,6 +25,10 @@ export function get (params) {
   return http.post(api.SETTING.GET, params)
 }
 
+export function weburl() {
+  return http.post(api.SETTING.WEBURL, {})
+}
+
 export function all (params) {
   return http.post(api.SETTING.ALL, params)
 }

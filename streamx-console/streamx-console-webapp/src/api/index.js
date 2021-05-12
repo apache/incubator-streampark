@@ -93,6 +93,7 @@ export default {
   },
   SETTING: {
     GET: '/flink/setting/get',
+    WEBURL: '/flink/setting/weburl',
     ALL: '/flink/setting/all',
     CHECK: '/flink/setting/check',
     GETFLINK: '/flink/setting/getflink',

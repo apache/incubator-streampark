@@ -631,6 +631,7 @@
               checked-children="ON"
               un-checked-children="OFF"
               v-model="flameGraph"
+              @click="handleCheckFlameGraph()"
               v-decorator="['flameGraph']"/>
             <span
               class="conf-switch"
@@ -874,6 +875,7 @@ import {mapActions} from 'vuex'
 import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
 import {latest, history} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
+import {weburl} from '@api/setting'
 import {Terminal} from 'xterm'
 import 'xterm/css/xterm.css'
 import SockJS from 'sockjs-client'
@@ -1332,6 +1334,22 @@ export default {
     handleDetail(app) {
       this.SetAppId(app.id)
       this.$router.push({'path': '/flink/app/detail'})
+    },
+
+    handleCheckFlameGraph() {
+      if (this.flameGraph) {
+        weburl({}).then((resp)=>{
+          if ( resp.data != null ) {
+            this.$swal.fire({
+              icon: 'success',
+              title: 'StreamX Webapp address not defined,please check!',
+              showConfirmButton: false,
+              timer: 2000
+            })
+          }
+          this.formStartCheckPoint.setFieldsValue({'flameGraph':false})
+        })
+      }
     },
 
     handleFlameGraph(app) {
