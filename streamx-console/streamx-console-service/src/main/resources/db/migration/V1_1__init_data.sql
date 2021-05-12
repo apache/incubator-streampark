@@ -25,10 +25,6 @@ INSERT INTO `t_menu` VALUES (15, 4, 'update', '', '', 'role:update', NULL, '1', 
 INSERT INTO `t_menu` VALUES (16, 4, 'delete', '', '', 'role:delete', NULL, '1', '1', NULL, '2017-12-27 17:06:38', '2020-10-11 10:37:42');
 INSERT INTO `t_menu` VALUES (17, 5, 'add', '', '', 'menu:add', NULL, '1', '1', NULL, '2017-12-27 17:08:02', '2020-10-11 10:40:33');
 INSERT INTO `t_menu` VALUES (18, 5, 'update', '', '', 'menu:update', NULL, '1', '1', NULL, '2017-12-27 17:08:02', '2020-10-11 10:40:28');
-INSERT INTO `t_menu` VALUES (19, 5, 'delete', '', '', 'menu:delete', NULL, '1', '1', NULL, '2017-12-27 17:08:02', '2020-10-11 10:40:22');
-INSERT INTO `t_menu` VALUES (130, 3, 'export', NULL, NULL, 'user:export', NULL, '1', '1', NULL, '2019-01-23 06:35:16', '2020-10-11 10:38:15');
-INSERT INTO `t_menu` VALUES (131, 4, 'export', NULL, NULL, 'role:export', NULL, '1', '1', NULL, '2019-01-23 06:35:36', '2020-10-11 10:37:51');
-INSERT INTO `t_menu` VALUES (132, 5, 'export', NULL, NULL, 'menu:export', NULL, '1', '1', NULL, '2019-01-23 06:36:05', '2020-10-11 10:40:16');
 INSERT INTO `t_menu` VALUES (135, 3, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, '2019-01-23 06:37:00', '2020-10-11 10:38:07');
 INSERT INTO `t_menu` VALUES (183, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, '2019-12-10 10:06:54', '2021-02-18 10:45:26');
 INSERT INTO `t_menu` VALUES (184, 183, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, '2019-12-10 10:08:30', '2020-09-27 18:33:41');
@@ -53,8 +49,6 @@ INSERT INTO `t_menu` VALUES (205, 185, 'conf delete', NULL, NULL, 'conf:delete',
 INSERT INTO `t_menu` VALUES (206, 185, 'flame Graph', NULL, NULL, 'app:flameGraph', NULL, '1', '1', NULL, '2020-12-23 21:59:00', '2020-12-23 22:00:10');
 INSERT INTO `t_menu` VALUES (207, 183, 'Setting', '/flink/setting', 'flink/setting/View', 'setting:view', 'setting', '0', '1', 4, '2021-02-08 22:54:41', '2021-02-09 09:32:09');
 INSERT INTO `t_menu` VALUES (208, 207, 'Setting Update', NULL, NULL, 'setting:update', NULL, '1', '1', NULL, '2021-02-08 23:17:29', NULL);
-INSERT INTO `t_menu` VALUES (209, 1, 'User Profile', '/user/profile', 'system/user/Profile', '', '', '0', '0', NULL, '2021-04-11 23:59:10', '2021-04-12 00:05:30');
-
 -- ----------------------------
 -- Records of t_role
 -- ----------------------------
@@ -64,41 +58,23 @@ INSERT INTO `t_role` VALUES (2, 'developer', 'developer', '2021-04-11 19:02:56',
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
-INSERT INTO `t_role_menu` VALUES (2, 197);
-INSERT INTO `t_role_menu` VALUES (2, 198);
-INSERT INTO `t_role_menu` VALUES (2, 199);
-INSERT INTO `t_role_menu` VALUES (2, 200);
-INSERT INTO `t_role_menu` VALUES (2, 185);
-INSERT INTO `t_role_menu` VALUES (2, 201);
-INSERT INTO `t_role_menu` VALUES (2, 202);
-INSERT INTO `t_role_menu` VALUES (2, 203);
-INSERT INTO `t_role_menu` VALUES (2, 205);
-INSERT INTO `t_role_menu` VALUES (2, 206);
-INSERT INTO `t_role_menu` VALUES (2, 204);
-INSERT INTO `t_role_menu` VALUES (2, 188);
-INSERT INTO `t_role_menu` VALUES (2, 191);
-INSERT INTO `t_role_menu` VALUES (2, 192);
-INSERT INTO `t_role_menu` VALUES (2, 193);
-INSERT INTO `t_role_menu` VALUES (2, 194);
-INSERT INTO `t_role_menu` VALUES (2, 183);
-INSERT INTO `t_role_menu` VALUES (2, 209);
+
+
+-- ----------------------------
+-- Records of t_role_menu
+-- ----------------------------
 INSERT INTO `t_role_menu` VALUES (1, 1);
 INSERT INTO `t_role_menu` VALUES (1, 3);
 INSERT INTO `t_role_menu` VALUES (1, 11);
 INSERT INTO `t_role_menu` VALUES (1, 12);
 INSERT INTO `t_role_menu` VALUES (1, 17);
 INSERT INTO `t_role_menu` VALUES (1, 18);
-INSERT INTO `t_role_menu` VALUES (1, 19);
-INSERT INTO `t_role_menu` VALUES (1, 132);
 INSERT INTO `t_role_menu` VALUES (1, 135);
 INSERT INTO `t_role_menu` VALUES (1, 5);
 INSERT INTO `t_role_menu` VALUES (1, 4);
 INSERT INTO `t_role_menu` VALUES (1, 14);
 INSERT INTO `t_role_menu` VALUES (1, 15);
-INSERT INTO `t_role_menu` VALUES (1, 16);
-INSERT INTO `t_role_menu` VALUES (1, 131);
 INSERT INTO `t_role_menu` VALUES (1, 13);
-INSERT INTO `t_role_menu` VALUES (1, 130);
 INSERT INTO `t_role_menu` VALUES (1, 183);
 INSERT INTO `t_role_menu` VALUES (1, 184);
 INSERT INTO `t_role_menu` VALUES (1, 191);
@@ -122,8 +98,24 @@ INSERT INTO `t_role_menu` VALUES (1, 205);
 INSERT INTO `t_role_menu` VALUES (1, 206);
 INSERT INTO `t_role_menu` VALUES (1, 207);
 INSERT INTO `t_role_menu` VALUES (1, 208);
-INSERT INTO `t_role_menu` VALUES (1, 209);
-
+INSERT INTO `t_role_menu` VALUES (1, 16);
+INSERT INTO `t_role_menu` VALUES (2, 185);
+INSERT INTO `t_role_menu` VALUES (2, 197);
+INSERT INTO `t_role_menu` VALUES (2, 198);
+INSERT INTO `t_role_menu` VALUES (2, 199);
+INSERT INTO `t_role_menu` VALUES (2, 200);
+INSERT INTO `t_role_menu` VALUES (2, 201);
+INSERT INTO `t_role_menu` VALUES (2, 202);
+INSERT INTO `t_role_menu` VALUES (2, 203);
+INSERT INTO `t_role_menu` VALUES (2, 204);
+INSERT INTO `t_role_menu` VALUES (2, 205);
+INSERT INTO `t_role_menu` VALUES (2, 206);
+INSERT INTO `t_role_menu` VALUES (2, 188);
+INSERT INTO `t_role_menu` VALUES (2, 190);
+INSERT INTO `t_role_menu` VALUES (2, 191);
+INSERT INTO `t_role_menu` VALUES (2, 192);
+INSERT INTO `t_role_menu` VALUES (2, 193);
+INSERT INTO `t_role_menu` VALUES (2, 194);
 -- ----------------------------
 -- Records of t_setting
 -- ----------------------------
