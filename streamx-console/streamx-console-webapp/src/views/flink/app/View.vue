@@ -1339,15 +1339,14 @@ export default {
     handleCheckFlameGraph() {
       if (this.flameGraph) {
         weburl({}).then((resp)=>{
-          if ( resp.data != null ) {
-            this.$swal.fire({
-              icon: 'success',
-              title: 'StreamX Webapp address not defined,please check!',
-              showConfirmButton: false,
-              timer: 2000
-            })
+          if ( resp.data == null || resp.data === '' ) {
+            this.$swal.fire(
+              'Failed',
+              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+              'error'
+            )
           }
-          this.formStartCheckPoint.setFieldsValue({'flameGraph':false})
+          this.flameGraph = false
         })
       }
     },
