@@ -1032,6 +1032,8 @@ export default {
           {text: 'RUNNING', value: 7},
           {text: 'FAILED', value: 9},
           {text: 'CANCELED', value: 11},
+          {text: 'FINISHED', value: 12},
+          {text: 'SUSPENDED', value: 13},
           {text: 'LOST', value: 15}
         ]
       }, {
