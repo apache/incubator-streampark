@@ -104,6 +104,7 @@
           @click.native="view(record)"
           title="查看" />
         <a-popconfirm
+          v-permit="'role:delete'"
           v-if="record.roleName !== 'admin'"
           title="Are you sure delete this Role ?"
           cancel-text="No"
@@ -250,6 +251,7 @@ export default {
       }
     },
     handleDelete (record) {
+      alert(record.roleId)
       remove({
         roleId: record.roleId
       }).then(() => {

@@ -91,10 +91,10 @@
         slot="operation"
         slot-scope="text, record">
         <svg-icon
+          v-permit="'user:update'"
           v-if="(record.username !== 'admin' || userName === 'admin')"
           name="edit"
           border
-          v-permit="'user:update'"
           @click.native="edit(record)"
           title="修改用户" />
         <svg-icon
@@ -103,13 +103,14 @@
           @click.native="view(record)"
           title="查看" />
         <svg-icon
+          v-permit="'user:reset'"
           v-if="(record.username !== 'admin' || userName === 'admin')"
           name="resetpass"
           border
           @click.native="resetPassword(record)"
-          v-permit="'user:reset'"
           title="reset password" />
         <a-popconfirm
+          v-permit="'user:delete'"
           v-if="record.username !== 'admin'"
           title="Are you sure delete this user ?"
           cancel-text="No"
