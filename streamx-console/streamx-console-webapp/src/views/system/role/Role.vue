@@ -54,12 +54,6 @@
                   shape="circle"
                   icon="plus"
                   @click="add" />
-                <a-button
-                  v-permit="'role:delete'"
-                  type="primary"
-                  shape="circle"
-                  icon="minus"
-                  @click="batchDelete" />
               </span>
             </a-col>
           </div>
@@ -98,6 +92,7 @@
         slot="operation"
         slot-scope="text, record">
         <svg-icon
+          v-if="(record.roleName !== 'admin' || userName === 'admin')"
           v-permit="'role:update'"
           name="edit"
           border
@@ -108,6 +103,14 @@
           border
           @click.native="view(record)"
           title="查看" />
+        <a-popconfirm
+          v-if="record.roleName !== 'admin'"
+          title="Are you sure delete this Role ?"
+          cancel-text="No"
+          ok-text="Yes"
+          @confirm="handleDelete(record)">
+          <svg-icon name="remove" border/>
+        </a-popconfirm>
       </template>
     </a-table>
     <!-- 角色信息查看 -->
@@ -136,7 +139,7 @@ import RoleAdd from './RoleAdd'
 import RoleInfo from './RoleInfo'
 import RoleEdit from './RoleEdit'
 import SvgIcon from '@/components/SvgIcon'
-
+import { mapState } from 'vuex'
 import { list, remove } from '@/api/role'
 
 export default {
@@ -162,7 +165,6 @@ export default {
       dataSource: [],
       sortedInfo: null,
       paginationInfo: null,
-      selectedRowKeys: [],
       pagination: {
         pageSizeOptions: ['10', '20', '30', '40', '100'],
         defaultCurrent: 1,
@@ -201,15 +203,15 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]
-    }
+    },
+    ...mapState({
+      userName: state => state.user.name
+    })
   },
   mounted () {
     this.fetch()
   },
   methods: {
-    onSelectChange (selectedRowKeys) {
-      this.selectedRowKeys = selectedRowKeys
-    },
     add () {
       this.roleAdd.visiable = true
     },
@@ -247,36 +249,12 @@ export default {
         this.queryParams.createTimeTo = value[1]
       }
     },
-    batchDelete () {
-      if (!this.selectedRowKeys.length) {
-        this.$message.warning('请选择需要删除的记录')
-        return
-      }
-      const that = this
-      this.$confirm({
-        title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        centered: true,
-        onOk () {
-          const roleIds = []
-          for (const key of that.selectedRowKeys) {
-            roleIds.push(that.dataSource[key].roleId)
-          }
-          remove({
-            roleIds: roleIds.join(',')
-          }).then(() => {
-            that.$message.success('删除成功')
-            that.selectedRowKeys = []
-            that.search()
-          })
-        },
-        onCancel () {
-          that.selectedRowKeys = []
-          that.$message.info('已取消删除')
-        }
+    handleDelete (record) {
+      remove({
+        roleId: record.roleId
+      }).then(() => {
+        this.$message.success('delete successful')
+        this.search()
       })
     },
     search () {
@@ -294,8 +272,6 @@ export default {
       })
     },
     reset () {
-      // 取消选中
-      this.selectedRowKeys = []
       // 重置分页
       this.$refs.TableInfo.pagination.current = this.pagination.defaultCurrent
       if (this.paginationInfo) {

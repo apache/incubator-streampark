@@ -20,31 +20,24 @@
  */
 package com.streamxhub.streamx.console.system.controller;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.util.Map;
 
 /**
  * @author benjobs
@@ -97,13 +90,12 @@ public class UserController extends BaseController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
-    public void deleteUsers(@NotBlank(message = "{required}") String userIds)
-            throws ServiceException {
+    public RestResponse deleteUsers(Long userId) throws ServiceException {
         try {
-            String[] ids = userIds.split(StringPool.COMMA);
-            this.userService.deleteUsers(ids);
+            this.userService.removeById(userId);
+            return RestResponse.create().data(true);
         } catch (Exception e) {
-            message = "删除用户失败";
+            message = "delete user failed, error:" + e.getMessage();
             log.info(message, e);
             throw new ServiceException(message);
         }
@@ -122,9 +114,9 @@ public class UserController extends BaseController {
 
     @PutMapping("avatar")
     public void updateAvatar(
-            @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String avatar)
-            throws ServiceException {
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String avatar)
+        throws ServiceException {
         try {
             this.userService.updateAvatar(username, avatar);
         } catch (Exception e) {
@@ -141,8 +133,8 @@ public class UserController extends BaseController {
 
     @PostMapping("check/password")
     public boolean checkPassword(
-            @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password) {
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) {
 
         User user = userService.findByName(username);
         String salt = user.getSalt();
@@ -152,9 +144,9 @@ public class UserController extends BaseController {
 
     @PutMapping("password")
     public void updatePassword(
-            @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password)
-            throws ServiceException {
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password)
+        throws ServiceException {
         try {
             userService.updatePassword(username, password);
         } catch (Exception e) {
@@ -167,7 +159,7 @@ public class UserController extends BaseController {
     @PutMapping("password/reset")
     @RequiresPermissions("user:reset")
     public void resetPassword(@NotBlank(message = "{required}") String usernames)
-            throws ServiceException {
+        throws ServiceException {
         try {
             String[] usernameArr = usernames.split(StringPool.COMMA);
             this.userService.resetPassword(usernameArr);

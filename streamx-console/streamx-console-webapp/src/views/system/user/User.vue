@@ -91,6 +91,7 @@
         slot="operation"
         slot-scope="text, record">
         <svg-icon
+          v-if="(record.username !== 'admin' || userName === 'admin')"
           name="edit"
           border
           v-permit="'user:update'"
@@ -102,12 +103,14 @@
           @click.native="view(record)"
           title="查看" />
         <svg-icon
+          v-if="(record.username !== 'admin' || userName === 'admin')"
           name="resetpass"
           border
           @click.native="resetPassword(record)"
           v-permit="'user:reset'"
           title="reset password" />
         <a-popconfirm
+          v-if="record.username !== 'admin'"
           title="Are you sure delete this user ?"
           cancel-text="No"
           ok-text="Yes"
@@ -142,6 +145,7 @@ import UserAdd from './UserAdd'
 import UserEdit from './UserEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
+import { mapState } from 'vuex'
 
 import { list, remove, reset as resetPassword } from '@/api/user'
 
@@ -217,11 +221,16 @@ export default {
         dataIndex: 'operation',
         scopedSlots: { customRender: 'operation' }
       }]
-    }
+    },
+    ...mapState({
+      userName: state => state.user.name
+    })
   },
+
   mounted () {
     this.fetch()
   },
+
   methods: {
     view (record) {
       this.userInfo.data = record
@@ -261,7 +270,7 @@ export default {
     },
     handleDelete (record) {
       remove({
-        userIds: record.userId
+        userId: record.userId
       }).then(() => {
         this.$message.success('delete successful')
         this.search()

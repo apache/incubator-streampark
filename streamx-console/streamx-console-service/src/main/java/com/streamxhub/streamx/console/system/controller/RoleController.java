@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -34,7 +35,6 @@ import org.springframework.web.bind.annotation.*;
 
 import lombok.extern.slf4j.Slf4j;
 
-import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -93,13 +93,12 @@ public class RoleController extends BaseController {
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public void deleteRoles(@NotBlank(message = "{required}") String roleIds)
-            throws ServiceException {
+    public RestResponse deleteRole(Long roleId) throws ServiceException {
         try {
-            String[] ids = roleIds.split(StringPool.COMMA);
-            this.roleService.deleteRoles(ids);
+            this.roleService.removeById(roleId);
+            return RestResponse.create().data(true);
         } catch (Exception e) {
-            message = "删除角色失败";
+            message = "delete user failed, error:" + e.getMessage();
             log.info(message, e);
             throw new ServiceException(message);
         }

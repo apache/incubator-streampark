@@ -47,7 +47,6 @@
                   shape="circle"
                   icon="rest"
                   @click="reset" />
-
                 <a-popconfirm
                   title="请选择创建类型"
                   ok-text="按钮"
@@ -64,14 +63,6 @@
                     shape="circle"
                     icon="plus" />
                 </a-popconfirm>
-                <!--
-                <a-button
-                  v-permit="'menu:delete'"
-                  type="primary"
-                  shape="circle"
-                  icon="minus"
-                  @click="batchDelete" />
-                -->
               </span>
             </a-col>
           </div>
@@ -87,7 +78,6 @@
         :data-source="dataSource"
         :pagination="pagination"
         :loading="loading"
-        :row-selection="{selectedRowKeys: selectedRowKeys, onChange: onSelectChange}"
         @change="handleTableChange"
         :scroll="{ x: 1650 }">
         <template
@@ -146,7 +136,7 @@ import MenuEdit from './MenuEdit'
 import ButtonAdd from './ButtonAdd'
 import ButtonEdit from './ButtonEdit'
 import SvgIcon from '@/components/SvgIcon'
-
+import { mapState } from 'vuex'
 import { list, remove } from '@/api/menu'
 
 export default {
@@ -159,7 +149,6 @@ export default {
       queryParams: {},
       filteredInfo: null,
       dataSource: [],
-      selectedRowKeys: [],
       pagination: {
         defaultPageSize: 10000000,
         hideOnSinglePage: true,
@@ -227,15 +216,15 @@ export default {
         scopedSlots: { customRender: 'operation' },
         fixed: 'right'
       }]
-    }
+    },
+    ...mapState({
+      userName: state => state.user.name
+    })
   },
   mounted () {
     this.fetch()
   },
   methods: {
-    onSelectChange (selectedRowKeys) {
-      this.selectedRowKeys = selectedRowKeys
-    },
     handleMenuEditClose () {
       this.menuEditVisiable = false
     },
@@ -289,36 +278,6 @@ export default {
         this.queryParams.createTimeTo = value[1]
       }
     },
-    batchDelete () {
-      if (!this.selectedRowKeys.length) {
-        this.$message.warning('请选择需要删除的记录')
-        return
-      }
-
-      const that = this
-      this.$confirm({
-        title: '确定删除所选中的记录?',
-        content: '当您点击确定按钮后，这些记录将会被彻底删除',
-        okText: '确定',
-        okType: 'danger',
-        cancelText: '取消',
-        centered: true,
-        onOk () {
-          remove({
-            menuIds: that.selectedRowKeys.join(',')
-          }).then(() => {
-            that.$message.success('删除成功')
-            that.selectedRowKeys = []
-            that.fetch()
-          })
-        },
-        onCancel () {
-          that.selectedRowKeys = []
-          that.$message.info('已取消删除')
-        }
-      })
-    },
-
     search () {
       const { filteredInfo } = this
       this.fetch({
@@ -327,8 +286,6 @@ export default {
       })
     },
     reset () {
-      // 取消选中
-      this.selectedRowKeys = []
       // 重置列过滤器规则
       this.filteredInfo = null
       // 重置查询参数
