@@ -13,10 +13,10 @@ INSERT INTO `t_flink_tutorial` VALUES (1, 1, 'repl', '### Introduction\n\n[Apach
 -- ----------------------------
 -- Records of t_menu
 -- ----------------------------
-INSERT INTO `t_menu` VALUES (1, 0, 'System', '/system', 'PageView', NULL, 'appstore', '0', '1', 1, '2017-12-27 16:39:07', '2021-02-18 10:45:18');
+INSERT INTO `t_menu` VALUES (1, 0, 'System', '/system', 'PageView', NULL, 'desktop', '0', '1', 1, '2017-12-27 16:39:07', '2021-02-18 10:45:18');
 INSERT INTO `t_menu` VALUES (3, 1, 'User Management', '/system/user', 'system/user/User', 'user:view', 'user', '0', '1', 1, '2017-12-27 16:47:13', '2021-02-09 19:01:36');
 INSERT INTO `t_menu` VALUES (4, 1, 'Role Management', '/system/role', 'system/role/Role', 'role:view', 'smile', '0', '1', 2, '2017-12-27 16:48:09', '2021-02-09 19:01:41');
-INSERT INTO `t_menu` VALUES (5, 1, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'profile', '0', '1', 3, '2017-12-27 16:48:57', '2021-02-09 19:01:47');
+INSERT INTO `t_menu` VALUES (5, 1, 'Router Management', '/system/menu', 'system/menu/Menu', 'menu:view', 'bars', '0', '1', 3, '2017-12-27 16:48:57', '2021-02-09 19:01:47');
 INSERT INTO `t_menu` VALUES (11, 3, 'add', '', '', 'user:add', NULL, '1', '1', NULL, '2017-12-27 17:02:58', '2020-10-11 10:38:35');
 INSERT INTO `t_menu` VALUES (12, 3, 'update', '', '', 'user:update', NULL, '1', '1', NULL, '2017-12-27 17:04:07', '2020-10-11 10:38:29');
 INSERT INTO `t_menu` VALUES (13, 3, 'delete', '', '', 'user:delete', NULL, '1', '1', NULL, '2017-12-27 17:04:58', '2020-10-11 10:38:22');
@@ -30,9 +30,9 @@ INSERT INTO `t_menu` VALUES (130, 3, 'export', NULL, NULL, 'user:export', NULL, 
 INSERT INTO `t_menu` VALUES (131, 4, 'export', NULL, NULL, 'role:export', NULL, '1', '1', NULL, '2019-01-23 06:35:36', '2020-10-11 10:37:51');
 INSERT INTO `t_menu` VALUES (132, 5, 'export', NULL, NULL, 'menu:export', NULL, '1', '1', NULL, '2019-01-23 06:36:05', '2020-10-11 10:40:16');
 INSERT INTO `t_menu` VALUES (135, 3, 'reset', NULL, NULL, 'user:reset', NULL, '1', '1', NULL, '2019-01-23 06:37:00', '2020-10-11 10:38:07');
-INSERT INTO `t_menu` VALUES (183, 0, 'StreamX', '/flink', 'PageView', NULL, 'dashboard', '0', '1', 2, '2019-12-10 10:06:54', '2021-02-18 10:45:26');
+INSERT INTO `t_menu` VALUES (183, 0, 'StreamX', '/flink', 'PageView', NULL, 'build', '0', '1', 2, '2019-12-10 10:06:54', '2021-02-18 10:45:26');
 INSERT INTO `t_menu` VALUES (184, 183, 'Project', '/flink/project', 'flink/project/View', 'project:view', 'github', '0', '1', 1, '2019-12-10 10:08:30', '2020-09-27 18:33:41');
-INSERT INTO `t_menu` VALUES (185, 183, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'hdd', '0', '1', 2, '2019-12-10 10:10:26', '2020-09-27 18:33:47');
+INSERT INTO `t_menu` VALUES (185, 183, 'Application', '/flink/app', 'flink/app/View', 'app:view', 'mobile', '0', '1', 2, '2019-12-10 10:10:26', '2020-09-27 18:33:47');
 INSERT INTO `t_menu` VALUES (188, 183, 'Add Application', '/flink/app/add', 'flink/app/Add', 'app:create', '', '0', '0', NULL, '2019-12-11 11:54:24', '2020-10-12 08:05:02');
 INSERT INTO `t_menu` VALUES (190, 183, 'Add Project', '/flink/project/add', 'flink/project/Add', 'project:create', '', '0', '0', NULL, '2020-08-04 07:36:00', '2020-10-12 08:04:19');
 INSERT INTO `t_menu` VALUES (191, 183, 'App Detail', '/flink/app/detail', 'flink/app/Detail', 'app:detail', '', '0', '0', NULL, '2020-08-20 09:56:47', '2020-10-12 08:04:26');
