@@ -59,29 +59,29 @@ INSERT INTO `t_menu` VALUES (209, 1, 'User Profile', '/user/profile', 'system/us
 -- Records of t_role
 -- ----------------------------
 INSERT INTO `t_role` VALUES (1, 'admin', 'admin', '2020-12-10 12:00:56', '2021-04-22 09:35:44', 'admin');
-INSERT INTO `t_role` VALUES (142, 'developer', '普通开发者', '2021-04-11 19:02:56', '2021-04-12 00:00:14', NULL);
+INSERT INTO `t_role` VALUES (2, 'developer', 'developer', '2021-04-11 19:02:56', '2021-04-12 00:00:14', NULL);
 
 -- ----------------------------
 -- Records of t_role_menu
 -- ----------------------------
-INSERT INTO `t_role_menu` VALUES (142, 197);
-INSERT INTO `t_role_menu` VALUES (142, 198);
-INSERT INTO `t_role_menu` VALUES (142, 199);
-INSERT INTO `t_role_menu` VALUES (142, 200);
-INSERT INTO `t_role_menu` VALUES (142, 185);
-INSERT INTO `t_role_menu` VALUES (142, 201);
-INSERT INTO `t_role_menu` VALUES (142, 202);
-INSERT INTO `t_role_menu` VALUES (142, 203);
-INSERT INTO `t_role_menu` VALUES (142, 205);
-INSERT INTO `t_role_menu` VALUES (142, 206);
-INSERT INTO `t_role_menu` VALUES (142, 204);
-INSERT INTO `t_role_menu` VALUES (142, 188);
-INSERT INTO `t_role_menu` VALUES (142, 191);
-INSERT INTO `t_role_menu` VALUES (142, 192);
-INSERT INTO `t_role_menu` VALUES (142, 193);
-INSERT INTO `t_role_menu` VALUES (142, 194);
-INSERT INTO `t_role_menu` VALUES (142, 183);
-INSERT INTO `t_role_menu` VALUES (142, 209);
+INSERT INTO `t_role_menu` VALUES (2, 197);
+INSERT INTO `t_role_menu` VALUES (2, 198);
+INSERT INTO `t_role_menu` VALUES (2, 199);
+INSERT INTO `t_role_menu` VALUES (2, 200);
+INSERT INTO `t_role_menu` VALUES (2, 185);
+INSERT INTO `t_role_menu` VALUES (2, 201);
+INSERT INTO `t_role_menu` VALUES (2, 202);
+INSERT INTO `t_role_menu` VALUES (2, 203);
+INSERT INTO `t_role_menu` VALUES (2, 205);
+INSERT INTO `t_role_menu` VALUES (2, 206);
+INSERT INTO `t_role_menu` VALUES (2, 204);
+INSERT INTO `t_role_menu` VALUES (2, 188);
+INSERT INTO `t_role_menu` VALUES (2, 191);
+INSERT INTO `t_role_menu` VALUES (2, 192);
+INSERT INTO `t_role_menu` VALUES (2, 193);
+INSERT INTO `t_role_menu` VALUES (2, 194);
+INSERT INTO `t_role_menu` VALUES (2, 183);
+INSERT INTO `t_role_menu` VALUES (2, 209);
 INSERT INTO `t_role_menu` VALUES (1, 1);
 INSERT INTO `t_role_menu` VALUES (1, 3);
 INSERT INTO `t_role_menu` VALUES (1, 11);
