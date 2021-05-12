@@ -60,7 +60,11 @@ export default {
       diffEditor: null,
       original: null,
       modified : null,
-      option: {
+    }
+  },
+  methods: {
+    getOption(){
+      return {
         theme: this.ideTheme(),
         language: 'yaml',
         selectOnLineNumbers: false,
@@ -90,11 +94,7 @@ export default {
           verticalScrollbarSize: 15
         }
       }
-    }
-  },
-
-  methods: {
-
+    },
     different(param,original,modified) {
       this.visiable = true
       this.original = original
@@ -102,6 +102,14 @@ export default {
       this.items = param
       this.activeTab = 0
       this.handleRenderTab(this.activeTab)
+    },
+
+    theme ($theme) {
+      if(this.diffEditor != null) {
+        this.diffEditor.updateOptions({
+          theme: $theme
+        })
+      }
     },
 
     handleRenderTab(index) {
@@ -117,7 +125,7 @@ export default {
             this.diffEditor.dispose()
           }catch (e) {}
         }
-        this.diffEditor = monaco.editor.createDiffEditor(elem, this.option)
+        this.diffEditor = monaco.editor.createDiffEditor(elem, this.getOption())
         this.diffEditor.setModel({
           original: originalModel,
           modified: modifiedModel

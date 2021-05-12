@@ -168,6 +168,14 @@ export default {
       })
     },
 
+    theme ($theme) {
+      if(this.editor != null) {
+        this.editor.updateOptions({
+          theme: $theme
+        })
+      }
+    },
+
     compare(original, modified, title) {
       this.compareMode = true
       this.visibleDiff = true

@@ -30,6 +30,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
+import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.utils.JsonUtils;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
@@ -409,7 +410,7 @@ public class Application implements Serializable {
         @JsonIgnore
         @SneakyThrows
         public static Dependency jsonToDependency(String dependency) {
-            if (dependency != null) {
+            if (Utils.notEmpty(dependency)) {
                 return JsonUtils.read(dependency, new TypeReference<Dependency>() {
                 });
             }

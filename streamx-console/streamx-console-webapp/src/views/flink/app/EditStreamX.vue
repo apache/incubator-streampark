@@ -1615,12 +1615,14 @@ export default {
   },
 
   watch: {
-    myTheme() {
+    myTheme(curr,old) {
       if (this.app.jobType === 2) {
         this.controller.editor.flinkSql.updateOptions({
-          theme: this.ideTheme()
+          theme: curr
         })
       }
+      this.$refs.mergely.theme(curr)
+      this.$refs.different.theme(curr)
     }
   },
 }

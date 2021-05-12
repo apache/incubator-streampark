@@ -105,6 +105,12 @@ export default {
     }
   },
 
+  computed: {
+    myTheme() {
+      return this.$store.state.app.theme
+    }
+  },
+
   mounted() {
     this.form = this.$form.createForm(this)
     this.handleAll()
@@ -221,7 +227,17 @@ export default {
         this.handleAll()
       })
     }
-  }
+  },
+
+  watch: {
+    myTheme() {
+      if (this.editor != null) {
+        this.editor.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+    }
+  },
 
 }
 </script>

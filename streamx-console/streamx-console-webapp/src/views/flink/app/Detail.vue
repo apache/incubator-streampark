@@ -606,7 +606,9 @@ configOptions.push(
 )
 
 export default {
+
   components: {SvgIcon, State, Mergely ,Different },
+
   data() {
     return {
       app: null,
@@ -865,6 +867,9 @@ export default {
   computed: {
     filterNotCurrConfig() {
       return this.allConfigVersions.filter(x => x.version !== this.compare.version)
+    },
+    myTheme() {
+      return this.$store.state.app.theme
     }
   },
 
@@ -881,6 +886,7 @@ export default {
       this.$router.back(-1)
     }
   },
+
   methods: {
     ...mapActions(['CleanAppId']),
     ...mapGetters(['applicationId']),
@@ -1237,7 +1243,13 @@ export default {
         this.pager[k]['loading'] = this.pager[k]['key'] === this.activeTab
       }
     }
-  }
+  },
+
+  watch: {
+    myTheme(curr,old) {
+      this.$refs.different.theme(curr)
+    }
+  },
 }
 </script>
 
