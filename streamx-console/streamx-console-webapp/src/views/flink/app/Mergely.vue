@@ -168,10 +168,10 @@ export default {
       })
     },
 
-    theme ($theme) {
+    theme () {
       if(this.editor != null) {
         this.editor.updateOptions({
-          theme: $theme
+          theme: this.ideTheme()
         })
       }
     },

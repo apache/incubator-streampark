@@ -104,10 +104,10 @@ export default {
       this.handleRenderTab(this.activeTab)
     },
 
-    theme ($theme) {
+    theme () {
       if(this.diffEditor != null) {
         this.diffEditor.updateOptions({
-          theme: $theme
+          theme: this.ideTheme()
         })
       }
     },

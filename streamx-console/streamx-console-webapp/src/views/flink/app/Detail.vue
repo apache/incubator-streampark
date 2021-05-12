@@ -1246,8 +1246,9 @@ export default {
   },
 
   watch: {
-    myTheme(curr,old) {
-      this.$refs.different.theme(curr)
+    myTheme() {
+      this.$refs.confEdit.theme()
+      this.$refs.different.theme()
     }
   },
 }

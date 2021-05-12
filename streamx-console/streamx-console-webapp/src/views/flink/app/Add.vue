@@ -901,26 +901,25 @@ export default {
   },
 
   watch: {
-    myTheme(curr,old) {
+    myTheme() {
       if (this.jobType === 'sql') {
         if (this.controller.editor.flinkSql) {
           this.controller.editor.flinkSql.updateOptions({
-            theme: curr
+            theme: this.ideTheme()
           })
         }
         if (this.controller.editor.bigScreen) {
           this.controller.editor.bigScreen.updateOptions({
-            theme: curr
+            theme: this.ideTheme()
           })
         }
         if (this.controller.editor.pom) {
           this.controller.editor.pom.updateOptions({
-            theme: curr
+            theme: this.ideTheme()
           })
         }
       }
-
-      this.$refs.confEdit.theme(curr)
+      this.$refs.confEdit.theme()
     }
   },
 
