@@ -58,7 +58,7 @@
             </if>
         </where>
         <if test="user.sortField != null and user.sortField != ''">
-            order by u.#{user.sortField} #{user.sortOrder}
+            order by u.${user.sortField} ${user.sortOrder}
         </if>
     </select>
 </mapper>
