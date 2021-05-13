@@ -188,7 +188,7 @@ public class Application implements Serializable {
             case DEPLOYING:
             case DEPLOYED:
             case CREATED:
-            case FINISHED:
+            case SUCCEEDED:
             case FAILED:
             case CANCELED:
             case LOST:

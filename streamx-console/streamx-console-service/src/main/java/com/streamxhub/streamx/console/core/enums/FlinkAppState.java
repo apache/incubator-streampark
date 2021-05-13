@@ -86,7 +86,7 @@ public enum FlinkAppState {
     /**
      * All of the job's tasks have successfully finished.
      */
-    FINISHED(12),
+    SUCCEEDED(12),
     /**
      * The job has been suspended which means that it has been stopped but not been removed from a
      * potential HA job store.
