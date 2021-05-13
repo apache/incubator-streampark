@@ -36,13 +36,10 @@ public class Constant {
     // token缓存前缀
     public static final String TOKEN_CACHE_PREFIX = "streamx.cache.token.";
 
-    // 存储在线用户的 zset前缀
-    public static final String ACTIVE_USERS_ZSET_PREFIX = "streamx.user.active";
-
     // 排序规则： descend 降序
-    public static final String ORDER_DESC = "descend";
+    public static final String ORDER_DESC = "desc";
     // 排序规则： ascend 升序
-    public static final String ORDER_ASC = "ascend";
+    public static final String ORDER_ASC = "asc";
 
     // 按钮
     public static final String TYPE_BUTTON = "1";

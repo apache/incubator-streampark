@@ -211,7 +211,7 @@ export default {
         ],
         filterMultiple: false,
         filteredValue: filteredInfo.status || null,
-        onFilter: (value, record) => record.status.includes(value)
+        onFilter: (value, record) => value
       }, {
         title: 'Create Time',
         dataIndex: 'createTime',
@@ -355,6 +355,11 @@ export default {
         // 如果分页信息为空，则设置为默认值
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
+      }
+      if(params.status != null && params.status.length>0) {
+        params.status = params.status[0]
+      } else {
+        delete params.status
       }
       list({ ...params }).then((resp) => {
         const pagination = { ...this.pagination }

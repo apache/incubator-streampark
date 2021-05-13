@@ -48,6 +48,20 @@ http.interceptors.request.use(config => {
   if (token) {
     config.headers['Authorization'] = token
   }
+  config.transformRequest = [function (data) {
+    // 在请求之前对data传参进行格式转换
+    if(data.sortOrder) {
+      data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc'
+    }
+    if (config.method === 'get') {
+      data = { params: data }
+    } else if (config.method === 'delete') {
+      data = { data: $qs.stringify(data) }
+    } else {
+      data = $qs.stringify(data)
+    }
+    return data
+  }]
   return config
 }, error => {
   return Promise.reject(error)
@@ -114,26 +128,23 @@ export default {
   get (url, data = {}, headers = null) {
     if (headers) {
     }
-    return http.get(url, { params: data })
+    return http.get(url, data)
   },
   post (url, data = {}, headers = null) {
-    return http.post(url, $qs.stringify(data))
+    return http.post(url, data)
   },
   put (url, data = {}, headers = null) {
-    return http.put(url, $qs.stringify(data))
+    return http.put(url, data)
   },
   delete (url, params = {}, headers = null) {
-    return http.delete(url, { data: $qs.stringify(params) })
+    return http.delete(url, params)
   },
   patch (url, data = {}, headers = null) {
-    return http.patch(url, $qs.stringify(data))
+    return http.patch(url, data)
   },
   download (url, params, filename) {
     message.loading('File transfer in progress')
     return http.post(url, params, {
-      transformRequest: [(params) => {
-        return $qs.stringify(params)
-      }],
       responseType: 'blob',
       timeout: blobTimeout // 上传文件超时10分钟
     }).then((resp) => {
@@ -158,9 +169,6 @@ export default {
     msg = msg == null ? {} : msg
     message.loading(msg.loading || '导入文件中...')
     return http.post(url, params, {
-      transformRequest: [(params) => {
-        return $qs.stringify(params)
-      }],
       responseType: 'blob'
     }).then((resp) => {
       blobCallback(resp)

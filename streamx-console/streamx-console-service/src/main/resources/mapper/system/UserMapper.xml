@@ -53,6 +53,13 @@
         <if test="user.status != null and user.status != ''">
             AND u.status = #{user.status}
         </if>
-        group by u.user_id
+        <if test="user.sortField != null">
+            order by
+            <choose>
+                <when test='user.sortField=="username"'>u.username</when>
+                <when test='user.sortField=="createTime"'>u.createTime</when>
+                <otherwise>#{user.sortOrder}</otherwise>
+            </choose>
+        </if>
     </select>
 </mapper>
