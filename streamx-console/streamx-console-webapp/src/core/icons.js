@@ -45,6 +45,8 @@ import copy from '@/assets/icons/copy.svg?inline'
 import swap from '@/assets/icons/swap.svg?inline'
 import github from '@/assets/icons/github.svg?inline'
 import resetpass from '@/assets/icons/resetpass.svg?inline'
+import sun from '@/assets/icons/sun.svg?inline'
+import moon from '@/assets/icons/moon.svg?inline'
 
 export {
   analyse,
@@ -85,5 +87,7 @@ export {
   copy,
   swap,
   github,
-  resetpass
+  resetpass,
+  sun,
+  moon
 }

@@ -39,7 +39,7 @@
         LEFT JOIN t_role r ON r.role_id = ur.role_id
         <where>
             <if test="user.username != null and user.username != ''">
-                AND u.username = #{user.username}
+                AND u.username like '%${user.username}%'
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
                 And u.create_time &gt; #{user.createTimeFrom}

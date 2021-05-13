@@ -39,6 +39,8 @@
     <swap v-if="name==='swap'"></swap>
     <github v-if="name==='github'"></github>
     <resetpass v-if="name==='resetpass'"></resetpass>
+    <sun v-if="name==='sun'"></sun>
+    <moon v-if="name==='moon'"></moon>
   </span>
 </template>
 
@@ -82,7 +84,9 @@ import {
   copy,
   swap,
   github,
-  resetpass
+  resetpass,
+  sun,
+  moon
 } from '@/core/icons'
 
 export default {
@@ -126,7 +130,9 @@ export default {
     copy,
     swap,
     github,
-    resetpass
+    resetpass,
+    sun,
+    moon
   },
   props: {
     name: {
@@ -157,6 +163,11 @@ export default {
   background: @border-color-split;
   border-radius: 50% ;
   margin-left: 2px;
+}
+
+.svg-icon-min > svg {
+  max-height: 15px !important;
+  max-width: 15px !important;
 }
 
 .svg-icon-small > svg {
