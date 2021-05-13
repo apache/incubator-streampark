@@ -136,8 +136,9 @@ import MenuEdit from './MenuEdit'
 import ButtonAdd from './ButtonAdd'
 import ButtonEdit from './ButtonEdit'
 import SvgIcon from '@/components/SvgIcon'
-import { mapState } from 'vuex'
-import { list, remove } from '@/api/menu'
+import { list } from '@/api/menu'
+import storage from '@/utils/storage'
+import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'Menu',
@@ -217,9 +218,9 @@ export default {
         fixed: 'right'
       }]
     },
-    ...mapState({
-      userName: state => state.user.name
-    })
+    userName() {
+      return storage.get(USER_NAME)
+    }
   },
   mounted () {
     this.fetch()

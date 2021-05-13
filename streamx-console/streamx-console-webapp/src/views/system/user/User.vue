@@ -146,9 +146,10 @@ import UserAdd from './UserAdd'
 import UserEdit from './UserEdit'
 import RangeDate from '@/components/DateTime/RangeDate'
 import SvgIcon from '@/components/SvgIcon'
-import { mapState } from 'vuex'
 
 import { list, remove, reset as resetPassword } from '@/api/user'
+import storage from '@/utils/storage'
+import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'User',
@@ -223,9 +224,9 @@ export default {
         scopedSlots: { customRender: 'operation' }
       }]
     },
-    ...mapState({
-      userName: state => state.user.name
-    })
+    userName() {
+      return storage.get(USER_NAME)
+    }
   },
 
   mounted () {

@@ -117,7 +117,7 @@
               class="list-content-item"
               style="width: 150px">
               <span>Build State</span>
-              <p v-if="item.buildState == 2">
+              <p v-if="item.buildState === 2">
                 <a-tag color="#f5222d">FAILED</a-tag>
               </p>
               <p v-else>
@@ -196,7 +196,6 @@ export default {
       loading: false,
       advanced: false,
       dataSource: [],
-      selectedRowKeys: [],
       queryParams: {},
       sortedInfo: null,
       stompClient: null,
@@ -231,11 +230,6 @@ export default {
   },
 
   methods: {
-    onSelectChange (selectedRowKeys) {
-      console.log(selectedRowKeys)
-      this.selectedRowKeys = selectedRowKeys
-    },
-
     handleSearch (value) {
       this.paginationInfo = null
       this.handleFetch({

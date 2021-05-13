@@ -20,6 +20,7 @@
  */
 import * as monaco from 'monaco-editor'
 import storage from '@/utils/storage'
+import {DEFAULT_THEME} from '@/store/mutation-types'
 
 
 // Register a new language
@@ -37,7 +38,7 @@ monaco.languages.setMonarchTokensProvider('log', {
 
 
 monaco.editor.defineTheme('log', {
-  base: storage.get('THEME') === 'dark' ? 'vs-dark' : 'vs',
+  base: storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs',
   inherit: false,
   rules: [
     { token: 'log-info', foreground: '808080' },

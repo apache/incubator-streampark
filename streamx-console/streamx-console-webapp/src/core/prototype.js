@@ -1,4 +1,7 @@
 import Vue from 'vue'
+import storage from '@/utils/storage'
+
+import {DEFAULT_THEME} from '@/store/mutation-types'
 
 Vue.prototype.randomNum = function (minNum, maxNum) {
   switch (arguments.length) {
@@ -12,7 +15,7 @@ Vue.prototype.randomNum = function (minNum, maxNum) {
 }
 
 Vue.prototype.ideTheme = function () {
-  return this.$store.state.app.theme === 'dark' ? 'vs-dark' : 'vs'
+  return storage.get(DEFAULT_THEME) === 'dark' ? 'vs-dark' : 'vs'
 }
 
 String.prototype.trim = function () {

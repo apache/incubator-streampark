@@ -11,13 +11,9 @@
         <svg-icon name="question" size="small" class="icon"></svg-icon>
       </a>
       <a-dropdown>
-        <span
-          style="margin-top: -10px"
-          class="action ant-dropdown-link user-dropdown-menu">
-          <a-avatar
-            class="avatar"
-            src="https://avatars.githubusercontent.com/u/13284744?s=180&u=5a0e88e9edeb806f957fc25938522d057f8a2e85&v=4" />
-        </span>
+        <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
+          {{ userName }} <a-icon type="caret-down" />
+        </a>
         <a-menu
           slot="overlay"
           class="user-dropdown-menu-wrapper">
@@ -116,6 +112,8 @@ import SvgIcon from '@/components/SvgIcon'
 import { mapState, mapActions } from 'vuex'
 import { password } from '@api/user'
 import themeUtil from '@/utils/themeUtil'
+import storage from '@/utils/storage'
+import {USER_NAME} from '@/store/mutation-types'
 
 export default {
   name: 'UserMenu',
@@ -135,10 +133,11 @@ export default {
 
   computed: {
     ...mapState({
-      // 动态主路由
-      userName: state => state.user.name,
       myTheme: state => state.app.theme
-    })
+    }),
+    userName() {
+      return storage.get(USER_NAME)
+    }
   },
 
   beforeMount() {
@@ -256,5 +255,9 @@ export default {
     }
   }
 }
-
+.username {
+  font-size: 15px;
+  font-weight: 500;
+  color: @text-color;
+}
 </style>

@@ -869,7 +869,7 @@ export default {
       return this.allConfigVersions.filter(x => x.version !== this.compare.version)
     },
     myTheme() {
-      return this.$store.state.app.theme
+      return this.ideTheme()
     }
   },
 
