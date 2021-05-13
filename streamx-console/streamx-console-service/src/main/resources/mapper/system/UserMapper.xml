@@ -58,8 +58,8 @@
             <choose>
                 <when test='user.sortField=="username"'>u.username</when>
                 <when test='user.sortField=="createTime"'>u.createTime</when>
-                <otherwise>#{user.sortOrder}</otherwise>
             </choose>
+            #{user.sortOrder}
         </if>
     </select>
 </mapper>
