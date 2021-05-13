@@ -4,9 +4,11 @@
 
     <div class="slogan">
       <span class="slogan-streamx">StreamX </span>, &nbsp;
-      <span class="slogan-action">Make</span>&nbsp;
-      <span class="slogan-target">Flink|Spark</span>&nbsp;
-      <span class="slogan-result">easier!</span>
+      <span class="slogan-action">
+        <span class="slogan-make">Make</span>&nbsp;
+        <span class="slogan-target">Flink|Spark</span>&nbsp;
+        <span class="slogan-result">easier!</span>
+      </span>
     </div>
 
     <div class="content-box header-icon">
@@ -28,9 +30,19 @@
         <svg-icon name="github" size="small" class="icon"></svg-icon>
       </a>
 
-      <img src="https://img.shields.io/github/stars/streamxhub/streamx.svg?sanitize=true" class="shields">
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <img src="https://img.shields.io/github/stars/streamxhub/streamx.svg?sanitize=true" class="shields">
+      </a>
 
-      <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
+      </a>
 
       <a-dropdown>
         <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
@@ -293,14 +305,8 @@ export default {
   font-weight: bolder;
   line-height: 60px;
   font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
-  .slogan-streamx,.slogan-result {
+  .slogan-streamx,.slogan-action {
     background: linear-gradient(130deg, #24c6dc, #5433ff 41.07%, #f09 76.05%);
-    -webkit-text-fill-color: transparent;
-    -webkit-background-clip: text;
-    -webkit-box-decoration-break: clone;
-  }
-  .slogan-action,.slogan-target {
-    background: linear-gradient(130deg, #6610f2, #5433ff 41.07%);
     -webkit-text-fill-color: transparent;
     -webkit-background-clip: text;
     -webkit-box-decoration-break: clone;
