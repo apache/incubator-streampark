@@ -71,7 +71,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public IPage<User> findUserDetail(User user, RestRequest request) {
         try {
             Page<User> page = new Page<>();
-            SortUtil.handlePageSort(request, page, "userId", Constant.ORDER_ASC, false);
+            page.setCurrent(request.getPageNum());
+            page.setSize(request.getPageSize());
             return this.baseMapper.findUserDetail(page, user);
         } catch (Exception e) {
             log.info("查询用户异常", e);

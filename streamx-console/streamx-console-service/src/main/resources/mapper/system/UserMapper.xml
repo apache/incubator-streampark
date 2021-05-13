@@ -53,6 +53,12 @@
             <if test="user.status != null and user.status != ''">
                 AND u.status = #{user.status}
             </if>
+            <if test="user.status != null and user.status != ''">
+                AND u.status = #{user.status}
+            </if>
+            <if test="user.sortField != null and user.sortField != ''">
+                order by u.#{user.sortField} #{user.sortOrder}
+            </if>
         </where>
     </select>
 </mapper>
