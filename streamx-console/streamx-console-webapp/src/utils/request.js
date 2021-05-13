@@ -50,7 +50,7 @@ http.interceptors.request.use(config => {
   }
   config.transformRequest = [function (data) {
     // 在请求之前对data传参进行格式转换
-    if(data.sortOrder) {
+    if (data.sortOrder) {
       data.sortOrder = data.sortOrder === 'descend' ? 'desc' : 'asc'
     }
     if (config.method === 'get') {
