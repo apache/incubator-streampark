@@ -255,7 +255,7 @@ public class ApplicationBackUpServiceImpl
             } else if(config != null){
                 version = config.getVersion();
             }
-            
+
             ApplicationBackUp applicationBackUp = new ApplicationBackUp(application);
             applicationBackUp.setVersion(version);
 

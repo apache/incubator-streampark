@@ -37,29 +37,22 @@
         t_user u
         LEFT JOIN t_user_role ur ON u.user_id = ur.user_id
         LEFT JOIN t_role r ON r.role_id = ur.role_id
-        WHERE 1 = 1
-        <if test="user.username != null and user.username != ''">
-            AND u.username = #{user.username}
-        </if>
-        <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
-            And u.create_time &gt; #{user.createTimeFrom}
-        </if>
-        <if test="user.createTimeTo!= null and user.createTimeTo !=''">
-            And u.create_time &lt; #{user.createTimeTo}
-        </if>
-        <if test="user.sex != null and user.sex != ''">
-            AND u.sex = #{user.sex}
-        </if>
-        <if test="user.status != null and user.status != ''">
-            AND u.status = #{user.status}
-        </if>
-        <if test="user.sortField != null and user.sortField != ''">
-            order by
-            <choose>
-                <when test='user.sortField=="username"'>u.username</when>
-                <when test='user.sortField=="createTime"'>u.createTime</when>
-            </choose>
-            #{user.sortOrder}
-        </if>
+        <where>
+            <if test="user.username != null and user.username != ''">
+                AND u.username = #{user.username}
+            </if>
+            <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
+                And u.create_time &gt; #{user.createTimeFrom}
+            </if>
+            <if test="user.createTimeTo!= null and user.createTimeTo !=''">
+                And u.create_time &lt; #{user.createTimeTo}
+            </if>
+            <if test="user.sex != null and user.sex != ''">
+                AND u.sex = #{user.sex}
+            </if>
+            <if test="user.status != null and user.status != ''">
+                AND u.status = #{user.status}
+            </if>
+        </where>
     </select>
 </mapper>
