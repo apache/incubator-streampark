@@ -1,6 +1,5 @@
 <template>
   <a-drawer
-    title="新增菜单"
     :mask-closable="false"
     width="650"
     placement="right"
@@ -8,6 +7,10 @@
     @close="onClose"
     :visible="menuAddVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+    <template slot="title">
+      <a-icon type="menu" />
+      新增菜单
+    </template>
     <a-form
       :form="form">
       <a-form-item

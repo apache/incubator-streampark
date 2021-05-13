@@ -54,7 +54,7 @@
                 shape="circle"
                 icon="plus"
                 v-permit="'user:add'"
-                @click="add" />
+                @click="handleAdd" />
             </span>
           </a-col>
         </a-row>
@@ -95,12 +95,12 @@
           v-if="(record.username !== 'admin' || userName === 'admin')"
           name="edit"
           border
-          @click.native="edit(record)"
+          @click.native="handleEdit(record)"
           title="修改用户" />
         <svg-icon
           name="see"
           border
-          @click.native="view(record)"
+          @click.native="handleView(record)"
           title="查看" />
         <svg-icon
           v-permit="'user:reset'"
@@ -234,11 +234,11 @@ export default {
   },
 
   methods: {
-    view (record) {
+    handleView (record) {
       this.userInfo.data = record
       this.userInfo.visible = true
     },
-    add () {
+    handleAdd () {
       this.userAdd.visible = true
     },
     handleUserAddClose () {
@@ -249,7 +249,7 @@ export default {
       this.$message.success('新增用户成功，初始密码为streamx123')
       this.search()
     },
-    edit (record) {
+    handleEdit (record) {
       this.$refs.userEdit.setFormValues(record)
       this.userEdit.visible = true
     },

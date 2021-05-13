@@ -1,6 +1,5 @@
 <template>
   <a-drawer
-    title="角色信息"
     :mask-closable="false"
     width="650"
     placement="right"
@@ -8,6 +7,10 @@
     @close="close"
     :visible="roleInfoVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+    <template slot="title">
+      <a-icon type="smile" />
+      角色信息
+    </template>
     <p>
       <a-icon
         type="crown" />&nbsp;&nbsp;角色名称：{{ roleInfoData.roleName }}

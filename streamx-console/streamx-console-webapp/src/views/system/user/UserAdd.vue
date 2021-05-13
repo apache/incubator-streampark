@@ -1,6 +1,5 @@
 <template>
   <a-drawer
-    title="Add New User"
     :mask-closable="false"
     width="650"
     placement="right"
@@ -8,6 +7,10 @@
     @close="onClose"
     :visible="visible"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
+    <template slot="title">
+      <a-icon type="user" />
+      添加用户
+    </template>
     <a-form
       :form="form">
       <a-form-item

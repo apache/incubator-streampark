@@ -4,21 +4,14 @@
     :centered="true"
     :keyboard="false"
     :footer="null"
-    :width="750"
-    @cancel="handleCancleClick"
-    title="用户信息">
-    <a-layout
-      class="user-info">
-      <a-layout-sider
-        class="user-info-side">
-        <a-avatar
-          shape="square"
-          :size="115"
-          icon="user"
-          :src="`static/avatar/${data.avatar}`" />
-      </a-layout-sider>
-      <a-layout-content
-        class="user-content-one">
+    :width="400"
+    @cancel="handleCancleClick">
+    <template slot="title">
+      <a-icon type="user" />
+      用户信息
+    </template>
+    <a-layout class="user-info">
+      <a-layout-content class="user-content">
         <p>
           <a-icon
             type="user" />账户：{{ data.username }}
@@ -42,7 +35,7 @@
         </p>
       </a-layout-content>
       <a-layout-content
-        class="user-content-two">
+        class="user-content">
         <p>
           <a-icon
             type="smile"
@@ -132,18 +125,11 @@ export default {
 <style lang="less" scoped>
   .user-info {
     background: @body-background;
-    padding: 0 10px 10px 10px;
+    padding: 10px;
   }
-  .user-info-side {
-    background-color: @component-background
-  }
-  .user-info-side {
-    max-width: 10rem !important;
-    min-width: 10rem !important;
-    width: 10rem !important;
-  }
-  .user-content-one{
+  .user-content{
     margin-right: 1.2rem;
+    float: left;
   }
   p {
     margin-bottom: 1rem;
