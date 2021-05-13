@@ -18,4 +18,24 @@
         where u.username = #{userName}
     </select>
 
+    <select id="findRole" resultType="role" parameterType="role">
+        SELECT t.*
+        FROM
+        t_role t
+        <where>
+            <if test="role.roleName != null and role.roleName != ''">
+                AND t.roleName like '%${role.roleName}%'
+            </if>
+            <if test="role.createTimeFrom != null and role.createTimeFrom !=''">
+                And t.create_time &gt; #{role.createTimeFrom}
+            </if>
+            <if test="role.createTimeTo!= null and role.createTimeTo !=''">
+                And t.create_time &lt; #{role.createTimeTo}
+            </if>
+        </where>
+        <if test="role.sortField != null and role.sortField != ''">
+            order by u.${role.sortField} ${role.sortOrder}
+        </if>
+    </select>
+
 </mapper>

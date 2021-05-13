@@ -54,6 +54,12 @@ public class Role implements Serializable {
 
     private Date modifyTime;
 
+    // 排序字段
+    private transient String sortField;
+
+    // 排序规则 ascend 升序 descend 降序
+    private transient String sortOrder;
+
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String menuId;

@@ -20,27 +20,12 @@
  */
 package com.streamxhub.streamx.console.system.service.impl;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.system.dao.RoleMapper;
 import com.streamxhub.streamx.console.system.dao.RoleMenuMapper;
 import com.streamxhub.streamx.console.system.entity.Role;
@@ -48,6 +33,18 @@ import com.streamxhub.streamx.console.system.entity.RoleMenu;
 import com.streamxhub.streamx.console.system.service.RoleMenuServie;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 
 @Slf4j
 @Service
@@ -72,20 +69,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
     @Override
     public IPage<Role> findRoles(Role role, RestRequest request) {
         try {
-            LambdaQueryWrapper<Role> queryWrapper = new LambdaQueryWrapper<>();
-
-            if (StringUtils.isNotBlank(role.getRoleName())) {
-                queryWrapper.eq(Role::getRoleName, role.getRoleName());
-            }
-            if (StringUtils.isNotBlank(role.getCreateTimeFrom())
-                    && StringUtils.isNotBlank(role.getCreateTimeTo())) {
-                queryWrapper
-                        .ge(Role::getCreateTime, role.getCreateTimeFrom())
-                        .le(Role::getCreateTime, role.getCreateTimeTo());
-            }
             Page<Role> page = new Page<>();
-            SortUtil.handlePageSort(request, page, true);
-            return this.page(page, queryWrapper);
+            page.setCurrent(request.getPageNum());
+            page.setSize(request.getPageSize());
+            return this.baseMapper.findRole(page, role);
         } catch (Exception e) {
             log.info("获取角色信息失败", e);
             return null;
@@ -126,7 +113,7 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
         role.setModifyTime(new Date());
         baseMapper.updateById(role);
         roleMenuMapper.delete(
-                new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
+            new LambdaQueryWrapper<RoleMenu>().eq(RoleMenu::getRoleId, role.getRoleId()));
         String[] menuIds = role.getMenuId().split(StringPool.COMMA);
         setRoleMenus(role, menuIds);
     }

@@ -312,6 +312,15 @@ export default {
         params.pageSize = this.pagination.defaultPageSize
         params.pageNum = this.pagination.defaultCurrent
       }
+
+      if (params.sortField === 'createTime') {
+        params.sortField = 'create_time'
+      }
+
+      if (params.sortField === 'modifyTime') {
+        params.sortField = 'modify_time'
+      }
+
       list({
         ...params
       }).then((resp) => {
