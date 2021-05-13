@@ -43,6 +43,7 @@ import flame from '@/assets/icons/flame.svg?inline'
 import code from '@/assets/icons/code.svg?inline'
 import copy from '@/assets/icons/copy.svg?inline'
 import swap from '@/assets/icons/swap.svg?inline'
+import github from '@/assets/icons/github.svg?inline'
 import resetpass from '@/assets/icons/resetpass.svg?inline'
 
 export {
@@ -83,5 +84,6 @@ export {
   code,
   copy,
   swap,
+  github,
   resetpass
 }

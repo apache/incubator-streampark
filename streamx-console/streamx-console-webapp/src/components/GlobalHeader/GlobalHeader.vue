@@ -21,9 +21,12 @@
             class="trigger"
             :type="collapsed ? 'menu-unfold' : 'menu-fold'"
             @click="toggle"
-            style="font-size: 18px;" />
+            style="font-size: 18px; float: left" />
+
           <user-menu />
+
         </div>
+
         <div
           v-else
           :class="['top-nav-header-index', theme]">
@@ -49,7 +52,9 @@
               class="header-index-right" />
           </div>
         </div>
+
       </a-layout-header>
+
     </div>
   </transition>
 </template>

@@ -37,6 +37,7 @@
     <code v-if="name==='code'"></code>
     <copy v-if="name==='copy'"></copy>
     <swap v-if="name==='swap'"></swap>
+    <github v-if="name==='github'"></github>
     <resetpass v-if="name==='resetpass'"></resetpass>
   </span>
 </template>
@@ -80,6 +81,7 @@ import {
   code,
   copy,
   swap,
+  github,
   resetpass
 } from '@/core/icons'
 
@@ -123,6 +125,7 @@ export default {
     code,
     copy,
     swap,
+    github,
     resetpass
   },
   props: {

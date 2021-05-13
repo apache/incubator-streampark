@@ -1,15 +1,37 @@
 <template>
   <div
     class="user-wrapper">
+
+    <div class="slogan">
+      <span class="slogan-streamx">StreamX </span>, &nbsp;
+      <span class="slogan-action">Make</span>&nbsp;
+      <span class="slogan-target">Flink|Spark</span>&nbsp;
+      <span class="slogan-result">easier!</span>
+    </div>
+
     <div class="content-box header-icon">
-      <a>
+      <a title="theme">
         <svg-icon name="theme" size="small" class="icon" @click.native="handleChangeTheme(false)"></svg-icon>
       </a>
+
       <a
         href="http://www.streamxhub.com/zh/doc/"
+        title="How to use"
         target="_blank">
         <svg-icon name="question" size="small" class="icon"></svg-icon>
       </a>
+
+      <a
+        href="https://github.com/streamxhub/streamx"
+        title="GitHub"
+        target="_blank">
+        <svg-icon name="github" size="small" class="icon"></svg-icon>
+      </a>
+
+      <img src="https://img.shields.io/github/stars/streamxhub/streamx.svg?sanitize=true" class="shields">
+
+      <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
+
       <a-dropdown>
         <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
           {{ userName }} <a-icon type="caret-down" />
@@ -244,6 +266,7 @@ export default {
 </script>
 <style lang="less">
 .header-icon {
+  float: right;
   .icon {
     margin-left: 3px;
     margin-right: 3px;
@@ -260,4 +283,28 @@ export default {
   font-weight: 500;
   color: @text-color;
 }
+.shields {
+  padding-left: 5px;
+  padding-right: 5px;
+}
+.slogan {
+  float: left;
+  font-size: 1.5rem;
+  font-weight: bolder;
+  line-height: 60px;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+  .slogan-streamx,.slogan-result {
+    background: linear-gradient(130deg, #24c6dc, #5433ff 41.07%, #f09 76.05%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-box-decoration-break: clone;
+  }
+  .slogan-action,.slogan-target {
+    background: linear-gradient(130deg, #6610f2, #5433ff 41.07%);
+    -webkit-text-fill-color: transparent;
+    -webkit-background-clip: text;
+    -webkit-box-decoration-break: clone;
+  }
+}
+
 </style>
