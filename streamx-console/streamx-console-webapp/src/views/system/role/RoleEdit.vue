@@ -222,8 +222,9 @@ export default {
     roleEditVisiable () {
       if (this.roleEditVisiable) {
         getMenu().then((r) => {
-          this.menuTreeData = r.rows.children
-          this.allTreeKeys = r.ids
+          const data = r.data
+          this.menuTreeData = data.rows.children
+          this.allTreeKeys = data.ids
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
