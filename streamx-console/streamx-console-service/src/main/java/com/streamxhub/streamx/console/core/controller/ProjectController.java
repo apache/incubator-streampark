@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Project;
@@ -45,7 +44,7 @@ import java.util.Map;
 @Validated
 @RestController
 @RequestMapping("flink/project")
-public class ProjectController extends BaseController {
+public class ProjectController {
 
     @Autowired
     private ProjectService projectService;

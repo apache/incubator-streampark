@@ -30,7 +30,6 @@ import org.springframework.web.bind.annotation.RestController;
 import lombok.extern.slf4j.Slf4j;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -44,7 +43,7 @@ import com.streamxhub.streamx.console.core.service.SavePointService;
 @Validated
 @RestController
 @RequestMapping("flink/savepoint")
-public class SavePointController extends BaseController {
+public class SavePointController {
 
     @Autowired
     private SavePointService savePointService;

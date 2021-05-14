@@ -20,28 +20,24 @@
  */
 package com.streamxhub.streamx.console.system.controller;
 
-import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.streamxhub.streamx.console.base.domain.RestResponse;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.*;
-
-import lombok.extern.slf4j.Slf4j;
-
-import com.streamxhub.streamx.console.base.controller.BaseController;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.system.entity.Role;
 import com.streamxhub.streamx.console.system.entity.RoleMenu;
 import com.streamxhub.streamx.console.system.service.RoleMenuServie;
 import com.streamxhub.streamx.console.system.service.RoleService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.authz.annotation.RequiresPermissions;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
+import javax.validation.constraints.NotBlank;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -50,7 +46,7 @@ import com.streamxhub.streamx.console.system.service.RoleService;
 @Validated
 @RestController
 @RequestMapping("role")
-public class RoleController extends BaseController {
+public class RoleController {
 
     @Autowired
     private RoleService roleService;
@@ -61,8 +57,9 @@ public class RoleController extends BaseController {
 
     @PostMapping("list")
     @RequiresPermissions("role:view")
-    public Map<String, Object> roleList(RestRequest restRequest, Role role) {
-        return getDataTable(roleService.findRoles(role, restRequest));
+    public RestResponse roleList(RestRequest restRequest, Role role) {
+        IPage<Role> roleList = roleService.findRoles(role, restRequest);
+        return RestResponse.create().data(roleList);
     }
 
     @PostMapping("check/name")
@@ -75,8 +72,8 @@ public class RoleController extends BaseController {
     public List<String> getRoleMenus(@NotBlank(message = "{required}") String roleId) {
         List<RoleMenu> list = this.roleMenuServie.getRoleMenusByRoleId(roleId);
         return list.stream()
-                .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
-                .collect(Collectors.toList());
+            .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
+            .collect(Collectors.toList());
     }
 
     @PostMapping("post")

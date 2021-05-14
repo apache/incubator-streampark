@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.*;
 import lombok.extern.slf4j.Slf4j;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.system.authentication.ServerUtil;
@@ -48,7 +47,7 @@ import com.streamxhub.streamx.console.system.service.MenuService;
 @Validated
 @RestController
 @RequestMapping("/menu")
-public class MenuController extends BaseController {
+public class MenuController {
 
     private String message;
 

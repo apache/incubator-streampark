@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.console.system.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
@@ -37,7 +37,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
-import java.util.Map;
 
 /**
  * @author benjobs
@@ -46,7 +45,7 @@ import java.util.Map;
 @Validated
 @RestController
 @RequestMapping("user")
-public class UserController extends BaseController {
+public class UserController {
 
     private String message;
 
@@ -60,8 +59,9 @@ public class UserController extends BaseController {
 
     @PostMapping("list")
     @RequiresPermissions("user:view")
-    public Map<String, Object> userList(RestRequest restRequest, User user) {
-        return getDataTable(userService.findUserDetail(user, restRequest));
+    public RestResponse userList(RestRequest restRequest, User user) {
+        IPage<User> userList = userService.findUserDetail(user, restRequest);
+        return RestResponse.create().data(userList);
     }
 
     @PostMapping("post")

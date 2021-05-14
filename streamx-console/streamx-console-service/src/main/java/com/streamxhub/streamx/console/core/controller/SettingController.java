@@ -22,7 +22,6 @@ package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.Setting;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -44,7 +43,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("flink/setting")
-public class SettingController extends BaseController {
+public class SettingController {
 
     @Autowired
     private SettingService settingService;

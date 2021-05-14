@@ -17,7 +17,6 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.common.enums.SQLErrorType;
-import com.streamxhub.streamx.console.base.controller.BaseController;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -42,7 +41,7 @@ import java.util.List;
 @Validated
 @RestController
 @RequestMapping("flink/sql")
-public class FlinkSqlController extends BaseController {
+public class FlinkSqlController {
 
     @Autowired
     private FlinkSqlService flinkSqlService;
