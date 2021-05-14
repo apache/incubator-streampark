@@ -30,7 +30,7 @@ import org.apache.flink.api.common.restartstrategy.RestartStrategies
 import org.apache.flink.api.common.time.Time
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{Configuration, CoreOptions}
-import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, RocksDBStateBackend}
+import org.apache.flink.contrib.streaming.state.{DefaultConfigurableOptionsFactory, EmbeddedRocksDBStateBackend}
 import org.apache.flink.runtime.state.filesystem.FsStateBackend
 import org.apache.flink.runtime.state.memory.MemoryStateBackend
 import org.apache.flink.streaming.api.environment.CheckpointConfig
@@ -339,7 +339,9 @@ private[scala] class FlinkStreamingInitializer(args: Array[String], apiType: Api
           logInfo("stat.backend Type: rocksdb...")
           // 默认开启增量.
           val incremental = Try(parameter.get(KEY_FLINK_STATE_BACKEND_INCREMENTAL).toBoolean).getOrElse(true)
-          val rs = new RocksDBStateBackend(cpDir, incremental)
+          val rs = new EmbeddedRocksDBStateBackend(incremental)
+          rs.setDbStoragePath(cpDir)
+
           /**
            * @see <a href="https://ci.apache.org/projects/flink/flink-docs-release-1.12/deployment/config.html#rocksdb-state-backend"/>Flink Rocksdb Config</a>
            */
