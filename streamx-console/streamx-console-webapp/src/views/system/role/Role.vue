@@ -255,9 +255,11 @@ export default {
       alert(record.roleId)
       remove({
         roleId: record.roleId
-      }).then(() => {
-        this.$message.success('delete successful')
-        this.search()
+      }).then((resp) => {
+        if ( resp.status === 'success' ) {
+          this.$message.success('delete successful')
+          this.search()
+        }
       })
     },
     search () {

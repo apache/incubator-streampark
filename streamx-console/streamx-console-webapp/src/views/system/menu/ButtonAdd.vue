@@ -156,9 +156,13 @@ export default {
           this.button.type = '1'
           submit({
             ...this.button
-          }).then(() => {
-            this.reset()
-            this.$emit('success')
+          }).then((resp) => {
+            if (resp.status === 'success') {
+              this.reset()
+              this.$emit('success')
+            } else {
+              this.loading = false
+            }
           }).catch(() => {
             this.loading = false
           })
@@ -172,8 +176,9 @@ export default {
         list({
           type: '0'
         }).then((r) => {
-          this.menuTreeData = r.rows.children
-          this.allTreeKeys = r.ids
+          const data = r.data
+          this.menuTreeData = data.rows.children
+          this.allTreeKeys = data.ids
         })
       }
     }

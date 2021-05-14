@@ -311,10 +311,11 @@ export default {
         ...params
       }).then((resp) => {
         this.loading = false
-        if (Object.is(resp.rows.children, undefined)) {
-          this.dataSource = resp.rows
+        const data = resp.data
+        if (Object.is(data.rows.children, undefined)) {
+          this.dataSource = data.rows
         } else {
-          this.dataSource = resp.rows.children
+          this.dataSource = data.rows.children
         }
       })
     },

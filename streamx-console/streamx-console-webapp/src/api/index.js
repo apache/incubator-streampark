@@ -19,10 +19,6 @@
  * under the License.
  */
 export default {
-  ForgePassword: '/auth/forge-password',
-  twoStepCode: '/auth/2step-code',
-  SendSms: '/account/sms',
-  SendSmsErr: '/account/sms_err',
   Passport: {
     SIGNIN: '/passport/signin',
     SIGNOUT: '/passport/signout'
@@ -109,7 +105,6 @@ export default {
     GET: '/user/get',
     POST: '/user/post',
     DELETE: '/user/delete',
-    EXPORT: '/user/export',
     CHECK_NAME: '/user/check/name',
     CHECK_PASSWORD: '/user/check/password'
   },
@@ -119,20 +114,17 @@ export default {
     LIST: '/role/list',
     CHECK_NAME: '/role/check/name',
     DELETE: '/role/delete',
-    EXPORT: '/role/export',
     MENU: '/role/menu'
   },
   Menu: {
     LIST: '/menu/list',
     DELETE: '/menu/delete',
     POST: '/menu/post',
-    EXPORT: '/menu/export',
     UPDATE: '/menu/update',
     ROUTER: '/menu/router'
   },
   Log: {
     LIST: '/log/list',
     DELETE: '/log/delete',
-    EXPORT: '/log/export'
   }
 }

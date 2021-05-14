@@ -273,9 +273,13 @@ export default {
     handleDelete (record) {
       remove({
         userId: record.userId
-      }).then(() => {
-        this.$message.success('delete successful')
-        this.search()
+      }).then((resp) => {
+        if (resp.status === 'success') {
+          this.$message.success('delete successful')
+          this.search()
+        } else {
+          this.$message.error('delete failed')
+        }
       })
     },
 
@@ -288,11 +292,13 @@ export default {
         if (result.isConfirmed) {
           resetPassword( {
             usernames: user.username
-          }).then(() => {
-            this.$swal.fire(
-              'reset password successful, user ['+ user.username + '] new password is streamx666', '',
-              'success'
-            )
+          }).then((resp) => {
+            if (resp.status === 'success') {
+              this.$swal.fire(
+                'reset password successful, user ['+ user.username + '] new password is streamx666', '',
+                'success'
+              )
+            }
           })
         }
       })

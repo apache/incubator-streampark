@@ -84,7 +84,7 @@
 </template>
 
 <script>
-import { update, list, post as submit } from '@/api/menu'
+import { update, list } from '@/api/menu'
 const formItemLayout = {
   labelCol: { span: 3 },
   wrapperCol: { span: 18 }
@@ -165,9 +165,13 @@ export default {
           button.menuId = this.button.menuId
           update({
             ...button
-          }).then(() => {
-            this.reset()
-            this.$emit('success')
+          }).then((resp) => {
+            if (resp.success === 'success') {
+              this.reset()
+              this.$emit('success')
+            } else {
+              this.loading = false
+            }
           }).catch(() => {
             this.loading = false
           })
@@ -181,8 +185,9 @@ export default {
         list({
           type: '0'
         }).then((r) => {
-          this.menuTreeData = r.rows.children
-          this.allTreeKeys = r.ids
+          const data = r.data
+          this.menuTreeData = data.rows.children
+          this.allTreeKeys = data.ids
           this.menuTreeKey = +new Date()
         })
       }

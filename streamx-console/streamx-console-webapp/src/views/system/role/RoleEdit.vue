@@ -203,9 +203,13 @@ export default {
             role.menuId = checkedArr.join(',')
             update({
               ...role
-            }).then((r) => {
-              this.reset()
-              this.$emit('success')
+            }).then((resp) => {
+              if (resp.status === 'success') {
+                this.reset()
+                this.$emit('success')
+              } else {
+                this.loading = false
+              }
             }).catch(() => {
               this.loading = false
             })
@@ -223,9 +227,10 @@ export default {
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
-            this.defaultCheckedKeys.splice(0, this.defaultCheckedKeys.length, resp)
-            this.checkedKeys = resp
-            this.expandedKeys = resp
+            const data = resp.data
+            this.defaultCheckedKeys.splice(0, this.defaultCheckedKeys.length, data)
+            this.checkedKeys = data
+            this.expandedKeys = data
             this.menuTreeKey = +new Date()
           })
         })

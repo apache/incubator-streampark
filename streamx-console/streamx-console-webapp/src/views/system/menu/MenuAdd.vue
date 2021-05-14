@@ -235,9 +235,13 @@ export default {
           menu.display = this.display ? '1' : '0'
           post({
             ...menu
-          }).then(() => {
-            this.reset()
-            this.$emit('success')
+          }).then((resp) => {
+            if (resp.status === 'success') {
+              this.reset()
+              this.$emit('success')
+            } else {
+              this.loading = false
+            }
           }).catch(() => {
             this.loading = false
           })
@@ -251,8 +255,9 @@ export default {
         list({
           type: '0'
         }).then((resp) => {
-          this.menuTreeData = resp.rows.children
-          this.allTreeKeys = resp.ids
+          const data = resp.data
+          this.menuTreeData = data.rows.children
+          this.allTreeKeys = data.ids
         })
       }
     }

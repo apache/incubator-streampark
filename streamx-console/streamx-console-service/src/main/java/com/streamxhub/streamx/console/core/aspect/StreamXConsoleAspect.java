@@ -45,7 +45,7 @@ public class StreamXConsoleAspect {
 
     @Pointcut("execution(public" +
             " com.streamxhub.streamx.console.base.domain.RestResponse" +
-            " com.streamxhub.streamx.console.core.controller.*.*(..))"
+            " com.streamxhub.streamx.console.*.controller.*.*(..))"
     )
     public void response() {
     }

@@ -23,7 +23,6 @@ package com.streamxhub.streamx.console.system.controller;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.system.entity.Role;
 import com.streamxhub.streamx.console.system.entity.RoleMenu;
 import com.streamxhub.streamx.console.system.service.RoleMenuServie;
@@ -63,54 +62,39 @@ public class RoleController {
     }
 
     @PostMapping("check/name")
-    public boolean checkRoleName(@NotBlank(message = "{required}") String roleName) {
+    public RestResponse checkRoleName(@NotBlank(message = "{required}") String roleName) {
         Role result = this.roleService.findByName(roleName);
-        return result == null;
+        return RestResponse.create().data(result == null);
     }
 
     @PostMapping("menu")
-    public List<String> getRoleMenus(@NotBlank(message = "{required}") String roleId) {
+    public RestResponse getRoleMenus(@NotBlank(message = "{required}") String roleId) {
         List<RoleMenu> list = this.roleMenuServie.getRoleMenusByRoleId(roleId);
-        return list.stream()
+        List<String> roleMenus = list.stream()
             .map(roleMenu -> String.valueOf(roleMenu.getMenuId()))
             .collect(Collectors.toList());
+        return RestResponse.create().data(roleMenus);
     }
 
     @PostMapping("post")
     @RequiresPermissions("role:add")
-    public void addRole(@Valid Role role) throws ServiceException {
-        try {
-            this.roleService.createRole(role);
-        } catch (Exception e) {
-            message = "新增角色失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse addRole(@Valid Role role) {
+        this.roleService.createRole(role);
+        return RestResponse.create();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("role:delete")
-    public RestResponse deleteRole(Long roleId) throws ServiceException {
-        try {
-            this.roleService.removeById(roleId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            message = "delete user failed, error:" + e.getMessage();
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse deleteRole(Long roleId) {
+        this.roleService.removeById(roleId);
+        return RestResponse.create();
     }
 
     @PutMapping("update")
     @RequiresPermissions("role:update")
-    public void updateRole(Role role) throws ServiceException {
-        try {
-            this.roleService.updateRole(role);
-        } catch (Exception e) {
-            message = "修改角色失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse updateRole(Role role) throws Exception {
+        this.roleService.updateRole(role);
+        return RestResponse.create();
     }
 
 }

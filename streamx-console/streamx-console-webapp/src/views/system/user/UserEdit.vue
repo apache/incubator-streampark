@@ -194,15 +194,19 @@ export default {
           user.roleId = user.roleId.join(',')
           user.userId = this.userId
           update(user).then((r) => {
-            this.loading = false
-            this.$emit('success')
-            // 如果修改用户就是当前登录用户的话，更新其state
-            if (user.username === this.currentUser.username) {
-              get({
-                username: user.username
-              }).then((r) => {
-                this.setUser(r.data)
-              })
+            if (r.status === 'success') {
+              this.loading = false
+              this.$emit('success')
+              // 如果修改用户就是当前登录用户的话，更新其state
+              if (user.username === this.currentUser.username) {
+                get({
+                  username: user.username
+                }).then((r) => {
+                  this.setUser(r.data)
+                })
+              }
+            } else {
+              this.loading = false
             }
           }).catch(() => {
             this.loading = false
@@ -214,8 +218,8 @@ export default {
   watch: {
     visible () {
       if (this.visible) {
-        getRole({ 'pageSize': '9999' }).then((r) => {
-          this.roleData = r.rows
+        getRole({ 'pageSize': '9999' }).then((resp) => {
+          this.roleData = resp.data.records
         })
       }
     }

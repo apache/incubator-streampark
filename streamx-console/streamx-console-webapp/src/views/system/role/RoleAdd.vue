@@ -185,9 +185,13 @@ export default {
             role.menuId = checkedArr.join(',')
             post({
               ...role
-            }).then((r) => {
-              this.reset()
-              this.$emit('success')
+            }).then((resp) => {
+              if (resp.status === 'success') {
+                this.reset()
+                this.$emit('success')
+              } else {
+                this.loading = false
+              }
             }).catch(() => {
               this.loading = false
             })
@@ -206,7 +210,7 @@ export default {
           checkName({
             roleName: roleName
           }).then((resp) => {
-            if (resp) {
+            if (resp.data) {
               this.validateStatus = 'success'
               this.help = ''
             } else {

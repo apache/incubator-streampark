@@ -82,7 +82,7 @@ export default {
             roleId: this.roleInfoData.roleId
           }).then((resp) => {
             const length = this.checkedKeys.length
-            this.checkedKeys.splice(0, length, resp)
+            this.checkedKeys.splice(0, length, resp.data)
             this.key = +new Date()
           })
         })

@@ -47,8 +47,6 @@ import javax.validation.constraints.NotBlank;
 @RequestMapping("user")
 public class UserController {
 
-    private String message;
-
     @Autowired
     private UserService userService;
 
@@ -66,108 +64,74 @@ public class UserController {
 
     @PostMapping("post")
     @RequiresPermissions("user:add")
-    public void addUser(@Valid User user) throws ServiceException {
-        try {
-            this.userService.createUser(user);
-        } catch (Exception e) {
-            message = "新增用户失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse addUser(@Valid User user) throws Exception {
+        this.userService.createUser(user);
+        return RestResponse.create();
     }
 
     @PutMapping("update")
     @RequiresPermissions("user:update")
-    public void updateUser(@Valid User user) throws ServiceException {
-        try {
-            this.userService.updateUser(user);
-        } catch (Exception e) {
-            message = "修改用户失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse updateUser(@Valid User user) throws Exception {
+        this.userService.updateUser(user);
+        return RestResponse.create();
     }
 
     @DeleteMapping("delete")
     @RequiresPermissions("user:delete")
     public RestResponse deleteUsers(Long userId) throws ServiceException {
-        try {
-            this.userService.removeById(userId);
-            return RestResponse.create().data(true);
-        } catch (Exception e) {
-            message = "delete user failed, error:" + e.getMessage();
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+        this.userService.removeById(userId);
+        return RestResponse.create();
     }
 
     @PutMapping("profile")
-    public void updateProfile(@Valid User user) throws ServiceException {
-        try {
-            this.userService.updateProfile(user);
-        } catch (Exception e) {
-            message = "修改个人信息失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse updateProfile(@Valid User user) throws Exception {
+        this.userService.updateProfile(user);
+        return RestResponse.create();
     }
 
     @PutMapping("avatar")
-    public void updateAvatar(
+    public RestResponse updateAvatar(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String avatar)
-        throws ServiceException {
-        try {
-            this.userService.updateAvatar(username, avatar);
-        } catch (Exception e) {
-            message = "修改头像失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+        throws Exception {
+        this.userService.updateAvatar(username, avatar);
+        return RestResponse.create();
     }
 
     @PostMapping("check/name")
-    public boolean checkUserName(@NotBlank(message = "{required}") String username) {
-        return this.userService.findByName(username) == null;
+    public RestResponse checkUserName(@NotBlank(message = "{required}") String username) {
+        boolean result = this.userService.findByName(username) == null;
+        return RestResponse.create().data(result);
     }
 
     @PostMapping("check/password")
-    public boolean checkPassword(
+    public RestResponse checkPassword(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password) {
 
         User user = userService.findByName(username);
         String salt = user.getSalt();
         String encryptPassword = ShaHashUtil.encrypt(salt, password);
-        return StringUtils.equals(user.getPassword(), encryptPassword);
+        boolean result = StringUtils.equals(user.getPassword(), encryptPassword);
+        return RestResponse.create().data(result);
     }
 
     @PutMapping("password")
-    public void updatePassword(
+    public RestResponse updatePassword(
         @NotBlank(message = "{required}") String username,
         @NotBlank(message = "{required}") String password)
-        throws ServiceException {
-        try {
-            userService.updatePassword(username, password);
-        } catch (Exception e) {
-            message = "修改密码失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+        throws Exception {
+        userService.updatePassword(username, password);
+        return RestResponse.create();
     }
 
     @PutMapping("password/reset")
     @RequiresPermissions("user:reset")
-    public void resetPassword(@NotBlank(message = "{required}") String usernames)
-        throws ServiceException {
-        try {
-            String[] usernameArr = usernames.split(StringPool.COMMA);
-            this.userService.resetPassword(usernameArr);
-        } catch (Exception e) {
-            message = "重置用户密码失败";
-            log.info(message, e);
-            throw new ServiceException(message);
-        }
+    public RestResponse resetPassword(@NotBlank(message = "{required}") String usernames)
+        throws Exception {
+        String[] usernameArr = usernames.split(StringPool.COMMA);
+        this.userService.resetPassword(usernameArr);
+        return RestResponse.create();
     }
 
 }

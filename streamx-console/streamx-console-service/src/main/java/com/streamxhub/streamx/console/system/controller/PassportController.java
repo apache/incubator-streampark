@@ -65,10 +65,9 @@ public class PassportController {
 
     @PostMapping("signin")
     public RestResponse signin(
-            @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password,
-            HttpServletRequest request)
-            throws Exception {
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password,
+        HttpServletRequest request) throws Exception {
 
         username = StringUtils.lowerCase(username);
         final String errorMessage = "用户名或密码错误";

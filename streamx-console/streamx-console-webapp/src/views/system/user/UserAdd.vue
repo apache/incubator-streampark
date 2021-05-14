@@ -172,8 +172,10 @@ export default {
           post({
             ...user
           }).then((r) => {
-            this.reset()
-            this.$emit('success')
+            if (r.status === 'success') {
+              this.reset()
+              this.$emit('success')
+            }
           }).catch(() => {
             this.loading = false
           })
@@ -194,7 +196,7 @@ export default {
           checkUserName({
             username: username
           }).then((r) => {
-            if (r) {
+            if (r.data) {
               this.validateStatus = 'success'
               this.help = ''
             } else {
@@ -214,8 +216,8 @@ export default {
       if (this.visible) {
         getRole(
           { 'pageSize': '9999' }
-        ).then((r) => {
-          this.roleData = r.rows
+        ).then((resp) => {
+          this.roleData = resp.data.records
         })
       }
     }
