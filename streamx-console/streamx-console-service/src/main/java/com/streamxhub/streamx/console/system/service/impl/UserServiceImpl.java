@@ -25,10 +25,8 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
 import com.streamxhub.streamx.console.system.dao.UserMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
@@ -69,15 +67,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public IPage<User> findUserDetail(User user, RestRequest request) {
-        try {
-            Page<User> page = new Page<>();
-            page.setCurrent(request.getPageNum());
-            page.setSize(request.getPageSize());
-            return this.baseMapper.findUserDetail(page, user);
-        } catch (Exception e) {
-            log.info("查询用户异常", e);
-            return null;
-        }
+        Page<User> page = new Page<>();
+        page.setCurrent(request.getPageNum());
+        page.setSize(request.getPageSize());
+        return this.baseMapper.findUserDetail(page, user);
     }
 
     @Override

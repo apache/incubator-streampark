@@ -368,8 +368,8 @@ export default {
 
       list({ ...params }).then((resp) => {
         const pagination = { ...this.pagination }
-        pagination.total = parseInt(resp.total)
-        this.dataSource = resp.rows
+        pagination.total = parseInt(resp.data.total)
+        this.dataSource = resp.data.records
         this.pagination = pagination
         // 数据加载完毕，关闭loading
         this.loading = false
