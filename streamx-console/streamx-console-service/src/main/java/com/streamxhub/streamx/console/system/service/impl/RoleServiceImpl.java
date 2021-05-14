@@ -68,15 +68,10 @@ public class RoleServiceImpl extends ServiceImpl<RoleMapper, Role> implements Ro
 
     @Override
     public IPage<Role> findRoles(Role role, RestRequest request) {
-        try {
-            Page<Role> page = new Page<>();
-            page.setCurrent(request.getPageNum());
-            page.setSize(request.getPageSize());
-            return this.baseMapper.findRole(page, role);
-        } catch (Exception e) {
-            log.info("获取角色信息失败", e);
-            return null;
-        }
+        Page<Role> page = new Page<>();
+        page.setCurrent(request.getPageNum());
+        page.setSize(request.getPageSize());
+        return this.baseMapper.findRole(page, role);
     }
 
     @Override

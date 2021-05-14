@@ -19,7 +19,7 @@
       :title="roleInfoData.remark">
       <a-icon
         type="book" />&nbsp;&nbsp;角色描述：{{ roleInfoData.remark }}
-    </p>roleInfoDataroleInfoData
+    </p>
     <p>
       <a-icon
         type="clock-circle" />&nbsp;&nbsp;创建时间：{{ roleInfoData.createTime }}
@@ -77,7 +77,7 @@ export default {
     roleInfoVisiable () {
       if (this.roleInfoVisiable) {
         getMenu().then((resp) => {
-          this.menuTreeData = resp.rows.children
+          this.menuTreeData = resp.data.rows.children
           roleMenu({
             roleId: this.roleInfoData.roleId
           }).then((resp) => {

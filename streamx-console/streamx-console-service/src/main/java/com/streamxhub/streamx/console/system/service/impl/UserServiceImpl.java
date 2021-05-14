@@ -40,10 +40,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -70,7 +67,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         Page<User> page = new Page<>();
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
-        return this.baseMapper.findUserDetail(page, user);
+        IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
+        if (resPage.getTotal() == 0) {
+            resPage.setRecords(Collections.emptyList());
+        }
+        return resPage;
     }
 
     @Override

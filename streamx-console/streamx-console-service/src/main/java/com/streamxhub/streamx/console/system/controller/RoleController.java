@@ -52,8 +52,6 @@ public class RoleController {
     @Autowired
     private RoleMenuServie roleMenuServie;
 
-    private String message;
-
     @PostMapping("list")
     @RequiresPermissions("role:view")
     public RestResponse roleList(RestRequest restRequest, Role role) {
