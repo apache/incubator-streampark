@@ -30,7 +30,7 @@
 # StreamX
 Make Flink|Spark easier!!!
 
-> 一个神奇的框架，让 Flink 开发更简单
+> 一个神奇的框架，让 Flink|Spark 开发更简单
 
 ## 🚀 什么是StreamX
 &nbsp;&nbsp;&nbsp;&nbsp;大数据技术如今发展的如火如荼，已经呈现百花齐放欣欣向荣的景象，实时处理流域 `Apache Spark` 和 `Apache Flink` 更是一个伟大的进步，尤其是 `Apache Flink` 被普遍认为是下一代大数据流计算引擎，
