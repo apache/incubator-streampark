@@ -3,7 +3,7 @@
     :mask-closable="false"
     width="650"
     placement="right"
-    :closable="false"
+    :closable="true"
     @close="onClose"
     :visible="menuEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
@@ -110,7 +110,6 @@
     <div
       class="drawer-bootom-button">
       <a-dropdown
-        style="float: left"
         :trigger="['click']"
         placement="topCenter">
         <a-menu
@@ -133,7 +132,6 @@
         </a-button>
       </a-dropdown>
       <a-button
-        style="margin-right: .8rem"
         @click="onClose">
         取消
       </a-button>

@@ -3,7 +3,7 @@
     :mask-closable="false"
     width="650"
     placement="right"
-    :closable="false"
+    :closable="true"
     @close="onClose"
     :visible="visible"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
@@ -112,7 +112,6 @@
     <div
       class="drawer-bootom-button">
       <a-button
-        style="margin-right: .8rem"
         @click="onClose">
         Cancel
       </a-button>

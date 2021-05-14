@@ -3,7 +3,7 @@
     :mask-closable="false"
     width="650"
     placement="right"
-    :closable="false"
+    :closable="true"
     @close="onClose"
     :visible="roleEditVisiable"
     style="height: calc(100% - 55px);overflow: auto;padding-bottom: 53px;">
