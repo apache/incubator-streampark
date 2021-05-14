@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.console.system.authentication;
 
-import java.util.Set;
-
+import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.service.RoleService;
+import com.streamxhub.streamx.console.system.service.UserService;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authc.AuthenticationException;
 import org.apache.shiro.authc.AuthenticationInfo;
@@ -33,9 +34,7 @@ import org.apache.shiro.realm.AuthorizingRealm;
 import org.apache.shiro.subject.PrincipalCollection;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.RoleService;
-import com.streamxhub.streamx.console.system.service.UserService;
+import java.util.Set;
 
 /**
  * 自定义实现 ShiroRealm，包含认证和授权两大模块

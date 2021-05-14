@@ -1,7 +1,6 @@
 package com.streamxhub.streamx.flink.javacase.tablesql;
 
 import org.apache.flink.table.api.EnvironmentSettings;
-import org.apache.flink.table.api.Table;
 import org.apache.flink.table.api.TableEnvironment;
 
 public class JavaTableApp {

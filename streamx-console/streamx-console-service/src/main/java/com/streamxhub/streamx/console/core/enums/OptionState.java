@@ -20,9 +20,9 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
-import java.util.Arrays;
-
 import lombok.Getter;
+
+import java.util.Arrays;
 
 /**
  * @author benjobs

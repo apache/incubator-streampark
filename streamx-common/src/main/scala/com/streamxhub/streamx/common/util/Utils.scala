@@ -22,10 +22,9 @@ package com.streamxhub.streamx.common.util
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
-import java.util.{Collection => JavaCollection, Map => JavaMap}
 import java.util.function.BiConsumer
 import java.util.jar.{JarFile, JarInputStream}
-import java.util.{Properties, UUID}
+import java.util.{Properties, UUID, Collection => JavaCollection, Map => JavaMap}
 import scala.util.{Failure, Success, Try}
 
 object Utils {

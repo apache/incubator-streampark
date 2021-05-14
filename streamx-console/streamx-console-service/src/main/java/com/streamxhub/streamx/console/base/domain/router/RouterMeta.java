@@ -20,12 +20,11 @@
  */
 package com.streamxhub.streamx.console.base.domain.router;
 
-import java.io.Serializable;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
+import java.io.Serializable;
 
 /**
  * Vue路由 Meta

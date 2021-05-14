@@ -21,12 +21,12 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-
-import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
 
 /** @author benjobs */
 public class ShutdownHookRunner implements Runnable {

@@ -20,14 +20,14 @@
  */
 package com.streamxhub.streamx.console.system.service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public interface MenuService extends IService<Menu> {
 

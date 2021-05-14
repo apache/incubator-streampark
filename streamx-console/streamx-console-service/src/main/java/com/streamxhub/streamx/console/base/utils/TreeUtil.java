@@ -20,11 +20,11 @@
  */
 package com.streamxhub.streamx.console.base.utils;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.streamxhub.streamx.console.base.domain.router.RouterTree;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class TreeUtil {
 

@@ -21,17 +21,17 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.lang.management.ManagementFactory;
-import java.lang.management.ThreadInfo;
-import java.lang.management.ThreadMXBean;
-import java.util.ArrayList;
-import java.util.List;
-
 import com.streamxhub.streamx.plugin.profiling.Profiler;
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.streamx.plugin.profiling.util.Stacktrace;
 import com.streamxhub.streamx.plugin.profiling.util.StacktraceMetricBuffer;
+
+import java.lang.management.ManagementFactory;
+import java.lang.management.ThreadInfo;
+import java.lang.management.ThreadMXBean;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class collects stacktraces by getting thread dump via JMX, and stores the stacktraces into

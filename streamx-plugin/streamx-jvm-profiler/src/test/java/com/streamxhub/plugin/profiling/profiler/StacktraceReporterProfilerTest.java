@@ -21,17 +21,16 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.streamx.plugin.profiling.util.Stacktrace;
 import com.streamxhub.streamx.plugin.profiling.util.StacktraceMetricBuffer;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class StacktraceReporterProfilerTest {
   @Test

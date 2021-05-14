@@ -21,12 +21,12 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
+import org.apache.commons.lang3.math.NumberUtils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.math.NumberUtils;
 
 /** @author benjobs */
 public class StringUtils {

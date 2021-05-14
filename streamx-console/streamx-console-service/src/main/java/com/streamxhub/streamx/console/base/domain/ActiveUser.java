@@ -20,15 +20,13 @@
  */
 package com.streamxhub.streamx.console.base.domain;
 
-import java.io.Serializable;
-import java.time.LocalDateTime;
-
-import org.apache.commons.lang3.RandomStringUtils;
-
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.streamxhub.streamx.console.base.utils.DateUtil;
+import lombok.Data;
+import org.apache.commons.lang3.RandomStringUtils;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
 
 /**
  * 在线用户

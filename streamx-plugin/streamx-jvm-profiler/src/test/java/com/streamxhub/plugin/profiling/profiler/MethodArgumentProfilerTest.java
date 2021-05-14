@@ -21,16 +21,15 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
+import com.streamxhub.streamx.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.streamxhub.streamx.plugin.profiling.Reporter;
-import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
 
 public class MethodArgumentProfilerTest {
   @Test

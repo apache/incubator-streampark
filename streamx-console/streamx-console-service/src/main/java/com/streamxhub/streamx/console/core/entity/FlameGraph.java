@@ -20,16 +20,15 @@
  */
 package com.streamxhub.streamx.console.core.entity;
 
-import java.util.Calendar;
-import java.util.Date;
-import java.util.TimeZone;
-
-import lombok.Data;
-import lombok.extern.slf4j.Slf4j;
-
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
+import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * @author benjobs

@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class ProfilerRunnableTest {
   @Test

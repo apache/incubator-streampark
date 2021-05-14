@@ -21,11 +21,11 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
+import com.streamxhub.streamx.plugin.profiling.ConfigProvider;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.streamxhub.streamx.plugin.profiling.ConfigProvider;
 
 /** @author benjobs */
 public class DummyConfigProvider implements ConfigProvider {

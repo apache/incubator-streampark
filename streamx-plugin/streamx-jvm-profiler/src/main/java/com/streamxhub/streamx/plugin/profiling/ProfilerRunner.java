@@ -21,9 +21,9 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
+
+import java.util.concurrent.atomic.AtomicLong;
 
 /** @author benjobs */
 public class ProfilerRunner implements Runnable {

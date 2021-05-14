@@ -20,20 +20,21 @@
  */
 package com.streamxhub.streamx.console.core.service.impl;
 
-import java.util.concurrent.*;
-
 import com.streamxhub.streamx.common.util.ThreadUtils;
-import com.streamxhub.streamx.console.core.service.SettingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.streamxhub.streamx.console.core.entity.Note;
 import com.streamxhub.streamx.console.core.service.NoteBookService;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.repl.flink.interpreter.FlinkInterpreter;
 import com.streamxhub.streamx.repl.flink.interpreter.InterpreterOutput;
 import com.streamxhub.streamx.repl.flink.interpreter.InterpreterResult;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author benjobs

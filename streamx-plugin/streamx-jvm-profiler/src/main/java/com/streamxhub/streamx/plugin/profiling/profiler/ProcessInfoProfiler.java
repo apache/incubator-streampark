@@ -21,20 +21,15 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.streamxhub.streamx.plugin.profiling.AgentImpl;
 import com.streamxhub.streamx.plugin.profiling.Profiler;
 import com.streamxhub.streamx.plugin.profiling.Reporter;
-import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
-import com.streamxhub.streamx.plugin.profiling.util.ProcFileUtils;
-import com.streamxhub.streamx.plugin.profiling.util.ProcessUtils;
-import com.streamxhub.streamx.plugin.profiling.util.SparkAppCmdInfo;
-import com.streamxhub.streamx.plugin.profiling.util.SparkUtils;
+import com.streamxhub.streamx.plugin.profiling.util.*;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** @author benjobs */
 public class ProcessInfoProfiler extends ProfilerBase implements Profiler {

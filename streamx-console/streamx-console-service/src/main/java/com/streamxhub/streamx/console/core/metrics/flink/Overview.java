@@ -20,9 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.metrics.flink;
 
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * @author benjobs

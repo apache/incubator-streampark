@@ -20,15 +20,15 @@
  */
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.streamxhub.streamx.plugin.profiling.Profiler;
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethodLongMetricBuffer;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethodMetricKey;
 import com.streamxhub.streamx.plugin.profiling.util.Histogram;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /** @author benjobs */
 public class MethodDurationProfiler extends ProfilerBase implements Profiler {

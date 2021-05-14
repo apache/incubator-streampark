@@ -20,9 +20,9 @@
  */
 package com.streamxhub.streamx.test.stream
 
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.sink.ESSink
 import com.streamxhub.streamx.flink.core.scala.util.ElasticSearchUtils
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s.DefaultFormats

@@ -20,14 +20,12 @@
  */
 package com.streamxhub.streamx.console.system.authentication;
 
+import com.streamxhub.streamx.console.system.entity.User;
+import com.streamxhub.streamx.console.system.service.UserService;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import lombok.extern.slf4j.Slf4j;
-
-import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.UserService;
 
 /**
  * @author benjobs

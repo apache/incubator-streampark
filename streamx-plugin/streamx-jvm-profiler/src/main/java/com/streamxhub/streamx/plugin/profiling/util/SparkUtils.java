@@ -21,9 +21,9 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.util.List;
-
 import com.streamxhub.streamx.plugin.profiling.profiler.Constants;
+
+import java.util.List;
 
 /** @author benjobs */
 public class SparkUtils {

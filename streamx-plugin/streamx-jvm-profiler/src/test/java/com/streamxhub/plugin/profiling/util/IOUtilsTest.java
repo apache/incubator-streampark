@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.io.ByteArrayInputStream;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.io.ByteArrayInputStream;
 
 public class IOUtilsTest {
   @Test

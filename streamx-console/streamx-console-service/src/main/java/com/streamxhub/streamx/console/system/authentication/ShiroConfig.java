@@ -20,16 +20,15 @@
  */
 package com.streamxhub.streamx.console.system.authentication;
 
-import javax.servlet.Filter;
-
-import java.util.LinkedHashMap;
-
 import org.apache.shiro.mgt.SecurityManager;
 import org.apache.shiro.spring.security.interceptor.AuthorizationAttributeSourceAdvisor;
 import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import javax.servlet.Filter;
+import java.util.LinkedHashMap;
 
 /**
  * Shiro 配置类

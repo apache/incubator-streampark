@@ -21,14 +21,13 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
+import com.streamxhub.streamx.plugin.profiling.Reporter;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.streamx.plugin.profiling.Reporter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class CpuAndMemoryProfilerTest {
   @Test

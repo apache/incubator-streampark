@@ -20,17 +20,16 @@
  */
 package com.streamxhub.streamx.console.base.utils;
 
-import java.io.File;
-import java.lang.reflect.Method;
-import java.util.Objects;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.lionsoul.ip2region.DataBlock;
 import org.lionsoul.ip2region.DbConfig;
 import org.lionsoul.ip2region.DbSearcher;
 import org.lionsoul.ip2region.Util;
 
-import lombok.extern.slf4j.Slf4j;
+import java.io.File;
+import java.lang.reflect.Method;
+import java.util.Objects;
 
 @Slf4j
 public class AddressUtil {

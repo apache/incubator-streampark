@@ -20,17 +20,15 @@
  */
 package com.streamxhub.streamx.console.system.entity;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
-
-import java.io.Serializable;
-import java.util.Date;
-
-import lombok.Data;
-
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Size;
+import java.io.Serializable;
+import java.util.Date;
 
 @Data
 @TableName("t_role")

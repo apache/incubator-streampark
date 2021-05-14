@@ -20,9 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.dao;
 
-import com.streamxhub.streamx.console.core.entity.Setting;
-
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.Setting;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;

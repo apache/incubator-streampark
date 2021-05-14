@@ -21,16 +21,15 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Test;
-
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.ProcFileUtils;
 import com.streamxhub.streamx.plugin.profiling.util.ProcessUtils;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 public class ProcessInfoProfilerTest {
   @Test

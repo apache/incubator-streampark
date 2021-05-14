@@ -33,9 +33,9 @@ import org.apache.flink.configuration.Configuration
 import org.apache.flink.streaming.api.scala.async.{ResultFuture, RichAsyncFunction}
 import org.apache.flink.streaming.api.scala.{AsyncDataStream, DataStream}
 
-import java.util.{Collections, Properties}
 import java.util.concurrent.{CompletableFuture, ExecutorService, Executors, TimeUnit}
 import java.util.function.{Consumer, Supplier}
+import java.util.{Collections, Properties}
 import javax.sql.DataSource
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._

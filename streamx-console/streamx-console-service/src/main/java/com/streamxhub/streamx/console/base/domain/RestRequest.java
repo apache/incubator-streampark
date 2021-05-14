@@ -20,9 +20,9 @@
  */
 package com.streamxhub.streamx.console.base.domain;
 
-import java.io.Serializable;
-
 import lombok.Data;
+
+import java.io.Serializable;
 
 /**
  * @author benjobs

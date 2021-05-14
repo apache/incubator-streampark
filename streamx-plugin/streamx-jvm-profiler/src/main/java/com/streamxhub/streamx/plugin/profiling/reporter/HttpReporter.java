@@ -21,18 +21,17 @@
 
 package com.streamxhub.streamx.plugin.profiling.reporter;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
-import scalaj.http.Http;
-import scalaj.http.HttpResponse;
-
 import com.streamxhub.streamx.plugin.profiling.ArgumentUtils;
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
 import com.streamxhub.streamx.plugin.profiling.util.Utils;
+import scalaj.http.Http;
+import scalaj.http.HttpResponse;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 
 /** @author benjobs */
 public class HttpReporter implements Reporter {

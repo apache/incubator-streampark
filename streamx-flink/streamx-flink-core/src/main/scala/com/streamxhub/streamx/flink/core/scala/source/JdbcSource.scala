@@ -21,11 +21,11 @@
 package com.streamxhub.streamx.flink.core.scala.source
 
 import com.streamxhub.streamx.common.enums.ApiType
+import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{JdbcUtils, Logger, Utils}
+import com.streamxhub.streamx.flink.common.util.FlinkUtils
 import com.streamxhub.streamx.flink.core.java.function.{SQLQueryFunction, SQLResultFunction}
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
-import ApiType.ApiType
-import com.streamxhub.streamx.flink.common.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.{CheckpointListener, FunctionInitializationContext, FunctionSnapshotContext}

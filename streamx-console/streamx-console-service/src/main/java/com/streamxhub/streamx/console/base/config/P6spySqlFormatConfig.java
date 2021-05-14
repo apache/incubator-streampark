@@ -20,12 +20,11 @@
  */
 package com.streamxhub.streamx.console.base.config;
 
-import java.time.LocalDateTime;
-
-import org.apache.commons.lang3.StringUtils;
-
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
 import com.streamxhub.streamx.console.base.utils.DateUtil;
+import org.apache.commons.lang3.StringUtils;
+
+import java.time.LocalDateTime;
 
 /**
  * 自定义 p6spy sql输出格式

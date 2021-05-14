@@ -20,11 +20,10 @@
  */
 package com.streamxhub.streamx.console.system.entity;
 
-import java.io.Serializable;
-
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import java.io.Serializable;
 
 @TableName("t_user_role")
 @Data

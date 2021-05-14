@@ -20,10 +20,10 @@
  */
 package com.streamxhub.streamx.console.base.utils;
 
-import java.util.Random;
-
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.util.ByteSource;
+
+import java.util.Random;
 
 public class ShaHashUtil {
 

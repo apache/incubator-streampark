@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.console.base.utils;
 
 import javax.crypto.Cipher;
-
 import java.security.Key;
 
 public class EncryptUtil {

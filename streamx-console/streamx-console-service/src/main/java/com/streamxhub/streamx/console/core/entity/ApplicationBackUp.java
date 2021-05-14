@@ -20,13 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.entity;
 
-import java.util.Date;
-
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.streamxhub.streamx.common.conf.ConfigConst;
+import java.util.Date;
 
 /**
  * @author benjobs

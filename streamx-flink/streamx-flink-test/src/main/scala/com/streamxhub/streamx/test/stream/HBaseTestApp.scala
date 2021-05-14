@@ -22,7 +22,7 @@ package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.common.util.ConfigUtils
 import com.streamxhub.streamx.flink.core.java.wrapper.HBaseQuery
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.request.HBaseRequest
 import org.apache.flink.api.scala._
 import org.apache.hadoop.hbase.client.Get

@@ -20,12 +20,11 @@
  */
 package com.streamxhub.streamx.console.core.metrics.flink;
 
-import java.io.Serializable;
-import java.util.List;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.List;
 
 /**
  * @author benjobs

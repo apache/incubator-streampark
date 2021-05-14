@@ -21,12 +21,11 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.lang.reflect.InvocationTargetException;
-
+import com.streamxhub.streamx.plugin.profiling.Arguments;
 import org.junit.Assert;
 import org.junit.Test;
 
-import com.streamxhub.streamx.plugin.profiling.Arguments;
+import java.lang.reflect.InvocationTargetException;
 
 public class SparkUtilsTest {
   @Test

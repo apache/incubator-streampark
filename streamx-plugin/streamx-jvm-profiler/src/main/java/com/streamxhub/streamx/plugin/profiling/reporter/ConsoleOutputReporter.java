@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling.reporter;
 
-import java.util.Map;
-
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.Utils;
+
+import java.util.Map;
 
 public class ConsoleOutputReporter implements Reporter {
   @Override

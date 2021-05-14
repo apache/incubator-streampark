@@ -21,17 +21,16 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
+import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
+import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgument;
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Test;
-
-import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
-import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
-import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgument;
 
 public class ArgumentsTest {
   @Test

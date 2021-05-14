@@ -21,6 +21,13 @@
 
 package com.streamxhub.streamx.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
+import com.streamxhub.streamx.plugin.profiling.util.ExponentialBackoffRetryPolicy;
+import com.streamxhub.streamx.plugin.profiling.util.Utils;
+import org.yaml.snakeyaml.Yaml;
+import scalaj.http.Http;
+import scalaj.http.HttpResponse;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -29,15 +36,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import scalaj.http.Http;
-import scalaj.http.HttpResponse;
-
-import org.yaml.snakeyaml.Yaml;
-
-import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
-import com.streamxhub.streamx.plugin.profiling.util.ExponentialBackoffRetryPolicy;
-import com.streamxhub.streamx.plugin.profiling.util.Utils;
 
 /** @author benjobs */
 public class YamlConfigProvider implements ConfigProvider {

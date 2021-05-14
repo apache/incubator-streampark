@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.util.Map;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.Map;
 
 public class ClassAndMethodMetricBufferTest {
   @Test

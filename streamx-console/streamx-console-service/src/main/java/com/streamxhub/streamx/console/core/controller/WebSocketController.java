@@ -21,12 +21,11 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.console.core.service.ProjectService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.stereotype.Controller;
-
-import com.streamxhub.streamx.console.core.service.ProjectService;
 
 /**
  * @author benjobs

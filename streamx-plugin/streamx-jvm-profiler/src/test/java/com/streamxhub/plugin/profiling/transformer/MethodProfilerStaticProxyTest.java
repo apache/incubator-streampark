@@ -21,19 +21,17 @@
 
 package com.streamxhub.streamx.plugin.profiling.transformer;
 
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicLong;
-
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-
-import junit.framework.Assert;
-
 import com.streamxhub.streamx.plugin.profiling.profiler.Constants;
 import com.streamxhub.streamx.plugin.profiling.profiler.MethodArgumentCollector;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethodMetricKey;
 import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgumentMetricBuffer;
+import junit.framework.Assert;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class MethodProfilerStaticProxyTest {
   private ClassMethodArgumentMetricBuffer buffer;

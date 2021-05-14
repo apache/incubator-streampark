@@ -20,17 +20,16 @@
  */
 package com.streamxhub.streamx.console.core.metrics.flink;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Map;
-
-import lombok.Data;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.base.utils.CommonUtil;
+import lombok.Data;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  * @author benjobs

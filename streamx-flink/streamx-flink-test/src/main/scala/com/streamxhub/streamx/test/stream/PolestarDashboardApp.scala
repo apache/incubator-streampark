@@ -20,10 +20,10 @@
  */
 package com.streamxhub.streamx.test.stream
 
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.sink.ESSink
 import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
 import com.streamxhub.streamx.flink.core.scala.util.ElasticSearchUtils
-import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest

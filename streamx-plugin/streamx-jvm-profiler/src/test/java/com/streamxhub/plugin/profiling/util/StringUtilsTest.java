@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.util.List;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.util.List;
 
 public class StringUtilsTest {
   @Test

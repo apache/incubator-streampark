@@ -21,10 +21,10 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
-import java.lang.reflect.InvocationTargetException;
-
 import org.junit.Assert;
 import org.junit.Test;
+
+import java.lang.reflect.InvocationTargetException;
 
 public class ReflectionUtilsTest {
   static class ClassA {

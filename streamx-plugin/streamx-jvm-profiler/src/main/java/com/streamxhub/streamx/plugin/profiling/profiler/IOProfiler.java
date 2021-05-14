@@ -21,13 +21,13 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.streamxhub.streamx.plugin.profiling.Profiler;
 import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.util.ProcFileUtils;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /** @author benjobs */
 public class IOProfiler extends ProfilerBase implements Profiler {

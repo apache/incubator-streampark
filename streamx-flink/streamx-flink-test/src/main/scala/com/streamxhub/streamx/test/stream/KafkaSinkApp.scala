@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.test.stream
 
-import com.streamxhub.streamx.flink.core.scala.sink.KafkaSink
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
+import com.streamxhub.streamx.flink.core.scala.sink.KafkaSink
 import org.apache.flink.streaming.api.functions.source.SourceFunction
 import org.apache.flink.streaming.api.scala._
 

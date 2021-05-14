@@ -21,12 +21,12 @@
 
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
-import java.util.UUID;
-
 import com.streamxhub.streamx.plugin.profiling.util.ProcFileUtils;
 import com.streamxhub.streamx.plugin.profiling.util.ProcessUtils;
 import com.streamxhub.streamx.plugin.profiling.util.SparkUtils;
 import com.streamxhub.streamx.plugin.profiling.util.Utils;
+
+import java.util.UUID;
 
 /** @author benjobs */
 public class ProfilerBase {

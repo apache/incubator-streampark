@@ -20,9 +20,9 @@
  */
 package com.streamxhub.streamx.test.stream
 
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.sink.JdbcSink
 import com.streamxhub.streamx.flink.core.scala.source.KafkaSource
-import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import org.apache.flink.api.scala._
 import org.apache.flink.connector.jdbc.{JdbcConnectionOptions, JdbcStatementBuilder, JdbcSink => JSink}
 

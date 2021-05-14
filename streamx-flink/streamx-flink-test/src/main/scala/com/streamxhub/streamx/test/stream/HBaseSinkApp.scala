@@ -21,8 +21,8 @@
 package com.streamxhub.streamx.test.stream
 
 import com.streamxhub.streamx.common.util.ConfigUtils
-import com.streamxhub.streamx.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
 import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
+import com.streamxhub.streamx.flink.core.scala.sink.{HBaseOutputFormat, HBaseSink}
 import org.apache.flink.api.scala._
 import org.apache.hadoop.hbase.client.{Mutation, Put}
 import org.apache.hadoop.hbase.util.Bytes

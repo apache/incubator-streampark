@@ -20,12 +20,12 @@
  */
 package com.streamxhub.streamx.console.system.service;
 
-import java.util.Set;
-
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.system.entity.User;
+
+import java.util.Set;
 
 public interface UserService extends IService<User> {
 

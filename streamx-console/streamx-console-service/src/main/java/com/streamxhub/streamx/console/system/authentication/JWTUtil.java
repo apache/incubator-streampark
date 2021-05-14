@@ -20,12 +20,6 @@
  */
 package com.streamxhub.streamx.console.system.authentication;
 
-import java.util.Date;
-
-import org.apache.commons.lang3.StringUtils;
-
-import lombok.extern.slf4j.Slf4j;
-
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -33,6 +27,10 @@ import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.streamxhub.streamx.console.base.properties.StreamXProperties;
 import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+
+import java.util.Date;
 
 /**
  * @author benjobs

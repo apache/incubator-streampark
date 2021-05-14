@@ -20,14 +20,14 @@
  */
 package com.streamxhub.streamx.plugin.profiling.profiler;
 
+import com.streamxhub.streamx.plugin.profiling.Profiler;
+import com.streamxhub.streamx.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
+
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.HashMap;
 import java.util.Map;
-
-import com.streamxhub.streamx.plugin.profiling.Profiler;
-import com.streamxhub.streamx.plugin.profiling.Reporter;
-import com.streamxhub.streamx.plugin.profiling.util.AgentLogger;
 
 /**
  * ThreadInfoProfiler is used to Collects the Thread Related Metrics.

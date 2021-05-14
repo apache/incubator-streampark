@@ -21,6 +21,9 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -29,9 +32,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 public class ProcFileUtilsTest {
   @Test

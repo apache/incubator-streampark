@@ -21,13 +21,13 @@
 
 package com.streamxhub.streamx.plugin.profiling.util;
 
+import org.junit.Assert;
+import org.junit.Test;
+
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
-
-import org.junit.Assert;
-import org.junit.Test;
 
 public class StacktraceMetricBufferTest {
   @Test

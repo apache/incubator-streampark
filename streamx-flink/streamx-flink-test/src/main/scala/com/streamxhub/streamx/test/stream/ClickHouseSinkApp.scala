@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.test.stream
 
+import com.streamxhub.streamx.flink.core.scala.FlinkStreaming
 import com.streamxhub.streamx.flink.core.scala.sink.ClickHouseSink
-import com.streamxhub.streamx.flink.core.scala.{FlinkStreaming, StreamingContext}
 import org.apache.flink.api.scala._
 
 object ClickHouseSinkApp extends FlinkStreaming {

@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.javacase.stream;
 
-import com.streamxhub.streamx.flink.core.java.function.StreamEnvConfigFunction;
 import com.streamxhub.streamx.flink.core.java.source.KafkaSource;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.source.KafkaRecord;

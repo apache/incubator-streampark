@@ -20,10 +20,10 @@
  */
 package com.streamxhub.streamx.console.system.service;
 
-import java.util.List;
-
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.system.entity.RoleMenu;
+
+import java.util.List;
 
 public interface RoleMenuServie extends IService<RoleMenu> {
 

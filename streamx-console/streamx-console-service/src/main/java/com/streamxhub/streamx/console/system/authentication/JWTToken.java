@@ -20,9 +20,8 @@
  */
 package com.streamxhub.streamx.console.system.authentication;
 
-import org.apache.shiro.authc.AuthenticationToken;
-
 import lombok.Data;
+import org.apache.shiro.authc.AuthenticationToken;
 
 /**
  * JSON Web Token
