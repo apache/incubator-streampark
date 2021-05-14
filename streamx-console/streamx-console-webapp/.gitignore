@@ -1,0 +1,6 @@
+# Node
+node_modules/
+dist/
+node/
+
+package-lock.json

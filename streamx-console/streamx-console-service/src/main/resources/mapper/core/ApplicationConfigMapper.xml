@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper">
+    <resultMap id="BaseResultMap" type="com.streamxhub.streamx.console.core.entity.ApplicationConfig">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
+        <result column="FORMAT" jdbcType="INTEGER" property="format"/>
+        <result column="VERSION" jdbcType="INTEGER" property="version"/>
+        <result column="LATEST" jdbcType="BOOLEAN" property="latest"/>
+        <result column="CONTENT" jdbcType="LONGVARCHAR" property="content"/>
+        <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+    </resultMap>
+</mapper>
