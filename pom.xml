@@ -26,7 +26,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spark.version>2.2.0</spark.version>
         <hive.version>2.3.4</hive.version>
-        <flink.version>1.12.0</flink.version>
+        <flink.version>1.13.0</flink.version>
         <async.client.version>2.0.39</async.client.version>
         <vertx.version>3.8.3</vertx.version>
         <hadoop.version>2.6.0</hadoop.version>

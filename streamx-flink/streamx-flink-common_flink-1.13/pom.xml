@@ -8,7 +8,7 @@
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>streamx-flink-common</artifactId>
+    <artifactId>streamx-flink-common_flink-1.13</artifactId>
     <name>StreamX : Flink Common</name>
 
     <!--

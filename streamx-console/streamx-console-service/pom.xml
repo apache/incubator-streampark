@@ -58,7 +58,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-common</artifactId>
+            <artifactId>streamx-flink-common_flink-1.13</artifactId>
             <version>1.0.0</version>
         </dependency>
 

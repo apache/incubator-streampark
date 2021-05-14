@@ -9,13 +9,13 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>streamx-flink</artifactId>
+    <artifactId>streamx-flink_flink-1.13</artifactId>
     <name>StreamX : Flink Parent</name>
     <packaging>pom</packaging>
 
     <modules>
-        <module>streamx-flink-common</module>
-        <module>streamx-flink-core</module>
+        <module>streamx-flink-common_flink-1.13</module>
+        <module>streamx-flink-core_flink-1.13</module>
         <module>streamx-flink-test</module>
     </modules>
 

@@ -31,7 +31,7 @@ import org.apache.flink.table.catalog.Catalog
 import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor}
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions.{ScalarFunction, UserDefinedFunction}
-import org.apache.flink.table.module.Module
+import org.apache.flink.table.module.{Module, ModuleEntry}
 import org.apache.flink.table.sources.TableSource
 import org.apache.flink.table.types.AbstractDataType
 
@@ -193,6 +193,10 @@ class TableContext(val parameter: ParameterTool,
   @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
 
   @Deprecated override def connect(connectorDescriptor: ConnectorDescriptor): ConnectTableDescriptor = tableEnv.connect(connectorDescriptor)
+
+  override def useModules(strings: String*): Unit = tableEnv.useModules(strings:_*)
+
+  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
 }
 
 trait FlinkTable extends Logger {

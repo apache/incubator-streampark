@@ -8,7 +8,7 @@
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
-    <artifactId>streamx-flink-core</artifactId>
+    <artifactId>streamx-flink-core_flink-1.13</artifactId>
     <name>StreamX : Flink Core</name>
 
     <!--
@@ -21,7 +21,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-common</artifactId>
+            <artifactId>streamx-flink-common_flink-1.13</artifactId>
             <version>1.0.0</version>
         </dependency>
 

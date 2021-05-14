@@ -43,14 +43,16 @@ import org.apache.flink.streaming.api.graph.StreamGraph
 import org.apache.flink.streaming.api.scala.{DataStream, StreamExecutionEnvironment}
 import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.bridge.scala.StreamTableEnvironment
-import org.apache.flink.table.api.{ExplainDetail, StatementSet, Table, TableConfig, TableResult}
+import org.apache.flink.table.api.{ExplainDetail, Schema, StatementSet, Table, TableConfig, TableResult}
 import org.apache.flink.table.catalog.Catalog
+import org.apache.flink.table.connector.ChangelogMode
 import org.apache.flink.table.descriptors.{ConnectTableDescriptor, ConnectorDescriptor, StreamTableDescriptor}
 import org.apache.flink.table.expressions.Expression
 import org.apache.flink.table.functions._
-import org.apache.flink.table.module.Module
+import org.apache.flink.table.module.{Module, ModuleEntry}
 import org.apache.flink.table.sources.TableSource
 import org.apache.flink.table.types.AbstractDataType
+import org.apache.flink.types.Row
 import org.apache.flink.util.SplittableIterator
 
 import java.util.{Optional, List => JavaList}
@@ -113,7 +115,7 @@ class StreamTableContext(val parameter: ParameterTool,
 
   def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
 
-  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback:Unit => String = null): Unit = super.callSql(sql, parameter, this)
+  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = super.callSql(sql, parameter, this)
 
   //...streamEnv api start...
 
@@ -377,6 +379,51 @@ class StreamTableContext(val parameter: ParameterTool,
   @Deprecated override def getCompletionHints(statement: String, position: Int): Array[String] = tableEnv.getCompletionHints(statement, position)
 
   @Deprecated override def sqlUpdate(stmt: String): Unit = tableEnv.sqlUpdate(stmt)
+
+  override def fromDataStream[T](dataStream: DataStream[T], schema: Schema): Table = tableEnv.fromDataStream[T](dataStream, schema)
+
+  override def fromChangelogStream(dataStream: DataStream[Row]): Table = tableEnv.fromChangelogStream(dataStream)
+
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema): Table = tableEnv.fromChangelogStream(dataStream, schema)
+
+  override def fromChangelogStream(dataStream: DataStream[Row], schema: Schema, changelogMode: ChangelogMode): Table = tableEnv.fromChangelogStream(dataStream, schema, changelogMode)
+
+  override def createTemporaryView[T](path: String, dataStream: DataStream[T], schema: Schema): Unit = tableEnv.createTemporaryView[T](path, dataStream, schema)
+
+  override def toDataStream(table: Table): DataStream[Row] = {
+    isConvertedToDataStream = true
+    tableEnv.toDataStream(table)
+  }
+
+  override def toDataStream[T](table: Table, targetClass: Class[T]): DataStream[T] = {
+    isConvertedToDataStream = true
+    tableEnv.toDataStream[T](table, targetClass)
+  }
+
+  override def toDataStream[T](table: Table, targetDataType: AbstractDataType[_]): DataStream[T] = {
+    isConvertedToDataStream = true
+    tableEnv.toDataStream[T](table, targetDataType)
+  }
+
+  override def toChangelogStream(table: Table): DataStream[Row] = {
+    isConvertedToDataStream = true
+    tableEnv.toChangelogStream(table)
+  }
+
+  override def toChangelogStream(table: Table, targetSchema: Schema): DataStream[Row] = {
+    isConvertedToDataStream = true
+    tableEnv.toChangelogStream(table, targetSchema)
+  }
+
+  override def toChangelogStream(table: Table, targetSchema: Schema, changelogMode: ChangelogMode): DataStream[Row] = {
+    isConvertedToDataStream = true
+    tableEnv.toChangelogStream(table, targetSchema, changelogMode)
+  }
+
+  override def useModules(strings: String*): Unit = tableEnv.useModules(strings: _*)
+
+  override def listFullModules(): Array[ModuleEntry] = tableEnv.listFullModules()
+
 }
 
 trait FlinkStreamTable extends Logger {
