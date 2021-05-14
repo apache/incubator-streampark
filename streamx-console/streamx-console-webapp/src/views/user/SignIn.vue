@@ -6,7 +6,7 @@
           <div class="header">
             <a href="/">
               <img
-                src="~@/assets/logo.png"
+                src="~@/assets/imgs/logo.png"
                 class="logo"
                 alt="logo">
             </a>
