@@ -3,12 +3,15 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
+
+
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink</artifactId>
         <version>1.0.0</version>
     </parent>
     <artifactId>streamx-flink-core</artifactId>
+
     <name>StreamX : Flink Core</name>
 
     <!--
@@ -16,13 +19,19 @@
     optional: 主要用于"可选依赖"的场景,例如该框架实现了很多source和sink,至于是否引入mysql和hbase,取决于用户的使用情况,如使用了mysql,则需要用户手动导入mysql依赖.
     provided: 表示的不是依赖可选,它表示这个依赖是必须的,但是这个依赖通常是已经提供的,应用服务不需要额外引入,通常也不用关心
     -->
-
     <dependencies>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-common</artifactId>
+            <artifactId>streamx-common</artifactId>
             <version>1.0.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <!--flink base-->

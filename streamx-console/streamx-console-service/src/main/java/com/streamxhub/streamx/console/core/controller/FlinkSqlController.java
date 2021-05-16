@@ -16,14 +16,14 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
-import com.streamxhub.streamx.common.enums.SQLErrorType;
+import com.streamxhub.streamx.common.enums.SqlErrorType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
-import com.streamxhub.streamx.flink.common.util.SQLCommandUtil;
-import com.streamxhub.streamx.flink.common.util.SQLError;
+import com.streamxhub.streamx.flink.core.SqlError;
+import com.streamxhub.streamx.flink.core.SqlValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
@@ -50,7 +50,7 @@ public class FlinkSqlController {
 
     @PostMapping("verify")
     public RestResponse verify(String sql) {
-        SQLError sqlError = SQLCommandUtil.verifySQL(sql);
+        SqlError sqlError = SqlValidator.verifySQL(sql);
         if (sqlError != null) {
             String[] array = sqlError.sql().trim().split("\n");
             String start = array[0].trim();
@@ -65,7 +65,7 @@ public class FlinkSqlController {
                     .put("start", start)
                     .put("end", end);
             //语法异常
-            if (sqlError.errorType().equals(SQLErrorType.SYNTAX_ERROR)) {
+            if (sqlError.errorType().equals(SqlErrorType.SYNTAX_ERROR)) {
                 String exception = sqlError.exception().replaceAll("[\r\n]", "");
                 if (exception.matches(SQL_SPARSE_FAILED_REGEXP)) {
                     String[] lineColumn = exception

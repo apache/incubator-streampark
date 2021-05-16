@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.test
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.common.conf.FlinkRunOption
+import com.streamxhub.streamx.flink.core.scala.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.SubmitResponse
 import org.apache.commons.cli.Options
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines

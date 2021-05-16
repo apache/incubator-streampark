@@ -19,7 +19,7 @@
  * under the License.
  */
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.flink.common.util.SQLCommandUtil;
+import com.streamxhub.streamx.flink.core.SqlValidator;
 import org.junit.Test;
 
 public class SQLCommandTest {
@@ -68,7 +68,7 @@ public class SQLCommandTest {
         RestResponse response = null;
 
         try {
-            SQLCommandUtil.verifySQL(sql);
+            SqlValidator.verifySQL(sql);
             response = RestResponse.create().data(true);
         } catch (Exception e) {
             String split = ",sql:";

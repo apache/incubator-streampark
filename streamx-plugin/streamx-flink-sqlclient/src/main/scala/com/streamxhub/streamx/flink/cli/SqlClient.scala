@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.cli
 
 import com.streamxhub.streamx.flink.core.scala.FlinkStreamTable
 
+
 object SqlClient extends FlinkStreamTable {
 
   override def handle(): Unit = context.sqlWithCallBack()

@@ -22,6 +22,7 @@
             </includes>
         </dependencySet>
     </dependencySets>
+
     <fileSets>
         <fileSet>
             <directory>src/assembly/bin</directory>

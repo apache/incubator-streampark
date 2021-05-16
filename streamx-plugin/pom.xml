@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-parent</artifactId>
         <version>1.0.0</version>
+        <relativePath>../streamx-parent/pom.xml</relativePath>
     </parent>
     <artifactId>streamx-plugin</artifactId>
     <name>StreamX : Plugin Parent</name>

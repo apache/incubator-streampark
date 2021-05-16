@@ -67,7 +67,7 @@ const user = {
       return new Promise((resolve, reject) => {
         signin(userInfo).then(response => {
           const respData = response.data
-          if (respData.token) {
+          if (respData != null && respData.token) {
             commit('SET_EXPIRE', respData.expire)
             commit('SET_TOKEN', respData.token)
             commit('SET_ROLES', respData.roles)
@@ -84,8 +84,9 @@ const user = {
     GetRouter ({ commit }, data) {
       return new Promise((resolve, reject) => {
         getRouter({}).then(resp => {
-          commit('SET_ROUTERS', resp)
-          resolve(resp)
+          const respData = resp.data
+          commit('SET_ROUTERS', respData)
+          resolve(respData)
         }).catch(error => {
           reject(error)
         })

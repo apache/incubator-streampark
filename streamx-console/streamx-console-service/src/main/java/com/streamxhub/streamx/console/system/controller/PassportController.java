@@ -20,26 +20,25 @@
  */
 package com.streamxhub.streamx.console.system.controller;
 
-import com.streamxhub.streamx.console.base.domain.ActiveUser;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.properties.StreamXProperties;
-import com.streamxhub.streamx.console.base.utils.*;
+import com.streamxhub.streamx.console.base.utils.DateUtil;
+import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
+import com.streamxhub.streamx.console.base.utils.WebUtil;
 import com.streamxhub.streamx.console.system.authentication.JWTToken;
 import com.streamxhub.streamx.console.system.authentication.JWTUtil;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
-import org.lionsoul.ip2region.DbSearcher;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -66,25 +65,24 @@ public class PassportController {
     @PostMapping("signin")
     public RestResponse signin(
         @NotBlank(message = "{required}") String username,
-        @NotBlank(message = "{required}") String password,
-        HttpServletRequest request) throws Exception {
+        @NotBlank(message = "{required}") String password) throws Exception {
 
         username = StringUtils.lowerCase(username);
-        final String errorMessage = "用户名或密码错误";
         User user = this.userService.findByName(username);
 
         if (user == null) {
-            throw new ServiceException(errorMessage);
+            return RestResponse.create().put("code",0);
         }
 
         String salt = user.getSalt();
         password = ShaHashUtil.encrypt(salt, password);
 
         if (!StringUtils.equals(user.getPassword(), password)) {
-            throw new ServiceException(errorMessage);
+            return RestResponse.create().put("code",0);
         }
+
         if (User.STATUS_LOCK.equals(user.getStatus())) {
-            throw new ServiceException("账号已被锁定,请联系管理员！");
+            return RestResponse.create().put("code",1);
         }
 
         // 更新用户登录时间
@@ -93,27 +91,16 @@ public class PassportController {
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(properties.getShiro().getJwtTimeOut());
         String expireTimeStr = DateUtil.formatFullTime(expireTime);
         JWTToken jwtToken = new JWTToken(token, expireTimeStr);
-        String userId = this.saveActiveUser(user, jwtToken, request);
+        String userId = RandomStringUtils.randomAlphanumeric(20);
         user.setId(userId);
         Map<String, Object> userInfo = this.generateUserInfo(jwtToken, user);
-        return new RestResponse().message("认证成功").data(userInfo);
+        return new RestResponse().data(userInfo);
     }
 
     @PostMapping("signout")
-    public RestResponse signout() throws Exception {
+    public RestResponse signout() {
         SecurityUtils.getSecurityManager().logout(SecurityUtils.getSubject());
-        return new RestResponse().message("退出成功");
-    }
-
-    private String saveActiveUser(User user, JWTToken token, HttpServletRequest request) throws Exception {
-        String ip = IPUtil.getIpAddr(request);
-        // 构建在线用户
-        ActiveUser activeUser = new ActiveUser();
-        activeUser.setUsername(user.getUsername());
-        activeUser.setIp(ip);
-        activeUser.setToken(token.getToken());
-        activeUser.setLoginAddress(AddressUtil.getCityInfo(DbSearcher.BTREE_ALGORITHM, ip));
-        return activeUser.getId();
+        return new RestResponse();
     }
 
     /**
