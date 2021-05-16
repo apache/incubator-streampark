@@ -28,9 +28,9 @@ import org.apache.flink.api.scala._
 import org.apache.flink.streaming.api.windowing.time.Time
 import org.elasticsearch.action.index.IndexRequest
 import org.json4s
-import org.json4s.DefaultFormats
-import org.json4s.jackson.JsonMethods.parse
 import org.json4s.jackson.Serialization
+import org.json4s.native.JsonMethods._
+import org.json4s.{DefaultFormats, _}
 
 import java.text.SimpleDateFormat
 import java.time.Duration

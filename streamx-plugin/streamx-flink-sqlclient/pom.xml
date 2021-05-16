@@ -7,10 +7,12 @@
         <artifactId>streamx-plugin</artifactId>
         <version>1.0.0</version>
     </parent>
+
     <artifactId>streamx-flink-sqlclient</artifactId>
     <name>StreamX : Flink SQL Client</name>
 
     <dependencies>
+
         <dependency>
             <groupId>com.beachape</groupId>
             <artifactId>enumeratum_${scala.binary.version}</artifactId>
@@ -18,8 +20,9 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common</artifactId>
+            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
             <version>1.0.0</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>

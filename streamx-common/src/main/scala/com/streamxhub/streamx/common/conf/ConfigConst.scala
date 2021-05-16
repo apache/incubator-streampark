@@ -108,6 +108,8 @@ object ConfigConst {
 
   val KEY_FLINK_STATE_CHECKPOINTS_DIR = "flink.state.checkpoints.dir"
 
+  val KEY_FLINK_STATE_CHECKPOINT_STORAGE = "flink.state.checkpoint-storage"
+
   val KEY_FLINK_STATE_BACKEND = "flink.state.backend.value"
 
   val KEY_FLINK_STATE_BACKEND_ASYNC = "flink.state.backend.async"

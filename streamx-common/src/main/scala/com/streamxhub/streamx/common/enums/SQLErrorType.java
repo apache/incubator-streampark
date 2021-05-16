@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.common.enums;
 
-public enum SQLErrorType {
+public enum SqlErrorType {
     /**
      * 基本检验失败(如为null等)
      */
@@ -43,12 +43,12 @@ public enum SQLErrorType {
     ENDS_WITH(5);
     public int errorType;
 
-    SQLErrorType(int errorType) {
+    SqlErrorType(int errorType) {
         this.errorType = errorType;
     }
 
-    public static SQLErrorType of(Integer errorType) {
-        for (SQLErrorType type : values()) {
+    public static SqlErrorType of(Integer errorType) {
+        for (SqlErrorType type : values()) {
             if (type.errorType == errorType) {
                 return type;
             }

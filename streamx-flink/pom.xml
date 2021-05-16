@@ -5,8 +5,9 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-parent</artifactId>
         <version>1.0.0</version>
+        <relativePath>../streamx-parent/pom.xml</relativePath>
     </parent>
 
     <artifactId>streamx-flink</artifactId>
@@ -14,7 +15,7 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>streamx-flink-common</module>
+        <module>streamx-flink-shims</module>
         <module>streamx-flink-core</module>
         <module>streamx-flink-test</module>
     </modules>

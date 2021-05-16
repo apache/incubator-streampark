@@ -1,7 +1,7 @@
 package com.streamxhub.streamx.flink.javacase.tablesql;
 
-import com.streamxhub.streamx.flink.core.scala.StreamTableContext;
-import com.streamxhub.streamx.flink.core.scala.util.StreamTableEnvConfig;
+import com.streamxhub.streamx.flink.core.StreamTableContext;
+import com.streamxhub.streamx.flink.core.StreamTableEnvConfig;
 import org.apache.flink.api.common.functions.MapFunction;
 import org.apache.flink.api.common.typeinfo.TypeInformation;
 import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;

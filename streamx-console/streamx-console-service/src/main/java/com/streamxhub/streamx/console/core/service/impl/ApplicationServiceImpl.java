@@ -45,7 +45,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.authentication.ServerUtil;
-import com.streamxhub.streamx.flink.common.conf.ParameterCli;
+import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
 import com.streamxhub.streamx.flink.submit.FlinkSubmit;
 import com.streamxhub.streamx.flink.submit.SubmitRequest;
 import com.streamxhub.streamx.flink.submit.SubmitResponse;

@@ -22,5 +22,5 @@ package com.streamxhub.streamx.common.enums
 
 object StateBackend extends Enumeration {
   type StateBackend = Value
-  val jobmanager, filesystem, rocksdb = Value
+  val jobmanager, filesystem, rocksdb, hashmap = Value
 }

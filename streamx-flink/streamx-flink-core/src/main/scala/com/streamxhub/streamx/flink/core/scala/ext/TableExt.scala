@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.core.scala.ext
 
-import com.streamxhub.streamx.flink.core.scala.StreamTableContext
+import com.streamxhub.streamx.flink.core.StreamTableContext
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.api.scala.DataSet
 import org.apache.flink.streaming.api.scala.DataStream

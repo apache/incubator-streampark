@@ -126,12 +126,12 @@ export default {
   },
 
   mounted() {
-    const index = this.randomNum(1,6)
+    const index = this.randomNum(1, 6)
     $('.main').css({
-        'background': index >= 5 ? 'rgba(122, 200, 255, .2)' : 'rgba(0, 0, 0, .2)'
+      'background': index >= 5 ? 'rgba(122, 200, 255, .2)' : 'rgba(0, 0, 0, .2)'
     })
     const bgUrl = require('@assets/bg/' + index + '.png')
-    $('#particles-js').css('background-image','url('+ bgUrl +')')
+    $('#particles-js').css('background-image', 'url(' + bgUrl + ')')
   },
 
   methods: {
@@ -143,7 +143,7 @@ export default {
     handleSubmit(e) {
       e.preventDefault()
       const {
-        form: {validateFields},
+        form: { validateFields },
         state,
         SignIn
       } = this
@@ -153,7 +153,14 @@ export default {
         if (!err) {
           const loginParams = {...values}
           SignIn(loginParams)
-            .then(resp => this.$router.push({path: '/flink/app'}))
+            .then(resp => {
+              if (resp.code != null) {
+                const message = 'SignIn failed,' + (resp.code === 0 ? ' authentication error' : ' current User is locked.')
+                this.$message.error(message)
+              } else {
+                this.$router.push({path: '/flink/app'})
+              }
+            })
             .catch(err => console.log(err))
             .finally(() => {
               state.loginBtn = false
