@@ -53,6 +53,7 @@ trait FlinkSubmitTrait extends Logger {
       s"""
          |"flink submit {"
          |      "userFlinkHome" : ${submitRequest.flinkHome},
+         |      "flinkVersion" : ${submitRequest.flinkVersion},
          |      "appName": ${submitRequest.appName},
          |      "devMode": ${submitRequest.developmentMode.name()},
          |      "execMode": ${submitRequest.executionMode.name()},

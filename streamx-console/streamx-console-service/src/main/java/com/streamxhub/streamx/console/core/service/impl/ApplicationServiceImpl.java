@@ -1022,6 +1022,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),
+            settingService.getFlinkVersion(),
             settingService.getFlinkYaml(),
             flinkUserJar,
             DevelopmentMode.of(application.getJobType()),

@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.dao.SettingMapper;
@@ -40,9 +41,12 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author benjobs
@@ -57,6 +61,10 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     private Map<String, String> flinkYamlMap;
 
     private String flinkYamlString = null;
+
+    private String flinkVersion = null;
+
+    private final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
 
     @Override
     public Setting get(String key) {
@@ -89,6 +97,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             this.baseMapper.updateByKey(setting);
             settings.get(setting.getKey()).setValue(setting.getValue());
             if (setting.getKey().equals(SettingService.KEY_ENV_FLINK_HOME)) {
+                this.flinkVersion = null;
                 this.syncFlinkConf();
             }
             return true;
@@ -141,7 +150,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
-    public Setting getFlink() throws IOException {
+    public Setting getFlinkSetting() throws IOException {
         Setting setting = new Setting();
         String flinkHome = getEffectiveFlinkHome();
         assert flinkHome != null;
@@ -153,6 +162,37 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         setting.setFlinkHome(flinkHome);
         setting.setFlinkConf(confYaml);
         return setting;
+    }
+
+    @Override
+    public String getFlinkVersion() {
+        if (flinkVersion == null) {
+            String flinkHome = getEffectiveFlinkHome();
+            String libPath = flinkHome.concat("/lib");
+            File[] distJar = new File(libPath).listFiles(x -> x.getName().matches("flink-dist_.*\\.jar"));
+            if (distJar == null || distJar.length == 0) {
+                throw new IllegalArgumentException("[StreamX] can no found flink-dist jar in " + libPath);
+            }
+            if (distJar.length > 1) {
+                throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
+            }
+            List<String> cmd = Arrays.asList(
+                "cd ".concat(flinkHome),
+                String.format(
+                    "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
+                    distJar[0].getAbsolutePath()
+                )
+            );
+
+            CommandUtils.execute(cmd, versionInfo -> {
+                Matcher matcher = flinkVersionPattern.matcher(versionInfo);
+                if (matcher.find()) {
+                    log.info("Flink version: {}", versionInfo);
+                    flinkVersion = matcher.group(1);
+                }
+            });
+        }
+        return flinkVersion;
     }
 
     @Override

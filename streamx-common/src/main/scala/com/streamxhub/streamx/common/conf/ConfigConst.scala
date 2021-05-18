@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.common.conf
 
-
 object ConfigConst {
   /**
    *
@@ -261,6 +260,11 @@ object ConfigConst {
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
   val APP_PLUGINS = "/streamx/plugins"
+
+  /**
+   * 存放不同版本flink相关的jar
+   */
+  val APP_SHIMS = "/streamx/shims"
 
   val APP_UPLOADS = "/streamx/uploads"
 

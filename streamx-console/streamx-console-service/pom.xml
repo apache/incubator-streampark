@@ -400,6 +400,7 @@
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
+                            <goal>copy</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -408,52 +409,20 @@
                     <includeScope>system</includeScope>
                     <excludeTransitive>false</excludeTransitive>
                     <stripVersion>false</stripVersion>
-
-                   <!--
-                   <artifactItems>
+                    <artifactItems>
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.12</artifactId>
                             <version>1.0.0</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.12</outputDirectory>
+                            <outputDirectory>${basedir}/src/assembly/shims/flink-1.12</outputDirectory>
                         </dependency>
-
-                        <dependency>
-                            <groupId>org.apache.flink</groupId>
-                            <artifactId>flink-clients_${scala.binary.version}</artifactId>
-                            <version>${flink112.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.12</outputDirectory>
-                        </dependency>
-
-                        <dependency>
-                            <groupId>org.apache.flink</groupId>
-                            <artifactId>flink-yarn_${scala.binary.version}</artifactId>
-                            <version>${flink112.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.12</outputDirectory>
-                        </dependency>
-
                         <dependency>
                             <groupId>com.streamxhub.streamx</groupId>
                             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
                             <version>1.0.0</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.13</outputDirectory>
-                        </dependency>
-
-                        <dependency>
-                            <groupId>org.apache.flink</groupId>
-                            <artifactId>flink-clients_${scala.binary.version}</artifactId>
-                            <version>${flink113.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.13</outputDirectory>
-                        </dependency>
-
-                        <dependency>
-                            <groupId>org.apache.flink</groupId>
-                            <artifactId>flink-yarn_${scala.binary.version}</artifactId>
-                            <version>${flink113.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/flink/1.13</outputDirectory>
+                            <outputDirectory>${basedir}/src/assembly/shims/flink-1.13</outputDirectory>
                         </dependency>
                     </artifactItems>
-                    -->
                 </configuration>
             </plugin>
 

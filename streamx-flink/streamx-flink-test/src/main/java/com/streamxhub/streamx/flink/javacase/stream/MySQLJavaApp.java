@@ -48,7 +48,7 @@ public class MySQLJavaApp {
                                 result.add(orderInfo);
                             });
                             return result;
-                        })
+                        },null)
                 .returns(TypeInformation.of(OrderInfo.class));
 
         context.start();

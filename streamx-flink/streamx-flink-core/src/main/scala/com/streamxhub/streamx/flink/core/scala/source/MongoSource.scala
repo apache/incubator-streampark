@@ -25,7 +25,7 @@ import com.mongodb.client.{FindIterable, MongoCollection, MongoCursor}
 import com.streamxhub.streamx.common.enums.ApiType
 import com.streamxhub.streamx.common.enums.ApiType.ApiType
 import com.streamxhub.streamx.common.util.{Logger, MongoConfig, Utils}
-import com.streamxhub.streamx.flink.core.java.function.{MongoQueryFunction, MongoResultFunction}
+import com.streamxhub.streamx.flink.core.java.function.{MongoQueryFunction, MongoResultFunction, RunningFunction}
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import com.streamxhub.streamx.flink.core.scala.util.FlinkUtils
 import org.apache.flink.api.common.state.ListState
@@ -38,6 +38,7 @@ import org.apache.flink.streaming.api.functions.source.SourceFunction.SourceCont
 import org.apache.flink.streaming.api.scala.DataStream
 import org.bson.Document
 
+import java.lang
 import java.util.Properties
 import scala.annotation.meta.param
 import scala.collection.JavaConversions._
@@ -62,10 +63,16 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
    * @return
    */
 
-  def getDataStream[R: TypeInformation](collection: String, queryFun: (R, MongoCollection[Document]) => FindIterable[Document], resultFun: MongoCursor[Document] => List[R])(implicit prop: Properties = new Properties()): DataStream[R] = {
+  def getDataStream[R: TypeInformation](
+                                         collection: String,
+                                         queryFun: (R, MongoCollection[Document]) => FindIterable[Document],
+                                         resultFun: MongoCursor[Document] => List[R],
+                                         running: Unit => Boolean)(implicit prop: Properties = new Properties()): DataStream[R] = {
+
     Utils.copyProperties(property, prop)
-    val mongoFun = new MongoSourceFunction[R](collection, prop, queryFun, resultFun)
+    val mongoFun = new MongoSourceFunction[R](collection, prop, queryFun, resultFun, running)
     ctx.addSource(mongoFun)
+
   }
 
 }
@@ -73,7 +80,10 @@ class MongoSource(@(transient@param) val ctx: StreamingContext, property: Proper
 
 private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, prop: Properties = new Properties(), collection: String) extends RichSourceFunction[R] with CheckpointedFunction with CheckpointListener with Logger {
 
-  private[this] var running = true
+  @volatile private[this] var running = true
+  private[this] var scalaRunningFunc: Unit => Boolean = _
+  private[this] var javaRunningFunc: RunningFunction = _
+
   var client: MongoClient = _
   var mongoCollection: MongoCollection[Document] = _
 
@@ -88,17 +98,32 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
   private[this] var last: R = _
 
   //for Scala
-  def this(collectionName: String, prop: Properties, scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document], scalaResultFunc: MongoCursor[Document] => List[R]) = {
+  def this(collectionName: String,
+           prop: Properties,
+           scalaQueryFunc: (R, MongoCollection[Document]) => FindIterable[Document],
+           scalaResultFunc: MongoCursor[Document] => List[R],
+           runningFunc: Unit => Boolean) = {
+
     this(ApiType.scala, prop, collectionName)
     this.scalaQueryFunc = scalaQueryFunc
     this.scalaResultFunc = scalaResultFunc
+    this.scalaRunningFunc = if (runningFunc == null) _ => true else runningFunc
   }
 
   //for JAVA
-  def this(collectionName: String, prop: Properties, queryFunc: MongoQueryFunction[R], resultFunc: MongoResultFunction[R]) {
+  def this(collectionName: String,
+           prop: Properties,
+           queryFunc: MongoQueryFunction[R],
+           resultFunc: MongoResultFunction[R],
+           runningFunc: RunningFunction) {
+
     this(ApiType.java, prop, collectionName)
     this.javaQueryFunc = queryFunc
     this.javaResultFunc = resultFunc
+    this.javaRunningFunc = if (runningFunc != null) runningFunc else new RunningFunction {
+      override def running(): lang.Boolean = true
+    }
+
   }
 
   override def cancel(): Unit = this.running = false
@@ -112,23 +137,31 @@ private[this] class MongoSourceFunction[R: TypeInformation](apiType: ApiType, pr
 
   @throws[Exception]
   override def run(ctx: SourceContext[R]): Unit = {
-    while (running) {
+    while (this.running) {
       apiType match {
         case ApiType.scala =>
-          val find = scalaQueryFunc(last, mongoCollection)
-          if (find != null) {
-            scalaResultFunc(find.iterator).foreach(x => {
-              last = x
-              ctx.collectWithTimestamp(last, System.currentTimeMillis())
-            })
+          if (scalaRunningFunc()) {
+            ctx.getCheckpointLock.synchronized {
+              val find = scalaQueryFunc(last, mongoCollection)
+              if (find != null) {
+                scalaResultFunc(find.iterator).foreach(x => {
+                  last = x
+                  ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                })
+              }
+            }
           }
         case ApiType.java =>
-          val find = javaQueryFunc.query(last, mongoCollection)
-          if (find != null) {
-            javaResultFunc.result(find.iterator).foreach(x => {
-              last = x
-              ctx.collectWithTimestamp(last, System.currentTimeMillis())
-            })
+          if (javaRunningFunc.running()) {
+            ctx.getCheckpointLock.synchronized {
+              val find = javaQueryFunc.query(last, mongoCollection)
+              if (find != null) {
+                javaResultFunc.result(find.iterator).foreach(x => {
+                  last = x
+                  ctx.collectWithTimestamp(last, System.currentTimeMillis())
+                })
+              }
+            }
           }
       }
     }

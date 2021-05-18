@@ -49,7 +49,7 @@
           <div slot="actions" v-if="item.type === 1">
             <a v-if="!item.submitting" @click="handleEdit(item)">Edit</a>
             <a v-else @click="handleSubmit(item)">Submit</a>
-            <a-divider type="vertical" />
+            <a-divider v-if="item.key === 'env.flink.home'" type="vertical" />
             <a v-if="item.key === 'env.flink.home'" @click="handleFlinkConf()">Flink Conf</a>
           </div>
         </a-list-item>

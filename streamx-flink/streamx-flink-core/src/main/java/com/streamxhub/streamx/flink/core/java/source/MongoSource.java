@@ -20,8 +20,10 @@
  */
 package com.streamxhub.streamx.flink.core.java.source;
 
+import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.flink.core.java.function.MongoQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.MongoResultFunction;
+import com.streamxhub.streamx.flink.core.java.function.RunningFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.source.MongoSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -40,9 +42,17 @@ public class MongoSource<T> {
         this.property = property;
     }
 
-    public DataStreamSource<T> getDataStream(String collectionName, MongoQueryFunction<T> queryFunction, MongoResultFunction<T> resultFunction) {
-        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName, property, queryFunction, resultFunction, null);
+    public DataStreamSource<T> getDataStream(String collectionName,
+                                             MongoQueryFunction<T> queryFunction,
+                                             MongoResultFunction<T> resultFunction,
+                                             RunningFunction runningFunc) {
+
+        Utils.require(collectionName != null, "collectionName must be not null");
+        Utils.require(queryFunction != null, "queryFunction must be not null");
+        Utils.require(resultFunction != null, "resultFunction must be not null");
+        MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName, property, queryFunction, resultFunction, runningFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
+
     }
 
 }

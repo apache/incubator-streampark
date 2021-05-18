@@ -20,8 +20,10 @@
  */
 package com.streamxhub.streamx.flink.core.java.source;
 
+import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.flink.core.java.function.HBaseQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.HBaseResultFunction;
+import com.streamxhub.streamx.flink.core.java.function.RunningFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
 import com.streamxhub.streamx.flink.core.scala.source.HBaseSourceFunction;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -40,8 +42,14 @@ public class HBaseSource<T> {
         this.property = property;
     }
 
-    public DataStreamSource<T> getDataStream(HBaseQueryFunction<T> queryFunc, HBaseResultFunction<T> resultFunc) {
-        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunc, resultFunc, null);
+    public DataStreamSource<T> getDataStream(HBaseQueryFunction<T> queryFunction,
+                                             HBaseResultFunction<T> resultFunction,
+                                             RunningFunction runningFunc) {
+
+        Utils.require(queryFunction != null, "queryFunction must be not null");
+        Utils.require(resultFunction != null, "resultFunction must be not null");
+        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunction, resultFunction, runningFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
+
     }
 }

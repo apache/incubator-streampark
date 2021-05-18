@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.common.util
 
-
 import java.io.{IOException, PrintWriter, StringWriter}
 import java.util.Optional
 import java.util.concurrent.{CompletionException, ExecutionException}

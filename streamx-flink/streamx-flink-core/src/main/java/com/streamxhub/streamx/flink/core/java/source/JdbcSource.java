@@ -21,6 +21,8 @@
 package com.streamxhub.streamx.flink.core.java.source;
 
 import com.streamxhub.streamx.common.util.ConfigUtils;
+import com.streamxhub.streamx.common.util.Utils;
+import com.streamxhub.streamx.flink.core.java.function.RunningFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLQueryFunction;
 import com.streamxhub.streamx.flink.core.java.function.SQLResultFunction;
 import com.streamxhub.streamx.flink.core.scala.StreamingContext;
@@ -58,12 +60,16 @@ public class JdbcSource<T> {
         return this;
     }
 
-    public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunc, SQLResultFunction<T> resultFunc) {
-        assert queryFunc != null;
-        assert resultFunc != null;
+    public DataStreamSource<T> getDataStream(SQLQueryFunction<T> queryFunction,
+                                             SQLResultFunction<T> resultFunction,
+                                             RunningFunction runningFunc) {
+
+        Utils.require(queryFunction != null, "queryFunction must be not null");
+        Utils.require(resultFunction != null, "resultFunction must be not null");
         this.jdbc = this.jdbc == null ? ConfigUtils.getJdbcConf(context.parameter().toMap(), alias) : this.jdbc;
-        JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(jdbc, queryFunc, resultFunc, null);
+        JdbcSourceFunction<T> sourceFunction = new JdbcSourceFunction<>(jdbc, queryFunction, resultFunction, runningFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
+
     }
 
 }
