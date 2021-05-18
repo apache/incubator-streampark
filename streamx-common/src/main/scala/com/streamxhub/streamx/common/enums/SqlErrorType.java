@@ -20,6 +20,11 @@
  */
 package com.streamxhub.streamx.common.enums;
 
+/**
+ *
+ * @author benjobs
+ *
+ */
 public enum SqlErrorType {
     /**
      * 基本检验失败(如为null等)

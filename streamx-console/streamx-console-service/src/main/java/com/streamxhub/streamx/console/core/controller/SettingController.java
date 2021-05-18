@@ -70,7 +70,7 @@ public class SettingController {
 
     @PostMapping("getflink")
     public RestResponse getFlink() throws IOException {
-        Setting setting = settingService.getFlink();
+        Setting setting = settingService.getFlinkSetting();
         return RestResponse.create().data(setting);
     }
 

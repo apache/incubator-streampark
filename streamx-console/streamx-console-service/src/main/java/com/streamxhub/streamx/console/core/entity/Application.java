@@ -103,7 +103,9 @@ public class Application implements Serializable {
 
     private Integer optionState;
 
-    //失败告警的通知邮箱
+    /**
+     * 失败告警的通知邮箱
+     */
     private String alertEmail;
 
     private String args;

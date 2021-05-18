@@ -70,7 +70,9 @@ public interface SettingService extends IService<Setting> {
 
     SenderEmail getSenderEmail();
 
-    Setting getFlink() throws IOException;
+    Setting getFlinkSetting() throws IOException;
+
+    String getFlinkVersion();
 
     String getFlinkYaml();
 

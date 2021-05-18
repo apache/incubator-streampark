@@ -45,6 +45,11 @@ object Utils {
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
+  def require(requirement: Boolean, message: String) {
+    if (!requirement)
+      throw new IllegalArgumentException(s"requirement failed: $message")
+  }
+
   @throws[IOException] def checkJarFile(jar: URL): Unit = {
     val jarFile: File = Try(new File(jar.toURI)) match {
       case Success(x) => x

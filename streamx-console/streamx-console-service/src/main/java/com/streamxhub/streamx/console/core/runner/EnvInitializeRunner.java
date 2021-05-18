@@ -95,6 +95,20 @@ public class EnvInitializeRunner implements ApplicationRunner {
                     HdfsUtils.upload(file.getAbsolutePath(), appPlugins, false, true);
                 }
             }
+
+            String appShims = ConfigConst.APP_SHIMS();
+            if (HdfsUtils.exists(appShims)) {
+                HdfsUtils.delete(appShims);
+            }
+            HdfsUtils.mkdirs(appShims);
+            File shims = new File(WebUtil.getAppDir("shims"));
+            for (File file : Objects.requireNonNull(shims.listFiles())) {
+                String path = appShims.concat("/").concat(file.getName());
+                if (!HdfsUtils.exists(path)) {
+                    log.info("load shims:{} to {}", file.getName(), appShims);
+                    HdfsUtils.upload(file.getAbsolutePath(), appShims, false, true);
+                }
+            }
         } else {
             log.warn("The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
         }

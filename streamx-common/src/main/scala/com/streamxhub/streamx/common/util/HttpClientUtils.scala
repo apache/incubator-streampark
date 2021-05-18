@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.common.util
 
-
 import org.apache.http.NameValuePair
 import org.apache.http.client.entity.UrlEncodedFormEntity
 import org.apache.http.client.methods.{HttpGet, HttpPatch, HttpPost, HttpRequestBase}

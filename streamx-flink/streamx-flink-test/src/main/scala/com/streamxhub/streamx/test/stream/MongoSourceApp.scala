@@ -46,7 +46,7 @@ object MongoSourceApp extends FlinkStreaming {
         val cond = new BasicDBObject().append("updateTime", new BasicDBObject("$gte", DateUtils.parse(offset)))
         d.find(cond)
       },
-      _.toList.map(_.toJson())
+      _.toList.map(_.toJson()),null
     ).print()
   }
 
