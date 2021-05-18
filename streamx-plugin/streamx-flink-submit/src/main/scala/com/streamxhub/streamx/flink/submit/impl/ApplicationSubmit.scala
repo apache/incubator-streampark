@@ -20,8 +20,8 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
@@ -119,10 +119,10 @@ object ApplicationSubmit extends YarnSubmitTrait {
         version match {
           case Array(1, 13, _) =>
             providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.13"
-          case Array(1, a, _) if a <= 12 =>
+          case Array(1, 11 | 12, _) =>
             providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.12"
           case _ =>
-            throw new UnsupportedOperationException(s"Unsupported flink verison: ${submitRequest.flinkVersion}")
+            throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
         }
         providedLibs += s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
       case _ =>
