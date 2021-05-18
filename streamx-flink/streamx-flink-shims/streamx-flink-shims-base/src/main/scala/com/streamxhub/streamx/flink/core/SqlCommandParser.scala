@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.enums.SqlErrorType
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 
@@ -34,7 +34,7 @@ object SqlCommandParser extends Logger {
   private[this] val WITH_REGEXP = "(WITH|with)\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
 
   def parseSQL(sql: String): List[SqlCommandCall] = {
-    val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
+    val sqlEmptyError = SqlError(SQLErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(sql != null && sql.trim.nonEmpty, sqlEmptyError)
     val lines = sql.split("\\n").filter(_ != null).filter(_.trim.nonEmpty).filter(!_.startsWith("--"))
     lines match {
@@ -47,14 +47,14 @@ object SqlCommandParser extends Logger {
           if (line.trim.endsWith(";")) {
             parseLine(stmt.toString.trim) match {
               case Some(x) => calls += x
-              case _ => throw new RuntimeException(SqlError(SqlErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
+              case _ => throw new RuntimeException(SqlError(SQLErrorType.UNSUPPORTED_SQL, sql = stmt.toString).toErrorString)
             }
             // clear string builder
             stmt.clear()
           }
         }
         calls.toList match {
-          case Nil => throw new RuntimeException(SqlError(SqlErrorType.ENDS_WITH, sql = sql).toErrorString)
+          case Nil => throw new RuntimeException(SqlError(SQLErrorType.ENDS_WITH, sql = sql).toErrorString)
           case r => r
         }
     }
@@ -290,7 +290,7 @@ case class SqlCommandCall(command: SqlCommand, operands: Array[String]) {
 
 
 case class SqlError(
-                     errorType: SqlErrorType,
+                     errorType: SQLErrorType,
                      exception: String = null,
                      sql: String = null
                    ) {

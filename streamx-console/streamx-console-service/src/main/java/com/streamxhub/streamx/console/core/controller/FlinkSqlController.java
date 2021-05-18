@@ -16,7 +16,7 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
-import com.streamxhub.streamx.common.enums.SqlErrorType;
+import com.streamxhub.streamx.common.enums.SQLErrorType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -65,7 +65,7 @@ public class FlinkSqlController {
                     .put("start", start)
                     .put("end", end);
             //语法异常
-            if (sqlError.errorType().equals(SqlErrorType.SYNTAX_ERROR)) {
+            if (sqlError.errorType().equals(SQLErrorType.SYNTAX_ERROR)) {
                 String exception = sqlError.exception().replaceAll("[\r\n]", "");
                 if (exception.matches(SQL_SPARSE_FAILED_REGEXP)) {
                     String[] lineColumn = exception

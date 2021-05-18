@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.core
 
-import com.streamxhub.streamx.common.enums.SqlErrorType
+import com.streamxhub.streamx.common.enums.SQLErrorType
 import com.streamxhub.streamx.common.util.Logger
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -52,7 +52,7 @@ object SqlValidator extends Logger {
         case _ =>
           throw new TableException(
             SqlError(
-              SqlErrorType.UNSUPPORTED_DIALECT,
+              SQLErrorType.UNSUPPORTED_DIALECT,
               s"Unsupported SQL dialect:${tableConfig.getSqlDialect}").toString
           )
       }
@@ -75,7 +75,7 @@ object SqlValidator extends Logger {
         val error = exception.getLocalizedMessage
         val array = error.split(separator)
         return SqlError(
-          SqlErrorType.of(array.head.toInt),
+          SQLErrorType.of(array.head.toInt),
           if (array(1) == "null") null else array(1),
           array.last
         )
@@ -99,14 +99,14 @@ object SqlValidator extends Logger {
           } catch {
             case e: Exception =>
               return SqlError(
-                SqlErrorType.SYNTAX_ERROR,
+                SQLErrorType.SYNTAX_ERROR,
                 e.getLocalizedMessage,
                 sql.trim.replaceFirst(";|$", ";")
               )
             case _: Throwable =>
           }
         case _ => return SqlError(
-          SqlErrorType.UNSUPPORTED_SQL,
+          SQLErrorType.UNSUPPORTED_SQL,
           sql = sql.replaceFirst(";|$", ";")
         )
       }
