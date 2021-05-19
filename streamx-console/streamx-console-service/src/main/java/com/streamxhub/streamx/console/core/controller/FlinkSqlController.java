@@ -46,8 +46,6 @@ public class FlinkSqlController {
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    private String SQL_SPARSE_FAILED_REGEXP = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*";
-
     @PostMapping("verify")
     public RestResponse verify(String sql) {
         SqlError sqlError = SqlValidator.verifySQL(sql);
@@ -58,26 +56,27 @@ public class FlinkSqlController {
 
             //记录错误类型,出错的sql,原因,错误的开始行和结束行内容(用于前端查找mod节点)
             RestResponse response = RestResponse.create()
-                    .data(false)
-                    .message(sqlError.exception())
-                    .put("type", sqlError.errorType().errorType)
-                    .put("sql", sqlError.sql())
-                    .put("start", start)
-                    .put("end", end);
+                .data(false)
+                .message(sqlError.exception())
+                .put("type", sqlError.errorType().errorType)
+                .put("sql", sqlError.sql())
+                .put("start", start)
+                .put("end", end);
             //语法异常
             if (sqlError.errorType().equals(SqlErrorType.SYNTAX_ERROR)) {
                 String exception = sqlError.exception().replaceAll("[\r\n]", "");
-                if (exception.matches(SQL_SPARSE_FAILED_REGEXP)) {
+                String sqlParseFailedRegexp = "SQL\\sparse\\sfailed\\.\\sEncountered\\s\"(.*)\"\\sat\\sline\\s\\d,\\scolumn\\s\\d.*";
+                if (exception.matches(sqlParseFailedRegexp)) {
                     String[] lineColumn = exception
-                            .replaceAll("^.*\\sat\\sline\\s", "")
-                            .replaceAll(",\\scolumn\\s", ",")
-                            .replaceAll("\\.(.*)", "")
-                            .trim()
-                            .split(",");
+                        .replaceAll("^.*\\sat\\sline\\s", "")
+                        .replaceAll(",\\scolumn\\s", ",")
+                        .replaceAll("\\.(.*)", "")
+                        .trim()
+                        .split(",");
 
                     //记录第几行出错.
                     response.put("line", lineColumn[0])
-                            .put("column ", lineColumn[1]);
+                        .put("column ", lineColumn[1]);
                 }
             }
             return response;

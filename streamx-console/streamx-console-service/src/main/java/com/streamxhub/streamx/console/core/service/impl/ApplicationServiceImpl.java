@@ -426,8 +426,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 flinkSqlService.create(flinkSql, CandidateType.NEW);
             }
             if (appParam.getConfig() != null) {
-                //TODO CONFIG
-                //configService.create(appParam, CandidateType.NEW);
+                configService.create(appParam, true);
             }
             assert appParam.getId() != null;
             deploy(appParam);
