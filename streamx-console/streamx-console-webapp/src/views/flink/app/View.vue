@@ -281,7 +281,7 @@
           :style="{ color: filtered ? '#108ee9' : undefined }"/>
 
         <template
-          slot="filterRender"
+          slot="customRender"
           slot-scope="text, record, index, column">
           <!--有条件搜索-->
           <template v-if="searchText && searchedColumn === column.dataIndex">
@@ -290,12 +290,10 @@
               @click="handleView(record)">
               <template
                 v-if="record.deploy === 0"
-                v-for="(fragment, i) in
-                  text
-                    .toString()
-                    .substr(0,25)
-                    .toString()
-                    .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                v-for="(fragment, i) in text
+                  .toString()
+                  .substr(0,25)
+                  .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark
                   v-if="fragment.toLowerCase() === searchText.toLowerCase()"
                   :key="i"
@@ -307,47 +305,31 @@
                 </template>
               </template>
               <template v-else>
-                <template v-if="text.length>25">
-                  <a-tooltip placement="top">
-                    <template slot="title">
-                      {{ text }}
-                    </template>
-                    <template
-                      v-for="(fragment, i) in
-                        text
-                          .toString()
-                          .substr(0,25)
-                          .toString()
-                          .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                      <mark
-                        v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                        :key="i"
-                        class="highlight">
-                        {{ fragment }}
-                      </mark>
-                      <template v-else>
-                        {{ fragment }}
-                      </template>
-                    </template>
-                    ...
-                  </a-tooltip>
-                </template>
-                <template
-                  v-else
-                  v-for="(fragment, i) in
-                    text
-                      .toString()
-                      .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
-                  <mark
-                    v-if="fragment.toLowerCase() === searchText.toLowerCase()"
-                    :key="i"
-                    class="highlight">
-                    {{ fragment }}
-                  </mark>
-                  <template v-else>
-                    {{ fragment }}
+                <a-tooltip placement="top">
+                  <template slot="title">
+                    {{ text }}
                   </template>
-                </template>
+                  <template
+                    v-for="(fragment, i) in
+                      text
+                        .toString()
+                        .substr(0,(text.length > 25 ? 25: text.length ))
+                        .toString()
+                        .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
+                    <mark
+                      v-if="fragment.toLowerCase() === searchText.toLowerCase()"
+                      :key="i"
+                      class="highlight">
+                      {{ fragment }}
+                    </mark>
+                    <template v-else>
+                      {{ fragment }}
+                    </template>
+                  </template>
+                  <span v-if="text.length>25">
+                    ...
+                  </span>
+                </a-tooltip>
               </template>
             </span>
           </template>
@@ -357,20 +339,11 @@
               v-if="column.dataIndex === 'jobName'"
               :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
-              <template v-if="record.deploy === 0">
-                <ellipsis
-                  :length="45"
-                  tooltip>
-                  {{ text }}
-                </ellipsis>
-              </template>
-              <template v-else>
-                <ellipsis
-                  :length="45"
-                  tooltip>
-                  {{ text }}
-                </ellipsis>
-              </template>
+              <ellipsis
+                :length="45"
+                tooltip>
+                {{ text }}
+              </ellipsis>
             </span>
             <span v-else>
               <ellipsis
@@ -932,7 +905,7 @@ export default {
         'stoping': new Map(),
         'deploy': new Map()
       },
-      searchedColumn: '',
+      searchedColumn: null,
       paginationInfo: null,
       stompClient: null,
       terminal: null,
@@ -975,11 +948,11 @@ export default {
       return [{
         title: 'Application Name',
         dataIndex: 'jobName',
-        width: 200,
+        width: 220,
         scopedSlots: {
           filterDropdown: 'filterDropdown',
           filterIcon: 'filterIcon',
-          customRender: 'filterRender'
+          customRender: 'customRender'
         },
         onFilter: (value, record) =>
           record.jobName
@@ -990,9 +963,9 @@ export default {
           if (visible) {
             setTimeout(() => {
               this.searchInput.focus()
-            },0)
+            }, 0)
           }
-        }
+        },
       }, {
         title: 'Job Type',
         dataIndex: 'jobType',
@@ -1046,9 +1019,10 @@ export default {
       }, {
         dataIndex: 'operation',
         key: 'operation',
+        fixed: 'right',
         scopedSlots: {customRender: 'operation'},
         slots: {title: 'customOperation'},
-        width: 170
+        width: 200
       }]
     }
   },
@@ -1533,7 +1507,7 @@ export default {
 
     handleAdd() {
       check().then((resp) => {
-        const success = resp.data == true || resp.data == 'true'
+        const success = resp.data === true || resp.data === 'true'
         if (success) {
           this.$router.push({'path': '/flink/app/add'})
         } else {
