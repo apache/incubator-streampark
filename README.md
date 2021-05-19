@@ -103,6 +103,13 @@ Thanks to the above excellent open source projects and many outstanding open sou
 Thanks to the [fire-spark](https://github.com/GuoNingNing/fire-spark) project for the early inspiration and help.
 
 ### 🚀 Quick Start
+
+Prerequisites for building:
+
+* Maven 3.6+
+* npm 7.11.2 (https://nodejs.org/en/)
+* JDK 1.8+
+
 ```
 git clone https://github.com/streamxhub/streamx.git
 cd Streamx
