@@ -206,13 +206,25 @@ public class Project implements Serializable {
         return repository.exists();
     }
 
+    /**
+     * 如果检查到项目已经存在被clone过,则先删除,
+     * 主要是解决: 如果最新拉取的代码里有文件删除等,本地不会自动删除
+     * 可能会引发不可预知的错误
+     */
+    public void cleanCloned() throws IOException {
+        if (isCloned()) {
+            FileUtils.deleteDirectory(getAppSource());
+            FileUtils.deleteDirectory(getAppBase());
+        }
+    }
+
     @JsonIgnore
     public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
         if (CommonUtil.notEmpty(this.getPom())) {
             buildHome = new File(buildHome.concat("/").concat(this.getPom()))
-                    .getParentFile()
-                    .getAbsolutePath();
+                .getParentFile()
+                .getAbsolutePath();
         }
         return Arrays.asList("cd ".concat(buildHome), "mvn clean install -DskipTests");
     }
@@ -220,32 +232,32 @@ public class Project implements Serializable {
     @JsonIgnore
     public String getLog4BuildStart() {
         return String.format(
-                "%s project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
-                getLogHeader("maven"),
-                getName(),
-                getBranches(),
-                getMavenBuildCmd()
+            "%s project [%s] branches [%s],maven install beginning! cmd: %s\n\n",
+            getLogHeader("maven"),
+            getName(),
+            getBranches(),
+            getMavenBuildCmd()
         );
     }
 
     @JsonIgnore
     public String getLog4PullStart() {
         return String.format(
-                "%s project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
-                getLogHeader("git pull"),
-                getName(),
-                getBranches()
+            "%s project [%s] branches [%s] remote [origin],git pull beginning!\n\n",
+            getLogHeader("git pull"),
+            getName(),
+            getBranches()
         );
     }
 
     @JsonIgnore
     public String getLog4CloneStart() {
         return String.format(
-                "%s project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
-                getLogHeader("git clone"),
-                getName(),
-                getBranches(),
-                getAppSource()
+            "%s project [%s] branches [%s], clone into [%s],git clone beginning!\n\n",
+            getLogHeader("git clone"),
+            getName(),
+            getBranches(),
+            getAppSource()
         );
     }
 

@@ -94,6 +94,9 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public boolean update(Setting setting) {
         try {
+            if (setting.getValue() != null) {
+                setting.setValue(setting.getValue().trim());
+            }
             this.baseMapper.updateByKey(setting);
             settings.get(setting.getKey()).setValue(setting.getValue());
             if (setting.getKey().equals(SettingService.KEY_ENV_FLINK_HOME)) {

@@ -19,14 +19,49 @@
 # specific language governing permissions and limitations
 # under the License.
 
-#kill server
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [[ -h "$PRG" ]]; do
+  # shellcheck disable=SC2006
+  ls=`ls -ld "$PRG"`
+  # shellcheck disable=SC2006
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    # shellcheck disable=SC2006
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
+# Get standard environment variables
 # shellcheck disable=SC2006
-pid=`jps -l|grep "com.streamxhub.streamx.console.StreamXConsole"|awk '{print $1}'`
-if [[ -z "${pid}" ]]
-then
-  echo "application is already stop"
+PRG_DIR=`dirname "$PRG"`
+
+# shellcheck disable=SC2006
+# shellcheck disable=SC2164
+APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
+APP_PID="$APP_HOME"/.pid
+
+if [ -f "$APP_PID" ]; then
+  pid=$(cat "${APP_PID}")
 else
-  echo "StreamXConsole pid is ${pid}"
+  # shellcheck disable=SC2006
+  # StreamX main
+  MAIN="com.streamxhub.streamx.console.StreamXConsole"
+  # shellcheck disable=SC2006
+  pid=`jps -l|grep $MAIN|awk '{print $1}'`
+fi
+
+if [[ -z "${pid}" ]] ; then
+  echo "StreamX already stopped."
+else
+  echo "StreamX pid is ${pid},now stopping..."
   kill "${pid}"
-  echo "StreamXConsole is killed!"
+  if [ $? -eq 0 ] ; then
+    echo "StreamX stop successful!"
+  else
+    echo "StreamX stop failed!"
+  fi
 fi

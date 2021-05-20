@@ -42,8 +42,8 @@ import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import lombok.extern.slf4j.Slf4j;
-import org.eclipse.jgit.api.*;
-import org.eclipse.jgit.internal.storage.file.FileRepository;
+import org.eclipse.jgit.api.CloneCommand;
+import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.lib.StoredConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -63,7 +63,7 @@ import java.util.concurrent.*;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
-        implements ProjectService {
+    implements ProjectService {
 
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
@@ -78,13 +78,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private SimpMessageSendingOperations simpMessageSendingOperations;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("streamx-build-executor"),
-            new ThreadPoolExecutor.AbortPolicy()
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streamx-build-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
     );
 
     @Override
@@ -133,18 +133,12 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return this.baseMapper.findProject(page, project);
     }
 
-    private void deleteFile(File file) {
-        if (file.exists()) {
-            file.delete();
-        }
-    }
-
     @Override
     public RestResponse build(Long id) {
         Project project = getById(id);
         this.baseMapper.startBuild(project);
         tailBuffer.put(id, new StringBuilder());
-        boolean success = cloneOrPull(project);
+        boolean success = cloneSourceCode(project);
         if (success) {
             executorService.execute(() -> {
                 boolean build = ProjectServiceImpl.this.mavenBuild(project);
@@ -190,9 +184,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 将项目解包到app下.
                 if (app.exists()) {
                     String cmd = String.format(
-                            "tar -xzvf %s -C %s",
-                            app.getAbsolutePath(),
-                            deployPath.getAbsolutePath()
+                        "tar -xzvf %s -C %s",
+                        app.getAbsolutePath(),
+                        deployPath.getAbsolutePath()
                     );
                     CommandUtils.execute(cmd);
                 }
@@ -229,8 +223,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     }
                     // 2) 尝试寻找jar文件...可能存在发现多个jar.
                     if (!targetFile.getName().startsWith("original-")
-                            && !targetFile.getName().endsWith("-sources.jar")
-                            && targetFile.getName().endsWith(".jar")) {
+                        && !targetFile.getName().endsWith("-sources.jar")
+                        && targetFile.getName().endsWith(".jar")) {
                         if (jar == null) {
                             jar = targetFile;
                         } else {
@@ -280,8 +274,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getAppBase();
         Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-                .filter((x) -> x.getName().equals(module))
-                .findFirst();
+            .filter((x) -> x.getName().equals(module))
+            .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -299,7 +293,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-                .eq(Project::getName, project.getName());
+            .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(wrapper) > 0;
     }
 
@@ -325,77 +319,41 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         return null;
     }
 
-    private boolean cloneOrPull(Project project) {
-        boolean isCloned = project.isCloned();
+    private boolean cloneSourceCode(Project project) {
         try {
-            if (isCloned) {
-                FileRepository fileRepository = new FileRepository(project.getGitRepository());
-                Git git = new Git(fileRepository);
-                git.reset()
-                        .setMode(ResetCommand.ResetType.HARD)
-                        .setRef(project.getBranches())
-                        .call();
+            project.cleanCloned();
+            log.info("clone {}, {} starting...", project.getName(), project.getUrl());
+            tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
+            CloneCommand cloneCommand = Git.cloneRepository()
+                .setURI(project.getUrl())
+                .setDirectory(project.getAppSource())
+                .setBranch(project.getBranches());
 
-                log.info("git {} was isCloned,pull starting...", project.getUrl());
-
-                tailBuffer.get(project.getId()).append(project.getLog4PullStart());
-
-                PullCommand pullCommand = git.pull()
-                        .setRemote("origin")
-                        .setRemoteBranchName(project.getBranches());
-
-                if (CommonUtil.notEmpty(project.getUsername(), project.getPassword())) {
-                    pullCommand.setCredentialsProvider(project.getCredentialsProvider());
-                }
-
-                PullResult result = pullCommand.call();
-
-                tailBuffer.get(project.getId()).append(result.getMergeResult().toString()).append("\n");
-                git.close();
-
-                tailBuffer.get(project.getId()).append(
-                        String.format(
-                                "[StreamX] project [%s] git pull successful!\n",
-                                project.getName()
-                        )
-                );
-
-            } else {
-                log.info("git {} is new,clone starting...", project.getUrl());
-                tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
-                CloneCommand cloneCommand = Git.cloneRepository()
-                        .setURI(project.getUrl())
-                        .setDirectory(project.getAppSource())
-                        .setBranch(project.getBranches());
-
-                if (CommonUtil.notEmpty(project.getUsername(), project.getPassword())) {
-                    cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
-                }
-
-                Git git = cloneCommand.call();
-                StoredConfig config = git.getRepository().getConfig();
-                config.setBoolean("http", project.getUrl(), "sslVerify", false);
-                config.setBoolean("https", project.getUrl(), "sslVerify", false);
-                config.save();
-
-                File workTree = git.getRepository().getWorkTree();
-
-                gitWorkTree(project.getId(), workTree, "");
-
-                tailBuffer.get(project.getId()).append(
-                        String.format(
-                                "[StreamX] project [%s] git clone successful!\n",
-                                project.getName()
-                        )
-                );
+            if (CommonUtil.notEmpty(project.getUsername(), project.getPassword())) {
+                cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
+
+            Git git = cloneCommand.call();
+            StoredConfig config = git.getRepository().getConfig();
+            config.setBoolean("http", project.getUrl(), "sslVerify", false);
+            config.setBoolean("https", project.getUrl(), "sslVerify", false);
+            config.save();
+
+            File workTree = git.getRepository().getWorkTree();
+            gitWorkTree(project.getId(), workTree, "");
+            tailBuffer.get(project.getId()).append(
+                String.format(
+                    "[StreamX] project [%s] git clone successful!\n",
+                    project.getName()
+                )
+            );
             return true;
         } catch (Exception e) {
             String errorLog = String.format(
-                    "[StreamX] project [%s] branch [%s] git %s failure, err: %s",
-                    project.getName(),
-                    project.getBranches(),
-                    isCloned ? "pull " : "clone", e
+                "[StreamX] project [%s] branch [%s] git clone failure, err: %s",
+                project.getName(),
+                project.getBranches(),
+                e
             );
             tailBuffer.get(project.getId()).append(errorLog);
             e.printStackTrace();
@@ -462,7 +420,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 if (tailBeginning.containsKey(project.getId())) {
                     tailBeginning.remove(project.getId());
                     Arrays.stream(builder.toString().split("\n"))
-                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/build", x));
+                        .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/build", x));
                 } else {
                     simpMessageSendingOperations.convertAndSend("/resp/build", line);
                 }

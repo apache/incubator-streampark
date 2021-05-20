@@ -114,6 +114,7 @@ APP_BASE="$APP_HOME"
 APP_CONF="$APP_BASE"/conf
 APP_BIN="$APP_BASE"/bin
 APP_LIB="$APP_BASE"/lib
+APP_PID="$APP_BASE"/.pid
 APP_OUT="$APP_BASE"/logs/streamx.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
@@ -196,12 +197,6 @@ if [[ $? -ne 1 ]];then
   echo_r "ERROR: java is not install,please install java first!"
   exit 1;
 fi
-
-APP_PID_DIR="/var/run";
-if [[ ! -d "$APP_PID_DIR" ]] ; then
-    mkdir ${APP_PID_DIR};
-fi
-APP_PID="$APP_BASE/streamx.pid";
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
@@ -336,6 +331,7 @@ eval "${RUNJAVA}" \
   $JAVA_OPTS \
   -cp "${APP_CLASSPATH}" \
   -Dapp.home="${APP_HOME}" \
+  -Dpid="${APP_PID}" \
   -Dspring.config.location="${PROPER}" \
   $MAIN >> "${APP_OUT}" 2>&1 &
 
