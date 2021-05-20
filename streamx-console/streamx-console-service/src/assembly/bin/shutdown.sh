@@ -26,8 +26,7 @@ PRG_DIR=`dirname "$PRG"`
 # shellcheck disable=SC2006
 # shellcheck disable=SC2164
 APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
-APP_BASE="$APP_HOME"
-APP_PID="$APP_BASE"/.pid
+APP_PID="$APP_HOME"/.pid
 
 pid=$(cat "${APP_PID}")
 

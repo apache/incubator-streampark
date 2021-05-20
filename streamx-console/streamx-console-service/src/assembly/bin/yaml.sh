@@ -20,7 +20,7 @@
 # under the License.
 #
 # -----------------------------------------------------------------------------
-#Start Script for the StreamX
+#yaml Script for the StreamX
 # -----------------------------------------------------------------------------
 #
 # Better OS/400 detection: see Bugzilla 31132
