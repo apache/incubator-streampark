@@ -1,9 +1,10 @@
 <div align="center">
   <br/>
-  <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
-    <img width="100" src="http://www.streamxhub.com/assets/logo/logo.png" alt="StreamX logo">
-  </a>
-  <h1>🏳️‍🌈 <b>StreamX 🏳️‍🌈</b></h1>
+  <h1>
+    <a href="http://www.streamxhub.com" target="_blank" rel="noopener noreferrer">
+    <img width="500" src="http://assets.streamxhub.com/streamx_log.png" alt="StreamX logo">
+    </a>
+  </h1>
   <strong>Make Flink|Spark easier!!!</strong>
 </div>
 

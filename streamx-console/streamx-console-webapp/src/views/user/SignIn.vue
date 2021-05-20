@@ -54,15 +54,8 @@
             </a-input>
           </a-form-item>
 
-          <a-form-item>
-            <a-switch
-              default-checked
-              @change="handleRember"/>
-            <span style="margin-left: 10px; color: rgba(255,255,255,.65)">remember</span>
-          </a-form-item>
-
           <a-form-item
-            style="margin-top:24px">
+            style="margin-top:40px">
             <a-button
               size="large"
               type="primary"

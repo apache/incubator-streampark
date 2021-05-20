@@ -4,7 +4,7 @@
     <router-link
       :to="{path:'/flink/app'}">
       <img
-        src="~@/assets/imgs/streamx.png"
+        src="~@/assets/imgs/logo.png"
         alt="logo">
     </router-link>
   </div>
