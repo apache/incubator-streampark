@@ -19,6 +19,22 @@
 # specific language governing permissions and limitations
 # under the License.
 
+# resolve links - $0 may be a softlink
+PRG="$0"
+
+while [[ -h "$PRG" ]]; do
+  # shellcheck disable=SC2006
+  ls=`ls -ld "$PRG"`
+  # shellcheck disable=SC2006
+  link=`expr "$ls" : '.*-> \(.*\)$'`
+  if expr "$link" : '/.*' > /dev/null; then
+    PRG="$link"
+  else
+    # shellcheck disable=SC2006
+    PRG=`dirname "$PRG"`/"$link"
+  fi
+done
+
 # Get standard environment variables
 # shellcheck disable=SC2006
 PRG_DIR=`dirname "$PRG"`
