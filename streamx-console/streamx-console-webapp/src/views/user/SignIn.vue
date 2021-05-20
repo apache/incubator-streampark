@@ -6,7 +6,7 @@
           <div class="header">
             <a href="/">
               <img
-                src="~@/assets/imgs/logo.png"
+                src="~@/assets/imgs/logo.svg"
                 class="logo"
                 alt="logo">
             </a>
@@ -119,9 +119,9 @@ export default {
   },
 
   mounted() {
-    const index = this.randomNum(1, 6)
+    const index = this.randomNum(1, 4)
     $('.main').css({
-      'background': index >= 5 ? 'rgba(122, 200, 255, .2)' : 'rgba(0, 0, 0, .2)'
+      'background': index > 2 ? 'rgba(122, 200, 255, .2)' : 'rgba(0, 0, 0, .2)'
     })
     const bgUrl = require('@assets/bg/' + index + '.png')
     $('#particles-js').css('background-image', 'url(' + bgUrl + ')')

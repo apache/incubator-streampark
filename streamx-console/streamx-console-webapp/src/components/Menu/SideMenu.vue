@@ -5,14 +5,14 @@
     :collapsible="collapsible"
     v-model="collapsed"
     :trigger="null">
-    <logo />
+    <logo ref="logo"/>
     <s-menu
       :collapsed="collapsed"
       :menu="menu"
       theme="dark"
       :mode="mode"
       @select="onSelect"
-      style="padding: 16px 0px;" />
+      style="padding: 16px 0;" />
   </a-layout-sider>
 </template>
 
@@ -60,6 +60,9 @@ export default {
     onSelect (obj) {
       this.$emit('menuSelect', obj)
     },
+    logoCollapsed () {
+      this.$emit('menuSelect', obj)
+    },
     // 处理菜单隐藏的。。。
     handleHideMenu (array, source) {
       source.filter((x) => { return !x.meta.hidden }).forEach((x) => {
@@ -78,6 +81,11 @@ export default {
     const array = []
     this.handleHideMenu(array, this.menus)
     this.menu = array
+  },
+  watch: {
+    collapsed(curr) {
+      this.$refs.logo.collapsed(curr)
+    }
   }
 }
 </script>

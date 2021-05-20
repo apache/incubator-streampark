@@ -4,7 +4,8 @@
     <router-link
       :to="{path:'/flink/app'}">
       <img
-        src="~@/assets/imgs/logo.png"
+        :src="logoImg"
+
         alt="logo">
     </router-link>
   </div>
@@ -24,6 +25,24 @@ export default {
       type: Boolean,
       default: true,
       required: false
+    }
+  },
+  data () {
+    return {
+      logoImg: require('@assets/imgs/logo2.svg')
+    }
+  },
+  methods: {
+    collapsed(flag) {
+      if(flag) {
+        setTimeout(()=>{
+          this.logoImg = require('@assets/imgs/logo.svg')
+        },50)
+      } else {
+        setTimeout(()=>{
+          this.logoImg = require('@assets/imgs/logo2.svg')
+        },50)
+      }
     }
   }
 }
