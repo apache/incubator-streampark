@@ -201,7 +201,7 @@ APP_PID_DIR="/var/run";
 if [[ ! -d "$APP_PID_DIR" ]] ; then
     mkdir ${APP_PID_DIR};
 fi
-APP_PID="$APP_BASE/streamx.pid";
+APP_PID="$APP_BIN/streamx.pid";
 
 # Add on extra jar files to CLASSPATH
 # shellcheck disable=SC2236
