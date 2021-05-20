@@ -44,12 +44,24 @@ PRG_DIR=`dirname "$PRG"`
 APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
 APP_PID="$APP_HOME"/.pid
 
-pid=$(cat "${APP_PID}")
+if [ -f "$APP_PID" ]; then
+  pid=$(cat "${APP_PID}")
+else
+  # shellcheck disable=SC2006
+  # StreamX main
+  MAIN="com.streamxhub.streamx.console.StreamXConsole"
+  # shellcheck disable=SC2006
+  pid=`jps -l|grep $MAIN|awk '{print $1}'`
+fi
 
 if [[ -z "${pid}" ]] ; then
   echo "StreamX already stopped."
 else
-  echo "StreamX pid is ${pid},stopping..."
+  echo "StreamX pid is ${pid},now stopping..."
   kill "${pid}"
-  echo "StreamX stop successful!"
+  if [ $? -eq 0 ] ; then
+    echo "StreamX stop successful!"
+  else
+    echo "StreamX stop failed!"
+  fi
 fi
