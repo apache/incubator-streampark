@@ -336,6 +336,7 @@ eval "${RUNJAVA}" \
   $JAVA_OPTS \
   -cp "${APP_CLASSPATH}" \
   -Dapp.home="${APP_HOME}" \
+  -Dpid="${APP_PID}" \
   -Dspring.config.location="${PROPER}" \
   $MAIN >> "${APP_OUT}" 2>&1 &
 

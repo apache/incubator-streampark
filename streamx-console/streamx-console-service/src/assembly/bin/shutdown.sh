@@ -19,14 +19,27 @@
 # specific language governing permissions and limitations
 # under the License.
 
-#kill server
+# Get standard environment variables
 # shellcheck disable=SC2006
-pid=`jps -l|grep "com.streamxhub.streamx.console.StreamXConsole"|awk '{print $1}'`
-if [[ -z "${pid}" ]]
-then
-  echo "application is already stop"
+PRG_DIR=`dirname "$PRG"`
+
+# shellcheck disable=SC2006
+# shellcheck disable=SC2164
+APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
+APP_BASE="$APP_HOME"
+APP_PID_DIR="/var/run";
+if [[ ! -d "$APP_PID_DIR" ]] ; then
+    mkdir ${APP_PID_DIR};
+fi
+
+APP_PID="$APP_BASE/streamx.pid"
+
+pid=$(cat "${APP_PID}")
+
+if [[ -z "${pid}" ]] ; then
+  echo "StreamX already stopped."
 else
-  echo "StreamXConsole pid is ${pid}"
+  echo "StreamX pid is ${pid},stopping..."
   kill "${pid}"
-  echo "StreamXConsole is killed!"
+  echo "StreamX stop successful!"
 fi

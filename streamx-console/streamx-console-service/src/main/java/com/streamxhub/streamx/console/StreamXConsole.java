@@ -20,8 +20,10 @@
  */
 package com.streamxhub.streamx.console;
 
+import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.ApplicationPidFileWriter;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.bind.annotation.CrossOrigin;
 
@@ -32,6 +34,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
  * 事了拂衣去
  * 深藏身与名
  * </b></pre>
+ *
  * @author benjobs
  */
 @CrossOrigin
@@ -40,6 +43,11 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 public class StreamXConsole {
 
     public static void main(String[] args) {
-        SpringApplication.run(StreamXConsole.class, args);
+        SpringApplication application = new SpringApplication(StreamXConsole.class);
+        String pid = SystemPropertyUtils.get("pid");
+        if (pid != null) {
+            application.addListeners(new ApplicationPidFileWriter(pid));
+        }
+        application.run();
     }
 }
