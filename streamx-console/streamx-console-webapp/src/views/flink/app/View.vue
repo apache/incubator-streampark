@@ -292,7 +292,7 @@
                 v-if="record.deploy === 0"
                 v-for="(fragment, i) in text
                   .toString()
-                  .substr(0,25)
+                  .substr(0,(text.length > 30 ? 30: text.length ))
                   .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                 <mark
                   v-if="fragment.toLowerCase() === searchText.toLowerCase()"
@@ -313,7 +313,7 @@
                     v-for="(fragment, i) in
                       text
                         .toString()
-                        .substr(0,(text.length > 25 ? 25: text.length ))
+                        .substr(0,(text.length > 30 ? 30: text.length ))
                         .toString()
                         .split(new RegExp(`(?<=${searchText})|(?=${searchText})`, 'i'))">
                     <mark
@@ -326,11 +326,11 @@
                       {{ fragment }}
                     </template>
                   </template>
-                  <span v-if="text.length>25">
-                    ...
-                  </span>
                 </a-tooltip>
               </template>
+              <span v-if="text.length>30">
+                ...
+              </span>
             </span>
           </template>
           <!--无条件搜索-->
@@ -340,14 +340,14 @@
               :class="{pointer: record.state === 6 || record.state === 7 || record['optionState'] === 4 }"
               @click="handleView(record)">
               <ellipsis
-                :length="45"
+                :length="30"
                 tooltip>
                 {{ text }}
               </ellipsis>
             </span>
             <span v-else>
               <ellipsis
-                :length="45"
+                :length="30"
                 tooltip>
                 {{ text }}
               </ellipsis>
