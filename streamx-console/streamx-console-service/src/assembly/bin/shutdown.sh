@@ -26,13 +26,8 @@ PRG_DIR=`dirname "$PRG"`
 # shellcheck disable=SC2006
 # shellcheck disable=SC2164
 APP_HOME=`cd "$PRG_DIR/.." >/dev/null; pwd`
-APP_BIN="$APP_HOME"/bin
-APP_PID_DIR="/var/run";
-if [[ ! -d "$APP_PID_DIR" ]] ; then
-    mkdir ${APP_PID_DIR};
-fi
-
-APP_PID="$APP_BIN/streamx.pid"
+APP_BASE="$APP_HOME"
+APP_PID="$APP_BASE"/.pid
 
 pid=$(cat "${APP_PID}")
 
