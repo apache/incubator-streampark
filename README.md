@@ -39,7 +39,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 
 <video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
-![](http://assets.streamxhub.com/streamx_theme.png?12345)
+![](http://assets.streamxhub.com/streamx-main.png?12345)
 
 ![](http://assets.streamxhub.com/1617033782728.png)
 
