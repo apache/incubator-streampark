@@ -134,7 +134,7 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费， 
 
 | 微信支付 | 支付宝 |
 |:----------|:----------|
-| <img src="http://assets.streamxhub.com/1617938114478.jpg" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg" alt="Buy Me A Coffee" width="150"> |
+| <img src="http://assets.streamxhub.com/1617938114478.jpg?123456" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg?123456" alt="Buy Me A Coffee" width="150"> |
 
 > 所有赞助人将在赞助人名单中显示。
 
