@@ -41,9 +41,9 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 
 ![](http://assets.streamxhub.com/streamx-main.png?12345)
 
-![](http://assets.streamxhub.com/1617033782728.png)
+![](http://assets.streamxhub.com/streamx-sql.png?12345)
 
-![](http://assets.streamxhub.com/1617033782731.png)
+![](http://assets.streamxhub.com/streamx-flameGraph.png?123456)
 
 ## 🎉 Features
 * Scaffolding
