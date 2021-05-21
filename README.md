@@ -142,7 +142,7 @@ If you like this framework, and appreciate the work done for it to exist, you ca
 
 | WeChat Pay | Alipay |
 |:----------|:----------|
-| <img src="http://assets.streamxhub.com/1617938114478.jpg" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg" alt="Buy Me A Coffee" width="150"> |
+| <img src="http://assets.streamxhub.com/1617938114478.jpg?12345" alt="Buy Me A Coffee" width="150"> | <img src="http://assets.streamxhub.com/1617938216431.jpg?12345" alt="Buy Me A Coffee" width="150"> |
 
 ### 🏅 Backers
 
