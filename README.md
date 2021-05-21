@@ -160,7 +160,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-  <img src="http://assets.streamxhub.com/1619345456249.jpg" alt="Join the Group" width="200"><br>
-  <span>join us</span>
+  <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="500"><br>
+  <span>join us(add information: StreamX)</span>
 </div>
 
