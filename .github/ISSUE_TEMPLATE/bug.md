@@ -1,8 +1,9 @@
 ---
-name: Bug
+name: Bug report
 about: "Report a confirmed bug."
 title: "[Bug] bug title"
 labels: ">bug,needs:triage"
+assignees: ''
 
 ---
 
