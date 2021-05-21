@@ -1,8 +1,9 @@
 ---
-name: 问题
+name: 问题报告
 about: "报告已确认的问题"
 title: "[Bug] 问题标题"
 labels: ">bug,needs:triage"
+assignees: ''
 
 ---
 
