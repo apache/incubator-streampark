@@ -270,6 +270,7 @@ public class FlinkTrackingTask {
 
                 //3) savePoint obsolete check and NEED_START check
                 OptionState optionState = OPTIONING.get(application.getId());
+                // cpu分支预测,将Running的状态单独拿出来
                 if (currentState.equals(FlinkAppState.RUNNING)) {
                     handleRunningState(application, optionState, currentState);
                 } else {

@@ -40,7 +40,7 @@ Make Flink|Spark easier!!!
 其最终目的是打造一个一站式大数据平台，流批一体，湖仓一体的解决方案
 <video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
-![](http://assets.streamxhub.com/theme.gif)
+![](http://assets.streamxhub.com/streamx-console.png)
 
 ![](http://assets.streamxhub.com/1617033782728.png)
 
@@ -153,7 +153,7 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费， 
 </div>
 
 <div align="center">
-  <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="500"><br>
+  <img src="http://assets.streamxhub.com/ben-wechat.png" alt="Join the Group" width="200"><br>
   <span>扫微信二维码加微信邀请你加群讨论(添加信息: StreamX)</span>
 </div>
 

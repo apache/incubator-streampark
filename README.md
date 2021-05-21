@@ -39,7 +39,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 
 <video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
 
-![](http://assets.streamxhub.com/theme.gif)
+![](http://assets.streamxhub.com/streamx-console.png)
 
 ![](http://assets.streamxhub.com/1617033782728.png)
 
@@ -160,7 +160,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-  <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="500"><br>
+  <img src="http://assets.streamxhub.com/ben-wechat.png" alt="Join the Group" width="200"><br>
   <span>join us(add information: StreamX)</span>
 </div>
 
