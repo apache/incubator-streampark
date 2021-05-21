@@ -125,6 +125,7 @@ Make Flink|Spark easier!!!
 
 - [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
 - [加入社区](#-加入社区)
+- [谁在使用streamx](https://github.com/streamxhub/streamx/issues/163)
 
 ## 💰 Donation
 
