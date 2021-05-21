@@ -140,6 +140,7 @@ You can contact us or ask questions via:
 
 - [New an issue](https://github.com/streamxhub/streamx/issues/new)
 - [Join us](#-Join-us)
+- [Who uses Streamx](https://github.com/streamxhub/streamx/issues/163)
 
 ## 💰 Donation
 
