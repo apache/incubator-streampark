@@ -1319,8 +1319,8 @@ export default {
               ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
               'error'
             )
+            this.flameGraph = false
           }
-          this.flameGraph = false
         })
       }
     },
