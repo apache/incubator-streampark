@@ -1,0 +1,79 @@
+---
+spark:
+  app:
+    name: HelloStreamXApp
+    conf:
+      version: 10
+  submit:
+    deployMode: cluster
+  sink:
+    redis:
+      port: 6379
+      host:
+      timeout: 30
+      db: 0
+  batch:
+    duration: 5
+  serializer: org.apache.spark.serializer.KryoSerializer
+  monitor:
+    zookeeper: bigdata-001-112-130.sqkb-s.com:2181,bigdata-002-112-129.sqkb-s.com:2181,bigdata-003-112-128.sqkb-s.com:2181,bigdata-004-112-131.sqkb-s.com:2181,bigdata-005-112-127.sqkb-s.com:2181
+    suicide:
+      batch: 0
+    congestion:
+      batch: 0
+    dingding:
+      user:
+      url: https://oapi.dingtalk.com/robot/send?access_token=d4d19790b4d4b83bfbeeb9f67e75ed5b1c2e3a40968e9d908df7c691c0f78afe
+  main:
+    class: com.streamx.spark.test.HelloStreamXApp
+  source:
+    kafka:
+      offset:
+        store:
+          type: kafka
+      consume:
+        auto:
+          offset:
+            reset: earliest
+        max:
+          partition:
+            fetch:
+              bytes: 10485760
+        topics: flm_monitor_sqkb_basic_app_v2
+        fetch:
+          max:
+            wait:
+              ms: 3000
+        bootstrap:
+          servers: bigdata-kafka-001-113-8:9092,bigdata-kafka-002-113-9:9092,bigdata-kafka-003-113-10:9092
+        value:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        key:
+          deserializer: org.apache.kafka.common.serialization.StringDeserializer
+        group:
+          id: StreamX01
+  master: yarn
+  driver:
+    memory: 512MB
+    cores: 1
+    userClassPathFirst: false
+  dynamicAllocation:
+    initialExecutors: 1
+    cachedExecutorIdleTimeout: -1
+    minExecutors: 1
+    sustainedSchedulerBacklogTimeout: 1s
+    executorIdleTimeout: 60s
+    schedulerBacklogTimeout: 1s
+    enabled: true
+    maxExecutors: 60
+  executor:
+    cores: 1
+    memory: 512MB
+    instances: 1
+    userClassPathFirst: true
+  shuffle:
+    service:
+      port: 7337
+      enabled: true
+  yarn:
+    queue: default

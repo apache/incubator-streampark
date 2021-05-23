@@ -1,0 +1,169 @@
+@active-color: 255,255,255;
+.container-wrapper {
+  height: 100%;
+
+  &.mobile {
+    .container {
+      .main {
+        max-width: 368px;
+        width: 98%;
+        z-index: 20;
+      }
+    }
+  }
+
+  .container {
+    position: relative;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    display: -webkit-flex;
+    display: flex;
+    height: 100%;
+    justify-content: center;
+
+    a {
+      text-decoration: none;
+    }
+
+    .top {
+      text-align: center;
+
+      .header {
+        height: 160px;
+        line-height: 160px;
+        .badge {
+          position: absolute;
+          display: inline-block;
+          line-height: 1;
+          vertical-align: middle;
+          margin-left: -12px;
+          margin-top: -10px;
+          opacity: 0.8;
+        }
+
+        .logo {
+          padding: 10px;
+          height: 160px;
+          vertical-align: top;
+          margin-right: 16px;
+        }
+
+        .title {
+          font-size: 33px;
+          color: rgba(0, 0, 0, .85);
+          font-family: Avenir, 'Helvetica Neue', Arial, Helvetica, sans-serif;
+          font-weight: 600;
+          position: relative;
+          top: 2px;
+        }
+      }
+
+      .desc {
+        font-size: 14px;
+        color: rgba(@active-color, .65);
+        margin-top: 12px;
+        margin-bottom: 20px;
+      }
+    }
+
+    .main {
+      min-width: 260px;
+      width: 368px;
+      margin: 0 auto;
+      z-index: 20;
+      background: rgba(122, 200, 255, .2);
+      padding: 20px 30px;
+      .signin-form {
+        .ant-input {
+          border: 1px solid rgba(@active-color, .55);
+          border-radius: 1px;
+          color: rgba(@active-color, .65);
+          margin-top: 10px;
+          background: unset;
+
+          .ant-input-affix-wrapper:hover, .ant-input:not(.ant-input-disabled) {
+            border-color: rgba(@active-color, .95);
+          }
+        }
+
+        .ant-btn-primary {
+          color: #fff;
+          background-color: rgba(@active-color, 0.35);
+          border: none;
+          border-radius: 0px;
+        }
+
+        .ant-checkbox-wrapper {
+          color: rgba(@active-color, .75);
+        }
+
+        .ant-switch-checked {
+          background-color: rgba(@active-color, 0.35);
+        }
+
+        button.signin-button {
+          padding: 0 15px;
+          font-size: 16px;
+          height: 40px;
+          width: 100%;
+        }
+
+        .icon {
+          color: rgba(@active-color, .55);
+          margin-top: 10px;
+        }
+      }
+    }
+
+    .footer {
+      position: absolute;
+      width: 100%;
+      bottom: 0;
+      padding: 0 16px;
+      margin: 48px 0 24px;
+      text-align: center;
+
+      .links {
+        margin-bottom: 8px;
+        font-size: 14px;
+
+        a {
+          color: rgba(0, 0, 0, 0.45);
+          transition: all 0.3s;
+
+          &:not(:last-child) {
+            margin-right: 40px;
+          }
+        }
+      }
+
+      .copyright {
+        color: rgba(0, 0, 0, 0.45);
+        font-size: 14px;
+      }
+    }
+  }
+
+  .icon {
+    color: rgba(@active-color, .55);
+    margin-top: 10px;
+  }
+
+  .particles {
+    position: absolute;
+    z-index: 1;
+    width: 100%;
+  }
+
+  #particles-js {
+    background: #f0f2f5 url(~@/assets/bg/1.png) no-repeat 50%;
+    background-size: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+}

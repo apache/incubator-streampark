@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>com.streamxhub.streamx</groupId>
+        <artifactId>streamx-parent</artifactId>
+        <version>1.0.0</version>
+        <relativePath>../streamx-parent/pom.xml</relativePath>
+    </parent>
+    <artifactId>streamx-console</artifactId>
+    <name>StreamX : Console Parent</name>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>streamx-console-service</module>
+        <module>streamx-console-webapp</module>
+    </modules>
+
+</project>

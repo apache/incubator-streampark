@@ -1,0 +1,1296 @@
+<template>
+  <a-card :bordered="false" style="margin-top: 20px;">
+    <a-descriptions
+      v-if="app"
+      bordered
+      size="middle"
+      layout="vertical">
+      <template slot="title">
+        <span class="app-bar">Application Info</span>
+        <a-button
+          type="primary"
+          shape="circle"
+          icon="arrow-left"
+          @click="handleGoBack()"
+          style="float: right;margin-top: -8px" />
+        <a-divider
+          style="margin-top: 5px;margin-bottom: -5px" />
+      </template>
+      <a-descriptions-item
+        label="Application Name">
+        {{ app.jobName }}
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Development Mode">
+        <div class="app_state">
+          <a-tag
+            color="#545454"
+            v-if="app.jobType === 1">
+            Custom Code
+          </a-tag>
+          <a-tag
+            color="#0C7EF2"
+            v-if="app.jobType === 2">
+            Flink SQL
+          </a-tag>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Module"
+        v-if="app.jobType!==2">
+        {{ app.module }}
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Project"
+        v-if="app.jobType!==2">
+        {{ app.projectName }}
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Application Type">
+        <div v-if="app.appType == 1">
+          <a-tag
+            color="cyan">
+            StreamX Flink
+          </a-tag>
+        </div>
+        <div v-else-if="app.appType == 2">
+          <a-tag
+            color="blue">
+            Apache Flink
+          </a-tag>
+        </div>
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Status">
+        <State
+          option="state"
+          :data="app" />
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Start Time">
+        <template v-if="app.startTime">
+          <a-icon type="clock-circle" />
+          {{ app.startTime }}
+        </template>
+      </a-descriptions-item>
+      <a-descriptions-item
+        v-if="app.endTime"
+        label="End Time">
+        <a-icon type="clock-circle" />
+        {{ app.endTime }}
+      </a-descriptions-item>
+      <a-descriptions-item
+        v-if="app.duration"
+        label="Duration">
+        {{ app.duration | duration }}
+      </a-descriptions-item>
+      <a-descriptions-item
+        label="Description"
+        :span="3">
+        {{ app.description }}
+      </a-descriptions-item>
+    </a-descriptions>
+    <a-divider
+      style="margin-top: 20px;margin-bottom: -17px" />
+    <a-tabs
+      v-if="app"
+      defaultActiveKey="1"
+      style="margin-top: 15px"
+      :animated="animated"
+      :tab-bar-gutter="tabBarGutter"
+      @change="handleChangeTab">
+      <a-tab-pane
+        key="1"
+        tab="Option"
+        force-render>
+        <a-descriptions
+          bordered
+          size="middle"
+          layout="vertical">
+          <a-descriptions-item
+            v-for="(v,k) in options"
+            :key="k">
+            <template
+              slot="label">
+              {{ k }}
+            </template>
+            {{ v }}
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane
+        key="2"
+        tab="Configuration"
+        v-if="app && app.appType == 1 && allConfigVersions != null && allConfigVersions.length > 0">
+        <a-descriptions>
+          <a-descriptions-item
+            class="desc-item">
+            <a-table
+              ref="TableConf"
+              :columns="column.conf"
+              size="middle"
+              row-key="id"
+              style="margin-top: -24px"
+              :data-source="configVersions"
+              :pagination="pagination.config"
+              :loading="pager.config.loading"
+              @change="handleTableChange"
+              class="detail-table">
+              <template
+                slot="format"
+                slot-scope="text, record">
+                <a-tag
+                  color="#2db7f5"
+                  v-if="record.format == 1">
+                  yaml
+                </a-tag>
+                <a-tag
+                  color="#108ee9"
+                  v-if="record.format == 2">
+                  properties
+                </a-tag>
+              </template>
+              <template
+                slot="version"
+                slot-scope="text, record">
+                <a-button
+                  type="primary"
+                  shape="circle"
+                  size="small"
+                  style="margin-right: 10px;">
+                  {{ record.version }}
+                </a-button>
+              </template>
+              <template
+                slot="effective"
+                slot-scope="text, record">
+                <a-tag
+                  color="green"
+                  v-if="record.effective">
+                  Effective
+                </a-tag>
+              </template>
+              <template
+                slot="effective"
+                slot-scope="text, record">
+                <a-tag
+                  color="cyan"
+                  v-if="record.latest">
+                  Latest
+                </a-tag>
+              </template>
+              <template
+                slot="createTime"
+                slot-scope="text, record">
+                <a-icon
+                  type="clock-circle" />
+                {{ record.createTime }}
+              </template>
+              <template
+                slot="operation"
+                slot-scope="text, record">
+                <svg-icon
+                  name="see"
+                  border
+                  @click.native="handleConfDetail(record)"
+                  title="detail" />
+                <svg-icon
+                  name="swap"
+                  border
+                  v-if="configVersions.length>1"
+                  @click.native="handleCompare(record)"
+                  title="compare" />
+                <a-popconfirm
+                  v-if="!record.effective"
+                  title="Are you sure delete this record ?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteConf(record)">
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'conf:delete'" />
+                </a-popconfirm>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane
+        key="3"
+        tab="Flink SQL"
+        v-if="app.jobType === 2">
+        <div class="sql-box syntax-true" id="flink-sql" style="height: 600px;"></div>
+      </a-tab-pane>
+      <a-tab-pane
+        key="4"
+        tab="Savepoints"
+        v-if="app && savePoints && savePoints.length>0">
+        <a-descriptions>
+          <a-descriptions-item
+            class="desc-item">
+            <a-table
+              ref="TableSavePoints"
+              :columns="column.savePoints"
+              size="middle"
+              row-key="id"
+              style="margin-top: -24px"
+              :data-source="savePoints"
+              :pagination="pagination.savePoints"
+              :loading="pager.savePoints.loading"
+              class="detail-table">
+              <template
+                slot="triggerTime"
+                slot-scope="text, record">
+                <a-icon
+                  type="clock-circle" />
+                {{ record.triggerTime }}
+              </template>
+              <template
+                slot="type"
+                slot-scope="text, record">
+                <div
+                  class="app_state">
+                  <a-tag
+                    color="#0C7EF2"
+                    v-if="record['type'] === 1">
+                    Check Point
+                  </a-tag>
+                  <a-tag
+                    color="#52c41a"
+                    v-if="record['type'] === 2">
+                    Save Point
+                  </a-tag>
+                </div>
+              </template>
+              <template
+                slot="latest"
+                slot-scope="text, record">
+                <a-tag
+                  color="green"
+                  v-if="record.latest">
+                  Latest
+                </a-tag>
+              </template>
+              <template
+                slot="operation"
+                slot-scope="text, record">
+                <svg-icon
+                  name="copy"
+                  border
+                  v-clipboard:copy="record.path"
+                  v-clipboard:success="handleCopySuccess"
+                  v-clipboard:error="handleCopyError" />
+                <a-popconfirm
+                  title="确定要删除吗?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteSavePoint(record)">
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'savepoint:delete'"/>
+                </a-popconfirm>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane
+        key="5"
+        tab="Backups"
+        v-if="app && backUpList && backUpList.length > 0">
+        <a-descriptions>
+          <a-descriptions-item>
+            <a-table
+              ref="TableBackUp"
+              :columns="column.backUps"
+              size="middle"
+              row-key="id"
+              style="margin-top: -24px"
+              :data-source="backUpList"
+              :pagination="pagination.backUp"
+              :loading="pager.backUp.loading"
+              class="detail-table"
+              @change="handleTableChange">
+              <template
+                slot="version"
+                slot-scope="text, record">
+                <a-button
+                  type="primary"
+                  shape="circle"
+                  size="small">
+                  {{ record.version }}
+                </a-button>
+              </template>
+              <template
+                slot="operation"
+                slot-scope="text, record">
+                <svg-icon
+                  name="rollback"
+                  border
+                  v-permit="'backup:rollback'"
+                  @click.native="handleRollback(record)"/>
+                <a-popconfirm
+                  title="Are you sure delete?"
+                  cancel-text="No"
+                  ok-text="Yes"
+                  @confirm="handleDeleteBackUp(record)">
+                  <svg-icon
+                    name="remove"
+                    border
+                    v-permit="'backup:delete'"/>
+                </a-popconfirm>
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+      <a-tab-pane
+        key="6"
+        tab="Start Logs"
+        v-if="app && startLogList && startLogList.length > 0">
+        <a-descriptions>
+          <a-descriptions-item>
+            <a-table
+              ref="TableStartLog"
+              :columns="column.startLog"
+              size="middle"
+              row-key="id"
+              style="margin-top: -24px"
+              :data-source="startLogList"
+              :pagination="pagination.startLog"
+              :loading="pager.startLog.loading"
+              @change="handleTableChange"
+              class="detail-table">
+              <template
+                slot="startTime"
+                slot-scope="text, record">
+                <a-icon
+                  type="clock-circle" />
+                {{ record.startTime }}
+              </template>
+              <template
+                slot="success"
+                slot-scope="text, record">
+                <a-tag
+                  class="start-state"
+                  color="#52c41a"
+                  v-if="record.success">
+                  SUCCESS
+                </a-tag>
+                <a-tag
+                  class="start-state"
+                  color="#f5222d"
+                  v-else>
+                  FAILED
+                </a-tag>
+              </template>
+              <template
+                slot="operation"
+                slot-scope="text, record">
+                <svg-icon
+                  v-if="!record.success"
+                  name="see"
+                  border
+                  @click.native="handleException(record)"
+                  title="查看" />
+              </template>
+            </a-table>
+          </a-descriptions-item>
+        </a-descriptions>
+      </a-tab-pane>
+    </a-tabs>
+
+    <a-modal
+      v-model="compareVisible"
+      on-ok="handleCompareOk"
+      v-if="compareVisible">
+      <template
+        slot="title">
+        <svg-icon
+          name="swap"/>
+        Compare Config
+      </template>
+      <template
+        slot="footer">
+        <a-button
+          key="back"
+          @click="handleCompareCancel">
+          Close
+        </a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          @click="handleCompareOk">
+          Compare
+        </a-button>
+      </template>
+      <a-form
+        @submit="handleCompareOk"
+        :form="formCompare">
+        <a-form-item
+          label="source version"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-button
+            type="primary"
+            shape="circle"
+            size="small"
+            style="margin-right: 10px;">
+            {{ compare.version }}
+          </a-button>
+          <a-icon
+            type="clock-circle"
+            style="color:darkgrey" />
+          <span
+            style="color:darkgrey">{{ compare.createTime }}</span>
+        </a-form-item>
+        <a-form-item
+          label="target version"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-select
+            @change="handleCompareTarget">
+            <a-select-option
+              v-for="(ver,index) in filterNotCurrConfig"
+              :value="ver.id"
+              :key="index">
+              <div
+                style="padding-left: 5px">
+                <a-button
+                  type="primary"
+                  shape="circle"
+                  size="small"
+                  style="margin-right: 10px;">
+                  {{ ver.version }}
+                </a-button>
+                <a-tag
+                  color="green"
+                  style=";margin-left: 10px;"
+                  size="small"
+                  v-if="ver.effective">
+                  Effective
+                </a-tag>
+                <a-tag
+                  color="cyan"
+                  style=";margin-left: 5px;"
+                  size="small"
+                  v-if="ver.candidate == 1 || ver.candidate == 2">
+                  Candidate
+                </a-tag>
+              </div>
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </a-form>
+    </a-modal>
+
+    <a-modal
+      v-model="execOption.visible"
+      width="80%"
+      :body-style="execOption.modalStyle"
+      :destroy-on-close="execOption.modalDestroyOnClose"
+      @ok="handleExpClose">
+      <template
+        slot="title">
+        <svg-icon
+          name="code"
+          style="color:RED" />&nbsp; Exception Info
+      </template>
+      <template
+        slot="footer">
+        <a-button
+          key="submit"
+          type="primary"
+          @click="handleExpClose">
+          Close
+        </a-button>
+      </template>
+      <div
+        id="startExp"
+        class="startExp"
+        style="height: 100%"/>
+    </a-modal>
+
+    <a-modal
+      v-model="rollbackVisible"
+      on-ok="handleRollbackOk">
+      <template
+        slot="title">
+        <svg-icon
+          slot="icon"
+          name="rollback"/>
+        Rollback Backup
+      </template>
+
+      <a-form
+        @submit="handleRollbackOk"
+        :form="formRollback">
+        <a-form-item
+          label="Backup"
+          :label-col="{lg: {span: 5}, sm: {span: 5}}"
+          :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+          <a-switch
+            checked-children="ON"
+            un-checked-children="OFF"
+            v-model="needBackup"
+            v-decorator="['needBackup']"/>
+          <span
+            class="conf-switch"
+            style="color:darkgrey"> current effective job need backed up?</span>
+        </a-form-item>
+
+        <a-form-item
+          v-if="needBackup"
+          label="Backup Desc"
+          :label-col="{lg: {span: 7}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+          <a-textarea
+            rows="3"
+            placeholder="The backup description for the application,so that it can be retrieved when the version is rolled back"
+            v-decorator="['description',{ rules: [{ message: 'Please enter a backup description' } ]}]"/>
+        </a-form-item>
+      </a-form>
+
+      <template
+        slot="footer">
+        <a-button
+          key="back"
+          @click="handleRollbackCancel">
+          Cancel
+        </a-button>
+        <a-button
+          key="submit"
+          type="primary"
+          @click="handleRollbackOk">
+          Rollback
+        </a-button>
+      </template>
+    </a-modal>
+
+    <Mergely
+      ref="confEdit"
+      @close="handleEditConfClose"
+      @ok="handleEditConfOk"
+      :visiable="confVisiable"
+      :read-only="true" />
+
+    <Different ref="different"/>
+
+  </a-card>
+</template>
+<script>
+import { mapActions, mapGetters } from 'vuex'
+import { get, backUps, startLog, removeBak, rollback } from '@api/application'
+import State from './State'
+import configOptions from './Option'
+import { get as getVer, list as listVer, remove as removeConf } from '@api/config'
+import { history, remove as removeSp } from '@api/savepoint'
+import Mergely from './Mergely'
+import Different from './Different'
+import notification from 'ant-design-vue/lib/notification'
+import monaco from '@/views/flink/app/Monaco.log'
+import SvgIcon from '@/components/SvgIcon'
+
+const Base64 = require('js-base64').Base64
+configOptions.push(
+  {
+    key: '-p',
+    name: 'parallelism'
+  },
+  {
+    key: '-ys',
+    name: 'yarnslots'
+  }
+)
+
+export default {
+
+  components: {SvgIcon, State, Mergely ,Different },
+
+  data() {
+    return {
+      app: null,
+      options: {},
+      defaultConfigId: null,
+      allConfigVersions: null,
+      configVersions: null,
+      savePoints: null,
+      confVisiable: false,
+      backUpList: null,
+      compareVisible: false,
+      formCompare: null,
+      compare: null,
+      startLogList: null,
+      queryParams: {},
+      animated: false,
+      tabBarGutter: 0,
+      backup: null,
+      needBackup: false,
+      rollbackVisible: false,
+      formRollback: null,
+      pager: {
+        config: {
+          key: '2',
+          info: null,
+          loading: false
+        },
+        savePoints: {
+          key: '4',
+          info: null,
+          loading: false
+        },
+        backUp: {
+          key: '5',
+          info: null,
+          loading: false
+        },
+        startLog: {
+          key: '6',
+          info: null,
+          loading: false
+        }
+      },
+      pagination: {
+        config: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        savePoints: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        backUp: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        },
+        startLog: {
+          pageSizeOptions: ['10', '20', '30', '40', '100'],
+          defaultCurrent: 1,
+          defaultPageSize: 10,
+          showQuickJumper: true,
+          showSizeChanger: true,
+          showTotal: (total, range) => `显示 ${range[0]} ~ ${range[1]} 条记录，共 ${total} 条记录`
+        }
+      },
+
+      editor: {
+        option: {
+          theme: this.ideTheme(),
+          language: 'sql',
+          selectOnLineNumbers: false,
+          foldingStrategy: 'indentation', // 代码分小段折叠
+          overviewRulerBorder: false, // 不要滚动条边框
+          autoClosingBrackets: true,
+          tabSize: 2, // tab 缩进长度
+          readOnly: true,
+          inherit: true,
+          scrollBeyondLastLine: false,
+          lineNumbersMinChars: 5,
+          lineHeight: 24,
+          automaticLayout: true,
+          cursorBlinking: 'line',
+          cursorStyle:'line',
+          cursorWidth: 3,
+          renderFinalNewline: true,
+          renderLineHighlight: 'all',
+          quickSuggestionsDelay: 100,  //代码提示延时
+          scrollbar: {
+            useShadows: false,
+            vertical: 'visible',
+            horizontal: 'visible',
+            horizontalSliderSize: 5,
+            verticalSliderSize: 5,
+            horizontalScrollbarSize: 15,
+            verticalScrollbarSize: 15
+          }
+        },
+        flinkSql: null,
+        exception: null
+      },
+
+      execOption: {
+        modalStyle: {
+          height: '600px',
+          padding: '5px'
+        },
+        visible: false,
+        modalDestroyOnClose: true,
+        content: null
+      },
+      activeTab: '1',
+      column: {
+        conf: [
+          {
+            title: 'Version',
+            dataIndex: 'version',
+            scopedSlots: { customRender: 'version' }
+          },
+          {
+            title: 'Conf Format',
+            dataIndex: 'format',
+            scopedSlots: { customRender: 'format' }
+          },
+          {
+            title: 'Effective',
+            dataIndex: 'effective',
+            scopedSlots: { customRender: 'effective' }
+          },
+          {
+            title: 'Candidate',
+            dataIndex: 'candidate',
+            scopedSlots: { customRender: 'candidate' }
+          },
+          {
+            title: 'Modify Time',
+            dataIndex: 'createTime',
+            scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        savePoints: [
+          {
+            title: 'Path',
+            dataIndex: 'path',
+            width: '45%'
+          },
+          {
+            title: 'Trigger Time',
+            dataIndex: 'triggerTime',
+            scopedSlots: { customRender: 'triggerTime' },
+            width: 250
+          },
+          {
+            title: 'Type',
+            dataIndex: 'type',
+            scopedSlots: { customRender: 'type' }
+          },
+          {
+            title: 'Latest',
+            dataIndex: 'latest',
+            scopedSlots: { customRender: 'latest' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        backUps: [
+          {
+            title: 'Save Path',
+            dataIndex: 'path',
+            width: '40%'
+          },
+          {
+            title: 'Description',
+            dataIndex: 'description',
+            width: '20%'
+          },
+          {
+            title: 'Version',
+            dataIndex: 'version',
+            width: '10%',
+            scopedSlots: { customRender: 'version' }
+          },
+          {
+            title: 'Backup Time',
+            dataIndex: 'createTime',
+            scopedSlots: { customRender: 'createTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ],
+        startLog: [
+          {
+            title: 'Application Id',
+            dataIndex: 'yarnAppId',
+            width: '40%'
+          },
+          {
+            title: 'Start Status',
+            dataIndex: 'success',
+            scopedSlots: { customRender: 'success' }
+          },
+          {
+            title: 'Start Time',
+            dataIndex: 'startTime',
+            scopedSlots: { customRender: 'startTime' }
+          },
+          {
+            title: 'Operation',
+            dataIndex: 'operation',
+            key: 'operation',
+            scopedSlots: { customRender: 'operation' },
+            fixed: 'right',
+            width: 150
+          }
+        ]
+      }
+    }
+  },
+
+  beforeMount() {
+    this.formCompare = this.$form.createForm(this)
+    this.formRollback = this.$form.createForm(this)
+  },
+
+  computed: {
+    filterNotCurrConfig() {
+      return this.allConfigVersions.filter(x => x.version !== this.compare.version)
+    },
+    myTheme() {
+      return this.ideTheme()
+    }
+  },
+
+  mounted() {
+    const appId = this.applicationId()
+    if (appId) {
+      this.CleanAppId()
+      this.handleGet(appId)
+      const timer = window.setInterval(() => this.handleGet(appId), 5000)
+      this.$once('hook:beforeDestroy', () => {
+        clearInterval(timer)
+      })
+    } else {
+      this.$router.back(-1)
+    }
+  },
+
+  methods: {
+    ...mapActions(['CleanAppId']),
+    ...mapGetters(['applicationId']),
+    handleGet(appId) {
+      get({ id: appId }).then((resp) => {
+        if (!this.app) {
+          this.app = resp.data
+          this.options = JSON.parse(this.app.options)
+          this.$nextTick(() => {
+            this.handleConfig()
+            this.handleFlinkSql()
+            this.handleSavePoint()
+            this.handleBackUps()
+            this.handleStartLog()
+          })
+        } else {
+          /**
+           * 第一次之后,每次轮询只管基本信息的变更
+           * @type {any}
+           */
+          this.app = resp.data
+        }
+      }).catch((error) => {
+        this.$message.error(error.message)
+      })
+    },
+    handleFlinkSql() {
+      if (this.app.jobType === 2) {
+        this.editor.option.value = Base64.decode(this.app.flinkSql)
+      }
+    },
+    handleConfig() {
+      const params = {
+        appId: this.app.id
+      }
+      if (this.pager.config.info) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableConf.pagination.current = this.pager.config.info.current
+        this.$refs.TableConf.pagination.pageSize = this.pager.config.info.pageSize
+        params.pageSize = this.pager.config.info.pageSize
+        params.pageNum = this.pager.config.info.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.config.defaultPageSize
+        params.pageNum = this.pagination.config.defaultCurrent
+      }
+      this.handlePagerLoading()
+      listVer({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.config }
+        pagination.total = parseInt(resp.data.total)
+        resp.data.records.forEach((value, index) => {
+          if (value.effective) {
+            this.defaultConfigId = value.id
+          }
+        })
+        this.configVersions = resp.data.records
+        let pageSize = this.pagination.config.defaultPageSize
+        if (this.pager.config.info != null) {
+          pageSize = this.pager.config.info.pageSize || pageSize
+        }
+        if (pagination.total >= pageSize) {
+          this.allConfigVersions = this.configVersions
+        }
+        this.pagination.config = pagination
+        this.pager.config.loading = false
+      })
+    },
+    handleSavePoint() {
+      const params = {
+        appId: this.app.id
+      }
+      if (this.pager.savePoints.info) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableSavePoints.pagination.current = this.pager.savePoints.info.current
+        this.$refs.TableSavePoints.pagination.pageSize = this.pager.savePoints.info.pageSize
+        params.pageSize = this.pager.savePoints.info.pageSize
+        params.pageNum = this.pager.savePoints.info.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.savePoints.defaultPageSize
+        params.pageNum = this.pagination.savePoints.defaultCurrent
+      }
+      this.handlePagerLoading()
+      history({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.savePoints }
+        pagination.total = parseInt(resp.data.total)
+        this.savePoints = resp.data.records
+        this.pagination.savePoints = pagination
+        this.pager.savePoints.loading = false
+      })
+    },
+
+    handleBackUps() {
+      const params = {
+        appId: this.app.id
+      }
+      if (this.pager.backUp.info) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableBackUp.pagination.current = this.pager.backUp.info.current
+        this.$refs.TableBackUp.pagination.pageSize = this.pager.backUp.info.pageSize
+        params.pageSize = this.pager.backUp.info.pageSize
+        params.pageNum = this.pager.backUp.info.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.backUp.defaultPageSize
+        params.pageNum = this.pagination.backUp.defaultCurrent
+      }
+      this.handlePagerLoading()
+      backUps({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.backUp }
+        pagination.total = parseInt(resp.data.total)
+        this.backUpList = resp.data.records
+        this.pagination.backUp = pagination
+        this.pager.backUp.loading = false
+      })
+    },
+
+    handleStartLog() {
+      const params = {
+        appId: this.app.id
+      }
+      if (this.pager.startLog.info) {
+        // 如果分页信息不为空，则设置表格当前第几页，每页条数，并设置查询分页参数
+        this.$refs.TableStartLog.pagination.current = this.pager.startLog.info.current
+        this.$refs.TableStartLog.pagination.pageSize = this.pager.startLog.info.pageSize
+        params.pageSize = this.pager.startLog.info.pageSize
+        params.pageNum = this.pager.startLog.info.current
+      } else {
+        // 如果分页信息为空，则设置为默认值
+        params.pageSize = this.pagination.startLog.defaultPageSize
+        params.pageNum = this.pagination.startLog.defaultCurrent
+      }
+      this.handlePagerLoading()
+      startLog({ ...params }).then((resp) => {
+        const pagination = { ...this.pagination.startLog }
+        pagination.total = parseInt(resp.data.total)
+        this.startLogList = resp.data.records
+        this.pagination.startLog = pagination
+        this.pager.startLog.loading = false
+      })
+    },
+
+    handleEditConfClose() {
+      this.confVisiable = false
+    },
+
+    handleEditConfOk(value) {
+      this.configOverride = value
+    },
+
+    handleConfDetail(record) {
+      this.confVisiable = true
+      getVer({
+        id: record.id
+      }).then((resp) => {
+        const text = Base64.decode(resp.data.content)
+        this.$refs.confEdit.set(text)
+      })
+    },
+
+    handleDeleteSavePoint(record) {
+      removeSp({
+        id: record.id
+      }).then((resp) => {
+        this.handleSavePoint()
+      })
+    },
+
+    handleDeleteBackUp(record) {
+      removeBak({
+        id: record.id
+      }).then((resp) => {
+        this.handleBackUps()
+      })
+    },
+
+    handleDeleteConf(record) {
+      removeConf({
+        id: record.id
+      }).then((resp) => {
+        this.handleConfig()
+      })
+    },
+
+    handleCopySuccess() {
+      notification.success({
+        message: 'The savepoint path copied to clipboard Successfully'
+      })
+    },
+
+    handleCopyError() {
+      notification.error({
+        message: 'The savepoint path copied to clipboard failed'
+      })
+    },
+
+    handleCompare(record) {
+      if (this.allConfigVersions == null) {
+        listVer({
+          appId: this.app.id,
+          pageNo: 1,
+          pageSize: 999999
+        }).then((resp) => {
+          this.allConfigVersions = resp.data.records
+        })
+      }
+      this.compareVisible = true
+      this.compare = {
+        id: record.id,
+        version: record.version,
+        createTime: record.createTime
+      }
+    },
+
+    handleCompareTarget(v) {
+      this.compare.target = v
+    },
+
+    handleCompareCancel() {
+      this.compareVisible = false
+    },
+
+    handleCompareOk() {
+      getVer({
+        id: this.compare.id
+      }).then((resp) => {
+        const conf1 = Base64.decode(resp.data.content)
+        const ver1 = resp.data.version
+        getVer({
+          id: this.compare.target
+        }).then((resp) => {
+          const conf2 = Base64.decode(resp.data.content)
+          const ver2 = resp.data.version
+          this.handleCompareCancel()
+          this.$refs.different.different([{
+              name: 'Configuration',
+              format: 'yaml',
+              original: conf1,
+              modified: conf2,
+            }],
+            ver1,
+            ver2
+          )
+        })
+      })
+    },
+
+    handleRollback(backup) {
+      this.rollbackVisible = true
+      this.backup = backup
+    },
+
+    handleRollbackOk() {
+      this.formRollback.validateFields((err, values) => {
+        if (!err) {
+          const id = this.backup.id
+          const appId = this.backup.appId
+          const sqlId = this.backup.sqlId
+          const path = this.backup.path
+          this.handleRollbackCancel()
+          this.$swal.fire({
+            icon: 'success',
+            title: 'this backup is rolling back',
+            showConfirmButton: false,
+            timer: 2000
+          }).then((r) => {
+            rollback({
+              id: id,
+              appId: appId,
+              sqlId: sqlId,
+              path: path,
+              backup: values.needBackup,
+              description: values.description || null
+            })
+          })
+        }
+      })
+    },
+
+    handleRollbackCancel() {
+      this.rollbackVisible = false
+      this.backup = null
+    },
+
+    handleException(record) {
+      this.execOption.visible = true
+      this.execOption.content = record.exception
+      this.$nextTick(() => {
+        this.editor.exception = monaco.editor.create(document.querySelector('#startExp'), {
+          theme: 'log',
+          value: this.execOption.content,
+          language: 'log',
+          scrollBeyondLastLine: false,
+          overviewRulerBorder: false, // 不要滚动条边框
+          autoClosingBrackets: true,
+          tabSize: 2, // tab 缩进长度
+          scrollbar: {
+            useShadows: false,
+            vertical: 'visible',
+            horizontal: 'visible',
+            horizontalSliderSize: 5,
+            verticalSliderSize: 5,
+            horizontalScrollbarSize: 15,
+            verticalScrollbarSize: 15
+          }
+        })
+      })
+    },
+
+    handleExpClose() {
+      this.execOption.visible = false
+      this.editor.exception.dispose()
+    },
+
+    handleGoBack() {
+      this.$router.back(-1)
+    },
+
+    handleTableChange(pagination, filters, sorter) {
+      // 将这两个参数赋值给Vue data，用于后续使用
+      switch (this.activeTab) {
+        case '2':
+          this.pager.config.info = pagination
+          this.handleConfig()
+          break
+        case '4':
+          this.pager.savePoints.info = pagination
+          this.handleSavePoint()
+          break
+        case '5':
+          this.pager.backUp.info = pagination
+          this.handleBackUps()
+          break
+        case '6':
+          this.pager.startLog.info = pagination
+          this.handleStartLog()
+          break
+      }
+    },
+
+    handleChangeTab(key) {
+      this.activeTab = key
+      this.$nextTick(()=>{
+        if (this.activeTab === '3') {
+          this.editor.flinkSql = monaco.editor.create(document.querySelector('#flink-sql'), this.editor.option)
+        } else if (this.editor.flinkSql) {
+          this.editor.flinkSql.dispose()
+        }
+      })
+    },
+
+    handlePagerLoading() {
+      for (const k in this.pager) {
+        this.pager[k]['loading'] = this.pager[k]['key'] === this.activeTab
+      }
+    }
+  },
+
+  watch: {
+    myTheme() {
+      this.$refs.confEdit.theme()
+      this.$refs.different.theme()
+    }
+  },
+}
+</script>
+
+<style scoped lang="less">
+.desc-item {
+  padding-top: 20px;
+}
+
+.syntax-true {
+  border: 1px solid @border-color-base
+}
+
+.ant-tabs-nav .ant-tabs-tab-active {
+  font-weight: unset !important;
+  background-color: @background-color-base;
+}
+
+.ant-tabs-nav .ant-tabs-tab {
+  margin: 0 32px 0 0;
+  padding: 8px 15px;
+}
+
+.app-bar {
+  background-color: @background-color-base;
+  height: 100%;
+  font-weight: normal;
+  margin: 0 32px 0 0;
+  padding: 8px 12px;
+}
+
+.ant-descriptions-bordered.ant-descriptions-middle .ant-descriptions-item-content {
+  padding: 10px 24px;
+}
+
+.detail-table {
+  margin-top: unset !important;
+}
+
+.detail-table .ant-table-thead > tr > td, .detail-table .ant-table-tbody > tr > td {
+  padding: 9px 9px !important;
+}
+
+</style>

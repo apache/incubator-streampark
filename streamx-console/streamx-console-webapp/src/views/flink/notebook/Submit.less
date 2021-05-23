@@ -1,0 +1,73 @@
+.nodebook-submit {
+  .code-box {
+    height: 600px;
+    display: block;
+    font-size: 11pt;
+    position: relative;
+    width: 100%;
+    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    .line-numbers:before {
+      content: "";
+      background-color: @border-color-base;
+      width: 4px;
+      height: 25px;
+      margin-left: 0px;
+      position: absolute;
+      margin-right: 5px;
+      left: 0;
+    }
+  }
+
+  .current-line,.current-line-both {
+    border: 1px solid rgba(122, 200, 255, .2) !important;
+    background-color: rgba(122, 200, 255, .2);
+  }
+  .monaco-editor {
+    .margin-view-overlays {
+      .current-line-margin-both {
+        border: unset !important;
+        background-color: unset !important;
+      }
+    }
+  }
+
+  .card-list {
+    position: relative;
+  }
+
+  .icon-list {
+    top: 0px;
+    height: 20px;
+  }
+
+  .ant-select-selection--single {
+    height: 24px !important;
+    border-radius: 4px !important;
+  }
+
+  .ant-select-selection__rendered{
+    line-height: unset;
+    margin-left: 5px;
+  }
+
+  .ant-select-arrow {
+    right: 5px;
+  }
+
+  .env-select {
+    width: 110px;
+    margin-left: 14px;
+    margin-top: -4px;
+    padding: 0px;
+  }
+
+  .ant-card-body {
+    padding: 15px !important;
+  }
+
+  .v-note-wrapper {
+    z-index: 5;
+  }
+
+}
+

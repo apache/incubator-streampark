@@ -1,0 +1,15 @@
+# IDEA
+.idea/
+*.iml
+
+# VSCode
+.vscode
+
+# Maven
+target/
+
+# Log
+*.log*
+
+# OS
+.DS_Store
