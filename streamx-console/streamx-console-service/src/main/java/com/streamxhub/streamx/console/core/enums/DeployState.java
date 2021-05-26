@@ -20,12 +20,13 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * @author benjobs
  */
-public enum DeployState {
+public enum DeployState implements Serializable {
 
     /**
      * 需用重新发布,但是下载maven依赖失败.(针对flinkSql任务)

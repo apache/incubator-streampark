@@ -26,10 +26,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
-import com.streamxhub.streamx.console.core.enums.DeployState;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.enums.OptionState;
-import com.streamxhub.streamx.console.core.enums.StopFrom;
+import com.streamxhub.streamx.console.core.enums.*;
 import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
@@ -37,6 +34,7 @@ import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
@@ -120,18 +118,11 @@ public class FlinkTrackingTask {
 
     private static final Map<String, Long> CHECK_POINT_MAP = new ConcurrentHashMap<>();
 
+    private static final Map<String, Counter> CHECK_POINT_FAILED_MAP = new ConcurrentHashMap<>();
+
     private static final Map<Long, OptionState> OPTIONING = new ConcurrentHashMap<>();
-    /**
-     * 10秒之内
-     */
-    private final Long OPTION_INTERVAL = 1000L * 10;
 
     private final Long STARTING_INTERVAL = 1000L * 30;
-
-    /**
-     * 正常5秒钟获取一次信息
-     */
-    private final Long TRACK_INTERVAL = 1000L * 5;
 
     private Long lastTrackTime = 0L;
 
@@ -172,13 +163,18 @@ public class FlinkTrackingTask {
      */
     @Scheduled(fixedDelay = 1000)
     public void execute() {
+        // 正常5秒钟获取一次信息
+        long track_interval = 1000L * 5;
+        //10秒之内
+        long option_interval = 1000L * 10;
+
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
         if (lastTrackTime == null || !OPTIONING.isEmpty()) {
             tracking();
-        } else if (System.currentTimeMillis() - lastOptionTime <= OPTION_INTERVAL) {
+        } else if (System.currentTimeMillis() - lastOptionTime <= option_interval) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
             tracking();
-        } else if (System.currentTimeMillis() - lastTrackTime >= TRACK_INTERVAL) {
+        } else if (System.currentTimeMillis() - lastTrackTime >= track_interval) {
             //3) 正常信息获取,判断本次时间和上次时间是否间隔5秒(正常监控信息获取,每5秒一次)
             tracking();
         }
@@ -326,24 +322,46 @@ public class FlinkTrackingTask {
      * @param application
      * @throws IOException
      */
-    private void handleCheckPoints(Application application) throws IOException {
+    private void handleCheckPoints(Application application) throws Exception {
         CheckPoints checkPoints = application.httpCheckpoints();
         if (checkPoints != null) {
             CheckPoints.Latest latest = checkPoints.getLatest();
-            if (latest != null ) {
+            if (latest != null) {
                 CheckPoints.CheckPoint checkPoint = latest.getCompleted();
-                if (checkPoint != null && checkPoint.isCompleted()) {
-                    Long latestId = CHECK_POINT_MAP.get(application.getJobId());
-                    if (latestId == null || latestId < checkPoint.getId()) {
-                        SavePoint savePoint = new SavePoint();
-                        savePoint.setAppId(application.getId());
-                        savePoint.setLatest(true);
-                        savePoint.setType(checkPoint.getCheckPointType().get());
-                        savePoint.setPath(checkPoint.getPath());
-                        savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
-                        savePoint.setCreateTime(new Date());
-                        savePointService.save(savePoint);
-                        CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
+                if (checkPoint != null) {
+                    CheckPointStatus status = checkPoint.getCheckPointStatus();
+                    if (CheckPointStatus.COMPLETED.equals(status)) {
+                        Long latestId = CHECK_POINT_MAP.get(application.getJobId());
+                        if (latestId == null || latestId < checkPoint.getId()) {
+                            SavePoint savePoint = new SavePoint();
+                            savePoint.setAppId(application.getId());
+                            savePoint.setLatest(true);
+                            savePoint.setType(checkPoint.getCheckPointType().get());
+                            savePoint.setPath(checkPoint.getPath());
+                            savePoint.setTriggerTime(new Date(checkPoint.getTriggerTimestamp()));
+                            savePoint.setCreateTime(new Date());
+                            savePointService.save(savePoint);
+                            CHECK_POINT_MAP.put(application.getJobId(), checkPoint.getId());
+                        }
+                    } else if (CheckPointStatus.FAILED.equals(status) && application.cpFailedTrigger()) {
+                        Counter counter = CHECK_POINT_FAILED_MAP.get(application.getJobId());
+                        if (counter == null) {
+                            CHECK_POINT_FAILED_MAP.put(application.getJobId(), new Counter(checkPoint.getTriggerTimestamp()));
+                        } else {
+                            //x分钟之内超过Y次CheckPoint失败触发动作
+                            long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
+                            if (minute <= application.getCpFailureRateInterval()
+                                    && counter.getCount() >= application.getCpMaxFailureInterval()) {
+                                CHECK_POINT_FAILED_MAP.remove(application.getJobId());
+                                if (application.getCpFailureAction() == 1) {
+                                    alertService.alert(application, CheckPointStatus.FAILED);
+                                } else {
+                                    applicationService.restart(application);
+                                }
+                            } else {
+                                counter.add();
+                            }
+                        }
                     }
                 }
             }
@@ -627,4 +645,24 @@ public class FlinkTrackingTask {
     public static Application getTracking(Long appId) {
         return TRACKING_MAP.get(appId);
     }
+
+    @Data
+    public static class Counter {
+        private Long timestamp;
+        private Integer count;
+
+        public Counter(Long timestamp) {
+            this.timestamp = timestamp;
+            this.count = 1;
+        }
+
+        public void add() {
+            this.count += 1;
+        }
+
+        public long getDuration(Long currentTimestamp) {
+            return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
+        }
+    }
+
 }

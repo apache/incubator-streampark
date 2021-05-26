@@ -20,9 +20,10 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public enum CandidateType {
+public enum CandidateType implements Serializable {
 
     /**
      * 非候选版本

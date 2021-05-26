@@ -22,11 +22,13 @@ package com.streamxhub.streamx.console.core.enums;
 
 import lombok.Getter;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
 @Getter
-public enum FlinkAppState {
+public enum FlinkAppState implements Serializable {
 
     /**
      * added new job to database

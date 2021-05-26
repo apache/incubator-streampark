@@ -34,7 +34,10 @@ public enum CheckPointType implements Serializable {
     /**
      * SAVEPOINT
      */
-    SAVEPOINT(2);
+    SAVEPOINT(2),
+
+    SYNC_SAVEPOINT(3);
+
     int value;
 
     public int get() {

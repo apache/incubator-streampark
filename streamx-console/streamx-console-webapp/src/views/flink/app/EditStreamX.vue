@@ -228,7 +228,7 @@
             <a-select
               style="width: 25%"
               default-value="1"
-              @change="handleStrategy">
+              @change="handleChangeStrategy">
               <a-select-option
                 value="1">
                 use existing
@@ -442,6 +442,54 @@
       </a-form-item>
 
       <a-form-item
+        label="CheckPoint Failure Options"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-group compact>
+          <a-input-number
+            :min="1"
+            :step="1"
+            placeholder="checkpoint failure rate interval"
+            allow-clear
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            style="width: calc(33% - 70px)"/>
+          <a-button style="width: 70px">
+            minute
+          </a-button>
+          <a-input-number
+            :min="1"
+            :step="1"
+            placeholder="max failures per interval"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            style="width: calc(33% - 70px); margin-left: 1%"/>
+          <a-button style="width: 70px">
+            count
+          </a-button>
+          <a-select
+            placeholder="trigger action"
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            allow-clear
+            style="width: 32%;margin-left: 1%">
+            <a-select-option
+              v-for="(o,index) in cpTriggerAction"
+              :key="`cp_trigger_${index}`"
+              :value="o.value">
+              <a-icon :type="o.value === 1?'alert':'sync'"/> {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-input-group>
+
+        <p class="conf-desc" style="margin-bottom: -15px;margin-top: -3px">
+          <span class="note-info" style="margin-bottom: 12px">
+            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+            Operation after checkpoint failure, e.g:<br>
+            Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
+          </span>
+        </p>
+      </a-form-item>
+
+      <a-form-item
+        v-if="1===2"
         label="Configuration"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -451,34 +499,13 @@
           mode="multiple"
           :max-tag-count="selectTagCount.count1"
           placeholder="Please select parameter"
-          @change="handleConf"
+          @change="handleChangeConf"
           v-decorator="['configuration']">
           <a-select-option
             v-for="(conf,index) in configuration"
             :key="`configuration_${index}`"
             :value="conf.key">
             {{ conf.name }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="Run Options"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          show-search
-          allow-clear
-          mode="multiple"
-          :max-tag-count="runMaxTagCount"
-          placeholder="Please select the resource parameters to set"
-          @change="handleConf"
-          v-decorator="['runOptions']">
-          <a-select-option
-            v-for="(conf,index) in dynamicOptions('run')"
-            :key="`run_${index}`"
-            :value="conf.key">
-            {{ conf.opt }} ( {{ conf.name }} )
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -528,7 +555,7 @@
           mode="multiple"
           :max-tag-count="totalTagCount"
           placeholder="Please select the resource parameters to set"
-          @change="handleProcess"
+          @change="handleChangeProcess"
           v-decorator="['totalOptions']">
           <a-select-opt-group
             label="process memory(进程总内存)">
@@ -591,7 +618,7 @@
           mode="multiple"
           :max-tag-count="jmMaxTagCount"
           placeholder="Please select the resource parameters to set"
-          @change="handleJmMemory"
+          @change="handleChangeJmMemory"
           v-decorator="['jmOptions']">
           <a-select-option
             v-for="(conf,index) in dynamicOptions('jobmanager-memory')"
@@ -635,7 +662,7 @@
           mode="multiple"
           :max-tag-count="tmMaxTagCount"
           placeholder="Please select the resource parameters to set"
-          @change="handleTmMemory"
+          @change="handleChangeTmMemory"
           v-decorator="['tmOptions']">
           <a-select-option
             v-for="(conf,index) in dynamicOptions('taskmanager-memory')"
@@ -889,6 +916,10 @@ export default {
         { mode: 'yarn-session', value: 3, disabled: true },
         { mode: 'kubernetes', value: 5, disabled: true }
       ],
+      cpTriggerAction: [
+        { name: 'alert', value: 1 },
+        { name: 'restart', value: 2 }
+      ],
       runMaxTagCount: 1,
       totalTagCount: 1,
       jmMaxTagCount: 1,
@@ -1054,19 +1085,19 @@ export default {
       })
     },
 
-    handleConf(item) {
+    handleChangeConf(item) {
       this.configItems = item
     },
 
-    handleJmMemory(item) {
+    handleChangeJmMemory(item) {
       this.jmMemoryItems = item
     },
 
-    handleTmMemory(item) {
+    handleChangeTmMemory(item) {
       this.tmMemoryItems = item
     },
 
-    handleProcess(item) {
+    handleChangeProcess(item) {
       this.totalItems = item
     },
 
@@ -1104,6 +1135,34 @@ export default {
             callback(new Error('The application name is already running in yarn,cannot be repeated. Please check'))
           }
         })
+      }
+    },
+
+    handleCheckCheckPoint (rule, value, callback) {
+      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
+      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
+      const cpFailureAction = this.form.getFieldValue('cpFailureAction')
+
+      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        if( cpFailureAction === 1) {
+          const alertEmail = this.form.getFieldValue('alertEmail')
+          if (alertEmail == null) {
+            this.form.setFields({
+              alertEmail: {
+                errors: [new Error('checkPoint Failure trigger is alert,alertEmail must be not empty must be')]
+              }
+            })
+            callback(new Error('trigger action is alert,alertEmail must be not empty'))
+          } else {
+            callback()
+          }
+        } else {
+          callback()
+        }
+      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+        callback()
+      } else {
+        callback(new Error('options all required or all empty'))
       }
     },
 
@@ -1250,7 +1309,7 @@ export default {
       updateDependency(this)
     },
 
-    handleStrategy(v) {
+    handleChangeStrategy(v) {
       this.strategy = parseInt(v)
     },
 
@@ -1362,6 +1421,9 @@ export default {
         args: values.args,
         options: JSON.stringify(options),
         dynamicOptions: values.dynamicOptions,
+        cpMaxFailureInterval: values.cpMaxFailureInterval || null,
+        cpFailureRateInterval: values.cpFailureRateInterval || null,
+        cpFailureAction: values.cpFailureAction || null,
         resolveOrder: values.resolveOrder,
         executionMode: values.executionMode,
         restartSize: values.restartSize,
@@ -1400,6 +1462,9 @@ export default {
         args: values.args || null,
         dependency: dependency.pom === undefined && dependency.jar === undefined ? null : JSON.stringify(dependency),
         options: JSON.stringify(options),
+        cpMaxFailureInterval: values.cpMaxFailureInterval || null,
+        cpFailureRateInterval: values.cpFailureRateInterval || null,
+        cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
         restartSize: values.restartSize,
@@ -1565,7 +1630,10 @@ export default {
           'resolveOrder': this.app.resolveOrder,
           'executionMode': this.app.executionMode,
           'restartSize': this.app.restartSize,
-          'alertEmail': this.app.alertEmail
+          'alertEmail': this.app.alertEmail,
+          'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
+          'cpFailureRateInterval': this.app.cpFailureRateInterval,
+          'cpFailureAction': this.app.cpFailureAction
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null

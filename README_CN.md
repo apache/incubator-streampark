@@ -38,13 +38,12 @@ Make Flink|Spark easier!!!
 我们在使用 `Flink` 时发现从编程模型， 启动配置到运维管理都有很多可以抽象共用的地方， 我们将一些好的经验固化下来并结合业内的最佳实践， 通过不断努力终于诞生了今天的框架 —— `StreamX`， 项目的初衷是 —— 让 `Flink` 开发更简单， 
 使用 `StreamX` 开发，可以极大降低学习成本和开发门槛， 让开发者只用关心最核心的业务， `StreamX` 规范了项目的配置，鼓励函数式编程，定义了最佳的编程方式，提供了一系列开箱即用的 `Connectors` ，标准化了配置、开发、测试、部署、监控、运维的整个过程， 提供 `Scala` 和 `Java` 两套api，
 其最终目的是打造一个一站式大数据平台，流批一体，湖仓一体的解决方案
-<video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
+
+[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx.mp4)
 
 ![](http://assets.streamxhub.com/streamx-main.png?12345)
 
 ![](http://assets.streamxhub.com/streamx-sql.png?12345)
-
-![](http://assets.streamxhub.com/streamx-flameGraph.png?123456)
 
 ## 🎉 Features
 * 开发脚手架
@@ -103,6 +102,14 @@ Make Flink|Spark easier!!!
 感谢以上优秀的开源项目和很多未提到的优秀开源项目，致以最崇高的敬意，特别感谢[Apache Zeppelin](http://zeppelin.apache.org)，[IntelliJ IDEA](https://www.jetbrains.com/idea/)， 
 感谢 [fire-spark](https://github.com/GuoNingNing/fire-spark) 项目，早期给予的灵感和帮助， 感谢我老婆在项目开发时给予的支持，悉心照顾我的生活和日常，给予我足够的时间开发这个项目
 
+### 🚀 快速上手
+```
+git clone https://github.com/streamxhub/streamx.git
+cd Streamx
+mvn clean install -DskipTests -Denv=prod
+```
+更多请查看[官网文档](http://www.streamxhub.com/zh/doc/)
+
 ## 👻 为什么不是...❓
 
 ### Apache Zeppelin
@@ -125,7 +132,6 @@ Make Flink|Spark easier!!!
 
 - [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
 - [加入社区](#-加入社区)
-- [谁在使用streamx](https://github.com/streamxhub/streamx/issues/163)
 
 ## 💰 Donation
 

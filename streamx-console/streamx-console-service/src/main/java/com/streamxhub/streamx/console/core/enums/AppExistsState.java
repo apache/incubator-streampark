@@ -20,10 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum AppExistsState {
+public enum AppExistsState implements Serializable {
 
     /**
      * 不存在

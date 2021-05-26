@@ -37,13 +37,12 @@ Make Flink|Spark easier
 
 The original intention of `StreamX` is to make the development of `Flink` easier. `StreamX` focuses on the management of development phases and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing, batch processing, data warehouse and data laker.
 
-<video src="http://assets.streamxhub.com/streamx.mp4" controls="controls" autoplay="autoplay" width="100%" height="100%"></video>
+[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx.mp4)
 
 ![](http://assets.streamxhub.com/streamx-main.png?12345)
 
 ![](http://assets.streamxhub.com/streamx-sql.png?12345)
 
-![](http://assets.streamxhub.com/streamx-flameGraph.png?123456)
 
 ## 🎉 Features
 * Scaffolding
@@ -104,18 +103,12 @@ Thanks to the above excellent open source projects and many outstanding open sou
 Thanks to the [fire-spark](https://github.com/GuoNingNing/fire-spark) project for the early inspiration and help.
 
 ### 🚀 Quick Start
-
-Prerequisites for building:
-
-* Maven 3.6+
-* npm 7.11.2 (https://nodejs.org/en/)
-* JDK 1.8+
-
 ```
 git clone https://github.com/streamxhub/streamx.git
 cd Streamx
-mvn clean install -DskipTests
+mvn clean install -DskipTests -Denv=prod
 ```
+click [Document](http://www.streamxhub.com/zh/doc/) for more information
 
 ## 👻 Why not...❓
 
@@ -140,7 +133,6 @@ You can contact us or ask questions via:
 
 - [New an issue](https://github.com/streamxhub/streamx/issues/new)
 - [Join us](#-Join-us)
-- [Who uses Streamx](https://github.com/streamxhub/streamx/issues/163)
 
 ## 💰 Donation
 

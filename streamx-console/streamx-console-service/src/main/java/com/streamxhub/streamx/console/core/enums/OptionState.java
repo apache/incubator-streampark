@@ -22,13 +22,14 @@ package com.streamxhub.streamx.console.core.enums;
 
 import lombok.Getter;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * @author benjobs
  */
 @Getter
-public enum OptionState {
+public enum OptionState implements Serializable {
 
     /**
      * Application which is currently action: none.
