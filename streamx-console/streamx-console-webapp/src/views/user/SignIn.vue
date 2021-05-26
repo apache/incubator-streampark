@@ -129,10 +129,6 @@ export default {
 
   methods: {
     ...mapActions(['SignIn']),
-    // handler
-    handleRember() {
-
-    },
     handleSubmit(e) {
       e.preventDefault()
       const {

@@ -80,4 +80,6 @@ public interface ApplicationService extends IService<Application> {
     void revoke(Application app) throws Exception;
 
     Boolean delete(Application app);
+
+    void restart(Application application) throws Exception;
 }

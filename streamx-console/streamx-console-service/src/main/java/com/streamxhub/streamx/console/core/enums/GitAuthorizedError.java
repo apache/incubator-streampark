@@ -20,10 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum GitAuthorizedError {
+public enum GitAuthorizedError implements Serializable {
 
     /**
      * 没有错误

@@ -20,13 +20,14 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
 /**
  * @author benjobs
  */
 
-public enum ChangedType {
+public enum ChangedType implements Serializable {
     /**
      * 未发生变化
      */

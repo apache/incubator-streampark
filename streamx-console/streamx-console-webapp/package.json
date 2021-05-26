@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@antv/data-set": "^0.10.1",
-    "ant-design-vue": "^1.7.3",
+    "ant-design-vue": "^1.7.5",
     "axios": "^0.21.1",
     "core-js": "^3.8.3",
     "dedent": "^0.7.0",

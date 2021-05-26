@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -37,6 +38,7 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
+import java.io.Serializable;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
@@ -84,8 +86,14 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public void alert(Application application, FlinkAppState appState) {
-        log.info("Email Alert:{} is {}", application.getJobName(), appState.name());
+    public void alert(Application application, Serializable state) {
+        String subject = "StreamX Alert: {}, %s";
+        if (state instanceof FlinkAppState) {
+            subject = String.format(subject, application.getJobName(), "checkPoint is Failed");
+        } else {
+            subject = String.format(subject, application.getJobName(), " is ".concat(((CheckPointStatus) state).name()));
+        }
+        log.info(subject);
         if (this.senderEmail == null) {
             this.senderEmail = settingService.getSenderEmail();
         }
@@ -102,8 +110,13 @@ public class AlertServiceImpl implements AlertService {
                         htmlEmail.setSSLOnConnect(true);
                         htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
                     }
-                    htmlEmail.setSubject("StreamX Alert: [ " + application.getJobName() + " ] is " + appState.name());
-                    String html = getHtmlMessage(application, appState);
+                    htmlEmail.setSubject(subject);
+                    String html;
+                    if (state instanceof FlinkAppState) {
+                        html = getHtmlMessage(application, (FlinkAppState) state);
+                    } else {
+                        html = getHtmlMessage(application, (CheckPointStatus) state);
+                    }
                     htmlEmail.setHtmlMsg(html);
                     htmlEmail.addTo(application.getAlertEmail().split(","));
                     htmlEmail.send();
@@ -136,6 +149,33 @@ public class AlertServiceImpl implements AlertService {
 
         Map<String, String> root = new HashMap<>(3);
         root.put("title", "Notify :" + application.getJobName().concat(" is ").concat(appState.name()));
+        root.put("message", content);
+        String format = "%s/proxy/%s/";
+        String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
+        root.put("link", url);
+
+        StringWriter writer = new StringWriter();
+        template.process(root, writer);
+        return writer.toString();
+    }
+
+    private String getHtmlMessage(Application application, CheckPointStatus appState) throws Exception {
+        long duration;
+        if (application.getEndTime() == null) {
+            duration = System.currentTimeMillis() - application.getStartTime().getTime();
+        } else {
+            duration = application.getEndTime().getTime() - application.getStartTime().getTime();
+        }
+        duration = duration / 1000 / 60;
+        String content = "Job [" + application.getJobName() + "] checkPoint is " + appState.name() + "<br>" +
+                "Start Time: " + DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "End Time: " + DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()) + "<br>" +
+                "Duration: " + DateUtils.toRichTimeDuration(duration) + "<br>";
+
+        content += "please check it,Thank you for using StreamX<br><br>Best Wishes!!";
+
+        Map<String, String> root = new HashMap<>(3);
+        root.put("title", "Notify :" + application.getJobName().concat(" checkpoint is ").concat(appState.name()));
         root.put("message", content);
         String format = "%s/proxy/%s/";
         String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());

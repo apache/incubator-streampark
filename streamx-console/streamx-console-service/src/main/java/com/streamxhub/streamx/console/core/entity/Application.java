@@ -139,6 +139,23 @@ public class Application implements Serializable {
     private Long duration;
 
     /**
+     * checkpoint最大的失败次数
+     */
+    private Integer cpMaxFailureInterval;
+
+    /**
+     * checkpoint在时间范围内失败(分钟)
+     */
+    private Integer cpFailureRateInterval;
+
+    /**
+     * 在X分钟之后失败Y次,之后触发的操作:
+     * 1: 发送告警
+     * 2: 重启
+     */
+    private Integer cpFailureAction;
+
+    /**
      * overview
      */
     @TableField("TOTAL_TM")
@@ -200,6 +217,11 @@ public class Application implements Serializable {
                 this.tracking = 1;
                 break;
         }
+    }
+
+    @JsonIgnore
+    public boolean cpFailedTrigger() {
+        return this.cpMaxFailureInterval != null && this.cpFailureRateInterval != null && this.cpFailureAction != null;
     }
 
     @JsonIgnore
@@ -356,7 +378,7 @@ public class Application implements Serializable {
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
         if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-            !this.getExecutionMode().equals(other.getExecutionMode())) {
+                !this.getExecutionMode().equals(other.getExecutionMode())) {
             return false;
         }
 
@@ -467,10 +489,10 @@ public class Application implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                "groupId='" + groupId + '\'' +
-                ", artifactId='" + artifactId + '\'' +
-                ", version='" + version + '\'' +
-                '}';
+                    "groupId='" + groupId + '\'' +
+                    ", artifactId='" + artifactId + '\'' +
+                    ", version='" + version + '\'' +
+                    '}';
         }
 
         private String getGav() {

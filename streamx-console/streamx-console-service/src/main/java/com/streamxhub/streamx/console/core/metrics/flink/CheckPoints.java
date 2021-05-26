@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.console.core.metrics.flink;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import lombok.Data;
 
@@ -32,6 +33,8 @@ import java.util.List;
  */
 @Data
 public class CheckPoints implements Serializable {
+
+    private Counts counts;
 
     private List<CheckPoint> history;
 
@@ -65,16 +68,17 @@ public class CheckPoints implements Serializable {
 
         private Boolean discarded;
 
-        public boolean isCompleted() {
-            return "COMPLETED".equals(this.status);
+        public CheckPointStatus getCheckPointStatus() {
+            return CheckPointStatus.valueOf(this.status);
         }
-
 
         public CheckPointType getCheckPointType() {
             if ("CHECKPOINT".equals(this.checkpointType)) {
                 return CheckPointType.CHECKPOINT;
+            } else if ("SAVEPOINT".equals(this.checkpointType)) {
+                return CheckPointType.SAVEPOINT;
             }
-            return CheckPointType.SAVEPOINT;
+            return CheckPointType.SYNC_SAVEPOINT;
         }
 
         public String getPath() {
@@ -85,5 +89,19 @@ public class CheckPoints implements Serializable {
     @Data
     public static class Latest implements Serializable {
         private CheckPoint completed;
+    }
+
+    @Data
+    public static class Counts implements Serializable {
+        private Integer completed;
+
+        private Integer failed;
+
+        @JsonProperty("in_progress")
+        private Integer inProgress;
+
+        private Integer restored;
+
+        private Integer total;
     }
 }

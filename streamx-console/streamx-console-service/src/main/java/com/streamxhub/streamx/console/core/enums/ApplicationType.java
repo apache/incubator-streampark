@@ -20,10 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
-public enum ApplicationType {
+public enum ApplicationType implements Serializable {
     /**
      * StreamX Flink
      */

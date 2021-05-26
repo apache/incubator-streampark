@@ -22,6 +22,9 @@
         <result column="END_TIME" jdbcType="DATE" property="endTime"/>
         <result column="DURATION" jdbcType="BIGINT" property="duration"/>
         <result column="STATE" jdbcType="INTEGER" property="state"/>
+        <result column="CP_MAX_FAILURE_INTERVAL" jdbcType="INTEGER" property="cpMaxFailureInterval"/>
+        <result column="CP_FAILURE_RATE_INTERVAL" jdbcType="INTEGER" property="cpFailureRateInterval"/>
+        <result column="CP_FAILURE_ACTION" jdbcType="INTEGER" property="cpFailureAction"/>
         <result column="RESTART_SIZE" jdbcType="INTEGER" property="restartSize"/>
         <result column="RESTART_COUNT" jdbcType="INTEGER" property="restartCount"/>
         <result column="DEPLOY" jdbcType="INTEGER" property="deploy"/>
