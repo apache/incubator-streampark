@@ -29,8 +29,8 @@ import java.io.Serializable;
 @FunctionalInterface
 public interface SQLFromFunction<T> extends Serializable {
     /**
-     * @param bean
-     * @return
+     * @param bean: bean
+     * @return String: sql
      */
     String from(T bean);
 }

@@ -34,9 +34,9 @@ public interface MongoQueryFunction<T> {
     /**
      * 返回一个查询条件
      *
-     * @param last
-     * @param collection
-     * @return
+     * @param last: last one
+     * @param collection MongoCollection
+     * @return FindIterable
      */
     FindIterable<Document> query(T last, MongoCollection<Document> collection);
 

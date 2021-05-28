@@ -32,8 +32,8 @@ public interface HBaseQueryFunction<T> extends Serializable {
     /**
      * 获取一个查询对象.
      *
-     * @param last
-     * @return
+     * @param last: last one
+     * @return HBaseQuery: HBaseQuery
      */
     HBaseQuery query(T last);
 }

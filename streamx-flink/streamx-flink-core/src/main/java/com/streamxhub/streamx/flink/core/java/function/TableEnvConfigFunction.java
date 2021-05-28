@@ -31,8 +31,8 @@ public interface TableEnvConfigFunction {
     /**
      * 用于初始化TableEnvironment的时候,用于可以实现该函数,自定义要设置的参数...
      *
-     * @param tableConfig
-     * @param parameterTool
+     * @param tableConfig: flink tableConfig
+     * @param parameterTool: parameterTool
      */
     void configuration(TableConfig tableConfig, ParameterTool parameterTool);
 

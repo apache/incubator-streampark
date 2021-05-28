@@ -32,8 +32,8 @@ public interface HBaseResultFunction<T> extends Serializable {
     /**
      * 返回结合处理
      *
-     * @param result
-     * @return
+     * @param result Result
+     * @return T t
      */
     T result(Result result);
 }

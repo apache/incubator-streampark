@@ -31,8 +31,8 @@ public interface SQLQueryFunction<T> extends Serializable {
     /**
      * 获取要查询的SQL
      *
-     * @return
-     * @throws Exception
+     * @param last: last one
+     * @return String: sql
      */
     String query(T last) throws Exception;
 

@@ -44,7 +44,6 @@ public class HBaseQuery extends Scan implements Serializable {
     /**
      * @param table 要查询的Hbase table表名
      * @param scan  根据scan为查询条件进行查询
-     * @throws IOException
      */
     public HBaseQuery(String table, Scan scan) throws IOException {
         super(scan);
@@ -55,7 +54,6 @@ public class HBaseQuery extends Scan implements Serializable {
     /**
      * @param table 要查询的Hbase table表名
      * @param get   根据get为查询条件进行查询
-     * @throws IOException
      */
     public HBaseQuery(String table, Get get) {
         super(get);
