@@ -81,8 +81,8 @@ public class SendEmailTest {
         Application application = new Application();
         application.setStartTime(new Date());
         application.setJobName("Test My Job");
-        application.setAppId("123322242");
-        application.setAlertEmail("190648@lifeat.cn");
+        application.setAppId("1234567890");
+        application.setAlertEmail("******");
 
         application.setCpFailureAction(1);
         application.setCpFailureRateInterval(30);
