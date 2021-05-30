@@ -774,7 +774,7 @@
 <script>
 import Ellipsis from '@/components/Ellipsis'
 import { jars, listConf, modules, select } from '@api/project'
-import { create, upload, exists, main, name, readConf } from '@api/application'
+import { create, upload, exists, main, name, readConf, checkJar } from '@api/application'
 import { template } from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
@@ -1094,9 +1094,10 @@ export default {
     },
 
     handleBeforeUpload(file) {
+      console.log('upload file type :' + file.type)
       if (file.type !== 'application/java-archive') {
         this.loading = false
-        this.$message.error('You can only upload jar file !')
+        this.$message.error('Only jar files can be uploaded! please check your file.')
         return false
       }
       this.loading = true

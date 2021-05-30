@@ -60,8 +60,8 @@ public class KafkaSink<T> {
     /**
      * 设置要下沉的topic
      *
-     * @param topic
-     * @return
+     * @param topic: topic name
+     * @return KafkaSink: KafkaSink instance
      */
     public KafkaSink<T> topic(String topic) {
         this.topic = topic;
@@ -71,8 +71,9 @@ public class KafkaSink<T> {
     /**
      * set SerializationSchema
      *
-     * @param serializer
-     * @return
+     * @param serializer: serializer
+     * @return KafkaSink: KafkaSink instance
+     *
      */
     public KafkaSink<T> serializer(SerializationSchema<T> serializer) {
         this.serializer = serializer;
@@ -82,9 +83,10 @@ public class KafkaSink<T> {
     /**
      * set FlinkKafkaPartitioner
      *
-     * @param partitioner
-     * @return
-     */
+     * @param partitioner: FlinkKafkaPartitioner
+     * @return KafkaSink: KafkaSink
+     *
+     * */
     public KafkaSink<T> partitioner(FlinkKafkaPartitioner<T> partitioner) {
         this.partitioner = partitioner;
         return this;

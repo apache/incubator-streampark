@@ -32,8 +32,8 @@ public interface MongoResultFunction<T> {
     /**
      * 处理查询结果
      *
-     * @param cursor
-     * @return
+     * @param cursor: MongoCursor
+     * @return Iterable: Iterable
      */
     Iterable<T> result(MongoCursor<Document> cursor);
 

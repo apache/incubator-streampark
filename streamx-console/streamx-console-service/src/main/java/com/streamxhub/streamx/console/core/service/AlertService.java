@@ -21,6 +21,8 @@
 package com.streamxhub.streamx.console.core.service;
 
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
 import java.io.Serializable;
 
@@ -34,7 +36,11 @@ public interface AlertService {
      *
      * @param application
      */
-    void alert(Application application, Serializable state);
+    void alert(Application application, CheckPointStatus checkPointStatus);
+
+
+    void alert(Application application, FlinkAppState appState);
+
 
 
 }

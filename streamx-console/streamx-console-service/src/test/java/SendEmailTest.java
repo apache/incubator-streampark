@@ -18,46 +18,31 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.core.service.impl;
 
 import com.streamxhub.streamx.common.util.DateUtils;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
-import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
-import com.streamxhub.streamx.console.core.enums.FlinkAppState;
-import com.streamxhub.streamx.console.core.service.AlertService;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.junit.Before;
+import org.junit.Test;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
 import java.util.*;
 
-/**
- * @author benjobs
- */
-@Slf4j
-@Service
-public class AlertServiceImpl implements AlertService {
+public class SendEmailTest {
 
     private Template template;
 
-    @Autowired
-    private SettingService settingService;
-
     private SenderEmail senderEmail;
 
-    @PostConstruct
+    @Before
     public void initConfig() throws Exception {
         Configuration configuration = new Configuration(Configuration.VERSION_2_3_28);
         String template = "email.html";
@@ -80,13 +65,28 @@ public class AlertServiceImpl implements AlertService {
                 this.template = configuration.getTemplate(template);
             }
         } else {
-            log.error("email.html not found!");
             throw new ExceptionInInitializerError("email.html not found!");
         }
+        senderEmail = new SenderEmail();
+        senderEmail.setEmail("******");
+        senderEmail.setPassword("******");
+        senderEmail.setSmtpPort(465);
+        senderEmail.setSsl(true);
+        senderEmail.setSmtpHost("smtp.exmail.qq.com");
     }
 
-    @Override
-    public void alert(Application application, CheckPointStatus checkPointStatus) {
+
+    @Test
+    public void alert() {
+        Application application = new Application();
+        application.setStartTime(new Date());
+        application.setJobName("Test My Job");
+        application.setAppId("123322242");
+        application.setAlertEmail("190648@lifeat.cn");
+
+        application.setCpFailureAction(1);
+        application.setCpFailureRateInterval(30);
+        application.setCpMaxFailureInterval(5);
         if (Utils.notEmpty(application.getAlertEmail())) {
             try {
                 Map<String, String> root = getAlertBaseInfo(application);
@@ -95,9 +95,9 @@ public class AlertServiceImpl implements AlertService {
                 root.put("savePointDisplay", "block");
                 root.put("cpFailureRateInterval", DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
                 root.put("cpMaxFailureInterval", application.getCpMaxFailureInterval().toString());
-                root.put("status", "");
-                root.put("restartIndex", "");
-                root.put("totalRestart", "");
+                root.put("status", "FAILED");
+                root.put("restartIndex", "2");
+                root.put("totalRestart", "100");
 
                 StringWriter writer = new StringWriter();
                 template.process(root, writer);
@@ -105,34 +105,6 @@ public class AlertServiceImpl implements AlertService {
                 writer.close();
 
                 String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
-    public void alert(Application application, FlinkAppState appState) {
-        //发送邮件
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                Map<String, String> root = getAlertBaseInfo(application);
-                root.put("title", "Notify: " + application.getJobName().concat(" " + appState.name()));
-                root.put("jobDisplay", "block");
-                root.put("savePointDisplay", "none");
-                root.put("status", appState.name());
-                root.put("restartIndex", application.getRestartCount() + "");
-                root.put("totalRestart", application.getRestartSize() + "");
-                root.put("cpFailureRateInterval", "");
-                root.put("cpMaxFailureInterval", "");
-
-                StringWriter writer = new StringWriter();
-                template.process(root, writer);
-                String html = writer.toString();
-                writer.close();
-
-                String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
                 sendEmail(subject, html, application.getAlertEmail().split(","));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -161,24 +133,19 @@ public class AlertServiceImpl implements AlertService {
     }
 
     private void sendEmail(String subject, String html, String... mails) throws EmailException {
-        if (this.senderEmail == null) {
-            this.senderEmail = settingService.getSenderEmail();
+        HtmlEmail htmlEmail = new HtmlEmail();
+        htmlEmail.setCharset("UTF-8");
+        htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+        htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
+        htmlEmail.setFrom(this.senderEmail.getEmail());
+        if (this.senderEmail.isSsl()) {
+            htmlEmail.setSSLOnConnect(true);
+            htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
         }
-        if (this.senderEmail != null) {
-            log.info(subject);
-            HtmlEmail htmlEmail = new HtmlEmail();
-            htmlEmail.setCharset("UTF-8");
-            htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-            htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
-            htmlEmail.setFrom(this.senderEmail.getEmail());
-            if (this.senderEmail.isSsl()) {
-                htmlEmail.setSSLOnConnect(true);
-                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
-            }
-            htmlEmail.setSubject(subject);
-            htmlEmail.setHtmlMsg(html);
-            htmlEmail.addTo(mails);
-            htmlEmail.send();
-        }
+        htmlEmail.setSubject(subject);
+        htmlEmail.setHtmlMsg(html);
+        htmlEmail.addTo(mails);
+        htmlEmail.send();
     }
+
 }

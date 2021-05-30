@@ -108,3 +108,7 @@ export function revoke (params) {
 export function startLog (params) {
   return http.post(api.Application.STARTLOG, params)
 }
+
+export function checkJar(params) {
+  return http.post(api.Application.CHECKJAR, params)
+}

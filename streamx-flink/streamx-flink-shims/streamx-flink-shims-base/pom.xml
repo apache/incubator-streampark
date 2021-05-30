@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-shims</artifactId>
-        <version>1.0.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>streamx-flink-shims-base</artifactId>
@@ -22,7 +22,7 @@
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
-            <version>1.0.0</version>
+            <version>${project.version}</version>
         </dependency>
 
         <!--flink base-->
@@ -63,7 +63,6 @@
             <scope>provided</scope>
         </dependency>
 
-
         <!-- 使用Blink Planner -->
         <dependency>
             <groupId>org.apache.flink</groupId>
@@ -73,31 +72,5 @@
         </dependency>
 
     </dependencies>
-
-    <build>
-        <!--各层强制依赖-->
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>1.7</version>
-                <executions>
-                    <execution>
-                        <id>add-source</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${basedir}/src/main/java</source>
-                                <source>${basedir}/src/main/scala</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
 </project>

@@ -63,13 +63,13 @@ import java.util.concurrent.*;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
-    implements ProjectService {
+        implements ProjectService {
 
-    private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
+    private final Map<Long, Byte> tailOutMap = new ConcurrentHashMap<>();
 
     private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
-    private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
+    private final Map<Long, Byte> tailBeginning = new ConcurrentHashMap<>();
 
     @Autowired
     private ApplicationMapper applicationMapper;
@@ -78,13 +78,13 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private SimpMessageSendingOperations simpMessageSendingOperations;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-        Runtime.getRuntime().availableProcessors() * 2,
-        200,
-        60L,
-        TimeUnit.SECONDS,
-        new LinkedBlockingQueue<>(1024),
-        ThreadUtils.threadFactory("streamx-build-executor"),
-        new ThreadPoolExecutor.AbortPolicy()
+            Runtime.getRuntime().availableProcessors() * 2,
+            200,
+            60L,
+            TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>(1024),
+            ThreadUtils.threadFactory("streamx-build-executor"),
+            new ThreadPoolExecutor.AbortPolicy()
     );
 
     @Override
@@ -184,9 +184,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                 // 将项目解包到app下.
                 if (app.exists()) {
                     String cmd = String.format(
-                        "tar -xzvf %s -C %s",
-                        app.getAbsolutePath(),
-                        deployPath.getAbsolutePath()
+                            "tar -xzvf %s -C %s",
+                            app.getAbsolutePath(),
+                            deployPath.getAbsolutePath()
                     );
                     CommandUtils.execute(cmd);
                 }
@@ -223,8 +223,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     }
                     // 2) 尝试寻找jar文件...可能存在发现多个jar.
                     if (!targetFile.getName().startsWith("original-")
-                        && !targetFile.getName().endsWith("-sources.jar")
-                        && targetFile.getName().endsWith(".jar")) {
+                            && !targetFile.getName().endsWith("-sources.jar")
+                            && targetFile.getName().endsWith(".jar")) {
                         if (jar == null) {
                             jar = targetFile;
                         } else {
@@ -274,8 +274,8 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
         Project project = getById(id);
         File appHome = project.getAppBase();
         Optional<File> fileOptional = Arrays.stream(Objects.requireNonNull(appHome.listFiles()))
-            .filter((x) -> x.getName().equals(module))
-            .findFirst();
+                .filter((x) -> x.getName().equals(module))
+                .findFirst();
         return fileOptional.map(File::getAbsolutePath).orElse(null);
     }
 
@@ -293,7 +293,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             }
         }
         LambdaQueryWrapper<Project> wrapper = new QueryWrapper<Project>().lambda()
-            .eq(Project::getName, project.getName());
+                .eq(Project::getName, project.getName());
         return this.baseMapper.selectCount(wrapper) > 0;
     }
 
@@ -325,9 +325,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             log.info("clone {}, {} starting...", project.getName(), project.getUrl());
             tailBuffer.get(project.getId()).append(project.getLog4CloneStart());
             CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(project.getUrl())
-                .setDirectory(project.getAppSource())
-                .setBranch(project.getBranches());
+                    .setURI(project.getUrl())
+                    .setDirectory(project.getAppSource())
+                    .setBranch(project.getBranches());
 
             if (CommonUtil.notEmpty(project.getUsername(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
@@ -342,18 +342,18 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             File workTree = git.getRepository().getWorkTree();
             gitWorkTree(project.getId(), workTree, "");
             tailBuffer.get(project.getId()).append(
-                String.format(
-                    "[StreamX] project [%s] git clone successful!\n",
-                    project.getName()
-                )
+                    String.format(
+                            "[StreamX] project [%s] git clone successful!\n",
+                            project.getName()
+                    )
             );
             return true;
         } catch (Exception e) {
             String errorLog = String.format(
-                "[StreamX] project [%s] branch [%s] git clone failure, err: %s",
-                project.getName(),
-                project.getBranches(),
-                e
+                    "[StreamX] project [%s] branch [%s] git clone failure, err: %s",
+                    project.getName(),
+                    project.getBranches(),
+                    e
             );
             tailBuffer.get(project.getId()).append(errorLog);
             e.printStackTrace();
@@ -414,13 +414,11 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     private boolean mavenBuild(Project project) {
         StringBuilder builder = tailBuffer.get(project.getId());
         builder.append(project.getLog4BuildStart());
-        tailBuffer.put(project.getId(), builder);
         CommandUtils.execute(project.getMavenBuildCmd(), (line) -> {
             if (tailOutMap.containsKey(project.getId())) {
-                if (tailBeginning.containsKey(project.getId())) {
-                    tailBeginning.remove(project.getId());
+                if (tailBeginning.remove(project.getId()) != null) {
                     Arrays.stream(builder.toString().split("\n"))
-                        .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/build", x));
+                            .forEach(x -> simpMessageSendingOperations.convertAndSend("/resp/build", x));
                 } else {
                     simpMessageSendingOperations.convertAndSend("/resp/build", line);
                 }
@@ -435,9 +433,9 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
 
     @Override
     public void tailBuildLog(Long id) {
-        this.tailOutMap.put(id, id);
+        this.tailOutMap.put(id, Byte.valueOf("0"));
         // 首次会从buffer里从头读取数据.有且仅有一次.
-        this.tailBeginning.put(id, true);
+        this.tailBeginning.put(id, Byte.valueOf("0"));
     }
 
     private void tailCleanUp(Long id) {

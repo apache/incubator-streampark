@@ -47,8 +47,8 @@ public class JdbcSource<T> {
     /**
      * 允许手动指定一个jdbc的连接信息
      *
-     * @param jdbc
-     * @return
+     * @param jdbc: jdbc connection info
+     * @return JdbcSource: JdbcSource
      */
     public JdbcSource<T> jdbc(Properties jdbc) {
         this.jdbc = jdbc;

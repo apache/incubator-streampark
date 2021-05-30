@@ -32,8 +32,8 @@ public interface SQLResultFunction<T> extends Serializable {
     /**
      * 将查下结果以Map的方式返回,用户去实现转成对象.
      *
-     * @param map
-     * @return
+     * @param map: sqlQuery result
+     * @return Iterable: Iterable
      */
     Iterable<T> result(Iterable<Map<String, ?>> map);
 }
