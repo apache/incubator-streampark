@@ -24,6 +24,8 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import org.apache.commons.mail.EmailException;
@@ -84,27 +86,32 @@ public class SendEmailTest {
         application.setAppId("1234567890");
         application.setAlertEmail("******");
 
+        application.setRestartCount(5);
+        application.setRestartSize(100);
+
         application.setCpFailureAction(1);
         application.setCpFailureRateInterval(30);
         application.setCpMaxFailureInterval(5);
+
+        FlinkAppState appState = FlinkAppState.FAILED;
+
         if (Utils.notEmpty(application.getAlertEmail())) {
             try {
-                Map<String, String> root = getAlertBaseInfo(application);
-                root.put("title", "Notify: " + application.getJobName().concat(" checkpoint FAILED"));
-                root.put("jobDisplay", "none");
-                root.put("savePointDisplay", "block");
-                root.put("cpFailureRateInterval", DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
-                root.put("cpMaxFailureInterval", application.getCpMaxFailureInterval().toString());
-                root.put("status", "FAILED");
-                root.put("restartIndex", "2");
-                root.put("totalRestart", "100");
+                MailTemplate mail = getAlertBaseInfo(application);
+                mail.setType(1);
+                mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
+                mail.setStatus(appState.name());
 
                 StringWriter writer = new StringWriter();
-                template.process(root, writer);
+                Map<String,MailTemplate> out = new HashMap<String,MailTemplate>();
+                out.put("mail",mail);
+
+                template.process(out, writer);
                 String html = writer.toString();
+                System.out.println(html);
                 writer.close();
 
-                String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+                String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
                 sendEmail(subject, html, application.getAlertEmail().split(","));
             } catch (Exception e) {
                 e.printStackTrace();
@@ -112,7 +119,7 @@ public class SendEmailTest {
         }
     }
 
-    private Map<String, String> getAlertBaseInfo(Application application) {
+    private MailTemplate getAlertBaseInfo(Application application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();
@@ -123,13 +130,19 @@ public class SendEmailTest {
         String format = "%s/proxy/%s/";
         String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
 
-        Map<String, String> root = new HashMap<>();
-        root.put("jobName", application.getJobName());
-        root.put("startTime", DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        root.put("endTime", DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        root.put("duration", DateUtils.toRichTimeDuration(duration));
-        root.put("link", url);
-        return root;
+        MailTemplate template = new MailTemplate();
+        template.setJobName(application.getJobName());
+        template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setDuration(DateUtils.toRichTimeDuration(duration));
+        template.setLink(url);
+        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setRestart(application.isNeedRestartOnFailed());
+        template.setRestartIndex(application.getRestartCount());
+        template.setTotalRestart(application.getRestartSize());
+        template.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
+        template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
+
+        return template;
     }
 
     private void sendEmail(String subject, String html, String... mails) throws EmailException {
@@ -141,6 +154,8 @@ public class SendEmailTest {
         if (this.senderEmail.isSsl()) {
             htmlEmail.setSSLOnConnect(true);
             htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+        } else {
+            htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
         }
         htmlEmail.setSubject(subject);
         htmlEmail.setHtmlMsg(html);

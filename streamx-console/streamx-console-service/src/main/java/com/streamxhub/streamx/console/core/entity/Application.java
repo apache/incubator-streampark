@@ -362,6 +362,11 @@ public class Application implements Serializable {
         return DeployState.NEED_ROLLBACK.get() == this.getDeploy();
     }
 
+    @JsonIgnore
+    public boolean isNeedRestartOnFailed() {
+        return this.restartSize != null && this.restartSize > 0 && this.getRestartCount() >= this.getRestartSize();
+    }
+
     /**
      * 参数对比,主要是对比Flink运行时相关的参数是否发生了变化
      *

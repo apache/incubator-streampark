@@ -891,7 +891,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         if (!auto) {
             application.setRestartCount(0);
         } else {
-            if (application.getRestartCount() >= application.getRestartSize()) {
+            if (!application.isNeedRestartOnFailed()) {
                 return false;
             }
             application.setRestartCount(application.getRestartCount() + 1);
