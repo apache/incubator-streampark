@@ -33,7 +33,6 @@ import com.streamxhub.streamx.console.core.service.SettingService;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.mail.EmailException;
 import org.apache.commons.mail.HtmlEmail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,9 +41,7 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.TimeZone;
+import java.util.*;
 
 /**
  * @author benjobs
@@ -90,49 +87,69 @@ public class AlertServiceImpl implements AlertService {
 
     @Override
     public void alert(Application application, FlinkAppState appState) {
-        //发送邮件
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                MailTemplate mail = getAlertBaseInfo(application);
-                mail.setType(1);
-                mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
-                mail.setStatus(appState.name());
+        if (this.senderEmail == null) {
+            this.senderEmail = settingService.getSenderEmail();
+        }
+        if (this.senderEmail != null && Utils.notEmpty(application.getAlertEmail())) {
+            MailTemplate mail = getMailTemplate(application);
+            mail.setType(1);
+            mail.setTitle(String.format("Notify: %s %s", application.getJobName(), appState.name()));
+            mail.setStatus(appState.name());
 
-                StringWriter writer = new StringWriter();
-                template.process(mail, writer);
-                String html = writer.toString();
-                writer.close();
-
-                String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String subject = String.format("StreamX Alert: %s %s", application.getJobName(), appState.name());
+            String[] emails = application.getAlertEmail().split(",");
+            sendEmail(mail, subject, emails);
         }
     }
 
     @Override
     public void alert(Application application, CheckPointStatus checkPointStatus) {
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                MailTemplate mail = getAlertBaseInfo(application);
-                mail.setType(2);
-                mail.setTitle("Notify: " + application.getJobName().concat(" checkpoint FAILED"));
+        if (this.senderEmail == null) {
+            this.senderEmail = settingService.getSenderEmail();
+        }
+        if (this.senderEmail != null && Utils.notEmpty(application.getAlertEmail())) {
+            MailTemplate mail = getMailTemplate(application);
+            mail.setType(2);
+            mail.setTitle(String.format("Notify: %s checkpoint FAILED", application.getJobName()));
 
-                StringWriter writer = new StringWriter();
-                template.process(mail, writer);
-                String html = writer.toString();
-                writer.close();
-
-                String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
+            String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+            String[] emails = application.getAlertEmail().split(",");
+            sendEmail(mail, subject, emails);
         }
     }
 
-    private MailTemplate getAlertBaseInfo(Application application) {
+    private void sendEmail(MailTemplate mail, String subject, String... mails) {
+        log.info(subject);
+        try {
+            Map<String, MailTemplate> out = new HashMap<>(16);
+            out.put("mail", mail);
+
+            StringWriter writer = new StringWriter();
+            template.process(out, writer);
+            String html = writer.toString();
+            writer.close();
+
+            HtmlEmail htmlEmail = new HtmlEmail();
+            htmlEmail.setCharset("UTF-8");
+            htmlEmail.setHostName(this.senderEmail.getSmtpHost());
+            htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
+            htmlEmail.setFrom(this.senderEmail.getEmail());
+            if (this.senderEmail.isSsl()) {
+                htmlEmail.setSSLOnConnect(true);
+                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+            } else {
+                htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
+            }
+            htmlEmail.setSubject(subject);
+            htmlEmail.setHtmlMsg(html);
+            htmlEmail.addTo(mails);
+            htmlEmail.send();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private MailTemplate getMailTemplate(Application application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();
@@ -157,30 +174,5 @@ public class AlertServiceImpl implements AlertService {
 
         return template;
     }
-
-    private void sendEmail(String subject, String html, String... mails) throws EmailException {
-        if (this.senderEmail == null) {
-            this.senderEmail = settingService.getSenderEmail();
-        }
-        if (this.senderEmail != null) {
-            log.info(subject);
-            HtmlEmail htmlEmail = new HtmlEmail();
-            htmlEmail.setCharset("UTF-8");
-            htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-            htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
-            htmlEmail.setFrom(this.senderEmail.getEmail());
-            if (this.senderEmail.isSsl()) {
-                htmlEmail.setSSLOnConnect(true);
-                htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
-            } else {
-                htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
-            }
-            htmlEmail.setSubject(subject);
-            htmlEmail.setHtmlMsg(html);
-            htmlEmail.addTo(mails);
-            htmlEmail.send();
-        }
-    }
-
 
 }
