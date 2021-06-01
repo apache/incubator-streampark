@@ -27,6 +27,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SenderEmail;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.metrics.flink.MailTemplate;
 import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import freemarker.template.Configuration;
@@ -41,7 +42,9 @@ import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URL;
-import java.util.*;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.TimeZone;
 
 /**
  * @author benjobs
@@ -86,49 +89,17 @@ public class AlertServiceImpl implements AlertService {
     }
 
     @Override
-    public void alert(Application application, CheckPointStatus checkPointStatus) {
-        if (Utils.notEmpty(application.getAlertEmail())) {
-            try {
-                Map<String, String> root = getAlertBaseInfo(application);
-                root.put("title", "Notify: " + application.getJobName().concat(" checkpoint FAILED"));
-                root.put("jobDisplay", "none");
-                root.put("savePointDisplay", "block");
-                root.put("cpFailureRateInterval", DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
-                root.put("cpMaxFailureInterval", application.getCpMaxFailureInterval().toString());
-                root.put("status", "");
-                root.put("restartIndex", "");
-                root.put("totalRestart", "");
-
-                StringWriter writer = new StringWriter();
-                template.process(root, writer);
-                String html = writer.toString();
-                writer.close();
-
-                String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
-                sendEmail(subject, html, application.getAlertEmail().split(","));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    @Override
     public void alert(Application application, FlinkAppState appState) {
         //发送邮件
         if (Utils.notEmpty(application.getAlertEmail())) {
             try {
-                Map<String, String> root = getAlertBaseInfo(application);
-                root.put("title", "Notify: " + application.getJobName().concat(" " + appState.name()));
-                root.put("jobDisplay", "block");
-                root.put("savePointDisplay", "none");
-                root.put("status", appState.name());
-                root.put("restartIndex", application.getRestartCount() + "");
-                root.put("totalRestart", application.getRestartSize() + "");
-                root.put("cpFailureRateInterval", "");
-                root.put("cpMaxFailureInterval", "");
+                MailTemplate mail = getAlertBaseInfo(application);
+                mail.setType(1);
+                mail.setTitle("Notify: " + application.getJobName().concat(" " + appState.name()));
+                mail.setStatus(appState.name());
 
                 StringWriter writer = new StringWriter();
-                template.process(root, writer);
+                template.process(mail, writer);
                 String html = writer.toString();
                 writer.close();
 
@@ -140,7 +111,28 @@ public class AlertServiceImpl implements AlertService {
         }
     }
 
-    private Map<String, String> getAlertBaseInfo(Application application) {
+    @Override
+    public void alert(Application application, CheckPointStatus checkPointStatus) {
+        if (Utils.notEmpty(application.getAlertEmail())) {
+            try {
+                MailTemplate mail = getAlertBaseInfo(application);
+                mail.setType(2);
+                mail.setTitle("Notify: " + application.getJobName().concat(" checkpoint FAILED"));
+
+                StringWriter writer = new StringWriter();
+                template.process(mail, writer);
+                String html = writer.toString();
+                writer.close();
+
+                String subject = String.format("StreamX Alert: %s, checkPoint is Failed", application.getJobName());
+                sendEmail(subject, html, application.getAlertEmail().split(","));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    private MailTemplate getAlertBaseInfo(Application application) {
         long duration;
         if (application.getEndTime() == null) {
             duration = System.currentTimeMillis() - application.getStartTime().getTime();
@@ -151,13 +143,19 @@ public class AlertServiceImpl implements AlertService {
         String format = "%s/proxy/%s/";
         String url = String.format(format, HadoopUtils.getRMWebAppURL(false), application.getAppId());
 
-        Map<String, String> root = new HashMap<>();
-        root.put("jobName", application.getJobName());
-        root.put("startTime", DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        root.put("endTime", DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
-        root.put("duration", DateUtils.toRichTimeDuration(duration));
-        root.put("link", url);
-        return root;
+        MailTemplate template = new MailTemplate();
+        template.setJobName(application.getJobName());
+        template.setLink(url);
+        template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        template.setDuration(DateUtils.toRichTimeDuration(duration));
+        template.setRestart(application.isNeedRestartOnFailed());
+        template.setRestartIndex(application.getRestartCount());
+        template.setTotalRestart(application.getRestartSize());
+        template.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));
+        template.setCpMaxFailureInterval(application.getCpMaxFailureInterval());
+
+        return template;
     }
 
     private void sendEmail(String subject, String html, String... mails) throws EmailException {
@@ -174,6 +172,8 @@ public class AlertServiceImpl implements AlertService {
             if (this.senderEmail.isSsl()) {
                 htmlEmail.setSSLOnConnect(true);
                 htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());
+            } else {
+                htmlEmail.setSmtpPort(this.senderEmail.getSmtpPort());
             }
             htmlEmail.setSubject(subject);
             htmlEmail.setHtmlMsg(html);
@@ -181,4 +181,6 @@ public class AlertServiceImpl implements AlertService {
             htmlEmail.send();
         }
     }
+
+
 }

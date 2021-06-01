@@ -1107,6 +1107,7 @@ export default {
     handleCustomRequest(data) {
       const formData = new FormData()
       formData.append('file', data.file)
+      console.log(data)
       upload(formData).then((response) => {
         this.loading = false
         this.controller.dependency.jar.set(data.file.name, data.file.name)
