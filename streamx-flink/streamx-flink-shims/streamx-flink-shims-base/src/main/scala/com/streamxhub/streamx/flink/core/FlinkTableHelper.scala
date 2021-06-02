@@ -5,10 +5,11 @@ import com.streamxhub.streamx.common.enums.SqlErrorType
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
-import org.apache.flink.configuration.ConfigOption
+import org.apache.flink.configuration.{ConfigOption, Configuration}
 import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
 
+import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.util.{Failure, Success, Try}
@@ -73,9 +74,15 @@ trait FlinkTableHelper extends Logger {
         case SHOW_CATALOGS =>
           val catalogs = context.listCatalogs
           callback(s"%table catalog\n${catalogs.mkString("\n")}")
+        case SHOW_CURRENT_CATALOG =>
+          val catalog = context.getCurrentCatalog
+          callback(s"%table current catalog\n$catalog")
         case SHOW_DATABASES =>
           val databases = context.listDatabases
           callback(s"%table database\n${databases.mkString("\n")}")
+        case SHOW_CURRENT_DATABASE =>
+          val database = context.getCurrentDatabase
+          callback(s"%table current database\n$database")
         case SHOW_TABLES =>
           val tables = context.listTables().filter(!_.startsWith("UnnamedTable"))
           callback(s"%table table\n${tables.mkString("\n")}")
@@ -91,6 +98,20 @@ trait FlinkTableHelper extends Logger {
           }
           context.getConfig.getConfiguration.setString(args, x.operands(1))
           logInfo(s"${x.command.name}: $args --> ${x.operands(1)}")
+        case RESET =>
+          val confDataField = classOf[Configuration].getDeclaredField("confData")
+          confDataField.setAccessible(true)
+          val confData = confDataField.get(context.getConfig.getConfiguration).asInstanceOf[util.HashMap[String, AnyRef]]
+          if (args.toUpperCase == "ALL") {
+            confData.synchronized {
+              confData.clear()
+            }
+          } else {
+            confData.synchronized {
+              confData.remove(args)
+            }
+          }
+          logInfo(s"${x.command.name}: $args")
         case DESC | DESCRIBE =>
           val schema = context.scan(args).getSchema
           val builder = new StringBuilder()

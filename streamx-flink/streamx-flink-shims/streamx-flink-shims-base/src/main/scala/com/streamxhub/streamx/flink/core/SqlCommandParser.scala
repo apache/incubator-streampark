@@ -356,8 +356,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object RESET extends SqlCommand(
     "reset",
-    "RESET",
-    NO_OPERANDS
+    "RESET"
   )
 
 }
