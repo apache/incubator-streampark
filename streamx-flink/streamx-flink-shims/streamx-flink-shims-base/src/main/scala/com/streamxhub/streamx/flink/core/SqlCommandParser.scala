@@ -100,7 +100,10 @@ object SqlCommandParser extends Logger {
           }
         }
       }
-      sqlCommand.converter(groups).map(operands => SqlCommandCall(sqlCommand, operands))
+      sqlCommand.converter(groups).map(
+        operands => {
+          SqlCommandCall(sqlCommand, operands)
+        })
     }
   }
 
@@ -184,7 +187,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "create view",
     "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(.*)", {
       case a if a.length < 2 => None
-      case x => Some(Array[String](x(1), x(2)))
+      case x => Some(Array[String](x.head, x.last))
     }
   )
 
@@ -224,7 +227,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "(DROP\\s+CATALOG\\s+.*)"
   )
 
-
   case object DROP_DATABASE extends SqlCommand(
     "drop database",
     "(DROP\\s+DATABASE\\s+.*)"
@@ -234,7 +236,6 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     "drop table",
     "(DROP\\s+TABLE\\s+.*)"
   )
-
 
   case object DROP_VIEW extends SqlCommand(
     "drop view",
@@ -254,15 +255,33 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
     NO_OPERANDS
   )
 
+  case object SHOW_CURRENT_CATALOG extends SqlCommand(
+    "show current catalogs",
+    "SHOW\\s+CURRENT\\s+CATALOG",
+    NO_OPERANDS
+  )
+
   case object SHOW_DATABASES extends SqlCommand(
     "show databases",
     "SHOW\\s+DATABASES",
     NO_OPERANDS
   )
 
+  case object SHOW_CURRENT_DATABASE extends SqlCommand(
+    "show current database",
+    "SHOW\\s+CURRENT\\s+DATABASE",
+    NO_OPERANDS
+  )
+
   case object SHOW_TABLES extends SqlCommand(
     "show tables",
     "SHOW\\s+TABLES",
+    NO_OPERANDS
+  )
+
+  case object SHOW_VIEWS extends SqlCommand(
+    "show views",
+    "SHOW\\s+VIEWS",
     NO_OPERANDS
   )
 
@@ -322,7 +341,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
   case object EXPLAIN extends SqlCommand(
     "explain",
     "EXPLAIN\\s+(SELECT|INSERT)\\s+(.*)",
-    (x: Array[String]) => Some(Array[String](x(1), x(2)))
+    (x: Array[String]) => Some(Array[String](x.head, x.last))
   )
 
 
@@ -333,6 +352,12 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
       case a if a(0) == null => Some(new Array[String](0))
       case x => Some(Array[String](x(1), x(2)))
     }
+  )
+
+  case object RESET extends SqlCommand(
+    "reset",
+    "RESET",
+    NO_OPERANDS
   )
 
 }

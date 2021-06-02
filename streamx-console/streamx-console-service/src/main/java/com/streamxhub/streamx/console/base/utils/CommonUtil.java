@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.base.utils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.streamxhub.streamx.common.util.AssertUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 
