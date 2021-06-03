@@ -66,7 +66,7 @@ object HadoopUtils extends Logger {
     conf
   }
 
-  lazy val yarnClient = {
+  lazy val yarnClient: YarnClient = {
     val yarnClient = YarnClient.createYarnClient
     val yarnConf = new YarnConfiguration(conf)
     yarnClient.init(yarnConf)

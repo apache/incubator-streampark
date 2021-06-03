@@ -166,7 +166,7 @@ public class AlertServiceImpl implements AlertService {
         template.setStartTime(DateUtils.format(application.getStartTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));
-        template.setRestart(application.isNeedRestartOnFailed());
+        template.setRestart(application.isNeedRestartOnFailed() && application.getRestartCount() > 0);
         template.setRestartIndex(application.getRestartCount());
         template.setTotalRestart(application.getRestartSize());
         template.setCpFailureRateInterval(DateUtils.toRichTimeDuration(application.getCpFailureRateInterval()));

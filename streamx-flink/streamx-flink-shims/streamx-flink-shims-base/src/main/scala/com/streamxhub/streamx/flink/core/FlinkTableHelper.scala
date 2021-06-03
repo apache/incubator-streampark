@@ -73,25 +73,25 @@ trait FlinkTableHelper extends Logger {
           logInfo(s"${x.command.name}: $args")
         case SHOW_CATALOGS =>
           val catalogs = context.listCatalogs
-          callback(s"%table catalog\n${catalogs.mkString("\n")}")
+          callback(s"%show catalog\n${catalogs.mkString("\n")}")
         case SHOW_CURRENT_CATALOG =>
           val catalog = context.getCurrentCatalog
-          callback(s"%table current catalog\n$catalog")
+          callback(s"%show current catalog\n$catalog")
         case SHOW_DATABASES =>
           val databases = context.listDatabases
-          callback(s"%table database\n${databases.mkString("\n")}")
+          callback(s"%show databases\n${databases.mkString("\n")}")
         case SHOW_CURRENT_DATABASE =>
           val database = context.getCurrentDatabase
-          callback(s"%table current database\n$database")
+          callback(s"%show current database\n$database")
         case SHOW_TABLES =>
           val tables = context.listTables().filter(!_.startsWith("UnnamedTable"))
-          callback(s"%table table\n${tables.mkString("\n")}")
+          callback(s"%show tables\n${tables.mkString("\n")}")
         case SHOW_FUNCTIONS =>
           val functions = context.listUserDefinedFunctions()
-          callback(s"%table function\n ${functions.mkString("\n")}")
+          callback(s"%table function\n${functions.mkString("\n")}")
         case SHOW_MODULES =>
           val modules = context.listModules()
-          callback(s"%table modules\n${modules.mkString("\n")}")
+          callback(s"%show modules\n${modules.mkString("\n")}")
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")

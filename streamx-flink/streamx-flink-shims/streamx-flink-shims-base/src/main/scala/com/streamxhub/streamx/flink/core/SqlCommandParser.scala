@@ -347,7 +347,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object SET extends SqlCommand(
     "set",
-    "(\\s+(\\S+)\\s*=(.*))?", {
+    "SET(\\s+(\\S+)\\s*=(.*))?", {
       case a if a.length < 3 => None
       case a if a(0) == null => Some(new Array[String](0))
       case x => Some(Array[String](x(1), x(2)))
@@ -356,7 +356,10 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
 
   case object RESET extends SqlCommand(
     "reset",
-    "RESET"
+    "RESET\\s*(.*)", {
+      case x if x.head.nonEmpty => Some(Array[String](x.head))
+      case _ => Some(Array[String]("ALL"))
+    }
   )
 
 }
