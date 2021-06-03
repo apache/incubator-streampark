@@ -22,10 +22,12 @@ package com.streamxhub.streamx.common.util
 
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.hadoop.fs._
-import org.apache.hadoop.hdfs.HAUtil
+import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.io.IOUtils
+import org.apache.hadoop.ipc.RPC
 
-import java.io.{ByteArrayOutputStream, FileWriter}
+import java.io.{ByteArrayOutputStream, FileWriter, IOException}
+import java.net.InetSocketAddress
 import scala.util.{Failure, Success, Try}
 
 object HdfsUtils extends Logger {
@@ -61,7 +63,7 @@ object HdfsUtils extends Logger {
     hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
   def getNameNode: String = {
-    Try(HAUtil.getAddressOfActive(hdfs).getHostString) match {
+    Try(getAddressOfActive(hdfs).getHostString) match {
       case Success(value) => value
       case Failure(exception) => throw exception
     }
@@ -82,6 +84,8 @@ object HdfsUtils extends Logger {
     outputStream.flush()
     outputStream.close()
   }
+
+
 
   def exists(path: String): Boolean = hdfs.exists(getPath(path))
 
@@ -131,5 +135,16 @@ object HdfsUtils extends Logger {
 
   private[this] def getPath(hdfsPath: String) = new Path(hdfsPath)
 
+  @throws[IOException]
+  def getAddressOfActive(fs: FileSystem): InetSocketAddress = {
+    if (!fs.isInstanceOf[DistributedFileSystem]) {
+      throw new IllegalArgumentException("FileSystem " + fs + " is not a DFS.")
+    }
+    // force client address resolution.
+    fs.exists(new Path("/"))
+    val dfs = fs.asInstanceOf[DistributedFileSystem]
+    val dfsClient = dfs.getClient
+    RPC.getServerAddress(dfsClient.getNamenode)
+  }
 
 }

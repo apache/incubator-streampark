@@ -20,10 +20,8 @@
  */
 package com.streamxhub.streamx.common.util
 
-import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.yarn.api.records.YarnApplicationState._
 import org.apache.hadoop.yarn.api.records._
-import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.util.ConverterUtils
 
 import java.util
@@ -40,7 +38,7 @@ object YarnUtils {
    * @return
    */
   def getAppId(appName: String): List[ApplicationId] = {
-    val client = getYarnClient()
+    val client = HadoopUtils.yarnClient
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
       client.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
@@ -59,7 +57,7 @@ object YarnUtils {
    * @return
    */
   def getState(appId: String): YarnApplicationState = {
-    val client = getYarnClient()
+    val client = HadoopUtils.yarnClient
     val applicationId = ConverterUtils.toApplicationId(appId)
     val state = try {
       val applicationReport = client.getApplicationReport(applicationId)
@@ -81,18 +79,10 @@ object YarnUtils {
    * @return
    */
   def isContains(appName: String): Boolean = {
-    val client = getYarnClient()
+    val client = HadoopUtils.yarnClient
     val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName == appName)
     client.close()
     contains
-  }
-
-  private[this] def getYarnClient(): YarnClient = {
-    val client = YarnClient.createYarnClient()
-    val conf = new Configuration()
-    client.init(conf)
-    client.start()
-    client
   }
 
 }
