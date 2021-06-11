@@ -122,7 +122,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
         }
       case _ =>
         val configFile = new File(config)
@@ -130,7 +130,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
           case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
         }
     }
 
@@ -168,7 +168,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
     } match {
       case p if p > 0 => localStreamEnv.setParallelism(p)
-      case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
+      case _ => throw new IllegalArgumentException("[StreamX] parallelism must be > 0. ")
     }
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {

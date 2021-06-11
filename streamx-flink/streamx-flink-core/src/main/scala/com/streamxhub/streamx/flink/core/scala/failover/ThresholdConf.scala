@@ -38,7 +38,7 @@ case class ThresholdConf(parameters: Properties) {
   val successCode: List[Int] = Try(parameters(KEY_SINK_THRESHOLD_SUCCESS_CODE).split(",").map(_.toInt).toList).getOrElse(List(DEFAULT_HTTP_SUCCESS_CODE))
   val numWriters: Int = Try(parameters(KEY_SINK_THRESHOLD_NUM_WRITERS).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_NUM_WRITERS)
   val maxRetries: Int = Try(parameters(KEY_SINK_THRESHOLD_RETRIES).toInt).getOrElse(DEFAULT_SINK_THRESHOLD_RETRIES)
-  val storageType: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage muse be not null! ")))
+  val storageType: FailoverStorageType = FailoverStorageType.get(parameters.getOrElse(KEY_SINK_FAILOVER_STORAGE, throw new IllegalArgumentException(s"[StreamX] usage error! failover.storage must not be null! ")))
 
   def getFailoverConfig: Properties = {
     storageType match {

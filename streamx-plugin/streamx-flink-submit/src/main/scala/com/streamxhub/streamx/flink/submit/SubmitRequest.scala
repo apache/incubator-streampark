@@ -80,7 +80,7 @@ case class SubmitRequest(flinkHome: String,
           extension match {
             case "properties" => PropertiesUtils.fromPropertiesText(text)
             case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-            case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+            case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
           }
         case x if x.trim.startsWith("json://") =>
           val json = x.trim.drop(7)
