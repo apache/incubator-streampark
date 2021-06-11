@@ -909,8 +909,8 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'application', value: 4, disabled: false },
-        { mode: 'pre-job', value: 2, disabled: false },
+        { mode: 'yarn application', value: 4, disabled: false },
+        { mode: 'yarn pre-job', value: 2, disabled: true },
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
         { mode: 'yarn-session', value: 3, disabled: true },
@@ -987,7 +987,6 @@ export default {
           value: null,
           errorLine: null,
           errorColumn: null,
-          errorSQL: null,
           errorMsg: null,
           errorStart: null,
           errorEnd: null,

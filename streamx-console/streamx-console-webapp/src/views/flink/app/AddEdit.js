@@ -103,7 +103,6 @@ export function verifySQL(vue) {
     if (success) {
       controller.flinkSql.success = true
       controller.flinkSql.errorMsg = null
-      controller.flinkSql.errorSQL = null
       controller.flinkSql.errorStart = null
       controller.flinkSql.errorEnd = null
       syntaxError(vue)
@@ -111,7 +110,6 @@ export function verifySQL(vue) {
       controller.flinkSql.success = false
       controller.flinkSql.errorLine = resp.line
       controller.flinkSql.errorColumn = resp.column
-      controller.flinkSql.errorSQL = resp.sql
       controller.flinkSql.errorStart = resp.start
       controller.flinkSql.errorEnd = resp.end
       switch (resp.type) {

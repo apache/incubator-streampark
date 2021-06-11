@@ -251,7 +251,7 @@ public class ApplicationConfigServiceImpl
             }
             File file = new File(path);
             try {
-                String conf = FileUtils.readFileToString(file, "utf-8");
+                String conf = FileUtils.readFileToString(file);
                 this.flinkConfTemplate = Base64.getEncoder().encodeToString(conf.getBytes());
             } catch (IOException e) {
                 e.printStackTrace();

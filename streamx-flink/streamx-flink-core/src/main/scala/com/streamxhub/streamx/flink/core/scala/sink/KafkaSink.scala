@@ -82,7 +82,7 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
         case Some("AT_LEAST_ONCE") => Semantic.AT_LEAST_ONCE
         case Some("EXACTLY_ONCE") => Semantic.EXACTLY_ONCE
         case Some("NONE") => Semantic.NONE
-        case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,muse be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
+        case _ => throw new IllegalArgumentException("[StreamX] kafka.sink semantic error,must be (AT_LEAST_ONCE|EXACTLY_ONCE|NONE) ")
       }
       val schema = new KeyedSerializationSchemaWrapper[T](serializer)
 

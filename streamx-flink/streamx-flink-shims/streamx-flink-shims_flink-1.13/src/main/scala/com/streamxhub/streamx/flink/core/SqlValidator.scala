@@ -21,7 +21,8 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.SqlErrorType
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
+import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
 import org.apache.flink.sql.parser.validate.FlinkSqlConformance
@@ -65,53 +66,69 @@ object SqlValidator extends Logger {
     new CalciteParser(sqlParserConfig)
   }
 
+
   def verifySQL(sql: String): SqlError = {
-    var sqlCommands: List[SqlCommandCall] = List.empty[SqlCommandCall]
     try {
-      sqlCommands = SqlCommandParser.parseSQL(sql)
+      val sqlCommands = SqlCommandParser.parseSQL(sql)
+      for (call <- sqlCommands) {
+        val args = call.operands.head
+        call.command match {
+          case SET =>
+            if (!FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+              return SqlError(
+                SqlErrorType.SYNTAX_ERROR,
+                exception = s"$args is not a valid table/sql config",
+                sql = sql.replaceFirst(";|$", ";")
+              )
+            }
+          case RESET =>
+            if (args != "ALL" && !FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+              return SqlError(
+                SqlErrorType.SYNTAX_ERROR,
+                exception = s"$args is not a valid table/sql config",
+                sql = sql.replaceFirst(";|$", ";")
+              )
+            }
+          case
+            SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE |
+            SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
+            CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
+            DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
+            ALTER_DATABASE | ALTER_TABLE | ALTER_FUNCTION |
+            USE | USE_CATALOG |
+            SELECT | INSERT_INTO | INSERT_OVERWRITE |
+            EXPLAIN | DESC | DESCRIBE =>
+            try {
+              call.command match {
+                case CREATE_VIEW => parser.parse(call.operands.last)
+                case _ => parser.parse(args)
+              }
+            } catch {
+              case e: Throwable =>
+                return SqlError(
+                  SqlErrorType.SYNTAX_ERROR,
+                  ExceptionUtils.stringifyException(e),
+                  args.trim.replaceFirst(";|$", ";")
+                )
+            }
+          case _ => return SqlError(
+            SqlErrorType.UNSUPPORTED_SQL,
+            sql = sql.replaceFirst(";|$", ";")
+          )
+        }
+      }
+      null
     } catch {
       case exception: Exception =>
         val separator = "\001"
         val error = exception.getLocalizedMessage
         val array = error.split(separator)
-        return SqlError(
+        SqlError(
           SqlErrorType.of(array.head.toInt),
           if (array(1) == "null") null else array(1),
           array.last
         )
     }
-
-    for (call <- sqlCommands) {
-      val sql = call.operands.head
-      import com.streamxhub.streamx.flink.core.SqlCommand._
-      call.command match {
-        case USE | USE_CATALOG | SET |
-             SELECT | INSERT_INTO | INSERT_OVERWRITE |
-             EXPLAIN | DESC | DESCRIBE |
-             SHOW_MODULES | SHOW_FUNCTIONS | SHOW_TABLES | SHOW_DATABASES | SHOW_CATALOGS |
-             CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
-             CREATE_CATALOG | DROP_CATALOG |
-             CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
-             CREATE_VIEW | DROP_VIEW |
-             CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
-          try {
-            parser.parse(sql)
-          } catch {
-            case e: Exception =>
-              return SqlError(
-                SqlErrorType.SYNTAX_ERROR,
-                e.getLocalizedMessage,
-                sql.trim.replaceFirst(";|$", ";")
-              )
-            case _: Throwable =>
-          }
-        case _ => return SqlError(
-          SqlErrorType.UNSUPPORTED_SQL,
-          sql = sql.replaceFirst(";|$", ";")
-        )
-      }
-    }
-    null
   }
 
 }

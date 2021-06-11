@@ -33,6 +33,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
+
 /**
  * @author benjobs
  */
@@ -68,6 +70,7 @@ public class EffectiveServiceImpl extends ServiceImpl<EffectiveMapper, Effective
             effective.setAppId(appId);
             effective.setTargetType(type.getType());
             effective.setTargetId(id);
+            effective.setCreateTime(new Date());
             save(effective);
         } else {
             update(new UpdateWrapper<Effective>()

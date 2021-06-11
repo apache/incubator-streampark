@@ -32,10 +32,10 @@ import org.apache.flink.configuration.CoreOptions
 import org.apache.flink.contrib.streaming.state.EmbeddedRocksDBStateBackend
 import org.apache.flink.runtime.state.hashmap.HashMapStateBackend
 import org.apache.flink.runtime.state.storage.{FileSystemCheckpointStorage, JobManagerCheckpointStorage}
+import org.apache.flink.streaming.api.CheckpointingMode
 import org.apache.flink.streaming.api.environment.CheckpointConfig
 import org.apache.flink.streaming.api.environment.CheckpointConfig.ExternalizedCheckpointCleanup
 import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
-import org.apache.flink.streaming.api.{CheckpointingMode, TimeCharacteristic}
 import org.apache.flink.table.api.TableConfig
 
 import java.io.File
@@ -97,10 +97,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         val flinkHome = System.getenv("FLINK_HOME")
         require(flinkHome != null)
         logInfo(s"flinkHome: $flinkHome")
-        PropertiesUtils.fromYamlFile(s"$flinkHome/conf/flink-conf.yaml")
+        val yaml = new File(s"$flinkHome/conf/flink-conf.yaml")
+        PropertiesUtils.loadFlinkConfYaml(yaml)
       case flinkConf =>
         //从StreamXConsole后端传递过来的.
-        PropertiesUtils.fromYamlText(DeflaterUtils.unzipString(flinkConf))
+        PropertiesUtils.loadFlinkConfYaml(DeflaterUtils.unzipString(flinkConf))
     }
   }
 
@@ -121,7 +122,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesText(text)
           case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
         }
       case _ =>
         val configFile = new File(config)
@@ -129,7 +130,7 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
         extension match {
           case "properties" => PropertiesUtils.fromPropertiesFile(configFile.getAbsolutePath)
           case "yml" | "yaml" => PropertiesUtils.fromYamlFile(configFile.getAbsolutePath)
-          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+          case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
         }
     }
 
@@ -167,17 +168,11 @@ private[flink] class FlinkStreamingInitializer(args: Array[String], apiType: Api
       Try(parameter.get(CoreOptions.DEFAULT_PARALLELISM.key()).toInt).getOrElse(CoreOptions.DEFAULT_PARALLELISM.defaultValue().toInt)
     } match {
       case p if p > 0 => localStreamEnv.setParallelism(p)
-      case _ => throw new IllegalArgumentException("[StreamX] parallelism muse be > 0. ")
+      case _ => throw new IllegalArgumentException("[StreamX] parallelism must be > 0. ")
     }
     val interval = Try(parameter.get(KEY_FLINK_WATERMARK_INTERVAL).toInt).getOrElse(0)
     if (interval > 0) {
       localStreamEnv.getConfig.setAutoWatermarkInterval(interval)
-    }
-
-    //兼容1.12和之前的版本(TimeCharacteristic在1.12版本中废弃)
-    if (classOf[TimeCharacteristic].getDeclaredAnnotation(classOf[Deprecated]) == null) {
-      val timeCharacteristic = Try(TimeCharacteristic.valueOf(parameter.get(KEY_FLINK_WATERMARK_TIME_CHARACTERISTIC))).getOrElse(TimeCharacteristic.ProcessingTime)
-      localStreamEnv.setStreamTimeCharacteristic(timeCharacteristic)
     }
 
     val executionMode = Try(RuntimeExecutionMode.valueOf(parameter.get(KEY_EXECUTION_RUNTIME_MODE))).getOrElse(RuntimeExecutionMode.STREAMING)

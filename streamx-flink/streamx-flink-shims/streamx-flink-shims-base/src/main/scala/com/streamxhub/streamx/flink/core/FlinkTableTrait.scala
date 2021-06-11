@@ -41,7 +41,7 @@ import java.util.Optional
  * @param tableEnv
  */
 abstract class FlinkTableTrait(val parameter: ParameterTool,
-                               private val tableEnv: TableEnvironment) extends TableEnvironment with FlinkTableHelper {
+                               private val tableEnv: TableEnvironment) extends TableEnvironment {
 
   /**
    * 推荐使用该Api启动任务...
@@ -67,9 +67,9 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
    *
    * @param sql 配置文件中的sql名称,或者一段sql
    */
-  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
+  def sql(sql: String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 
-  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = super.callSql(sql, parameter, this)
+  private[flink] def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 
   override def fromValues(values: Expression*): Table = tableEnv.fromValues(values)
 

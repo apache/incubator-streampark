@@ -464,9 +464,9 @@ export default {
       executionMode: [
         { mode: 'local', value: 0,disabled: true },
         { mode: 'remote', value: 1,disabled: true },
-        { mode: 'pre-job', value: 2,disabled: false },
+        { mode: 'yarn pre-job', value: 2,disabled: true },
         { mode: 'yarn-session', value: 3,disabled: true },
-        { mode: 'application', value: 4,disabled: false },
+        { mode: 'yarn application', value: 4,disabled: false },
         { mode: 'kubernetes', value: 5,disabled: true }
       ],
       cpTriggerAction: [

@@ -31,6 +31,8 @@ import org.apache.flink.streaming.api.scala.StreamExecutionEnvironment
 import org.apache.flink.table.api.{Table, TableConfig}
 import org.apache.flink.table.descriptors.ConnectTableDescriptor
 
+import scala.language.implicitConversions
+
 
 trait FlinkStreamTable extends Logger {
 

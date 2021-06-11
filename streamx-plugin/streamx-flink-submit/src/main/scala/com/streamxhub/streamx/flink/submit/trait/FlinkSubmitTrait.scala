@@ -29,7 +29,6 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, CustomCommandLine}
 import org.apache.flink.configuration.{ConfigOption, CoreOptions, GlobalConfiguration}
 import org.apache.flink.util.Preconditions.checkNotNull
-import org.apache.hadoop.fs.Path
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
@@ -211,12 +210,9 @@ trait FlinkSubmitTrait extends Logger {
 
 }
 
-case class WorkspaceEnv(
-                         flinkName: String,
-                         flinkHdfsHome: String,
-                         flinkHdfsLibs: Path,
-                         flinkHdfsPlugins: Path,
-                         flinkHdfsJars: Path,
-                         streamxPlugin: Path,
-                         flinkHdfsDistJar: String
-                       )
+case class WorkspaceEnv(flinkName: String,
+                        flinkHome: String,
+                        flinkDistJar: String,
+                        flinkLib: String,
+                        appJars: String,
+                        appPlugins: String)

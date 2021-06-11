@@ -23,7 +23,8 @@ package com.streamxhub.streamx.common.util
 import org.yaml.snakeyaml.Yaml
 
 import java.io._
-import java.util.{Properties, Scanner, LinkedHashMap => JavaLinkedMap}
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
@@ -31,7 +32,8 @@ import scala.collection.mutable.{Map => MutableMap}
 /**
  * @author benjobs
  */
-object PropertiesUtils {
+object PropertiesUtils extends Logger {
+
 
   def readFile(filename: String): String = {
     val file = new File(filename)
@@ -153,6 +155,49 @@ object PropertiesUtils {
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from inputStream", e)
     }
+  }
+
+
+  /**
+   * <pre>
+   * 不要问我为什么,因为flink在解析flink-conf.yaml的时候才发现
+   * 压根就没有按照yaml的标准去解析,也是就是说flink-conf.yaml根本
+   * 就不是一个标准的yaml格式的文件,不能按照标准的yaml格式的方式来读取,坑死人不填命啊.
+   * </pre>
+   *
+   * @param file
+   */
+  def loadFlinkConfYaml(file: File): JavaMap[String, String] = {
+    require(file != null && file.exists() && file.isFile)
+    loadFlinkConfYaml(org.apache.commons.io.FileUtils.readFileToString(file))
+  }
+
+  def loadFlinkConfYaml(yaml: String): JavaMap[String, String] = {
+    require(yaml != null && yaml.nonEmpty)
+    val flinkConf = new JavaMap[String, String]()
+    val scanner: Scanner = new Scanner(yaml)
+    val lineNo: AtomicInteger = new AtomicInteger(0)
+    while (scanner.hasNextLine) {
+      val line = scanner.nextLine()
+      lineNo.incrementAndGet()
+      // 1. check for comments
+      val comments = line.split("#", 2)
+      val conf = comments(0).trim
+      // 2. get key and value
+      if (conf.nonEmpty) {
+        val kv = conf.split(": ", 2)
+        // skip line with no valid key-value pair
+        val key = kv(0).trim
+        val value = kv(1).trim
+        // sanity check
+        if (key.nonEmpty && value.nonEmpty) {
+          flinkConf += key -> value
+        } else {
+          logWarn(s"Error after splitting key and value in configuration " + lineNo.get() + ": \"" + line + "\"")
+        }
+      }
+    }
+    flinkConf
   }
 
 }

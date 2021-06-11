@@ -59,7 +59,6 @@ public class FlinkSqlController {
                 .data(false)
                 .message(sqlError.exception())
                 .put("type", sqlError.errorType().errorType)
-                .put("sql", sqlError.sql())
                 .put("start", start)
                 .put("end", end);
             //语法异常

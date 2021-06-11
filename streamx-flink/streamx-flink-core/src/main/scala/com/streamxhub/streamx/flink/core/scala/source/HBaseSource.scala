@@ -129,7 +129,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
             ctx.getCheckpointLock.synchronized {
               //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
               query = scalaQueryFunc(last)
-              require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
+              require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table must be not null ")
               table = query.getTable(prop)
               table.getScanner(query).foreach(x => {
                 last = scalaResultFunc(x)
@@ -142,7 +142,7 @@ class HBaseSourceFunction[R: TypeInformation](apiType: ApiType = ApiType.scala, 
             ctx.getCheckpointLock.synchronized {
               //将上次(或者从checkpoint中恢复)的query查询对象返回用户,用户根据这个构建下次要查询的条件.
               query = javaQueryFunc.query(last)
-              require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table muse be not null ")
+              require(query != null && query.getTable != null, "[StreamX] HBaseSource query and query's param table must be not null ")
               table = query.getTable(prop)
               table.getScanner(query).foreach(x => {
                 last = javaResultFunc.result(x)

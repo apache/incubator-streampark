@@ -101,10 +101,9 @@ object ApplicationSubmit extends YarnSubmitTrait {
     programArgs += submitRequest.effectiveAppName
 
     val providedLibs = ListBuffer(
-      submitRequest.workspaceEnv.flinkHdfsLibs.toString,
-      submitRequest.workspaceEnv.flinkHdfsPlugins.toString,
-      submitRequest.workspaceEnv.flinkHdfsJars.toString,
-      submitRequest.workspaceEnv.streamxPlugin.toString
+      submitRequest.workspaceEnv.flinkLib,
+      submitRequest.workspaceEnv.appJars,
+      submitRequest.workspaceEnv.appPlugins
     )
 
     submitRequest.developmentMode match {
@@ -124,7 +123,10 @@ object ApplicationSubmit extends YarnSubmitTrait {
           case _ =>
             throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
         }
-        providedLibs += s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
+        val jobLib = s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
+        if (HdfsUtils.exists(jobLib)) {
+          providedLibs += jobLib
+        }
       case _ =>
         // Custom Code 必传配置文件...
         programArgs += PARAM_KEY_APP_CONF
@@ -152,7 +154,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //flinkDistJar
-    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.workspaceEnv.flinkHdfsDistJar)
+    effectiveConfiguration.set(YarnConfigOptions.FLINK_DIST_JAR, submitRequest.workspaceEnv.flinkDistJar)
     //pipeline.jars
     effectiveConfiguration.set(PipelineOptions.JARS, Collections.singletonList(submitRequest.flinkUserJar))
     //execution.target

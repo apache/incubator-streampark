@@ -29,14 +29,13 @@ import org.apache.flink.client.cli.CliFrontend
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, GlobalConfiguration}
-import org.apache.hadoop.fs.Path
 
 import java.io.File
 import java.util.{Map => JavaMap}
 import scala.collection.JavaConversions._
 
 case class SubmitRequest(flinkHome: String,
-                         flinkVersion:String,
+                         flinkVersion: String,
                          flinkYaml: String,
                          flinkUserJar: String,
                          developmentMode: DevelopmentMode,
@@ -80,7 +79,7 @@ case class SubmitRequest(flinkHome: String,
           extension match {
             case "properties" => PropertiesUtils.fromPropertiesText(text)
             case "yml" | "yaml" => PropertiesUtils.fromYamlText(text)
-            case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,muse be properties or yml")
+            case _ => throw new IllegalArgumentException("[StreamX] Usage:flink.conf file error,must be properties or yml")
           }
         case x if x.trim.startsWith("json://") =>
           val json = x.trim.drop(7)
@@ -106,16 +105,15 @@ case class SubmitRequest(flinkHome: String,
     val flinkHdfsHome = s"${HdfsUtils.getDefaultFS}$APP_FLINK/$flinkName"
     WorkspaceEnv(
       flinkName,
-      flinkHdfsHome,
-      flinkHdfsLibs = new Path(s"$flinkHdfsHome/lib"),
-      flinkHdfsPlugins = new Path(s"$flinkHdfsHome/plugins"),
-      flinkHdfsJars = new Path(s"${HdfsUtils.getDefaultFS}$APP_JARS"),
-      streamxPlugin = new Path(s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"),
-      flinkHdfsDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
+      flinkHome,
+      flinkLib = s"$flinkHdfsHome/lib",
+      flinkDistJar = new File(s"$flinkHome/lib").list().filter(_.matches("flink-dist_.*\\.jar")) match {
         case Array() => throw new IllegalArgumentException(s"[StreamX] can no found flink-dist jar in $flinkHome/lib")
         case array if array.length == 1 => s"$flinkHdfsHome/lib/${array.head}"
         case more => throw new IllegalArgumentException(s"[StreamX] found multiple flink-dist jar in $flinkHome/lib,[${more.mkString(",")}]")
-      }
+      },
+      appJars = s"${HdfsUtils.getDefaultFS}$APP_JARS",
+      appPlugins = s"${HdfsUtils.getDefaultFS}$APP_PLUGINS"
     )
   }
 

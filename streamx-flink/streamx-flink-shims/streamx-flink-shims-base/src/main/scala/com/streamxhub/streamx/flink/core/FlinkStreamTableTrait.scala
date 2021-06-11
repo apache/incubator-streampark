@@ -62,7 +62,7 @@ import java.util.{Optional, List => JavaList}
 
 abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
                                      private val streamEnv: StreamExecutionEnvironment,
-                                     private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment with FlinkTableHelper {
+                                     private val tableEnv: StreamTableEnvironment) extends StreamTableEnvironment {
 
   /**
    * 一旦 Table 被转化为 DataStream，必须使用 StreamExecutionEnvironment 的 execute 方法执行该 DataStream 作业。
@@ -95,9 +95,9 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
     } else null
   }
 
-  def sql(sql: String = null): Unit = super.callSql(sql, parameter, this)
+  def sql(sql: String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 
-  def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = super.callSql(sql, parameter, this)
+  def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 
   //...streamEnv api start...
 

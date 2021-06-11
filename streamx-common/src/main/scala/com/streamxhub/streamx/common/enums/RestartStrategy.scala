@@ -33,7 +33,7 @@ object RestartStrategy extends Enumeration {
     if (name == null) null else {
       values.find(_.toString.replace("$minus", "-").equalsIgnoreCase(name)) match {
         case Some(v) => v
-        case _ => throw new IllegalArgumentException("[StreamX] RestartStrategy muse be (fixed-delay|failure-rate|none)")
+        case _ => throw new IllegalArgumentException("[StreamX] RestartStrategy must be (fixed-delay|failure-rate|none)")
       }
     }
   }
