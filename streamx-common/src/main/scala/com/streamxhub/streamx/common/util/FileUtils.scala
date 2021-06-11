@@ -18,19 +18,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.properties;
+package com.streamxhub.streamx.common.util
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
+import java.io._
 
-@Data
-@Configuration
-@ConfigurationProperties(prefix = "streamx")
-public class StreamXProperties {
+object FileUtils extends org.apache.commons.io.FileUtils {
 
-    private ShiroProperties shiro = new ShiroProperties();
+  def exists(path: String): Unit = {
+    require(path != null && path.nonEmpty && new File(path).exists(), s"file $path is not exist!")
+  }
 
-    private boolean openAopLog = true;
+  def getPathFromEnv(env: String): String = {
+    val path = System.getenv(env)
+    require(Utils.notEmpty(path), s"$env is not set on system env")
+    val file = new File(path)
+    require(file.exists(), s"$env is not exist!")
+    file.getAbsolutePath
+  }
+
+  def resolvePath(parent: String, child: String): String = {
+    val file = new File(parent, child)
+    require(file.exists, s"${file.getAbsolutePath} is not exist!")
+    file.getAbsolutePath
+  }
 
 }

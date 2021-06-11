@@ -1,0 +1,19 @@
+{
+  "properties": [
+    {
+      "name": "streamx.shiro.anonUrl",
+      "type": "java.lang.String",
+      "description": "Description for streamx.shiro.anonUrl."
+    },
+    {
+      "name": "streamx.shiro.jwtTimeOut",
+      "type": "java.lang.String",
+      "description": "Description for streamx.shiro.jwtTimeOut."
+    },
+    {
+      "name": "streamx.hdfs.workspace",
+      "type": "java.lang.String",
+      "description": "Description for streamx.hdfs.workspace."
+    }
+  ]
+}

@@ -38,35 +38,30 @@ object YarnUtils {
    * @return
    */
   def getAppId(appName: String): List[ApplicationId] = {
-    val client = HadoopUtils.yarnClient
     val appStates = util.EnumSet.of(RUNNING, ACCEPTED, SUBMITTED)
     val appIds = try {
-      client.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
+      HadoopUtils.yarnClient.getApplications(appStates).filter(_.getName == appName).map(_.getApplicationId)
     } catch {
       case e: Exception => e.printStackTrace()
         ArrayBuffer.empty[ApplicationId]
-    } finally {
-      client.close()
     }
     appIds.toList
   }
 
   /**
    * 查询 state
+   *
    * @param appId
    * @return
    */
   def getState(appId: String): YarnApplicationState = {
-    val client = HadoopUtils.yarnClient
     val applicationId = ConverterUtils.toApplicationId(appId)
     val state = try {
-      val applicationReport = client.getApplicationReport(applicationId)
+      val applicationReport = HadoopUtils.yarnClient.getApplicationReport(applicationId)
       applicationReport.getYarnApplicationState
     } catch {
-      case e:Exception => e.printStackTrace()
+      case e: Exception => e.printStackTrace()
         null
-    } finally {
-      client.close()
     }
     state
   }
@@ -79,10 +74,12 @@ object YarnUtils {
    * @return
    */
   def isContains(appName: String): Boolean = {
-    val client = HadoopUtils.yarnClient
-    val contains = client.getApplications(util.EnumSet.of(RUNNING)).exists(_.getName == appName)
-    client.close()
-    contains
+    val runningApps = HadoopUtils.yarnClient.getApplications(util.EnumSet.of(RUNNING))
+    if (runningApps != null) {
+      runningApps.exists(_.getName == appName)
+    } else {
+      false
+    }
   }
 
 }

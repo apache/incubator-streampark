@@ -49,8 +49,19 @@ public class EnvInitializeRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+
+        System.getProperties().setProperty(
+                ConfigConst.KEY_STREAMX_HDFS_WORKSPACE(),
+                context.getEnvironment().getProperty(
+                        ConfigConst.KEY_STREAMX_HDFS_WORKSPACE(),
+                        ConfigConst.STREAMX_HDFS_WORKSPACE_DEFAULT()
+                )
+        );
+
         String profiles = context.getEnvironment().getActiveProfiles()[0];
+
         if (profiles.equals(PROD_ENV_NAME)) {
+
             String appUploads = ConfigConst.APP_UPLOADS();
             if (!HdfsUtils.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);

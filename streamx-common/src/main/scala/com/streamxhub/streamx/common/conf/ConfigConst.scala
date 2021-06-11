@@ -55,6 +55,22 @@ object ConfigConst {
 
   val SIGN_EMPTY = ""
 
+  /**
+   * kerberos
+   */
+  val KEY_KERBEROS = "kerberos"
+
+  /**
+   * hadoop.security.authentication
+   */
+  val KEY_HADOOP_SECURITY_AUTHENTICATION = "hadoop.security.authentication"
+
+  val KEY_SECURITY_KERBEROS_ENABLE = "security.kerberos.login.enable"
+
+  val KEY_SECURITY_KERBEROS_KEYTAB = "security.kerberos.login.keytab"
+
+  val KEY_SECURITY_KERBEROS_PRINCIPAL = "security.kerberos.login.principal"
+
   //spark
 
   val KEY_SPARK_USER_ARGS = "spark.user.args"
@@ -259,27 +275,33 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val APP_PLUGINS = "/streamx/plugins"
+  val STREAMX_HDFS_WORKSPACE_DEFAULT = "/streamx"
+
+  val KEY_STREAMX_HDFS_WORKSPACE = "streamx.hdfs.workspace"
+
+  lazy val HDFS_WORKSPACE: String = System.getProperties.getProperty(KEY_STREAMX_HDFS_WORKSPACE, STREAMX_HDFS_WORKSPACE_DEFAULT)
+
+  lazy val APP_PLUGINS = s"$HDFS_WORKSPACE/plugins"
 
   /**
    * 存放不同版本flink相关的jar
    */
-  val APP_SHIMS = "/streamx/shims"
+  lazy val APP_SHIMS = s"$HDFS_WORKSPACE/shims"
 
-  val APP_UPLOADS = "/streamx/uploads"
+  lazy val APP_UPLOADS = s"$HDFS_WORKSPACE/uploads"
 
-  val APP_WORKSPACE = "/streamx/workspace"
+  lazy val APP_WORKSPACE = s"$HDFS_WORKSPACE/workspace"
 
-  val APP_FLINK = "/streamx/flink"
+  lazy val APP_FLINK = s"$HDFS_WORKSPACE/flink"
 
-  val APP_BACKUPS = "/streamx/backups"
+  lazy val APP_BACKUPS = s"$HDFS_WORKSPACE/backups"
 
-  val APP_SAVEPOINTS = "/streamx/savepoints"
+  lazy val APP_SAVEPOINTS = s"$HDFS_WORKSPACE/savepoints"
 
   /**
    * 存放全局公共的jar
    */
-  val APP_JARS = "/streamx/jars"
+  lazy val APP_JARS = s"$HDFS_WORKSPACE/jars"
 
   val LOGO =
     """

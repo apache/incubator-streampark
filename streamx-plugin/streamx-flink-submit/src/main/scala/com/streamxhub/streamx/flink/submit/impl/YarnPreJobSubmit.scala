@@ -168,7 +168,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
 
-    val providedLibs = ListBuffer(submitRequest.workspaceEnv.flinkHdfsJars.toString)
+    val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
 
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //execution.target

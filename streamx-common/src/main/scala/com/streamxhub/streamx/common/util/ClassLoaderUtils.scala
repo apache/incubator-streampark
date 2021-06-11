@@ -116,7 +116,7 @@ object ClassLoaderUtils extends Logger {
 
   private[this] def addURL(file: File): Unit = {
     try {
-      addURL.invoke(classloader, Array[AnyRef](file.toURI.toURL))
+      addURL.invoke(classloader, file.toURI.toURL)
     } catch {
       case e: Exception =>
     }

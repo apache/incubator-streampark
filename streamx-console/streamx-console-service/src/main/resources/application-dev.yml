@@ -57,15 +57,29 @@ mybatis-plus:
   global-config:
     banner: false
 
+
 streamx:
-  # 是否异步记录用户操作日志
-  openAopLog: true
-  # 单次最大批量入库数量
-  max.batch.insert.num: 1000
+  # hdfs默认workspace位置
+  hdfs.workspace: /streamx
+
   shiro:
-    # 后端免认证接口 url
-    anonUrl: /passport/**,/systemName,/user/check/**,/websocket/**,/metrics/**,/index.html,/assets/**,/css/**,/fonts/**,/img/**,/js/**,/loading/**,/*.js,/*.png,/*.jpg,/*.less
     # token有效期，单位秒
     jwtTimeOut: 86400
-
-
+    # 后端免认证接口 url
+    anonUrl: >
+      /passport/**,
+      /systemName,
+      /user/check/**,
+      /websocket/**,
+      /metrics/**,
+      /index.html,
+      /assets/**,
+      /css/**,
+      /fonts/**,
+      /img/**,
+      /js/**,
+      /loading/**,
+      /*.js,
+      /*.png,
+      /*.jpg,
+      /*.less

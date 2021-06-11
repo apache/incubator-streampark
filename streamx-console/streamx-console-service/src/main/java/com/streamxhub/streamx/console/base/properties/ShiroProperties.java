@@ -20,11 +20,13 @@
  */
 package com.streamxhub.streamx.console.base.properties;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@Getter
-@Setter
+@Data
+@Configuration
+@ConfigurationProperties(prefix = "streamx.shiro")
 public class ShiroProperties {
 
     private String anonUrl;
@@ -33,4 +35,5 @@ public class ShiroProperties {
      * token默认有效时间 1天
      */
     private Long jwtTimeOut = 86400L;
+
 }

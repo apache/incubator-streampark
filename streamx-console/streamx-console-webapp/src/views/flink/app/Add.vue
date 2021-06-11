@@ -811,8 +811,8 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'application', value: 4, disabled: false },
-        { mode: 'pre-job', value: 2, disabled: false },
+        { mode: 'yarn application', value: 4, disabled: false },
+        { mode: 'yarn pre-job', value: 2, disabled: true },
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
         { mode: 'yarn-session', value: 3, disabled: true },
@@ -882,7 +882,6 @@ export default {
           value: null,
           errorLine: null,
           errorColumn: null,
-          errorSQL: null,
           errorMsg: null,
           errorStart: null,
           errorEnd: null,
@@ -1094,11 +1093,13 @@ export default {
     },
 
     handleBeforeUpload(file) {
-      console.log('upload file type :' + file.type)
       if (file.type !== 'application/java-archive') {
-        this.loading = false
-        this.$message.error('Only jar files can be uploaded! please check your file.')
-        return false
+        console.log('upload file type :' + file.type)
+        if (!/\.(jar|JAR)$/.test(file.name)) {
+          this.loading = false
+          this.$message.error('Only jar files can be uploaded! please check your file.')
+          return false
+        }
       }
       this.loading = true
       return true
@@ -1107,8 +1108,7 @@ export default {
     handleCustomRequest(data) {
       const formData = new FormData()
       formData.append('file', data.file)
-      console.log(data)
-      upload(formData).then((response) => {
+      upload(formData).then((resp) => {
         this.loading = false
         this.controller.dependency.jar.set(data.file.name, data.file.name)
         this.handleUpdateDependency()

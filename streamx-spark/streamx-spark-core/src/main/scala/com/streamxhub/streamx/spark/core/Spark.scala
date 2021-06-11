@@ -86,7 +86,7 @@ trait Spark {
         sparkConf.setAll(PropertiesUtils.fromPropertiesFile(conf))
       case "yaml"|"yml" =>
         sparkConf.setAll(PropertiesUtils.fromYamlFile(conf))
-      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,muse be properties or yml")
+      case _ => throw new IllegalArgumentException("[StreamX] Usage:properties-file format error,must be properties or yml")
     }
 
     //debug mode

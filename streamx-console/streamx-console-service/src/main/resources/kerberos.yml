@@ -1,0 +1,7 @@
+
+security:
+  kerberos:
+    login:
+      enable: false
+      principal:
+      keytab:

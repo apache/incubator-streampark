@@ -62,11 +62,9 @@ object HdfsUtils extends Logger {
   def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
     hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)
 
-  def getNameNode: String = {
-    Try(getAddressOfActive(hdfs).getHostString) match {
-      case Success(value) => value
-      case Failure(exception) => throw exception
-    }
+  def getNameNode: String = Try(getAddressOfActive(hdfs).getHostString) match {
+    case Success(value) => value
+    case Failure(exception) => throw exception
   }
 
   /**
@@ -84,8 +82,6 @@ object HdfsUtils extends Logger {
     outputStream.flush()
     outputStream.close()
   }
-
-
 
   def exists(path: String): Boolean = hdfs.exists(getPath(path))
 
@@ -138,7 +134,7 @@ object HdfsUtils extends Logger {
   @throws[IOException]
   def getAddressOfActive(fs: FileSystem): InetSocketAddress = {
     if (!fs.isInstanceOf[DistributedFileSystem]) {
-      throw new IllegalArgumentException("FileSystem " + fs + " is not a DFS.")
+      throw new IllegalArgumentException(s"FileSystem $fs is not a DFS.")
     }
     // force client address resolution.
     fs.exists(new Path("/"))

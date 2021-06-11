@@ -40,7 +40,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +55,7 @@ import java.util.regex.Pattern;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 @DependsOn({"flyway", "flywayInitializer"})
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-    implements SettingService {
+        implements SettingService {
 
     private Map<String, String> flinkYamlMap;
 
@@ -86,8 +85,8 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
             assert flinkLocalHome != null;
             File yaml = new File(flinkLocalHome.concat("/conf/flink-conf.yaml"));
             assert yaml.exists();
-            this.flinkYamlString = FileUtils.readFileToString(yaml, Charset.defaultCharset());
-            this.flinkYamlMap = scala.collection.JavaConversions.mapAsJavaMap(PropertiesUtils.fromYamlText(this.flinkYamlString));
+            this.flinkYamlString = FileUtils.readFileToString(yaml);
+            this.flinkYamlMap = PropertiesUtils.loadFlinkConfYaml(yaml);
         }
     }
 
@@ -161,7 +160,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
         File yaml = new File(flinkHome.concat("/conf/flink-conf.yaml"));
         assert yaml.exists();
 
-        String confYaml = FileUtils.readFileToString(yaml, Charset.defaultCharset());
+        String confYaml = FileUtils.readFileToString(yaml);
         setting.setFlinkHome(flinkHome);
         setting.setFlinkConf(confYaml);
         return setting;
@@ -180,11 +179,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
             }
             List<String> cmd = Arrays.asList(
-                "cd ".concat(flinkHome),
-                String.format(
-                    "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
-                    distJar[0].getAbsolutePath()
-                )
+                    "cd ".concat(flinkHome),
+                    String.format(
+                            "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
+                            distJar[0].getAbsolutePath()
+                    )
             );
 
             CommandUtils.execute(cmd, versionInfo -> {
@@ -234,5 +233,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     public String getMavenRepository() {
         return settings.get(SettingService.KEY_MAVEN_REPOSITORY).getValue();
     }
+
 
 }

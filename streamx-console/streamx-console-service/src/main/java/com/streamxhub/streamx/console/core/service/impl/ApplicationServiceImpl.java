@@ -120,15 +120,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private ServerUtil serverUtil;
 
-    private final String workspace = ConfigConst.APP_WORKSPACE();
-
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
     private final Map<Long, StringBuilder> tailBuffer = new ConcurrentHashMap<>();
 
     private final Map<Long, Boolean> tailBeginning = new ConcurrentHashMap<>();
-
-    private final String APP_UPLOADS = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_UPLOADS());
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;
@@ -218,6 +214,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
     @Override
     public boolean upload(MultipartFile file) throws IOException {
+        String APP_UPLOADS = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_UPLOADS());
         String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
         //1)检查文件是否存在,md5是否一致.
         if (HdfsUtils.exists(uploadFile)) {
@@ -595,8 +592,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             File appHome = application.getAppHome();
                             HdfsUtils.delete(appHome.getPath());
                             File localJobHome = new File(application.getLocalAppBase(), application.getModule());
-                            HdfsUtils.upload(localJobHome.getAbsolutePath(), workspace, false, true);
-                            HdfsUtils.movie(workspace.concat("/").concat(application.getModule()), appHome.getPath());
+                            HdfsUtils.upload(localJobHome.getAbsolutePath(), ConfigConst.APP_WORKSPACE(), false, true);
+                            HdfsUtils.movie(ConfigConst.APP_WORKSPACE().concat("/").concat(application.getModule()), appHome.getPath());
                         } else {
                             log.info("FlinkSqlJob deploying...");
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
@@ -747,10 +744,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //3) upload jar by pomJar
             HdfsUtils.delete(application.getAppHome().getAbsolutePath());
 
-            HdfsUtils.upload(jobLocalHome.getAbsolutePath(), workspace, false, true);
+            HdfsUtils.upload(jobLocalHome.getAbsolutePath(), ConfigConst.APP_WORKSPACE(), false, true);
 
             //4) upload jar by uploadJar
             List<String> jars = application.getDependencyObject().getJar();
+            String APP_UPLOADS = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_UPLOADS());
             if (Utils.notEmpty(jars)) {
                 jars.forEach(jar -> {
                     String src = APP_UPLOADS.concat("/").concat(jar);
@@ -771,7 +769,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public String readConf(Application appParam) throws IOException {
         File file = new File(appParam.getConfig());
-        String conf = FileUtils.readFileToString(file, "utf-8");
+        String conf = FileUtils.readFileToString(file);
         return Base64.getEncoder().encodeToString(conf.getBytes());
     }
 
@@ -870,6 +868,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @param appParam
      */
     @Override
+    @RefreshCache
     public void starting(Application appParam) {
         Application application = getById(appParam.getId());
         assert application != null;

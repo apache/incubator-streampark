@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.SqlErrorType
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -33,8 +33,6 @@ import org.apache.flink.table.api.{EnvironmentSettings, TableException}
 import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
 import org.apache.flink.table.planner.utils.TableConfigUtils
-
-import scala.util.{Failure, Success, Try}
 
 object SqlValidator extends Logger {
 
@@ -72,7 +70,24 @@ object SqlValidator extends Logger {
     try {
       val sqlCommands = SqlCommandParser.parseSQL(sql)
       for (call <- sqlCommands) {
+        val args = call.operands.head
         call.command match {
+          case SET =>
+            if (!FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+              return SqlError(
+                SqlErrorType.SYNTAX_ERROR,
+                exception = s"$args is not a valid table/sql config",
+                sql = sql.replaceFirst(";|$", ";")
+              )
+            }
+          case RESET =>
+            if (args != "ALL" && !FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+              return SqlError(
+                SqlErrorType.SYNTAX_ERROR,
+                exception = s"$args is not a valid table/sql config",
+                sql = sql.replaceFirst(";|$", ";")
+              )
+            }
           case
             SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE |
             SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
@@ -80,16 +95,19 @@ object SqlValidator extends Logger {
             DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |
             ALTER_DATABASE | ALTER_TABLE | ALTER_FUNCTION |
             USE | USE_CATALOG |
-            SET | RESET |
             SELECT | INSERT_INTO | INSERT_OVERWRITE |
             EXPLAIN | DESC | DESCRIBE =>
-            Try(parser.parse(sql)) match {
-              case Success(_) => return null
-              case Failure(exception) =>
+            try {
+              call.command match {
+                case CREATE_VIEW => parser.parse(call.operands.last)
+                case _ => parser.parse(args)
+              }
+            } catch {
+              case e: Throwable =>
                 return SqlError(
                   SqlErrorType.SYNTAX_ERROR,
-                  exception.getLocalizedMessage,
-                  sql.trim.replaceFirst(";|$", ";")
+                  ExceptionUtils.stringifyException(e),
+                  args.trim.replaceFirst(";|$", ";")
                 )
             }
           case _ => return SqlError(

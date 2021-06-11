@@ -1,3 +1,23 @@
+/*
+ * Copyright (c) 2019 The StreamX Project
+ * <p>
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License") you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_SQL
@@ -6,22 +26,23 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.flink.api.java.utils.ParameterTool
 import org.apache.flink.configuration.{ConfigOption, Configuration}
-import org.apache.flink.table.api.TableEnvironment
 import org.apache.flink.table.api.config.{ExecutionConfigOptions, OptimizerConfigOptions, TableConfigOptions}
+import org.apache.flink.table.api.{SqlDialect, TableEnvironment}
 
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
 import scala.util.{Failure, Success, Try}
 
-trait FlinkTableHelper extends Logger {
+object FlinkTableHelper extends Logger {
 
   private[this] val lock = new ReentrantReadWriteLock().writeLock
+
   /**
    * all the available sql config options. see
    * https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html
    */
-  private lazy val tableConfigOptions: JavaMap[String, ConfigOption[_]] = {
+  lazy val tableConfigOptions: JavaMap[String, ConfigOption[_]] = {
     def extractConfig(clazz: Class[_]): JavaMap[String, ConfigOption[_]] = {
       val configOptions = new JavaHashMap[String, ConfigOption[_]]
       clazz.getDeclaredFields.foreach(field => {
@@ -96,7 +117,17 @@ trait FlinkTableHelper extends Logger {
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
           }
-          context.getConfig.getConfiguration.setString(args, x.operands(1))
+          if (TableConfigOptions.TABLE_SQL_DIALECT.key().equalsIgnoreCase(args)) {
+            val dialect = x.operands(1)
+            if (SqlDialect.HIVE.name().equalsIgnoreCase(dialect)) {
+              context.getConfig.setSqlDialect(SqlDialect.HIVE)
+              if (SqlDialect.DEFAULT.name().equalsIgnoreCase(dialect)) {
+                context.getConfig.setSqlDialect(SqlDialect.DEFAULT)
+              }
+            }
+          } else {
+            context.getConfig.getConfiguration.setString(args, x.operands(1))
+          }
           logInfo(s"${x.command.name}: $args --> ${x.operands(1)}")
         case RESET =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
@@ -148,5 +179,4 @@ trait FlinkTableHelper extends Logger {
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
-
 }
