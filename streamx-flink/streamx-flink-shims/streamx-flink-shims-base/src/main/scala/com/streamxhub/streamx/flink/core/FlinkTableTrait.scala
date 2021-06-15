@@ -67,7 +67,7 @@ abstract class FlinkTableTrait(val parameter: ParameterTool,
    *
    * @param sql 配置文件中的sql名称,或者一段sql
    */
-  def sql(sql: String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
+  def sql(sql: String = null)(implicit callback: String => Unit = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 
   private[flink] def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
 

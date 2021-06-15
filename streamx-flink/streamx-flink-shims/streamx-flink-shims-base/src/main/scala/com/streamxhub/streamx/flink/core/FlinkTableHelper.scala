@@ -70,14 +70,14 @@ object FlinkTableHelper extends Logger {
     configOptions
   }
 
-  private[streamx] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: Unit => String = null): Unit = {
+  private[streamx] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(flinkSql != null && flinkSql.trim.nonEmpty, sqlEmptyError)
 
     def callback(r: String): Unit = {
       callbackFunc match {
-        case null => println(r)
+        case null => logInfo(r)
         case x => x(r)
       }
     }
@@ -85,34 +85,35 @@ object FlinkTableHelper extends Logger {
     //TODO registerHiveCatalog
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
+      val command = x.command.name
       x.command match {
         case USE =>
           context.useDatabase(args)
-          logInfo(s"${x.command.name}: $args")
+          logInfo(s"$command: $args")
         case USE_CATALOG =>
           context.useCatalog(args)
-          logInfo(s"${x.command.name}: $args")
+          logInfo(s"$command: $args")
         case SHOW_CATALOGS =>
           val catalogs = context.listCatalogs
-          callback(s"%show catalog\n${catalogs.mkString("\n")}")
+          callback(s"$command: ${catalogs.mkString("\n")}")
         case SHOW_CURRENT_CATALOG =>
           val catalog = context.getCurrentCatalog
-          callback(s"%show current catalog\n$catalog")
+          callback(s"$command: $catalog")
         case SHOW_DATABASES =>
           val databases = context.listDatabases
-          callback(s"%show databases\n${databases.mkString("\n")}")
+          callback(s"$command: ${databases.mkString("\n")}")
         case SHOW_CURRENT_DATABASE =>
           val database = context.getCurrentDatabase
-          callback(s"%show current database\n$database")
+          callback(s"$command: $database")
         case SHOW_TABLES =>
           val tables = context.listTables().filter(!_.startsWith("UnnamedTable"))
-          callback(s"%show tables\n${tables.mkString("\n")}")
+          callback(s"$command: ${tables.mkString("\n")}")
         case SHOW_FUNCTIONS =>
           val functions = context.listUserDefinedFunctions()
-          callback(s"%table function\n${functions.mkString("\n")}")
+          callback(s"$command: ${functions.mkString("\n")}")
         case SHOW_MODULES =>
           val modules = context.listModules()
-          callback(s"%show modules\n${modules.mkString("\n")}")
+          callback(s"$command: ${modules.mkString("\n")}")
         case SET =>
           if (!tableConfigOptions.containsKey(args)) {
             throw new IllegalArgumentException(s"$args is not a valid table/sql config, please check link: https://ci.apache.org/projects/flink/flink-docs-release-1.10/dev/table/config.html")
@@ -128,7 +129,7 @@ object FlinkTableHelper extends Logger {
           } else {
             context.getConfig.getConfiguration.setString(args, x.operands(1))
           }
-          logInfo(s"${x.command.name}: $args --> ${x.operands(1)}")
+          logInfo(s"$command: $args --> ${x.operands(1)}")
         case RESET =>
           val confDataField = classOf[Configuration].getDeclaredField("confData")
           confDataField.setAccessible(true)
@@ -142,7 +143,7 @@ object FlinkTableHelper extends Logger {
               confData.remove(args)
             }
           }
-          logInfo(s"${x.command.name}: $args")
+          logInfo(s"$command: $args")
         case DESC | DESCRIBE =>
           val schema = context.scan(args).getSchema
           val builder = new StringBuilder()
@@ -155,7 +156,7 @@ object FlinkTableHelper extends Logger {
           val tableResult = context.executeSql(sql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case INSERT_INTO | INSERT_OVERWRITE |
+        case SELECT | INSERT_INTO | INSERT_OVERWRITE |
              CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
              CREATE_CATALOG | DROP_CATALOG |
              CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
@@ -163,16 +164,13 @@ object FlinkTableHelper extends Logger {
              CREATE_DATABASE | DROP_DATABASE | ALTER_DATABASE =>
           try {
             lock.lock()
-            context.executeSql(args)
-            logInfo(s"${x.command.name}:$args")
+            val result = context.executeSql(args)
+            logInfo(s"$command:$args")
           } finally {
             if (lock.isHeldByCurrentThread) {
               lock.unlock()
             }
           }
-        case SELECT =>
-          // TODO SELECT
-          throw new UnsupportedOperationException(s"[StreamX] Unsupported select operation:$sql")
         case _ => throw new Exception(s"[StreamX] Unsupported command: ${x.command}")
       }
     })

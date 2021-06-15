@@ -28,6 +28,12 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims-base</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-1.12</artifactId>
             <version>${project.version}</version>
             <scope>provided</scope>

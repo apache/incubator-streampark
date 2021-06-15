@@ -393,6 +393,12 @@
         <!--以下依赖会自动隔离处理,针对flink1.12和flink1.13不同版本同时支持-->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+            <version>1.1.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
             <version>1.1.0-SNAPSHOT</version>
         </dependency>
@@ -471,40 +477,6 @@
                 <version>2.16</version>
                 <configuration>
                     <argLine>-Dfile.encoding=utf-8</argLine>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                            <goal>copy</goal>
-                        </goals>
-                    </execution>
-                </executions>
-
-                <configuration>
-                    <includeScope>system</includeScope>
-                    <excludeTransitive>false</excludeTransitive>
-                    <stripVersion>false</stripVersion>
-                    <artifactItems>
-                        <dependency>
-                            <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/shims/flink-1.12</outputDirectory>
-                        </dependency>
-                        <dependency>
-                            <groupId>com.streamxhub.streamx</groupId>
-                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
-                            <version>${project.version}</version>
-                            <outputDirectory>${basedir}/src/assembly/shims/flink-1.13</outputDirectory>
-                        </dependency>
-                    </artifactItems>
                 </configuration>
             </plugin>
 
@@ -611,8 +583,8 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
 
+            </plugin>
         </plugins>
     </build>
 

@@ -95,10 +95,7 @@ abstract class FlinkStreamTableTrait(val parameter: ParameterTool,
     } else null
   }
 
-  def sql(sql: String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
-
-  def sqlWithCallBack(sql: String = null)(implicit callback: Unit => String = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
-
+  def sql(sql: String = null)(implicit callback: String => Unit = null): Unit = FlinkTableHelper.callSql(sql, parameter, this)
   //...streamEnv api start...
 
   def getJavaEnv: JavaStreamExecutionEnvironment = this.streamEnv.getJavaEnv

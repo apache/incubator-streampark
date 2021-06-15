@@ -17,6 +17,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.common.enums.SqlErrorType;
+import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -48,7 +49,7 @@ public class FlinkSqlController {
 
     @PostMapping("verify")
     public RestResponse verify(String sql) {
-        SqlError sqlError = SqlValidator.verifySQL(sql);
+        SqlError sqlError = flinkSqlService.verifySql(sql);
         if (sqlError != null) {
             String[] array = sqlError.sql().trim().split("\n");
             String start = array[0].trim();

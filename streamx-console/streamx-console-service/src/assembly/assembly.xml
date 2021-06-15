@@ -45,11 +45,6 @@
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
-            <directory>src/assembly/shims</directory>
-            <outputDirectory>shims</outputDirectory>
-            <fileMode>0755</fileMode>
-        </fileSet>
-        <fileSet>
             <directory>src/main/resources</directory>
             <outputDirectory>conf</outputDirectory>
             <fileMode>0755</fileMode>

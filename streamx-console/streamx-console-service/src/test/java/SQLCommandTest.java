@@ -35,7 +35,7 @@ public class SQLCommandTest {
 
         String sql = "SET table.planner = blink;";
 
-        SqlError sqlError = SqlValidator.verifySQL(sql);
+        SqlError sqlError = SqlValidator.verifySql(sql);
         if (sqlError != null) {
             String[] array = sqlError.sql().trim().split("\n");
             String start = array[0].trim();
