@@ -26,6 +26,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
+import com.streamxhub.streamx.console.base.utils.WebUtil;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
@@ -34,13 +35,23 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
+import com.streamxhub.streamx.flink.core.SqlError;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author benjobs
@@ -55,6 +66,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @Autowired
     private ApplicationBackUpService backUpService;
+
+    private List<URL> libCache;
+
+    private List<URL> shimsCache;
+
 
     /**
      * @param appId
@@ -152,16 +168,63 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
         assert sql != null;
 
         //检查并备份当前的任务.
-        FlinkSql effectiveSql = getEffective(application.getId(),false);
+        FlinkSql effectiveSql = getEffective(application.getId(), false);
         assert effectiveSql != null;
         if (!isFlinkSqlBacked(effectiveSql)) {
-            log.info("current job version:{}, Backing up...",sql.getVersion());
+            log.info("current job version:{}, Backing up...", sql.getVersion());
             backUpService.backup(application);
         } else {
-            log.info("current job version:{}, already backed",sql.getVersion());
+            log.info("current job version:{}, already backed", sql.getVersion());
         }
         //回滚历史版本的任务
         backUpService.rollbackFlinkSql(application, sql);
+    }
+
+    @SneakyThrows
+    @Override
+    public SqlError verifySql(String sql) {
+        ClassLoader loader = getFlinkShimsClassLoader();
+        Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.SqlValidator");
+        Method method = clazz.getDeclaredMethod("verifySql", String.class);
+        method.setAccessible(true);
+        return (SqlError) method.invoke(null, sql);
+    }
+
+    @SneakyThrows
+    private synchronized ClassLoader getFlinkShimsClassLoader() {
+        String shimsRegex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
+        Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+        if (libCache == null) {
+            libCache = new ArrayList<>(0);
+            File[] jars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> !pathname.getName().matches(shimsRegex));
+            assert jars != null;
+            for (File jar : jars) {
+                libCache.add(jar.toURI().toURL());
+            }
+        }
+
+        if (shimsCache == null) {
+            shimsCache = new ArrayList<>(0);
+            File[] jars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsRegex));
+            assert jars != null;
+            for (File jar : jars) {
+                shimsCache.add(jar.toURI().toURL());
+            }
+        }
+        // TODO: 根据用户选择的Flink版本选择对应的版本实现.
+        String version = "1.13";
+        List<URL> shimsUrls = shimsCache.stream().filter(url -> {
+            Matcher matcher = pattern.matcher(url.getPath());
+            boolean match = matcher.matches() && version.equals(matcher.group(2));
+            if (match) {
+                log.info("load shims jar:{}", url);
+            }
+            return match;
+        }).collect(Collectors.toList());
+
+        shimsUrls.addAll(libCache);
+
+        return new URLClassLoader(shimsUrls.toArray(new URL[0]));
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

@@ -21,6 +21,9 @@
 package com.streamxhub.streamx.common.util
 
 import java.io._
+import java.net.URL
+import java.util
+import scala.collection.JavaConversions._
 
 object FileUtils extends org.apache.commons.io.FileUtils {
 
@@ -41,5 +44,19 @@ object FileUtils extends org.apache.commons.io.FileUtils {
     require(file.exists, s"${file.getAbsolutePath} is not exist!")
     file.getAbsolutePath
   }
+
+  def listFileAsURL(dirPath: String): util.List[URL] = {
+    new File(dirPath) match {
+      case x if x.exists() && x.isDirectory =>
+        val files = x.listFiles()
+        if (files != null && files.nonEmpty) {
+          files.map(f => f.toURI.toURL).toList
+        } else {
+          util.Collections.emptyList()
+        }
+      case _ => util.Collections.emptyList()
+    }
+  }
+
 
 }

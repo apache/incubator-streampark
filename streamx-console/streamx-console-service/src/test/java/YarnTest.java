@@ -26,7 +26,7 @@ public class YarnTest {
          * 将hadoop的配置文件放到一个目录下,
          * 在运行该类的时候加上jvm级别的参数(idea里的 vmOption ) -DHADOOP_CONF_DIR=${目录}
          */
-        String url =  HadoopUtils.getRMWebAppURL(true);
+        String url = HadoopUtils.getRMWebAppURL(true);
         System.out.println(url);
     }
 
@@ -35,7 +35,7 @@ public class YarnTest {
     public void loadFlinkYaml() {
         String path = System.getenv("FLINK_HOME").concat("/conf/flink-conf.yaml");
         File yaml = new File(path);
-        Map<String,String> map = PropertiesUtils.loadFlinkConfYaml(yaml);
+        Map<String, String> map = PropertiesUtils.loadFlinkConfYaml(yaml);
         System.out.println(map.size());
     }
 

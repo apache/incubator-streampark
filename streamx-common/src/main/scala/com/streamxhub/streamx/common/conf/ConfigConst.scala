@@ -44,6 +44,8 @@ object ConfigConst {
 
   val KEY_SEMANTIC = "semantic"
 
+  val KEY_STREAMX_CONSOLE_URL = "streamx.console.url"
+
   /**
    * sign....
    */

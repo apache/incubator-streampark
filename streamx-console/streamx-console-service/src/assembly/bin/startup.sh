@@ -304,7 +304,14 @@ fi
 # 2): Streamx
 # 3): hadoop conf
 
-APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib:${APP_LIB}/*"
+APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
+# shellcheck disable=SC2206
+JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streamx-flink-shims_.*.jar$")
+# shellcheck disable=SC2128
+for jar in $JARS;do
+   APP_CLASSPATH=$APP_CLASSPATH:$jar
+done
+
 if [[ -n "${HADOOP_CONF_DIR}" ]] && [[ -d "${HADOOP_CONF_DIR}" ]]; then
   echo_r "Using HADOOP_CONF_DIR:   ${HADOOP_CONF_DIR}"
   APP_CLASSPATH+=":${HADOOP_CONF_DIR}"

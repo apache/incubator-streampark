@@ -66,7 +66,7 @@ object SqlValidator extends Logger {
     new CalciteParser(sqlParserConfig)
   }
 
-  def verifySQL(sql: String): SqlError = {
+  def verifySql(sql: String): SqlError = {
     try {
       val sqlCommands = SqlCommandParser.parseSQL(sql)
       for (call <- sqlCommands) {
@@ -88,8 +88,14 @@ object SqlValidator extends Logger {
                 sql = sql.replaceFirst(";|$", ";")
               )
             }
+          case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
+            return SqlError(
+              SqlErrorType.UNSUPPORTED_SQL,
+              exception = s"$args unsupported in current flink version",
+              sql = sql.replaceFirst(";|$", ";")
+            )
           case
-            SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE |
+            SHOW_CATALOGS | SHOW_DATABASES |
             SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
             CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
             DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |

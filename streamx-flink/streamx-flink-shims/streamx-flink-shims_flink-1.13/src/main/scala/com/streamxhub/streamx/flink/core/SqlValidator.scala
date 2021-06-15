@@ -67,7 +67,7 @@ object SqlValidator extends Logger {
   }
 
 
-  def verifySQL(sql: String): SqlError = {
+  def verifySql(sql: String): SqlError = {
     try {
       val sqlCommands = SqlCommandParser.parseSQL(sql)
       for (call <- sqlCommands) {

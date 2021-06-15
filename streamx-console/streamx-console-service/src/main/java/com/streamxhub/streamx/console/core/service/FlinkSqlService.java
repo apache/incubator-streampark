@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
+import com.streamxhub.streamx.flink.core.SqlError;
 
 import java.util.List;
 
@@ -75,4 +76,6 @@ public interface FlinkSqlService extends IService<FlinkSql> {
     void removeApp(Long appId);
 
     void rollback(Application application);
+
+    SqlError verifySql(String sql);
 }

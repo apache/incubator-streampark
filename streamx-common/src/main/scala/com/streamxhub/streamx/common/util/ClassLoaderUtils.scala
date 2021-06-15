@@ -23,6 +23,7 @@ package com.streamxhub.streamx.common.util
 import java.io.File
 import java.lang.reflect.Method
 import java.net.{URL, URLClassLoader}
+import java.util.function.Supplier
 
 object ClassLoaderUtils extends Logger {
 
@@ -41,6 +42,27 @@ object ClassLoaderUtils extends Logger {
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
       func()
+    } catch {
+      case e: Exception => throw e
+    } finally {
+      Thread.currentThread.setContextClassLoader(originalClassLoader)
+    }
+  }
+
+  /**
+   * 指定 classLoader执行代码...
+   * for java
+   *
+   * @param targetClassLoader
+   * @param supplier
+   * @tparam R
+   * @return
+   */
+  def runAsClassLoader[R](targetClassLoader: ClassLoader, supplier: Supplier[R]): R = {
+    val originalClassLoader = Thread.currentThread.getContextClassLoader
+    try {
+      Thread.currentThread.setContextClassLoader(targetClassLoader)
+      supplier.get()
     } catch {
       case e: Exception => throw e
     } finally {
@@ -118,7 +140,7 @@ object ClassLoaderUtils extends Logger {
     try {
       addURL.invoke(classloader, file.toURI.toURL)
     } catch {
-      case e: Exception =>
+      case e: Exception => throw e
     }
   }
 
