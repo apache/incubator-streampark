@@ -112,7 +112,7 @@ object SqlValidator extends Logger {
               case e: Throwable =>
                 return SqlError(
                   SqlErrorType.SYNTAX_ERROR,
-                  ExceptionUtils.stringifyException(e),
+                  e.getLocalizedMessage,
                   args.trim.replaceFirst(";|$", ";")
                 )
             }

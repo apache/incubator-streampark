@@ -350,6 +350,53 @@
           v-decorator="['restartSize']" />
       </a-form-item>
 
+      <a-form-item
+        label="CheckPoint Failure Options"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input-group compact>
+          <a-input-number
+            :min="1"
+            :step="1"
+            placeholder="checkpoint failure rate interval"
+            allow-clear
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            style="width: calc(33% - 70px)"/>
+          <a-button style="width: 70px">
+            minute
+          </a-button>
+          <a-input-number
+            :min="1"
+            :step="1"
+            placeholder="max failures per interval"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            style="width: calc(33% - 70px); margin-left: 1%"/>
+          <a-button style="width: 70px">
+            count
+          </a-button>
+          <a-select
+            placeholder="trigger action"
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            allow-clear
+            style="width: 32%;margin-left: 1%">
+            <a-select-option
+              v-for="(o,index) in cpTriggerAction"
+              :key="`cp_trigger_${index}`"
+              :value="o.value">
+              <a-icon :type="o.value === 1?'alert':'sync'"/> {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-input-group>
+
+        <p class="conf-desc" style="margin-bottom: -15px;margin-top: -3px">
+          <span class="note-info" style="margin-bottom: 12px">
+            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
+            Operation after checkpoint failure, e.g:<br>
+            Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
+          </span>
+        </p>
+      </a-form-item>
+
       <!--告警方式-->
       <template>
         <a-form-item
@@ -377,7 +424,7 @@
         </a-form-item>
 
         <a-form-item
-          label="Fault Alert Email"
+          label="Alert Email"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
@@ -437,53 +484,6 @@
         </a-form-item>
 
       </template>
-
-      <a-form-item
-        label="CheckPoint Failure Options"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input-group compact>
-          <a-input-number
-            :min="1"
-            :step="1"
-            placeholder="checkpoint failure rate interval"
-            allow-clear
-            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
-            style="width: calc(33% - 70px)"/>
-          <a-button style="width: 70px">
-            minute
-          </a-button>
-          <a-input-number
-            :min="1"
-            :step="1"
-            placeholder="max failures per interval"
-            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
-            style="width: calc(33% - 70px); margin-left: 1%"/>
-          <a-button style="width: 70px">
-            count
-          </a-button>
-          <a-select
-            placeholder="trigger action"
-            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
-            allow-clear
-            style="width: 32%;margin-left: 1%">
-            <a-select-option
-              v-for="(o,index) in cpTriggerAction"
-              :key="`cp_trigger_${index}`"
-              :value="o.value">
-              <a-icon :type="o.value === 1?'alert':'sync'"/> {{ o.name }}
-            </a-select-option>
-          </a-select>
-        </a-input-group>
-
-        <p class="conf-desc" style="margin-bottom: -15px;margin-top: -3px">
-          <span class="note-info" style="margin-bottom: 12px">
-            <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
-            Operation after checkpoint failure, e.g:<br>
-            Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
-          </span>
-        </p>
-      </a-form-item>
 
       <a-form-item
         class="conf-item"

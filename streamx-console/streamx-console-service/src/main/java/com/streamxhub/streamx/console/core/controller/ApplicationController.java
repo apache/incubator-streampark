@@ -127,9 +127,14 @@ public class ApplicationController {
     @PostMapping("start")
     @RequiresPermissions("app:start")
     public RestResponse start(Application app) throws Exception {
-        applicationService.starting(app);
-        boolean started = applicationService.start(app, false);
-        return RestResponse.create().data(started);
+        boolean success = applicationService.checkStart(app);
+        if (success) {
+            applicationService.starting(app);
+            boolean started = applicationService.start(app, false);
+            return RestResponse.create().data(started ? 1 : 0);
+        } else {
+            return RestResponse.create().data(-1);
+        }
     }
 
     @PostMapping("clean")

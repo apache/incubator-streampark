@@ -23,11 +23,11 @@ package com.streamxhub.streamx.common.util
 
 import com.google.common.io.Files
 import com.streamxhub.streamx.common.conf.ConfigConst
+import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_JAVA_SECURITY_KRB5_CONF, KEY_SECURITY_KERBEROS_KRB5_CONF}
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.{FileSystem, LocalFileSystem, Path}
-import org.apache.hadoop.hdfs.DFSConfigKeys._
+import org.apache.hadoop.fs.{CommonConfigurationKeys, FileSystem, LocalFileSystem, Path}
 import org.apache.hadoop.hdfs.DistributedFileSystem
 import org.apache.hadoop.net.NetUtils
 import org.apache.hadoop.security.UserGroupInformation
@@ -36,12 +36,18 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import org.apache.hadoop.yarn.client.api.YarnClient
 import org.apache.hadoop.yarn.conf.{HAUtil, YarnConfiguration}
 import org.apache.hadoop.yarn.util.RMHAUtils
+import org.apache.http.client.config.RequestConfig
+import org.apache.http.client.methods.HttpGet
+import org.apache.http.client.protocol.HttpClientContext
+import org.apache.http.impl.client.HttpClients
 
 import java.io.{File, IOException}
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.ConcurrentHashMap
+import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
+import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
 
 /**
@@ -61,7 +67,7 @@ object HadoopUtils extends Logger {
   lazy val kerberosConf: Map[String, String] = {
     SystemPropertyUtils.get("app.home", null) match {
       case null =>
-        val inputStream = getClass.getResourceAsStream("kerberos.yml")
+        val inputStream = getClass.getResourceAsStream("/kerberos.yml")
         if (inputStream == null) null else {
           PropertiesUtils.fromYamlFile(inputStream)
         }
@@ -137,19 +143,13 @@ object HadoopUtils extends Logger {
       s"${ConfigConst.KEY_SECURITY_KERBEROS_PRINCIPAL} and ${ConfigConst.KEY_SECURITY_KERBEROS_KEYTAB} must be not empty"
     )
 
-    conf.set(DFS_NAMENODE_KERBEROS_PRINCIPAL_KEY, principal)
-    conf.set(DFS_DATANODE_KERBEROS_PRINCIPAL_KEY, principal)
-    conf.set(DFS_WEB_AUTHENTICATION_KERBEROS_PRINCIPAL_KEY, principal)
-    conf.set(DFS_NAMENODE_KEYTAB_FILE_KEY, keytab)
-    conf.set(DFS_DATANODE_KEYTAB_FILE_KEY, keytab)
-    conf.set(DFS_WEB_AUTHENTICATION_KERBEROS_KEYTAB_KEY, keytab)
+    val krb5 = kerberosConf.getOrElse(
+      KEY_SECURITY_KERBEROS_KRB5_CONF,
+      kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")
+    ).trim
 
-    conf.set("mapreduce.jobhistory.principal", principal)
-    conf.set("yarn.resourcemanager.principal", principal)
-    conf.set("yarn.nodemanager.principal", principal)
-    conf.set("yarn.resourcemanager.keytab", keytab)
-    conf.set("yarn.nodemanager.keytab", keytab)
-    conf.set("mapreduce.jobhistory.keytab", keytab)
+    System.setProperty("java.security.krb5.conf", krb5)
+    System.setProperty("java.security.krb5.conf.path", krb5)
 
     conf.set(ConfigConst.KEY_HADOOP_SECURITY_AUTHENTICATION, ConfigConst.KEY_KERBEROS)
     try {
@@ -174,6 +174,7 @@ object HadoopUtils extends Logger {
 
   /**
    * <pre>
+   *
    * @param getLatest :
    *                  默认单例模式,如果getLatest=true则再次寻找活跃节点返回,主要是考虑到主备的情况,
    *                  如: 第一次获取的时候返回的是一个当前的活跃节点,之后可能这个活跃节点挂了,就不能提供服务了,
@@ -187,31 +188,57 @@ object HadoopUtils extends Logger {
         if (rmHttpURL == null || getLatest) {
 
           val useHttps = YarnConfiguration.useHttps(conf)
-
-          val addressPrefix = useHttps match {
-            case x if x => YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS
-            case _ => YarnConfiguration.RM_WEBAPP_ADDRESS
+          val (addressPrefix, defaultPort, protocol) = useHttps match {
+            case x if x => (YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS, "8090", "https://")
+            case _ => (YarnConfiguration.RM_WEBAPP_ADDRESS, "8088", "http://")
           }
 
           val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
             val yarnConf = new YarnConfiguration(conf)
-            if (conf.get("yarn.resourcemanager.principal") != null) {
-              yarnConf.set("yarn.resourcemanager.principal", conf.get("yarn.resourcemanager.principal"))
+            val activeRMId = kerberosEnable match {
+              case b if !b => RMHAUtils.findActiveRMHAId(yarnConf)
+              case _ =>
+                //If you don't know why, don't modify it
+                val rmIds = conf.getStringCollection("yarn.resourcemanager.ha.rm-ids")
+                // url ==> rmId
+                val idUrlMap = new JavaHashMap[String, String]
+                rmIds.foreach(id => {
+                  val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
+                    case null =>
+                      val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
+                      s"$hostname:$defaultPort"
+                    case x => x
+                  }
+                  idUrlMap.put(s"$protocol$address", id)
+                })
+
+                var rmId: String = null
+
+                val rpcTimeoutForChecks = yarnConf.getInt(
+                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
+                )
+
+                breakable(idUrlMap.foreach(x => {
+                  //test yarn url
+                  val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
+                  if (activeUrl != null) {
+                    rmId = idUrlMap(activeUrl)
+                    break
+                  }
+                }))
+                rmId
             }
-            val activeRMId = RMHAUtils.findActiveRMHAId(yarnConf)
             require(activeRMId != null, "[StreamX] can not found yarn active node")
             logInfo(s"current activeRMHAId: $activeRMId")
             HAUtil.addSuffix(addressPrefix, activeRMId)
           }
 
-          val inetSocketAddress = useHttps match {
-            case x if x => conf.getSocketAddr(name, "0.0.0.0:8090", 8090)
-            case _ => conf.getSocketAddr(name, "0.0.0.0:8088", 8088)
-          }
+          val inetSocketAddress = conf.getSocketAddr(name, s"0.0.0.0:$defaultPort", defaultPort.toInt)
 
           val address = NetUtils.getConnectAddress(inetSocketAddress)
 
-          val buffer = new StringBuilder(if (useHttps) "https://" else "http://")
+          val buffer = new StringBuilder(protocol)
           val resolved = address.getAddress
           if (resolved != null && !resolved.isAnyLocalAddress && !resolved.isLoopbackAddress) {
             buffer.append(address.getHostName)
@@ -221,12 +248,32 @@ object HadoopUtils extends Logger {
               case _ => buffer.append(address.getHostName)
             }
           }
-          buffer.append(":").append(address.getPort)
-          rmHttpURL = buffer.toString
+
+          rmHttpURL = buffer
+            .append(":")
+            .append(address.getPort)
+            .toString()
+
         }
       }
     }
     rmHttpURL
+  }
+
+  private[this] def httpTestYarnRMUrl(url: String, timeout: Int): String = {
+    val httpClient = HttpClients.createDefault();
+    val context = HttpClientContext.create()
+    val httpGet = new HttpGet(url)
+    val requestConfig = RequestConfig
+      .custom()
+      .setSocketTimeout(timeout)
+      .setConnectTimeout(timeout)
+      .build()
+    httpGet.setConfig(requestConfig)
+    Try(httpClient.execute(httpGet, context)) match {
+      case Success(_) => context.getTargetHost.toString
+      case _ => null
+    }
   }
 
   def toApplicationId(appId: String): ApplicationId = {

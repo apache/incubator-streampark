@@ -1245,11 +1245,18 @@ export default {
               flameGraph: flameGraph,
               allowNonRestored: allowNonRestoredState
             }).then((resp) => {
-              if (!resp.data) {
+              const code = parseInt(resp.data)
+              if (code === 0) {
                 this.$swal.fire(
                   'Failed',
                   'startup failed, please check the startup log :)',
                   'error'
+                )
+              } else if (code === -1) {
+                this.$swal.fire(
+                    'Failed',
+                    'startup failed, Maybe FLINK_HOME undefined,please check :)',
+                    'error'
                 )
               }
             })

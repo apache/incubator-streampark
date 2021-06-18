@@ -429,19 +429,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Fault Alert Email"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-input
-          type="text"
-          placeholder="Please enter email,separate multiple emails with comma(,)"
-          allowClear
-          v-decorator="[ 'alertEmail' ]">
-          <svg-icon name="mail" slot="prefix"/>
-        </a-input>
-      </a-form-item>
-
-      <a-form-item
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -450,8 +437,7 @@
             :min="1"
             :step="1"
             placeholder="checkpoint failure rate interval"
-            allow-clear
-            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpMaxFailureInterval',{ rules: [ { validator: handleCheckCheckPoint , trigger:'change'} ]}]"
             style="width: calc(33% - 70px)"/>
           <a-button style="width: 70px">
             minute
@@ -460,15 +446,15 @@
             :min="1"
             :step="1"
             placeholder="max failures per interval"
-            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
+            v-decorator="['cpFailureRateInterval',{ rules: [ { validator: handleCheckCheckPoint , trigger: 'change'} ]}]"
             style="width: calc(33% - 70px); margin-left: 1%"/>
           <a-button style="width: 70px">
             count
           </a-button>
           <a-select
             placeholder="trigger action"
-            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint} ]}]"
-            allow-clear
+            allowClear
+            v-decorator="['cpFailureAction',{ rules: [ { validator: handleCheckCheckPoint , trigger: 'change'} ]}]"
             style="width: 32%;margin-left: 1%">
             <a-select-option
               v-for="(o,index) in cpTriggerAction"
@@ -486,6 +472,19 @@
             Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
           </span>
         </p>
+      </a-form-item>
+
+      <a-form-item
+        label="Alert Email List"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-input
+          type="text"
+          placeholder="Please enter email,separate multiple emails with comma(,)"
+          allowClear
+          v-decorator="[ 'alertEmail',{ rules: [ { validator: handleCheckAlertEmail} ]} ]">
+          <svg-icon name="mail" slot="prefix"/>
+        </a-input>
       </a-form-item>
 
       <a-form-item
@@ -950,6 +949,7 @@ export default {
       optionsValueMapping: {},
       loading: false,
       submitting: false,
+      validateAgain: false,
       configuration: [
         { key: 'tc', name: ' time characteristic' },
         { key: 'cp', name: ' checkpoints' },
@@ -1138,6 +1138,34 @@ export default {
     },
 
     handleCheckCheckPoint (rule, value, callback) {
+      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval') || null
+      const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval') || null
+      const cpFailureAction = this.form.getFieldValue('cpFailureAction') || null
+      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
+        callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+        callback()
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      } else {
+        callback(new Error('checkPoint failure options must be all required or all empty'))
+        if (!this.validateAgain) {
+          this.validateAgain = true
+          this.form.validateFields(['cpMaxFailureInterval', 'cpFailureRateInterval','cpFailureAction'])
+          this.validateAgain = false
+        }
+      }
+    },
+
+    handleCheckAlertEmail(rule, value, callback) {
       const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
       const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
       const cpFailureAction = this.form.getFieldValue('cpFailureAction')
@@ -1145,23 +1173,16 @@ export default {
       if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
         if( cpFailureAction === 1) {
           const alertEmail = this.form.getFieldValue('alertEmail')
-          if (alertEmail == null) {
-            this.form.setFields({
-              alertEmail: {
-                errors: [new Error('checkPoint Failure trigger is alert,alertEmail must be not empty must be')]
-              }
-            })
-            callback(new Error('trigger action is alert,alertEmail must be not empty'))
+          if (alertEmail == null || alertEmail.trim() === '') {
+            callback(new Error('checkPoint Failure trigger is alert,alertEmail must be not empty'))
           } else {
             callback()
           }
         } else {
           callback()
         }
-      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
-        callback()
       } else {
-        callback(new Error('options all required or all empty'))
+        callback()
       }
     },
 
@@ -1189,7 +1210,7 @@ export default {
     },
 
     handleDependencyJsonToPom (json,pomMap,jarMap) {
-      if (json != null) {
+      if (json != null && json.trim() !== '') {
         const deps = JSON.parse(json)
         const pom = deps.pom
         if (pom && pom.length > 0) {
@@ -1341,7 +1362,7 @@ export default {
     },
 
     handleEditConfOk(value) {
-      if (value == null || !value.replace(/^\s+|\s+$/gm, '')) {
+      if (value == null || value.trim() === '') {
         this.isSetConfig = false
         this.configOverride = null
       } else {
