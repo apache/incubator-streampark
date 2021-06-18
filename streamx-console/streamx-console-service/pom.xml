@@ -441,6 +441,13 @@
             <version>${flink113.version}</version>
         </dependency>
 
+        <!-- 支持一些自定义的消息格式，比如kafka里面消息格式是json的，或者需要自定义函数支持 -->
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-table-common</artifactId>
+            <version>${flink113.version}</version>
+        </dependency>
+
     </dependencies>
 
     <build>

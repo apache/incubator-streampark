@@ -136,6 +136,7 @@ object HadoopUtils extends Logger {
   }
 
   private[this] def kerberosLogin(conf: Configuration): Unit = if (kerberosEnable) {
+    logInfo("kerberos login starting....")
     val principal = kerberosConf.getOrElse(ConfigConst.KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
     val keytab = kerberosConf.getOrElse(ConfigConst.KEY_SECURITY_KERBEROS_KEYTAB, "").trim
     require(
@@ -148,8 +149,10 @@ object HadoopUtils extends Logger {
       kerberosConf.getOrElse(KEY_JAVA_SECURITY_KRB5_CONF, "")
     ).trim
 
-    System.setProperty("java.security.krb5.conf", krb5)
-    System.setProperty("java.security.krb5.conf.path", krb5)
+    if (krb5.nonEmpty) {
+      System.setProperty("java.security.krb5.conf", krb5)
+      System.setProperty("java.security.krb5.conf.path", krb5)
+    }
 
     conf.set(ConfigConst.KEY_HADOOP_SECURITY_AUTHENTICATION, ConfigConst.KEY_KERBEROS)
     try {
@@ -157,7 +160,9 @@ object HadoopUtils extends Logger {
       UserGroupInformation.loginUserFromKeytab(principal, keytab)
       logInfo("kerberos authentication successful")
     } catch {
-      case e: IOException => throw e
+      case e: IOException =>
+        logInfo(s"kerberos login failed,${e.getLocalizedMessage}")
+        throw e
     }
   }
 
