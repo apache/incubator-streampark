@@ -81,8 +81,10 @@ import java.util.concurrent.*;
 public class FlinkTrackingTask {
 
     /**
-     * 记录任务是否需要savePoint<br>
-     * 只有在RUNNING状态下才会真正使用,如检查到任务正在运行,且需要savePoint,则设置该任务的状态为"savepoint"<br>
+     * <pre>
+     * 记录任务是否需要savePoint
+     * 只有在RUNNING状态下才会真正使用,如检查到任务正在运行,且需要savePoint,则设置该任务的状态为"savepoint"
+     * </pre>
      */
     private static final Cache<Long, Byte> SAVEPOINT_CACHE = Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build();
 
@@ -97,9 +99,11 @@ public class FlinkTrackingTask {
     private static final Map<Long, Application> TRACKING_MAP = new ConcurrentHashMap<>(0);
 
     /**
-     * StopFrom: 用来记录任务是从StreamX web管理端停止的还是其他方式停止<br>
-     * 如从StreamX web管理端停止可以知道在停止任务时是否做savepoint,如做了savepoint,则将该savepoint设置为最后有效的savepoint,下次启动时,自动选择从该savepoint<br>
-     * 如:其他方式停止则,无法知道是否savepoint,直接将所有的savepoint设置为过期,任务再次启动时需要手动指定<br>
+     * <pre>
+     * StopFrom: 用来记录任务是从StreamX web管理端停止的还是其他方式停止
+     * 如从StreamX web管理端停止可以知道在停止任务时是否做savepoint,如做了savepoint,则将该savepoint设置为最后有效的savepoint,下次启动时,自动选择从该savepoint
+     * 如:其他方式停止则,无法知道是否savepoint,直接将所有的savepoint设置为过期,任务再次启动时需要手动指定
+     * </pre>
      */
     private static final Map<Long, StopFrom> STOP_FROM_MAP = new ConcurrentHashMap<>(0);
 

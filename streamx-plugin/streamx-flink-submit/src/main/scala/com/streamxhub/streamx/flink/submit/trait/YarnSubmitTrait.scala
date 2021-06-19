@@ -21,10 +21,12 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
+import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.SubmitRequest
 import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.ClusterSpecification
+import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClientProvider
 import org.apache.flink.configuration.{CheckpointingOptions, ConfigOptions, Configuration, CoreOptions}
 import org.apache.flink.runtime.jobgraph.JobGraph
@@ -36,6 +38,7 @@ import org.apache.hadoop.yarn.api.records.ApplicationId
 import java.lang.reflect.Method
 import java.lang.{Boolean => JavaBool}
 import java.util.concurrent.TimeUnit
+import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
@@ -103,6 +106,20 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     } else {
       val parallelism = submitRequest.flinkDefaultConfiguration.getInteger(CoreOptions.DEFAULT_PARALLELISM, -1)
       if (parallelism == -1) null else parallelism
+    }
+  }
+
+  private[submit] def applyToConfiguration(submitRequest: SubmitRequest, effectiveConfiguration: Configuration): Unit = {
+    //flink-conf.yaml配置
+    submitRequest.flinkDefaultConfiguration.keySet.foreach(x => {
+      submitRequest.flinkDefaultConfiguration.getString(x, null) match {
+        case v if v != null => effectiveConfiguration.setString(x, v)
+        case _ =>
+      }
+    })
+    //main class
+    if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
+      effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
   }
 

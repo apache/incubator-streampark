@@ -5,9 +5,9 @@
         <id column="ID" jdbcType="BIGINT" property="id"/>
         <result column="PROJECT_ID" jdbcType="BIGINT" property="projectId"/>
         <result column="MODULE" jdbcType="VARCHAR" property="module"/>
-        <result column="ARGS" jdbcType="VARCHAR" property="args"/>
-        <result column="OPTIONS" jdbcType="VARCHAR" property="options"/>
-        <result column="DYNAMIC_OPTIONS" jdbcType="VARCHAR" property="dynamicOptions"/>
+        <result column="ARGS" jdbcType="LONGVARCHAR" property="args"/>
+        <result column="OPTIONS" jdbcType="LONGVARCHAR" property="options"/>
+        <result column="DYNAMIC_OPTIONS" jdbcType="LONGVARCHAR" property="dynamicOptions"/>
         <result column="JOB_NAME" jdbcType="VARCHAR" property="jobName"/>
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>

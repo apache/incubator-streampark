@@ -49,6 +49,8 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -67,10 +69,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Autowired
     private ApplicationBackUpService backUpService;
 
-    private List<URL> libCache;
-
-    private List<URL> shimsCache;
-
+    private final Map<String, URLClassLoader> shimsClassLoaderCache = new ConcurrentHashMap<>();
 
     /**
      * @param appId
@@ -192,39 +191,40 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
     @SneakyThrows
     private synchronized ClassLoader getFlinkShimsClassLoader() {
-        String shimsRegex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
-        Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-        if (libCache == null) {
-            libCache = new ArrayList<>(0);
-            File[] jars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> !pathname.getName().matches(shimsRegex));
-            assert jars != null;
-            for (File jar : jars) {
-                libCache.add(jar.toURI().toURL());
-            }
-        }
-
-        if (shimsCache == null) {
-            shimsCache = new ArrayList<>(0);
-            File[] jars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsRegex));
-            assert jars != null;
-            for (File jar : jars) {
-                shimsCache.add(jar.toURI().toURL());
-            }
-        }
         // TODO: 根据用户选择的Flink版本选择对应的版本实现.
         String version = "1.13";
-        List<URL> shimsUrls = shimsCache.stream().filter(url -> {
-            Matcher matcher = pattern.matcher(url.getPath());
-            boolean match = matcher.matches() && version.equals(matcher.group(2));
-            if (match) {
-                log.info("load shims jar:{}", url);
+
+        if (!shimsClassLoaderCache.containsKey(version)) {
+            String shimsRegex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
+            Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+            File[] libJars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> !pathname.getName().matches(shimsRegex));
+            assert libJars != null;
+            List<URL> libList = new ArrayList<>(0);
+            for (File jar : libJars) {
+                libList.add(jar.toURI().toURL());
             }
-            return match;
-        }).collect(Collectors.toList());
 
-        shimsUrls.addAll(libCache);
+            List<URL> shimsList = new ArrayList<>(0);
+            File[] shimsJars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsRegex));
+            assert shimsJars != null;
+            for (File jar : shimsJars) {
+                shimsList.add(jar.toURI().toURL());
+            }
 
-        return new URLClassLoader(shimsUrls.toArray(new URL[0]));
+            List<URL> shimsUrls = shimsList.stream().filter(url -> {
+                Matcher matcher = pattern.matcher(url.getPath());
+                return matcher.matches() && version.equals(matcher.group(2));
+            }).collect(Collectors.toList());
+
+            shimsUrls.addAll(libList);
+
+            URLClassLoader classLoader = new URLClassLoader(shimsUrls.toArray(new URL[0]));
+            shimsClassLoaderCache.put(version, classLoader);
+        }
+
+        return shimsClassLoaderCache.get(version);
+
     }
 
     private boolean isFlinkSqlBacked(FlinkSql sql) {

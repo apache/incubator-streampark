@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.core
 
 import com.streamxhub.streamx.common.enums.SqlErrorType
-import com.streamxhub.streamx.common.util.{ExceptionUtils, Logger}
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.SqlCommand._
 import org.apache.calcite.config.Lex
 import org.apache.calcite.sql.parser.SqlParser
@@ -71,8 +71,10 @@ object SqlValidator extends Logger {
     try {
       val sqlCommands = SqlCommandParser.parseSQL(sql)
       for (call <- sqlCommands) {
-        val args = call.operands.head
-        call.command match {
+        lazy val args = call.operands.head
+        lazy val command = call.command
+        lazy val last = call.operands.last
+        command match {
           case SET =>
             if (!FlinkTableHelper.tableConfigOptions.containsKey(args)) {
               return SqlError(
@@ -99,15 +101,15 @@ object SqlValidator extends Logger {
             SELECT | INSERT_INTO | INSERT_OVERWRITE |
             EXPLAIN | DESC | DESCRIBE =>
             try {
-              call.command match {
-                case CREATE_VIEW => parser.parse(call.operands.last)
+              command match {
+                case CREATE_VIEW => parser.parse(last)
                 case _ => parser.parse(args)
               }
             } catch {
               case e: Throwable =>
                 return SqlError(
                   SqlErrorType.SYNTAX_ERROR,
-                  ExceptionUtils.stringifyException(e),
+                  e.getLocalizedMessage,
                   args.trim.replaceFirst(";|$", ";")
                 )
             }

@@ -30,13 +30,12 @@ import org.apache.flink.client.cli.{CustomCommandLine, ExecutionConfigAccessor, 
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.PackagedProgramUtils
-import org.apache.flink.configuration.{CheckpointingOptions, Configuration, DeploymentOptions, PipelineOptions}
+import org.apache.flink.configuration._
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
 import java.util.{Collections, List => JavaList}
-import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
 import scala.util.Try
@@ -64,16 +63,25 @@ object ApplicationSubmit extends YarnSubmitTrait {
     val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
     try {
       val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-      logInfo("--------------------------<<specification>>---------------------------")
-      logInfo(s"$clusterSpecification")
-      logInfo("----------------------------------------------------------------------")
+      logInfo(
+        s"""
+           |--------------------------<<specification>>---------------------------
+           |$clusterSpecification
+           |----------------------------------------------------------------------
+           |""".stripMargin)
+
       val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
       var applicationId: ApplicationId = null
       val clusterClient = clusterDescriptor.deployApplicationCluster(clusterSpecification, applicationConfiguration).getClusterClient
       applicationId = clusterClient.getClusterId
-      logInfo("|--------------------------<<applicationId>>--------------------------|")
-      logInfo(s"| Flink Job Started: applicationId: $applicationId  |")
-      logInfo("|_____________________________________________________________________|")
+
+      logInfo(
+        s"""
+           ||--------------------------<<applicationId>>--------------------------|
+           || Flink Job Started: applicationId: $applicationId  |
+           ||_____________________________________________________________________|
+           |""".stripMargin)
+
       SubmitResponse(applicationId, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
@@ -91,65 +99,47 @@ object ApplicationSubmit extends YarnSubmitTrait {
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
+    super.applyToConfiguration(submitRequest, effectiveConfiguration)
 
-    val programArgs = new ArrayBuffer[String]()
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
-
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
-    programArgs += PARAM_KEY_APP_NAME
-    programArgs += submitRequest.effectiveAppName
-
-    val providedLibs = ListBuffer(
-      submitRequest.workspaceEnv.flinkLib,
-      submitRequest.workspaceEnv.appJars,
-      submitRequest.workspaceEnv.appPlugins
-    )
-
-    submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        programArgs += PARAM_KEY_FLINK_SQL
-        programArgs += submitRequest.flinkSQL
-        if (submitRequest.appConf != null) {
+    val (providedLibs, programArgs) = {
+      val programArgs = new ArrayBuffer[String]()
+      Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+      programArgs += PARAM_KEY_FLINK_CONF
+      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      programArgs += PARAM_KEY_APP_NAME
+      programArgs += submitRequest.effectiveAppName
+      val providedLibs = ListBuffer(
+        submitRequest.workspaceEnv.flinkLib,
+        submitRequest.workspaceEnv.appJars,
+        submitRequest.workspaceEnv.appPlugins
+      )
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          programArgs += PARAM_KEY_FLINK_SQL
+          programArgs += submitRequest.flinkSQL
+          if (submitRequest.appConf != null) {
+            programArgs += PARAM_KEY_APP_CONF
+            programArgs += submitRequest.appConf
+          }
+          val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
+          version match {
+            case Array(1, 13, _) =>
+              providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.13"
+            case Array(1, 11 | 12, _) =>
+              providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.12"
+            case _ =>
+              throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
+          }
+          val jobLib = s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
+          if (HdfsUtils.exists(jobLib)) {
+            providedLibs += jobLib
+          }
+        case _ =>
+          // Custom Code 必传配置文件...
           programArgs += PARAM_KEY_APP_CONF
           programArgs += submitRequest.appConf
-        }
-        val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
-        version match {
-          case Array(1, 13, _) =>
-            providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.13"
-          case Array(1, 11 | 12, _) =>
-            providedLibs += s"${HdfsUtils.getDefaultFS}$APP_SHIMS/flink-1.12"
-          case _ =>
-            throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
-        }
-        val jobLib = s"${HdfsUtils.getDefaultFS}$APP_WORKSPACE/${submitRequest.jobID}/lib"
-        if (HdfsUtils.exists(jobLib)) {
-          providedLibs += jobLib
-        }
-      case _ =>
-        // Custom Code 必传配置文件...
-        programArgs += PARAM_KEY_APP_CONF
-        programArgs += submitRequest.appConf
-    }
-
-    val defParallelism = getParallelism(submitRequest)
-    if (defParallelism != null) {
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += s"$defParallelism"
-    }
-
-    //flink-conf.yaml配置
-    submitRequest.flinkDefaultConfiguration.keySet().foreach(x => {
-      submitRequest.flinkDefaultConfiguration.getString(x, null) match {
-        case v if v != null => effectiveConfiguration.setString(x, v)
-        case _ =>
       }
-    })
-
-    //main class
-    if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
+      providedLibs -> programArgs
     }
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
@@ -169,9 +159,12 @@ object ApplicationSubmit extends YarnSubmitTrait {
     val retainedOption = CheckpointingOptions.MAX_RETAINED_CHECKPOINTS
     effectiveConfiguration.set(retainedOption, submitRequest.flinkDefaultConfiguration.get(retainedOption))
 
-    logInfo("----------------------------------------------------------------------")
-    logInfo(s"Effective executor configuration: $effectiveConfiguration ")
-    logInfo("----------------------------------------------------------------------")
+    logInfo(
+      s"""
+         |----------------------------------------------------------------------
+         |Effective executor configuration: $effectiveConfiguration
+         |----------------------------------------------------------------------
+         |""".stripMargin)
 
     effectiveConfiguration
   }

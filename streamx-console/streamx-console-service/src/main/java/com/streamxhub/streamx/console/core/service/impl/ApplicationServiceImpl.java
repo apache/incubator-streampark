@@ -336,6 +336,16 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         this.start(application, false);
     }
 
+    @Override
+    public boolean checkStart(Application app) {
+        try {
+            checkFlinkEnv();
+            return true;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
     private void removeApp(Long appId) {
         removeById(appId);
         HdfsUtils.delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
@@ -880,8 +890,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean start(Application appParam, boolean auto) throws Exception {
-
-        checkFlinkEnv();
 
         final Application application = getById(appParam.getId());
         //手动启动的,将reStart清空

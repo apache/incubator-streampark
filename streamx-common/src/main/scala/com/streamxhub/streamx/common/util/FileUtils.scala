@@ -27,6 +27,19 @@ import scala.collection.JavaConversions._
 
 object FileUtils extends org.apache.commons.io.FileUtils {
 
+  def createTempDir(): File = {
+    val TEMP_DIR_ATTEMPTS = 10000
+    val baseDir = new File(System.getProperty("java.io.tmpdir"))
+    val baseName = System.currentTimeMillis + "-"
+    for (counter <- 0 until TEMP_DIR_ATTEMPTS) {
+      val tempDir = new File(baseDir, baseName + counter)
+      if (tempDir.mkdir) {
+        return tempDir
+      }
+    }
+    throw new IllegalStateException(s"Failed to create directory within $TEMP_DIR_ATTEMPTS  attempts (tried $baseName 0 to $baseName ${TEMP_DIR_ATTEMPTS - 1})")
+  }
+
   def exists(path: String): Unit = {
     require(path != null && path.nonEmpty && new File(path).exists(), s"file $path is not exist!")
   }

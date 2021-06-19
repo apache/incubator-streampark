@@ -73,6 +73,10 @@ object ConfigConst {
 
   val KEY_SECURITY_KERBEROS_PRINCIPAL = "security.kerberos.login.principal"
 
+  val KEY_SECURITY_KERBEROS_KRB5_CONF = "security.kerberos.login.krb5"
+
+  val KEY_JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf"
+
   //spark
 
   val KEY_SPARK_USER_ARGS = "spark.user.args"

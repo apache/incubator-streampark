@@ -232,7 +232,7 @@ export function bigScreenClose(vue) {
 export function applyPom(vue) {
   const controller = vue.controller
   const pom = controller.pom.value
-  if (pom == null || pom.replace(/\\s+/, '') === '') {
+  if (pom == null || pom.trim() === '') {
     return
   }
   const groupExp = /<groupId>([\s\S]*?)<\/groupId>/
