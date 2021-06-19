@@ -79,9 +79,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     try {
       val clusterClient = {
         val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
-        logInfo("--------------------------<<specification>>---------------------------")
-        logInfo(s"$clusterSpecification")
-        logInfo("----------------------------------------------------------------------")
+        logInfo(
+          s"""
+             |--------------------------<<specification>>---------------------------
+             |$clusterSpecification
+             |----------------------------------------------------------------------
+             |""".stripMargin)
+
         val packagedProgram = PackagedProgram
           .newBuilder
           .setJarFile(new File(submitRequest.flinkUserJar))
@@ -99,9 +103,12 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
           getParallelism(submitRequest),
           false
         )
-        logInfo("|------------------------------<<jobId>>------------------------------|")
-        logger.info(s"| jobGraph getJobID: ${jobGraph.getJobID.toString}")
-        logInfo("______________________________________________________________________|")
+        logInfo(
+          s"""
+             ||--------------------------<<applicationId>>--------------------------|
+             || jobGraph getJobID: ${jobGraph.getJobID.toString}  |
+             ||_____________________________________________________________________|
+             |""".stripMargin)
         deployInternal(
           clusterDescriptor,
           clusterSpecification,
@@ -113,9 +120,13 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
       }
       val applicationId = clusterClient.getClusterId
-      logInfo("|--------------------------<<applicationId>>--------------------------|")
-      logInfo(s"| Flink Job Started: applicationId: $applicationId  |")
-      logInfo("|_____________________________________________________________________|")
+      logInfo(
+        s"""
+           ||--------------------------<<applicationId>>--------------------------|
+           || Flink Job Started: applicationId: $applicationId  |
+           ||_____________________________________________________________________|
+           |""".stripMargin)
+
       SubmitResponse(applicationId, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
@@ -125,50 +136,39 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
   private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
     val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
     val effectiveConfiguration = new Configuration(executorConfig)
+    super.applyToConfiguration(submitRequest, effectiveConfiguration)
 
-    val programArgs = new ArrayBuffer[String]()
-    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+    val (providedLibs, programArgs) = {
+      val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
 
-    programArgs += PARAM_KEY_APP_NAME
-    programArgs += submitRequest.effectiveAppName
-    programArgs += PARAM_KEY_FLINK_CONF
-    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+      val programArgs = new ArrayBuffer[String]()
+      Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+      programArgs += PARAM_KEY_APP_NAME
+      programArgs += submitRequest.effectiveAppName
+      programArgs += PARAM_KEY_FLINK_CONF
+      programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
 
-    submitRequest.developmentMode match {
-      case DevelopmentMode.FLINKSQL =>
-        programArgs += PARAM_KEY_FLINK_SQL
-        programArgs += submitRequest.flinkSQL
-        if (submitRequest.appConf != null) {
+      submitRequest.developmentMode match {
+        case DevelopmentMode.FLINKSQL =>
+          programArgs += PARAM_KEY_FLINK_SQL
+          programArgs += submitRequest.flinkSQL
+          if (submitRequest.appConf != null) {
+            programArgs += PARAM_KEY_APP_CONF
+            programArgs += submitRequest.appConf
+          }
+          val jobId = submitRequest.jobID
+        case _ =>
+          // Custom Code 必传配置文件...
           programArgs += PARAM_KEY_APP_CONF
           programArgs += submitRequest.appConf
-        }
-        val jobId = submitRequest.jobID
-      case _ =>
-        // Custom Code 必传配置文件...
-        programArgs += PARAM_KEY_APP_CONF
-        programArgs += submitRequest.appConf
-    }
-
-    val parallelism = getParallelism(submitRequest)
-    if (parallelism != null) {
-      programArgs += PARAM_KEY_FLINK_PARALLELISM
-      programArgs += s"$parallelism"
-    }
-
-    //flink-conf.yaml配置
-    submitRequest.flinkDefaultConfiguration.keySet().foreach(x => {
-      submitRequest.flinkDefaultConfiguration.getString(x, null) match {
-        case v if v != null => effectiveConfiguration.setString(x, v)
-        case _ =>
       }
-    })
-
-    //main class
-    if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
+      val parallelism = getParallelism(submitRequest)
+      if (parallelism != null) {
+        programArgs += PARAM_KEY_FLINK_PARALLELISM
+        programArgs += s"$parallelism"
+      }
+      providedLibs -> programArgs
     }
-
-    val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
 
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //execution.target
@@ -179,9 +179,14 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
     effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_ARGS, programArgs.toList.asJava)
     //shutdown-on-attached-exit
     effectiveConfiguration.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.TRUE)
-    logInfo("----------------------------------------------------------------------")
-    logInfo(s"Effective executor configuration: $effectiveConfiguration ")
-    logInfo("----------------------------------------------------------------------")
+
+    logInfo(
+      s"""
+         |----------------------------------------------------------------------
+         |Effective executor configuration: $effectiveConfiguration
+         |----------------------------------------------------------------------
+         |""".stripMargin)
+
     effectiveConfiguration
   }
 

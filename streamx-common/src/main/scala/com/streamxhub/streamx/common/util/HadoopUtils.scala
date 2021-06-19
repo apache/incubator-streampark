@@ -21,7 +21,6 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.google.common.io.Files
 import com.streamxhub.streamx.common.conf.ConfigConst
 import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_JAVA_SECURITY_KRB5_CONF, KEY_SECURITY_KERBEROS_KRB5_CONF}
 import org.apache.commons.collections.CollectionUtils
@@ -94,15 +93,15 @@ object HadoopUtils extends Logger {
     if (!configurationCache.containsKey(confDir)) {
       FileUtils.exists(confDir)
       val hadoopConfDir = new File(confDir)
-      val files = hadoopConfDir.listFiles().filter(x => x.isFile && x.getName.endsWith(".xml")).toList
+      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
+      val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
-        conf.clear()
         files.foreach(x => conf.addResource(new Path(x.getAbsolutePath)))
       }
       configurationCache.put(confDir, conf)
     }
-    configurationCache.get(confDir)
+    configurationCache(confDir)
   }
 
   /**
@@ -290,7 +289,7 @@ object HadoopUtils extends Logger {
   def getYarnAppTrackingUrl(applicationId: ApplicationId): String = yarnClient.getApplicationReport(applicationId).getTrackingUrl
 
   @throws[IOException] def downloadJar(jarOnHdfs: String): String = {
-    val tmpDir = Files.createTempDir
+    val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))
     if (!fs.exists(sourcePath)) throw new IOException("jar file: " + jarOnHdfs + " doesn't exist.")

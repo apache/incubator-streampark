@@ -21,8 +21,8 @@
         <flink.version>1.12.0</flink.version>
         <async.client.version>2.0.39</async.client.version>
         <vertx.version>3.8.3</vertx.version>
-        <hadoop.version>2.8.0</hadoop.version>
-        <hbase.version>1.2.0</hbase.version>
+        <hadoop.version>2.8.3</hadoop.version>
+        <hbase.version>2.1.10</hbase.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
         <zkclient.version>0.11</zkclient.version>
