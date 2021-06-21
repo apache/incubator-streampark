@@ -140,7 +140,7 @@ trait SparkStreaming {
     }
 
     if (appMain == null) {
-      System.err.println(s"[StreamX] $KEY_SPARK_MAIN_CLASS must be not empty!")
+      System.err.println(s"[StreamX] $KEY_SPARK_MAIN_CLASS must not be empty!")
       System.exit(1)
     }
 

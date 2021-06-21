@@ -82,7 +82,7 @@ object ConfigUtils {
     val password = parameter.toMap.getOrDefault(s"$prefix$KEY_JDBC_PASSWORD", null)
 
     (driver, url, user, password) match {
-      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must be not null")
+      case (x, y, _, _) if x == null || y == null => throw new IllegalArgumentException(s"Jdbc instance:$prefix error,[driver|url] must not be null")
       case (_, _, x, y) if (x != null && y == null) || (x == null && y != null) => throw new IllegalArgumentException("Jdbc instance:" + prefix + " error, [user|password] must be all null,or all not null ")
       case _ =>
     }

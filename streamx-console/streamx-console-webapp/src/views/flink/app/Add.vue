@@ -1229,10 +1229,10 @@ export default {
           if (alertEmail == null) {
             this.form.setFields({
               alertEmail: {
-                errors: [new Error('checkPoint Failure trigger is alert,alertEmail must be not empty must be')]
+                errors: [new Error('checkPoint Failure trigger is alert,alertEmail must not be empty')]
               }
             })
-            callback(new Error('trigger action is alert,alertEmail must be not empty'))
+            callback(new Error('trigger action is alert,alertEmail must not be empty'))
           } else {
             callback()
           }
