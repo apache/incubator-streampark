@@ -91,7 +91,7 @@ class HBaseAsyncFunction[T: TypeInformation, R: TypeInformation](prop: Propertie
     CompletableFuture.supplyAsync(new Supplier[ResultScanner]() {
       override def get(): ResultScanner = {
         val query = queryFunc(input)
-        require(query != null && query.getTable != null, "[StreamX] HBaseRequest query and query's attr table must be not null ")
+        require(query != null && query.getTable != null, "[StreamX] HBaseRequest query and query's attr table must not be null ")
         table = query.getTable(prop)
         table.getScanner(query)
       }

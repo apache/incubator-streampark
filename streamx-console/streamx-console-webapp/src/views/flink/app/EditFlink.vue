@@ -629,7 +629,7 @@ export default {
         if( cpFailureAction === 1) {
           const alertEmail = this.form.getFieldValue('alertEmail')
           if (alertEmail == null || alertEmail.trim() === '') {
-            callback(new Error('checkPoint Failure trigger is alert,alertEmail must be not empty'))
+            callback(new Error('checkPoint Failure trigger is alert,alertEmail must not be empty'))
           } else {
             callback()
           }

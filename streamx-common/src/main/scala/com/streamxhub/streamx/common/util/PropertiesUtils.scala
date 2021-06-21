@@ -131,7 +131,7 @@ object PropertiesUtils extends Logger {
 
   /** Load Yaml present in the given file. */
   def fromYamlFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"Properties inputStream  must be not null")
+    require(inputStream != null, s"Properties inputStream  must not be null")
     try {
       val map = MutableMap[String, String]()
       new Yaml()
@@ -147,7 +147,7 @@ object PropertiesUtils extends Logger {
 
   /** Load properties present in the given file. */
   def fromPropertiesFile(inputStream: InputStream): Map[String, String] = {
-    require(inputStream != null, s"Properties inputStream  must be not null")
+    require(inputStream != null, s"Properties inputStream  must not be null")
     try {
       val properties = new Properties()
       properties.load(inputStream)

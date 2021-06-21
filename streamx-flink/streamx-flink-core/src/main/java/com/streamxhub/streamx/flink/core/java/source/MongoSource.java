@@ -47,9 +47,9 @@ public class MongoSource<T> {
                                              MongoResultFunction<T> resultFunction,
                                              RunningFunction runningFunc) {
 
-        Utils.require(collectionName != null, "collectionName must be not null");
-        Utils.require(queryFunction != null, "queryFunction must be not null");
-        Utils.require(resultFunction != null, "resultFunction must be not null");
+        Utils.require(collectionName != null, "collectionName must not be null");
+        Utils.require(queryFunction != null, "queryFunction must not be null");
+        Utils.require(resultFunction != null, "resultFunction must not be null");
         MongoSourceFunction<T> sourceFunction = new MongoSourceFunction<>(collectionName, property, queryFunction, resultFunction, runningFunc, null);
         return context.getJavaEnv().addSource(sourceFunction);
 

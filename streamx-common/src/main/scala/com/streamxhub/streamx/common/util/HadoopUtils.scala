@@ -21,8 +21,7 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.streamxhub.streamx.common.conf.ConfigConst
-import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_JAVA_SECURITY_KRB5_CONF, KEY_SECURITY_KERBEROS_KRB5_CONF}
+import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.hadoop.conf.Configuration
@@ -79,7 +78,7 @@ object HadoopUtils extends Logger {
   }
 
   private[this] val kerberosEnable: Boolean = if (kerberosConf == null) false else {
-    val enableString = kerberosConf.getOrElse(ConfigConst.KEY_SECURITY_KERBEROS_ENABLE, "false")
+    val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
     Try(enableString.trim.toBoolean).getOrElse(false)
   }
 
@@ -136,11 +135,11 @@ object HadoopUtils extends Logger {
 
   private[this] def kerberosLogin(conf: Configuration): Unit = if (kerberosEnable) {
     logInfo("kerberos login starting....")
-    val principal = kerberosConf.getOrElse(ConfigConst.KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
-    val keytab = kerberosConf.getOrElse(ConfigConst.KEY_SECURITY_KERBEROS_KEYTAB, "").trim
+    val principal = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_PRINCIPAL, "").trim
+    val keytab = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_KEYTAB, "").trim
     require(
       principal.nonEmpty && keytab.nonEmpty,
-      s"${ConfigConst.KEY_SECURITY_KERBEROS_PRINCIPAL} and ${ConfigConst.KEY_SECURITY_KERBEROS_KEYTAB} must be not empty"
+      s"${KEY_SECURITY_KERBEROS_PRINCIPAL} and ${KEY_SECURITY_KERBEROS_KEYTAB} must not be empty"
     )
 
     val krb5 = kerberosConf.getOrElse(
@@ -153,7 +152,7 @@ object HadoopUtils extends Logger {
       System.setProperty("java.security.krb5.conf.path", krb5)
     }
 
-    conf.set(ConfigConst.KEY_HADOOP_SECURITY_AUTHENTICATION, ConfigConst.KEY_KERBEROS)
+    conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
     try {
       UserGroupInformation.setConfiguration(conf)
       UserGroupInformation.loginUserFromKeytab(principal, keytab)
@@ -198,40 +197,42 @@ object HadoopUtils extends Logger {
           }
 
           val name = if (!HAUtil.isHAEnabled(conf)) addressPrefix else {
-            val yarnConf = new YarnConfiguration(conf)
-            val activeRMId = kerberosEnable match {
-              case b if !b => RMHAUtils.findActiveRMHAId(yarnConf)
-              case _ =>
-                //If you don't know why, don't modify it
-                val rmIds = conf.getStringCollection("yarn.resourcemanager.ha.rm-ids")
-                // url ==> rmId
-                val idUrlMap = new JavaHashMap[String, String]
-                rmIds.foreach(id => {
-                  val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
-                    case null =>
-                      val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
-                      s"$hostname:$defaultPort"
-                    case x => x
-                  }
-                  idUrlMap.put(s"$protocol$address", id)
-                })
-
-                var rmId: String = null
-
-                val rpcTimeoutForChecks = yarnConf.getInt(
-                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
-                  CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
-                )
-
-                breakable(idUrlMap.foreach(x => {
-                  //test yarn url
-                  val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
-                  if (activeUrl != null) {
-                    rmId = idUrlMap(activeUrl)
-                    break
-                  }
-                }))
-                rmId
+            val activeRMId = {
+              val yarnConf = new YarnConfiguration(conf)
+              Option(RMHAUtils.findActiveRMHAId(yarnConf)) match {
+                case Some(x) =>
+                  logInfo("findActiveRMHAId successful")
+                  x
+                case None =>
+                  //If you don't know why, don't modify it
+                  logWarn(s"findActiveRMHAId is null,config yarn.acl.enable:${yarnConf.get("yarn.acl.enable")},now http try it.")
+                  // url ==> rmId
+                  val idUrlMap = new JavaHashMap[String, String]
+                  val rmIds = HAUtil.getRMHAIds(conf)
+                  rmIds.foreach(id => {
+                    val address = conf.get(HAUtil.addSuffix(addressPrefix, id)) match {
+                      case null =>
+                        val hostname = conf.get(HAUtil.addSuffix("yarn.resourcemanager.hostname", id))
+                        s"$hostname:$defaultPort"
+                      case x => x
+                    }
+                    idUrlMap.put(s"$protocol$address", id)
+                  })
+                  var rmId: String = null
+                  val rpcTimeoutForChecks = yarnConf.getInt(
+                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_KEY,
+                    CommonConfigurationKeys.HA_FC_CLI_CHECK_TIMEOUT_DEFAULT
+                  )
+                  breakable(idUrlMap.foreach(x => {
+                    //test yarn url
+                    val activeUrl = httpTestYarnRMUrl(x._1, rpcTimeoutForChecks)
+                    if (activeUrl != null) {
+                      rmId = idUrlMap(activeUrl)
+                      break
+                    }
+                  }))
+                  rmId
+              }
             }
             require(activeRMId != null, "[StreamX] can not found yarn active node")
             logInfo(s"current activeRMHAId: $activeRMId")
@@ -261,6 +262,7 @@ object HadoopUtils extends Logger {
         }
       }
     }
+    logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
     rmHttpURL
   }
 
