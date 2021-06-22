@@ -1592,7 +1592,18 @@ export default {
       const socket = new SockJS(baseUrl(true).concat('/websocket'))
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
-        this.stompClient.subscribe('/resp/mvn', (msg) => this.terminal.writeln(msg.body))
+        this.stompClient.subscribe(
+            '/resp/mvn',
+            (msg) => {
+              if(msg.body.startsWith('[Exception]')) {
+                this.$swal.fire(
+                    'Failed',
+                    msg.body,
+                    'error'
+                )
+              }
+              this.terminal.writeln(msg.body)
+            })
         this.stompClient.send('/req/mvn/' + app.id)
       })
     },

@@ -591,6 +591,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         return null;
                     });
 
+                    LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
@@ -609,11 +610,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             FlinkSql flinkSql = flinkSqlService.getCandidate(application.getId(), CandidateType.NEW);
                             assert flinkSql != null;
                             application.setDependency(flinkSql.getDependency());
-                            log.info("FlinkSqlJob deploying...");
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
-                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
                         updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
                             application.setSavePointed(true);
@@ -631,28 +630,23 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
                             }
                         }
-
+                    } catch (ServiceException e) {
+                        updateWrapper.eq(Application::getId, application.getId());
+                        updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
+                        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
+                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
                         FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                             baseMapper.update(application, updateWrapper);
                             return null;
                         });
-
                         //如果当前任务未运行,或者刚刚新增的任务,则直接将候选版本的设置为正式版本
                         FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), false);
                         if (!application.isRunning() || flinkSql == null) {
                             toEffective(application);
                         }
-                    } catch (ServiceException e) {
-                        LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
-                        updateWrapper.eq(Application::getId, application.getId());
-                        updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
-                        updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                        FlinkTrackingTask.refreshTracking(application.getId(), () -> {
-                            baseMapper.update(application, updateWrapper);
-                            return null;
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                     return null;
                 });
@@ -729,7 +723,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                 ));
             } catch (Exception e) {
-                simpMessageSendingOperations.convertAndSend("/resp/mvn", e.getMessage());
+                simpMessageSendingOperations.convertAndSend("/resp/mvn", "[Exception] ".concat(e.getMessage()));
                 throw new ServiceException("downloadDependency error: " + e.getMessage());
             } finally {
                 tailOutMap.remove(id);
