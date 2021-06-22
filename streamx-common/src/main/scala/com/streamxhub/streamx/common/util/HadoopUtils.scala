@@ -259,10 +259,10 @@ object HadoopUtils extends Logger {
             .append(address.getPort)
             .toString()
 
+          logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
         }
       }
     }
-    logInfo(s"yarn resourceManager webapp url:$rmHttpURL")
     rmHttpURL
   }
 
