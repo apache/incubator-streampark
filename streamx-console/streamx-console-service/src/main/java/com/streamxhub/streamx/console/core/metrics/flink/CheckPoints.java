@@ -82,7 +82,7 @@ public class CheckPoints implements Serializable {
         }
 
         public String getPath() {
-            return this.getExternalPath().replaceFirst("^hdfs:", "hdfs://");
+            return this.getExternalPath().replaceFirst("^hdfs:/[^/]", "hdfs:///");
         }
     }
 
