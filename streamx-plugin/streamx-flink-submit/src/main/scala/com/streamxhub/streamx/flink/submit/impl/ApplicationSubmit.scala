@@ -83,7 +83,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
           logInfo(
             s"""
                ||--------------------------<<applicationId>>--------------------------|
-               || Flink Job Started: applicationId: $applicationId|
+               || Flink Job Started: applicationId: $applicationId  |
                ||_____________________________________________________________________|
                |""".stripMargin)
 

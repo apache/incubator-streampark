@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="60 seconds" debug="false">
-    <include resource="org/springframework/boot/logging/logback/base.xml" />
     <contextName>StreamX</contextName>
     <property name="log.path" value="${app.home}/logs"/>
     <property name="log.maxHistory" value="15"/>

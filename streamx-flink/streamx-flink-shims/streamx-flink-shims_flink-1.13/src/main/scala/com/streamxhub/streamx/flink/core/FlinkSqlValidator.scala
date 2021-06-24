@@ -30,11 +30,11 @@ import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment
 import org.apache.flink.table.api.SqlDialect.{DEFAULT, HIVE}
 import org.apache.flink.table.api.bridge.java.StreamTableEnvironment
 import org.apache.flink.table.api.{EnvironmentSettings, TableException}
-import org.apache.flink.table.planner.calcite.CalciteParser
 import org.apache.flink.table.planner.delegation.FlinkSqlParserFactories
+import org.apache.flink.table.planner.parse.CalciteParser
 import org.apache.flink.table.planner.utils.TableConfigUtils
 
-object SqlValidator extends Logger {
+object FlinkSqlValidator extends Logger {
 
   private[this] lazy val parser = {
     val tableConfig = StreamTableEnvironment.create(
@@ -66,6 +66,7 @@ object SqlValidator extends Logger {
     new CalciteParser(sqlParserConfig)
   }
 
+
   def verifySql(sql: String): SqlError = {
     try {
       val sqlCommands = SqlCommandParser.parseSQL(sql)
@@ -75,7 +76,7 @@ object SqlValidator extends Logger {
         lazy val last = call.operands.last
         command match {
           case SET =>
-            if (!FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+            if (!FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
               return SqlError(
                 SqlErrorType.SYNTAX_ERROR,
                 exception = s"$args is not a valid table/sql config",
@@ -83,21 +84,15 @@ object SqlValidator extends Logger {
               )
             }
           case RESET =>
-            if (args != "ALL" && !FlinkTableHelper.tableConfigOptions.containsKey(args)) {
+            if (args != "ALL" && !FlinkSqlExecutor.tableConfigOptions.containsKey(args)) {
               return SqlError(
                 SqlErrorType.SYNTAX_ERROR,
                 exception = s"$args is not a valid table/sql config",
                 sql = sql.replaceFirst(";|$", ";")
               )
             }
-          case SHOW_CURRENT_CATALOG | SHOW_CURRENT_DATABASE =>
-            return SqlError(
-              SqlErrorType.UNSUPPORTED_SQL,
-              exception = s"$args unsupported in current flink version",
-              sql = sql.replaceFirst(";|$", ";")
-            )
           case
-            SHOW_CATALOGS | SHOW_DATABASES |
+            SHOW_CATALOGS | SHOW_CURRENT_CATALOG | SHOW_DATABASES | SHOW_CURRENT_DATABASE |
             SHOW_TABLES | SHOW_VIEWS | SHOW_FUNCTIONS | SHOW_MODULES |
             CREATE_FUNCTION | CREATE_CATALOG | CREATE_TABLE | CREATE_VIEW | CREATE_DATABASE |
             DROP_CATALOG | DROP_DATABASE | DROP_TABLE | DROP_VIEW | DROP_FUNCTION |

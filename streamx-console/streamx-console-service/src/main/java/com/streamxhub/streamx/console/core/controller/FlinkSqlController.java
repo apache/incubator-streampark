@@ -17,14 +17,12 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.streamxhub.streamx.common.enums.SqlErrorType;
-import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
 import com.streamxhub.streamx.flink.core.SqlError;
-import com.streamxhub.streamx.flink.core.SqlValidator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;

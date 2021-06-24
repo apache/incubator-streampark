@@ -183,7 +183,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     @Override
     public SqlError verifySql(String sql) {
         ClassLoader loader = getFlinkShimsClassLoader();
-        Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.SqlValidator");
+        Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
         Method method = clazz.getDeclaredMethod("verifySql", String.class);
         method.setAccessible(true);
         return (SqlError) method.invoke(null, sql);

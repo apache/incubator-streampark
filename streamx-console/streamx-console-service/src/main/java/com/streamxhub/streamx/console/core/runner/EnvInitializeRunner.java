@@ -100,10 +100,12 @@ public class EnvInitializeRunner implements ApplicationRunner {
             }
             HdfsUtils.mkdirs(appPlugins);
 
+            String keepFile = ".gitkeep";
+
             File plugins = new File(WebUtil.getAppDir("plugins"));
             for (File file : Objects.requireNonNull(plugins.listFiles())) {
                 String plugin = appPlugins.concat("/").concat(file.getName());
-                if (!HdfsUtils.exists(plugin)) {
+                if (!HdfsUtils.exists(plugin) && !keepFile.equals(file.getName())) {
                     log.info("load plugin:{} to {}", file.getName(), appPlugins);
                     HdfsUtils.upload(file.getAbsolutePath(), appPlugins, false, true);
                 }
@@ -118,7 +120,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             File[] shims = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
             for (File file : Objects.requireNonNull(shims)) {
                 Matcher matcher = pattern.matcher(file.getName());
-                if (matcher.matches()) {
+                if (!keepFile.equals(file.getName()) && matcher.matches()) {
                     String version = matcher.group(1);
                     String shimsPath = appShims.concat("/flink-").concat(version);
                     if (!HdfsUtils.exists(shimsPath)) {

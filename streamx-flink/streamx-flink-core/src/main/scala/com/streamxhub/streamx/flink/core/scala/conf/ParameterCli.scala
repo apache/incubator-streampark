@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst.{KEY_FLINK_DEPLOYMENT_OPTI
 import com.streamxhub.streamx.common.util.PropertiesUtils
 import org.apache.commons.cli.{DefaultParser, Options}
 
+import java.net.URLClassLoader
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
@@ -42,58 +43,65 @@ object ParameterCli {
   def main(args: Array[String]): Unit = print(read(args))
 
   def read(args: Array[String]): String = {
-    val action = args(0)
-    val conf = args(1)
-    val map = Try(if (conf.endsWith(".properties")) {
-      PropertiesUtils.fromPropertiesFile(conf)
-    } else {
-      PropertiesUtils.fromYamlFile(conf)
-    }) match {
-      case Success(value) => value
-      case _ => Map.empty[String, String]
-    }
-    val programArgs = args.drop(2)
-    action match {
-      case "--option" =>
-        val option = getOption(map, programArgs)
-        val buffer = new StringBuffer()
-        Try {
-          val line = parser.parse(flinkOptions, option, false)
-          line.getOptions.foreach(x => {
-            buffer.append(s" -${x.getOpt}")
-            if (x.hasArg) {
-              buffer.append(s" ${x.getValue()}")
+    args(0) match {
+      case "--vmopt" =>
+        //解决jdk1.8+ 动态加载资源到classpath下问题
+        ClassLoader.getSystemClassLoader match {
+          case c if c.isInstanceOf[URLClassLoader] => ""
+          case _ => "--add-opens java.base/jdk.internal.loader=ALL-UNNAMED --add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED"
+        }
+      case action =>
+        val conf = args(1)
+        val map = Try(if (conf.endsWith(".properties")) {
+          PropertiesUtils.fromPropertiesFile(conf)
+        } else {
+          PropertiesUtils.fromYamlFile(conf)
+        }) match {
+          case Success(value) => value
+          case _ => Map.empty[String, String]
+        }
+        val programArgs = args.drop(2)
+        action match {
+          case "--option" =>
+            val option = getOption(map, programArgs)
+            val buffer = new StringBuffer()
+            Try {
+              val line = parser.parse(flinkOptions, option, false)
+              line.getOptions.foreach(x => {
+                buffer.append(s" -${x.getOpt}")
+                if (x.hasArg) {
+                  buffer.append(s" ${x.getValue()}")
+                }
+              })
+            } match {
+              case Failure(exception) => exception.printStackTrace()
+              case _ =>
             }
-          })
-        } match {
-          case Failure(exception) => exception.printStackTrace()
-          case _ =>
+            map.getOrElse(optionMain, null) match {
+              case null =>
+              case mainClass => buffer.append(s" -c $mainClass")
+            }
+            buffer.toString.trim
+          case "--property" =>
+            val buffer = new StringBuffer()
+            map
+              .filter(x => x._1 != optionMain && x._1.startsWith(propertyPrefix) && x._2.nonEmpty)
+              .foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
+            buffer.toString.trim
+          case "--name" =>
+            map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
+              case yarnName if yarnName.nonEmpty => yarnName
+              case _ => ""
+            }
+          //是否detached模式...
+          case "--detached" =>
+            val option = getOption(map, programArgs)
+            val line = parser.parse(FlinkRunOption.allOptions, option, false)
+            val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
+            val mode = if (detached) "Detached" else "Attach"
+            mode
+          case _ => null
         }
-        map.getOrElse(optionMain, null) match {
-          case null =>
-          case mainClass => buffer.append(s" -c $mainClass")
-        }
-        buffer.toString.trim
-      case "--property" =>
-        val buffer = new StringBuffer()
-        map
-          .filter(x => x._1 != optionMain && x._1.startsWith(propertyPrefix) && x._2.nonEmpty)
-          .foreach(x => buffer.append(s" -D${x._1.drop(propertyPrefix.length)}=${x._2}"))
-        buffer.toString.trim
-      case "--name" =>
-        map.getOrElse(propertyPrefix.concat(ConfigConst.KEY_FLINK_APP_NAME), "").trim match {
-          case yarnName if yarnName.nonEmpty => yarnName
-          case _ => ""
-        }
-      //是否detached模式...
-      case "--detached" =>
-        val option = getOption(map, programArgs)
-        val line = parser.parse(FlinkRunOption.allOptions, option, false)
-        val detached = line.hasOption(FlinkRunOption.DETACHED_OPTION.getOpt) || line.hasOption(FlinkRunOption.DETACHED_OPTION.getLongOpt)
-        val mode = if (detached) "Detached" else "Attach"
-        mode
-      case _ => null
-
     }
   }
 

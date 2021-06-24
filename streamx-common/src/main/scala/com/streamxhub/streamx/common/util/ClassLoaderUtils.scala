@@ -21,13 +21,10 @@
 package com.streamxhub.streamx.common.util
 
 import java.io.File
-import java.lang.reflect.Method
 import java.net.{URL, URLClassLoader}
 import java.util.function.Supplier
 
 object ClassLoaderUtils extends Logger {
-
-  private val classloader = ClassLoader.getSystemClassLoader.asInstanceOf[URLClassLoader]
 
   /**
    * 指定 classLoader执行代码...
@@ -98,17 +95,6 @@ object ClassLoaderUtils extends Logger {
     loopDirs(file)
   }
 
-  /**
-   * URLClassLoader的addURL方法
-   */
-  private val addURL: Method = try {
-    val add = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
-    add.setAccessible(true)
-    add
-  } catch {
-    case e: Exception => throw new RuntimeException(e)
-  }
-
   private[this] def loadPath(filepath: String, ext: List[String]): Unit = {
     val file = new File(filepath)
     loopFiles(file, ext)
@@ -138,7 +124,20 @@ object ClassLoaderUtils extends Logger {
 
   private[this] def addURL(file: File): Unit = {
     try {
-      addURL.invoke(classloader, file.toURI.toURL)
+      val classLoader = ClassLoader.getSystemClassLoader
+      classLoader match {
+        case c if c.isInstanceOf[URLClassLoader] =>
+          val addURL = classOf[URLClassLoader].getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+          addURL.setAccessible(true)
+          addURL.invoke(c, file.toURI.toURL)
+        case _ =>
+          val field = classLoader.getClass.getDeclaredField("ucp")
+          field.setAccessible(true)
+          val ucp = field.get(classLoader)
+          val addURL = ucp.getClass.getDeclaredMethod("addURL", Array(classOf[URL]): _*)
+          addURL.setAccessible(true)
+          addURL.invoke(ucp, file.toURI.toURL)
+      }
     } catch {
       case e: Exception => throw e
     }

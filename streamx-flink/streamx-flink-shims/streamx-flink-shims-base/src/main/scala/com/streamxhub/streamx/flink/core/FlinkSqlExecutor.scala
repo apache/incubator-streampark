@@ -32,9 +32,10 @@ import org.apache.flink.table.api.{SqlDialect, TableEnvironment}
 import java.util
 import java.util.concurrent.locks.ReentrantReadWriteLock
 import java.util.{HashMap => JavaHashMap, Map => JavaMap}
+import scala.collection.mutable.ArrayBuffer
 import scala.util.{Failure, Success, Try}
 
-object FlinkTableHelper extends Logger {
+object FlinkSqlExecutor extends Logger {
 
   private[this] val lock = new ReentrantReadWriteLock().writeLock
 
@@ -70,7 +71,7 @@ object FlinkTableHelper extends Logger {
     configOptions
   }
 
-  private[streamx] def callSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
+  private[streamx] def executeSql(sql: String, parameter: ParameterTool, context: TableEnvironment)(implicit callbackFunc: String => Unit = null): Unit = {
     val flinkSql: String = if (sql == null || sql.isEmpty) parameter.get(KEY_FLINK_SQL()) else parameter.get(sql)
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
     require(flinkSql != null && flinkSql.trim.nonEmpty, sqlEmptyError)
@@ -83,6 +84,7 @@ object FlinkTableHelper extends Logger {
     }
 
     //TODO registerHiveCatalog
+    val insertArray = new ArrayBuffer[String]()
     SqlCommandParser.parseSQL(flinkSql).foreach(x => {
       val args = x.operands.head
       val command = x.command.name
@@ -156,7 +158,10 @@ object FlinkTableHelper extends Logger {
           val tableResult = context.executeSql(sql)
           val r = tableResult.collect().next().getField(0).toString
           callback(r)
-        case SELECT | INSERT_INTO | INSERT_OVERWRITE |
+        case INSERT_INTO | INSERT_OVERWRITE => insertArray += args
+        case SELECT =>
+          throw new Exception(s"[StreamX] Unsupported SELECT in current version.")
+        case INSERT_INTO | INSERT_OVERWRITE |
              CREATE_FUNCTION | DROP_FUNCTION | ALTER_FUNCTION |
              CREATE_CATALOG | DROP_CATALOG |
              CREATE_TABLE | DROP_TABLE | ALTER_TABLE |
@@ -174,6 +179,19 @@ object FlinkTableHelper extends Logger {
         case _ => throw new Exception(s"[StreamX] Unsupported command: ${x.command}")
       }
     })
+
+    if (insertArray.nonEmpty) {
+      val statementSet = context.createStatementSet()
+      insertArray.foreach(statementSet.addInsertSql)
+      statementSet.execute() match {
+        case t if t != null =>
+          Try(t.getJobClient.get.getJobID).getOrElse(null) match {
+            case x if x != null => logInfo(s"jobId:$x")
+            case _ =>
+          }
+        case _ =>
+      }
+    }
 
     logInfo(s"\n\n\n==============flinkSql==============\n\n $flinkSql\n\n============================\n\n\n")
   }
