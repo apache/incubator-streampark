@@ -245,7 +245,7 @@ cat > $name/pom.xml <<EOF
         <streamx.spark.version>1.0.0</streamx.spark.version>
 
         <spark.version>2.2.0</spark.version>
-        <hadoop.version>2.8.0</hadoop.version>
+        <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>1.2.0-cdh5.12.1</hbase.version>
         <hive.version>1.1.0-cdh5.12.1</hive.version>
 

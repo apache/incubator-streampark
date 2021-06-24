@@ -153,7 +153,7 @@ public class ApplicationController {
 
     @PostMapping("yarn")
     public RestResponse yarn() {
-        return RestResponse.create().data(HadoopUtils.getRMWebAppURL(true));
+        return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
     }
 
     @PostMapping("name")

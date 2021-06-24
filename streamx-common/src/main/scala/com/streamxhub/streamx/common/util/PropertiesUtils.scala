@@ -159,13 +159,9 @@ object PropertiesUtils extends Logger {
 
 
   /**
-   * <pre>
-   * 不要问我为什么,因为flink在解析flink-conf.yaml的时候才发现
-   * 压根就没有按照yaml的标准去解析,也是就是说flink-conf.yaml根本
-   * 就不是一个标准的yaml格式的文件,不能按照标准的yaml格式的方式来读取,坑死人不填命啊.
-   * </pre>
    *
    * @param file
+   * @return
    */
   def loadFlinkConfYaml(file: File): JavaMap[String, String] = {
     require(file != null && file.exists() && file.isFile)
@@ -193,7 +189,7 @@ object PropertiesUtils extends Logger {
         if (key.nonEmpty && value.nonEmpty) {
           flinkConf += key -> value
         } else {
-          logWarn(s"Error after splitting key and value in configuration " + lineNo.get() + ": \"" + line + "\"")
+          logWarn(s"Error after splitting key and value in configuration ${lineNo.get()}: $line")
         }
       }
     }

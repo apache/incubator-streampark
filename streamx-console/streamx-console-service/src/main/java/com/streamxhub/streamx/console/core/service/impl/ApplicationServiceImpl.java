@@ -460,7 +460,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             } else if (application.isStreamXJob()) {
                 ApplicationConfig config = configService.getEffective(application.getId());
                 if (config != null) {
-                    if (!appParam.getConfigId().equals(config.getId())) {
+                    if (appParam.getConfigId() == null || !appParam.getConfigId().equals(config.getId())) {
                         application.setDeploy(DeployState.NEED_RESTART_AFTER_CONF_UPDATE.get());
                     } else {
                         String decode = new String(Base64.getDecoder().decode(appParam.getConfig()));

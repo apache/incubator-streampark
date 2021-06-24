@@ -22,7 +22,7 @@
 import com.streamxhub.streamx.common.enums.SqlErrorType;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.flink.core.SqlError;
-import com.streamxhub.streamx.flink.core.SqlValidator;
+import com.streamxhub.streamx.flink.core.FlinkSqlValidator;
 import org.junit.Test;
 
 import java.util.regex.Matcher;
@@ -35,7 +35,7 @@ public class SQLCommandTest {
 
         String sql = "SET table.planner = blink;";
 
-        SqlError sqlError = SqlValidator.verifySql(sql);
+        SqlError sqlError = FlinkSqlValidator.verifySql(sql);
         if (sqlError != null) {
             String[] array = sqlError.sql().trim().split("\n");
             String start = array[0].trim();

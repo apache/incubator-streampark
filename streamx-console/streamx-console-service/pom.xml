@@ -17,7 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <mybatis-plus.version>3.1.0</mybatis-plus.version>
-        <hadoop.version>2.8.0</hadoop.version>
+        <hadoop.version>2.10.1</hadoop.version>
         <hbase.version>2.1.10</hbase.version>
         <flink112.version>1.12.0</flink112.version>
         <flink113.version>1.13.0</flink113.version>
