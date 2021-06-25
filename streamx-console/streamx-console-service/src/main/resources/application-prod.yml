@@ -7,6 +7,9 @@ server:
       io: 4
       worker: 20
 
+logging:
+  level: debug
+
 spring:
   application.name: streamx
   devtools:
@@ -34,7 +37,7 @@ spring:
         # 数据源-1，名称为 primary
         primary:
           username: root
-          password: 123322242
+          password: 123456
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/streamx?useUnicode=true&characterEncoding=UTF-8&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=GMT%2B8
   aop.proxy-target-class: true
@@ -85,5 +88,6 @@ streamx:
       /*.js,
       /*.png,
       /*.jpg,
-      /*.less
+      /*.less,
+      /
 
