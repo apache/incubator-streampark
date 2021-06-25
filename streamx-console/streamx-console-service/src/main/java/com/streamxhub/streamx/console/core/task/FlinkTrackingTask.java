@@ -168,17 +168,17 @@ public class FlinkTrackingTask {
     @Scheduled(fixedDelay = 1000)
     public void execute() {
         // 正常5秒钟获取一次信息
-        long track_interval = 1000L * 5;
+        long trackInterval = 1000L * 5;
         //10秒之内
-        long option_interval = 1000L * 10;
+        long optionInterval = 1000L * 10;
 
         //1) 项目刚启动第一次执行,或者前端正在操作...(启动,停止)需要立即返回状态信息.
         if (lastTrackTime == null || !OPTIONING.isEmpty()) {
             tracking();
-        } else if (System.currentTimeMillis() - lastOptionTime <= option_interval) {
+        } else if (System.currentTimeMillis() - lastOptionTime <= optionInterval) {
             //2) 如果在管理端正在操作时间的10秒中之内(每秒执行一次)
             tracking();
-        } else if (System.currentTimeMillis() - lastTrackTime >= track_interval) {
+        } else if (System.currentTimeMillis() - lastTrackTime >= trackInterval) {
             //3) 正常信息获取,判断本次时间和上次时间是否间隔5秒(正常监控信息获取,每5秒一次)
             tracking();
         }
