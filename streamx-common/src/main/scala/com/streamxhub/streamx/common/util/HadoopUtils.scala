@@ -21,7 +21,7 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.google.common.cache.{CacheBuilder, CacheLoader}
+import com.github.benmanes.caffeine.cache.{Cache, CacheLoader, Caffeine}
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
@@ -43,7 +43,7 @@ import org.apache.http.impl.client.HttpClients
 import java.io.{File, IOException}
 import java.net.InetAddress
 import java.util
-import java.util.concurrent.{ConcurrentHashMap, TimeUnit}
+import java.util.concurrent.ConcurrentHashMap
 import java.util.{HashMap => JavaHashMap}
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
@@ -54,9 +54,9 @@ import scala.util.{Failure, Success, Try}
  */
 object HadoopUtils extends Logger {
 
-  private[this] val HADOOP_HOME: String = "HADOOP_HOME"
-  private[this] val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
-  private[this] val CONF_SUFFIX: String = "/etc/hadoop"
+  private[this] lazy val HADOOP_HOME: String = "HADOOP_HOME"
+  private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
+  private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
   private[this] var reusableYarnClient: YarnClient = _
   private[this] var reusableConf: Configuration = _
@@ -65,7 +65,9 @@ object HadoopUtils extends Logger {
 
   private[this] var rmHttpURL: String = _
 
-  private[this] val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]
+  private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
+
+  private[this] var caffeine: Cache[String, Configuration] = _
 
   lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
     case null =>
@@ -178,21 +180,31 @@ object HadoopUtils extends Logger {
       }
     }
 
+    def refreshConf(): Configuration = {
+      val conf = initHadoopConf()
+      kerberosLogin(conf)
+      if (reusableYarnClient != null) {
+        reusableYarnClient.close()
+        reusableYarnClient = null
+      }
+      hdfs = getFileSystem(conf)
+      conf
+    }
+
     if (kerberosEnable) {
       val expire = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_EXPIRE, "2").trim
-      CacheBuilder.newBuilder.expireAfterWrite(expire.toLong, TimeUnit.HOURS)
-        .build[String, Configuration](new CacheLoader[String, Configuration]() {
-          override def load(key: String): Configuration = {
-            val conf = initHadoopConf()
-            kerberosLogin(conf)
-            if (reusableYarnClient != null) {
-              reusableYarnClient.close()
-              reusableYarnClient = null
+      val (duration, unit) = DateUtils.getTimeUnit(expire)
+      if (caffeine == null) {
+        caffeine = Caffeine.newBuilder().refreshAfterWrite(duration.toLong, unit)
+          .build[String, Configuration](new CacheLoader[String, Configuration]() {
+            override def load(key: String): Configuration = {
+              logInfo(s"recertification kerberos: time:${DateUtils.now(DateUtils.fullFormat)}, duration:$expire")
+              refreshConf()
             }
-            hdfs = getFileSystem(conf)
-            conf
-          }
-        }).asMap().entrySet().head.getValue
+          })
+        caffeine.put("config", refreshConf())
+      }
+      caffeine.getIfPresent("config")
     } else {
       if (reusableConf == null) {
         reusableConf = initHadoopConf()
