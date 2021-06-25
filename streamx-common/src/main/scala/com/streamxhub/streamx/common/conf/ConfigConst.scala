@@ -77,6 +77,8 @@ object ConfigConst {
 
   val KEY_JAVA_SECURITY_KRB5_CONF = "java.security.krb5.conf"
 
+  val KEY_SECURITY_KERBEROS_EXPIRE = "security.kerberos.expire"
+
   //spark
 
   val KEY_SPARK_USER_ARGS = "spark.user.args"
