@@ -516,6 +516,7 @@
       <div
         id="startExp"
         class="startExp"
+        ref="startExp"
         style="height: 100%"/>
     </a-modal>
 
@@ -1197,6 +1198,8 @@ export default {
           theme: 'log',
           value: this.execOption.content,
           language: 'log',
+          readOnly: true,
+          inherit: true,
           scrollBeyondLastLine: false,
           overviewRulerBorder: false, // 不要滚动条边框
           autoClosingBrackets: true,
@@ -1267,6 +1270,11 @@ export default {
     myTheme() {
       this.$refs.confEdit.theme()
       this.$refs.different.theme()
+      if(this.editor.exception !== null) {
+        this.editor.exception.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
     }
   },
 }

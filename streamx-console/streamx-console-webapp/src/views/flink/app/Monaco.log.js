@@ -31,7 +31,7 @@ monaco.languages.setMonarchTokensProvider('log', {
       [/.*Exception.*/,'log-error'],
       [/.*Caused\s+by:.*/,'log-error'],
       [/\s+at\s+.*/, 'log-info'],
-      [/\[[a-zA-Z 0-9:]+\]/, 'log-date'],
+      [/\[[a-zA-Z 0-9:]+]/, 'log-date'],
     ]
   }
 })
