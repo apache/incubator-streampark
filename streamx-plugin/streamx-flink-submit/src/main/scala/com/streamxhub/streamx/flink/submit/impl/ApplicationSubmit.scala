@@ -32,10 +32,13 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
+import org.apache.flink.runtime.util.HadoopUtils
 import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
+import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
 
+import java.lang.{Boolean => JavaBool}
 import java.util.concurrent.Callable
 import java.util.{Collections, List => JavaList}
 import scala.collection.JavaConverters._
@@ -83,7 +86,7 @@ object ApplicationSubmit extends YarnSubmitTrait {
           logInfo(
             s"""
                ||--------------------------<<applicationId>>--------------------------|
-               || Flink Job Started: applicationId: $applicationId  |
+               || Flink Job Started: applicationId: $applicationId|
                ||_____________________________________________________________________|
                |""".stripMargin)
 
@@ -148,6 +151,17 @@ object ApplicationSubmit extends YarnSubmitTrait {
       }
       providedLibs -> programArgs
     }
+
+    val currentUser = UserGroupInformation.getCurrentUser
+    logDebug(s"UserGroupInformation currentUser: $currentUser")
+    if (HadoopUtils.isKerberosSecurityEnabled(currentUser)) {
+      logDebug(s"kerberos Security is Enabled...")
+      val useTicketCache = getOptionFromDefaultFlinkConfig[JavaBool](submitRequest.flinkHome, SecurityOptions.KERBEROS_LOGIN_USETICKETCACHE)
+      if (!HadoopUtils.areKerberosCredentialsValid(currentUser, useTicketCache)) {
+        throw new RuntimeException(s"Hadoop security with Kerberos is enabled but the login user ${currentUser} does not have Kerberos credentials or delegation tokens!")
+      }
+    }
+
     //yarn.provided.lib.dirs
     effectiveConfiguration.set(YarnConfigOptions.PROVIDED_LIB_DIRS, providedLibs.asJava)
     //flinkDistJar

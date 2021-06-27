@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
-import com.streamxhub.streamx.common.util.AssertUtil;
+import com.streamxhub.streamx.common.util.AssertUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cglib.beans.BeanMap;
 
@@ -30,7 +30,7 @@ import java.io.Serializable;
 import java.util.*;
 
 @Slf4j
-public class CommonUtil implements Serializable {
+public class CommonUtils implements Serializable {
 
     private static final long serialVersionUID = 6458428317155311192L;
 
@@ -41,7 +41,6 @@ public class CommonUtil implements Serializable {
      *
      * @param objs 要判断,处理的对象
      * @return Boolean
-     * @author <a href="mailto:benjobs@qq.com">Ben</a>
      * @see <b>对象为Null返回true,集合的大小为0也返回true,迭代器没有下一个也返回true..</b>
      * @since 1.0
      */
@@ -110,7 +109,6 @@ public class CommonUtil implements Serializable {
      *
      * @param obj 要判断,处理的对象
      * @return Boolean
-     * @author <a href="mailto:benjobs@qq.com">Ben</a>
      * @see <b>与非空相反</b>
      * @since 1.0
      */
@@ -179,14 +177,14 @@ public class CommonUtil implements Serializable {
     }
 
     public static List arrayToList(Object source) {
-        return Arrays.asList(ObjectUtil.toObjectArray(source));
+        return Arrays.asList(ObjectUtils.toObjectArray(source));
     }
 
     public static boolean contains(Iterator iterator, Object element) {
         if (iterator != null) {
             while (iterator.hasNext()) {
                 Object candidate = iterator.next();
-                if (ObjectUtil.safeEquals(candidate, element)) {
+                if (ObjectUtils.safeEquals(candidate, element)) {
                     return true;
                 }
             }
@@ -205,7 +203,7 @@ public class CommonUtil implements Serializable {
         if (enumeration != null) {
             while (enumeration.hasMoreElements()) {
                 Object candidate = enumeration.nextElement();
-                if (ObjectUtil.safeEquals(candidate, element)) {
+                if (ObjectUtils.safeEquals(candidate, element)) {
                     return true;
                 }
             }
@@ -420,10 +418,10 @@ public class CommonUtil implements Serializable {
      */
     public static int getPlatform() {
         int platform = 0;
-        if (CommonUtil.isUnix()) {
+        if (CommonUtils.isUnix()) {
             platform = 1;
         }
-        if (CommonUtil.isWindows()) {
+        if (CommonUtils.isWindows()) {
             platform = 2;
         }
         return platform;
@@ -440,7 +438,7 @@ public class CommonUtil implements Serializable {
     }
 
     public static <T> T[] arrayRemoveElements(T[] array, T... elem) {
-        AssertUtil.notNull(array);
+        AssertUtils.notNull(array);
         List<T> arrayList = new ArrayList<>(0);
         Collections.addAll(arrayList, array);
         if (isEmpty(elem)) {
@@ -453,7 +451,7 @@ public class CommonUtil implements Serializable {
     }
 
     public static <T> T[] arrayRemoveIndex(T[] array, int... index) {
-        AssertUtil.notNull(array);
+        AssertUtils.notNull(array);
         for (int j : index) {
             if (j < 0 || j > array.length - 1) {
                 throw new IndexOutOfBoundsException("index error.@" + j);
@@ -470,7 +468,7 @@ public class CommonUtil implements Serializable {
     }
 
     public static <T> T[] arrayInsertIndex(T[] array, int index, T t) {
-        AssertUtil.notNull(array);
+        AssertUtils.notNull(array);
         List<T> arrayList = new ArrayList<T>(array.length + 1);
         if (index == 0) {
             arrayList.add(t);
@@ -579,8 +577,8 @@ public class CommonUtil implements Serializable {
         if (objList != null && objList.size() > 0) {
             Map<String, Object> map = null;
             T bean = null;
-            for (int i = 0, size = objList.size(); i < size; i++) {
-                bean = objList.get(i);
+            for (T t : objList) {
+                bean = t;
                 map = beanToMap(bean);
                 list.add(map);
             }
@@ -601,10 +599,10 @@ public class CommonUtil implements Serializable {
             throws InstantiationException, IllegalAccessException {
         List<T> list = new ArrayList<>();
         if (maps != null && maps.size() > 0) {
-            Map<String, Object> map = null;
-            T bean = null;
-            for (int i = 0, size = maps.size(); i < size; i++) {
-                map = maps.get(i);
+            Map<String, Object> map;
+            T bean;
+            for (Map<String, Object> stringObjectMap : maps) {
+                map = stringObjectMap;
                 bean = clazz.newInstance();
                 mapToBean(map, bean);
                 list.add(bean);

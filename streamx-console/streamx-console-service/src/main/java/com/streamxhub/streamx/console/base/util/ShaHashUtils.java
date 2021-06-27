@@ -18,14 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import org.apache.shiro.crypto.hash.Sha256Hash;
 import org.apache.shiro.util.ByteSource;
 
 import java.util.Random;
 
-public class ShaHashUtil {
+public class ShaHashUtils {
 
     /**
      * 用户密码加密

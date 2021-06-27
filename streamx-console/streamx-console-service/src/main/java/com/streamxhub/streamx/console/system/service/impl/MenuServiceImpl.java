@@ -26,7 +26,7 @@ import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.router.RouterMeta;
 import com.streamxhub.streamx.console.base.domain.router.RouterTree;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
-import com.streamxhub.streamx.console.base.utils.TreeUtil;
+import com.streamxhub.streamx.console.base.util.TreeUtils;
 import com.streamxhub.streamx.console.system.dao.MenuMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
@@ -70,7 +70,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             if (StringUtils.equals(menu.getType(), Constant.TYPE_BUTTON)) {
                 result.put("rows", trees);
             } else {
-                RouterTree<Menu> menuTree = TreeUtil.build(trees);
+                RouterTree<Menu> menuTree = TreeUtils.build(trees);
                 result.put("rows", menuTree);
             }
             result.put("total", menus.size());
@@ -133,7 +133,7 @@ public class MenuServiceImpl extends ServiceImpl<MenuMapper, Menu> implements Me
             route.setMeta(new RouterMeta(true, hidden, true, menu.getIcon()));
             routes.add(route);
         });
-        return TreeUtil.buildVueRouter(routes);
+        return TreeUtils.buildVueRouter(routes);
     }
 
     private void buildTrees(List<RouterTree<Menu>> trees, List<Menu> menus, List<String> ids) {

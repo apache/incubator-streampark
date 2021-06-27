@@ -19,11 +19,9 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 /**
- * @Package: cn.damai.usercenter.common.util @Description: TODO
- * @author: <a href="mailto:benjobs@qq.com">Wanghuajie</a>
  * @date: 13-3-6 - 上午11:17
  * @version: V1.0
  * @company: damai
@@ -32,7 +30,7 @@ package com.streamxhub.streamx.console.base.utils;
 import java.lang.reflect.Array;
 import java.util.Arrays;
 
-public class ObjectUtil {
+public class ObjectUtils {
 
     private static final int INITIAL_HASH = 7;
     private static final int MULTIPLIER = 31;

@@ -25,8 +25,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
-import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
@@ -103,7 +103,7 @@ public class Project implements Serializable {
 
     private String getStreamXWorkspace() {
         if (settingService == null) {
-            settingService = SpringContextUtil.getBean(SettingService.class);
+            settingService = SpringContextUtils.getBean(SettingService.class);
         }
         return settingService.getStreamXWorkspace();
     }
@@ -159,7 +159,7 @@ public class Project implements Serializable {
     public List<String> getAllBranches() {
         try {
             Collection<Ref> refList;
-            if (CommonUtil.notEmpty(username, password)) {
+            if (CommonUtils.notEmpty(username, password)) {
                 UsernamePasswordCredentialsProvider pro = new UsernamePasswordCredentialsProvider(username, password);
                 refList = Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(pro).call();
             } else {
@@ -182,7 +182,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public GitAuthorizedError gitCheck() {
         try {
-            if (CommonUtil.notEmpty(username, password)) {
+            if (CommonUtils.notEmpty(username, password)) {
                 UsernamePasswordCredentialsProvider credentialsProvider = new UsernamePasswordCredentialsProvider(username, password);
                 Git.lsRemoteRepository().setRemote(url).setCredentialsProvider(credentialsProvider).call();
             } else {
@@ -221,7 +221,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public List<String> getMavenBuildCmd() {
         String buildHome = this.getAppSource().getAbsolutePath();
-        if (CommonUtil.notEmpty(this.getPom())) {
+        if (CommonUtils.notEmpty(this.getPom())) {
             buildHome = new File(buildHome.concat("/").concat(this.getPom()))
                 .getParentFile()
                 .getAbsolutePath();

@@ -31,8 +31,8 @@ import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
-import com.streamxhub.streamx.console.base.utils.JsonUtils;
-import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
+import com.streamxhub.streamx.console.base.util.JsonUtils;
+import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -236,13 +236,13 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public File getLocalAppBase() {
-        String localWorkspace = SpringContextUtil.getBean(SettingService.class).getStreamXWorkspace();
+        String localWorkspace = SpringContextUtils.getBean(SettingService.class).getStreamXWorkspace();
         return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
     }
 
     @JsonIgnore
     public File getLocalFlinkSqlBase() {
-        String localWorkspace = SpringContextUtil.getBean(SettingService.class).getStreamXWorkspace();
+        String localWorkspace = SpringContextUtils.getBean(SettingService.class).getStreamXWorkspace();
         File flinkSql = new File(localWorkspace, "flinksql");
         if (!flinkSql.exists()) {
             flinkSql.mkdirs();

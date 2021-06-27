@@ -18,12 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import javax.crypto.Cipher;
 import java.security.Key;
 
-public class EncryptUtil {
+public class EncryptUtils {
 
     // 设置默认密匙
     private static String strDefaultKey = "defaultKey";
@@ -60,11 +60,11 @@ public class EncryptUtil {
         return arrOut;
     }
 
-    public EncryptUtil() throws Exception {
+    public EncryptUtils() throws Exception {
         this(strDefaultKey);
     }
 
-    EncryptUtil(String strKey) throws Exception {
+    EncryptUtils(String strKey) throws Exception {
         /*
          * Security.addProvider(new com.sun.crypto.provider.SunJCE());
          */

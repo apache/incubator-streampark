@@ -31,9 +31,9 @@ import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
-import com.streamxhub.streamx.console.base.utils.GZipUtil;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.GZipUtils;
+import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.dao.ProjectMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -129,7 +129,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
     @Override
     public IPage<Project> page(Project project, RestRequest request) {
         Page<Project> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "date", Constant.ORDER_DESC, false);
         return this.baseMapper.findProject(page, project);
     }
 
@@ -303,7 +303,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
             File file = new File(project.getAppBase(), project.getModule());
             File unzipFile = new File(file.getAbsolutePath().replaceAll(".tar.gz", ""));
             if (!unzipFile.exists()) {
-                GZipUtil.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
+                GZipUtils.decompress(file.getAbsolutePath(), file.getParentFile().getAbsolutePath());
             }
             List<Map<String, Object>> list = new ArrayList<>();
             // 只过滤conf这个目录
@@ -329,7 +329,7 @@ public class ProjectServiceImpl extends ServiceImpl<ProjectMapper, Project>
                     .setDirectory(project.getAppSource())
                     .setBranch(project.getBranches());
 
-            if (CommonUtil.notEmpty(project.getUsername(), project.getPassword())) {
+            if (CommonUtils.notEmpty(project.getUsername(), project.getPassword())) {
                 cloneCommand.setCredentialsProvider(project.getCredentialsProvider());
             }
 

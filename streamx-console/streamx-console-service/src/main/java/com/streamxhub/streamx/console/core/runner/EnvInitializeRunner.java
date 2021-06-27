@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.HdfsUtils;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
@@ -102,7 +102,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
 
             String keepFile = ".gitkeep";
 
-            File plugins = new File(WebUtil.getAppDir("plugins"));
+            File plugins = new File(WebUtils.getAppDir("plugins"));
             for (File file : Objects.requireNonNull(plugins.listFiles())) {
                 String plugin = appPlugins.concat("/").concat(file.getName());
                 if (!HdfsUtils.exists(plugin) && !keepFile.equals(file.getName())) {
@@ -117,7 +117,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
             }
             String regex = "^streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
             Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
-            File[] shims = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
+            File[] shims = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(regex));
             for (File file : Objects.requireNonNull(shims)) {
                 Matcher matcher = pattern.matcher(file.getName());
                 if (!keepFile.equals(file.getName()) && matcher.matches()) {

@@ -25,9 +25,8 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.FlinkSqlMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
@@ -52,7 +51,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -200,7 +198,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             String shimsRegex = "(^|.*)streamx-flink-shims_flink-(1.12|1.13)-(.*).jar$";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-            File[] libJars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> !pathname.getName().matches(shimsRegex));
+            File[] libJars = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> !pathname.getName().matches(shimsRegex));
             assert libJars != null;
             List<URL> libList = new ArrayList<>(0);
             for (File jar : libJars) {
@@ -208,7 +206,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             }
 
             List<URL> shimsList = new ArrayList<>(0);
-            File[] shimsJars = new File(WebUtil.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsRegex));
+            File[] shimsJars = new File(WebUtils.getAppDir("lib")).listFiles(pathname -> pathname.getName().matches(shimsRegex));
             assert shimsJars != null;
             for (File jar : shimsJars) {
                 shimsList.add(jar.toURI().toURL());

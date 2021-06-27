@@ -32,7 +32,7 @@ import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
+import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationBackUpMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationBackUp;
@@ -90,7 +90,7 @@ public class ApplicationBackUpServiceImpl
     @Override
     public IPage<ApplicationBackUp> page(ApplicationBackUp backUp, RestRequest request) {
         Page<ApplicationBackUp> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, backUp.getAppId());
     }
 

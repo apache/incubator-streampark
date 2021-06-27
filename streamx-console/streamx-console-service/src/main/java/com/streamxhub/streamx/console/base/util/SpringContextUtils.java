@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -31,12 +31,12 @@ import org.springframework.stereotype.Component;
  * @author benjobs
  */
 @Component
-public class SpringContextUtil implements ApplicationContextAware {
+public class SpringContextUtils implements ApplicationContextAware {
     private static ApplicationContext applicationContext;
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        SpringContextUtil.applicationContext = applicationContext;
+        SpringContextUtils.applicationContext = applicationContext;
     }
 
     public static Object getBean(String name) {

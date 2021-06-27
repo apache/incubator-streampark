@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import com.streamxhub.streamx.console.base.domain.router.RouterTree;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
@@ -26,9 +26,9 @@ import com.streamxhub.streamx.console.base.domain.router.VueRouter;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TreeUtil {
+public class TreeUtils {
 
-    protected TreeUtil() {
+    protected TreeUtils() {
     }
 
     private static final String TOP_NODE_ID = "0";

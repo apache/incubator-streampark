@@ -20,7 +20,9 @@
  */
 package com.streamxhub.streamx.common.util
 
-import java.text.SimpleDateFormat
+import java.text.{ParseException, SimpleDateFormat}
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import java.util.{Calendar, TimeZone, _}
 import scala.util._
@@ -179,6 +181,24 @@ object DateUtils {
       case other if other._2 == null => (other._1 / 1000, TimeUnit.SECONDS)
       case other => other
     }
+  }
+
+  def formatFullTime(localDateTime: LocalDateTime): String = formatFullTime(localDateTime, fullFormat)
+
+  def formatFullTime(localDateTime: LocalDateTime, pattern: String): String = {
+    val dateTimeFormatter = DateTimeFormatter.ofPattern(pattern)
+    localDateTime.format(dateTimeFormatter)
+  }
+
+  private def getDateFormat(date: Date, dateFormatType: String) = {
+    val simformat = new SimpleDateFormat(dateFormatType)
+    simformat.format(date)
+  }
+
+  @throws[ParseException] def formatCSTTime(date: String, format: String): String = {
+    val sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.US)
+    val d = sdf.parse(date)
+    DateUtils.getDateFormat(d, format)
   }
 
   def main(args: Array[String]): Unit = {

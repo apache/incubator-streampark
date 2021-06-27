@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
+import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -111,7 +111,7 @@ public class UserController {
 
         User user = userService.findByName(username);
         String salt = user.getSalt();
-        String encryptPassword = ShaHashUtil.encrypt(salt, password);
+        String encryptPassword = ShaHashUtils.encrypt(salt, password);
         boolean result = StringUtils.equals(user.getPassword(), encryptPassword);
         return RestResponse.create().data(result);
     }
