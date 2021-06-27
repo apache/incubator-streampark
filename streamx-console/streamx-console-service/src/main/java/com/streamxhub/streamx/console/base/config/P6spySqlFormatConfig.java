@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.console.base.config;
 
 import com.p6spy.engine.spy.appender.MessageFormattingStrategy;
-import com.streamxhub.streamx.console.base.utils.DateUtil;
+import com.streamxhub.streamx.common.util.DateUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.time.LocalDateTime;
@@ -49,7 +49,7 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
         return StringUtils.isBlank(sql) ? "" :
                 String.format(
                         "%s  | 耗时 %d ms | SQL 语句：\n %s;",
-                        DateUtil.formatFullTime(LocalDateTime.now()),
+                        DateUtils.formatFullTime(LocalDateTime.now()),
                         elapsed,
                         sql.replaceAll("[\\s]+", StringUtils.SPACE)
                 );

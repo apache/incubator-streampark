@@ -26,7 +26,7 @@ import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.utils.ShaHashUtil;
+import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.dao.UserMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.entity.User;
@@ -88,8 +88,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 创建用户
         user.setCreateTime(new Date());
         user.setAvatar(User.DEFAULT_AVATAR);
-        String salt = ShaHashUtil.getRandomSalt(26);
-        String password = ShaHashUtil.encrypt(salt, user.getPassword());
+        String salt = ShaHashUtils.getRandomSalt(26);
+        String password = ShaHashUtils.encrypt(salt, user.getPassword());
         user.setSalt(salt);
         user.setPassword(password);
         save(user);
@@ -137,8 +137,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Transactional(rollbackFor = Exception.class)
     public void updatePassword(String username, String password) throws Exception {
         User user = new User();
-        String salt = ShaHashUtil.getRandomSalt(26);
-        password = ShaHashUtil.encrypt(salt, password);
+        String salt = ShaHashUtils.getRandomSalt(26);
+        password = ShaHashUtils.encrypt(salt, password);
         user.setSalt(salt);
         user.setPassword(password);
         this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));
@@ -149,8 +149,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void resetPassword(String[] usernames) throws Exception {
         for (String username : usernames) {
             User user = new User();
-            String salt = ShaHashUtil.getRandomSalt(26);
-            String password = ShaHashUtil.encrypt(salt, User.DEFAULT_PASSWORD);
+            String salt = ShaHashUtils.getRandomSalt(26);
+            String password = ShaHashUtils.encrypt(salt, User.DEFAULT_PASSWORD);
             user.setSalt(salt);
             user.setPassword(password);
             this.baseMapper.update(user, new LambdaQueryWrapper<User>().eq(User::getUsername, username));

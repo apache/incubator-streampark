@@ -24,7 +24,7 @@ package com.streamxhub.streamx.common.util
 import java.util;
 
 
-object AssertUtil {
+object AssertUtils {
 
   /**
    * Assert a boolean expression, throwing <code>IllegalArgumentException</code> if the test result

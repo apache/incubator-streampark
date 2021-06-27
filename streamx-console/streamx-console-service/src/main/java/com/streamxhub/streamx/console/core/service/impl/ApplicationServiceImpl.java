@@ -34,9 +34,9 @@ import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.entity.*;
@@ -229,7 +229,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
 
         //2) 确定需要上传,先上传到本地零时目录
-        String temp = WebUtil.getAppDir("temp");
+        String temp = WebUtils.getAppDir("temp");
         File saveFile = new File(temp, file.getOriginalFilename());
         // delete when exsit
         if (saveFile.exists()) {
@@ -354,7 +354,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public IPage<Application> page(Application appParam, RestRequest request) {
         Page<Application> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "create_time", Constant.ORDER_DESC, false);
         this.baseMapper.page(page, appParam);
         //瞒天过海,暗度陈仓,偷天换日,鱼目混珠.
         List<Application> records = page.getRecords();
@@ -660,7 +660,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //1) init.
         File jobLocalHome = application.getLocalFlinkSqlBase();
         if (jobLocalHome.exists()) {
-            if (!CommonUtil.deleteFile(jobLocalHome)) {
+            if (!CommonUtils.deleteFile(jobLocalHome)) {
                 throw new RuntimeException(jobLocalHome + " delete failed.");
             }
         }
@@ -961,7 +961,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             this.flinkSqlService.cleanCandidate(flinkSql.getId());
 
             //1) dist_userJar
-            File localPlugins = new File(WebUtil.getAppDir("plugins"));
+            File localPlugins = new File(WebUtils.getAppDir("plugins"));
             assert localPlugins.exists();
             List<String> jars = Arrays.stream(Objects.requireNonNull(localPlugins.list())).filter(x -> x.matches("streamx-flink-sqlclient-.*\\.jar")).collect(Collectors.toList());
             if (jars.isEmpty()) {
@@ -1004,7 +1004,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             option.append(" -n ");
         }
 
-        String[] dynamicOption = CommonUtil.notEmpty(application.getDynamicOptions())
+        String[] dynamicOption = CommonUtils.notEmpty(application.getDynamicOptions())
                 ? application.getDynamicOptions().split("\\s+")
                 : new String[0];
 

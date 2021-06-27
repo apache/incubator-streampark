@@ -31,8 +31,8 @@ import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.SortUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.ApplicationConfigMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.ApplicationConfig;
@@ -214,7 +214,7 @@ public class ApplicationConfigServiceImpl
     @Override
     public IPage<ApplicationConfig> page(ApplicationConfig config, RestRequest request) {
         Page<ApplicationConfig> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "version", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, config.getAppId());
     }
 
@@ -243,7 +243,7 @@ public class ApplicationConfigServiceImpl
             String path;
             if (profiles.equals(PROD_ENV_NAME)) {
                 //生产环境部署读取conf/flink-application.template
-                path = WebUtil.getAppDir("conf").concat("/flink-application.template");
+                path = WebUtils.getAppDir("conf").concat("/flink-application.template");
             } else {
                 URL url = Thread.currentThread().getContextClassLoader().getResource("flink-application.template");
                 assert url != null;

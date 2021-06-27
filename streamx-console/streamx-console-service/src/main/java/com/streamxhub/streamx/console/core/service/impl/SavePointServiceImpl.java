@@ -30,8 +30,8 @@ import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
-import com.streamxhub.streamx.console.base.utils.SortUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
@@ -108,7 +108,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     public Boolean delete(Long id) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
-            if (CommonUtil.notEmpty(savePoint.getPath())) {
+            if (CommonUtils.notEmpty(savePoint.getPath())) {
                 HdfsUtils.delete(savePoint.getPath());
             }
             removeById(id);
@@ -121,7 +121,7 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Override
     public IPage<SavePoint> page(SavePoint savePoint, RestRequest request) {
         Page<SavePoint> page = new Page<>();
-        SortUtil.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
+        SortUtils.handlePageSort(request, page, "trigger_time", Constant.ORDER_DESC, false);
         return this.baseMapper.page(page, savePoint.getAppId());
     }
 

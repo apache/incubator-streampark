@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import org.apache.commons.compress.archivers.ArchiveInputStream;
 import org.apache.commons.compress.archivers.ArchiveStreamFactory;
@@ -30,7 +30,7 @@ import java.util.zip.GZIPInputStream;
 /**
  * @author benjobs
  */
-public class GZipUtil {
+public class GZipUtils {
     /**
      * @param tarZipSource 源文件
      * @param targetDir    目标目录

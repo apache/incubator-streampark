@@ -23,7 +23,7 @@ package com.streamxhub.streamx.console.core.metrics.flink;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
 import lombok.Data;
 
 import java.io.IOException;
@@ -48,7 +48,7 @@ public class JvmProfiler implements Serializable {
 
     @JsonIgnore
     public Map getMetricsAsMap() throws IOException {
-        if (CommonUtil.notEmpty(metric)) {
+        if (CommonUtils.notEmpty(metric)) {
             String content = DeflaterUtils.unzipString(metric);
             return mapper.readValue(content, Map.class);
         }

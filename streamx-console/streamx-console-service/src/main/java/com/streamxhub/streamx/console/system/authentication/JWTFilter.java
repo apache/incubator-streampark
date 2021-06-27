@@ -22,8 +22,8 @@ package com.streamxhub.streamx.console.system.authentication;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.properties.ShiroProperties;
-import com.streamxhub.streamx.console.base.utils.SpringContextUtil;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.SpringContextUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.authz.UnauthorizedException;
@@ -52,7 +52,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
             ServletRequest request, ServletResponse response, Object mappedValue)
             throws UnauthorizedException {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
-        ShiroProperties properties = SpringContextUtil.getBean(ShiroProperties.class);
+        ShiroProperties properties = SpringContextUtils.getBean(ShiroProperties.class);
         String[] anonUrl = StringUtils.splitByWholeSeparatorPreserveAllTokens(
                 properties.getAnonUrl(),
                 StringPool.COMMA
@@ -81,7 +81,7 @@ public class JWTFilter extends BasicHttpAuthenticationFilter {
     protected boolean executeLogin(ServletRequest request, ServletResponse response) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) request;
         String token = httpServletRequest.getHeader(TOKEN);
-        JWTToken jwtToken = new JWTToken(WebUtil.decryptToken(token));
+        JWTToken jwtToken = new JWTToken(WebUtils.decryptToken(token));
         try {
             getSubject(request, response).login(jwtToken);
             return true;

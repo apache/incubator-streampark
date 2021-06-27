@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -30,7 +30,7 @@ import org.apache.commons.lang3.StringUtils;
  * 处理排序工具类
  */
 @SuppressWarnings("unchecked")
-public class SortUtil {
+public class SortUtils {
     /**
      * 处理排序（分页情况下） for mybatis-plus
      *
@@ -48,10 +48,10 @@ public class SortUtil {
             boolean camelToUnderscore) {
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
-        String sortField = WebUtil.camelToUnderscore(request.getSortField());
+        String sortField = WebUtils.camelToUnderscore(request.getSortField());
         if (camelToUnderscore) {
-            sortField = WebUtil.camelToUnderscore(sortField);
-            defaultSort = WebUtil.camelToUnderscore(defaultSort);
+            sortField = WebUtils.camelToUnderscore(sortField);
+            defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())
@@ -111,8 +111,8 @@ public class SortUtil {
             boolean camelToUnderscore) {
         String sortField = request.getSortField();
         if (camelToUnderscore) {
-            sortField = WebUtil.camelToUnderscore(sortField);
-            defaultSort = WebUtil.camelToUnderscore(defaultSort);
+            sortField = WebUtils.camelToUnderscore(sortField);
+            defaultSort = WebUtils.camelToUnderscore(defaultSort);
         }
         if (StringUtils.isNotBlank(request.getSortField())
                 && StringUtils.isNotBlank(request.getSortOrder())

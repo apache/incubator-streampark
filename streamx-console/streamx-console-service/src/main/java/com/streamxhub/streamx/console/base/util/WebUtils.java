@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.base.utils;
+package com.streamxhub.streamx.console.base.util;
 
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.domain.Constant;
@@ -32,7 +32,7 @@ import java.util.stream.IntStream;
  * 工具类
  */
 @Slf4j
-public class WebUtil {
+public class WebUtils {
 
     /**
      * token 加密
@@ -42,8 +42,8 @@ public class WebUtil {
      */
     public static String encryptToken(String token) {
         try {
-            EncryptUtil encryptUtil = new EncryptUtil(Constant.TOKEN_CACHE_PREFIX);
-            return encryptUtil.encrypt(token);
+            EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
+            return encryptUtils.encrypt(token);
         } catch (Exception e) {
             log.info("token加密失败：", e);
             return null;
@@ -58,8 +58,8 @@ public class WebUtil {
      */
     public static String decryptToken(String encryptToken) {
         try {
-            EncryptUtil encryptUtil = new EncryptUtil(Constant.TOKEN_CACHE_PREFIX);
-            return encryptUtil.decrypt(encryptToken);
+            EncryptUtils encryptUtils = new EncryptUtils(Constant.TOKEN_CACHE_PREFIX);
+            return encryptUtils.decrypt(encryptToken);
         } catch (Exception e) {
             log.info("token解密失败：", e);
             return null;

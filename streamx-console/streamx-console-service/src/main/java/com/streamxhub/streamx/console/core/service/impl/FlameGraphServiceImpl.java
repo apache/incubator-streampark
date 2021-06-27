@@ -22,8 +22,8 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.util.CommandUtils;
-import com.streamxhub.streamx.console.base.utils.CommonUtil;
-import com.streamxhub.streamx.console.base.utils.WebUtil;
+import com.streamxhub.streamx.console.base.util.CommonUtils;
+import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.dao.FlameGraphMapper;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlameGraph;
@@ -62,7 +62,7 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
                 flameGraph.getStart(),
                 flameGraph.getEnd()
         );
-        if (CommonUtil.notEmpty(flameGraphList)) {
+        if (CommonUtils.notEmpty(flameGraphList)) {
             StringBuffer jsonBuffer = new StringBuffer();
             flameGraphList.forEach(x -> jsonBuffer.append(x.getUnzipContent()).append("\r\n"));
 
@@ -73,10 +73,10 @@ public class FlameGraphServiceImpl extends ServiceImpl<FlameGraphMapper, FlameGr
                     flameGraph.getStart().getTime(),
                     flameGraph.getEnd().getTime()
             );
-            String jsonPath = WebUtil.getAppDir("temp").concat(File.separator).concat(jsonName);
+            String jsonPath = WebUtils.getAppDir("temp").concat(File.separator).concat(jsonName);
             String foldedPath = jsonPath.replace(".json", ".folded");
             String svgPath = jsonPath.replace(".json", ".svg");
-            String flameGraphPath = WebUtil.getAppDir("bin/flame-graph");
+            String flameGraphPath = WebUtils.getAppDir("bin/flame-graph");
 
             // write json
             FileOutputStream fileOutputStream = new FileOutputStream(jsonPath);

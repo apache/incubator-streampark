@@ -6,6 +6,6 @@
         <result column="APP_ID" jdbcType="BIGINT" property="appId"/>
         <result column="TIMELINE" jdbcType="DATE" property="timeline"/>
         <result column="PROFILER" jdbcType="VARCHAR" property="profiler"/>
-        <result column="CONTENT" jdbcType="VARCHAR" property="content"/>
+        <result column="CONTENT" jdbcType="LONGVARCHAR" property="content"/>
     </resultMap>
 </mapper>

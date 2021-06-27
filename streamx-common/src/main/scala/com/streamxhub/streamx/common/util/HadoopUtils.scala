@@ -106,7 +106,7 @@ object HadoopUtils extends Logger {
     if (!configurationCache.containsKey(confDir)) {
       FileUtils.exists(confDir)
       val hadoopConfDir = new File(confDir)
-      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml")
+      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml","mapred-site.xml")
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
@@ -175,7 +175,7 @@ object HadoopUtils extends Logger {
         logInfo("kerberos authentication successful")
       } catch {
         case e: IOException =>
-          logInfo(s"kerberos login failed,${e.getLocalizedMessage}")
+          logError(s"kerberos login failed,${e.getLocalizedMessage}")
           throw e
       }
     }
