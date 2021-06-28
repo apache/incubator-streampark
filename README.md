@@ -193,7 +193,4 @@ Thank you to all our backers!
     <span>join us</span>
 </div>
 
-<div align="center" style="display:none">
-   <img src="http://assets.streamxhub.com/ben-wechat.png" alt="Join the Group" width="200"><br>
-   <span>join us(add information: StreamX)</span> 
-</div>
+
