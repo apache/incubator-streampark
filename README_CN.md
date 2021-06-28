@@ -133,6 +133,7 @@ mvn clean install -DskipTests -Denv=prod
 - [快速创建issue!](https://github.com/streamxhub/streamx/issues/new)
 - [加入社区](#-加入社区)
 
+
 ## 💰 Donation
 
 Are you **enjoying this project** ? 👋
@@ -145,9 +146,32 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费， 
 
 > 所有赞助人将在赞助人名单中显示。
 
-### 🏅 我的赞助
 
-虚席以待，快快来赞助我们吧，你的名字将出现在这里
+### 🏆 我的赞助
+
+### 💜 月度赞助商
+
+虚席以待,欢迎个人和企业前来赞助,您的支持会帮助我们更好的发展项目
+
+### 🥇 金牌赞助商
+
+<p>
+  <a href="https://github.com/wolfboys" alt="benjobs"><img src="https://avatars.githubusercontent.com/u/13284744?v=4" height="50" width="50"></a>
+  <a href="https://github.com/Narcasserun" alt="Narcasserun"><img src="https://avatars.githubusercontent.com/u/39329477?v=4" height="50" width="50"></a>
+</p>
+
+### 🥈 白金赞助商
+
+<p>
+    <a href="https://github.com/lianxiaobao" alt="lianxiaobao"><img src="https://avatars.githubusercontent.com/u/36557317?v=4" height="50" width="50"></a>
+</p>
+
+### 🥈 白银赞助商
+
+<p>
+    <a href="https://github.com/CrazyJugger" alt="leohantaoluo"><img src="https://avatars.githubusercontent.com/u/30514978?v=4" height="50" width="50"></a>
+    <a href="https://github.com/zhaizhirui" alt="zhaizhirui"><img src="https://avatars.githubusercontent.com/u/39609947?v=4" height="50" width="50"></a>
+</p>
 
 ## 💬 加入社区
 
@@ -159,8 +183,15 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费， 
 
 </div>
 
+
 <div align="center">
-  <img src="http://assets.streamxhub.com/ben-wechat.png" alt="Join the Group" width="200"><br>
-  <span>扫微信二维码加微信邀请你加群讨论(添加信息: StreamX)</span>
+    <img src="http://assets.streamxhub.com/joinus0627.png" alt="Join the Group" width="200"><br>
+    <span>扫微信二维码加群讨论</span>
+</div>
+
+
+<div align="center" style="display:none">
+   <img src="http://assets.streamxhub.com/ben-wechat.png" alt="Join the Group" width="200"><br>
+   <span>扫微信二维码加微信邀请你加群讨论(添加信息: StreamX)</span>
 </div>
 
