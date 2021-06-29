@@ -22,12 +22,14 @@ package com.streamxhub.streamx.common.util
 
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
-import java.util.function.BiConsumer
 import java.util.jar.{JarFile, JarInputStream}
-import java.util.{Properties, UUID, Collection => JavaCollection, Map => JavaMap}
+import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 object Utils {
+
+  private[this] val OS = System.getProperty("os.name").toLowerCase
 
   def notEmpty(elem: Any): Boolean = {
     elem match {
@@ -67,21 +69,18 @@ object Utils {
     }
   }
 
-  def getJarManifest(jarFile: File) = {
+  def getJarManifest(jarFile: File): jar.Manifest = {
     checkJarFile(jarFile.toURL)
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
   }
 
-  def copyProperties(original: Properties, target: Properties): Unit = {
-    original.forEach(new BiConsumer[Object, Object] {
-      override def accept(k: Object, v: Object): Unit = target.put(k, v)
-    })
-  }
+  def copyProperties(original: Properties, target: Properties): Unit = original.foreach(x => target.put(x._1, x._2))
 
-  def main(args: Array[String]): Unit = {
-    val jar = "/Users/benjobs/Workspace/deploy/workspace/app/1/flink-quickstart-1.0/flink-quickstart-1.0.jar"
-    val manifest = getJarManifest(new File(jar))
-    println(manifest.getMainAttributes.getValue("Main-Class"))
-  }
+  //获取系统名字
+  def getOsName: String = OS
+
+  def isLinux: Boolean = OS.indexOf("linux") >= 0
+
+  def isWindows: Boolean = OS.indexOf("windows") >= 0
 
 }

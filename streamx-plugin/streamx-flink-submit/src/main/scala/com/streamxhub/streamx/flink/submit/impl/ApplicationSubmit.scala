@@ -73,9 +73,9 @@ object ApplicationSubmit extends YarnSubmitTrait {
           val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
           logInfo(
             s"""
-               |--------------------------<<specification>>---------------------------
+               |------------------------<<specification>>-------------------------
                |$clusterSpecification
-               |----------------------------------------------------------------------
+               |------------------------------------------------------------------
                |""".stripMargin)
 
           val applicationConfiguration = ApplicationConfiguration.fromConfiguration(flinkConfig)
@@ -85,9 +85,9 @@ object ApplicationSubmit extends YarnSubmitTrait {
 
           logInfo(
             s"""
-               ||--------------------------<<applicationId>>--------------------------|
-               || Flink Job Started: applicationId: $applicationId|
-               ||_____________________________________________________________________|
+               ||-------------------------<<applicationId>>------------------------|
+               ||Flink Job Started: applicationId: $applicationId|
+               ||__________________________________________________________________|
                |""".stripMargin)
 
           SubmitResponse(applicationId, flinkConfig)
@@ -182,9 +182,9 @@ object ApplicationSubmit extends YarnSubmitTrait {
 
     logInfo(
       s"""
-         |----------------------------------------------------------------------
+         |------------------------------------------------------------------
          |Effective executor configuration: $effectiveConfiguration
-         |----------------------------------------------------------------------
+         |------------------------------------------------------------------
          |""".stripMargin)
 
     effectiveConfiguration

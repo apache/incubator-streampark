@@ -81,9 +81,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         val clusterSpecification = clientFactory.getClusterSpecification(flinkConfig)
         logInfo(
           s"""
-             |--------------------------<<specification>>---------------------------
+             |------------------------<<specification>>-------------------------
              |$clusterSpecification
-             |----------------------------------------------------------------------
+             |------------------------------------------------------------------
              |""".stripMargin)
 
         val packagedProgram = PackagedProgram
@@ -105,9 +105,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
         )
         logInfo(
           s"""
-             ||--------------------------<<applicationId>>--------------------------|
-             || jobGraph getJobID: ${jobGraph.getJobID.toString}  |
-             ||_____________________________________________________________________|
+             ||-------------------------<<applicationId>>------------------------|
+             ||jobGraph getJobID: ${jobGraph.getJobID.toString}|
+             ||__________________________________________________________________|
              |""".stripMargin)
         deployInternal(
           clusterDescriptor,
@@ -122,9 +122,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
       val applicationId = clusterClient.getClusterId
       logInfo(
         s"""
-           ||--------------------------<<applicationId>>--------------------------|
-           || Flink Job Started: applicationId: $applicationId  |
-           ||_____________________________________________________________________|
+           ||-------------------------<<applicationId>>------------------------|
+           ||Flink Job Started: applicationId: $applicationId|
+           ||__________________________________________________________________|
            |""".stripMargin)
 
       SubmitResponse(applicationId, flinkConfig)
@@ -182,9 +182,9 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
     logInfo(
       s"""
-         |----------------------------------------------------------------------
+         |------------------------------------------------------------------
          |Effective executor configuration: $effectiveConfiguration
-         |----------------------------------------------------------------------
+         |------------------------------------------------------------------
          |""".stripMargin)
 
     effectiveConfiguration

@@ -5,8 +5,6 @@ security:
       principal:
       krb5:
       keytab:
-    expire: 2 h #2小时过期
-
 java:
   security:
     krb5:
