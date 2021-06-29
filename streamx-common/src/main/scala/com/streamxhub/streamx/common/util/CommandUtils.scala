@@ -64,8 +64,11 @@ object CommandUtils extends Logger {
   def execute(commands: JavaIter[String], consumer: Consumer[String]): Unit = {
     Try {
       require(commands != null && commands.nonEmpty)
-      logInfo(s"Command execute:\n${commands.mkString("\n")} ")
-      val process = Runtime.getRuntime.exec("/bin/bash", null, null)
+      logDebug(s"Command execute:\n${commands.mkString("\n")} ")
+      val process = Utils.isWindows match {
+        case x if x => Runtime.getRuntime.exec("cmd /c ", null, null)
+        case _ => Runtime.getRuntime.exec("/bin/bash ", null, null)
+      }
       val out = new PrintWriter(new BufferedWriter(new OutputStreamWriter(process.getOutputStream)), true)
       commands.foreach(out.println)
       commands.last.toLowerCase.trim match {

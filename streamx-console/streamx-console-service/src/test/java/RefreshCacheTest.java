@@ -21,9 +21,10 @@
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.streamxhub.streamx.common.util.DateUtils;
 import org.junit.Test;
 
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class RefreshCacheTest {
@@ -46,5 +47,20 @@ public class RefreshCacheTest {
 
     public String refresh(String value) {
         return UUID.randomUUID() + "@" + value;
+    }
+
+    @Test
+    public void task() throws InterruptedException {
+        System.out.println(DateUtils.format(new Date(), DateUtils.fullFormat(), TimeZone.getDefault()));
+        Timer timer = new Timer();
+        timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+                System.out.println(DateUtils.format(new Date(), DateUtils.fullFormat(), TimeZone.getDefault()));
+            }
+        }, 1000 * 10, 1000 * 10);
+
+        Thread.sleep(Long.MAX_VALUE);
+
     }
 }

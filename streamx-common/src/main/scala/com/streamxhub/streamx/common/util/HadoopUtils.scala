@@ -21,7 +21,6 @@
 
 package com.streamxhub.streamx.common.util
 
-import com.github.benmanes.caffeine.cache.{Cache, CacheLoader, Caffeine}
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import org.apache.commons.collections.CollectionUtils
 import org.apache.commons.lang.StringUtils
@@ -44,7 +43,8 @@ import java.io.{File, IOException}
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import java.util.{HashMap => JavaHashMap}
+import java.util.{Date, Timer, TimerTask, HashMap => JavaHashMap}
+import javax.security.auth.kerberos.KerberosTicket
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
 import scala.util.{Failure, Success, Try}
@@ -59,6 +59,7 @@ object HadoopUtils extends Logger {
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
   private[this] var reusableYarnClient: YarnClient = _
+
   private[this] var reusableConf: Configuration = _
 
   private[util] var hdfs: FileSystem = getFileSystem(hadoopConf)
@@ -66,8 +67,6 @@ object HadoopUtils extends Logger {
   private[this] var rmHttpURL: String = _
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
-
-  private[this] var caffeine: Cache[String, Configuration] = _
 
   lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
     case null =>
@@ -80,11 +79,6 @@ object HadoopUtils extends Logger {
       if (file.exists() && file.isFile) {
         PropertiesUtils.fromYamlFile(file.getAbsolutePath)
       } else null
-  }
-
-  private[this] val kerberosEnable: Boolean = if (kerberosConf == null) false else {
-    val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
-    Try(enableString.trim.toBoolean).getOrElse(false)
   }
 
   private[this] lazy val hadoopConfDir: String = Try(FileUtils.getPathFromEnv(HADOOP_CONF_DIR)) match {
@@ -106,7 +100,7 @@ object HadoopUtils extends Logger {
     if (!configurationCache.containsKey(confDir)) {
       FileUtils.exists(confDir)
       val hadoopConfDir = new File(confDir)
-      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml","mapred-site.xml")
+      val confName = List("core-site.xml", "hdfs-site.xml", "yarn-site.xml", "mapred-site.xml")
       val files = hadoopConfDir.listFiles().filter(x => x.isFile && confName.contains(x.getName)).toList
       val conf = new Configuration()
       if (CollectionUtils.isNotEmpty(files)) {
@@ -167,7 +161,6 @@ object HadoopUtils extends Logger {
       }
       System.setProperty("sun.security.spnego.debug", "true")
       System.setProperty("sun.security.krb5.debug", "true")
-
       conf.set(KEY_HADOOP_SECURITY_AUTHENTICATION, KEY_KERBEROS)
       try {
         UserGroupInformation.setConfiguration(conf)
@@ -175,42 +168,61 @@ object HadoopUtils extends Logger {
         logInfo("kerberos authentication successful")
       } catch {
         case e: IOException =>
-          logError(s"kerberos login failed,${e.getLocalizedMessage}")
+          logInfo(s"kerberos login failed,${ExceptionUtils.stringifyException(e)}")
           throw e
       }
     }
 
-    def refreshConf(): Configuration = {
-      val conf = initHadoopConf()
-      kerberosLogin(conf)
-      if (reusableYarnClient != null) {
-        reusableYarnClient.close()
-        reusableYarnClient = null
+    def getDuration: (Long, Long) = {
+      val user = UserGroupInformation.getLoginUser
+      val method = classOf[UserGroupInformation].getDeclaredMethod("getTGT")
+      method.setAccessible(true)
+      val tgt = method.invoke(user).asInstanceOf[KerberosTicket]
+      Option(tgt) match {
+        case Some(value) =>
+          val start = value.getStartTime.getTime
+          val end = value.getEndTime.getTime
+          val duration = ((end - start) * 0.80f).toLong
+          logInfo(s"kerberosTicket start:${DateUtils.format(value.getStartTime)},end: ${DateUtils.format(value.getEndTime)},duration:$duration")
+          (duration, start + duration)
+        case _ => (0, 0)
       }
-      hdfs = getFileSystem(conf)
-      conf
     }
 
-    if (kerberosEnable) {
-      val expire = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_EXPIRE, "2").trim
-      val (duration, unit) = DateUtils.getTimeUnit(expire)
-      if (caffeine == null) {
-        caffeine = Caffeine.newBuilder().refreshAfterWrite(duration.toLong, unit)
-          .build[String, Configuration](new CacheLoader[String, Configuration]() {
-            override def load(key: String): Configuration = {
-              logInfo(s"recertification kerberos: time:${DateUtils.now(DateUtils.fullFormat)}, duration:$expire")
-              refreshConf()
-            }
-          })
-        caffeine.put("config", refreshConf())
-      }
-      caffeine.getIfPresent("config")
-    } else {
-      if (reusableConf == null) {
-        reusableConf = initHadoopConf()
-      }
-      reusableConf
+    def reLoginKerberos(): Unit = {
+      val timer = new Timer()
+      val duration = getDuration
+      val delay = 1000 * 5 //you know way?
+      timer.schedule(new TimerTask {
+        override def run(): Unit = {
+          UserGroupInformation.getLoginUser.checkTGTAndReloginFromKeytab()
+          val nextDuration = getDuration
+          val nextTrigger = System.currentTimeMillis() + nextDuration._1 + delay
+          logInfo(
+            s"""
+               |------------------------------------------------------------------
+               |      Check Kerberos Tgt And reLogin From Keytab Finish.
+               |            current   trigger: ${DateUtils.now(DateUtils.fullFormat)}
+               |            next task trigger: ${DateUtils.format(new Date(nextTrigger))}
+               |            next refresh time: ${DateUtils.format(new Date(nextDuration._2))}
+               |------------------------------------------------------------------
+               |""".stripMargin)
+        }
+      }, duration._1, duration._1 + delay)
     }
+
+    if (reusableConf == null) {
+      reusableConf = initHadoopConf()
+      if (kerberosConf != null) {
+        val enableString = kerberosConf.getOrElse(KEY_SECURITY_KERBEROS_ENABLE, "false")
+        val kerberosEnable = Try(enableString.trim.toBoolean).getOrElse(false)
+        if (kerberosEnable) {
+          kerberosLogin(reusableConf)
+          reLoginKerberos()
+        }
+      }
+    }
+    reusableConf
   }
 
   def yarnClient: YarnClient = {
