@@ -7,6 +7,10 @@ server:
       io: 4
       worker: 20
 
+logging:
+  level:
+    root: debug
+
 spring:
   application.name: streamx
   devtools:
@@ -82,4 +86,5 @@ streamx:
       /*.js,
       /*.png,
       /*.jpg,
-      /*.less
+      /*.less,
+      /
