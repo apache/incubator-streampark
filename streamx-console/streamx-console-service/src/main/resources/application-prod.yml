@@ -8,7 +8,8 @@ server:
       worker: 20
 
 logging:
-  level: debug
+  level:
+    root: info
 
 spring:
   application.name: streamx
