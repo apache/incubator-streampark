@@ -90,8 +90,7 @@ object HadoopUtils extends Logger {
     Try(FileSystem.get(hadoopConf)) match {
       case Success(fs) => fs
       case Failure(e) =>
-        new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
-        null
+        throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
     }
   }
 

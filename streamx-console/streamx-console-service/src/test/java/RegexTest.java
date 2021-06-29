@@ -19,6 +19,7 @@
  * under the License.
  */
 
+import com.streamxhub.streamx.common.util.CommandUtils;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,6 +27,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -79,6 +81,35 @@ public class RegexTest {
         shimsUrls.addAll(libCache);
         URLClassLoader urlClassLoader = new URLClassLoader(shimsUrls.toArray(new URL[0]));
         System.out.println(urlClassLoader);
+    }
+
+    @Test
+    public void flinkVersion() {
+        final Pattern flinkVersionPattern = Pattern.compile("^Version: (.*), Commit ID: (.*)$");
+        String flinkHome = System.getenv("FLINK_HOME");
+        String libPath = flinkHome.concat("/lib");
+        File[] distJar = new File(libPath).listFiles(x -> x.getName().matches("flink-dist_.*\\.jar"));
+        if (distJar == null || distJar.length == 0) {
+            throw new IllegalArgumentException("[StreamX] can no found flink-dist jar in " + libPath);
+        }
+        if (distJar.length > 1) {
+            throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
+        }
+        List<String> cmd = Arrays.asList(
+                "cd ".concat(flinkHome),
+                String.format(
+                        "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
+                        distJar[0].getAbsolutePath()
+                )
+        );
+
+        CommandUtils.execute(cmd, versionInfo -> {
+            Matcher matcher = flinkVersionPattern.matcher(versionInfo);
+            if (matcher.find()) {
+                String flinkVersion = matcher.group(1);
+                System.out.println(flinkVersion);
+            }
+        });
     }
 
 }

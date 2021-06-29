@@ -86,5 +86,5 @@ streamx:
       /*.js,
       /*.png,
       /*.jpg,
-      /*.less
+      /*.less,
       /
