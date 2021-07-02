@@ -24,6 +24,8 @@ import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
+import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.lang
@@ -40,18 +42,26 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     assert(flinkConfig.getOptional(KubernetesConfigOptions.CLUSTER_ID).isPresent)
     assert(flinkConfig.getOptional(KubernetesConfigOptions.CONTAINER_IMAGE).isPresent)
 
-    val (clusterDescriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
-    val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
-    val clusterClient = clusterDescriptor
-      .deployApplicationCluster(clusterSpecification, applicationConfig)
-      .getClusterClient
-    val appId = clusterClient.getClusterId
+    var clusterDescriptor: KubernetesClusterDescriptor = null
+    var clusterClient: ClusterClient[String] = null
 
-    clusterClient.close()
-    clusterDescriptor.close()
+    try {
+      val (descriptor, clusterSpecification) = getK8sClusterDescriptorAndSpecification(flinkConfig)
+      clusterDescriptor = descriptor
+      val applicationConfig = ApplicationConfiguration.fromConfiguration(flinkConfig)
+      clusterClient = clusterDescriptor
+        .deployApplicationCluster(clusterSpecification, applicationConfig)
+        .getClusterClient
 
-    // todo request refactoring of SubmitResponse
-    SubmitResponse(null, flinkConfig)
+      val appId = clusterClient.getClusterId
+      // todo request refactoring of SubmitResponse
+      SubmitResponse(null, flinkConfig)
+
+    } finally {
+      if (clusterClient != null) clusterClient.close()
+      if (clusterDescriptor != null) clusterDescriptor.close()
+    }
+
   }
 
 

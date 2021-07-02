@@ -24,8 +24,9 @@ import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
-import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
+import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
+import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
@@ -37,37 +38,47 @@ import scala.collection.JavaConverters._
  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
 
+  //noinspection DuplicatedCode
   // todo request refactoring of submitRequest
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     assert(flinkConfig.getOptional(KubernetesConfigOptions.CLUSTER_ID).isPresent)
 
-    val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
+    var clusterDescriptor: KubernetesClusterDescriptor = null
+    var packageProgram: PackagedProgram = null
+    var client: ClusterClient[String] = null
 
-    // build JobGraph
-    val packageProgram = PackagedProgram.newBuilder()
-      .setJarFile(new File(submitRequest.flinkUserJar)) // todo request to refactor StreamX 's file system abstraction
-      .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-      .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS).get().asScala: _*)
-      .build()
-    val jobGraph = PackagedProgramUtils.createJobGraph(
-      packageProgram,
-      flinkConfig,
-      flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
-      false)
+    try {
+      clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
 
-    // retrieve client and submit JobGraph
-    val client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-    val submitResult = client.submitJob(jobGraph)
+      // build JobGraph
+      packageProgram = PackagedProgram.newBuilder()
+        .setJarFile(new File(submitRequest.flinkUserJar)) // todo request to refactor StreamX 's file system abstraction
+        .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
+        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS).get().asScala: _*)
+        .build()
 
-    val jobId = submitResult.get().toString
+      val jobGraph = PackagedProgramUtils.createJobGraph(
+        packageProgram,
+        flinkConfig,
+        flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
+        false)
 
-    client.close()
-    packageProgram.close()
-    clusterDescriptor.close()
+      // retrieve client and submit JobGraph
+      client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
+      val submitResult = client.submitJob(jobGraph)
 
-    // todo request refactoring of SubmitResponse
-    SubmitResponse(null, flinkConfig)
+      val jobId = submitResult.get().toString
+
+      // todo request refactoring of SubmitResponse
+      SubmitResponse(null, flinkConfig)
+
+    } finally {
+      if (client != null) client.close()
+      if (packageProgram != null) packageProgram.close()
+      if (clusterDescriptor != null) clusterDescriptor.close()
+    }
   }
 
 

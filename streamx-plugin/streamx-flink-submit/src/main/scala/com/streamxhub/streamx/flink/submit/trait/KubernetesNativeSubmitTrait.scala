@@ -28,6 +28,7 @@ import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
+import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
@@ -63,22 +64,31 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .set(KubernetesConfigOptions.CLUSTER_ID, appId)
       .set(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
 
-    val clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
-    val client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-    val jobID = JobID.fromHexString(jobStringId)
-    val savePointDir = getOptionFromDefaultFlinkConfig(flinkHome, SavepointConfigOptions.SAVEPOINT_PATH) // todo request to refactor StreamX 's file system abstraction
+    var clusterDescriptor: KubernetesClusterDescriptor = null
+    var client: ClusterClient[String] = null
 
-    val actionResult = {
-      if (drain) {
-        client.stopWithSavepoint(jobID, drain, savePointDir).get()
-      } else if (savePoint) {
-        client.cancelWithSavepoint(jobID, savePointDir).get()
-      } else {
-        client.cancel(jobID).get()
-        ""
+    try {
+      clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
+      client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
+      val jobID = JobID.fromHexString(jobStringId)
+      val savePointDir = getOptionFromDefaultFlinkConfig(flinkHome, SavepointConfigOptions.SAVEPOINT_PATH) // todo request to refactor StreamX 's file system abstraction
+
+      val actionResult = {
+        if (drain) {
+          client.stopWithSavepoint(jobID, drain, savePointDir).get()
+        } else if (savePoint) {
+          client.cancelWithSavepoint(jobID, savePointDir).get()
+        } else {
+          client.cancel(jobID).get()
+          ""
+        }
       }
+      actionResult
+
+    } finally {
+      if (client != null) client.close()
+      if (clusterDescriptor != null) clusterDescriptor.close()
     }
-    actionResult
   }
 
   /*
