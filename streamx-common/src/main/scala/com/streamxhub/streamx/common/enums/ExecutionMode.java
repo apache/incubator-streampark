@@ -32,7 +32,9 @@ public enum ExecutionMode {
     YARN_PRE_JOB(2, "yarn-pre-job"),
     YARN_SESSION(3, "yarn-session"),
     APPLICATION(4, "yarn-application"),
-    KUBERNETES(5, "kubernetes");
+    KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
+    KUBERNETES_NATIVE_APPLICATION(6,"kubernetes-application");
+
 
     private Integer mode;
     private String name;
