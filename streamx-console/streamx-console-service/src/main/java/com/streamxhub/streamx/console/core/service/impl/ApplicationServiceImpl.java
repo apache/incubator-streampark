@@ -592,6 +592,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     });
 
                     LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(Application::getId, application.getId());
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
@@ -613,7 +614,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
-                        updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
                             application.setSavePointed(true);
                             // 重新启动.
@@ -631,7 +631,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             }
                         }
                     } catch (ServiceException e) {
-                        updateWrapper.eq(Application::getId, application.getId());
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
                         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                         updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
