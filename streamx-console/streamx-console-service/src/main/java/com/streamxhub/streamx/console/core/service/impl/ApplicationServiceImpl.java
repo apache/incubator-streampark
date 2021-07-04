@@ -630,12 +630,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
                             }
                         }
-                    } catch (ServiceException e) {
+                    } catch (Exception e) {
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
                         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                         updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     } finally {
                         FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                             baseMapper.update(application, updateWrapper);

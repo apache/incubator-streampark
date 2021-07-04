@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit
 
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.flink.submit.impl.{ApplicationSubmit, KubernetesSubmit, LocalSubmit, YarnPreJobSubmit}
+import com.streamxhub.streamx.flink.submit.impl._
 
 import java.lang.{Boolean => JavaBool}
 
@@ -29,7 +29,7 @@ object FlinkSubmit {
 
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
-      case ExecutionMode.APPLICATION => ApplicationSubmit.submit(submitInfo)
+      case ExecutionMode.APPLICATION => YarnApplicationSubmit.submit(submitInfo)
       case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES => KubernetesSubmit.submit(submitInfo)
