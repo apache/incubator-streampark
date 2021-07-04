@@ -48,7 +48,7 @@ import scala.util.Try
 /**
  * yarn application mode submit
  */
-object ApplicationSubmit extends YarnSubmitTrait {
+object YarnApplicationSubmit extends YarnSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
 
