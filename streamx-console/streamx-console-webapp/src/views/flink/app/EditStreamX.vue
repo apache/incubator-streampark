@@ -1683,10 +1683,10 @@ export default {
             this.tmMemoryItems.push(key)
           }
           if (k === 'taskmanager.numberOfTaskSlots') {
-            parallelism = parseInt(v)
+            slot = parseInt(v)
           }
           if (k === 'parallelism.default') {
-            slot = parseInt(v)
+            parallelism = parseInt(v)
           }
         }
       }

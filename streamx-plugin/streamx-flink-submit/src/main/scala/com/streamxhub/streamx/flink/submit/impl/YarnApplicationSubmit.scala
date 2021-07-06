@@ -118,6 +118,11 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
       programArgs += PARAM_KEY_APP_NAME
       programArgs += submitRequest.effectiveAppName
+      val parallelism = getParallelism(submitRequest)
+      if (parallelism != null) {
+        programArgs += PARAM_KEY_FLINK_PARALLELISM
+        programArgs += s"$parallelism"
+      }
       val providedLibs = ListBuffer(
         submitRequest.workspaceEnv.flinkLib,
         submitRequest.workspaceEnv.appJars,
