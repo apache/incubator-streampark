@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
@@ -30,7 +30,6 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
-import java.lang
 import scala.collection.JavaConverters._
 
 /**
@@ -79,8 +78,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
   }
 
 
-  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
-    doStop(ExecutionMode.KUBERNETES_NATIVE_SESSION, flinkHome, appId, jobStringId, savePoint, drain)
+  override def doStop(stopInfo: StopRequest): StopResponse = {
+    doStop(ExecutionMode.KUBERNETES_NATIVE_SESSION, stopInfo)
   }
 
 

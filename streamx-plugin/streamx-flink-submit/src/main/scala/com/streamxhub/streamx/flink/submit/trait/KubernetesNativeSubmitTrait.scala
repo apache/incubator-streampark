@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
 import com.streamxhub.streamx.common.util.Utils
-import com.streamxhub.streamx.flink.submit.SubmitRequest
+import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
@@ -34,13 +34,12 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
-import java.lang
-import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
+import java.lang.{Boolean => JavaBool}
 
 /**
  * kubernetes native mode submit
@@ -50,19 +49,13 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
-
-  // todo doStop method needs to be refactored to provide kubernetes.cluster-id, kubernetes.namespace
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   protected def doStop(@Nonnull executeMode: ExecutionMode,
-                       flinkHome: String,
-                       appId: String,
-                       jobStringId: String,
-                       savePoint: lang.Boolean,
-                       drain: lang.Boolean): String = {
+                       stopRequest: StopRequest): StopResponse = {
     val flinkConfig = new Configuration()
       .set(DeploymentOptions.TARGET, executeMode.getName)
-      .set(KubernetesConfigOptions.CLUSTER_ID, appId)
-      .set(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
+      .set(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
+      .set(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -70,20 +63,20 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
-      val jobID = JobID.fromHexString(jobStringId)
-      val savePointDir = getOptionFromDefaultFlinkConfig(flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
+      val jobID = JobID.fromHexString(stopRequest.jobId)
+      val savePointDir = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
 
       val actionResult = {
-        if (drain) {
-          client.stopWithSavepoint(jobID, drain, savePointDir).get()
-        } else if (savePoint) {
+        if (stopRequest.withDrain) {
+          client.stopWithSavepoint(jobID, true, savePointDir).get()
+        } else if (stopRequest.withSavePoint) {
           client.cancelWithSavepoint(jobID, savePointDir).get()
         } else {
           client.cancel(jobID).get()
           ""
         }
       }
-      actionResult
+      StopResponse(actionResult)
 
     } finally {
       if (client != null) client.close()
