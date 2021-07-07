@@ -39,7 +39,6 @@ import scala.collection.JavaConverters._
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
 
   //noinspection DuplicatedCode
-  // todo request refactoring of submitRequest
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
 
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
@@ -54,7 +53,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
 
       // build JobGraph
       packageProgram = PackagedProgram.newBuilder()
-        .setJarFile(new File(submitRequest.flinkUserJar)) // todo request to refactor StreamX 's file system abstraction
+        .setJarFile(new File(submitRequest.flinkUserJar))
         .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
         .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS).get().asScala: _*)
         .build()
@@ -68,11 +67,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
       // retrieve client and submit JobGraph
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
-
       val jobId = submitResult.get().toString
 
-      // todo request refactoring of SubmitResponse
-      SubmitResponse(null, flinkConfig)
+      SubmitResponse(client.getClusterId, flinkConfig, jobId)
 
     } finally {
       if (client != null) client.close()

@@ -65,7 +65,9 @@ trait FlinkSubmitTrait extends Logger {
          |      "option": ${submitRequest.option},
          |      "property": ${submitRequest.property},
          |      "dynamicOption": ${submitRequest.dynamicOption.mkString(" ")},
-         |      "args": ${submitRequest.args}
+         |      "args": ${submitRequest.args},
+         |      "clusterId": ${submitRequest.clusterId},
+         |      "kubernetesNamespace": ${submitRequest.kubernetesNamespace}
          |}
          |""".stripMargin)
     doSubmit(submitRequest)

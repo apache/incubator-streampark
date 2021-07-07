@@ -60,7 +60,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
                        savePoint: lang.Boolean,
                        drain: lang.Boolean): String = {
     val flinkConfig = new Configuration()
-      .set(DeploymentOptions.TARGET, executeMode)
+      .set(DeploymentOptions.TARGET, executeMode.getName)
       .set(KubernetesConfigOptions.CLUSTER_ID, appId)
       .set(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
 
@@ -71,7 +71,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(jobStringId)
-      val savePointDir = getOptionFromDefaultFlinkConfig(flinkHome, SavepointConfigOptions.SAVEPOINT_PATH) // todo request to refactor StreamX 's file system abstraction
+      val savePointDir = getOptionFromDefaultFlinkConfig(flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
 
       val actionResult = {
         if (drain) {
@@ -138,8 +138,8 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     // extract from submitRequest
     flinkConfig
       .set(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-      .set(KubernetesConfigOptions.CLUSTER_ID, "") // todo information missing, or maybe overridden by submitRequest.property/dynamicOption
-      .set(KubernetesConfigOptions.NAMESPACE, "") // todo Id.
+      .set(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
+      .set(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
       .set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
 
     if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
