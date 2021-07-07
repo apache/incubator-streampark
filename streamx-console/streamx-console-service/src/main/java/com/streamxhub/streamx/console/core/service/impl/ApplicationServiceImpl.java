@@ -1046,7 +1046,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 option.toString(),
                 optionMap,
                 dynamicOption,
-                application.getArgs()
+                application.getArgs(),
+                application.getAppId()
         );
 
         ApplicationLog log = new ApplicationLog();
@@ -1055,19 +1056,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         try {
             SubmitResponse submitResponse = FlinkSubmit.submit(submitInfo);
-            if (submitResponse.configuration() != null) {
-                String jmMemory = submitResponse.configuration().toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
+            if (submitResponse.flinkConfig() != null) {
+                String jmMemory = submitResponse.flinkConfig().toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 if (jmMemory != null) {
                     application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
                 }
-                String tmMemory = submitResponse.configuration().toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                String tmMemory = submitResponse.flinkConfig().toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
                 if (tmMemory != null) {
                     application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
                 }
             }
-            application.setAppId(submitResponse.applicationId().toString());
+            application.setAppId(submitResponse.clusterId());
             application.setFlameGraph(appParam.getFlameGraph());
-            log.setYarnAppId(submitResponse.applicationId().toString());
+            log.setYarnAppId(submitResponse.clusterId());
             application.setEndTime(null);
             updateById(application);
 

@@ -53,9 +53,8 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         .deployApplicationCluster(clusterSpecification, applicationConfig)
         .getClusterClient
 
-      val appId = clusterClient.getClusterId
-      // todo request refactoring of SubmitResponse
-      SubmitResponse(null, flinkConfig)
+      val clusterId = clusterClient.getClusterId
+      SubmitResponse(clusterId, flinkConfig)
 
     } finally {
       if (clusterClient != null) clusterClient.close()

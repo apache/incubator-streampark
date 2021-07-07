@@ -21,9 +21,11 @@
 package com.streamxhub.streamx.flink.submit
 
 import org.apache.flink.configuration.Configuration
-import org.apache.hadoop.yarn.api.records.ApplicationId
 
+import javax.annotation.Nullable
 
-case class SubmitResponse(applicationId: ApplicationId, configuration: Configuration) {
+case class SubmitResponse(clusterId: String,
+                          flinkConfig: Configuration,
+                          @Nullable jobId: String = "") {
 
 }
