@@ -734,6 +734,7 @@ export default {
       this.$nextTick(() => {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
+          'mainClass': this.app.mainClass,
           'args': this.app.args,
           'jar': this.app.jar,
           'description': this.app.description,
