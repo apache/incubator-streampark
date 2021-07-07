@@ -33,7 +33,6 @@ import org.apache.flink.client.program.PackagedProgramUtils
 import org.apache.flink.configuration._
 import org.apache.flink.runtime.security.{SecurityConfiguration, SecurityUtils}
 import org.apache.flink.runtime.util.HadoopUtils
-import org.apache.flink.util.Preconditions.checkNotNull
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.hadoop.security.UserGroupInformation
 import org.apache.hadoop.yarn.api.records.ApplicationId
@@ -104,12 +103,10 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                                             commandLine: CommandLine,
                                             jobJars: JavaList[String]) = {
 
-    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    val effectiveConfiguration = new Configuration(executorConfig)
+    val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
     val programOptions = ProgramOptions.create(commandLine)
     val executionParameters = ExecutionConfigAccessor.fromProgramOptions(programOptions, jobJars)
     executionParameters.applyToConfiguration(effectiveConfiguration)
-    super.applyToConfiguration(submitRequest, effectiveConfiguration)
 
     val (providedLibs, programArgs) = {
       val programArgs = new ArrayBuffer[String]()

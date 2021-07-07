@@ -191,7 +191,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/joinus0627.png" alt="Join the Group" width="200"><br>
+    <img src="http://assets.streamxhub.com/joinus0707.png" alt="Join the Group" width="200"><br>
     <span>join us</span>
 </div>
 

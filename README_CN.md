@@ -185,7 +185,7 @@ StreamX 采用 Apache LICENSE 2.0 许可的开源项目，使用完全免费， 
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/joinus0627.png" alt="Join the Group" width="200"><br>
+    <img src="http://assets.streamxhub.com/joinus0707.png" alt="Join the Group" width="200"><br>
     <span>扫微信二维码加群讨论</span>
 </div>
 

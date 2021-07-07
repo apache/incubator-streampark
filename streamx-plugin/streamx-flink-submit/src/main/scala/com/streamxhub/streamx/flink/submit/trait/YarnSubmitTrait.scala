@@ -24,7 +24,8 @@ import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.SubmitRequest
-import org.apache.flink.client.cli.ClientOptions
+import org.apache.commons.cli.CommandLine
+import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClientProvider
@@ -109,18 +110,34 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
-  private[submit] def applyToConfiguration(submitRequest: SubmitRequest, effectiveConfiguration: Configuration): Unit = {
+  /**
+   * 页面定义参数优先级 > flink-conf.yaml中配置优先级
+   *
+   * @param submitRequest
+   * @param customConfiguration
+   * @return
+   */
+  private[submit] def applyConfiguration(submitRequest: SubmitRequest,
+                                         activeCustomCommandLine: CustomCommandLine,
+                                         commandLine: CommandLine): Configuration = {
+
+    require(activeCustomCommandLine != null)
+    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
+    val customConfiguration = new Configuration(executorConfig)
+    val configuration = new Configuration()
     //flink-conf.yaml配置
     submitRequest.flinkDefaultConfiguration.keySet.foreach(x => {
       submitRequest.flinkDefaultConfiguration.getString(x, null) match {
-        case v if v != null => effectiveConfiguration.setString(x, v)
+        case v if v != null => configuration.setString(x, v)
         case _ =>
       }
     })
+    configuration.addAll(customConfiguration)
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
+      configuration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
+    configuration
   }
 
   private[submit] def deployInternal(clusterDescriptor: YarnClusterDescriptor,
