@@ -134,7 +134,7 @@ public class AlertServiceImpl implements AlertService {
             HtmlEmail htmlEmail = new HtmlEmail();
             htmlEmail.setCharset("UTF-8");
             htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-            htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
+            htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
             htmlEmail.setFrom(this.senderEmail.getFrom());
             if (this.senderEmail.isSsl()) {
                 htmlEmail.setSSLOnConnect(true);
