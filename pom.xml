@@ -63,7 +63,7 @@
 
 
     <properties>
-        <checkstyle.version>2.17</checkstyle.version>
+
         <project.build.jdk>1.8</project.build.jdk>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -88,6 +88,9 @@
         <grpc.version>1.15.0</grpc.version>
         <jackson.version>2.12.1</jackson.version>
         <gson.version>2.8.5</gson.version>
+
+        <checkstyle.version>2.17</checkstyle.version>
+        <puppycrawl.version>8.18</puppycrawl.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
@@ -465,22 +468,26 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-checkstyle-plugin</artifactId>
                     <version>${checkstyle.version}</version>
-                    <configuration>
-                        <configLocation>dev/checkstyle.xml</configLocation>
-                        <consoleOutput>true</consoleOutput>
-                        <failsOnError>true</failsOnError>
-                        <linkXRef>false</linkXRef>
-                        <violationSeverity>error</violationSeverity>
-                        <includeTestSourceDirectory>true</includeTestSourceDirectory>
-                        <inputEncoding>${project.build.sourceEncoding}</inputEncoding>
-                        <outputEncoding>${project.reporting.outputEncoding}</outputEncoding>
-                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>com.puppycrawl.tools</groupId>
+                            <artifactId>checkstyle</artifactId>
+                            <version>${puppycrawl.version}</version>
+                        </dependency>
+                    </dependencies>
                     <executions>
                         <execution>
                             <id>check-style</id>
                             <phase>validate</phase>
+                            <configuration>
+                                <configLocation>dev/checkstyle.xml</configLocation>
+                                <suppressionsLocation>dev/checkstyle-suppression.xml</suppressionsLocation>
+                                <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                                <consoleOutput>true</consoleOutput>
+                                <failsOnError>true</failsOnError>
+                            </configuration>
                             <goals>
-                                <goal>checkstyle</goal>
+                                <goal>check</goal>
                             </goals>
                         </execution>
                     </executions>
@@ -646,11 +653,16 @@
                         <autoReleaseAfterClose>true</autoReleaseAfterClose>
                     </configuration>
                 </plugin>
-
             </plugins>
         </pluginManagement>
 
         <plugins>
+            <!--
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-checkstyle-plugin</artifactId>
+                </plugin>
+            -->
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
