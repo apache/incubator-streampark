@@ -41,7 +41,7 @@
     <resetpass v-if="name==='resetpass'"></resetpass>
     <sun v-if="name==='sun'"></sun>
     <moon v-if="name==='moon'"></moon>
-    <ifrom v-if="name==='from'"></ifrom>
+    <emailfrom v-if="name==='emailfrom'"></emailfrom>
   </span>
 </template>
 
@@ -88,7 +88,7 @@ import {
   resetpass,
   sun,
   moon,
-  ifrom
+  emailfrom
 } from '@/core/icons'
 
 export default {
@@ -135,7 +135,7 @@ export default {
     resetpass,
     sun,
     moon,
-    ifrom
+    emailfrom
   },
   props: {
     name: {

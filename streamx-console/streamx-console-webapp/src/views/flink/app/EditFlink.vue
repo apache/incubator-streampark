@@ -647,7 +647,9 @@ export default {
         module: this.app.module,
         jar: jar
       }).then((resp) => {
-        this.form.setFieldsValue({ 'mainClass': resp.data })
+        if(resp.data) {
+          this.form.setFieldsValue({ 'mainClass': resp.data })
+        }
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -730,7 +732,6 @@ export default {
     },
 
     handleReset() {
-      this.handleChangeJars(this.app.jar)
       this.$nextTick(() => {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
