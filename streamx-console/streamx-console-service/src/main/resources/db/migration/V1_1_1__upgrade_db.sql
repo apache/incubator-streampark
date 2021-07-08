@@ -5,7 +5,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 -- ----------------------------
 update `t_setting` set `NUM` = `NUM` + 1 where `NUM` > 6;
 
-update `t_setting` set `KEY` = 'alert.email.userName', DESCRIPTION='用来发送告警邮箱的认证用户名' where `KEY` = 'alert.email.address';
+update `t_setting` set `KEY` = 'alert.email.userName',`TITLE`='Alert  Email User', DESCRIPTION='用来发送告警邮箱的认证用户名' where `KEY` = 'alert.email.address';
 
 update `t_setting` set `DESCRIPTION`= '用来发送告警邮箱的认证密码' where `KEY` = 'alert.email.password';
 
