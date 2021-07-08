@@ -169,8 +169,8 @@ public class AlertServiceImpl implements AlertService {
         template.setEndTime(DateUtils.format(application.getEndTime() == null ? new Date() : application.getEndTime(), DateUtils.fullFormat(), TimeZone.getDefault()));
         template.setDuration(DateUtils.toRichTimeDuration(duration));
         boolean needRestart = application.isNeedRestartOnFailed() && application.getRestartCount() > 0;
+        template.setRestart(needRestart);
         if (needRestart) {
-            template.setRestart(true);
             template.setRestartIndex(application.getRestartCount());
             template.setTotalRestart(application.getRestartSize());
         }
