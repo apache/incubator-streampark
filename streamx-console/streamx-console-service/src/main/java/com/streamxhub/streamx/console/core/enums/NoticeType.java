@@ -18,3 +18,30 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package com.streamxhub.streamx.console.core.enums;
+
+import java.io.Serializable;
+import java.util.Arrays;
+
+/**
+ * @author benjobs
+ */
+
+public enum NoticeType implements Serializable {
+    EXCEPTION(1),
+    MESSAGE(2);
+    int value;
+
+    public int get() {
+        return this.value;
+    }
+
+    NoticeType(int value) {
+        this.value = value;
+    }
+
+    public static NoticeType of(Integer value) {
+        return Arrays.stream(values()).filter((x) -> x.value == value).findFirst().orElse(null);
+    }
+
+}

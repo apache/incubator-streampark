@@ -185,7 +185,7 @@ trait FlinkSubmitTrait extends Logger {
 
   private[submit] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
     val line = checkNotNull(commandLine)
-    logInfo(s"Custom commandlines: ${customCommandLines}")
+    logInfo(s"Custom commandlines: $customCommandLines")
     for (cli <- customCommandLines) {
       val isActive = cli.isActive(line)
       logInfo(s"Checking custom commandline $cli, isActive: $isActive")

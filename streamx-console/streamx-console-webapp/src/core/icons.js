@@ -47,6 +47,7 @@ import github from '@/assets/icons/github.svg?inline'
 import resetpass from '@/assets/icons/resetpass.svg?inline'
 import sun from '@/assets/icons/sun.svg?inline'
 import moon from '@/assets/icons/moon.svg?inline'
+import user from '@/assets/icons/user.svg?inline'
 
 export {
   analyse,
@@ -89,5 +90,6 @@ export {
   github,
   resetpass,
   sun,
-  moon
+  moon,
+  user
 }

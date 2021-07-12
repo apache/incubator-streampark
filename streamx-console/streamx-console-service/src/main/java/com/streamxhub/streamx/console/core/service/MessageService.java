@@ -18,29 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.system.authentication;
+package com.streamxhub.streamx.console.core.service;
 
-import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.core.entity.Message;
+import com.streamxhub.streamx.console.core.enums.NoticeType;
 
 /**
  * @author benjobs
  */
-@Slf4j
-@Component
-public class ServerUtil {
+public interface MessageService extends IService<Message> {
+    /**
+     * @param id
+     * @param info
+     * @param noticeType
+     */
+    void push(Message message);
 
-    @Autowired
-    private UserService userService;
-
-    public User getUser() {
-        String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        User user = userService.findByName(username);
-        return user;
-    }
+    /**
+     * @return
+     */
+    IPage<Message> getUnRead(NoticeType noticeType,RestRequest request);
 }

@@ -647,7 +647,9 @@ export default {
         module: this.app.module,
         jar: jar
       }).then((resp) => {
-        this.form.setFieldsValue({ 'mainClass': resp.data })
+        if (resp.data) {
+          this.form.setFieldsValue({ 'mainClass': resp.data })
+        }
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -730,10 +732,10 @@ export default {
     },
 
     handleReset() {
-      this.handleChangeJars(this.app.jar)
       this.$nextTick(() => {
         this.form.setFieldsValue({
           'jobName': this.app.jobName,
+          'mainClass': this.app.mainClass,
           'args': this.app.args,
           'jar': this.app.jar,
           'description': this.app.description,
@@ -768,10 +770,10 @@ export default {
             this.tmMemoryItems.push(key)
           }
           if (k === 'taskmanager.numberOfTaskSlots') {
-            parallelism = parseInt(v)
+            slot = parseInt(v)
           }
           if (k === 'parallelism.default') {
-            slot = parseInt(v)
+            parallelism = parseInt(v)
           }
         }
       }

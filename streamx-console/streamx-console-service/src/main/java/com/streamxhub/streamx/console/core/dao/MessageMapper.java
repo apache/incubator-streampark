@@ -18,10 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.core
+package com.streamxhub.streamx.console.core.dao;
 
-class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.streamxhub.streamx.console.core.entity.Message;
 
-class StreamTableEnvConfig(val args: Array[String], val streamConfig: StreamEnvConfigFunction, val tableConfig: TableEnvConfigFunction)
-
-class TableEnvConfig(val args: Array[String], val conf: TableEnvConfigFunction)
+public interface MessageMapper extends BaseMapper<Message> {
+}

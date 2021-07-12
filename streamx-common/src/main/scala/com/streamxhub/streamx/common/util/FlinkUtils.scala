@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.common.util
 
-
 import org.apache.flink.api.common.state.{ListState, ListStateDescriptor}
 import org.apache.flink.api.common.typeinfo.TypeInformation
 import org.apache.flink.runtime.state.FunctionInitializationContext

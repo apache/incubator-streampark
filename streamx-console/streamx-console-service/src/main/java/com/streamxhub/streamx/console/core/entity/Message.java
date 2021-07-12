@@ -18,17 +18,48 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.javacase.bean;
+package com.streamxhub.streamx.console.core.entity;
 
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.streamxhub.streamx.console.core.enums.NoticeType;
 import lombok.Data;
 
-import java.io.Serializable;
+import java.util.Date;
 
 @Data
-public class LogBean implements Serializable {
-    private String platenum;
-    private String cardType;
-    private Long inTime;
-    private Long outTime;
-    private String controlid;
+@TableName("t_message")
+public class Message {
+
+    private Long id;
+
+    private Long appId;
+
+    private Long userId;
+
+    private String title;
+
+    /**
+     * 1) 构建失败报
+     * 2) 任务监控到异常
+     */
+    private Integer type;
+
+    private String context;
+
+    private Boolean readed;
+
+    private Date createTime;
+
+    public Message() {}
+
+    public Message(Long userId, Long appId, String title, String context, NoticeType noticeType) {
+        this.userId = userId;
+        this.appId = appId;
+        this.title = title;
+        this.context = context;
+        this.type = noticeType.get();
+        this.createTime = new Date();
+        this.readed = false;
+    }
+
 }
