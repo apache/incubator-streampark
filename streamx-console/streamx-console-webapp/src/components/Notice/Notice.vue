@@ -6,7 +6,7 @@
     overlay-class-name="header-notice-wrapper"
     :auto-adjust-overflow="true"
     :arrow-point-at-center="true"
-    :overlay-style="{ width: '300px', top: '50px' }">
+    :overlay-style="{ width: '380px', top: '65px' }">
     <template slot="content">
       <a-spin :spinning="loadding">
         <a-tabs default-active-key="1" @change="handleChange">
@@ -15,24 +15,30 @@
             key="1">
             <a-list>
               <a-list-item
-                v-for="(msg,index) in exceptions"
+                v-for="(e,index) in exceptions"
                 :key="'message-'.concat(index)">
                 <a-list-item-meta
-                  :title="msg.title"
-                  :description="msg.createTime">
+                  :title="e.title"
+                  :description="e.createTime"
+                  @click="handleAlert(e)">
                   <a-avatar
                     style="background-color: white"
                     slot="avatar"
                     src="https://gw.alipayobjects.com/zos/rmsportal/ThXAXghbEsBCCSDihZxY.png"/>
                 </a-list-item-meta>
+                <span class="mark-read" @click="handleMarkRead(e.id)">
+                  <a-icon type="check" style="color: #d9d9d9;font-size: 20px"/>
+                </span>
               </a-list-item>
-              <a-pagination
-                size="small"
-                :total="total"
-                :page-size="pageSize"
-                :default-current="pageNo1"
-                class="pagination"
-                @change="handleNoticePage" />
+              <template v-if="total1 > 0">
+                <a-pagination
+                  size="small"
+                  :total="total1"
+                  :page-size="pageSize"
+                  :default-current="pageNo1"
+                  class="pagination"
+                  @change="handleNoticePage" />
+              </template>
             </a-list>
           </a-tab-pane>
           <a-tab-pane
@@ -44,13 +50,18 @@
                 :key="'message-'.concat(index)">
                 <a-list-item-meta
                   :title="msg.title"
-                  :description="msg.createTime">
+                  :description="msg.createTime"
+                  @click="handleAlert(msg)">
                 </a-list-item-meta>
+                <span class="mark-read" @click="handleMarkRead(e.id)">
+                  <a-icon type="check" style="color: #d9d9d9;font-size: 20px"/>
+                </span>
               </a-list-item>
             </a-list>
             <a-pagination
+              v-if="total2 > 0"
               size="small"
-              :total="total"
+              :total="total2"
               :page-size="pageSize"
               :default-current="pageNo2"
               class="pagination"
@@ -63,7 +74,7 @@
       @click="fetchNotice"
       class="header-notice">
       <a-badge
-        :count="total">
+        :count="noticeType === 1 ? (total1 > 0 ? total1 : total2) : (total2 > 0 ? total2 : total1)">
         <a-icon
           style="font-size: 16px; padding: 4px"
           type="bell"/>
@@ -76,7 +87,7 @@
 import SockJS from 'sockjs-client'
 import Stomp from 'webstomp-client'
 import {baseUrl} from '@/api/baseUrl'
-import {notice} from '@api/metrics'
+import {notice,delnotice} from '@api/metrics'
 
 export default {
   name: 'Notice',
@@ -87,7 +98,8 @@ export default {
       pageSize: 8,
       pageNo1: 1,
       pageNo2: 1,
-      total: 0,
+      total1: 0,
+      total2: 0,
       noticeType: 1,
       message: [],
       exceptions: []
@@ -117,11 +129,12 @@ export default {
         pageNum: pageNo,
         pageSize: this.pageSize
       }).then((resp)=> {
-        this.total = parseInt(resp.data.total)
         if (this.noticeType === 1) {
           this.exceptions = resp.data.records || []
+          this.total1 = parseInt(resp.data.total)
         } else {
           this.message = resp.data.records || []
+          this.total2 = parseInt(resp.data.total)
         }
       }).then((err)=>{
 
@@ -129,7 +142,7 @@ export default {
     },
 
     handleChange(key) {
-      this.noticeType = key
+      this.noticeType = parseInt(key)
       if (this.noticeType === 1) {
          this.handleNoticePage(this.pageNo1)
       } else {
@@ -143,38 +156,42 @@ export default {
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/notice', (resp) => {
           const message = JSON.parse(resp.body)
-          this.message.push(message)
-          const key = message.id
-          this.$notification.open({
-            message: message.title,
-            description: message.context,
-            duration: null,
-            style: {
-              width: '600px',
-              marginLeft: `${380 - 600}px`
-            },
-            icon: <a-icon type="smile" style="color: #108ee9" />,
-            btn: h => {
-              return h(
-                  'a-button',
-                  {
-                    props: {
-                      type: 'primary',
-                      size: 'small',
-                    },
-                    on: {
-                      click: () => this.$notification.close(key),
-                    },
-                  },
-                  'Confirm',
-              )
-            },
-            key,
-            onClose: close,
-          })
+          if (this.noticeType === 1) {
+            this.exceptions = message || []
+            this.total1 = parseInt(message.total)
+          } else {
+            this.message = message || []
+            this.total2 = parseInt(message.total)
+          }
+          this.handleAlert(message)
         })
       })
-    }
+    },
+
+    handleAlert(message) {
+      this.$swal.fire({
+        title: message.title,
+        icon: 'error',
+        width: 800,
+        html: '<pre style="font-size: 10px">' + message.context + '</pre>',
+        focusConfirm: false,
+      })
+    },
+
+    handleMarkRead(id) {
+      delnotice({
+        id: id
+      }).then((resp)=> {
+        if (this.noticeType === 1) {
+          this.handleNoticePage(this.pageNo1)
+        } else {
+          this.handleNoticePage(this.pageNo2)
+        }
+      }).then((err)=>{
+
+      })
+    },
+
   },
 
   mounted() {
@@ -203,4 +220,13 @@ export default {
   margin-top: 10px;
   float: right;
 }
+
+.mark-read {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #d9d9d9;
+  border-radius: 50%;
+  padding: 5px
+}
+
 </style>

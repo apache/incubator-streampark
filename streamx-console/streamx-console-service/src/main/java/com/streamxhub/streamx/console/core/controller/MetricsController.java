@@ -66,6 +66,11 @@ public class MetricsController {
         return RestResponse.create().data(pages);
     }
 
+    @PostMapping("delnotice")
+    public RestResponse delNotice(Long id) {
+        return RestResponse.create().data(messageService.removeById(id));
+    }
+
     @PostMapping("report")
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {
         try {

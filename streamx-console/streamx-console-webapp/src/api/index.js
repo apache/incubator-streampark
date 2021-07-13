@@ -46,6 +46,7 @@ export default {
   Metrics: {
     FLAMEGRAPH: '/metrics/flamegraph',
     NOTICE: '/metrics/notice',
+    DELNOTICE: '/metrics/delnotice'
   },
   SavePoint: {
     LATEST: '/flink/savepoint/latest',

@@ -29,3 +29,6 @@ export function notice (parameter) {
   return http.post(api.Metrics.NOTICE, parameter)
 }
 
+export function delnotice(parameter) {
+  return http.post(api.Metrics.DELNOTICE, parameter)
+}
