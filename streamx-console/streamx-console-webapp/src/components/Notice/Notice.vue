@@ -157,11 +157,11 @@ export default {
         this.stompClient.subscribe('/resp/notice', (resp) => {
           const message = JSON.parse(resp.body)
           if (this.noticeType === 1) {
-            this.exceptions = message || []
-            this.total1 = parseInt(message.total)
+            this.exceptions.push(message)
+            this.total1 += 1
           } else {
-            this.message = message || []
-            this.total2 = parseInt(message.total)
+            this.message.push(message)
+            this.total2 += 1
           }
           this.handleAlert(message)
         })
