@@ -1423,6 +1423,7 @@ export default {
     },
 
     handleSubmitCustomJob(values) {
+      debugger
       const options = this.handleFormValue(values)
       const format = this.strategy === 1 ? this.app.format : (this.form.getFieldValue('config').endsWith('.properties') ? 2 : 1)
       let config = this.configOverride || this.app.config
@@ -1683,10 +1684,10 @@ export default {
             this.tmMemoryItems.push(key)
           }
           if (k === 'taskmanager.numberOfTaskSlots') {
-            parallelism = parseInt(v)
+            slot = parseInt(v)
           }
           if (k === 'parallelism.default') {
-            slot = parseInt(v)
+            parallelism = parseInt(v)
           }
         }
       }

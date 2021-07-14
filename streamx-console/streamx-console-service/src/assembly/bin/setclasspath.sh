@@ -83,11 +83,6 @@ if [[ "$1" = "debug" ]] ; then
 fi
 
 # Set standard commands for invoking Java, if not already set.
-if [[ -z "$_RUNJAVA" ]]; then
+if [[ -z "$RUNJAVA" ]]; then
   RUNJAVA="$JRE_HOME"/bin/java
-fi
-if [[ "$os400" != "true" ]]; then
-  if [[ -z "$_RUNJDB" ]]; then
-    _RUNJDB="$JAVA_HOME"/bin/jdb
-  fi
 fi

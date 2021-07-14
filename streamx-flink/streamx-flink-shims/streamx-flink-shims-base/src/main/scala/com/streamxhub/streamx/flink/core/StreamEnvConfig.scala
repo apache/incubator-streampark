@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.core
 
-
 class StreamEnvConfig(val args: Array[String], val conf: StreamEnvConfigFunction)
 
 class StreamTableEnvConfig(val args: Array[String], val streamConfig: StreamEnvConfigFunction, val tableConfig: TableEnvConfigFunction)

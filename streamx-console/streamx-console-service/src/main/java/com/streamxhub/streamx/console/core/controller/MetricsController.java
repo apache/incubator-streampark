@@ -16,10 +16,15 @@
  */
 package com.streamxhub.streamx.console.core.controller;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.core.entity.FlameGraph;
+import com.streamxhub.streamx.console.core.entity.Message;
+import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.metrics.flink.JvmProfiler;
 import com.streamxhub.streamx.console.core.service.FlameGraphService;
+import com.streamxhub.streamx.console.core.service.MessageService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -50,6 +55,21 @@ public class MetricsController {
 
     @Autowired
     private FlameGraphService flameGraphService;
+
+    @Autowired
+    private MessageService messageService;
+
+    @PostMapping("notice")
+    public RestResponse notice(Integer type, RestRequest request) {
+        NoticeType noticeType = NoticeType.of(type);
+        IPage<Message> pages = messageService.getUnRead(noticeType, request);
+        return RestResponse.create().data(pages);
+    }
+
+    @PostMapping("delnotice")
+    public RestResponse delNotice(Long id) {
+        return RestResponse.create().data(messageService.removeById(id));
+    }
 
     @PostMapping("report")
     public RestResponse report(@RequestBody JvmProfiler jvmProfiler) {

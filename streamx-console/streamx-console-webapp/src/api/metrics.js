@@ -24,3 +24,11 @@ import http from '@/utils/request'
 export function flamegraph (queryParam, callback, message) {
   return http.export(api.Metrics.FLAMEGRAPH, queryParam, callback, message)
 }
+
+export function notice (parameter) {
+  return http.post(api.Metrics.NOTICE, parameter)
+}
+
+export function delnotice(parameter) {
+  return http.post(api.Metrics.DELNOTICE, parameter)
+}

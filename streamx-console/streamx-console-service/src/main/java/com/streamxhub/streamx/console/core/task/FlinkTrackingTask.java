@@ -382,7 +382,7 @@ public class FlinkTrackingTask {
     private void handleRunningState(Application application, OptionState optionState, FlinkAppState currentState) {
         /**
          * 上次记录的状态的 "STARTING" 本次获取到最新的状态为"RUNNING",说明是重启后的第一次跟踪
-         * 则:job之前一下状态需要请求重启状态:
+         * 则:job以下状态需要更新为重启状态:
          * NEED_RESTART_AFTER_CONF_UPDATE(配置文件修改后需要重新启动)
          * NEED_RESTART_AFTER_SQL_UPDATE(flink sql修改后需要重启)
          * NEED_RESTART_AFTER_ROLLBACK(任务回滚后需要重启)

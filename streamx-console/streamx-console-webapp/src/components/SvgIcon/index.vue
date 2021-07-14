@@ -41,6 +41,7 @@
     <resetpass v-if="name==='resetpass'"></resetpass>
     <sun v-if="name==='sun'"></sun>
     <moon v-if="name==='moon'"></moon>
+    <user v-if="name==='user'"></user>
   </span>
 </template>
 
@@ -86,7 +87,8 @@ import {
   github,
   resetpass,
   sun,
-  moon
+  moon,
+  user
 } from '@/core/icons'
 
 export default {
@@ -132,7 +134,8 @@ export default {
     github,
     resetpass,
     sun,
-    moon
+    moon,
+    user
   },
   props: {
     name: {

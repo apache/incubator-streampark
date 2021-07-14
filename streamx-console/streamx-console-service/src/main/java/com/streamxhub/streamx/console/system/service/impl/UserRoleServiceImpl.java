@@ -50,6 +50,7 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
         Arrays.stream(userIds).forEach(id -> baseMapper.deleteByUserId(Long.valueOf(id)));
     }
 
+
     @Override
     public List<String> findUserIdsByRoleId(String[] roleIds) {
         List<UserRole> list =

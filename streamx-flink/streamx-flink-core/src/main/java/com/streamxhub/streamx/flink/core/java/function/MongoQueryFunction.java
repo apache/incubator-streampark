@@ -31,13 +31,13 @@ import org.bson.Document;
 @FunctionalInterface
 public interface MongoQueryFunction<T> {
 
-    /**
-     * 返回一个查询条件
-     *
-     * @param last: last one
-     * @param collection MongoCollection
-     * @return FindIterable
-     */
-    FindIterable<Document> query(T last, MongoCollection<Document> collection);
+     /**
+      * 返回一个查询条件
+      *
+      * @param last:      last one
+      * @param collection MongoCollection
+      * @return FindIterable
+      */
+     FindIterable<Document> query(T last, MongoCollection<Document> collection);
 
 }

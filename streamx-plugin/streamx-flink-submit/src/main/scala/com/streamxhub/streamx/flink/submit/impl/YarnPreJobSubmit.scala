@@ -29,8 +29,7 @@ import org.apache.flink.client.cli.CustomCommandLine
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{PackagedProgram, PackagedProgramUtils}
-import org.apache.flink.configuration.{Configuration, DeploymentOptions}
-import org.apache.flink.util.Preconditions.checkNotNull
+import org.apache.flink.configuration.DeploymentOptions
 import org.apache.flink.yarn.YarnClusterDescriptor
 import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTarget}
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
@@ -134,10 +133,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
   }
 
   private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
-    val executorConfig = checkNotNull(activeCustomCommandLine).toConfiguration(commandLine)
-    val effectiveConfiguration = new Configuration(executorConfig)
-    super.applyToConfiguration(submitRequest, effectiveConfiguration)
-
+    val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
     val (providedLibs, programArgs) = {
       val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
 
