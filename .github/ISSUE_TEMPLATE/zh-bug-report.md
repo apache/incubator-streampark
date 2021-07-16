@@ -3,9 +3,9 @@ name: "\U0001F41B 报告 Bug（Bug Report）"
 about: 我想要提交一个 StreamX 的 Bug 报告
 title: "[Bug] 标题 "
 labels: type/bug
-
 ---
-*请在提交你的 issue 前，回答以下问题，这有助于社区快速定位问题，谢谢！ 🙏*
+
+*请在提交你的 issue 前，请回答以下问题，这有助于社区快速定位问题，谢谢！ 🙏*
 
 ### Environment Description（运行环境描述）
 * **StreamX Version**: 

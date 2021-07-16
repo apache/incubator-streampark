@@ -1,13 +1,11 @@
 ---
 name: "\U0001F680 新功能诉求（Feature Request）"
 about: 我有一个绝妙的 idea，希望 StreamX 可以支持它！
+title: "[feature] 标题 "
 labels: type/feature-request
 ---
 
 ## Feature Request
-
-
-**Is your feature request related to a problem? Please describe:**
 
 **您的功能诉求是否是跟某个问题相关的?**
 <!-- 请简要描述一下这个困扰您的问题 -->

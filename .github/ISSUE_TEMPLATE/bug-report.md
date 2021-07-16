@@ -3,8 +3,8 @@ name: "\U0001F41B Bug Report"
 about: As a User, I want to report a Bug.
 title: "[Bug] Bug title "
 labels: type/bug
-
 ---
+
 *Please answer these questions before submitting your issue. Thanks!*
 
 ### Environment Description
