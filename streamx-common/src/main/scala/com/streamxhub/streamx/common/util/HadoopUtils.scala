@@ -43,7 +43,7 @@ import java.io.{File, IOException}
 import java.net.InetAddress
 import java.util
 import java.util.concurrent.ConcurrentHashMap
-import java.util.{Date, Timer, TimerTask, HashMap => JavaHashMap}
+import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
 import javax.security.auth.kerberos.KerberosTicket
 import scala.collection.JavaConversions._
 import scala.util.control.Breaks._
@@ -172,7 +172,7 @@ object HadoopUtils extends Logger {
       }
     }
 
-    def getDuration: (Long, Long) = {
+    def getRefreshTime: Long = {
       val user = UserGroupInformation.getLoginUser
       val method = classOf[UserGroupInformation].getDeclaredMethod("getTGT")
       method.setAccessible(true)
@@ -181,33 +181,26 @@ object HadoopUtils extends Logger {
         case Some(value) =>
           val start = value.getStartTime.getTime
           val end = value.getEndTime.getTime
-          val duration = ((end - start) * 0.80f).toLong
-          logInfo(s"kerberosTicket start:${DateUtils.format(value.getStartTime)},end: ${DateUtils.format(value.getEndTime)},duration:$duration")
-          (duration, start + duration)
-        case _ => (0, 0)
+          ((end - start) * 0.90f).toLong
+        case _ => 0
       }
     }
 
     def reLoginKerberos(): Unit = {
       val timer = new Timer()
-      val duration = getDuration
-      val delay = 1000 * 5 //you know way?
+      val refreshTime = getRefreshTime
       timer.schedule(new TimerTask {
         override def run(): Unit = {
-          UserGroupInformation.getLoginUser.checkTGTAndReloginFromKeytab()
-          val nextDuration = getDuration
-          val nextTrigger = System.currentTimeMillis() + nextDuration._1 + delay
-          logInfo(
-            s"""
-               |------------------------------------------------------------------
-               |      Check Kerberos Tgt And reLogin From Keytab Finish.
-               |            current   trigger: ${DateUtils.now(DateUtils.fullFormat)}
-               |            next task trigger: ${DateUtils.format(new Date(nextTrigger))}
-               |            next refresh time: ${DateUtils.format(new Date(nextDuration._2))}
-               |------------------------------------------------------------------
-               |""".stripMargin)
+          reusableConf = initHadoopConf()
+          kerberosLogin(reusableConf)
+          hdfs = getFileSystem(reusableConf)
+          if (reusableYarnClient != null) {
+            reusableYarnClient.close()
+            reusableYarnClient = null
+          }
+          logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
         }
-      }, duration._1, duration._1 + delay)
+      }, refreshTime, refreshTime)
     }
 
     if (reusableConf == null) {

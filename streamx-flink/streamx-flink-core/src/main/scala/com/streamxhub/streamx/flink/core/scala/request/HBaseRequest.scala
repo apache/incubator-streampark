@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.core.scala.request
 
-
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.core.java.wrapper.HBaseQuery
 import org.apache.flink.api.common.typeinfo.TypeInformation

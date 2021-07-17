@@ -19,8 +19,11 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.plugin.profiling;
+package com.streamxhub.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.Arguments;
+import com.streamxhub.streamx.plugin.profiling.ConfigProvider;
+import com.streamxhub.streamx.plugin.profiling.Reporter;
 import com.streamxhub.streamx.plugin.profiling.reporter.ConsoleOutputReporter;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.streamx.plugin.profiling.util.ClassMethodArgument;
@@ -111,7 +114,7 @@ public class ArgumentsTest {
 
     arguments.setReporter("com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyReporter");
     Reporter reporter = arguments.getReporter();
-    Assert.assertTrue(reporter instanceof ArgumentsTest.DummyReporter);
+    Assert.assertTrue(reporter instanceof DummyReporter);
   }
 
   @Test
@@ -121,7 +124,7 @@ public class ArgumentsTest {
     arguments.setConfigProvider(
         "com.streamxhub.streamx.plugin.profiling.ArgumentsTest$DummyConfigProvider");
     ConfigProvider configProvider = arguments.getConfigProvider();
-    Assert.assertTrue(configProvider instanceof ArgumentsTest.DummyConfigProvider);
+    Assert.assertTrue(configProvider instanceof DummyConfigProvider);
   }
 
   @Test

@@ -30,6 +30,7 @@ import org.apache.flink.streaming.api.datastream.DataStreamSource;
 
 import java.util.Properties;
 
+
 /**
  * @author benjobs
  */
@@ -48,8 +49,12 @@ public class HBaseSource<T> {
 
         Utils.require(queryFunction != null, "queryFunction must not be null");
         Utils.require(resultFunction != null, "resultFunction must not be null");
-        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(property, queryFunction, resultFunction, runningFunc, null);
+        HBaseSourceFunction<T> sourceFunction = new HBaseSourceFunction<>(
+                property,
+                queryFunction,
+                resultFunction,
+                runningFunc,
+                null);
         return context.getJavaEnv().addSource(sourceFunction);
-
     }
 }

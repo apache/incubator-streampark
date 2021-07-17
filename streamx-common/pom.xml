@@ -6,9 +6,9 @@
 
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx-parent</artifactId>
-        <version>1.1.0</version>
-        <relativePath>../streamx-parent/pom.xml</relativePath>
+        <artifactId>streamx</artifactId>
+        <version>1.1.1</version>
+        <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>streamx-common</artifactId>

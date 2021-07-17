@@ -18,3 +18,27 @@
  * specific language governing permissions and limitations
  * under the License.
  */
+package com.streamxhub.streamx.console.core.service;
+
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.console.base.domain.RestRequest;
+import com.streamxhub.streamx.console.core.entity.Message;
+import com.streamxhub.streamx.console.core.enums.NoticeType;
+
+/**
+ * @author benjobs
+ */
+public interface MessageService extends IService<Message> {
+    /**
+     * @param id
+     * @param info
+     * @param noticeType
+     */
+    void push(Message message);
+
+    /**
+     * @return
+     */
+    IPage<Message> getUnRead(NoticeType noticeType,RestRequest request);
+}

@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit
 
 import com.streamxhub.streamx.common.enums.ExecutionMode
-import com.streamxhub.streamx.flink.submit.impl.{ApplicationSubmit, KubernetesSubmit, LocalSubmit, YarnPreJobSubmit}
+import com.streamxhub.streamx.flink.submit.impl._
 
 import java.lang.{Boolean => JavaBool}
 
@@ -29,20 +29,22 @@ object FlinkSubmit {
 
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
-      case ExecutionMode.APPLICATION => ApplicationSubmit.submit(submitInfo)
+      case ExecutionMode.APPLICATION => YarnApplicationSubmit.submit(submitInfo)
       case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
-      case ExecutionMode.KUBERNETES => KubernetesSubmit.submit(submitInfo)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.submit(submitInfo)
       case _ => throw new UnsupportedOperationException(s"Unsupported ${submitInfo.executionMode} Submit ")
     }
   }
 
-  def stop(flinkHome: String, executionMode: ExecutionMode, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  def stop(executionMode: ExecutionMode, stopInfo: StopRequest): StopResponse = {
     executionMode match {
       case ExecutionMode.APPLICATION | ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION =>
-        YarnPreJobSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
-      case ExecutionMode.LOCAL => LocalSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
-      case ExecutionMode.KUBERNETES => KubernetesSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
+        YarnPreJobSubmit.stop(stopInfo)
+      case ExecutionMode.LOCAL => LocalSubmit.stop(stopInfo)
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.stop(stopInfo)
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.stop(stopInfo)
       case _ => throw new UnsupportedOperationException(s"Unsupported ${executionMode} Submit ")
     }
   }

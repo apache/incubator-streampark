@@ -18,29 +18,26 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.system.authentication;
+package com.streamxhub.streamx.flink.submit
 
-import com.streamxhub.streamx.console.system.entity.User;
-import com.streamxhub.streamx.console.system.service.UserService;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.shiro.SecurityUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-/**
- * @author benjobs
- */
-@Slf4j
-@Component
-public class ServerUtil {
+import javax.annotation.Nullable
 
-    @Autowired
-    private UserService userService;
+case class StopRequest(flinkHome: String,
+                       clusterId: String,
+                       jobId: String,
+                       withSavePoint: Boolean,
+                       withDrain: Boolean,
+                       @Nullable kubernetesNamespace: String) {
 
-    public User getUser() {
-        String token = (String) SecurityUtils.getSubject().getPrincipal();
-        String username = JWTUtil.getUsername(token);
-        User user = userService.findByName(username);
-        return user;
-    }
+  def this(flinkHome: String,
+           clusterId: String,
+           jobId: String,
+           withSavePoint: Boolean,
+           withDrain: Boolean) {
+    this(flinkHome, clusterId, jobId, withSavePoint, withDrain, KubernetesConfigOptions.NAMESPACE.defaultValue())
+  }
+
+
 }

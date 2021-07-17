@@ -20,10 +20,13 @@
  */
 package com.streamxhub.streamx.common.util
 
+import org.apache.commons.lang3.ArrayUtils
+
 import java.io.{IOException, PrintWriter, StringWriter}
-import java.util.Optional
+import java.util
 import java.util.concurrent.{CompletionException, ExecutionException}
 import java.util.function.Predicate
+import java.util.{Optional, StringTokenizer}
 import javax.annotation.Nullable
 
 
@@ -413,6 +416,21 @@ object ExceptionUtils {
    */
   def checkInterrupted(e: Throwable): Unit = {
     if (e.isInstanceOf[InterruptedException]) Thread.currentThread.interrupt()
+  }
+
+  /**
+   *
+   * @param stackTrace
+   * @return
+   */
+  def getStackFrames(stackTrace: String): Array[String] = {
+    val linebreak: String = System.lineSeparator
+    val frames: StringTokenizer = new StringTokenizer(stackTrace, linebreak)
+    val list: util.List[String] = new util.ArrayList[String]
+    while (frames.hasMoreTokens) {
+      list.add(frames.nextToken)
+    }
+    list.toArray(ArrayUtils.EMPTY_STRING_ARRAY)
   }
 
 }

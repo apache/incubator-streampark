@@ -23,8 +23,11 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
-import com.streamxhub.streamx.flink.submit.SubmitRequest
+import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
 import org.apache.flink.client.cli.ClientOptions
+import com.streamxhub.streamx.flink.submit.SubmitRequest
+import org.apache.commons.cli.CommandLine
+import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
 import org.apache.flink.client.deployment.ClusterSpecification
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClientProvider
@@ -46,13 +49,13 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  override def doStop(stopRequest: StopRequest): StopResponse = {
 
-    val jobID = getJobID(jobStringId)
+    val jobID = getJobID(stopRequest.jobId)
 
     val clusterClient = {
       val flinkConfiguration = new Configuration
-      flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
+      flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
       if (applicationId == null) {
@@ -63,27 +66,28 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     val savePointDir = getOptionFromDefaultFlinkConfig(
-      flinkHome,
+      stopRequest.flinkHome,
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
         .defaultValue(s"hdfs://$APP_SAVEPOINTS")
     )
 
-    val savepointPathFuture = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
+    val savepointPathFuture = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
       case (false, false) =>
         clusterClient.cancel(jobID)
         null
       case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir)
-      case (_, _) => clusterClient.stopWithSavepoint(jobID, drain, savePointDir)
+      case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir)
     }
 
     if (savepointPathFuture == null) null else try {
-      val clientTimeout = getOptionFromDefaultFlinkConfig(flinkHome, ClientOptions.CLIENT_TIMEOUT)
-      savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, ClientOptions.CLIENT_TIMEOUT)
+      val savepointDir = savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
+      StopResponse(savepointDir)
     } catch {
       case e: Exception =>
         val cause = ExceptionUtils.stringifyException(e)
-        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
+        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${stopRequest.jobId} failed. $cause");
     }
   }
 
@@ -109,18 +113,34 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
-  private[submit] def applyToConfiguration(submitRequest: SubmitRequest, effectiveConfiguration: Configuration): Unit = {
+  /**
+   * 页面定义参数优先级 > flink-conf.yaml中配置优先级
+   *
+   * @param submitRequest
+   * @param customConfiguration
+   * @return
+   */
+  private[submit] def applyConfiguration(submitRequest: SubmitRequest,
+                                         activeCustomCommandLine: CustomCommandLine,
+                                         commandLine: CommandLine): Configuration = {
+
+    require(activeCustomCommandLine != null)
+    val executorConfig = activeCustomCommandLine.toConfiguration(commandLine)
+    val customConfiguration = new Configuration(executorConfig)
+    val configuration = new Configuration()
     //flink-conf.yaml配置
     submitRequest.flinkDefaultConfiguration.keySet.foreach(x => {
       submitRequest.flinkDefaultConfiguration.getString(x, null) match {
-        case v if v != null => effectiveConfiguration.setString(x, v)
+        case v if v != null => configuration.setString(x, v)
         case _ =>
       }
     })
+    configuration.addAll(customConfiguration)
     //main class
     if (submitRequest.developmentMode == DevelopmentMode.CUSTOMCODE) {
-      effectiveConfiguration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
+      configuration.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
+    configuration
   }
 
   private[submit] def deployInternal(clusterDescriptor: YarnClusterDescriptor,

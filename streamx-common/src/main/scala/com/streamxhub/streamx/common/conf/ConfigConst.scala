@@ -285,7 +285,11 @@ object ConfigConst {
 
   val KEY_STREAMX_HDFS_WORKSPACE = "streamx.hdfs.workspace"
 
-  lazy val HDFS_WORKSPACE: String = System.getProperties.getProperty(KEY_STREAMX_HDFS_WORKSPACE, STREAMX_HDFS_WORKSPACE_DEFAULT)
+  lazy val HDFS_WORKSPACE: String = {
+    val workspace = System.getProperties.getProperty(KEY_STREAMX_HDFS_WORKSPACE, STREAMX_HDFS_WORKSPACE_DEFAULT)
+    require(!workspace.startsWith("hdfs://"))
+    workspace
+  }
 
   lazy val APP_PLUGINS = s"$HDFS_WORKSPACE/plugins"
 

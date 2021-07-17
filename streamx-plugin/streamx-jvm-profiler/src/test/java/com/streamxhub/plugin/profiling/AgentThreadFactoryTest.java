@@ -19,8 +19,9 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.plugin.profiling;
+package com.streamxhub.plugin.profiling;
 
+import com.streamxhub.streamx.plugin.profiling.AgentThreadFactory;
 import org.junit.Assert;
 import org.junit.Test;
 

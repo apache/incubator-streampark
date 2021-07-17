@@ -44,6 +44,8 @@
         <img src="https://img.shields.io/github/forks/streamxhub/streamx.svg?sanitize=true" class="shields">
       </a>
 
+      <notice class="action"/>
+
       <a-dropdown>
         <a class="ant-dropdown-link username" @click="e => e.preventDefault()">
           {{ userName }} <a-icon type="caret-down" />
@@ -140,7 +142,7 @@
 </template>
 
 <script>
-import NoticeIcon from '@/components/NoticeIcon'
+import Notice from '@/components/Notice'
 import SvgIcon from '@/components/SvgIcon'
 
 import { mapState, mapActions } from 'vuex'
@@ -152,7 +154,7 @@ import {USER_NAME} from '@/store/mutation-types'
 export default {
   name: 'UserMenu',
   components: {
-    NoticeIcon,
+    Notice,
     SvgIcon
   },
 

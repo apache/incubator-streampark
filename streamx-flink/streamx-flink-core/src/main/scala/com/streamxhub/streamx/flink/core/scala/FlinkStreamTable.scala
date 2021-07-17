@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.flink.core.scala
 
-
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils}
 import com.streamxhub.streamx.flink.core.scala.ext.TableExt
