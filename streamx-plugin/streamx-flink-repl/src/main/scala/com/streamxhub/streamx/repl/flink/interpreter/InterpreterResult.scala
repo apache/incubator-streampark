@@ -20,7 +20,6 @@
  */
 package com.streamxhub.streamx.repl.flink.interpreter
 
-
 object InterpreterResult extends Enumeration {
   type Code = Value
   val SUCCESS, INCOMPLETE, ERROR, KEEP_PREVIOUS_RESULT = Value

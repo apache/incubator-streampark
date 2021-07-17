@@ -116,7 +116,7 @@ trait FlinkSubmitTrait extends Logger {
       submitRequest.appOption.filter(x => {
         //验证参数是否合法...
         val verify = commandLineOptions.hasOption(x._1)
-        if (!verify) println(s"[StreamX] param:${x._1} is error,skip it.")
+        if (!verify) logWarn(s"[StreamX] param:${x._1} is error,skip it.")
         verify
       }).foreach(x => {
         val opt = commandLineOptions.getOption(x._1.trim).getOpt
@@ -187,10 +187,10 @@ trait FlinkSubmitTrait extends Logger {
 
   private[submit] def validateAndGetActiveCommandLine(customCommandLines: JavaList[CustomCommandLine], commandLine: CommandLine): CustomCommandLine = {
     val line = checkNotNull(commandLine)
-    println("Custom commandlines: {}", customCommandLines)
+    logInfo(s"Custom commandlines: $customCommandLines")
     for (cli <- customCommandLines) {
       val isActive = cli.isActive(line)
-      println("Checking custom commandline {}, isActive: {}", cli, isActive)
+      logInfo(s"Checking custom commandline $cli, isActive: $isActive")
       if (isActive) return cli
     }
     throw new IllegalStateException("No valid command-line found.")

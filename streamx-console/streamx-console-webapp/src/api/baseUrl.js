@@ -28,11 +28,11 @@ export function baseUrl() {
       break
     //前后端分离(production)
     case 'detached':
-      url = 'http://test-hadoop-2:10001'
+      url = 'http://localhost:10000'
       break
     //测试阶段的测试地址(dev)
     case 'development':
-      url = 'http://test-hadoop-2:10000'
+      url = 'http://localhost:10000'
       break
   }
   return url

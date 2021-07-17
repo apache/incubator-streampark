@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.1</version>
     </parent>
     <artifactId>streamx-flink-udf</artifactId>
     <name>StreamX : Flink Udf</name>

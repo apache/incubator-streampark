@@ -44,14 +44,13 @@ import com.streamxhub.streamx.console.core.enums.*;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
-import com.streamxhub.streamx.console.system.authentication.ServerUtil;
+import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
 import com.streamxhub.streamx.flink.submit.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
@@ -108,15 +107,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private EffectiveService effectiveService;
 
     @Autowired
+    private MessageService messageService;
+
+    @Autowired
     private SettingService settingService;
+
+    @Autowired
+    private ServerComponent serverComponent;
 
     @Autowired
     private ApplicationContext context;
 
     private String PROD_ENV_NAME = "prod";
-
-    @Autowired
-    private ServerUtil serverUtil;
 
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
@@ -426,7 +428,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public boolean create(Application appParam) {
-        appParam.setUserId(serverUtil.getUser().getUserId());
+        appParam.setUserId(serverComponent.getUser().getUserId());
         appParam.setState(FlinkAppState.CREATED.getValue());
         appParam.setOptionState(OptionState.NONE.getValue());
         appParam.setCreateTime(new Date());
@@ -590,6 +592,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     });
 
                     LambdaUpdateWrapper<Application> updateWrapper = new LambdaUpdateWrapper<>();
+                    updateWrapper.eq(Application::getId, application.getId());
                     try {
                         if (application.isCustomCodeJob()) {
                             log.info("CustomCodeJob deploying...");
@@ -611,7 +614,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             downloadDependency(application);
                         }
                         // 4) 更新发布状态,需要重启的应用则重新启动...
-                        updateWrapper.eq(Application::getId, application.getId());
                         if (application.getRestart()) {
                             application.setSavePointed(true);
                             // 重新启动.
@@ -628,13 +630,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                                 updateWrapper.set(Application::getState, FlinkAppState.DEPLOYED.getValue());
                             }
                         }
-                    } catch (ServiceException e) {
-                        updateWrapper.eq(Application::getId, application.getId());
+                    } catch (Exception e) {
+                        Message message = new Message(
+                                serverComponent.getUser().getUserId(),
+                                application.getId(),
+                                application.getJobName().concat(" deploy failed"),
+                                ExceptionUtils.stringifyException(e),
+                                NoticeType.EXCEPTION
+                        );
+                        messageService.push(message);
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
                         updateWrapper.set(Application::getOptionState, OptionState.NONE.getValue());
                         updateWrapper.set(Application::getDeploy, DeployState.NEED_DEPLOY_DOWN_DEPENDENCY_FAILED.get());
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     } finally {
                         FlinkTrackingTask.refreshTracking(application.getId(), () -> {
                             baseMapper.update(application, updateWrapper);
@@ -784,8 +791,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             config.setToApplication(application);
         }
         if (application.isFlinkSqlJob()) {
-            FlinkSql flinkSQL = flinkSqlService.getEffective(application.getId(), true);
-            flinkSQL.setToApplication(application);
+            FlinkSql flinkSql = flinkSqlService.getEffective(application.getId(), true);
+            flinkSql.setToApplication(application);
         } else {
             String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
             application.setConfPath(path);
@@ -1083,7 +1090,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             savePointService.obsolete(application.getId());
             return true;
         } catch (Exception e) {
-            String exception = ExceptionUtils.getStackTrace(e);
+            String exception = ExceptionUtils.stringifyException(e);
             log.setException(exception);
             log.setSuccess(false);
             applicationLogService.save(log);

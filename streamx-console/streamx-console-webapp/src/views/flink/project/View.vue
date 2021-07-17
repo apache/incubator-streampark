@@ -335,7 +335,7 @@ export default {
       this.stompClient = Stomp.over(socket)
       this.stompClient.connect({}, (success) => {
         this.stompClient.subscribe('/resp/build', (msg) => this.terminal.writeln(msg.body))
-        this.stompClient.send('/req/build/' + project.id)
+        this.stompClient.send('/req/SockJSbuild/' + project.id)
       })
     },
 

@@ -70,7 +70,8 @@ public class SendEmailTest {
             throw new ExceptionInInitializerError("email.html not found!");
         }
         senderEmail = new SenderEmail();
-        senderEmail.setEmail("******");
+        senderEmail.setFrom("****@domain.com");
+        senderEmail.setUserName("******");
         senderEmail.setPassword("******");
         senderEmail.setSmtpPort(465);
         senderEmail.setSsl(true);
@@ -149,8 +150,9 @@ public class SendEmailTest {
         HtmlEmail htmlEmail = new HtmlEmail();
         htmlEmail.setCharset("UTF-8");
         htmlEmail.setHostName(this.senderEmail.getSmtpHost());
-        htmlEmail.setAuthentication(this.senderEmail.getEmail(), this.senderEmail.getPassword());
-        htmlEmail.setFrom(this.senderEmail.getEmail());
+        htmlEmail.setAuthentication(this.senderEmail.getUserName(), this.senderEmail.getPassword());
+        htmlEmail.setFrom(this.senderEmail.getFrom());
+
         if (this.senderEmail.isSsl()) {
             htmlEmail.setSSLOnConnect(true);
             htmlEmail.setSslSmtpPort(this.senderEmail.getSmtpPort().toString());

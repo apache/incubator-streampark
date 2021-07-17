@@ -19,9 +19,10 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.plugin.profiling.profiler;
+package com.streamxhub.plugin.profiling.profiler;
 
 import com.streamxhub.streamx.plugin.profiling.Reporter;
+import com.streamxhub.streamx.plugin.profiling.profiler.StacktraceReporterProfiler;
 import com.streamxhub.streamx.plugin.profiling.util.ClassAndMethod;
 import com.streamxhub.streamx.plugin.profiling.util.Stacktrace;
 import com.streamxhub.streamx.plugin.profiling.util.StacktraceMetricBuffer;

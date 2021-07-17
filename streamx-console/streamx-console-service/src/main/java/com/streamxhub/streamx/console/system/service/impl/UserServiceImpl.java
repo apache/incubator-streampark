@@ -29,9 +29,11 @@ import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.util.ShaHashUtils;
 import com.streamxhub.streamx.console.system.dao.UserMapper;
 import com.streamxhub.streamx.console.system.entity.Menu;
+import com.streamxhub.streamx.console.system.entity.Role;
 import com.streamxhub.streamx.console.system.entity.User;
 import com.streamxhub.streamx.console.system.entity.UserRole;
 import com.streamxhub.streamx.console.system.service.MenuService;
+import com.streamxhub.streamx.console.system.service.RoleService;
 import com.streamxhub.streamx.console.system.service.UserRoleService;
 import com.streamxhub.streamx.console.system.service.UserService;
 import lombok.extern.slf4j.Slf4j;
@@ -55,6 +57,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     private UserRoleService userRoleService;
 
     @Autowired
+    private RoleService roleService;
+
+    @Autowired
     private MenuService menuService;
 
     @Override
@@ -68,6 +73,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         page.setCurrent(request.getPageNum());
         page.setSize(request.getPageSize());
         IPage<User> resPage = this.baseMapper.findUserDetail(page, user);
+
+        if (resPage != null && !resPage.getRecords().isEmpty()) {
+            List<User> users = resPage.getRecords();
+            users.forEach(u -> {
+                List<Role> roleList = roleService.findUserRole(u.getUsername());
+                String roleIds = roleList.stream().map((iter) -> iter.getRoleId().toString()).collect(Collectors.joining(","));
+                String roleNames = roleList.stream().map(Role::getRoleName).collect(Collectors.joining(","));
+                u.setRoleId(roleIds);
+                u.setRoleName(roleNames);
+            });
+            resPage.setRecords(users);
+        }
+        assert resPage != null;
         if (resPage.getTotal() == 0) {
             resPage.setRecords(Collections.emptyList());
         }

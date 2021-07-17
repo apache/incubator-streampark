@@ -19,43 +19,39 @@
 
     <select id="findUserDetail" resultType="user" parameterType="user">
         SELECT
-        u.user_id as userId,
-        u.username,
-        u.nick_Name as nickName,
-        u.password,
-        u.email,
-        u.mobile,
-        u.STATUS,
-        u.create_time createTime,
-        u.sex,
-        u.AVATAR,
-        u.DESCRIPTION,
-        u.LAST_LOGIN_TIME lastLoginTime,
-        GROUP_CONCAT(r.role_id) roleId,
-        GROUP_CONCAT(r.ROLE_NAME) roleName
+        user_id as userId,
+        username,
+        nick_Name as nickName,
+        password,
+        email,
+        mobile,
+        STATUS,
+        create_time createTime,
+        sex,
+        AVATAR,
+        DESCRIPTION,
+        LAST_LOGIN_TIME lastLoginTime
         FROM
-        t_user u
-        LEFT JOIN t_user_role ur ON u.user_id = ur.user_id
-        LEFT JOIN t_role r ON r.role_id = ur.role_id
+        t_user
         <where>
             <if test="user.username != null and user.username != ''">
-                AND u.username like '%${user.username}%'
+                AND username like '%${user.username}%'
             </if>
             <if test="user.createTimeFrom != null and user.createTimeFrom !=''">
-                And u.create_time &gt; #{user.createTimeFrom}
+                And create_time &gt; #{user.createTimeFrom}
             </if>
             <if test="user.createTimeTo!= null and user.createTimeTo !=''">
-                And u.create_time &lt; #{user.createTimeTo}
+                And create_time &lt; #{user.createTimeTo}
             </if>
             <if test="user.sex != null and user.sex != ''">
-                AND u.sex = #{user.sex}
+                AND sex = #{user.sex}
             </if>
             <if test="user.status != null and user.status != ''">
-                AND u.status = #{user.status}
+                AND status = #{user.status}
             </if>
         </where>
         <if test="user.sortField != null and user.sortField != ''">
-            order by u.${user.sortField} ${user.sortOrder}
+            order by ${user.sortField} ${user.sortOrder}
         </if>
     </select>
 </mapper>

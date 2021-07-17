@@ -56,6 +56,13 @@ http.interceptors.request.use(config => {
             delete data.sortField
             delete data.sortOrder
         }
+        if (config.method === 'get') {
+            data = { params: data }
+        } else if (config.method === 'delete') {
+            data = { data: $qs.stringify(data) }
+        } else if (config.method !== 'upload') {
+            data = $qs.stringify(data)
+        }
         return data
     }]
     return config
@@ -122,26 +129,23 @@ const respBlob = (content, fileName) => {
 const blobTimeout = 1000 * 60 * 10
 export default {
     get (url, data = {}) {
-        return http.get(url, { params: data })
+        return http.get(url, data)
     },
     post (url, data = {}) {
-        return http.post(url, $qs.stringify(data))
+        return http.post(url, data)
     },
     put (url, data = {}) {
-        return http.put(url, $qs.stringify(data))
+        return http.put(url, data)
     },
-    delete (url, data = {}) {
-        return http.delete(url, { data: $qs.stringify(data) })
+    delete (url, params = {}) {
+        return http.delete(url, params)
     },
-    patch  (url, data = {}) {
-        return http.patch(url, $qs.stringify(data))
+    patch (url, data = {}) {
+        return http.patch(url, data)
     },
     download (url, params, filename) {
         message.loading('File transfer in progress')
         return http.post(url, params, {
-            transformRequest: [(params) => {
-                return $qs.stringify(params)
-            }],
             responseType: 'blob',
             timeout: blobTimeout // 上传文件超时10分钟
         }).then((resp) => {
@@ -166,9 +170,6 @@ export default {
         msg = msg == null ? {} : msg
         message.loading(msg.loading || '导入文件中...')
         return http.post(url, params, {
-            transformRequest: [(params) => {
-                return $qs.stringify(params)
-            }],
             responseType: 'blob'
         }).then((resp) => {
             blobCallback(resp)
@@ -177,4 +178,5 @@ export default {
             message.error(msg.error || '导出文件失败!')
         })
     },
+
 }

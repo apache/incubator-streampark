@@ -29,7 +29,7 @@ object FlinkSubmit {
 
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
-      case ExecutionMode.APPLICATION => ApplicationSubmit.submit(submitInfo)
+      case ExecutionMode.APPLICATION => YarnApplicationSubmit.submit(submitInfo)
       case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)

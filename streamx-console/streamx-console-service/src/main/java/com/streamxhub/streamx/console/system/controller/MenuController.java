@@ -23,7 +23,7 @@ package com.streamxhub.streamx.console.system.controller;
 import com.baomidou.mybatisplus.core.toolkit.StringPool;
 import com.streamxhub.streamx.console.base.domain.RestResponse;
 import com.streamxhub.streamx.console.base.domain.router.VueRouter;
-import com.streamxhub.streamx.console.system.authentication.ServerUtil;
+import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.console.system.entity.Menu;
 import com.streamxhub.streamx.console.system.service.MenuService;
 import lombok.extern.slf4j.Slf4j;
@@ -50,11 +50,11 @@ public class MenuController {
     private MenuService menuService;
 
     @Autowired
-    private ServerUtil serverUtil;
+    private ServerComponent serverComponent;
 
     @PostMapping("router")
     public RestResponse getUserRouters() {
-        ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(serverUtil.getUser());
+        ArrayList<VueRouter<Menu>> routers = this.menuService.getUserRouters(serverComponent.getUser());
         return RestResponse.create().data(routers);
     }
 
@@ -75,7 +75,7 @@ public class MenuController {
     @DeleteMapping("delete")
     @RequiresPermissions("menu:delete")
     public RestResponse deleteMenus(@NotBlank(message = "{required}") String menuIds)
-        throws Exception {
+            throws Exception {
         String[] ids = menuIds.split(StringPool.COMMA);
         this.menuService.deleteMenus(ids);
         return RestResponse.create();

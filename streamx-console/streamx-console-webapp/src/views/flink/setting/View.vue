@@ -14,7 +14,8 @@
             <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
             <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
             <svg-icon class="avatar" name="port" size="large" slot="avatar" v-if="item.key === 'alert.email.port'"></svg-icon>
-            <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.address'"></svg-icon>
+            <svg-icon class="avatar" name="mail" size="large" slot="avatar" v-if="item.key === 'alert.email.from'"></svg-icon>
+            <svg-icon class="avatar" name="user" size="large" slot="avatar" v-if="item.key === 'alert.email.userName'"></svg-icon>
             <svg-icon class="avatar" name="keys" size="large" slot="avatar" v-if="item.key === 'alert.email.password'"></svg-icon>
             <svg-icon class="avatar" name="ssl" size="large" slot="avatar" v-if="item.key === 'alert.email.ssl'"></svg-icon>
             <span slot="title">
