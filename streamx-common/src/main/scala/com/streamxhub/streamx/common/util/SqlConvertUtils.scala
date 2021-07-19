@@ -20,15 +20,26 @@
  */
 package com.streamxhub.streamx.common.util
 
+import java.util
 import java.util.Scanner
-import java.util.regex._
-import scala.util.Try
+import java.util.regex.Pattern
+import scala.annotation.tailrec
+import scala.collection.JavaConversions._
 
-object SqlConvertUtils {
+/**
+ * @author benjobs
+ */
+object SqlConvertUtils extends Logger {
 
-  private[this] val FIELD_PATTERN = Pattern.compile("\\s+([a-zA-Z]+\\((\\d+|\\d+,\\d+)\\)|[a-zA-Z]+)((\\s+|)|((.*)(COMMENT)\\s+('(.*)'|\"(.*)\")|(.*))),$", Pattern.CASE_INSENSITIVE)
+  private[this] val FIELD_REGEXP = Pattern.compile(
+    "\\s*(.*?)\\s+(([a-z]+)\\((.*?)\\)|[a-z]+)(\\s*|((.*?)(comment)\\s+(['|\"](.*?)['|\"])|(.*?))),$",
+    Pattern.CASE_INSENSITIVE
+  )
 
-  private[this] val PRIMARY_PATTERN = Pattern.compile("PRIMARY\\s+KEY\\s+\\((.*)\\)", Pattern.CASE_INSENSITIVE)
+  private[this] val PRIMARY_REGEXP = Pattern.compile(
+    "primary\\s+key\\s+\\((.*?)\\)",
+    Pattern.CASE_INSENSITIVE
+  )
 
   /**
    * 转成Flink里的数据类型
@@ -41,12 +52,7 @@ object SqlConvertUtils {
     dataType.toUpperCase() match {
       case "TEXT" | "LONGTEXT" => "VARCHAR"
       case "DATETIME" => "TIMESTAMP"
-      case x if x.startsWith("BIGINT") => "BIGINT"
-      case x if x.startsWith("TINYINT") => "TINYINT"
-      case x if x.startsWith("SMALLINT") => "SMALLINT"
-      case x if x.startsWith("INT") => "INTEGER"
-      case x if x.startsWith("VARCHAR") => "VARCHAR"
-      case x if x.startsWith("DOUBLE") => "DOUBLE"
+      case "INT" => "INTEGER"
       case x => x.toUpperCase()
     }
   }
@@ -60,27 +66,25 @@ object SqlConvertUtils {
    */
   def toClickhouseDataType(dataType: String, length: String): String = {
     dataType.toUpperCase() match {
-      case x if x.startsWith("TEXT")
-        || x.startsWith("LONGTEXT")
-        || x.startsWith("BLOB")
-        || x.startsWith("TEXT")
-        || x.startsWith("VARCHAR")
-        || x.startsWith("VARBINARY") => "String"
+      case "TEXT" | "LONGTEXT" | "BLOB" | "VARCHAR" | "VARBINARY" => "String"
       case "DATETIME" | "TIMESTAMP" => "DateTime"
-      case x if x.startsWith("BIGINT") || x.startsWith("INT") =>
-        Try(length.toInt).getOrElse(11) match {
-          case x if x < 3 => "Int8"
-          case x if x < 5 => "Int16"
-          case x if x < 9 => "Int32"
-          case _ => "Int64"
+      case "TINYINT" => "Int8"
+      case "SMALLINT" => "Int16"
+      case "FLOAT" => "Float32"
+      case "DOUBLE" => "Float64"
+      case "DATE" => "Date"
+      case "BIGINT" | "INT" =>
+        length match {
+          case null => "Int32"
+          case x => x.trim.toInt match {
+            case x if x < 3 => "Int8"
+            case x if x < 5 => "Int16"
+            case x if x < 9 => "Int32"
+            case _ => "Int64"
+          }
         }
-      case x if x.startsWith("TINYINT") => "Int8"
-      case x if x.startsWith("SMALLINT") => "Int16"
-      case x if x.startsWith("FLOAT") => "Float32"
-      case x if x.startsWith("DOUBLE") => "Float64"
-      case x if x.startsWith("DATE") => "Date"
-      case x if x.startsWith("DECIMAL") =>
-        length.split(",").map(_.toInt) match {
+      case "DECIMAL" =>
+        length.split(",").map(_.trim.toInt) match {
           case Array(p, s) =>
             p + s match {
               case x if x <= 32 => s"Decimal32($s)"
@@ -93,43 +97,140 @@ object SqlConvertUtils {
     }
   }
 
-  def convertSql(sql: String, func: (String, String) => String = null, keyFunc: String => String = null, postfix: String = null): String = {
-    val scanner = new Scanner(sql)
+
+  /**
+   * 一段神奇的代码.目前只支持ddl,create table等语法.
+   *
+   * @param sql '
+   * @return
+   */
+  def formatSql(sql: String): String = {
+
+    val BODY_REGEXP = "\\((.+|\\n+|\\r)*\\)".r
+
+    val LENGTH_REGEXP = "(.*?)\\s*\\([^\\\\)|^\\n]+,$".r
+
+    val COMMENT_REGEXP = Pattern.compile("(comment)\\s+('|\")", Pattern.CASE_INSENSITIVE)
+
+    @tailrec def commentJoin(map: util.Map[Integer, String],
+                             index: Integer,
+                             segment: String): (Integer, String) = {
+      val matcher = COMMENT_REGEXP.matcher(segment)
+      matcher.find() match {
+        case b if !b => index -> segment
+        case _ =>
+          val signal = matcher.group(2)
+          val cleaned = segment
+            .replaceFirst("(?i)(comment)\\s+('|\")", "")
+            .replace(s"\\$signal", "")
+          val regex = if (signal == "'") "\'(,|)$".r else "\"(,|)$".r
+          if (regex.findFirstIn(cleaned).nonEmpty) index -> segment; else {
+            val nextLine = map(index + 1)
+            commentJoin(map, index + 1, s"$segment$nextLine")
+          }
+      }
+    }
+
+    @tailrec def lengthJoin(
+                             map: util.Map[Integer, String],
+                             index: Integer,
+                             segment: String): (Integer, String) = {
+      LENGTH_REGEXP.findFirstIn(segment) match {
+        case None => commentJoin(map, index, segment)
+        case Some(_) =>
+          val nextLine = map(index + 1)
+          lengthJoin(map, index + 1, s"${segment.trim}$nextLine")
+      }
+    }
+
+
+    BODY_REGEXP.findFirstIn(sql) match {
+      case None => null
+      case Some(x) =>
+        val body = x
+          .replaceAll("\r\n", "")
+          .replaceFirst("\\(", "(\n")
+          .replaceFirst("\\)$", "\n)")
+          .replaceAll(",", ",\n")
+
+        val scanner = new Scanner(body)
+        val map = new util.HashMap[Integer, String]()
+        while (scanner.hasNextLine) {
+          map.put(map.size(), scanner.nextLine().trim)
+        }
+        val sqlBuffer = new StringBuffer(sql.substring(0, sql.indexOf("(")))
+        var skipNo: Int = -1
+        map.foreach(a => {
+          if (a._1 > skipNo) {
+            val length = lengthJoin(map, a._1, a._2)
+            if (length._1 > a._1) {
+              sqlBuffer.append(length._2).append("\n")
+              skipNo = length._1
+            } else {
+              val comment = commentJoin(map, a._1, a._2)
+              if (comment._1 > a._1) {
+                sqlBuffer.append(comment._2).append("\n")
+                skipNo = comment._1
+              } else {
+                sqlBuffer.append(a._2).append("\n")
+              }
+            }
+          }
+        })
+        scanner.close()
+        sqlBuffer.toString.trim.concat(sql.substring(sql.lastIndexOf(")") + 1))
+    }
+  }
+
+  /**
+   *
+   * @param sql      : 原始要转化的sql ddl语句
+   * @param typeFunc : 类型转换方法
+   * @param keyFunc  : 遇到primary key的处理函数
+   * @param postfix  : 后缀内容
+   * @return
+   */
+  def convertSql(sql: String,
+                 typeFunc: (String, String) => String = null,
+                 keyFunc: String => String = null,
+                 postfix: String = null): String = {
+
+    val formattedSql = formatSql(sql)
+    logDebug(s"formatted Sql:\n$formattedSql")
+    val scanner = new Scanner(formattedSql)
     val sqlBuffer = new StringBuffer()
-    var index: Int = 0
     while (scanner.hasNextLine) {
       val line = {
         val line = scanner.nextLine().trim
         line.toUpperCase().trim match {
           case a if a.startsWith("CREATE ") => line
-          case a if a.startsWith("PRIMARY KEY") =>
+          case a if a.startsWith("PRIMARY KEY ") =>
             keyFunc match {
               case null => null
               case _ => keyFunc(line)
             }
-          case a if !a.startsWith("UNIQUE KEY") && !a.startsWith("KEY") =>
-            val matcher = FIELD_PATTERN.matcher(line)
-            if (!matcher.find) null; else {
-              val dataType = matcher.group(1)
-              val length = matcher.group(2)
+          case a if !a.startsWith("UNIQUE KEY ") && !a.startsWith("KEY ") =>
+            val matcher = FIELD_REGEXP.matcher(line)
+            if (!matcher.find()) null; else {
+              val fieldName = matcher.group(1)
+              val dataType = (matcher.group(2), matcher.group(3)) match {
+                case (_, b) if b != null => b
+                case (a, _) => a
+              }
+              val length = matcher.group(4)
               if (dataType == null) null; else {
-                val comment = matcher.group(7) match {
-                  case x if x != null =>
-                    (matcher.group(9), matcher.group(10)) match {
-                      case (a, _) if a != null => a
-                      case (_, b) => b
-                    }
-                  case _ => null
+                val fieldType = typeFunc(dataType, length)
+                matcher.group(8) match {
+                  case x if x != null => s"$fieldName $fieldType COMMENT '${matcher.group(10)}'"
+                  case _ => s"$fieldName $fieldType"
                 }
-                s"${line.trim.split("\\s+").head} ${func(dataType, length)} ${if (comment != null) s"COMMENT '$comment'" else ""}".trim
               }
             }
           case _ => null
         }
       }
       if (line != null) {
-        sqlBuffer.append(line).append(if (index == 0) "\n" else ",\n")
-        index += 1
+        sqlBuffer.append(line).append(if (line.toUpperCase.trim.startsWith("CREATE ")) "\n" else ",\n")
       }
     }
     scanner.close()
@@ -143,93 +244,15 @@ object SqlConvertUtils {
     sql,
     toFlinkDataType,
     x => {
-      val matcher = PRIMARY_PATTERN.matcher(x)
-      if (!matcher.find()) null; else {
-        val primary = matcher.group()
-        primary.concat(" NOT ENFORCED")
+      val matcher = PRIMARY_REGEXP.matcher(x)
+      matcher.find() match {
+        case b if b => s"${matcher.group()} NOT ENFORCED"
+        case _ => null
       }
     },
     postfix
   )
 
   def mysqlToClickhouse(sql: String, postfix: String): String = convertSql(sql, toClickhouseDataType, postfix = postfix)
-
-  def main(args: Array[String]): Unit = {
-    val sql =
-      """
-        |CREATE TABLE `t_flink_app` (
-        |`ID` bigint NOT NULL AUTO_INCREMENT,
-        |`JOB_TYPE` tinyint DEFAULT NULL,
-        |`EXECUTION_MODE` tinyint DEFAULT NULL,
-        |`PROJECT_ID` varchar(64) DEFAULT NULL,
-        |`JOB_NAME` varchar(255) DEFAULT NULL,
-        |`MODULE` varchar(255) DEFAULT NULL,
-        |`JAR` varchar(255) DEFAULT NULL,
-        |`MAIN_CLASS` varchar(255) DEFAULT NULL,
-        |`ARGS` text DEFAULT NULL,
-        |`OPTIONS` text DEFAULT NULL,
-        |`USER_ID` bigint DEFAULT NULL,
-        |`APP_ID` varchar(255) DEFAULT NULL,
-        |`APP_TYPE` tinyint DEFAULT NULL,
-        |`DURATION` bigint DEFAULT NULL,
-        |`JOB_ID` varchar(64) DEFAULT NULL,
-        |`STATE` varchar(50) DEFAULT NULL,
-        |`RESTART_SIZE` int DEFAULT NULL,
-        |`RESTART_COUNT` int DEFAULT NULL,
-        |`CP_THRESHOLD` int DEFAULT NULL,
-        |`CP_MAX_FAILURE_INTERVAL` int NULL,
-        |`CP_FAILURE_RATE_INTERVAL` int NULL,
-        |`CP_FAILURE_ACTION` tinyint NULL,
-        |`DYNAMIC_OPTIONS` text DEFAULT NULL,
-        |`DESCRIPTION` varchar(255) DEFAULT NULL,
-        |`RESOLVE_ORDER` tinyint DEFAULT NULL,
-        |`FLAME_GRAPH` tinyint DEFAULT '0',
-        |`JM_MEMORY` int DEFAULT NULL,
-        |`TM_MEMORY` int DEFAULT NULL,
-        |`TOTAL_TASK` int DEFAULT NULL,
-        |`TOTAL_TM` int DEFAULT NULL,
-        |`TOTAL_SLOT` int DEFAULT NULL,
-        |`AVAILABLE_SLOT` int DEFAULT NULL,
-        |`OPTION_STATE` tinyint DEFAULT NULL,
-        |`TRACKING` tinyint DEFAULT NULL,
-        |`CREATE_TIME` datetime DEFAULT NULL,
-        |`DEPLOY` tinyint DEFAULT '0',
-        |`START_TIME` datetime DEFAULT NULL,
-        |`END_TIME` datetime DEFAULT NULL,
-        |`ALERT_EMAIL` varchar(255) DEFAULT NULL,
-        |PRIMARY KEY (`ID`) USING BTREE,
-        |KEY `INX_STATE` (`STATE`) USING BTREE,
-        |KEY `INX_JOB_TYPE` (`JOB_TYPE`) USING BTREE,
-        |KEY `INX_TRACK` (`TRACKING`) USING BTREE
-        |) ENGINE=InnoDB  DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-        |""".stripMargin
-
-    val flinkSql = mysqlToFlinkSql(
-      sql,
-      """WITH (
-        |'connector' = 'upsert-kafka',
-        |'topic' = 'test_topic',
-        |'properties.bootstrap.servers' = '172.0.0.1:9092,172.0.0.2:9092,172.0.0.3:9092',
-        |'key.format' = 'json',
-        |'value.format' = 'json'
-        |);
-        |""".stripMargin
-    )
-    println(flinkSql)
-
-    println("-------------------------------------------------")
-
-    val ckSql = mysqlToClickhouse(
-      sql,
-      """
-        |ENGINE = MergeTree
-        |ORDER BY id
-        |SETTINGS index_granularity = 8192
-        |""".stripMargin
-    )
-
-    println(ckSql)
-
-  }
 
 }
