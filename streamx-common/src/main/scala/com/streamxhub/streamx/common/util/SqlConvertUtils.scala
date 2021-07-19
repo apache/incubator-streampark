@@ -119,14 +119,16 @@ object SqlConvertUtils extends Logger {
       matcher.find() match {
         case b if !b => index -> segment
         case _ =>
-          val signal = matcher.group(2)
+          val s = matcher.group(2)
+          val regexp = s"\\$s(,|)$$".r
           val cleaned = segment
             .replaceFirst("(?i)(comment)\\s+('|\")", "")
-            .replace(s"\\$signal", "")
-          val regex = if (signal == "'") "\'(,|)$".r else "\"(,|)$".r
-          if (regex.findFirstIn(cleaned).nonEmpty) index -> segment; else {
-            val nextLine = map(index + 1)
-            commentJoin(map, index + 1, s"$segment$nextLine")
+            .replace(s"\\$s", "")
+          regexp.findFirstIn(cleaned) match {
+            case Some(_) => index -> segment
+            case _ =>
+              val nextLine = map(index + 1)
+              commentJoin(map, index + 1, s"$segment$nextLine")
           }
       }
     }
