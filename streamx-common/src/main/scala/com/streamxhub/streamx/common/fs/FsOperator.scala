@@ -21,8 +21,6 @@
 
 package com.streamxhub.streamx.common.fs
 
-import com.streamxhub.streamx.common.enums.StorageType.{HDFS, LFS, StorageType}
-
 trait FsOperator {
 
   def exists(path: String): Boolean
