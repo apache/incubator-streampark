@@ -20,6 +20,9 @@
  */
 package com.streamxhub.streamx.common.conf
 
+import com.streamxhub.streamx.common.enums.StorageType
+import com.streamxhub.streamx.common.enums.StorageType.StorageType
+
 object ConfigConst {
   /**
    *
@@ -281,37 +284,31 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val STREAMX_HDFS_WORKSPACE_DEFAULT = "/streamx"
+  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
-  val KEY_STREAMX_HDFS_WORKSPACE = "streamx.hdfs.workspace"
+  val KEY_STREAMX_WORKSPACE = "streamx.workspace"
 
-  lazy val HDFS_WORKSPACE: String = {
-    val workspace = System.getProperties.getProperty(KEY_STREAMX_HDFS_WORKSPACE, STREAMX_HDFS_WORKSPACE_DEFAULT)
-    require(!workspace.startsWith("hdfs://"))
-    workspace
-  }
-
-  lazy val APP_PLUGINS = s"$HDFS_WORKSPACE/plugins"
+  lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
 
   /**
    * 存放不同版本flink相关的jar
    */
-  lazy val APP_SHIMS = s"$HDFS_WORKSPACE/shims"
+  lazy val APP_SHIMS = s"$WORKSPACE/shims"
 
-  lazy val APP_UPLOADS = s"$HDFS_WORKSPACE/uploads"
+  lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
 
-  lazy val APP_WORKSPACE = s"$HDFS_WORKSPACE/workspace"
+  lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
 
-  lazy val APP_FLINK = s"$HDFS_WORKSPACE/flink"
+  lazy val APP_FLINK = s"$WORKSPACE/flink"
 
-  lazy val APP_BACKUPS = s"$HDFS_WORKSPACE/backups"
+  lazy val APP_BACKUPS = s"$WORKSPACE/backups"
 
-  lazy val APP_SAVEPOINTS = s"$HDFS_WORKSPACE/savepoints"
+  lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
 
   /**
    * 存放全局公共的jar
    */
-  lazy val APP_JARS = s"$HDFS_WORKSPACE/jars"
+  lazy val APP_JARS = s"$WORKSPACE/jars"
 
   val LOGO =
     """
@@ -359,6 +356,22 @@ object ConfigConst {
       |          [StreamX] Make Flink|Spark easier ô‿ô!
       |
       |""".stripMargin
+
+
+  /**
+   * the type of workspace depends on the prefix of the dir value, such as hdfs://.... to HDFS
+   */
+  lazy val WORKSPACE: WorkspaceInfo = {
+    val workspaceDir = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
+    val storageType = workspaceDir match {
+      case workspaceDir if workspaceDir.startsWith("hdfs://") => StorageType.HDFS
+      case _ => StorageType.LFS
+    }
+    WorkspaceInfo(workspaceDir, storageType)
+  }
+
+  case class WorkspaceInfo(dir: String, stype: StorageType)
+
 
 }
 
