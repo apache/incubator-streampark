@@ -19,12 +19,35 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.common.enums
+package com.streamxhub.streamx.common.enums;
 
-/**
- * file system storage types
- */
-object StorageType extends Enumeration {
-  type StorageType = Value
-  val HDFS, LFS = Value
+import org.apache.commons.lang3.StringUtils;
+
+public enum StorageType {
+
+    HDFS("hdfs"),
+    LFS("lfs");
+
+    private final String identifier;
+
+    StorageType(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public static StorageType of(String identifier) {
+        if (StringUtils.isEmpty(identifier)) {
+            return LFS;
+        }
+        for (StorageType type : values()) {
+            if (type.identifier.equals(identifier)) {
+                return type;
+            }
+        }
+        return LFS;
+    }
+
 }
