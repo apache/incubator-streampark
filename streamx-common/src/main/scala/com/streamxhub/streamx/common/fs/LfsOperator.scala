@@ -23,10 +23,11 @@ package com.streamxhub.streamx.common.fs
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.isAnyBank
-import org.apache.commons.io.FileUtils
+import org.apache.commons.codec.digest.DigestUtils
+import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang.StringUtils
 
-import java.io.File
+import java.io.{File, FileInputStream}
 
 /**
  * Local File System (aka LFS) Operator
@@ -95,6 +96,9 @@ object LfsOperator extends FsOperator with Logger {
     FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
   }
 
+  override def fileMd5(path: String): String = {
+    DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
+  }
 }
 
 

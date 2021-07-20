@@ -30,7 +30,6 @@ object HdfsOperator extends FsOperator with Logger {
 
   override def exists(path: String): Boolean = HdfsUtils.exists(toHdfsPath(path))
 
-
   override def mkdirs(path: String): Unit = HdfsUtils.mkdirs(toHdfsPath(path))
 
   override def delete(path: String): Unit = HdfsUtils.delete(toHdfsPath(path))
@@ -45,6 +44,8 @@ object HdfsOperator extends FsOperator with Logger {
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
     HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
+
+  override def fileMd5(path: String): String = HdfsUtils.fileMd5(toHdfsPath(path))
 
   private def toHdfsPath(path: String): String = {
     if (path.startsWith("hdfs://")) {

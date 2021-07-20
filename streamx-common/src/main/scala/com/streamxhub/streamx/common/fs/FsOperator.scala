@@ -43,5 +43,7 @@ trait FsOperator {
 
   def move(srcPath: String, dstPath: String): Unit
 
+  def fileMd5(path: String): String
+
 
 }
