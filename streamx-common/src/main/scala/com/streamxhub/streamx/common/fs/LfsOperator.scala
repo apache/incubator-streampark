@@ -55,31 +55,6 @@ object LfsOperator extends FsOperator with Logger {
     FileUtils.forceDelete(file)
   }
 
-  override def upload(srcPath: String, dstPath: String): Unit = {
-    copy(srcPath, dstPath)
-  }
-
-  override def copy(srcPath: String, dstPath: String): Unit = {
-    if (isAnyBank(srcPath, dstPath))
-      return
-    val srcFile = new File(srcPath)
-    val dstFile = new File(dstPath)
-    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
-      return
-    FileUtils.copyFile(srcFile, dstFile)
-  }
-
-  override def copyDir(srcPath: String, dstPath: String): Unit = {
-    if (isAnyBank(srcPath, dstPath)) {
-      return
-    }
-    val srcFile = new File(srcPath)
-    val dstFile = new File(dstPath)
-    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
-      return
-    FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
-  }
-
   override def move(srcPath: String, dstPath: String): Unit = {
     if (isAnyBank(srcPath, dstPath)) {
       return
@@ -91,6 +66,34 @@ object LfsOperator extends FsOperator with Logger {
     FileUtils.moveFile(srcFile, dstFile)
   }
 
+  override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
+    copy(srcPath, dstPath, delSrc, overwrite)
+  }
+
+  override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
+    if (isAnyBank(srcPath, dstPath))
+      return
+    val srcFile = new File(srcPath)
+    val dstFile = new File(dstPath)
+    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
+      return
+    if (!overwrite && dstFile.exists())
+      return
+    FileUtils.copyFile(srcFile, dstFile)
+  }
+
+  override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
+    if (isAnyBank(srcPath, dstPath)) {
+      return
+    }
+    val srcFile = new File(srcPath)
+    val dstFile = new File(dstPath)
+    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
+      return
+    if (!overwrite && dstFile.exists())
+      return
+    FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
+  }
 
 }
 
