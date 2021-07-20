@@ -51,6 +51,10 @@ public class FsOperatorRegisterProcessor implements BeanDefinitionRegistryPostPr
             ConfigConst.KEY_STREAMX_WORKSPACE(),
             context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT())
         );
+        System.getProperties().setProperty(
+            ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(),
+            context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(), ConfigConst.STREAMX_WORKSPACE_TYPE_DEFAULT())
+        );
         beanDefinitionRegistry.registerBeanDefinition("fsOperator",
             new RootBeanDefinition(FsOperator.class, UnifiledFsOperator::auto)
         );

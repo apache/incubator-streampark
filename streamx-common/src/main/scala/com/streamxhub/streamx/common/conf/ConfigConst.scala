@@ -21,7 +21,6 @@
 package com.streamxhub.streamx.common.conf
 
 import com.streamxhub.streamx.common.enums.StorageType
-import com.streamxhub.streamx.common.enums.StorageType.StorageType
 
 object ConfigConst {
   /**
@@ -284,9 +283,21 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
+  val KEY_STREAMX_WORKSPACE = "streamx.workspace"
+
   val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
-  val KEY_STREAMX_WORKSPACE = "streamx.workspace"
+  val KEY_STREAMX_WORKSPACE_TYPE = "streamx.workspace.type"
+
+  /**
+   * optional value from {@link StorageType}
+   */
+  val STREAMX_WORKSPACE_TYPE_DEFAULT = "lfs"
+
+  lazy val WORKSPACE: String = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
+
+  lazy val WORKSPACE_TYPE: StorageType =
+    StorageType.of(System.getProperties.getProperty(KEY_STREAMX_WORKSPACE_TYPE, STREAMX_WORKSPACE_TYPE_DEFAULT))
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
 
@@ -356,21 +367,6 @@ object ConfigConst {
       |          [StreamX] Make Flink|Spark easier ô‿ô!
       |
       |""".stripMargin
-
-
-  /**
-   * the type of workspace depends on the prefix of the dir value, such as hdfs://.... to HDFS
-   */
-  lazy val WORKSPACE: WorkspaceInfo = {
-    val workspaceDir = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
-    val storageType = workspaceDir match {
-      case workspaceDir if workspaceDir.startsWith("hdfs://") => StorageType.HDFS
-      case _ => StorageType.LFS
-    }
-    WorkspaceInfo(workspaceDir, storageType)
-  }
-
-  case class WorkspaceInfo(dir: String, stype: StorageType)
 
 
 }

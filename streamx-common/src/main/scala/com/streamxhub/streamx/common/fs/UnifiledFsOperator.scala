@@ -21,8 +21,8 @@
 
 package com.streamxhub.streamx.common.fs
 
-import com.streamxhub.streamx.common.conf.ConfigConst
-import com.streamxhub.streamx.common.enums.StorageType.{HDFS, LFS, StorageType}
+import com.streamxhub.streamx.common.conf.ConfigConst.WORKSPACE_TYPE
+import com.streamxhub.streamx.common.enums.StorageType
 
 /**
  * Unifiled file system operator
@@ -33,7 +33,7 @@ object UnifiledFsOperator {
    * auto choose the file sustem type
    */
   def auto(): FsOperator = {
-    hint(ConfigConst.WORKSPACE.stype)
+    hint(WORKSPACE_TYPE)
   }
 
   /**
@@ -41,8 +41,8 @@ object UnifiledFsOperator {
    */
   def hint(stype: StorageType): FsOperator = {
     stype match {
-      case HDFS => HdfsOperator
-      case LFS => LfsOperator
+      case StorageType.HDFS => HdfsOperator
+      case StorageType.LFS => LfsOperator
     }
   }
 

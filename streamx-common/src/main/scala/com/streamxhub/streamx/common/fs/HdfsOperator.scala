@@ -28,22 +28,30 @@ import com.streamxhub.streamx.common.util.{HdfsUtils, Logger}
  */
 object HdfsOperator extends FsOperator with Logger {
 
-  override def exists(path: String): Boolean = HdfsUtils.exists(path)
+  override def exists(path: String): Boolean = HdfsUtils.exists(toHdfsPath(path))
 
-  override def mkdirs(path: String): Unit = HdfsUtils.mkdirs(path)
 
-  override def delete(path: String): Unit = HdfsUtils.delete(path)
+  override def mkdirs(path: String): Unit = HdfsUtils.mkdirs(toHdfsPath(path))
 
-  override def move(srcPath: String, dstPath: String): Unit = HdfsUtils.move(srcPath, dstPath)
+  override def delete(path: String): Unit = HdfsUtils.delete(toHdfsPath(path))
+
+  override def move(srcPath: String, dstPath: String): Unit = HdfsUtils.move(toHdfsPath(srcPath), toHdfsPath(dstPath))
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.upload(srcPath, dstPath, delSrc = delSrc, overwrite = overwrite)
+    HdfsUtils.upload(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.copyHdfs(srcPath, dstPath, delSrc = delSrc, overwrite = overwrite)
+    HdfsUtils.copyHdfs(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.copyHdfsDir(srcPath, dstPath, delSrc = delSrc, overwrite = overwrite)
+    HdfsUtils.copyHdfsDir(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
+
+  private def toHdfsPath(path: String): String = {
+    if (path.startsWith("hdfs://")) {
+      return path
+    }
+    HdfsUtils.getDefaultFS.concat(path)
+  }
 
 }
 
