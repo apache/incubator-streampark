@@ -31,7 +31,7 @@ import scala.collection.mutable.ArrayBuffer
 
 object SqlCommandParser extends Logger {
 
-  private[this] val WITH_REGEXP = "(WITH|with)\\s*\\(\\s*\\n+((.*)\\s*=(.*)(,|)\\s*\\n+)+\\)".r
+  private[this] val WITH_REGEXP = Pattern.compile("WITH\\s*\\((.+|\\n+|\\r)*\\)", Pattern.CASE_INSENSITIVE)
 
   def parseSQL(sql: String): List[SqlCommandCall] = {
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
@@ -72,28 +72,27 @@ object SqlCommandParser extends Logger {
       for (i <- groups.indices) {
         groups(i) = {
           val segment = matcher.group(i + 1)
-          val withMatcher = WITH_REGEXP.pattern.matcher(segment)
+          val withMatcher = WITH_REGEXP.matcher(segment)
           if (!withMatcher.find()) segment else {
-            /**
-             * 解决with里的属性参数必须加单引号'的问题,从此可以不用带'了,更可读(手指多动一下是可耻的,scala语言之父说的.)
-             */
             val withSegment = withMatcher.group()
             val scanner = new Scanner(withSegment)
             val buffer = new StringBuffer()
             while (scanner.hasNextLine) {
-              val line = scanner.nextLine().replaceAll("--(.*)$", "").trim
-              val propRegexp = "\\s*(.*)\\s*=(.*)(,|)\\s*"
-              if (line.matches(propRegexp)) {
-                var newLine = line
-                  .replaceAll("^'|^", "'")
-                  .replaceAll("('|)\\s*=\\s*('|)", "' = '")
-                  .replaceAll("('|),$", "',")
-                if (!line.endsWith(",")) {
-                  newLine = newLine.replaceFirst("('|)\\s*$", "'")
-                }
-                buffer.append(newLine).append("\n")
-              } else {
-                buffer.append(line).append("\n")
+              //注释
+              val line = scanner.nextLine().replaceAll("--(.*)$|\\/*(.*)*\\/$", "").trim
+              val propRegexp = "\\s*(.*)\\s*=(.*)(,|)\\s*".r
+              propRegexp.findFirstIn(line) match {
+                case Some(_) =>
+                  var newLine = line
+                    .replaceAll("^'|^", "'")
+                    .replaceAll("('|)\\s*=\\s*('|)", "' = '")
+                    .replaceAll("('|),$", "',")
+                  if (!line.endsWith(",")) {
+                    newLine = newLine.replaceFirst("('|)\\s*$", "'")
+                  }
+                  buffer.append(newLine).append("\n")
+                case _ =>
+                  buffer.append(line).append("\n")
               }
             }
             segment.replace(withSegment, buffer.toString.trim)
@@ -170,7 +169,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_TABLE extends SqlCommand(
     "create table",
-    "(CREATE\\s+TABLE\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|)TABLE\\s+.*)"
   )
 
   /**
@@ -182,7 +181,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
     "create view",
-    "CREATE\\s+VIEW\\s+(\\S+)\\s+AS\\s+(.*)", {
+    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\s+)\\s+AS\\s+(.*)", {
       case a if a.length < 2 => None
       case x => Some(Array[String](x.head, x.last))
     }
@@ -197,9 +196,8 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_FUNCTION extends SqlCommand(
     "create function",
-    "(CREATE\\s+FUNCTION\\s+.*)"
+    "(CREATE\\s+(TEMPORARY\\s+|TEMPORARY\\s+SYSTEM\\s+|)FUNCTION\\s+.*)"
   )
-
 
   //----ALTER Statements ---
   case object ALTER_DATABASE extends SqlCommand(
