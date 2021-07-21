@@ -29,11 +29,11 @@ trait FsOperator {
 
   def delete(path: String): Unit
 
-  def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath)
+  def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, false, true)
 
-  def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath)
+  def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, false, true)
 
-  def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath)
+  def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath, false, true)
 
   def upload(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
 

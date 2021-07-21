@@ -61,7 +61,10 @@ object LfsOperator extends FsOperator with Logger {
       return
     }
     val srcFile = new File(srcPath)
-    val dstFile = new File(dstPath)
+    var dstFile = new File(dstPath)
+    if (dstFile.isDirectory) {
+      dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+    }
     if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
       return
     FileUtils.moveFile(srcFile, dstFile)
@@ -75,7 +78,10 @@ object LfsOperator extends FsOperator with Logger {
     if (isAnyBank(srcPath, dstPath))
       return
     val srcFile = new File(srcPath)
-    val dstFile = new File(dstPath)
+    var dstFile = new File(dstPath)
+    if (dstFile.isDirectory) {
+      dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+    }
     if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
       return
     if (!overwrite && dstFile.exists())
