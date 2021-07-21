@@ -56,7 +56,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Autowired
     private SettingService settingService;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private FsOperator fsOperator;
 

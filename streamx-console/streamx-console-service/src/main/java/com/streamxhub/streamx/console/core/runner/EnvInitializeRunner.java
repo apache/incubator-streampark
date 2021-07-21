@@ -48,7 +48,6 @@ public class EnvInitializeRunner implements ApplicationRunner {
     @Autowired
     private ApplicationContext context;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private FsOperator fsOperator;
 

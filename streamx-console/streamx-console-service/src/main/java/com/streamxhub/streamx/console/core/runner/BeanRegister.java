@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 The StreamX Project
+ * Copyright (c) 2020 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -24,29 +24,18 @@ package com.streamxhub.streamx.console.core.runner;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.UnifiledFsOperator;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.beans.factory.support.BeanDefinitionRegistryPostProcessor;
-import org.springframework.beans.factory.support.RootBeanDefinition;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * provide FsOperator Bean in SpringBoot.
- * what more, you can use {@link UnifiledFsOperator} directly.
- */
 @Configuration
-public class FsOperatorRegisterProcessor implements BeanDefinitionRegistryPostProcessor {
+public class BeanRegister {
 
-    private final ApplicationContext context;
-
-    public FsOperatorRegisterProcessor(ApplicationContext context) {
-        this.context = context;
-    }
-
-    @Override
-    public void postProcessBeanDefinitionRegistry(BeanDefinitionRegistry beanDefinitionRegistry) throws BeansException {
+    /**
+     * register bean of FsOperator
+     */
+    @Bean("fsOperator")
+    public FsOperator fsOperator(ApplicationContext context) {
         System.getProperties().setProperty(
             ConfigConst.KEY_STREAMX_WORKSPACE(),
             context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT())
@@ -55,13 +44,8 @@ public class FsOperatorRegisterProcessor implements BeanDefinitionRegistryPostPr
             ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(),
             context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(), ConfigConst.STREAMX_WORKSPACE_TYPE_DEFAULT())
         );
-        beanDefinitionRegistry.registerBeanDefinition("fsOperator",
-            new RootBeanDefinition(FsOperator.class, UnifiledFsOperator::auto)
-        );
+        return UnifiledFsOperator.auto();
     }
 
-    @Override
-    public void postProcessBeanFactory(ConfigurableListableBeanFactory configurableListableBeanFactory) throws BeansException {
-    }
 
 }

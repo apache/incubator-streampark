@@ -76,7 +76,6 @@ public class ApplicationBackUpServiceImpl
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
     @Autowired
     private FsOperator fsOperator;
 
