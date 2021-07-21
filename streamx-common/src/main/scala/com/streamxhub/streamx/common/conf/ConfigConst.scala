@@ -283,7 +283,7 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE = "streamx.workspace"
+  val KEY_STREAMX_WORKSPACE = "streamx.workspace.path"
 
   val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
