@@ -71,7 +71,11 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    copy(srcPath, dstPath, delSrc, overwrite)
+    if (new File(srcPath).isDirectory){
+      copyDir(srcPath, dstPath, delSrc, overwrite)
+    }else{
+      copy(srcPath, dstPath, delSrc, overwrite)
+    }
   }
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
