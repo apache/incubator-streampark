@@ -296,8 +296,12 @@ object ConfigConst {
 
   lazy val WORKSPACE: String = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
 
-  lazy val WORKSPACE_TYPE: StorageType =
-    StorageType.of(System.getProperties.getProperty(KEY_STREAMX_WORKSPACE_TYPE, STREAMX_WORKSPACE_TYPE_DEFAULT))
+  lazy val WORKSPACE_TYPE: StorageType = StorageType.of(
+    System.getProperties.getProperty(
+      KEY_STREAMX_WORKSPACE_TYPE,
+      STREAMX_WORKSPACE_TYPE_DEFAULT
+    )
+  )
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
 
