@@ -23,7 +23,7 @@ package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.UnifiledFsOperator;
+import com.streamxhub.streamx.common.fs.UnfilledFsOperator;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import java.io.File;
 import java.util.Objects;
@@ -60,7 +60,7 @@ public class EnvInitializeRunner implements ApplicationRunner {
         if (profiles.equals(PROD_ENV_NAME)) {
 
             String appUploads = ConfigConst.APP_UPLOADS();
-            if (!UnifiledFsOperator.auto().exists(appUploads)) {
+            if (!UnfilledFsOperator.auto().exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }

@@ -19,17 +19,20 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.console.core.runner;
+package com.streamxhub.streamx.console.core.config;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.UnifiledFsOperator;
+import com.streamxhub.streamx.common.fs.UnfilledFsOperator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * @author Al-assad
+ */
 @Configuration
-public class BeanRegister {
+public class BeanConfiguration {
 
     /**
      * register bean of FsOperator
@@ -38,13 +41,19 @@ public class BeanRegister {
     public FsOperator fsOperator(ApplicationContext context) {
         System.getProperties().setProperty(
             ConfigConst.KEY_STREAMX_WORKSPACE(),
-            context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT())
+            context.getEnvironment().getProperty(
+                ConfigConst.KEY_STREAMX_WORKSPACE(),
+                ConfigConst.STREAMX_WORKSPACE_DEFAULT()
+            )
         );
         System.getProperties().setProperty(
             ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(),
-            context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(), ConfigConst.STREAMX_WORKSPACE_TYPE_DEFAULT())
+            context.getEnvironment().getProperty(
+                ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(),
+                ConfigConst.STREAMX_WORKSPACE_TYPE_DEFAULT()
+            )
         );
-        return UnifiledFsOperator.auto();
+        return UnfilledFsOperator.auto();
     }
 
 
