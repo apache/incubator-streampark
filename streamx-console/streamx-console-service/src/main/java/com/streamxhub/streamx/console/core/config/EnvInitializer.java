@@ -19,23 +19,25 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.console.core.runner;
+package com.streamxhub.streamx.console.core.config;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.UnfilledFsOperator;
+import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.console.base.util.WebUtils;
-import java.io.File;
-import java.util.Objects;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
+
+import java.io.File;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * @author benjobs
@@ -43,24 +45,24 @@ import org.springframework.stereotype.Component;
 @Order
 @Slf4j
 @Component
-public class EnvInitializeRunner implements ApplicationRunner {
+public class EnvInitializer {
 
     @Autowired
-    private ApplicationContext context;
+    private SettingService settingService;
 
-    @Autowired
-    private FsOperator fsOperator;
+    private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
 
-    private String PROD_ENV_NAME = "prod";
+    /**
+     * @param storageType
+     * @throws Exception
+     */
+    public synchronized void storageInitialize(StorageType storageType) throws Exception {
+        if (initialized.get(storageType) == null) {
 
-    @Override
-    public void run(ApplicationArguments args) throws Exception {
-        String profiles = context.getEnvironment().getActiveProfiles()[0];
-
-        if (profiles.equals(PROD_ENV_NAME)) {
+            FsOperator fsOperator = FsOperatorGetter.get(storageType);
 
             String appUploads = ConfigConst.APP_UPLOADS();
-            if (!UnfilledFsOperator.auto().exists(appUploads)) {
+            if (!fsOperator.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }
@@ -125,10 +127,26 @@ public class EnvInitializeRunner implements ApplicationRunner {
                     fsOperator.upload(file.getAbsolutePath(), shimsPath);
                 }
             }
-        } else {
-            log.warn(
-                "The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
+            initialized.put(storageType, Boolean.TRUE);
         }
     }
 
+    public void checkFlinkEnv(StorageType storageType) {
+        String flinkLocalHome = settingService.getEffectiveFlinkHome();
+        if (flinkLocalHome == null) {
+            throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
+        }
+        String appFlink = ConfigConst.APP_FLINK();
+        FsOperator fsOperator = FsOperatorGetter.get(storageType);
+        if (!fsOperator.exists(appFlink)) {
+            log.info("mkdir {} starting ...", appFlink);
+            fsOperator.mkdirs(appFlink);
+        }
+        String flinkName = new File(flinkLocalHome).getName();
+        String flinkHome = appFlink.concat("/").concat(flinkName);
+        if (!fsOperator.exists(flinkHome)) {
+            log.info("{} is not exists,upload beginning....", flinkHome);
+            fsOperator.upload(flinkLocalHome, flinkHome, false, false);
+        }
+    }
 }

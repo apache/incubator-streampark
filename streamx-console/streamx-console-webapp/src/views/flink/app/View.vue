@@ -845,8 +845,8 @@
 import Ellipsis from '@/components/Ellipsis'
 import State from './State'
 import {mapActions} from 'vuex'
-import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
-import {latest, history} from '@api/savepoint'
+import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+import {history, latest} from '@api/savepoint'
 import {flamegraph} from '@api/metrics'
 import {weburl} from '@api/setting'
 import {Terminal} from 'xterm'
@@ -955,10 +955,10 @@ export default {
           customRender: 'customRender'
         },
         onFilter: (value, record) =>
-          record.jobName
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
+            record.jobName
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: visible => {
           if (visible) {
             setTimeout(() => {
@@ -1066,7 +1066,7 @@ export default {
       }
     },
 
-    handleDeployTitle (deploy) {
+    handleDeployTitle(deploy) {
       switch (deploy) {
         case -1:
           return 'dependency changed,but download dependency failed'
@@ -1114,7 +1114,7 @@ export default {
             title: 'The current job is deploying',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             deploy({
               id: id,
               restart: restart,
@@ -1149,7 +1149,7 @@ export default {
             title: 'The current job is mapping',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             mapping({
               id: id,
               appId: appId,
@@ -1172,12 +1172,12 @@ export default {
 
     handleIsStart(app) {
       const status = app.state === 0 ||
-        app.state === 2 ||
-        app.state === 9 ||
-        app.state === 11 ||
-        app.state === 12 ||
-        app.state === 13 ||
-        app.state === 15 || false
+          app.state === 2 ||
+          app.state === 9 ||
+          app.state === 11 ||
+          app.state === 12 ||
+          app.state === 13 ||
+          app.state === 15 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1237,7 +1237,7 @@ export default {
             title: 'The current job is starting',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             start({
               id: id,
               savePointed: savePointed,
@@ -1248,9 +1248,9 @@ export default {
               const code = parseInt(resp.data)
               if (code === 0) {
                 this.$swal.fire(
-                  'Failed',
-                  'startup failed, please check the startup log :)',
-                  'error'
+                    'Failed',
+                    'startup failed, please check the startup log :)',
+                    'error'
                 )
               } else if (code === -1) {
                 this.$swal.fire(
@@ -1303,9 +1303,9 @@ export default {
         }).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
-              'Failed',
-              resp.exception,
-              'error'
+                'Failed',
+                resp.exception,
+                'error'
             )
           }
         })
@@ -1319,12 +1319,12 @@ export default {
 
     handleCheckFlameGraph() {
       if (this.flameGraph) {
-        weburl({}).then((resp)=>{
-          if ( resp.data == null || resp.data === '' ) {
+        weburl({}).then((resp) => {
+          if (resp.data == null || resp.data === '') {
             this.$swal.fire(
-              'Failed',
-              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
-              'error'
+                'Failed',
+                ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+                'error'
             )
             this.flameGraph = false
           }
@@ -1334,34 +1334,34 @@ export default {
 
     handleFlameGraph(app) {
       flamegraph({
-          appId: app.id,
-          width: document.documentElement.offsetWidth || document.body.offsetWidth
-        },
-        (resp) => {
-          if (resp != null) {
-            const blob = new Blob([resp], {type: 'image/svg+xml'})
-            const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-            window.open(imageUrl)
-          }
-        },
-        {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
+            appId: app.id,
+            width: document.documentElement.offsetWidth || document.body.offsetWidth
+          },
+          (resp) => {
+            if (resp != null) {
+              const blob = new Blob([resp], {type: 'image/svg+xml'})
+              const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+              window.open(imageUrl)
+            }
+          },
+          {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
     },
 
-    handleCanDelete (app) {
+    handleCanDelete(app) {
       return app.state === 0 ||
-        app.state === 2 ||
-        app.state === 9 ||
-        app.state === 11 ||
-        app.state === 12 ||
-        app.state === 15 ||
-        app.state === 19 || false
+          app.state === 2 ||
+          app.state === 9 ||
+          app.state === 11 ||
+          app.state === 12 ||
+          app.state === 15 ||
+          app.state === 19 || false
     },
 
     handleDelete(app) {
       remove({
         id: app.id
-      }).then((resp)=>{
+      }).then((resp) => {
         this.$swal.fire({
           icon: 'success',
           title: 'delete successful',
@@ -1519,9 +1519,9 @@ export default {
           this.$router.push({'path': '/flink/app/add'})
         } else {
           this.$swal.fire(
-            'Failed',
-            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-            'error'
+              'Failed',
+              'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
+              'error'
           )
         }
       })
@@ -1536,10 +1536,10 @@ export default {
       }
     },
 
-    handleRevoke (app) {
+    handleRevoke(app) {
       revoke({
         id: app.id
-      }).then((resp)=>{
+      }).then((resp) => {
 
       })
     },
@@ -1595,7 +1595,7 @@ export default {
         this.stompClient.subscribe(
             '/resp/mvn',
             (msg) => {
-              if(msg.body.startsWith('[Exception]')) {
+              if (msg.body.startsWith('[Exception]')) {
                 this.$swal.fire(
                     'Failed',
                     msg.body,

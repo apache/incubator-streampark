@@ -28,6 +28,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
+import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -428,6 +430,26 @@ public class Application implements Serializable {
             }
         } else {
             return other.getArgs() == null;
+        }
+    }
+
+    @JsonIgnore
+    public StorageType getStorageType() {
+        return getStorageType(getExecutionMode());
+    }
+
+    public static StorageType getStorageType(Integer execMode) {
+        ExecutionMode executionMode = ExecutionMode.of(execMode);
+        switch (Objects.requireNonNull(executionMode)) {
+            case YARN_APPLICATION:
+                return StorageType.HDFS;
+            case YARN_PRE_JOB:
+            case YARN_SESSION:
+            case KUBERNETES_NATIVE_SESSION:
+            case KUBERNETES_NATIVE_APPLICATION:
+                return StorageType.LFS;
+            default:
+                throw new UnsupportedOperationException("Unsupported ".concat(executionMode.getName()));
         }
     }
 
