@@ -58,10 +58,10 @@ public class EnvInitializer {
      */
     public synchronized void storageInitialize(StorageType storageType) throws Exception {
         if (initialized.get(storageType) == null) {
-            String appUploads = ConfigConst.APP_UPLOADS();
 
             FsOperator fsOperator = FsOperatorGetter.get(storageType);
 
+            String appUploads = ConfigConst.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
