@@ -43,7 +43,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
 
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
-    assert(flinkConfig.getOptional(KubernetesConfigOptions.CLUSTER_ID).isPresent)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
