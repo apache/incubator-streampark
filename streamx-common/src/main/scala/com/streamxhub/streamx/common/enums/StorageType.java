@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,14 +18,36 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.submit
 
-import org.apache.flink.configuration.Configuration
+package com.streamxhub.streamx.common.enums;
 
-import javax.annotation.Nullable
+import org.apache.commons.lang3.StringUtils;
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: Configuration,
-                          @Nullable jobId: String = "") {
+public enum StorageType {
+
+    HDFS("hdfs"),
+    LFS("lfs");
+
+    private final String identifier;
+
+    StorageType(String identifier) {
+        this.identifier = identifier;
+    }
+
+    public String getIdentifier() {
+        return identifier;
+    }
+
+    public static StorageType of(String identifier) {
+        if (StringUtils.isEmpty(identifier)) {
+            return LFS;
+        }
+        for (StorageType type : values()) {
+            if (type.identifier.equals(identifier)) {
+                return type;
+            }
+        }
+        return LFS;
+    }
 
 }

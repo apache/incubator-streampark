@@ -194,7 +194,7 @@ object YarnPreJobTestCase extends Logger {
       logInfo("------------------<<applicationId>>-------------------")
       logInfo(s"Flink Job Started: applicationId: $applicationId ")
       logInfo("-------------------------------------")
-      SubmitResponse(applicationId, flinkConfig)
+      SubmitResponse(applicationId.toString, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }

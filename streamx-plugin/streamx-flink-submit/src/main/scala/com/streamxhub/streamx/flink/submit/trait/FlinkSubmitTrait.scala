@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.core.scala.conf.FlinkRunOption
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, CustomCommandLine}
@@ -31,7 +31,6 @@ import org.apache.flink.configuration.{ConfigOption, CoreOptions, GlobalConfigur
 import org.apache.flink.util.Preconditions.checkNotNull
 
 import java.io.File
-import java.lang.{Boolean => JavaBool}
 import java.util.{List => JavaList}
 import scala.collection.JavaConversions._
 import scala.collection.mutable
@@ -65,29 +64,32 @@ trait FlinkSubmitTrait extends Logger {
          |      "option": ${submitRequest.option},
          |      "property": ${submitRequest.property},
          |      "dynamicOption": ${submitRequest.dynamicOption.mkString(" ")},
-         |      "args": ${submitRequest.args}
+         |      "args": ${submitRequest.args},
+         |      "clusterId": ${submitRequest.clusterId},
+         |      "kubernetesNamespace": ${submitRequest.kubernetesNamespace}
          |}
          |""".stripMargin)
     doSubmit(submitRequest)
   }
 
-  def stop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
+  def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
       s"""
          |"flink stop {"
-         |      "flinkHome" :$flinkHome,
-         |      "appId": $appId,
-         |      "jobId": $jobStringId,
-         |      "savePoint": $savePoint,
-         |      "drain": $drain
+         |      "flinkHome" :${stopRequest.flinkHome},
+         |      "appId": ${stopRequest.clusterId},
+         |      "jobId": ${stopRequest.jobId},
+         |      "withSavePoint": ${stopRequest.withSavePoint},
+         |      "withDrain": ${stopRequest.withDrain}
+         |      "kubernetesNamespace": ${stopRequest.kubernetesNamespace}
          |}
          |""".stripMargin)
-    doStop(flinkHome, appId, jobStringId, savePoint, drain)
+    doStop(stopRequest)
   }
 
   def doSubmit(submitRequest: SubmitRequest): SubmitResponse
 
-  def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String
+  def doStop(stopRequest: StopRequest) : StopResponse
 
   private[submit] def getJobID(jobId: String) = Try(JobID.fromHexString(jobId)) match {
     case Success(id) => id

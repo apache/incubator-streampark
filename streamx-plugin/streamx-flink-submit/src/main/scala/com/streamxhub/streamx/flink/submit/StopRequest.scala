@@ -20,12 +20,24 @@
  */
 package com.streamxhub.streamx.flink.submit
 
-import org.apache.flink.configuration.Configuration
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import javax.annotation.Nullable
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: Configuration,
-                          @Nullable jobId: String = "") {
+case class StopRequest(flinkHome: String,
+                       clusterId: String,
+                       jobId: String,
+                       withSavePoint: Boolean,
+                       withDrain: Boolean,
+                       @Nullable kubernetesNamespace: String) {
+
+  def this(flinkHome: String,
+           clusterId: String,
+           jobId: String,
+           withSavePoint: Boolean,
+           withDrain: Boolean) {
+    this(flinkHome, clusterId, jobId, withSavePoint, withDrain, KubernetesConfigOptions.NAMESPACE.defaultValue())
+  }
+
 
 }

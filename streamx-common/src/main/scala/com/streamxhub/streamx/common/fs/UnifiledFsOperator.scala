@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,14 +18,32 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.submit
 
-import org.apache.flink.configuration.Configuration
+package com.streamxhub.streamx.common.fs
 
-import javax.annotation.Nullable
+import com.streamxhub.streamx.common.conf.ConfigConst.WORKSPACE_TYPE
+import com.streamxhub.streamx.common.enums.StorageType
 
-case class SubmitResponse(clusterId: String,
-                          flinkConfig: Configuration,
-                          @Nullable jobId: String = "") {
+/**
+ * Unfilled file system operator
+ */
+object UnfilledFsOperator {
+
+  /**
+   * auto choose the file system type
+   */
+  def auto(): FsOperator = {
+    hint(WORKSPACE_TYPE)
+  }
+
+  /**
+   * specify the file system type
+   */
+  def hint(storageType: StorageType): FsOperator = {
+    storageType match {
+      case StorageType.HDFS => HdfsOperator
+      case StorageType.LFS => LfsOperator
+    }
+  }
 
 }

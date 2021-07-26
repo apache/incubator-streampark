@@ -126,7 +126,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
            ||__________________________________________________________________|
            |""".stripMargin)
 
-      SubmitResponse(applicationId, flinkConfig)
+      SubmitResponse(applicationId.toString, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }
