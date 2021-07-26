@@ -23,8 +23,6 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
-import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
-import org.apache.flink.client.cli.ClientOptions
 import com.streamxhub.streamx.flink.submit.SubmitRequest
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
@@ -49,13 +47,13 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
-  override def doStop(stopRequest: StopRequest): StopResponse = {
+  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
 
-    val jobID = getJobID(stopRequest.jobId)
+    val jobID = getJobID(jobStringId)
 
     val clusterClient = {
       val flinkConfiguration = new Configuration
-      flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, stopRequest.clusterId)
+      flinkConfiguration.set(YarnConfigOptions.APPLICATION_ID, appId)
       val clusterClientFactory = new YarnClusterClientFactory
       val applicationId = clusterClientFactory.getClusterId(flinkConfiguration)
       if (applicationId == null) {
@@ -66,28 +64,27 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
     }
 
     val savePointDir = getOptionFromDefaultFlinkConfig(
-      stopRequest.flinkHome,
+      flinkHome,
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
         .defaultValue(s"hdfs://$APP_SAVEPOINTS")
     )
 
-    val savepointPathFuture = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {
+    val savepointPathFuture = (Try(savePoint.booleanValue()).getOrElse(false), Try(drain.booleanValue()).getOrElse(false)) match {
       case (false, false) =>
         clusterClient.cancel(jobID)
         null
       case (true, false) => clusterClient.cancelWithSavepoint(jobID, savePointDir)
-      case (_, _) => clusterClient.stopWithSavepoint(jobID, stopRequest.withDrain, savePointDir)
+      case (_, _) => clusterClient.stopWithSavepoint(jobID, drain, savePointDir)
     }
 
     if (savepointPathFuture == null) null else try {
-      val clientTimeout = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, ClientOptions.CLIENT_TIMEOUT)
-      val savepointDir = savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
-      StopResponse(savepointDir)
+      val clientTimeout = getOptionFromDefaultFlinkConfig(flinkHome, ClientOptions.CLIENT_TIMEOUT)
+      savepointPathFuture.get(clientTimeout.toMillis, TimeUnit.MILLISECONDS)
     } catch {
       case e: Exception =>
         val cause = ExceptionUtils.stringifyException(e)
-        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job ${stopRequest.jobId} failed. $cause");
+        throw new FlinkException(s"[StreamX] Triggering a savepoint for the job $jobStringId failed. $cause");
     }
   }
 

@@ -32,19 +32,17 @@ object FlinkSubmit {
       case ExecutionMode.APPLICATION => YarnApplicationSubmit.submit(submitInfo)
       case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.submit(submitInfo)
+      case ExecutionMode.KUBERNETES => KubernetesSubmit.submit(submitInfo)
       case _ => throw new UnsupportedOperationException(s"Unsupported ${submitInfo.executionMode} Submit ")
     }
   }
 
-  def stop(executionMode: ExecutionMode, stopInfo: StopRequest): StopResponse = {
+  def stop(flinkHome: String, executionMode: ExecutionMode, appId: String, jobStringId: String, savePoint: JavaBool, drain: JavaBool): String = {
     executionMode match {
       case ExecutionMode.APPLICATION | ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION =>
-        YarnPreJobSubmit.stop(stopInfo)
-      case ExecutionMode.LOCAL => LocalSubmit.stop(stopInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.stop(stopInfo)
-      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => KubernetesNativeApplicationSubmit.stop(stopInfo)
+        YarnPreJobSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
+      case ExecutionMode.LOCAL => LocalSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
+      case ExecutionMode.KUBERNETES => KubernetesSubmit.stop(flinkHome, appId, jobStringId, savePoint, drain)
       case _ => throw new UnsupportedOperationException(s"Unsupported ${executionMode} Submit ")
     }
   }
