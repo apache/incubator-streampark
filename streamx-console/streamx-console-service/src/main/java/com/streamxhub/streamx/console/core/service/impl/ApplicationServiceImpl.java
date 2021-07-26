@@ -894,6 +894,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean start(Application appParam, boolean auto) throws Exception {
+        // todo refactor all flink params
 
         final Application application = getById(appParam.getId());
         //手动启动的,将reStart清空
@@ -984,14 +985,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
             assert executionMode != null;
-            if (executionMode.equals(ExecutionMode.APPLICATION)) {
-                //3) plugin
-                String pluginPath = ConfigConst.APP_PLUGINS();
-                flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
-            } else if (executionMode.equals(ExecutionMode.YARN_PRE_JOB)) {
-                flinkUserJar = sqlDistJar;
-            } else {
-                throw new UnsupportedOperationException("Unsupported..." + executionMode);
+            //3) plugin
+            switch (executionMode) {
+                case YARN_PRE_JOB:
+                    flinkUserJar = sqlDistJar;
+                    break;
+                case APPLICATION:
+                case KUBERNETES_NATIVE_SESSION:
+                    String pluginPath = ConfigConst.APP_PLUGINS();
+                    flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported..." + executionMode);
             }
         } else {
             throw new UnsupportedOperationException("Unsupported...");

@@ -20,7 +20,9 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
+import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -35,7 +37,7 @@ import scala.collection.JavaConverters._
 /**
  * kubernetes native session mode submit
  */
-object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
+object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
   //noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -53,8 +55,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
       // build JobGraph
       packageProgram = PackagedProgram.newBuilder()
         .setJarFile(new File(submitRequest.flinkUserJar))
-        .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
-        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS).get().asScala: _*)
+        .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
+        .setArguments(flinkConfig
+          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+          .orElse(Lists.newArrayList())
+          .asScala: _*)
         .build()
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
@@ -70,6 +75,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait {
 
       SubmitResponse(client.getClusterId, flinkConfig, jobId)
 
+    } catch {
+      case e: Exception =>
+        logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
+        e.printStackTrace()
+        null
     } finally {
       if (client != null) client.close()
       if (packageProgram != null) packageProgram.close()
