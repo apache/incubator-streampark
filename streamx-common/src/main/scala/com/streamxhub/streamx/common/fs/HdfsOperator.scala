@@ -48,10 +48,10 @@ object HdfsOperator extends FsOperator with Logger {
   override def fileMd5(path: String): String = HdfsUtils.fileMd5(toHdfsPath(path))
 
   private def toHdfsPath(path: String): String = {
-    if (path.startsWith("hdfs://")) {
-      return path
+    path match {
+      case x if x.startsWith("hdfs://") => x
+      case p => HdfsUtils.getDefaultFS.concat(p)
     }
-    HdfsUtils.getDefaultFS.concat(path)
   }
 
 }

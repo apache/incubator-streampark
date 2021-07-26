@@ -88,6 +88,6 @@ object Utils {
   /**
    * if any blank strings exist
    */
-  def isAnyBank(strs: String*): Boolean = strs == null || strs.exists(path => StringUtils.isBlank(path))
+  def isAnyBank(items: String*): Boolean =  items == null || items.exists(StringUtils.isBlank)
 
 }

@@ -22,7 +22,7 @@
 package com.streamxhub.streamx.common.fs
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.common.util.Utils.isAnyBank
+import com.streamxhub.streamx.common.util.Utils.{isAnyBank, notEmpty}
 import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.io.{FileUtils, IOUtils}
 import org.apache.commons.lang.StringUtils
@@ -40,71 +40,70 @@ object LfsOperator extends FsOperator with Logger {
   }
 
   override def mkdirs(path: String): Unit = {
-    if (isAnyBank(path))
-      return
-    FileUtils.forceMkdir(new File(path))
+    if (!isAnyBank(path)) {
+      FileUtils.forceMkdir(new File(path))
+    }
   }
 
   override def delete(path: String): Unit = {
-    if (StringUtils.isBlank(path))
-      return
-    val file = new File(path)
-    if (!file.exists()) {
-      logWarn(s"delete file: file is no exists, ${path}")
-      return
+    if (notEmpty(path)) {
+      val file = new File(path)
+      if (!file.exists()) {
+        logWarn(s"delete file: file is no exists, ${path}")
+      } else {
+        FileUtils.forceDelete(file)
+      }
     }
-    FileUtils.forceDelete(file)
   }
 
   override def move(srcPath: String, dstPath: String): Unit = {
-    if (isAnyBank(srcPath, dstPath)) {
-      return
+    if (!isAnyBank(srcPath, dstPath)) {
+      val srcFile = new File(srcPath)
+      var dstFile = new File(dstPath)
+      if (dstFile.isDirectory) {
+        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+      }
+      if (srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        FileUtils.moveFile(srcFile, dstFile)
+      }
     }
-    val srcFile = new File(srcPath)
-    var dstFile = new File(dstPath)
-    if (dstFile.isDirectory) {
-      dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
-    }
-    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
-      return
-    FileUtils.moveFile(srcFile, dstFile)
   }
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    copy(srcPath, dstPath, delSrc, overwrite)
+    if (new File(srcPath).isDirectory) {
+      copyDir(srcPath, dstPath, delSrc, overwrite)
+    } else {
+      copy(srcPath, dstPath, delSrc, overwrite)
+    }
   }
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (isAnyBank(srcPath, dstPath))
-      return
-    val srcFile = new File(srcPath)
-    var dstFile = new File(dstPath)
-    if (dstFile.isDirectory) {
-      dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+    if (!isAnyBank(srcPath, dstPath)) {
+      val srcFile = new File(srcPath)
+      var dstFile = new File(dstPath)
+      if (dstFile.isDirectory) {
+        dstFile = new File(dstFile.getAbsolutePath.concat("/").concat(srcFile.getName))
+      }
+      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        FileUtils.copyFile(srcFile, dstFile)
+      }
     }
-    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
-      return
-    if (!overwrite && dstFile.exists())
-      return
-    FileUtils.copyFile(srcFile, dstFile)
   }
 
   override def copyDir(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit = {
-    if (isAnyBank(srcPath, dstPath)) {
-      return
+    if (!isAnyBank(srcPath, dstPath)) {
+      val srcFile = new File(srcPath)
+      val dstFile = new File(dstPath)
+      if (overwrite && !dstFile.exists() && srcFile.getCanonicalPath != dstFile.getCanonicalPath) {
+        FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
+      }
     }
-    val srcFile = new File(srcPath)
-    val dstFile = new File(dstPath)
-    if (srcFile.getCanonicalPath == dstFile.getCanonicalPath)
-      return
-    if (!overwrite && dstFile.exists())
-      return
-    FileUtils.copyDirectory(new File(srcPath), new File(dstPath))
   }
 
   override def fileMd5(path: String): String = {
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
+
 }
 
 
