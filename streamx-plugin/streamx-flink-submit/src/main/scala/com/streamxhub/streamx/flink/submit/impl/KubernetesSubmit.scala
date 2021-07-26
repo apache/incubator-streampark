@@ -18,8 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.submit
+package com.streamxhub.streamx.flink.submit.impl
 
-case class StopResponse(savePointDir: String) {
+import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
+import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
 
+import java.lang
+
+object KubernetesSubmit extends FlinkSubmitTrait {
+  override def doSubmit(submitInfo: SubmitRequest): SubmitResponse = {
+    throw new UnsupportedOperationException("Unsupported Kubernetes Submit ")
+  }
+
+  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
+    throw new UnsupportedOperationException("Unsupported Kubernetes Submit ")
+  }
 }

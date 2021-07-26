@@ -27,7 +27,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -76,9 +76,6 @@ public class ApplicationBackUpServiceImpl
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    @Autowired
-    private FsOperator fsOperator;
-
     private ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
             200,
@@ -103,7 +100,7 @@ public class ApplicationBackUpServiceImpl
         /**
          * 备份文件不存在
          */
-        if (!fsOperator.exists(backParam.getPath())) {
+        if (!HdfsUtils.exists(backParam.getPath())) {
             return;
         }
         executorService.execute(() -> {
@@ -139,11 +136,11 @@ public class ApplicationBackUpServiceImpl
                     }
 
                     // 4) 删除当前的有效项目工程文件(注意:该操作如果整个回滚失败,则要恢复...)
-                    fsOperator.delete(application.getAppHome().getAbsolutePath());
+                    HdfsUtils.delete(application.getAppHome().getAbsolutePath());
 
                     try {
                         // 5)将备份的文件copy到有效项目目录下.
-                        fsOperator.copyDir(backParam.getPath(), application.getAppHome().getAbsolutePath());
+                        HdfsUtils.copyHdfsDir(backParam.getPath(), application.getAppHome().getAbsolutePath(), false, true);
                     } catch (Exception e) {
                         //1. TODO: 如果失败了,则要恢复第4部操作.
 
@@ -177,23 +174,21 @@ public class ApplicationBackUpServiceImpl
         ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
         assert backup != null;
         String path = backup.getPath();
-        fsOperator.move(path, ConfigConst.APP_WORKSPACE());
+        HdfsUtils.movie(path, ConfigConst.APP_WORKSPACE());
         removeById(backup.getId());
     }
 
     @Override
     public void removeApp(Long appId) {
         baseMapper.removeApp(appId);
-        fsOperator.delete(
-            ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString())
-        );
+        HdfsUtils.delete(ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString()));
     }
 
     @Override
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
-        if (!fsOperator.exists(backUp.getPath())) {
+        if (!HdfsUtils.exists(backUp.getPath())) {
             return;
         }
         try {
@@ -203,10 +198,10 @@ public class ApplicationBackUpServiceImpl
                 effectiveService.saveOrUpdate(backUp.getAppId(), EffectiveType.FLINKSQL, backUp.getSqlId());
 
                 // 2) 删除当前项目
-                fsOperator.delete(application.getAppHome().getAbsolutePath());
+                HdfsUtils.delete(application.getAppHome().getAbsolutePath());
                 try {
                     // 5)将备份的文件copy到有效项目目录下.
-                    fsOperator.copyDir(backUp.getPath(), application.getAppHome().getAbsolutePath());
+                    HdfsUtils.copyHdfsDir(backUp.getPath(), application.getAppHome().getAbsolutePath(), false, true);
                 } catch (Exception e) {
                     throw e;
                 }
@@ -233,7 +228,7 @@ public class ApplicationBackUpServiceImpl
     public Boolean delete(Long id) throws ServiceException {
         ApplicationBackUp backUp = getById(id);
         try {
-            fsOperator.delete(backUp.getPath());
+            HdfsUtils.delete(backUp.getPath());
             removeById(id);
             return true;
         } catch (Exception e) {
@@ -246,7 +241,7 @@ public class ApplicationBackUpServiceImpl
     public void backup(Application application) {
         //1) 基础的配置文件备份
         File appHome = application.getAppHome();
-        if (fsOperator.exists(appHome.getPath())) {
+        if (HdfsUtils.exists(appHome.getPath())) {
             // 3) 需要备份的做备份,移动文件到备份目录...
             ApplicationConfig config = configService.getEffective(application.getId());
             if (config != null) {
@@ -268,8 +263,8 @@ public class ApplicationBackUpServiceImpl
             applicationBackUp.setVersion(version);
 
             this.save(applicationBackUp);
-            fsOperator.mkdirs(applicationBackUp.getPath());
-            fsOperator.move(appHome.getPath(), applicationBackUp.getPath());
+            HdfsUtils.mkdirs(applicationBackUp.getPath());
+            HdfsUtils.movie(appHome.getPath(), applicationBackUp.getPath());
         }
     }
 
