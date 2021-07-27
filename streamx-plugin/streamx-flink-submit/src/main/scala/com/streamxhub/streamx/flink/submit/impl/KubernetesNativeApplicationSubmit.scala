@@ -37,7 +37,6 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
 
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
-    assert(flinkConfig.getOptional(KubernetesConfigOptions.CLUSTER_ID).isPresent)
     assert(flinkConfig.getOptional(KubernetesConfigOptions.CONTAINER_IMAGE).isPresent)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null

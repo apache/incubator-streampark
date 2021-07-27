@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
+import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_PARALLELISM
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
-import com.streamxhub.streamx.common.util.Utils
+import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
@@ -29,17 +30,18 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{Configuration, DeploymentOptions}
+import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, DeploymentOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
+import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
-import java.lang.{Boolean => JavaBool}
+import scala.util.Try
 
 /**
  * kubernetes native mode submit
@@ -52,10 +54,13 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   protected def doStop(@Nonnull executeMode: ExecutionMode,
                        stopRequest: StopRequest): StopResponse = {
-    val flinkConfig = new Configuration()
-      .set(DeploymentOptions.TARGET, executeMode.getName)
-      .set(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
-      .set(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
+    assert(StringUtils.isNotBlank(stopRequest.clusterId))
+
+    val flinkConfig = new Configuration
+    val safeSet = safeSetConfig(flinkConfig) _
+    safeSet(DeploymentOptions.TARGET, executeMode.getName)
+    safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
+    safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -115,42 +120,27 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
    */
   @Nonnull
   def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
-
     // base from default config
-    val flinkConfig = {
-      val defaultFlinkConfig = {
-        try {
-          submitRequest.flinkDefaultConfiguration
-        } catch {
-          case e: Exception => new Configuration
-        }
-      }
-      if (defaultFlinkConfig != null) defaultFlinkConfig else new Configuration
-    }
+    val flinkConfig = Try(submitRequest.flinkDefaultConfiguration).getOrElse(new Configuration)
+    val safeSet = safeSetConfig(flinkConfig) _
 
     // extract from submitRequest
-    flinkConfig
-      .set(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-      .set(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
-      .set(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
-      .set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
+    flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
+    safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
+    safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
+    safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
+    safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
 
     if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
-    }
-    if (StringUtils.isNotBlank(submitRequest.savePoint)) {
-      flinkConfig.set(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
     }
     if (StringUtils.isNotBlank(submitRequest.option)
       && submitRequest.option.split("\\s+").contains("-n")) {
       // please transfer the execution.savepoint.ignore-unclaimed-state to submitRequest.property or dynamicOption
       flinkConfig.set(SavepointConfigOptions.SAVEPOINT_IGNORE_UNCLAIMED_STATE, JavaBool.TRUE)
     }
-    if (StringUtils.isNotBlank(submitRequest.args)) {
-      val args = new ArrayBuffer[String]
-      submitRequest.args.split("\\s+").foreach(args += _)
-      flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, args.toList.asJava)
-    }
+    val args = extractProgarmArgs(submitRequest)
+    flinkConfig.set(ApplicationConfiguration.APPLICATION_ARGS, args.toList.asJava)
 
     // copy from submitRequest.property
     if (MapUtils.isNotEmpty(submitRequest.property)) {
@@ -158,15 +148,25 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
         .filter(_._2 != null)
         .foreach(e => flinkConfig.setString(e._1, e._2.toString))
     }
+
     // copy from submitRequest.dynamicOption
     extractDynamicOption(submitRequest.dynamicOption)
       .foreach(e => flinkConfig.setString(e._1, e._2))
 
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    // set parallism
+    if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
+      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
+        Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
+    } else{
+      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
+        CoreOptions.DEFAULT_PARALLELISM.defaultValue())
+    }
+
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty)
+      flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
 
     flinkConfig
   }
-
 
   /**
    * extract flink configuration from submitRequest.dynamicOption
@@ -185,5 +185,32 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .toMap
   }
 
+  private def safeSetConfig(flinkConfig: Configuration)(option: ConfigOption[String], value: String): Configuration = {
+    if (StringUtils.isNotBlank(value)) flinkConfig.set(option, value)
+    else flinkConfig
+  }
+
+  protected def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
+    val programArgs = new ArrayBuffer[String]()
+    Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
+    programArgs += PARAM_KEY_FLINK_CONF
+    programArgs += DeflaterUtils.zipString(submitRequest.flinkYaml)
+    programArgs += PARAM_KEY_APP_NAME
+    programArgs += submitRequest.effectiveAppName
+    submitRequest.developmentMode match {
+      case DevelopmentMode.FLINKSQL =>
+        programArgs += PARAM_KEY_FLINK_SQL
+        programArgs += submitRequest.flinkSQL
+        if (submitRequest.appConf != null) {
+          programArgs += PARAM_KEY_APP_CONF
+          programArgs += submitRequest.appConf
+        }
+      case _ =>
+        // Custom Code 必传配置文件...
+        programArgs += PARAM_KEY_APP_CONF
+        programArgs += submitRequest.appConf
+    }
+    programArgs
+  }
 
 }
