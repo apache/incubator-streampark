@@ -21,6 +21,8 @@
 
 package com.streamxhub.streamx.console.core.runner;
 
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
+
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.UnifiedFsOperator;
@@ -125,6 +127,13 @@ public class EnvInitializeRunner implements ApplicationRunner {
                     fsOperator.upload(file.getAbsolutePath(), shimsPath);
                 }
             }
+
+            // create maven local repository dir
+            String localMavnRepo = ConfigConst.MAVEN_LOCAL_DIR();
+            if (UnifiedFsOperator.hint(LFS).exists(localMavnRepo)){
+                UnifiedFsOperator.hint(LFS).mkdirs(localMavnRepo);
+            }
+
         } else {
             log.warn(
                 "The local test environment is only used in the development phase to provide services to the console web, and many functions will not be available...");
