@@ -201,8 +201,9 @@ public class ApplicationController {
     }
 
     @PostMapping("delete")
-    public RestResponse delete(Application app) throws ServiceException {
-        Boolean deleted = applicationService.delete(app);
+    public RestResponse delete(Long id) throws ServiceException {
+        Application application = applicationService.getById(id);
+        Boolean deleted = applicationService.delete(application);
         return RestResponse.create().data(deleted);
     }
 

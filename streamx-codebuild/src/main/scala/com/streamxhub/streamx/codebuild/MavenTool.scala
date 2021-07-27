@@ -52,22 +52,22 @@ object MavenTool extends Logger {
    * @return File Object of output fat-jar
    */
   @Nonnull
-  def buildFatJar(@Nonnull jarLibs: Array[String], @Nonnull outfatJarPath: String): File = {
+  def buildFatJar(@Nonnull jarLibs: Array[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
-    val uberJar = new File(outfatJarPath)
+    val uberJar = new File(outFatJarPath)
     if (uberJar.isDirectory) {
-      throw new Exception(s"[Streamx-Maven] outfatJarPath(${outfatJarPath}) should be a file.")
+      throw new Exception(s"[Streamx-Maven] outFatJarPath($outFatJarPath) should be a file.")
     }
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
-    jarLibs.map(lib => new File(lib))
-      .filter(lib => lib.exists())
+    jarLibs.map(new File(_))
+      .filter(_.exists())
       .distinct
       .foreach(lib =>
         if (isJarFile(lib)) {
           jarSet.add(lib)
         } else if (lib.isDirectory) {
-          lib.listFiles.filter(isJarFile).foreach(jar => jarSet.add(jar))
+          lib.listFiles.filter(isJarFile).foreach(jarSet.add)
         }
       )
     logInfo(s"start shaded fat-jar: ${jarLibs.mkString}")
@@ -81,7 +81,7 @@ object MavenTool extends Logger {
       req.setRelocators(Lists.newArrayList())
       req
     }
-    val shader = new DefaultShader();
+    val shader = new DefaultShader()
     shader.enableLogging(plexusLog)
     shader.shade(shadeRequest)
     logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
@@ -98,14 +98,14 @@ object MavenTool extends Logger {
    */
   @Nonnull
   def buildFatJar(@Nullable jarLibs: Array[String], @Nullable mavenArtifacts: Array[MavenArtifact],
-                  @Nonnull outfatJarPath: String): File = {
+                  @Nonnull outFatJarPath: String): File = {
     val libs = if (jarLibs == null) Array[String]() else jarLibs
     val arts = if (mavenArtifacts == null) Array[MavenArtifact]() else mavenArtifacts
     if (libs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[Streamx-Maven] empty artifacts.")
     }
-    val artFilePaths = resolveArtifacts(arts).map(file => file.getAbsolutePath)
-    buildFatJar(libs ++ artFilePaths, outfatJarPath)
+    val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
+    buildFatJar(libs ++ artFilePaths, outFatJarPath)
   }
 
 

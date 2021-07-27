@@ -316,10 +316,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //以下涉及到hdfs文件的删除
 
             //5) 删除 backup
-            backUpService.removeApp(app.getId());
+            backUpService.removeApp(app);
 
             //6) 删除savepoint
-            savePointService.removeApp(app.getId());
+            savePointService.removeApp(app);
 
             //7) 删除 app
             removeApp(app.getId(),app.getStorageType());

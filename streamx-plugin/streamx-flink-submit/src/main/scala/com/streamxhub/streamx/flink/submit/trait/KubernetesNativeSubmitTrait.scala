@@ -155,15 +155,20 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
     // set parallism
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
-      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
-        Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
-    } else{
-      flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
-        CoreOptions.DEFAULT_PARALLELISM.defaultValue())
+      flinkConfig.set(
+        CoreOptions.DEFAULT_PARALLELISM,
+        Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString)
+      )
+    } else {
+      flinkConfig.set(
+        CoreOptions.DEFAULT_PARALLELISM,
+        CoreOptions.DEFAULT_PARALLELISM.defaultValue()
+      )
     }
 
-    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty)
+    if (flinkConfig.get(KubernetesConfigOptions.NAMESPACE).isEmpty) {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
+    }
 
     flinkConfig
   }

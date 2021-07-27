@@ -26,13 +26,14 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.SavePointService;
@@ -56,14 +57,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     @Autowired
     private SettingService settingService;
 
-    @Autowired
-    private FsOperator fsOperator;
-
     @Override
     public void obsolete(Long appId) {
         this.baseMapper.obsolete(appId);
     }
-
 
     @Override
     public boolean save(SavePoint entity) {
@@ -74,9 +71,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     private void expire(SavePoint entity) {
         int cpThreshold = Integer.parseInt(
-            settingService
-                .getFlinkDefaultConfig()
-                .getOrDefault("state.checkpoints.num-retained", "1")
+                settingService
+                        .getFlinkDefaultConfig()
+                        .getOrDefault("state.checkpoints.num-retained", "1")
         );
 
         if (CheckPointType.CHECKPOINT.equals(CheckPointType.of(entity.getType()))) {
@@ -88,10 +85,10 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
         } else {
             LambdaQueryWrapper<SavePoint> queryWrapper = new QueryWrapper<SavePoint>().lambda();
             queryWrapper.select(SavePoint::getTriggerTime)
-                .eq(SavePoint::getAppId, entity.getAppId())
-                .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
-                .orderByDesc(SavePoint::getTriggerTime)
-                .last("limit 0," + cpThreshold + 1);
+                    .eq(SavePoint::getAppId, entity.getAppId())
+                    .eq(SavePoint::getType, CheckPointType.CHECKPOINT.get())
+                    .orderByDesc(SavePoint::getTriggerTime)
+                    .last("limit 0," + cpThreshold + 1);
 
             List<SavePoint> savePointList = this.baseMapper.selectList(queryWrapper);
             if (!savePointList.isEmpty() && savePointList.size() > cpThreshold) {
@@ -108,13 +105,13 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long id) throws ServiceException {
-        SavePoint savePoint = getById(id);
+    public Boolean delete(Application application) throws ServiceException {
+        SavePoint savePoint = getById(application.getId());
         try {
             if (CommonUtils.notEmpty(savePoint.getPath())) {
-                fsOperator.delete(savePoint.getPath());
+                FsOperatorGetter.get(application.getStorageType()).delete(savePoint.getPath());
             }
-            removeById(id);
+            removeById(application.getId());
             return true;
         } catch (Exception e) {
             throw new ServiceException(e.getMessage());
@@ -129,8 +126,12 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     @Override
-    public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
-        fsOperator.delete(ConfigConst.APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+    public void removeApp(Application application) {
+        baseMapper.removeApp(application.getId());
+        FsOperatorGetter
+                .get(application.getStorageType())
+                .delete(
+                        ConfigConst.APP_SAVEPOINTS().concat("/").concat(application.getId().toString())
+                );
     }
 }

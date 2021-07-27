@@ -28,6 +28,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -76,9 +77,6 @@ public class ApplicationBackUpServiceImpl
     @Autowired
     private FlinkSqlService flinkSqlService;
 
-    @Autowired
-    private FsOperator fsOperator;
-
     private ExecutorService executorService = new ThreadPoolExecutor(
             Runtime.getRuntime().availableProcessors() * 2,
             200,
@@ -100,6 +98,10 @@ public class ApplicationBackUpServiceImpl
     @Override
     @Transactional(rollbackFor = {Exception.class})
     public void rollback(ApplicationBackUp backParam) {
+        Application application = applicationService.getById(backParam.getAppId());
+        assert application != null;
+
+        FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
         /**
          * 备份文件不存在
          */
@@ -111,7 +113,6 @@ public class ApplicationBackUpServiceImpl
                 FlinkTrackingTask.refreshTracking(backParam.getAppId(), () -> {
                     // 备份文件存在则执行回滚
                     // 1) 在回滚时判断当前生效的项目是否需要备份.如需要则先执行备份...
-                    Application application = applicationService.getById(backParam.getAppId());
                     if (backParam.isBackup()) {
                         application.setBackUpDescription(backParam.getDescription());
                         backup(application);
@@ -177,15 +178,16 @@ public class ApplicationBackUpServiceImpl
         ApplicationBackUp backup = baseMapper.getLastBackup(application.getId());
         assert backup != null;
         String path = backup.getPath();
+        FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
         fsOperator.move(path, ConfigConst.APP_WORKSPACE());
         removeById(backup.getId());
     }
 
     @Override
-    public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
-        fsOperator.delete(
-            ConfigConst.APP_BACKUPS().concat("/").concat(appId.toString())
+    public void removeApp(Application application) {
+        baseMapper.removeApp(application.getId());
+        FsOperatorGetter.get(application.getStorageType()).delete(
+            ConfigConst.APP_BACKUPS().concat("/").concat(application.getId().toString())
         );
     }
 
@@ -193,6 +195,7 @@ public class ApplicationBackUpServiceImpl
     public void rollbackFlinkSql(Application application, FlinkSql sql) {
         ApplicationBackUp backUp = getFlinkSqlBackup(application.getId(), sql.getId());
         assert backUp != null;
+        FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
         if (!fsOperator.exists(backUp.getPath())) {
             return;
         }
@@ -232,8 +235,10 @@ public class ApplicationBackUpServiceImpl
     @Override
     public Boolean delete(Long id) throws ServiceException {
         ApplicationBackUp backUp = getById(id);
+        assert backUp != null;
+        Application application = applicationService.getById(backUp.getAppId());
         try {
-            fsOperator.delete(backUp.getPath());
+            FsOperatorGetter.get(application.getStorageType()).delete(backUp.getPath());
             removeById(id);
             return true;
         } catch (Exception e) {
@@ -246,6 +251,7 @@ public class ApplicationBackUpServiceImpl
     public void backup(Application application) {
         //1) 基础的配置文件备份
         File appHome = application.getAppHome();
+        FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
         if (fsOperator.exists(appHome.getPath())) {
             // 3) 需要备份的做备份,移动文件到备份目录...
             ApplicationConfig config = configService.getEffective(application.getId());
