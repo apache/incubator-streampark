@@ -1113,25 +1113,4 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
     }
 
-    private void checkFlinkEnv() {
-        String profiles = context.getEnvironment().getActiveProfiles()[0];
-        if (profiles.equals(PROD_ENV_NAME)) {
-            String flinkLocalHome = settingService.getEffectiveFlinkHome();
-            if (flinkLocalHome == null) {
-                throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
-            }
-            String appFlink = ConfigConst.APP_FLINK();
-            if (!fsOperator.exists(appFlink)) {
-                log.info("mkdir {} starting ...", appFlink);
-                fsOperator.mkdirs(appFlink);
-            }
-            String flinkName = new File(flinkLocalHome).getName();
-            String flinkHome = appFlink.concat("/").concat(flinkName);
-            if (!fsOperator.exists(flinkHome)) {
-                log.info("{} is not exists,upload beginning....", flinkHome);
-                fsOperator.upload(flinkLocalHome, flinkHome, false, false);
-            }
-        }
-    }
-
 }
