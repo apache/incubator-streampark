@@ -313,6 +313,17 @@ object ConfigConst {
    */
   lazy val APP_JARS = s"$WORKSPACE/jars"
 
+  /**
+   * dirpath of the maven local repository with built-in compilation process
+   */
+  lazy val MAVEN_LOCAL_DIR = s"$WORKSPACE/mvnrepo"
+
+  /**
+   * maven repository used for built-in compilation
+   */
+  val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
+
+
   val LOGO =
     """
       |

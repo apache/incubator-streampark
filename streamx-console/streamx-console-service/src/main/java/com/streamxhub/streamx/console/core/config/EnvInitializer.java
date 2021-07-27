@@ -21,23 +21,25 @@
 
 package com.streamxhub.streamx.console.core.config;
 
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
+
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.FsOperatorGetter;
+import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.SettingService;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-
 import java.io.File;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
 
 /**
  * @author benjobs
@@ -62,7 +64,7 @@ public class EnvInitializer {
             FsOperator fsOperator = FsOperatorGetter.get(storageType);
 
             String appUploads = ConfigConst.APP_UPLOADS();
-            if (!fsOperator.exists(appUploads)) {
+            if (!HdfsUtils.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }
@@ -126,6 +128,11 @@ public class EnvInitializer {
                     log.info("load shims:{} to {}", file.getName(), shimsPath);
                     fsOperator.upload(file.getAbsolutePath(), shimsPath);
                 }
+            }
+            // create maven local repository dir
+            String localMavnRepo = ConfigConst.MAVEN_LOCAL_DIR();
+            if (FsOperatorGetter.get(LFS).exists(localMavnRepo)){
+                FsOperatorGetter.get(LFS).mkdirs(localMavnRepo);
             }
             initialized.put(storageType, Boolean.TRUE);
         }

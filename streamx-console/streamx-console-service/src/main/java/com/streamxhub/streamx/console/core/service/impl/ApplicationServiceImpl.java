@@ -316,10 +316,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //以下涉及到hdfs文件的删除
 
             //5) 删除 backup
-            backUpService.removeApp(app.getId());
+            backUpService.removeApp(app);
 
             //6) 删除savepoint
-            savePointService.removeApp(app.getId());
+            savePointService.removeApp(app);
 
             //7) 删除 app
             removeApp(app.getId(),app.getStorageType());
@@ -986,14 +986,18 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //2) appConfig
             appConf = applicationConfig == null ? null : String.format("yaml://%s", applicationConfig.getContent());
             assert executionMode != null;
-            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
-                //3) plugin
-                String pluginPath = ConfigConst.APP_PLUGINS();
-                flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
-            } else if (executionMode.equals(ExecutionMode.YARN_PRE_JOB)) {
-                flinkUserJar = sqlDistJar;
-            } else {
-                throw new UnsupportedOperationException("Unsupported..." + executionMode);
+            //3) plugin
+            switch (executionMode) {
+                case YARN_PRE_JOB:
+                    flinkUserJar = sqlDistJar;
+                    break;
+                case YARN_APPLICATION:
+                case KUBERNETES_NATIVE_SESSION:
+                    String pluginPath = ConfigConst.APP_PLUGINS();
+                    flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
+                    break;
+                default:
+                    throw new UnsupportedOperationException("Unsupported..." + executionMode);
             }
         } else {
             throw new UnsupportedOperationException("Unsupported...");
