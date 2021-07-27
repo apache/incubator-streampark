@@ -30,7 +30,9 @@ import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -39,6 +41,7 @@ import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
+import com.streamxhub.streamx.console.core.config.EnvInitializer;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.entity.*;
 import com.streamxhub.streamx.console.core.enums.*;
@@ -117,12 +120,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     private ServerComponent serverComponent;
 
     @Autowired
-    private ApplicationContext context;
-
-    @Autowired
-    private FsOperator fsOperator;
-
-    private String PROD_ENV_NAME = "prod";
+    private EnvInitializer envInitializer;
 
     private final Map<Long, Long> tailOutMap = new ConcurrentHashMap<>();
 
@@ -217,9 +215,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean upload(MultipartFile file) throws IOException {
+    public boolean upload(MultipartFile file, StorageType storageType) throws IOException {
         String APP_UPLOADS = ConfigConst.APP_UPLOADS();
         String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
+        FsOperator fsOperator = FsOperatorGetter.get(storageType);
         //1)检查文件是否存在,md5是否一致.
         if (fsOperator.exists(uploadFile)) {
             String md5 = DigestUtils.md5Hex(file.getInputStream());
@@ -274,7 +273,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
 
         //1) 将已经发布到workspace的文件删除
-        fsOperator.delete(application.getAppHome().getAbsolutePath());
+        FsOperatorGetter.get(application.getStorageType()).delete(application.getAppHome().getAbsolutePath());
 
         //2) 将backup里的文件回滚到workspace
         backUpService.revoke(application);
@@ -323,7 +322,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             savePointService.removeApp(app.getId());
 
             //7) 删除 app
-            removeApp(app.getId());
+            removeApp(app.getId(),app.getStorageType());
 
             FlinkTrackingTask.stopTracking(app.getId());
 
@@ -343,16 +342,17 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public boolean checkStart(Application app) {
         try {
-            checkFlinkEnv();
+            envInitializer.checkFlinkEnv(app.getStorageType());
+            envInitializer.storageInitialize(app.getStorageType());
             return true;
         } catch (Throwable ignored) {
             return false;
         }
     }
 
-    private void removeApp(Long appId) {
+    private void removeApp(Long appId,StorageType storageType) {
         removeById(appId);
-        fsOperator.delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
+        FsOperatorGetter.get(storageType).delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
     }
 
     @Override
@@ -606,6 +606,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             }
                             // 3) deploying...
                             File appHome = application.getAppHome();
+                            FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
                             fsOperator.delete(appHome.getPath());
                             File localJobHome = new File(application.getLocalAppBase(), application.getModule());
                             fsOperator.upload(localJobHome.getAbsolutePath(), ConfigConst.APP_WORKSPACE());
@@ -752,6 +753,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // 3) deploying...
             File appHome = application.getAppHome();
+            FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
             fsOperator.delete(appHome.getPath());
 
             //3) upload jar by pomJar
@@ -894,7 +896,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
     public boolean start(Application appParam, boolean auto) throws Exception {
-        // todo refactor all flink params
 
         final Application application = getById(appParam.getId());
         //手动启动的,将reStart清空
@@ -931,7 +932,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         if (application.isCustomCodeJob()) {
             assert executionMode != null;
-            if (executionMode.equals(ExecutionMode.APPLICATION)) {
+            if (executionMode.equals(ExecutionMode.YARN_APPLICATION)) {
                 switch (application.getApplicationType()) {
                     case STREAMX_FLINK:
                         String format = applicationConfig.getFormat() == 1 ? "yaml" : "prop";
@@ -990,7 +991,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 case YARN_PRE_JOB:
                     flinkUserJar = sqlDistJar;
                     break;
-                case APPLICATION:
+                case YARN_APPLICATION:
                 case KUBERNETES_NATIVE_SESSION:
                     String pluginPath = ConfigConst.APP_PLUGINS();
                     flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);

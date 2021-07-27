@@ -21,20 +21,42 @@
 package com.streamxhub.streamx.common.enums;
 
 
+import java.io.Serializable;
+
 /**
  * @author benjobs
  */
 
-public enum ExecutionMode {
+public enum ExecutionMode implements Serializable {
 
-    LOCAL(0, "remote"),
+    /**
+     * Local mode
+     */
+    LOCAL(0, "local"),
+    /**
+     * remote
+     */
     REMOTE(1, "remote"),
+    /**
+     * yarn-pre-job mode
+     */
     YARN_PRE_JOB(2, "yarn-pre-job"),
+    /**
+     * yarn session
+     */
     YARN_SESSION(3, "yarn-session"),
-    APPLICATION(4, "yarn-application"),
+    /**
+     * yarn application
+     */
+    YARN_APPLICATION(4, "yarn-application"),
+    /**
+     * kubernetes session
+     */
     KUBERNETES_NATIVE_SESSION(5, "kubernetes-session"),
+    /**
+     * kubernetes application
+     */
     KUBERNETES_NATIVE_APPLICATION(6,"kubernetes-application");
-
 
     private Integer mode;
     private String name;

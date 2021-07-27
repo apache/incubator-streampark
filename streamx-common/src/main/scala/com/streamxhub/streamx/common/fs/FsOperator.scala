@@ -21,6 +21,35 @@
 
 package com.streamxhub.streamx.common.fs
 
+import com.streamxhub.streamx.common.enums.StorageType
+
+/**
+ * just for java.
+ * @author benjobs
+ */
+object FsOperatorGetter {
+  /**
+   * specify the file system type
+   */
+  def get(storageType: StorageType): FsOperator = FsOperator.of(storageType)
+
+}
+
+object FsOperator {
+  /**
+   * specify the file system type
+   */
+  def of(storageType: StorageType): FsOperator = {
+    storageType match {
+      case StorageType.HDFS => HdfsOperator
+      case StorageType.LFS => LfsOperator
+      case _ => throw new UnsupportedOperationException(s"Unsupported storageType:$storageType")
+    }
+  }
+
+}
+
+
 trait FsOperator {
 
   def exists(path: String): Boolean
@@ -29,11 +58,11 @@ trait FsOperator {
 
   def delete(path: String): Unit
 
-  def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, false, true)
+  def upload(srcPath: String, dstPath: String): Unit = upload(srcPath, dstPath, delSrc = false, overwrite = true)
 
-  def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, false, true)
+  def copy(srcPath: String, dstPath: String): Unit = copy(srcPath, dstPath, delSrc = false, overwrite = true)
 
-  def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath, false, true)
+  def copyDir(srcPath: String, dstPath: String): Unit = copyDir(srcPath, dstPath, delSrc = false, overwrite = true)
 
   def upload(srcPath: String, dstPath: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit
 
@@ -44,6 +73,4 @@ trait FsOperator {
   def move(srcPath: String, dstPath: String): Unit
 
   def fileMd5(path: String): String
-
-
 }

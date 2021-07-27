@@ -23,13 +23,11 @@ package com.streamxhub.streamx.flink.submit
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.impl._
 
-import java.lang.{Boolean => JavaBool}
-
 object FlinkSubmit {
 
   def submit(submitInfo: SubmitRequest): SubmitResponse = {
     submitInfo.executionMode match {
-      case ExecutionMode.APPLICATION => YarnApplicationSubmit.submit(submitInfo)
+      case ExecutionMode.YARN_APPLICATION => YarnApplicationSubmit.submit(submitInfo)
       case ExecutionMode.YARN_PRE_JOB => YarnPreJobSubmit.submit(submitInfo)
       case ExecutionMode.LOCAL => LocalSubmit.submit(submitInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.submit(submitInfo)
@@ -40,7 +38,7 @@ object FlinkSubmit {
 
   def stop(executionMode: ExecutionMode, stopInfo: StopRequest): StopResponse = {
     executionMode match {
-      case ExecutionMode.APPLICATION | ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION =>
+      case ExecutionMode.YARN_APPLICATION | ExecutionMode.YARN_PRE_JOB | ExecutionMode.YARN_SESSION =>
         YarnPreJobSubmit.stop(stopInfo)
       case ExecutionMode.LOCAL => LocalSubmit.stop(stopInfo)
       case ExecutionMode.KUBERNETES_NATIVE_SESSION => KubernetesNativeSessionSubmit.stop(stopInfo)

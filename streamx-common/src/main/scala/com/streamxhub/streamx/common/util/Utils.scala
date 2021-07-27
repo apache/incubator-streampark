@@ -26,12 +26,11 @@ import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
 import java.util.jar.{JarFile, JarInputStream}
 import java.util.{Properties, UUID, jar, Collection => JavaCollection, Map => JavaMap}
-import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 object Utils {
 
-  private[this] val OS = System.getProperty("os.name").toLowerCase
+  private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
   def notEmpty(elem: Any): Boolean = {
     elem match {
@@ -76,7 +75,7 @@ object Utils {
     new JarInputStream(new BufferedInputStream(new FileInputStream(jarFile))).getManifest
   }
 
-  def copyProperties(original: Properties, target: Properties): Unit = original.foreach(x => target.put(x._1, x._2))
+  def copyProperties(original: Properties, target: Properties): Unit = target.putAll(original)
 
   //获取系统名字
   def getOsName: String = OS

@@ -20,8 +20,6 @@
  */
 package com.streamxhub.streamx.common.conf
 
-import com.streamxhub.streamx.common.enums.StorageType
-
 object ConfigConst {
   /**
    *
@@ -287,21 +285,11 @@ object ConfigConst {
 
   val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
-  val KEY_STREAMX_WORKSPACE_TYPE = "streamx.workspace.type"
-
-  /**
-   * optional value from {@link StorageType}
-   */
-  val STREAMX_WORKSPACE_TYPE_DEFAULT = "lfs"
-
-  lazy val WORKSPACE: String = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
-
-  lazy val WORKSPACE_TYPE: StorageType = StorageType.of(
-    System.getProperties.getProperty(
-      KEY_STREAMX_WORKSPACE_TYPE,
-      STREAMX_WORKSPACE_TYPE_DEFAULT
-    )
-  )
+  lazy val WORKSPACE: String = {
+    val workspace = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
+    require(!workspace.startsWith("hdfs://"))
+    workspace
+  }
 
   lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
 

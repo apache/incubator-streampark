@@ -22,6 +22,23 @@
           type="info" />
       </a-form-item>
 
+      <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
+          <a-select-option
+            v-for="(o,index) in executionMode"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
       <template v-if="app.jobType === 2">
 
         <a-form-item
@@ -374,23 +391,6 @@
             :key="`resolve_order_${index}`"
             :value="o.order">
             {{ o.name }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
-          <a-select-option
-            v-for="(o,index) in executionMode"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -908,12 +908,13 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
-        { mode: 'yarn-session', value: 3, disabled: true },
-        { mode: 'kubernetes', value: 5, disabled: true }
+        { mode: 'yarn pre-job', value: 2, disabled: true },
+        { mode: 'yarn session', value: 3, disabled: true },
+        { mode: 'yarn application', value: 4, disabled: false },
+        { mode: 'kubernetes-session', value: 5, disabled: false },
+        { mode: 'kubernetes-application', value: 6, disabled: false }
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
@@ -1302,16 +1303,25 @@ export default {
     },
 
     handleCustomRequest(data) {
-      const formData = new FormData()
-      formData.append('file', data.file)
-      upload(formData).then((response) => {
-        this.loading = false
-        this.controller.dependency.jar.set(data.file.name, data.file.name)
-        this.handleUpdateDependency()
-      }).catch((error) => {
-        this.$message.error(error.message)
-        this.loading = false
-      })
+      const executionMode =  this.form.getFieldValue('executionMode') || null
+      if (executionMode !== null) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        upload(formData).then((response) => {
+          this.loading = false
+          this.controller.dependency.jar.set(data.file.name, data.file.name)
+          this.handleUpdateDependency()
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+      } else {
+        this.$swal.fire(
+            'Failed',
+            'Please select "execution Mode" first',
+            'error'
+        )
+      }
     },
 
     handleRemovePom(pom) {
