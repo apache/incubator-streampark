@@ -25,9 +25,9 @@ import com.streamxhub.streamx.common.conf.ConfigConst.WORKSPACE_TYPE
 import com.streamxhub.streamx.common.enums.StorageType
 
 /**
- * Unfilled file system operator
+ * Unified file system operator
  */
-object UnfilledFsOperator {
+object UnifiedFsOperator {
 
   /**
    * auto choose the file system type
