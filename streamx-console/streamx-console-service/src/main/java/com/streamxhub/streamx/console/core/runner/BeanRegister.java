@@ -23,7 +23,7 @@ package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.UnifiledFsOperator;
+import com.streamxhub.streamx.common.fs.UnifiedFsOperator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +44,7 @@ public class BeanRegister {
             ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(),
             context.getEnvironment().getProperty(ConfigConst.KEY_STREAMX_WORKSPACE_TYPE(), ConfigConst.STREAMX_WORKSPACE_TYPE_DEFAULT())
         );
-        return UnifiledFsOperator.auto();
+        return UnifiedFsOperator.auto();
     }
 
 
