@@ -131,7 +131,6 @@ object MavenTool extends Logger {
       .map(art => new ArtifactDescriptorRequest(art, MavenRetriever.remoteRepos, null))
       .map(artReq => repoSystem.readArtifactDescriptor(session, artReq))
       .flatMap(artRes => artRes.getDependencies.asScala)
-      .filter(dependency => dependency.isOptional)
       .filter(dependency => "compile".equals(dependency.getScope))
       .map(dependency => dependency.getArtifact)
     logInfo(s"resolved dependencies: ${resolvedArtifacts.mkString}")
