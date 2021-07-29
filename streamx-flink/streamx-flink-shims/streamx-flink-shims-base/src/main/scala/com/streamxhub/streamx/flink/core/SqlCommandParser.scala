@@ -24,14 +24,11 @@ import com.streamxhub.streamx.common.enums.SqlErrorType
 import com.streamxhub.streamx.common.util.Logger
 import enumeratum.EnumEntry
 
-import java.util.Scanner
 import java.util.regex.{Matcher, Pattern}
 import scala.collection.immutable
 import scala.collection.mutable.ArrayBuffer
 
 object SqlCommandParser extends Logger {
-
-  private[this] val WITH_REGEXP = Pattern.compile("WITH\\s*\\((.+|\\n+|\\r)*\\)", Pattern.CASE_INSENSITIVE)
 
   def parseSQL(sql: String): List[SqlCommandCall] = {
     val sqlEmptyError = SqlError(SqlErrorType.VERIFY_FAILED, "sql is empty", sql).toString
@@ -70,34 +67,7 @@ object SqlCommandParser extends Logger {
       val matcher = sqlCommand.matcher
       val groups = new Array[String](matcher.groupCount)
       for (i <- groups.indices) {
-        groups(i) = {
-          val segment = matcher.group(i + 1)
-          val withMatcher = WITH_REGEXP.matcher(segment)
-          if (!withMatcher.find()) segment else {
-            val withSegment = withMatcher.group()
-            val scanner = new Scanner(withSegment)
-            val buffer = new StringBuffer()
-            while (scanner.hasNextLine) {
-              //注释
-              val line = scanner.nextLine().replaceAll("--(.*)$|\\/*(.*)*\\/$", "").trim
-              val propRegexp = "\\s*(.*)\\s*=(.*)(,|)\\s*".r
-              propRegexp.findFirstIn(line) match {
-                case Some(_) =>
-                  var newLine = line
-                    .replaceAll("^'|^", "'")
-                    .replaceAll("('|)\\s*=\\s*('|)", "' = '")
-                    .replaceAll("('|),$", "',")
-                  if (!line.endsWith(",")) {
-                    newLine = newLine.replaceFirst("('|)\\s*$", "'")
-                  }
-                  buffer.append(newLine).append("\n")
-                case _ =>
-                  buffer.append(line).append("\n")
-              }
-            }
-            segment.replace(withSegment, buffer.toString.trim)
-          }
-        }
+        groups(i) = matcher.group(i + 1)
       }
       sqlCommand.converter(groups).map(x => SqlCommandCall(sqlCommand, x))
     }

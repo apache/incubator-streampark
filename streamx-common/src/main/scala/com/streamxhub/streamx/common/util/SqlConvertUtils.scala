@@ -106,11 +106,9 @@ object SqlConvertUtils extends Logger {
    */
   def formatSql(sql: String): String = {
 
-    val BODY_REGEXP = "\\((.+|\\n+|\\r)*\\)".r
-
     val LENGTH_REGEXP = "(.*?)\\s*\\([^\\\\)|^\\n]+,$".r
 
-    val COMMENT_REGEXP = Pattern.compile("(comment)\\s+('|\")", Pattern.CASE_INSENSITIVE)
+    val COMMENT_REGEXP = Pattern.compile("(comment)\\s+(['\"])", Pattern.CASE_INSENSITIVE)
 
     @tailrec def commentJoin(map: util.Map[Integer, String],
                              index: Integer,
@@ -122,7 +120,7 @@ object SqlConvertUtils extends Logger {
           val s = matcher.group(2)
           val regexp = s"\\$s(,|)$$".r
           val cleaned = segment
-            .replaceFirst("(?i)(comment)\\s+('|\")", "")
+            .replaceFirst("(?i)(comment)\\s+(['\"])", "")
             .replace(s"\\$s", "")
           regexp.findFirstIn(cleaned) match {
             case Some(_) => index -> segment
@@ -145,43 +143,39 @@ object SqlConvertUtils extends Logger {
       }
     }
 
+    val body = sql.substring(sql.indexOf("("),sql.lastIndexOf(")") + 1)
+      .replaceAll("\r\n", "")
+      .replaceFirst("\\(", "(\n")
+      .replaceFirst("\\)$", "\n)")
+      .replaceAll(",", ",\n")
 
-    BODY_REGEXP.findFirstIn(sql) match {
-      case None => null
-      case Some(x) =>
-        val body = x
-          .replaceAll("\r\n", "")
-          .replaceFirst("\\(", "(\n")
-          .replaceFirst("\\)$", "\n)")
-          .replaceAll(",", ",\n")
-
-        val scanner = new Scanner(body)
-        val map = new util.HashMap[Integer, String]()
-        while (scanner.hasNextLine) {
-          map.put(map.size(), scanner.nextLine().trim)
-        }
-        val sqlBuffer = new StringBuffer(sql.substring(0, sql.indexOf("(")))
-        var skipNo: Int = -1
-        map.foreach(a => {
-          if (a._1 > skipNo) {
-            val length = lengthJoin(map, a._1, a._2)
-            if (length._1 > a._1) {
-              sqlBuffer.append(length._2).append("\n")
-              skipNo = length._1
-            } else {
-              val comment = commentJoin(map, a._1, a._2)
-              if (comment._1 > a._1) {
-                sqlBuffer.append(comment._2).append("\n")
-                skipNo = comment._1
-              } else {
-                sqlBuffer.append(a._2).append("\n")
-              }
-            }
-          }
-        })
-        scanner.close()
-        sqlBuffer.toString.trim.concat(sql.substring(sql.lastIndexOf(")") + 1))
+    val scanner = new Scanner(body)
+    val map = new util.HashMap[Integer, String]()
+    while (scanner.hasNextLine) {
+      map.put(map.size(), scanner.nextLine().trim)
     }
+    val sqlBuffer = new StringBuffer(sql.substring(0, sql.indexOf("(")))
+    var skipNo: Int = -1
+    map.foreach(a => {
+      if (a._1 > skipNo) {
+        val length = lengthJoin(map, a._1, a._2)
+        if (length._1 > a._1) {
+          sqlBuffer.append(length._2).append("\n")
+          skipNo = length._1
+        } else {
+          val comment = commentJoin(map, a._1, a._2)
+          if (comment._1 > a._1) {
+            sqlBuffer.append(comment._2).append("\n")
+            skipNo = comment._1
+          } else {
+            sqlBuffer.append(a._2).append("\n")
+          }
+        }
+      }
+    })
+    scanner.close()
+    sqlBuffer.toString.trim.concat(sql.substring(sql.lastIndexOf(")") + 1))
+
   }
 
   /**
@@ -198,7 +192,6 @@ object SqlConvertUtils extends Logger {
                  postfix: String = null): String = {
 
     val formattedSql = formatSql(sql)
-    logDebug(s"formatted Sql:\n$formattedSql")
     val scanner = new Scanner(formattedSql)
     val sqlBuffer = new StringBuffer()
     while (scanner.hasNextLine) {
@@ -256,5 +249,6 @@ object SqlConvertUtils extends Logger {
   )
 
   def mysqlToClickhouse(sql: String, postfix: String): String = convertSql(sql, toClickhouseDataType, postfix = postfix)
+
 
 }
