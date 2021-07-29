@@ -81,7 +81,7 @@ object MavenTool extends Logger {
       req.setRelocators(Lists.newArrayList())
       req
     }
-    val shader = new DefaultShader();
+    val shader = new DefaultShader()
     shader.enableLogging(plexusLog)
     shader.shade(shadeRequest)
     logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
