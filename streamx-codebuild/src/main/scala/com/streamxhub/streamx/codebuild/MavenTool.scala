@@ -130,9 +130,9 @@ object MavenTool extends Logger {
     val resolvedArtifacts = artifacts
       .map(art => new ArtifactDescriptorRequest(art, MavenRetriever.remoteRepos, null))
       .map(artReq => repoSystem.readArtifactDescriptor(session, artReq))
-      .flatMap(artRes => artRes.getDependencies.asScala)
-      .filter(dependency => "compile".equals(dependency.getScope))
-      .map(dependency => dependency.getArtifact)
+      .flatMap(_.getDependencies.asScala)
+      .filter(_.getScope == "compile")
+      .map(_.getArtifact)
     logInfo(s"resolved dependencies: ${resolvedArtifacts.mkString}")
 
     // download artifacts
@@ -140,7 +140,7 @@ object MavenTool extends Logger {
     repoSystem
       .resolveArtifacts(session, artReqs)
       .asScala
-      .map(artRes => artRes.getArtifact.getFile)
+      .map(_.getArtifact.getFile)
       .toArray
   }
 
