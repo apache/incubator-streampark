@@ -21,17 +21,20 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
+import com.streamxhub.streamx.codebuild.MavenTool
+import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import org.apache.commons.lang.StringUtils
+import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import java.io.File
 import scala.collection.JavaConverters._
 
 /**
@@ -41,19 +44,26 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
   //noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
-
+    val jobID = {
+      if (StringUtils.isBlank(submitRequest.jobID)) new JobID()
+      else JobID.fromHexString(submitRequest.jobID)
+    }
+    // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+    // build fat-jar
+    var flinkLibs = extractProvidedLibs(submitRequest)
+    flinkLibs :+= submitRequest.flinkUserJar
+    val fatJarPath = s"$APP_WORKSPACE/${jobID.toHexString}/flink-job.jar"
+    val fatJar = MavenTool.buildFatJar(flinkLibs, fatJarPath)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[String] = null
-
     try {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
-
       // build JobGraph
       packageProgram = PackagedProgram.newBuilder()
-        .setJarFile(new File(submitRequest.flinkUserJar))
+        .setJarFile(fatJar)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
         .setArguments(flinkConfig
           .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
@@ -65,6 +75,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
         packageProgram,
         flinkConfig,
         flinkConfig.getInteger(CoreOptions.DEFAULT_PARALLELISM),
+        jobID,
         false)
 
       // retrieve client and submit JobGraph

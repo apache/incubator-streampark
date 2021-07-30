@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst.KEY_FLINK_PARALLELISM
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode}
+import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, StorageType}
+import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
 import org.apache.commons.collections.MapUtils
@@ -35,12 +36,14 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
+import java.io.File
 import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions.mapAsScalaMap
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
+import scala.language.postfixOps
 import scala.util.Try
 
 /**
@@ -114,7 +117,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     getK8sClusterDescriptorAndSpecification(flinkConfig)._1
   }
 
-
   /**
    * extract all necessary flink configuration from submitRequest
    */
@@ -157,7 +159,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     if (submitRequest.property.containsKey(KEY_FLINK_PARALLELISM())) {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
         Integer.valueOf(submitRequest.property.get(KEY_FLINK_PARALLELISM()).toString))
-    } else{
+    } else {
       flinkConfig.set(CoreOptions.DEFAULT_PARALLELISM,
         CoreOptions.DEFAULT_PARALLELISM.defaultValue())
     }
@@ -212,5 +214,29 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
     programArgs
   }
+
+  protected def extractProvidedLibs(submitRequest: SubmitRequest): Array[String] = {
+    val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
+    val providedLibs = ArrayBuffer(
+      flinkLib,
+      APP_JARS,
+      APP_PLUGINS
+    )
+    val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
+    version match {
+      case Array(1, 13, _) =>
+        providedLibs += s"$APP_SHIMS/flink-1.13"
+      case Array(1, 11 | 12, _) =>
+        providedLibs += s"$APP_SHIMS/flink-1.12"
+      case _ =>
+        throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
+    }
+    val jobLib = s"${APP_WORKSPACE}/${submitRequest.jobID}/lib"
+    if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
+      providedLibs += jobLib
+    }
+    providedLibs.toArray
+  }
+
 
 }
