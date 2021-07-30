@@ -76,6 +76,7 @@
         <hbase.version>2.1.10</hbase.version>
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
+        <scalatest.version>3.2.9</scalatest.version>
         <zkclient.version>0.11</zkclient.version>
         <curator.version>4.2.0</curator.version>
         <redis.version>3.3.0</redis.version>
