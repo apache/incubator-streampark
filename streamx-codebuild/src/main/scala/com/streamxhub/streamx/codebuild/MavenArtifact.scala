@@ -32,11 +32,14 @@ object MavenArtifact {
    * build from coords
    */
   def of(coords: String): MavenArtifact = {
-    val m = p.matcher(coords)
-    if (!m.matches) throw new IllegalArgumentException("Bad artifact coordinates " + coords + ", expected format is <groupId>:<artifactId>:<version>")
-    val groupId = m.group(1)
-    val artifactId = m.group(2)
-    val version = m.group(3)
-    new MavenArtifact(groupId, artifactId, version)
+    p.matcher(coords) match {
+      case m if m.matches() =>
+        val groupId = m.group(1)
+        val artifactId = m.group(2)
+        val version = m.group(3)
+        MavenArtifact(groupId, artifactId, version)
+      case _ =>
+        throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
+    }
   }
 }
