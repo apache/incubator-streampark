@@ -56,16 +56,17 @@ object DockerTool {
     }
     val dockerfile = template.writeDockerfile(projectPath)
     // build and push docker image
-    val tagName = buildImage(projectDir, dockerfile, tag)
+    var tagName = buildImage(projectDir, dockerfile, tag)
     if (push) {
-      pushImage(tagName)
+      tagName = pushImage(tagName)
     }
     tagName
   }
 
   /**
    * build docker image.
-   * this sync call api.
+   * this is sync call api.
+   *
    * @param baseDir    base directory
    * @param dockerfile dockerfile
    * @param tag        image tag
@@ -75,37 +76,36 @@ object DockerTool {
   def buildImage(baseDir: File, dockerfile: File, tag: String): String = {
     val tagName = compileTag(tag)
     tryWithResource(DockerRetriver.newDockerClient()) {
-      client =>
+      client => {
         // build docker image
         val buildImageCmd = client.buildImageCmd()
           .withBaseDirectory(baseDir)
           .withDockerfile(dockerfile)
           .withTags(Sets.newHashSet(tagName))
-        tryWithResource(buildImageCmd.start()) {
-          result => result.awaitCompletion()
-        }
+        buildImageCmd.start().awaitCompletion()
+      }
     }
     tagName
   }
 
   /**
    * push image to remote repository.
-   * this sync call api.
+   * this is sync call api.
+   * @param tag tag name
+   * @return actually image tag
    */
-  def pushImage(tag: String): Unit = {
-    val tageName = compileTag(tag)
+  def pushImage(tag: String): String = {
+    val tagName = compileTag(tag)
     tryWithResource(DockerRetriver.newDockerClient()) {
       client => {
-        val pushCmd: PushImageCmd = client.pushImageCmd(tageName)
+        val pushCmd: PushImageCmd = client.pushImageCmd(tagName)
           .withAuthConfig(DockerRetriver.remoteImageRegisterAuthConfig)
-          .withTag(tageName)
-        tryWithResource(pushCmd.start()) {
-          result => result.awaitCompletion()
-        }
+          .withTag(tagName)
+        pushCmd.start().awaitStarted()
       }
     }
+    tagName
   }
-
 
   /**
    * compile image tag with namespace and remote address.
@@ -116,7 +116,7 @@ object DockerTool {
       else s"$IMAGE_NAMESPACE/$tag"
     }
     if (K8S_IMAGE_REGISTER_ADDRESS.nonEmpty && !tagName.startsWith(K8S_IMAGE_REGISTER_ADDRESS)) {
-      tagName =  s"$K8S_IMAGE_REGISTER_ADDRESS/$tagName"
+      tagName = s"$K8S_IMAGE_REGISTER_ADDRESS/$tagName"
     }
     tagName
   }
