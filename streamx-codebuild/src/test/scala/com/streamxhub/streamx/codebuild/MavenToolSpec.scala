@@ -33,7 +33,7 @@ import scala.language.postfixOps
 
 class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
-  val outputDir = "MavenToolTest-output/"
+  val outputDir = "MavenToolSpec-output/"
   val preWorkSpaceVal: String = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE)
 
   override protected def beforeAll(): Unit = {

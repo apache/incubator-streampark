@@ -118,6 +118,7 @@ object DockerTool {
     if (K8S_IMAGE_REGISTER_ADDRESS.nonEmpty && !tagName.startsWith(K8S_IMAGE_REGISTER_ADDRESS)) {
       tagName =  s"$K8S_IMAGE_REGISTER_ADDRESS/$tagName"
     }
+    tagName
   }
 
 
