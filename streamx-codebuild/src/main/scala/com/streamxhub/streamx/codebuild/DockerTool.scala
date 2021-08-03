@@ -111,12 +111,12 @@ object DockerTool {
    * compile image tag with namespace and remote address.
    */
   private[codebuild] def compileTag(tag: String): String = {
-    var tagName = {
+    val tagName = {
       if (tag.contains("/")) tag
       else s"$IMAGE_NAMESPACE/$tag"
     }
     if (K8S_IMAGE_REGISTER_ADDRESS.nonEmpty && !tagName.startsWith(K8S_IMAGE_REGISTER_ADDRESS)) {
-      tagName =  s"$K8S_IMAGE_REGISTER_ADDRESS/$tagName"
+      s"$K8S_IMAGE_REGISTER_ADDRESS/$tagName"
     }
   }
 
