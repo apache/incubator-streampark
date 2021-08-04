@@ -27,7 +27,9 @@ package com.streamxhub.streamx.common.conf
 object K8sConfigConst {
 
   /**
-   * docker image regoster address for remote k8s cluster
+   * docker image regoster address for remote k8s cluster.
+   * when this configuration item is empty, it means that
+   * the dockerhub public repository is used.
    */
   lazy val KEY_K8S_IMAGE_REGISTER_ADDRESS = "k8s.image.register.address"
   lazy val K8S_IMAGE_REGISTER_ADDRESS: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
@@ -36,13 +38,13 @@ object K8sConfigConst {
    * login username of docker image regoster for remote k8s cluster
    */
   lazy val KEY_K8S_IMAGE_REGISTER_USERNAME = "k8s.image.register.username"
-  lazy val K8S_IMAGE_REGISTER_USERNAME: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
+  lazy val K8S_IMAGE_REGISTER_USERNAME: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_USERNAME, "")
 
   /**
    * login password of docker image regoster for remote k8s cluster
    */
   lazy val KEY_K8S_IMAGE_REGISTER_PASSWORD = "k8s.image.register.password"
-  lazy val K8S_IMAGE_REGISTER_PASSWORD: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
+  lazy val K8S_IMAGE_REGISTER_PASSWORD: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_PASSWORD, "")
 
   /**
    * namespace for docker image used in docker build env and image register

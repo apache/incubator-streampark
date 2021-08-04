@@ -384,4 +384,6 @@ $RECYCLE.BIN/
 # Windows shortcuts
 *.lnk
 
-MavenToolTest-output/
+# unit test temporary output directory
+*Spec-output/
+
