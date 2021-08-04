@@ -52,15 +52,17 @@ object DockerTool {
     }
     val flinkFatJar = new File(template.flinkFatjarPath)
     if (flinkFatJar.getParentFile.getAbsolutePath != projectDir.getAbsolutePath) {
-      FileUtils.copyFile(flinkFatJar, new File(projectDir.getAbsolutePath.concat("/").concat(flinkFatJar.getName)))
+      FileUtils.copyFile(flinkFatJar, new File(s"${projectDir.getAbsolutePath}/${flinkFatJar.getName}"))
     }
     val dockerfile = template.writeDockerfile(projectPath)
     // build and push docker image
-    var tagName = buildImage(projectDir, dockerfile, tag)
+    val tagName = buildImage(projectDir, dockerfile, tag)
     if (push) {
-      tagName = pushImage(tagName)
+      pushImage(tagName)
+    } else {
+      tagName
     }
-    tagName
+    
   }
 
   /**
