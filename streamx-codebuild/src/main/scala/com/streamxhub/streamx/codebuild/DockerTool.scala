@@ -52,7 +52,7 @@ object DockerTool {
     }
     val flinkFatJar = new File(template.flinkFatjarPath)
     if (flinkFatJar.getParentFile.getAbsolutePath != projectDir.getAbsolutePath) {
-      FileUtils.copyFile(flinkFatJar, projectDir)
+      FileUtils.copyFile(flinkFatJar, new File(projectDir.getAbsolutePath.concat("/").concat(flinkFatJar.getName)))
     }
     val dockerfile = template.writeDockerfile(projectPath)
     // build and push docker image
@@ -79,6 +79,7 @@ object DockerTool {
       client => {
         // build docker image
         val buildImageCmd = client.buildImageCmd()
+          .withPull(true)
           .withBaseDirectory(baseDir)
           .withDockerfile(dockerfile)
           .withTags(Sets.newHashSet(tagName))
@@ -91,6 +92,7 @@ object DockerTool {
   /**
    * push image to remote repository.
    * this is sync call api.
+   *
    * @param tag tag name
    * @return actually image tag
    */
@@ -101,7 +103,7 @@ object DockerTool {
         val pushCmd: PushImageCmd = client.pushImageCmd(tagName)
           .withAuthConfig(DockerRetriver.remoteImageRegisterAuthConfig)
           .withTag(tagName)
-        pushCmd.start().awaitStarted()
+        pushCmd.start().awaitCompletion()
       }
     }
     tagName

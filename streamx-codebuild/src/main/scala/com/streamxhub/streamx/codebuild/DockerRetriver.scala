@@ -40,8 +40,7 @@ object DockerRetriver {
    * todo support custom docker configuration parameters in unifined configurations in the future
    */
   lazy val dockerClientConf: DockerClientConfig = {
-    DefaultDockerClientConfig.createDefaultConfigBuilder().
-      build()
+    DefaultDockerClientConfig.createDefaultConfigBuilder().build()
   }
 
   /**
@@ -72,7 +71,6 @@ object DockerRetriver {
    * get new DockerClient instance
    */
   def newDockerClient(): DockerClient = DockerClientImpl.getInstance(dockerClientConf, dockerHttpClient)
-
 
 
 }
