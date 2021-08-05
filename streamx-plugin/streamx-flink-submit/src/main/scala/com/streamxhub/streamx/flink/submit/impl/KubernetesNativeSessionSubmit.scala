@@ -36,6 +36,7 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
  * kubernetes native session mode submit
@@ -44,6 +45,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
   //noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
+    // require parameters
+    assert(Try(submitRequest.clusterId.nonEmpty).getOrElse(false))
+
     val jobID = {
       if (StringUtils.isBlank(submitRequest.jobID)) new JobID()
       else JobID.fromHexString(submitRequest.jobID)
@@ -51,11 +55,13 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // build fat-jar
-    var flinkLibs = extractProvidedLibs(submitRequest)
-    flinkLibs :+= submitRequest.flinkUserJar
-    val fatJarPath = s"$APP_WORKSPACE/${jobID.toHexString}/flink-job.jar"
-    val fatJar = MavenTool.buildFatJar(flinkLibs, fatJarPath)
+    val fatJar = {
+      val flinkLibs = extractProvidedLibs(submitRequest) :+= submitRequest.flinkUserJar
+      val fatJarPath = s"$APP_WORKSPACE/${submitRequest.clusterId}/${jobID.toHexString}/flink-job.jar"
+      MavenTool.buildFatJar(flinkLibs, fatJarPath)
+    }
 
+    // retirve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[String] = null
@@ -89,7 +95,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")
         e.printStackTrace()
-        null
+        throw e
     } finally {
       if (client != null) client.close()
       if (packageProgram != null) packageProgram.close()
