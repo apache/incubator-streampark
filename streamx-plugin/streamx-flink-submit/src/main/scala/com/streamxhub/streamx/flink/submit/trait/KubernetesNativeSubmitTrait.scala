@@ -132,6 +132,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
     safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
     safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
+    safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.flinkBaseImage)
 
     if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)

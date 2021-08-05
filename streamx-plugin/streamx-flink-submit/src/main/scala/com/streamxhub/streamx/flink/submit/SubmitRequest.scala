@@ -54,7 +54,8 @@ case class SubmitRequest(flinkHome: String,
                          dynamicOption: Array[String],
                          args: String,
                          clusterId: String,
-                         @Nullable kubernetesNamespace: String) {
+                         @Nullable kubernetesNamespace: String,
+                         @Nullable flinkBaseImage: String) {
 
   def this(flinkHome: String,
            flinkVersion: String,
@@ -74,7 +75,7 @@ case class SubmitRequest(flinkHome: String,
            args: String,
            clusterId: String) {
     this(flinkHome, flinkVersion, flinkYaml, flinkUserJar, developmentMode, executionMode, resolveOrder, appName, appConf, applicationType,
-      savePoint, flameGraph, option, property, dynamicOption, args, clusterId, KubernetesConfigOptions.NAMESPACE.defaultValue())
+      savePoint, flameGraph, option, property, dynamicOption, args, clusterId, KubernetesConfigOptions.NAMESPACE.defaultValue(), "")
   }
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
