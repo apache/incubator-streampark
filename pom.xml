@@ -17,7 +17,6 @@
         <module>streamx-spark</module>
         <module>streamx-plugin</module>
         <module>streamx-console</module>
-        <module>streamx-codebuild</module>
     </modules>
 
     <url>https://github.com/streamxhub/streamx</url>

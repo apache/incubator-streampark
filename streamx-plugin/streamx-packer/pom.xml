@@ -6,27 +6,28 @@
 
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
-        <artifactId>streamx</artifactId>
+        <artifactId>streamx-plugin</artifactId>
         <version>1.1.1</version>
-        <relativePath>../pom.xml</relativePath>
     </parent>
 
-    <artifactId>streamx-codebuild</artifactId>
-    <name>StreamX : Code Build</name>
+    <artifactId>streamx-packer</artifactId>
+    <name>StreamX : Packer</name>
 
     <properties>
         <eclipse.aether.version>1.1.0</eclipse.aether.version>
         <maven.aether.version>3.3.9</maven.aether.version>
-        <maven.shade.version>3.0.0</maven.shade.version>
+        <maven.shade.version>3.2.4</maven.shade.version>
         <docker.client.version>3.2.11</docker.client.version>
     </properties>
 
     <dependencies>
+
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-common</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest_2.11</artifactId>
@@ -40,26 +41,31 @@
             <artifactId>maven-shade-plugin</artifactId>
             <version>${maven.shade.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-impl</artifactId>
             <version>${eclipse.aether.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-connector-basic</artifactId>
             <version>${eclipse.aether.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-file</artifactId>
             <version>${eclipse.aether.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.eclipse.aether</groupId>
             <artifactId>aether-transport-http</artifactId>
             <version>${eclipse.aether.version}</version>
         </dependency>
+
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>maven-aether-provider</artifactId>
@@ -72,6 +78,7 @@
             <artifactId>docker-java-core</artifactId>
             <version>${docker.client.version}</version>
         </dependency>
+
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-httpclient5</artifactId>

@@ -18,15 +18,15 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
-import com.streamxhub.streamx.codebuild.MavenArtifactSpec.illegalArtifactCoordsCases
+import com.streamxhub.streamx.plugin.packer.MavenArtifactSpec.illegalArtifactCoordsCases
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 
 object MavenArtifactSpec {
 
-  lazy private[codebuild] val illegalArtifactCoordsCases = Array(
+  lazy private[packer] val illegalArtifactCoordsCases = Array(
     ":::",
     "org.apache.flink:flink-table:",
     ":flink-table:1.13.0",

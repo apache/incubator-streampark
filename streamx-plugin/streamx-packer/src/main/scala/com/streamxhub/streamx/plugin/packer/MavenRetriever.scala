@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst.{DEFAULT_MAVEN_REMOTE_URL, MAVEN_LOCAL_DIR}

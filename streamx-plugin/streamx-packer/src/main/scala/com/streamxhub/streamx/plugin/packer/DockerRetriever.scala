@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
 import com.github.dockerjava.api.DockerClient
 import com.github.dockerjava.api.model.AuthConfig
@@ -32,7 +32,7 @@ import java.time.Duration
 /**
  * author: Al-assad
  */
-object DockerRetriver {
+object DockerRetriever {
 
   /**
    * docker config param from system properties,

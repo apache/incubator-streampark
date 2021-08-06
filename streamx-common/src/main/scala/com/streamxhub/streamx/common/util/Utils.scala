@@ -48,7 +48,7 @@ object Utils {
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
-  def require(requirement: Boolean, message: String) {
+  def require(requirement: Boolean, message: String): Unit = {
     if (!requirement)
       throw new IllegalArgumentException(s"requirement failed: $message")
   }

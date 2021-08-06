@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
-import com.streamxhub.streamx.common.conf.K8sConfigConst.{IMAGE_NAMESPACE, K8S_IMAGE_REGISTER_ADDRESS, KEY_K8S_IMAGE_REGISTER_ADDRESS}
+import com.streamxhub.streamx.common.conf.K8sConfigConst._
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers

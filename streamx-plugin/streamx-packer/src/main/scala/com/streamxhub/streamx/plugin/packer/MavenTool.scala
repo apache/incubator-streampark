@@ -18,10 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.{Logger, Utils}
 import org.apache.maven.plugins.shade.{DefaultShader, ShadeRequest}
 import org.codehaus.plexus.logging.console.ConsoleLogger
 import org.codehaus.plexus.logging.{Logger => PlexusLogger}
@@ -32,6 +32,7 @@ import java.io.File
 import java.util
 import javax.annotation.{Nonnull, Nullable}
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 
 /**
@@ -41,35 +42,32 @@ object MavenTool extends Logger {
 
   val plexusLog = new ConsoleLogger(PlexusLogger.LEVEL_INFO, "streamx-maven")
 
-  private val isJarFile = (file: File) => file.isFile && file.getName.endsWith(".jar")
-
+  private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
 
   /**
    * Build fat-jar with custom jar libs
    *
    * @param jarLibs       list of jar lib paths for building fat-jar
-   * @param outfatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
+   * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    * @return File Object of output fat-jar
    */
   @Nonnull
-  def buildFatJar(@Nonnull jarLibs: Array[String], @Nonnull outfatJarPath: String): File = {
+  def buildFatJar(@Nonnull jarLibs: Array[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
-    val uberJar = new File(outfatJarPath)
+    val uberJar = new File(outFatJarPath)
     if (uberJar.isDirectory) {
-      throw new Exception(s"[Streamx-Maven] outfatJarPath(${outfatJarPath}) should be a file.")
+      throw new Exception(s"[Streamx-Maven] outFatJarPath($outFatJarPath) should be a file.")
     }
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
-      .filter(lib => lib.exists())
+      .filter(_.exists)
       .distinct
-      .foreach(lib =>
-        if (isJarFile(lib)) {
-          jarSet.add(lib)
-        } else if (lib.isDirectory) {
-          lib.listFiles.filter(isJarFile).foreach(jar => jarSet.add(jar))
-        }
-      )
+      .foreach {
+        case f if isJarFile(f) => jarSet.add(f)
+        case f if f.isDirectory => f.listFiles.filter(isJarFile).foreach(jarSet.add)
+        case _ =>
+      }
     logInfo(s"start shaded fat-jar: ${jarLibs.mkString}")
     // shade jars
     val shadeRequest = {
@@ -93,19 +91,19 @@ object MavenTool extends Logger {
    *
    * @param jarLibs        list of jar lib paths
    * @param mavenArtifacts collection of maven artifacts
-   * @param outfatJarPath  output paths of fat-jar
+   * @param outFatJarPath  output paths of fat-jar
    * @return File Object of output fat-jar
    */
   @Nonnull
   def buildFatJar(@Nullable jarLibs: Array[String], @Nullable mavenArtifacts: Array[MavenArtifact],
-                  @Nonnull outfatJarPath: String): File = {
+                  @Nonnull outFatJarPath: String): File = {
     val libs = if (jarLibs == null) Array[String]() else jarLibs
     val arts = if (mavenArtifacts == null) Array[MavenArtifact]() else mavenArtifacts
     if (libs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[Streamx-Maven] empty artifacts.")
     }
-    val artFilePaths = resolveArtifacts(arts).map(file => file.getAbsolutePath)
-    buildFatJar(libs ++ artFilePaths, outfatJarPath)
+    val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
+    buildFatJar(libs ++ artFilePaths, outFatJarPath)
   }
 
 

@@ -21,12 +21,12 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.google.common.collect.Lists
-import com.streamxhub.streamx.codebuild.MavenTool
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.plugin.packer.MavenTool
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -56,7 +56,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // build fat-jar
     val fatJar = {
-      val flinkLibs = extractProvidedLibs(submitRequest) :+= submitRequest.flinkUserJar
+      val flinkLibs = extractProvidedLibs(submitRequest) :+ submitRequest.flinkUserJar
       val fatJarPath = s"$APP_WORKSPACE/${submitRequest.clusterId}/${jobID.toHexString}/flink-job.jar"
       MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
