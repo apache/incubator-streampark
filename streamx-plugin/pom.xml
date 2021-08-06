@@ -19,6 +19,7 @@
         <module>streamx-flink-udf</module>
         <module>streamx-flink-submit</module>
         <module>streamx-jvm-profiler</module>
+        <module>streamx-packer</module>
     </modules>
 
 </project>

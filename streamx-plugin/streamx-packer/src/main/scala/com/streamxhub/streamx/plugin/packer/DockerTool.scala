@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
 import com.github.dockerjava.api.command.PushImageCmd
 import com.google.common.collect.Sets
@@ -56,13 +56,10 @@ object DockerTool {
     }
     val dockerfile = template.writeDockerfile(projectPath)
     // build and push docker image
-    val tagName = buildImage(projectDir, dockerfile, tag)
-    if (push) {
-      pushImage(tagName)
-    } else {
-      tagName
+    buildImage(projectDir, dockerfile, tag) match {
+      case x if push => pushImage(x)
+      case y => y
     }
-    
   }
 
   /**
@@ -77,7 +74,7 @@ object DockerTool {
   @Nonnull
   def buildImage(baseDir: File, dockerfile: File, tag: String): String = {
     val tagName = compileTag(tag)
-    tryWithResource(DockerRetriver.newDockerClient()) {
+    tryWithResource(DockerRetriever.newDockerClient()) {
       client => {
         // build docker image
         val buildImageCmd = client.buildImageCmd()
@@ -100,10 +97,10 @@ object DockerTool {
    */
   def pushImage(tag: String): String = {
     val tagName = compileTag(tag)
-    tryWithResource(DockerRetriver.newDockerClient()) {
+    tryWithResource(DockerRetriever.newDockerClient()) {
       client => {
         val pushCmd: PushImageCmd = client.pushImageCmd(tagName)
-          .withAuthConfig(DockerRetriver.remoteImageRegisterAuthConfig)
+          .withAuthConfig(DockerRetriever.remoteImageRegisterAuthConfig)
           .withTag(tagName)
         pushCmd.start().awaitCompletion()
       }
@@ -114,7 +111,7 @@ object DockerTool {
   /**
    * compile image tag with namespace and remote address.
    */
-  private[codebuild] def compileTag(tag: String): String = {
+  private[packer] def compileTag(tag: String): String = {
     var tagName = {
       if (tag.contains("/")) tag
       else s"$IMAGE_NAMESPACE/$tag"

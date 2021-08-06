@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_STREAMX_WORKSPACE
 import org.apache.commons.io.FileUtils
@@ -104,8 +104,8 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
           "flink-connector-base-1.13.0.jar",
           "kafka-clients-2.4.1.jar")
         jars.foreach(jar => println(jar.getName))
-        jars.forall(jar => jar.exists()) mustBe true
-        jars.map(jar => jar.getName).sameElements(expectJars) mustBe true
+        jars.forall(_.exists) mustBe true
+        jars.map(_.getName).sameElements(expectJars) mustBe true
         FileUtils.deleteDirectory(new File(outputDir))
       }
 

@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
-import com.streamxhub.streamx.codebuild.FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
+import FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
 import org.apache.commons.io.FileUtils
 
 import java.io.File

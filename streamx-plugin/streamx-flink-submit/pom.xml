@@ -28,7 +28,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-codebuild</artifactId>
+            <artifactId>streamx-packer</artifactId>
             <version>${project.version}</version>
         </dependency>
 

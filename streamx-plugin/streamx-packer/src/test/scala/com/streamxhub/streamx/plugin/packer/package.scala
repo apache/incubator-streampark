@@ -18,28 +18,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
 
-import java.util.regex.Pattern
+package com.streamxhub.streamx.plugin
 
-case class MavenArtifact(groupId: String, artifactId: String, version: String) {
-}
+import org.codehaus.plexus.util.IOUtil
 
-object MavenArtifact {
-  private val p = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
+import java.io.{IOException, InputStream}
+import java.util
+import java.util.jar.JarFile
 
-  /**
-   * build from coords
-   */
-  def of(coords: String): MavenArtifact = {
-    p.matcher(coords) match {
-      case m if m.matches() =>
-        val groupId = m.group(1)
-        val artifactId = m.group(2)
-        val version = m.group(3)
-        MavenArtifact(groupId, artifactId, version)
-      case _ =>
-        throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
+package object packer {
+
+  def path: String => String = (path: String) => getClass.getClassLoader.getResource(path).getFile
+
+  def jarEquals(jar1: JarFile, jar2: JarFile, entry: String): Boolean = {
+    var s1: InputStream = null
+    var s2: InputStream = null
+    try {
+      s1 = jar1.getInputStream(jar1.getJarEntry(entry))
+      s2 = jar2.getInputStream(jar2.getJarEntry(entry))
+      util.Arrays.equals(IOUtil.toByteArray(s1), IOUtil.toByteArray(s2))
+    } catch {
+      case e: IOException => false
+    } finally {
+      if (s1 != null) s1.close()
+      if (s2 != null) s2.close()
     }
   }
+
+
 }

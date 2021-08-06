@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.codebuild
+package com.streamxhub.streamx.plugin.packer
 
-import com.streamxhub.streamx.codebuild.FlinkDockerfileTemplate.DEFAULT_DOCKER_FILE_NAME
+import com.streamxhub.streamx.plugin.packer.FlinkDockerfileTemplate.DEFAULT_DOCKER_FILE_NAME
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers
@@ -32,7 +32,7 @@ class FlinkDockerfileTemplateSpec extends AnyWordSpec with BeforeAndAfter with M
 
   val outputDir = new File("FlinkDockerfileTemplateSpec-output/")
 
-  val assertDockerFileContent =
+  val assertDockerFileContent: String =
     """FROM 1.13-scala_2.11
       |RUN mkdir -p $FLINK_HOME/usrlib
       |COPY /WordCountSQL.jar $FLINK_HOME/usrlib/WordCountSQL.jar

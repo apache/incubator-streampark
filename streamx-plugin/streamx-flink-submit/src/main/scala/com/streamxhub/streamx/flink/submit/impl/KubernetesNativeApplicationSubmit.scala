@@ -20,11 +20,11 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.codebuild.{DockerTool, FlinkDockerfileTemplate, MavenTool}
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.plugin.packer.{DockerTool, FlinkDockerfileTemplate, MavenTool}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -49,17 +49,17 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // build fat-jar
     val fatJar = {
       val fatJarPath = buildWorkspace + "flink-job.jar"
-      val flinkLibs = extractProvidedLibs(submitRequest) :+= submitRequest.flinkUserJar
+      val flinkLibs = extractProvidedLibs(submitRequest) :+ submitRequest.flinkUserJar
       MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
     // build and push flink application image
-    val flinkImgeTag = {
+    val flinkImageTag = {
       val tagName = s"flinkjob-${submitRequest.clusterId}"
-      val dockerFiletemplate = new FlinkDockerfileTemplate(submitRequest.flinkBaseImage, fatJar.getAbsolutePath)
-      DockerTool.buildFlinkImage(buildWorkspace, dockerFiletemplate, tagName, push = true)
+      val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.flinkBaseImage, fatJar.getAbsolutePath)
+      DockerTool.buildFlinkImage(buildWorkspace, dockerFileTemplate, tagName, push = true)
     }
     // add flink image tag to flink configuration
-    flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImgeTag)
+    flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)
 
     // retirve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null

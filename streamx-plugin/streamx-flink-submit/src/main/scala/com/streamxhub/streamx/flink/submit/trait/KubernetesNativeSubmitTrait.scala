@@ -232,7 +232,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       case _ =>
         throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
     }
-    val jobLib = s"${APP_WORKSPACE}/${submitRequest.jobID}/lib"
+    val jobLib = s"$APP_WORKSPACE/${submitRequest.jobID}/lib"
     if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
       providedLibs += jobLib
     }
