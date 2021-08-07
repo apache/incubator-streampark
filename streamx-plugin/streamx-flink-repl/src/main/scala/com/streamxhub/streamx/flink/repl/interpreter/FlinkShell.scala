@@ -18,10 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.interpreter
+package com.streamxhub.streamx.flink.repl.interpreter
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.repl.flink.shims.FlinkShims
+import com.streamxhub.streamx.flink.repl.shims.FlinkShims
 import org.apache.flink.annotation.Internal
 import org.apache.flink.client.cli.{CliFrontend, CliFrontendParser, CustomCommandLine}
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader

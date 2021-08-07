@@ -47,7 +47,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class MessageServiceImpl extends ServiceImpl<MessageMapper, Message>
-        implements MessageService {
+    implements MessageService {
 
     @Autowired
     private SimpMessageSendingOperations simpMessageSendingOperations;

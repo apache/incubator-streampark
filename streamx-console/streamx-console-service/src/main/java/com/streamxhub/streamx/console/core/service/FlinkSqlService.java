@@ -35,9 +35,9 @@ public interface FlinkSqlService extends IService<FlinkSql> {
 
     /**
      * @param flinkSql
-     * @param latest 是否latest
+     * @param latest   是否latest
      */
-    void create(FlinkSql flinkSql,CandidateType type);
+    void create(FlinkSql flinkSql, CandidateType type);
 
     /**
      * @param latest true  表示设置新增的的记录为 "latest"<br>
@@ -64,12 +64,12 @@ public interface FlinkSqlService extends IService<FlinkSql> {
      * @param application
      * @return
      */
-    FlinkSql getCandidate(Long appId,CandidateType type);
+    FlinkSql getCandidate(Long appId, CandidateType type);
 
     /**
      * @param appId
      */
-    void toEffective(Long appId,Long sqlId);
+    void toEffective(Long appId, Long sqlId);
 
     void cleanCandidate(Long id);
 

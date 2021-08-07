@@ -21,8 +21,6 @@
 
 package com.streamxhub.streamx.console.core.config;
 
-import static com.streamxhub.streamx.common.enums.StorageType.LFS;
-
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
@@ -30,16 +28,19 @@ import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.annotation.Order;
+import org.springframework.stereotype.Component;
+
 import java.io.File;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
+
+import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 
 /**
  * @author benjobs
@@ -131,7 +132,7 @@ public class EnvInitializer {
             }
             // create maven local repository dir
             String localMavnRepo = ConfigConst.MAVEN_LOCAL_DIR();
-            if (FsOperatorGetter.get(LFS).exists(localMavnRepo)){
+            if (FsOperatorGetter.get(LFS).exists(localMavnRepo)) {
                 FsOperatorGetter.get(LFS).mkdirs(localMavnRepo);
             }
             initialized.put(storageType, Boolean.TRUE);

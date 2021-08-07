@@ -39,7 +39,7 @@ public interface ApplicationConfigService extends IService<ApplicationConfig> {
 
     void setLatestOrEffective(Boolean latest, Long configId, Long appId);
 
-    void toEffective(Long appId,Long configId);
+    void toEffective(Long appId, Long configId);
 
     ApplicationConfig getLatest(Long appId);
 

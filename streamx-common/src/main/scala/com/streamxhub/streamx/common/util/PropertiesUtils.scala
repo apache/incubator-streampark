@@ -86,7 +86,7 @@ object PropertiesUtils extends Logger {
     try {
       val properties = new Properties()
       properties.load(new StringReader(conf))
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties ", e)
     }
@@ -121,7 +121,7 @@ object PropertiesUtils extends Logger {
     try {
       val properties = new Properties()
       properties.load(inReader)
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from $filename", e)
     } finally {
@@ -151,7 +151,7 @@ object PropertiesUtils extends Logger {
     try {
       val properties = new Properties()
       properties.load(inputStream)
-      properties.stringPropertyNames().asScala.map(k => (k, properties.getProperty(k).trim)).toMap
+      properties.stringPropertyNames().map(k => (k, properties.getProperty(k).trim)).toMap
     } catch {
       case e: IOException => throw new IllegalArgumentException(s"Failed when loading properties from inputStream", e)
     }

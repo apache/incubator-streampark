@@ -26,13 +26,13 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.streamxhub.streamx.common.conf.ConfigConst;
-import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.core.dao.SavePointMapper;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 import com.streamxhub.streamx.console.core.enums.CheckPointType;
 import com.streamxhub.streamx.console.core.service.SavePointService;
@@ -55,9 +55,6 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Autowired
     private SettingService settingService;
-
-    @Autowired
-    private FsOperator fsOperator;
 
     @Override
     public void obsolete(Long appId) {
@@ -108,11 +105,11 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Boolean delete(Long id) throws ServiceException {
+    public Boolean delete(Long id, Application application) throws ServiceException {
         SavePoint savePoint = getById(id);
         try {
             if (CommonUtils.notEmpty(savePoint.getPath())) {
-                fsOperator.delete(savePoint.getPath());
+                application.getFsOperator().delete(savePoint.getPath());
             }
             removeById(id);
             return true;
@@ -129,8 +126,9 @@ public class SavePointServiceImpl extends ServiceImpl<SavePointMapper, SavePoint
     }
 
     @Override
-    public void removeApp(Long appId) {
-        baseMapper.removeApp(appId);
-        fsOperator.delete(ConfigConst.APP_SAVEPOINTS().concat("/").concat(appId.toString()));
+    public void removeApp(Application application) {
+        Long appId = application.getId();
+        baseMapper.removeApp(application.getId());
+        application.getFsOperator().delete(ConfigConst.APP_SAVEPOINTS().concat("/").concat(appId.toString()));
     }
 }

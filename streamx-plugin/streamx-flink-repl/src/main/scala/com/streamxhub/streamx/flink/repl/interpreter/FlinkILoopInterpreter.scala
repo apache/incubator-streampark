@@ -19,7 +19,7 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.repl.flink.interpreter
+package com.streamxhub.streamx.flink.repl.interpreter
 
 import scala.collection.mutable
 import scala.tools.nsc.Settings

@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.interpreter
+package com.streamxhub.streamx.flink.repl.interpreter
 
 import scala.tools.nsc.interpreter.{ExprTyper, IR}
 

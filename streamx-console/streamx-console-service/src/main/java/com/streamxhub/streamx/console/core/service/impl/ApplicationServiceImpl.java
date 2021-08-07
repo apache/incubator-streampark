@@ -60,7 +60,6 @@ import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
@@ -273,7 +272,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         assert application != null;
 
         //1) 将已经发布到workspace的文件删除
-        FsOperatorGetter.get(application.getStorageType()).delete(application.getAppHome().getAbsolutePath());
+        application.getFsOperator().delete(application.getAppHome().getAbsolutePath());
 
         //2) 将backup里的文件回滚到workspace
         backUpService.revoke(application);
@@ -299,32 +298,35 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     @Transactional(rollbackFor = {Exception.class})
     @RefreshCache
-    public Boolean delete(Application app) {
+    public Boolean delete(Application paramApp) {
+
+        Application application = getById(paramApp.getId());
+
         try {
             //1) 删除flink sql
-            flinkSqlService.removeApp(app.getId());
+            flinkSqlService.removeApp(application.getId());
 
             //2) 删除 log
-            applicationLogService.removeApp(app.getId());
+            applicationLogService.removeApp(application.getId());
 
             //3) 删除 config
-            configService.removeApp(app.getId());
+            configService.removeApp(application.getId());
 
             //4) 删除 effective
-            effectiveService.removeApp(app.getId());
+            effectiveService.removeApp(application.getId());
 
             //以下涉及到hdfs文件的删除
 
             //5) 删除 backup
-            backUpService.removeApp(app.getId());
+            backUpService.removeApp(application);
 
             //6) 删除savepoint
-            savePointService.removeApp(app.getId());
+            savePointService.removeApp(application);
 
             //7) 删除 app
-            removeApp(app.getId(),app.getStorageType());
+            removeApp(application);
 
-            FlinkTrackingTask.stopTracking(app.getId());
+            FlinkTrackingTask.stopTracking(paramApp.getId());
 
             return true;
         } catch (Exception e) {
@@ -350,9 +352,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         }
     }
 
-    private void removeApp(Long appId,StorageType storageType) {
+    private void removeApp(Application application) {
+        Long appId = application.getId();
         removeById(appId);
-        FsOperatorGetter.get(storageType).delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
+        application.getFsOperator().delete(ConfigConst.APP_WORKSPACE().concat("/").concat(appId.toString()));
     }
 
     @Override
@@ -606,7 +609,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                             }
                             // 3) deploying...
                             File appHome = application.getAppHome();
-                            FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
+                            FsOperator fsOperator = application.getFsOperator();
                             fsOperator.delete(appHome.getPath());
                             File localJobHome = new File(application.getLocalAppBase(), application.getModule());
                             fsOperator.upload(localJobHome.getAbsolutePath(), ConfigConst.APP_WORKSPACE());
@@ -637,11 +640,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         }
                     } catch (Exception e) {
                         Message message = new Message(
-                                serverComponent.getUser().getUserId(),
-                                application.getId(),
-                                application.getJobName().concat(" deploy failed"),
-                                ExceptionUtils.stringifyException(e),
-                                NoticeType.EXCEPTION
+                            serverComponent.getUser().getUserId(),
+                            application.getId(),
+                            application.getJobName().concat(" deploy failed"),
+                            ExceptionUtils.stringifyException(e),
+                            NoticeType.EXCEPTION
                         );
                         messageService.push(message);
                         updateWrapper.set(Application::getState, FlinkAppState.ADDED.getValue());
@@ -753,7 +756,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
             // 3) deploying...
             File appHome = application.getAppHome();
-            FsOperator fsOperator = FsOperatorGetter.get(application.getStorageType());
+            FsOperator fsOperator = application.getFsOperator();
             fsOperator.delete(appHome.getPath());
 
             //3) upload jar by pomJar

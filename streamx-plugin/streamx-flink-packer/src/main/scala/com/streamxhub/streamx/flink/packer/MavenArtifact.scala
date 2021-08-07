@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,12 +18,28 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.interpreter
+package com.streamxhub.streamx.flink.packer
 
-object InterpreterResult extends Enumeration {
-  type Code = Value
-  val SUCCESS, INCOMPLETE, ERROR, KEEP_PREVIOUS_RESULT = Value
+import java.util.regex.Pattern
+
+case class MavenArtifact(groupId: String, artifactId: String, version: String) {
 }
 
+object MavenArtifact {
+  private val p = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
 
-class InterpreterResult(val code: InterpreterResult.Code) extends Serializable
+  /**
+   * build from coords
+   */
+  def of(coords: String): MavenArtifact = {
+    p.matcher(coords) match {
+      case m if m.matches() =>
+        val groupId = m.group(1)
+        val artifactId = m.group(2)
+        val version = m.group(3)
+        MavenArtifact(groupId, artifactId, version)
+      case _ =>
+        throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
+    }
+  }
+}

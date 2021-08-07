@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,30 +18,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.shims;
 
+package com.streamxhub.streamx.flink
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.flink.client.cli.CliFrontend;
+import org.codehaus.plexus.util.IOUtil
 
-import java.util.Properties;
+import java.io.{IOException, InputStream}
+import java.util
+import java.util.jar.JarFile
 
-/**
- * This is abstract class for anything that is api incompatible between different flink versions. It will
- * load the correct version of FlinkShims based on the version of flink.
- *
- * @author benjobs
- */
-public class FlinkShims {
+package object packer {
 
-    protected Properties properties;
+  def path: String => String = (path: String) => getClass.getClassLoader.getResource(path).getFile
 
-    public FlinkShims(Properties properties) {
-        this.properties = properties;
+  def jarEquals(jar1: JarFile, jar2: JarFile, entry: String): Boolean = {
+    var s1: InputStream = null
+    var s2: InputStream = null
+    try {
+      s1 = jar1.getInputStream(jar1.getJarEntry(entry))
+      s2 = jar2.getInputStream(jar2.getJarEntry(entry))
+      util.Arrays.equals(IOUtil.toByteArray(s1), IOUtil.toByteArray(s2))
+    } catch {
+      case e: IOException => false
+    } finally {
+      if (s1 != null) s1.close()
+      if (s2 != null) s2.close()
     }
+  }
 
-    public Object getCustomCli(Object cliFrontend, Object commandLine) {
-        return ((CliFrontend) cliFrontend).validateAndGetActiveCommandLine((CommandLine) commandLine);
-    }
 
 }

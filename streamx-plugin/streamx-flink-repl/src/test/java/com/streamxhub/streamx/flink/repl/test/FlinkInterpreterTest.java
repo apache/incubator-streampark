@@ -18,11 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.test;
+package com.streamxhub.streamx.flink.repl.test;
 
-import com.streamxhub.streamx.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.streamx.repl.flink.interpreter.InterpreterOutput;
-import com.streamxhub.streamx.repl.flink.interpreter.InterpreterResult;
+import com.streamxhub.streamx.flink.repl.interpreter.FlinkInterpreter;
+import com.streamxhub.streamx.flink.repl.interpreter.InterpreterOutput;
+import com.streamxhub.streamx.flink.repl.interpreter.InterpreterResult;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

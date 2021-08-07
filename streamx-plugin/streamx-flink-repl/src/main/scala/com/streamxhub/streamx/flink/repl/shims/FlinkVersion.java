@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.repl.flink.shims;
+package com.streamxhub.streamx.flink.repl.shims;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

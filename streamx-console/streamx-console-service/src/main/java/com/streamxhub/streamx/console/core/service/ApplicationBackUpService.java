@@ -32,6 +32,7 @@ import com.streamxhub.streamx.console.core.entity.FlinkSql;
  * @author benjobs
  */
 public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
+
     Boolean delete(Long id) throws ServiceException;
 
     void backup(Application app);
@@ -46,9 +47,9 @@ public interface ApplicationBackUpService extends IService<ApplicationBackUp> {
 
     void revoke(Application application);
 
-    void removeApp(Long appId);
+    void removeApp(Application application);
 
-    void rollbackFlinkSql(Application application,FlinkSql sql);
+    void rollbackFlinkSql(Application application, FlinkSql sql);
 
     boolean isFlinkSqlBacked(Long appId, Long sqlId);
 }

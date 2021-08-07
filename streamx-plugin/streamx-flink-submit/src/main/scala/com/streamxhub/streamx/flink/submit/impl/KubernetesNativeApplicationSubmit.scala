@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
-import com.streamxhub.streamx.plugin.packer.{DockerTool, FlinkDockerfileTemplate, MavenTool}
+import com.streamxhub.streamx.flink.packer.{DockerTool, FlinkDockerfileTemplate, MavenTool}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor

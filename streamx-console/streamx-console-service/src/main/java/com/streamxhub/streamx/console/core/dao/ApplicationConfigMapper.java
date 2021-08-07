@@ -41,14 +41,14 @@ public interface ApplicationConfigMapper extends BaseMapper<ApplicationConfig> {
     IPage<ApplicationConfig> page(Page<ApplicationConfig> page, @Param("appId") Long appId);
 
     @Select("select s.* from t_flink_config s inner join t_flink_effective e on s.id = e.target_id where e.app_id=#{appId} and e.target_type=1")
-    ApplicationConfig getEffective(@Param("appId")Long appId);
+    ApplicationConfig getEffective(@Param("appId") Long appId);
 
     @Select("select * from t_flink_config where app_id=#{appId} and latest=1")
-    ApplicationConfig getLatest(@Param("appId")Long appId);
+    ApplicationConfig getLatest(@Param("appId") Long appId);
 
     @Update("update t_flink_config set latest=0 where app_id=#{appId}")
-    void clearLatest(@Param("appId")Long appId);
+    void clearLatest(@Param("appId") Long appId);
 
     @Delete("delete from t_flink_config where app_id=#{appId}")
-    void removeApp(@Param("appId")Long appId);
+    void removeApp(@Param("appId") Long appId);
 }

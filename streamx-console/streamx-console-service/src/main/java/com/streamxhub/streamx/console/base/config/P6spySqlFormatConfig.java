@@ -38,20 +38,20 @@ public class P6spySqlFormatConfig implements MessageFormattingStrategy {
      */
     @Override
     public String formatMessage(
-            int connectionId,
-            String now,
-            long elapsed,
-            String category,
-            String prepared,
-            String sql,
-            String url) {
+        int connectionId,
+        String now,
+        long elapsed,
+        String category,
+        String prepared,
+        String sql,
+        String url) {
 
         return StringUtils.isBlank(sql) ? "" :
-                String.format(
-                        "%s  | 耗时 %d ms | SQL 语句：\n %s;",
-                        DateUtils.formatFullTime(LocalDateTime.now()),
-                        elapsed,
-                        sql.replaceAll("[\\s]+", StringUtils.SPACE)
-                );
+            String.format(
+                "%s  | 耗时 %d ms | SQL 语句：\n %s;",
+                DateUtils.formatFullTime(LocalDateTime.now()),
+                elapsed,
+                sql.replaceAll("[\\s]+", StringUtils.SPACE)
+            );
     }
 }

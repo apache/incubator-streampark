@@ -40,7 +40,7 @@ import java.io.File
 import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
-import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps

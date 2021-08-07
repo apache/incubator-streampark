@@ -19,11 +19,11 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.repl.flink.interpreter
+package com.streamxhub.streamx.flink.repl.interpreter
 
 import com.streamxhub.streamx.common.util.{ClassLoaderUtils, DependencyUtils, HadoopUtils, Utils}
-import com.streamxhub.streamx.repl.flink.interpreter.FlinkShell.{Config, ExecutionMode, _}
-import com.streamxhub.streamx.repl.flink.shims.FlinkShims
+import com.streamxhub.streamx.flink.repl.interpreter.FlinkShell.{Config, ExecutionMode, _}
+import com.streamxhub.streamx.flink.repl.shims.FlinkShims
 import org.apache.commons.lang3.StringUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.flink.api.common.JobExecutionResult
@@ -47,7 +47,7 @@ import java.nio.file.Files
 import java.util.Properties
 import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable.ArrayBuffer
 import scala.tools.nsc.Settings
 import scala.tools.nsc.interpreter.{IR, JPrintWriter, SimpleReader}
@@ -161,7 +161,7 @@ class FlinkScalaInterpreter(properties: Properties) {
     }
 
     // load other configuration from interpreter properties
-    properties.asScala.foreach(entry => configuration.setString(entry._1, entry._2))
+    properties.foreach(entry => configuration.setString(entry._1, entry._2))
     this.defaultParallelism = configuration.getInteger(CoreOptions.DEFAULT_PARALLELISM)
     logInfo("Default Parallelism: " + this.defaultParallelism)
 
