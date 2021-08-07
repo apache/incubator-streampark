@@ -61,7 +61,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // add flink image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)
 
-    // retirve k8s cluster and submit flink job on application mode
+    // retrieve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var clusterClient: ClusterClient[String] = null
 

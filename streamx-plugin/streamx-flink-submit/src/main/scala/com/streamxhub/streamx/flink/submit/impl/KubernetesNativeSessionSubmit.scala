@@ -61,7 +61,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
 
-    // retirve k8s cluster and submit flink job on session mode
+    // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var packageProgram: PackagedProgram = null
     var client: ClusterClient[String] = null
