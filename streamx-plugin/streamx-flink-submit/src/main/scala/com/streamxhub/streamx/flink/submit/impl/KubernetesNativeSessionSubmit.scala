@@ -26,7 +26,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
-import com.streamxhub.streamx.plugin.packer.MavenTool
+import com.streamxhub.streamx.flink.packer.MavenTool
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -35,7 +35,7 @@ import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
@@ -71,11 +71,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       packageProgram = PackagedProgram.newBuilder()
         .setJarFile(fatJar)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(flinkConfig
-          .getOptional(ApplicationConfiguration.APPLICATION_ARGS)
-          .orElse(Lists.newArrayList())
-          .asScala: _*)
-        .build()
+        .setArguments(
+          flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+            .orElse(Lists.newArrayList())
+            : _*
+        ).build()
 
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,

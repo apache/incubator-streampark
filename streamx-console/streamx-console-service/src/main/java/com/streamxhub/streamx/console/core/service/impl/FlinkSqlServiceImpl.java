@@ -109,12 +109,12 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public void setCandidate(Long appId, Long sqlId, CandidateType candidateType) {
         LambdaUpdateWrapper<FlinkSql> updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, 0)
-                .eq(FlinkSql::getAppId, appId);
+            .eq(FlinkSql::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<FlinkSql>().lambda();
         updateWrapper.set(FlinkSql::getCandidate, candidateType.get())
-                .eq(FlinkSql::getId, sqlId);
+            .eq(FlinkSql::getId, sqlId);
         this.update(updateWrapper);
     }
 
@@ -122,7 +122,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
     public List<FlinkSql> history(Application application) {
         LambdaQueryWrapper<FlinkSql> wrapper = new QueryWrapper<FlinkSql>().lambda();
         wrapper.eq(FlinkSql::getAppId, application.getId())
-                .orderByDesc(FlinkSql::getVersion);
+            .orderByDesc(FlinkSql::getVersion);
 
         List<FlinkSql> sqlList = this.baseMapper.selectList(wrapper);
         FlinkSql effective = getEffective(application.getId(), false);

@@ -208,6 +208,7 @@ public class ApplicationController {
 
     @PostMapping("deletebak")
     public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
+
         Boolean deleted = backUpService.delete(backUp.getId());
         return RestResponse.create().data(deleted);
     }

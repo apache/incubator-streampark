@@ -51,8 +51,8 @@ public class MetricsTask {
         String tempPath = WebUtils.getAppDir("temp");
         File temp = new File(tempPath);
         Arrays.stream(Objects.requireNonNull(temp.listFiles()))
-                .filter(x -> x.getName().matches(FLAMEGRAPH_FILE_REGEXP))
-                .forEach(File::delete);
+            .filter(x -> x.getName().matches(FLAMEGRAPH_FILE_REGEXP))
+            .forEach(File::delete);
 
         // 2 clean date
         Date start = new Date();

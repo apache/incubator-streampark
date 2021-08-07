@@ -44,12 +44,12 @@ public class JsonUtils {
         MAPPER.setDateFormat(new SimpleDateFormat(DateUtils.fullFormat()));
     }
 
-    public static <T>T read(String json, Class<T> clazz) throws JsonProcessingException {
-        return MAPPER.readValue(json,clazz);
+    public static <T> T read(String json, Class<T> clazz) throws JsonProcessingException {
+        return MAPPER.readValue(json, clazz);
     }
 
-    public static <T>T read(String json, TypeReference<T> typeReference) throws JsonProcessingException {
-        return MAPPER.readValue(json,typeReference);
+    public static <T> T read(String json, TypeReference<T> typeReference) throws JsonProcessingException {
+        return MAPPER.readValue(json, typeReference);
     }
 
 }

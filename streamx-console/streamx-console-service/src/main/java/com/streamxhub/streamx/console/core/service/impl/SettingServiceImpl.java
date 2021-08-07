@@ -55,7 +55,7 @@ import java.util.regex.Pattern;
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 @DependsOn({"flyway", "flywayInitializer"})
 public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
-        implements SettingService {
+    implements SettingService {
 
     private Map<String, String> flinkYamlMap;
 
@@ -181,11 +181,11 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
                 throw new IllegalArgumentException("[StreamX] found multiple flink-dist jar in " + libPath);
             }
             List<String> cmd = Arrays.asList(
-                    "cd ".concat(flinkHome),
-                    String.format(
-                            "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
-                            distJar[0].getAbsolutePath()
-                    )
+                "cd ".concat(flinkHome),
+                String.format(
+                    "java -classpath %s org.apache.flink.client.cli.CliFrontend --version",
+                    distJar[0].getAbsolutePath()
+                )
             );
 
             CommandUtils.execute(cmd, versionInfo -> {

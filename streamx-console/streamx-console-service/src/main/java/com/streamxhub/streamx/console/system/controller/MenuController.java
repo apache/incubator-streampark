@@ -75,7 +75,7 @@ public class MenuController {
     @DeleteMapping("delete")
     @RequiresPermissions("menu:delete")
     public RestResponse deleteMenus(@NotBlank(message = "{required}") String menuIds)
-            throws Exception {
+        throws Exception {
         String[] ids = menuIds.split(StringPool.COMMA);
         this.menuService.deleteMenus(ids);
         return RestResponse.create();

@@ -61,8 +61,8 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationConfigServiceImpl
-        extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
-        implements ApplicationConfigService {
+    extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
+    implements ApplicationConfigService {
 
     private String flinkConfTemplate = null;
 
@@ -95,12 +95,12 @@ public class ApplicationConfigServiceImpl
     public void setLatest(Long appId, Long configId) {
         LambdaUpdateWrapper<ApplicationConfig> updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
         updateWrapper.set(ApplicationConfig::getLatest, 0)
-                .eq(ApplicationConfig::getAppId, appId);
+            .eq(ApplicationConfig::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
         updateWrapper.set(ApplicationConfig::getLatest, 1)
-                .eq(ApplicationConfig::getId, configId);
+            .eq(ApplicationConfig::getId, configId);
         this.update(updateWrapper);
     }
 
@@ -222,7 +222,7 @@ public class ApplicationConfigServiceImpl
     public List<ApplicationConfig> history(Application application) {
         LambdaQueryWrapper<ApplicationConfig> wrapper = new QueryWrapper<ApplicationConfig>().lambda();
         wrapper.eq(ApplicationConfig::getAppId, application.getId())
-                .orderByDesc(ApplicationConfig::getVersion);
+            .orderByDesc(ApplicationConfig::getVersion);
 
         List<ApplicationConfig> configList = this.baseMapper.selectList(wrapper);
         ApplicationConfig effective = getEffective(application.getId());

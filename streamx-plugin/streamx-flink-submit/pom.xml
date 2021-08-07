@@ -28,7 +28,7 @@
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-packer</artifactId>
+            <artifactId>streamx-flink-packer</artifactId>
             <version>${project.version}</version>
         </dependency>
 

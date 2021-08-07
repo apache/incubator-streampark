@@ -137,12 +137,12 @@ public class FlinkTrackingTask {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
     private final ExecutorService executor = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("flink-tracking-executor"));
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("flink-tracking-executor"));
 
     @Autowired
     public void setApplicationService(ApplicationService appService) {
@@ -206,8 +206,8 @@ public class FlinkTrackingTask {
                      * 2: 如果操作状态为STARTING,则需要判断操作间隔是否在30秒之内(启动可能需要时间,这里给足够多的时间去完成启动)</br>
                      */
                     if (optionState == null
-                            || !optionState.equals(OptionState.STARTING)
-                            || now - optioningTime >= STARTING_INTERVAL) {
+                        || !optionState.equals(OptionState.STARTING)
+                        || now - optioningTime >= STARTING_INTERVAL) {
                         //非正在手动映射appId
                         if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                             log.error("flinkTrackingTask getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint obsoleted!");
@@ -355,7 +355,7 @@ public class FlinkTrackingTask {
                             //x分钟之内超过Y次CheckPoint失败触发动作
                             long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
                             if (minute <= application.getCpFailureRateInterval()
-                                    && counter.getCount() >= application.getCpMaxFailureInterval()) {
+                                && counter.getCount() >= application.getCpMaxFailureInterval()) {
                                 CHECK_POINT_FAILED_MAP.remove(application.getJobId());
                                 if (application.getCpFailureAction() == 1) {
                                     alertService.alert(application, CheckPointStatus.FAILED);

@@ -30,6 +30,8 @@ import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.StorageType;
+import com.streamxhub.streamx.common.fs.FsOperator;
+import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -385,7 +387,7 @@ public class Application implements Serializable {
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
         if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-                !this.getExecutionMode().equals(other.getExecutionMode())) {
+            !this.getExecutionMode().equals(other.getExecutionMode())) {
             return false;
         }
 
@@ -453,6 +455,10 @@ public class Application implements Serializable {
         }
     }
 
+    public FsOperator getFsOperator() {
+        return FsOperatorGetter.get(getStorageType());
+    }
+
     @Data
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
@@ -516,10 +522,10 @@ public class Application implements Serializable {
         @Override
         public String toString() {
             return "{" +
-                    "groupId='" + groupId + '\'' +
-                    ", artifactId='" + artifactId + '\'' +
-                    ", version='" + version + '\'' +
-                    '}';
+                "groupId='" + groupId + '\'' +
+                ", artifactId='" + artifactId + '\'' +
+                ", version='" + version + '\'' +
+                '}';
         }
 
         private String getGav() {

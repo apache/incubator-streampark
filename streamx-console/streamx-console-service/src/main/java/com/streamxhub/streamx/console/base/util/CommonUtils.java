@@ -596,7 +596,7 @@ public class CommonUtils implements Serializable {
      * @throws IllegalAccessException
      */
     public static <T> List<T> mapsToObjects(List<Map<String, Object>> maps, Class<T> clazz)
-            throws InstantiationException, IllegalAccessException {
+        throws InstantiationException, IllegalAccessException {
         List<T> list = new ArrayList<>();
         if (maps != null && maps.size() > 0) {
             Map<String, Object> map;
