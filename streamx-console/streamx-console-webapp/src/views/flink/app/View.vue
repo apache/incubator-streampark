@@ -1028,7 +1028,6 @@ export default {
   },
 
   mounted() {
-    this.handleYarn()
     this.handleDashboard()
     this.handleFetch(true)
     const timer = window.setInterval(() => {
@@ -1499,16 +1498,22 @@ export default {
       }
     },
 
-    handleYarn() {
-      yarn({}).then((resp) => {
-        this.yarn = resp.data
-      })
-    },
-
     handleView(params) {
       if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
-        const url = this.yarn + '/proxy/' + params['appId'] + '/'
-        window.open(url)
+        // yarn-pre-job|yarn-session|yarn-application
+        const executionMode = params['executionMode']
+        if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
+          if(this.yarn == null) {
+            yarn({}).then((resp) => {
+              this.yarn = resp.data
+              const url = this.yarn + '/proxy/' + params['appId'] + '/'
+              window.open(url)
+            })
+          } else {
+            const url = this.yarn + '/proxy/' + params['appId'] + '/'
+            window.open(url)
+          }
+        }
       }
     },
 

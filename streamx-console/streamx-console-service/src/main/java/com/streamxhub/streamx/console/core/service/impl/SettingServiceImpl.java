@@ -212,6 +212,21 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     }
 
     @Override
+    public String getDockerRegisterAddress() {
+        return settings.get(SettingService.KEY_DOCKER_REGISTER_ADDRESS).getValue();
+    }
+
+    @Override
+    public String getDockerRegisterUser() {
+        return settings.get(SettingService.KEY_DOCKER_REGISTER_USER).getValue();
+    }
+
+    @Override
+    public String getDockerRegisterPassword() {
+        return settings.get(SettingService.KEY_DOCKER_REGISTER_PASSWORD).getValue();
+    }
+
+    @Override
     public void syncFlinkConf() {
         this.loadDefaultConfig(true);
     }

@@ -47,6 +47,8 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // build fat-jar
+    // todo: cache file MD5 is used to compare whether it is consistent when it is generated next time.
+    //  If it is consistent, it is used directly and returned directly instead of being regenerated
     val fatJar = {
       val fatJarPath = buildWorkspace + "flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest) :+ submitRequest.flinkUserJar
@@ -56,7 +58,15 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     val flinkImageTag = {
       val tagName = s"flinkjob-${submitRequest.clusterId}"
       val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.flinkBaseImage, fatJar.getAbsolutePath)
-      DockerTool.buildFlinkImage(buildWorkspace, dockerFileTemplate, tagName, push = true)
+      DockerTool.buildFlinkImage(
+        submitRequest.dockerRegisterAddress,
+        submitRequest.dockerRegisterUser,
+        submitRequest.dockerRegisterPassword,
+        buildWorkspace,
+        dockerFileTemplate,
+        tagName,
+        push = true
+      )
     }
     // add flink image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)

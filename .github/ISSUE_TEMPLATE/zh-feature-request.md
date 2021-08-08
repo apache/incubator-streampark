@@ -1,7 +1,6 @@
 ---
 name: "\U0001F680 新功能诉求（Feature Request）"
-about: 我有一个绝妙的 idea，希望 StreamX 可以支持它！
-title: "[feature] 标题 "
+about: 我有一个绝妙的 idea，希望 StreamX 可以支持它！ title: "[feature] 标题 "
 labels: type/feature-request
 ---
 

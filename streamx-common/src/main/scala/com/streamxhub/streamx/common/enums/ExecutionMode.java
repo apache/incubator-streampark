@@ -56,7 +56,7 @@ public enum ExecutionMode implements Serializable {
     /**
      * kubernetes application
      */
-    KUBERNETES_NATIVE_APPLICATION(6,"kubernetes-application");
+    KUBERNETES_NATIVE_APPLICATION(6, "kubernetes-application");
 
     private Integer mode;
     private String name;

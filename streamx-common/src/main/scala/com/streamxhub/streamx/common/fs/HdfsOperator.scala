@@ -37,7 +37,7 @@ object HdfsOperator extends FsOperator with Logger {
   override def move(srcPath: String, dstPath: String): Unit = HdfsUtils.move(toHdfsPath(srcPath), toHdfsPath(dstPath))
 
   override def upload(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
-    HdfsUtils.upload(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
+    HdfsUtils.upload(srcPath, toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)
 
   override def copy(srcPath: String, dstPath: String, delSrc: Boolean, overwrite: Boolean): Unit =
     HdfsUtils.copyHdfs(toHdfsPath(srcPath), toHdfsPath(dstPath), delSrc = delSrc, overwrite = overwrite)

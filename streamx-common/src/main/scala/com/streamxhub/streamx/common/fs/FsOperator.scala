@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.enums.StorageType
 
 /**
  * just for java.
+ *
  * @author benjobs
  */
 object FsOperatorGetter {
@@ -42,7 +43,7 @@ object FsOperator {
   def of(storageType: StorageType): FsOperator = {
     storageType match {
       case StorageType.HDFS => HdfsOperator
-      case StorageType.LFS => LfsOperator
+      case StorageType.LFS => LFsOperator
       case _ => throw new UnsupportedOperationException(s"Unsupported storageType:$storageType")
     }
   }

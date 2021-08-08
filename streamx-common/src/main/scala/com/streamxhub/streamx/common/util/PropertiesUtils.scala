@@ -26,7 +26,6 @@ import java.io._
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.{Properties, Scanner, HashMap => JavaMap, LinkedHashMap => JavaLinkedMap}
 import scala.collection.JavaConversions._
-import scala.collection.JavaConverters._
 import scala.collection.mutable.{Map => MutableMap}
 
 /**

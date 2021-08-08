@@ -19,17 +19,19 @@
  * under the License.
  */
 
-package com.streamxhub.streamx.console.core.config;
+package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.FsOperatorGetter;
-import com.streamxhub.streamx.common.util.HdfsUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.core.annotation.Order;
 import org.springframework.stereotype.Component;
 
@@ -48,12 +50,26 @@ import static com.streamxhub.streamx.common.enums.StorageType.LFS;
 @Order
 @Slf4j
 @Component
-public class EnvInitializer {
+public class EnvInitializer implements ApplicationRunner {
 
     @Autowired
     private SettingService settingService;
 
+    @Autowired
+    private ApplicationContext context;
+
     private final Map<StorageType, Boolean> initialized = new ConcurrentHashMap<>(2);
+
+    @Override
+    public void run(ApplicationArguments args) throws Exception {
+        System.getProperties().setProperty(
+            ConfigConst.KEY_STREAMX_WORKSPACE(),
+            context.getEnvironment().getProperty(
+                ConfigConst.KEY_STREAMX_WORKSPACE(),
+                ConfigConst.STREAMX_WORKSPACE_DEFAULT()
+            )
+        );
+    }
 
     /**
      * @param storageType
@@ -65,7 +81,7 @@ public class EnvInitializer {
             FsOperator fsOperator = FsOperatorGetter.get(storageType);
 
             String appUploads = ConfigConst.APP_UPLOADS();
-            if (!HdfsUtils.exists(appUploads)) {
+            if (!fsOperator.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }
@@ -157,4 +173,6 @@ public class EnvInitializer {
             fsOperator.upload(flinkLocalHome, flinkHome, false, false);
         }
     }
+
+
 }
