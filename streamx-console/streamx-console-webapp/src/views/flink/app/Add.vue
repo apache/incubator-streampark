@@ -31,9 +31,10 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          @change="handleChangeMode">
           <a-select-option
-            v-for="(o,index) in executionMode"
+            v-for="(o,index) in executionModes"
             :key="`execution_mode_${index}`"
             :disabled="o.disabled"
             :value="o.value">
@@ -41,6 +42,34 @@
           </a-select-option>
         </a-select>
       </a-form-item>
+
+      <template v-if="executionMode === 5|| executionMode === 6">
+        <a-form-item
+          label="kubernetes clusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Kubernetes clusterId"
+            allowClear
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="executionMode === 6">
+        <a-form-item
+          label="Flink Docker image"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Flink Base image"
+            allowClear
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base image is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
 
       <template v-if="jobType === 'sql'">
         <a-form-item
@@ -813,7 +842,7 @@ export default {
         {name: 'parent-first', order: 0},
         {name: 'child-first', order: 1}
       ],
-      executionMode: [
+      executionModes: [
         {mode: 'local', value: 0, disabled: true},
         {mode: 'remote', value: 1, disabled: true},
         {mode: 'yarn pre-job', value: 2, disabled: true},
@@ -853,6 +882,7 @@ export default {
       uploadJars: [],
       loading: false,
       submitting: false,
+      executionMode: null,
       exclusions: new Map(),
       controller: {
         activeTab: 'pom',
@@ -1020,6 +1050,10 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
     },
 
     handleChangeJmMemory(value) {
@@ -1371,7 +1405,9 @@ export default {
         resolveOrder: values.resolveOrder,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
-        description: values.description
+        description: values.description,
+        clusterId: values.values || null,
+        flinkImage: values.flinkImage || null
       }
 
       if (this.appType === 1) {
@@ -1434,7 +1470,9 @@ export default {
         resolveOrder: values.resolveOrder,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
-        description: values.description || null
+        description: values.description || null,
+        clusterId: values.values || null,
+        flinkImage: values.flinkImage || null
       }
       this.handleCreateApp(params)
     },

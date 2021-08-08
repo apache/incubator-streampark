@@ -1,5 +1,4 @@
 <template>
-
   <a-card
     :bordered="false"
     class="nodebook-submit"

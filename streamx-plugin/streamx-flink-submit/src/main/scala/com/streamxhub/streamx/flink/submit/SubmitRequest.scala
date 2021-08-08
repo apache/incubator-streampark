@@ -29,7 +29,6 @@ import org.apache.flink.client.cli.CliFrontend
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.configuration.{Configuration, GlobalConfiguration}
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.io.File
 import java.util.{Map => JavaMap}
@@ -53,30 +52,12 @@ case class SubmitRequest(flinkHome: String,
                          property: JavaMap[String, Any],
                          dynamicOption: Array[String],
                          args: String,
-                         clusterId: String,
-                         @Nullable kubernetesNamespace: String,
-                         @Nullable flinkBaseImage: String) {
-
-  def this(flinkHome: String,
-           flinkVersion: String,
-           flinkYaml: String,
-           flinkUserJar: String,
-           developmentMode: DevelopmentMode,
-           executionMode: ExecutionMode,
-           resolveOrder: ResolveOrder,
-           appName: String,
-           appConf: String,
-           applicationType: String,
-           savePoint: String,
-           flameGraph: JavaMap[String, java.io.Serializable],
-           option: String,
-           property: JavaMap[String, Any],
-           dynamicOption: Array[String],
-           args: String,
-           clusterId: String) {
-    this(flinkHome, flinkVersion, flinkYaml, flinkUserJar, developmentMode, executionMode, resolveOrder, appName, appConf, applicationType,
-      savePoint, flameGraph, option, property, dynamicOption, args, clusterId, KubernetesConfigOptions.NAMESPACE.defaultValue(), "")
-  }
+                         @Nullable clusterId: String,
+                         @Nullable flinkBaseImage: String,
+                         @Nullable kubernetesNamespace:String,
+                         @Nullable dockerRegisterAddress: String,
+                         @Nullable dockerRegisterUser: String,
+                         @Nullable dockerRegisterPassword:String) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
 

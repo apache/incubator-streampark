@@ -43,6 +43,11 @@ public interface SettingService extends IService<Setting> {
     String KEY_ALERT_EMAIL_PASSWORD = "alert.email.password";
     String KEY_ALERT_EMAIL_SSL = "alert.email.ssl";
 
+    String KEY_DOCKER_REGISTER_ADDRESS = "docker.register.address";
+    String KEY_DOCKER_REGISTER_USER = "docker.register.user";
+    String KEY_DOCKER_REGISTER_PASSWORD = "docker.register.password";
+
+
     String KEY_ENV_FLINK_HOME = "env.flink.home";
 
     /**
@@ -76,6 +81,12 @@ public interface SettingService extends IService<Setting> {
     String getFlinkVersion();
 
     String getFlinkYaml();
+
+    String getDockerRegisterAddress();
+
+    String getDockerRegisterUser();
+
+    String getDockerRegisterPassword();
 
     void syncFlinkConf() throws IOException;
 }

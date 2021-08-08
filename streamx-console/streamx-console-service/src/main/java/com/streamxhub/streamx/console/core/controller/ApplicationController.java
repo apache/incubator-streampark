@@ -208,7 +208,6 @@ public class ApplicationController {
 
     @PostMapping("deletebak")
     public RestResponse deleteBak(ApplicationBackUp backUp) throws ServiceException {
-
         Boolean deleted = backUpService.delete(backUp.getId());
         return RestResponse.create().data(deleted);
     }
@@ -226,7 +225,7 @@ public class ApplicationController {
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file, Integer executionMode) throws IOException {
+    public RestResponse upload(MultipartFile file, Integer executionMode) throws Exception {
         StorageType storageType = Application.getStorageType(executionMode);
         boolean upload = applicationService.upload(file, storageType);
         return RestResponse.create().data(upload);

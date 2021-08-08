@@ -22,15 +22,11 @@
 export function baseUrl() {
   let url = ''
   switch (process.env.NODE_ENV) {
-    //混合打包(production)
+    //混合打包(production,不用配置,maven编译项目阶段-Denv=prod自动将环境参数透传到这里)
     case 'production':
       url = (arguments[0] || null) ? (location.protocol + '//' + location.host) : '/'
       break
-    //前后端分离(production)
-    case 'detached':
-      url = 'http://localhost:10000'
-      break
-    //测试阶段的测试地址(dev)
+    //开发测试阶段采用前后端分离,这里配置后端的请求URI
     case 'development':
       url = 'http://localhost:10000'
       break

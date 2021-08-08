@@ -1,7 +1,6 @@
 ---
 name: "\U0001F914 Ask a Question"
-about: I want to ask a question.
-title: "[Question] Question title "
+about: I want to ask a question. title: "[Question] Question title "
 labels: type/question
 ---
 

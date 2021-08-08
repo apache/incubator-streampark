@@ -89,6 +89,16 @@ public class Application implements Serializable {
     @TableField(strategy = FieldStrategy.IGNORED)
     private String jobId;
 
+    /**
+     * k8s部署下clusterId
+     */
+    private String clusterId;
+
+    /**
+     * flink docker base image
+     */
+    private String flinkImage;
+
     private Integer state;
     /**
      * 是否需要重新发布(针对项目已更新,需要重新发布项目.)

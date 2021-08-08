@@ -28,9 +28,10 @@
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
         <a-select
           placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          @change="handleChangeMode">
           <a-select-option
-            v-for="(o,index) in executionMode"
+            v-for="(o,index) in executionModes"
             :key="`execution_mode_${index}`"
             :disabled="o.disabled"
             :value="o.value">
@@ -38,6 +39,34 @@
           </a-select-option>
         </a-select>
       </a-form-item>
+
+      <template v-if="executionMode === 5|| executionMode === 6">
+        <a-form-item
+          label="kubernetes clusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Kubernetes clusterId"
+            allowClear
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="executionMode === 6">
+        <a-form-item
+          label="Flink Docker image"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Flink Base image"
+            allowClear
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base image is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
 
       <template v-if="app.jobType === 2">
 
@@ -907,7 +936,7 @@ export default {
         { name: 'parent-first', order: 0 },
         { name: 'child-first', order: 1 }
       ],
-      executionMode: [
+      executionModes: [
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
         { mode: 'yarn pre-job', value: 2, disabled: true },
@@ -950,6 +979,7 @@ export default {
       optionsValueMapping: {},
       loading: false,
       submitting: false,
+      executionMode: null,
       validateAgain: false,
       configuration: [
         { key: 'tc', name: ' time characteristic' },
@@ -1083,6 +1113,10 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
     },
 
     handleChangeConf(item) {
@@ -1307,6 +1341,7 @@ export default {
       if (executionMode !== null) {
         const formData = new FormData()
         formData.append('file', data.file)
+        formData.append('executionMode',executionMode)
         upload(formData).then((response) => {
           this.loading = false
           this.controller.dependency.jar.set(data.file.name, data.file.name)
@@ -1459,7 +1494,9 @@ export default {
         executionMode: values.executionMode,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
-        description: values.description
+        description: values.description,
+        clusterId: values.values || null,
+        flinkImage: values.flinkImage || null,
       }
       this.handleUpdateApp(params)
     },
@@ -1501,7 +1538,9 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail|| null,
         executionMode: values.executionMode,
-        description: values.description || null
+        description: values.description || null,
+        clusterId: values.values || null,
+        flinkImage: values.flinkImage || null
       }
       this.handleUpdateApp(params)
     },

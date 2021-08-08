@@ -60,11 +60,13 @@ object DockerRetriever {
   /**
    * remote image regoster authentication configuration which used by K8s cluster
    */
-  lazy val remoteImageRegisterAuthConfig: AuthConfig = {
+  def remoteImageRegisterAuthConfig(dockerRegisterAddress:String,
+                                    dockerRegisterUser:String,
+                                    dockerRegisterPassword:String): AuthConfig = {
     new AuthConfig()
-      .withRegistryAddress(K8sConfigConst.K8S_IMAGE_REGISTER_ADDRESS)
-      .withUsername(K8sConfigConst.K8S_IMAGE_REGISTER_USERNAME)
-      .withPassword(K8sConfigConst.K8S_IMAGE_REGISTER_PASSWORD)
+      .withRegistryAddress(dockerRegisterAddress)
+      .withUsername(dockerRegisterUser)
+      .withPassword(dockerRegisterPassword)
   }
 
   /**

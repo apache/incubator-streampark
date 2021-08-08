@@ -41,7 +41,7 @@ import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SortUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.annotation.RefreshCache;
-import com.streamxhub.streamx.console.core.config.EnvInitializer;
+import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.dao.ApplicationMapper;
 import com.streamxhub.streamx.console.core.entity.*;
 import com.streamxhub.streamx.console.core.enums.*;
@@ -59,6 +59,7 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -214,7 +215,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean upload(MultipartFile file, StorageType storageType) throws IOException {
+    public boolean upload(MultipartFile file, StorageType storageType) throws Exception {
+        envInitializer.storageInitialize(storageType);
         String APP_UPLOADS = ConfigConst.APP_UPLOADS();
         String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
         FsOperator fsOperator = FsOperatorGetter.get(storageType);
@@ -292,7 +294,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             baseMapper.update(application, updateWrapper);
             return null;
         });
-
     }
 
     @Override
@@ -342,10 +343,11 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     }
 
     @Override
-    public boolean checkStart(Application app) {
+    public boolean checkStart(Application appParam) {
         try {
-            envInitializer.checkFlinkEnv(app.getStorageType());
-            envInitializer.storageInitialize(app.getStorageType());
+            Application application = getById(appParam.getId());
+            envInitializer.checkFlinkEnv(application.getStorageType());
+            envInitializer.storageInitialize(application.getStorageType());
             return true;
         } catch (Throwable ignored) {
             return false;
@@ -992,11 +994,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             //3) plugin
             switch (executionMode) {
                 case YARN_PRE_JOB:
-                    flinkUserJar = sqlDistJar;
+                case KUBERNETES_NATIVE_SESSION:
+                case KUBERNETES_NATIVE_APPLICATION:
+                    flinkUserJar = ConfigConst.APP_PLUGINS().concat(sqlDistJar);
                     break;
                 case YARN_APPLICATION:
-                case KUBERNETES_NATIVE_SESSION:
-                    String pluginPath = ConfigConst.APP_PLUGINS();
+                    String pluginPath = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_PLUGINS());
                     flinkUserJar = String.format("%s/%s", pluginPath, sqlDistJar);
                     break;
                 default:
@@ -1048,7 +1051,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
-
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),
             settingService.getFlinkVersion(),
@@ -1066,7 +1068,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             optionMap,
             dynamicOption,
             application.getArgs(),
-            application.getAppId()
+            application.getClusterId(),
+            application.getFlinkImage(),
+            KubernetesConfigOptions.NAMESPACE.defaultValue(),
+            settingService.getDockerRegisterAddress(),
+            settingService.getDockerRegisterUser(),
+            settingService.getDockerRegisterPassword()
         );
 
         ApplicationLog log = new ApplicationLog();

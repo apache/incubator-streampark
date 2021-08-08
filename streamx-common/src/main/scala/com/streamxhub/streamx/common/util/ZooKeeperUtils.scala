@@ -26,7 +26,6 @@ import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
 
 import java.nio.charset.StandardCharsets
-import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
 import scala.collection.mutable
 

@@ -33,7 +33,7 @@ import java.io.{File, FileInputStream}
  * Local File System (aka LFS) Operator
  */
 //noinspection DuplicatedCode
-object LfsOperator extends FsOperator with Logger {
+object LFsOperator extends FsOperator with Logger {
 
   override def exists(path: String): Boolean = {
     StringUtils.isNotBlank(path) && new File(path).exists()

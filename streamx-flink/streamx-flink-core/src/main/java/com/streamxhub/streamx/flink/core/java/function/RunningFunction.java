@@ -30,6 +30,7 @@ public interface RunningFunction extends Serializable {
 
     /**
      * 是否running...
+     *
      * @return Boolean: isRunning
      */
     Boolean running();

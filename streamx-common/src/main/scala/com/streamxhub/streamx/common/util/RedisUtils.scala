@@ -24,8 +24,8 @@ import redis.clients.jedis.{Jedis, JedisCluster, Pipeline, ScanParams}
 
 import java.lang.{Integer => JInt}
 import java.util.Set
-import scala.collection.JavaConverters._
 import scala.collection.JavaConversions._
+import scala.collection.JavaConverters._
 import scala.collection.immutable
 import scala.util.{Failure, Success, Try}
 
