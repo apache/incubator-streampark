@@ -28,7 +28,7 @@ object LocalSubmit extends FlinkSubmitTrait {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 
-  override def doStop(stopInfo: StopRequest) : StopResponse ={
+  override def doStop(stopInfo: StopRequest): StopResponse = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 }

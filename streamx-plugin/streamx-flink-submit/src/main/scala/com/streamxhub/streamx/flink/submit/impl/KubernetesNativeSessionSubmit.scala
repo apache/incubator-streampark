@@ -24,9 +24,9 @@ import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.flink.packer.MavenTool
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
-import com.streamxhub.streamx.flink.packer.MavenTool
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
@@ -46,7 +46,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
   //noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
-    assert(Try(submitRequest.clusterId.nonEmpty).getOrElse(false))
+    assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
 
     val jobID = {
       if (StringUtils.isBlank(submitRequest.jobID)) new JobID()
@@ -57,7 +57,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     // build fat-jar
     val fatJar = {
       val flinkLibs = extractProvidedLibs(submitRequest) :+ submitRequest.flinkUserJar
-      val fatJarPath = s"$APP_WORKSPACE/${submitRequest.clusterId}/${jobID.toHexString}/flink-job.jar"
+      val fatJarPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/${jobID.toHexString}/flink-job.jar"
       MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
 

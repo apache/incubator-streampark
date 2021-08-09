@@ -22,9 +22,9 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.flink.packer.{DockerTool, FlinkDockerfileTemplate, MavenTool}
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
-import com.streamxhub.streamx.flink.packer.{DockerTool, FlinkDockerfileTemplate, MavenTool}
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
@@ -40,10 +40,10 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
   //noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
-    assert(Try(submitRequest.clusterId.nonEmpty).getOrElse(false))
-    assert(Try(submitRequest.flinkBaseImage.nonEmpty).getOrElse(false))
+    assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
+    assert(Try(submitRequest.k8sSubmitParam.flinkDockerImage.nonEmpty).getOrElse(false))
 
-    val buildWorkspace = s"$APP_WORKSPACE/${submitRequest.clusterId}/"
+    val buildWorkspace = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/"
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // build fat-jar
@@ -56,12 +56,12 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
     // build and push flink application image
     val flinkImageTag = {
-      val tagName = s"flinkjob-${submitRequest.clusterId}"
-      val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.flinkBaseImage, fatJar.getAbsolutePath)
+      val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
+      val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkDockerImage, fatJar.getAbsolutePath)
       DockerTool.buildFlinkImage(
-        submitRequest.dockerRegisterAddress,
-        submitRequest.dockerRegisterUser,
-        submitRequest.dockerRegisterPassword,
+        submitRequest.k8sSubmitParam.dockerRegisterAddress,
+        submitRequest.k8sSubmitParam.dockerRegisterUser,
+        submitRequest.k8sSubmitParam.dockerRegisterPassword,
         buildWorkspace,
         dockerFileTemplate,
         tagName,

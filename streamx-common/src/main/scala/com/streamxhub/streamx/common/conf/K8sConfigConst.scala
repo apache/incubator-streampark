@@ -35,18 +35,6 @@ object K8sConfigConst {
   lazy val K8S_IMAGE_REGISTER_ADDRESS: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
 
   /**
-   * login username of docker image regoster for remote k8s cluster
-   */
-  lazy val KEY_K8S_IMAGE_REGISTER_USERNAME = "k8s.image.register.username"
-  lazy val K8S_IMAGE_REGISTER_USERNAME: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_USERNAME, "")
-
-  /**
-   * login password of docker image regoster for remote k8s cluster
-   */
-  lazy val KEY_K8S_IMAGE_REGISTER_PASSWORD = "k8s.image.register.password"
-  lazy val K8S_IMAGE_REGISTER_PASSWORD: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_PASSWORD, "")
-
-  /**
    * namespace for docker image used in docker build env and image register
    */
   val IMAGE_NAMESPACE = "streamx"

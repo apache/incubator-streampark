@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
+import com.streamxhub.streamx.flink.packer.FlinkDockerfileTemplate.{DEFAULT_DOCKER_FILE_NAME, DOCKER_FILE_TEMPLATE}
 import org.apache.commons.io.FileUtils
 
 import java.io.File

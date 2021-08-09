@@ -44,13 +44,13 @@ object DockerTool {
    * @return actual flink job jar image name
    */
   @Nonnull
-  def buildFlinkImage(dockerRegisterAddress:String,
-                       dockerRegisterUser:String,
-                       dockerRegisterPassword:String,
-                       projectPath: String,
-                       template: FlinkDockerfileTemplate,
-                       tag: String,
-                       push: Boolean = false): String = {
+  def buildFlinkImage(dockerRegisterAddress: String,
+                      dockerRegisterUser: String,
+                      dockerRegisterPassword: String,
+                      projectPath: String,
+                      template: FlinkDockerfileTemplate,
+                      tag: String,
+                      push: Boolean = false): String = {
     // organize project path and write docker file
     val projectDir = new File(projectPath)
     if (!projectDir.exists()) {
@@ -63,7 +63,7 @@ object DockerTool {
     val dockerfile = template.writeDockerfile(projectPath)
     // build and push docker image
     buildImage(projectDir, dockerfile, tag) match {
-      case x if push => pushImage(dockerRegisterAddress,dockerRegisterUser,dockerRegisterPassword,x)
+      case x if push => pushImage(dockerRegisterAddress, dockerRegisterUser, dockerRegisterPassword, x)
       case y => y
     }
   }
@@ -101,16 +101,21 @@ object DockerTool {
    * @param tag tag name
    * @return actually image tag
    */
-  def pushImage(dockerRegisterAddress:String,
-                 dockerRegisterUser:String,
-                 dockerRegisterPassword:String,
-                 tag: String): String = {
+  def pushImage(dockerRegisterAddress: String,
+                dockerRegisterUser: String,
+                dockerRegisterPassword: String,
+                tag: String): String = {
     val tagName = compileTag(tag)
     tryWithResource(DockerRetriever.newDockerClient()) {
       client => {
         val pushCmd: PushImageCmd = client.pushImageCmd(tagName)
-          .withAuthConfig(DockerRetriever.remoteImageRegisterAuthConfig(dockerRegisterAddress,dockerRegisterUser,dockerRegisterPassword))
-          .withTag(tagName)
+          .withAuthConfig(
+            DockerRetriever.remoteImageRegisterAuthConfig(
+              dockerRegisterAddress,
+              dockerRegisterUser,
+              dockerRegisterPassword
+            )
+          ).withTag(tagName)
         pushCmd.start().awaitCompletion()
       }
     }

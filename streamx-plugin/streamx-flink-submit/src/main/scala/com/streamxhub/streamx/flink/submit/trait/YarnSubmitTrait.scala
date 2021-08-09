@@ -24,8 +24,6 @@ import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
-import org.apache.flink.client.cli.ClientOptions
-import com.streamxhub.streamx.flink.submit.SubmitRequest
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
 import org.apache.flink.client.deployment.ClusterSpecification

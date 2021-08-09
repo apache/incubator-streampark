@@ -35,6 +35,14 @@ import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 import scala.collection.JavaConversions._
 
+
+case class KubernetesSubmitParam(clusterId: String,
+                                 flinkDockerImage: String,
+                                 kubernetesNamespace: String,
+                                 dockerRegisterAddress: String,
+                                 dockerRegisterUser: String,
+                                 dockerRegisterPassword: String)
+
 // todo need for more elegant code refactoring
 case class SubmitRequest(flinkHome: String,
                          flinkVersion: String,
@@ -52,12 +60,7 @@ case class SubmitRequest(flinkHome: String,
                          property: JavaMap[String, Any],
                          dynamicOption: Array[String],
                          args: String,
-                         @Nullable clusterId: String,
-                         @Nullable flinkBaseImage: String,
-                         @Nullable kubernetesNamespace:String,
-                         @Nullable dockerRegisterAddress: String,
-                         @Nullable dockerRegisterUser: String,
-                         @Nullable dockerRegisterPassword:String) {
+                         @Nullable k8sSubmitParam: KubernetesSubmitParam) {
 
   lazy val appProperties: Map[String, String] = getParameterMap(KEY_FLINK_DEPLOYMENT_PROPERTY_PREFIX)
 
