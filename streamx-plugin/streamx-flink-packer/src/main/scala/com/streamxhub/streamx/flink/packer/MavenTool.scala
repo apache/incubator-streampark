@@ -53,7 +53,7 @@ object MavenTool extends Logger {
    * @return File Object of output fat-jar
    */
   @Nonnull
-  def buildFatJar(@Nonnull jarLibs: Array[String], @Nonnull outFatJarPath: String): File = {
+  def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
     if (uberJar.isDirectory) {
@@ -63,7 +63,6 @@ object MavenTool extends Logger {
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
       .filter(_.exists)
-      .distinct
       .foreach {
         case f if isJarFile(f) => jarSet.add(f)
         case f if f.isDirectory => f.listFiles.filter(isJarFile).foreach(jarSet.add)
@@ -96,10 +95,10 @@ object MavenTool extends Logger {
    * @return File Object of output fat-jar
    */
   @Nonnull
-  def buildFatJar(@Nullable jarLibs: Array[String], @Nullable mavenArtifacts: Array[MavenArtifact],
+  def buildFatJar(@Nullable jarLibs: Set[String], @Nullable mavenArtifacts: Set[MavenArtifact],
                   @Nonnull outFatJarPath: String): File = {
-    val libs = if (jarLibs == null) Array[String]() else jarLibs
-    val arts = if (mavenArtifacts == null) Array[MavenArtifact]() else mavenArtifacts
+    val libs = if (jarLibs == null) Set.empty[String] else jarLibs
+    val arts = if (mavenArtifacts == null) Set.empty[MavenArtifact] else mavenArtifacts
     if (libs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[Streamx-Maven] empty artifacts.")
     }
@@ -117,29 +116,28 @@ object MavenTool extends Logger {
    * @return jar File Object of resolved artifacts
    */
   @Nonnull
-  def resolveArtifacts(mavenArtifacts: Array[MavenArtifact]): Array[File] = {
-    if (mavenArtifacts == null) {
-      return Array[File]()
+  def resolveArtifacts(mavenArtifacts: Set[MavenArtifact]): Set[File] = {
+    if (mavenArtifacts == null) Set.empty[File]; else {
+      val (repoSystem, session) = MavenRetriever.retrieve()
+      val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version)).toSet
+      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
+
+      // read relevant artifact descriptor info
+      val resolvedArtifacts = artifacts
+        .map(art => new ArtifactDescriptorRequest(art, MavenRetriever.remoteRepos, null))
+        .map(artReq => repoSystem.readArtifactDescriptor(session, artReq))
+        .flatMap(_.getDependencies)
+        .filter(_.getScope == "compile")
+        .map(_.getArtifact)
+      logInfo(s"resolved dependencies: ${resolvedArtifacts.mkString}")
+
+      // download artifacts
+      val artReqs = resolvedArtifacts.map(art => new ArtifactRequest(art, MavenRetriever.remoteRepos, null)).asJava
+      repoSystem
+        .resolveArtifacts(session, artReqs)
+        .map(_.getArtifact.getFile)
+        .toSet
     }
-    val (repoSystem, session) = MavenRetriever.retrieve()
-    val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version)).toSet
-    logInfo(s"start resolving dependencies: ${artifacts.mkString}")
-
-    // read relevant artifact descriptor info
-    val resolvedArtifacts = artifacts
-      .map(art => new ArtifactDescriptorRequest(art, MavenRetriever.remoteRepos, null))
-      .map(artReq => repoSystem.readArtifactDescriptor(session, artReq))
-      .flatMap(_.getDependencies)
-      .filter(_.getScope == "compile")
-      .map(_.getArtifact)
-    logInfo(s"resolved dependencies: ${resolvedArtifacts.mkString}")
-
-    // download artifacts
-    val artReqs = resolvedArtifacts.map(art => new ArtifactRequest(art, MavenRetriever.remoteRepos, null)).asJava
-    repoSystem
-      .resolveArtifacts(session, artReqs)
-      .map(_.getArtifact.getFile)
-      .toArray
   }
 
 
