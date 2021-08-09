@@ -120,8 +120,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   /**
    * extract all necessary flink configuration from submitRequest
    */
-  @Nonnull
-  def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
+  @Nonnull def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
     // base from default config
     val flinkConfig = Try(submitRequest.flinkDefaultConfiguration).getOrElse(new Configuration)
     val safeSet = safeSetConfig(flinkConfig) _
@@ -129,10 +128,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     // extract from submitRequest
     flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
     safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-    safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.clusterId)
-    safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.kubernetesNamespace)
+    safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
+    safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
     safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-    safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.flinkBaseImage)
+    safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
 
     if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
@@ -174,8 +173,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   /**
    * extract flink configuration from submitRequest.dynamicOption
    */
-  @Nonnull
-  def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
+  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
     if (Utils.isEmpty(dynamicOption)) {
       return Map.empty
     }
@@ -189,8 +187,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private def safeSetConfig(flinkConfig: Configuration)(option: ConfigOption[String], value: String): Configuration = {
-    if (StringUtils.isNotBlank(value)) flinkConfig.set(option, value)
-    else flinkConfig
+    flinkConfig match {
+      case x if StringUtils.isNotBlank(value) => x.set(option, value)
+      case x => x
+    }
   }
 
   protected def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {

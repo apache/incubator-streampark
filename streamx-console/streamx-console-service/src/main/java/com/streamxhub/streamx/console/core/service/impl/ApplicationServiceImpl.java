@@ -1051,6 +1051,15 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
 
         ResolveOrder resolveOrder = ResolveOrder.of(application.getResolveOrder());
 
+        KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
+            application.getClusterId(),
+            application.getFlinkImage(),
+            KubernetesConfigOptions.NAMESPACE.defaultValue(),
+            settingService.getDockerRegisterAddress(),
+            settingService.getDockerRegisterUser(),
+            settingService.getDockerRegisterPassword()
+        );
+
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),
             settingService.getFlinkVersion(),
@@ -1068,12 +1077,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             optionMap,
             dynamicOption,
             application.getArgs(),
-            application.getClusterId(),
-            application.getFlinkImage(),
-            KubernetesConfigOptions.NAMESPACE.defaultValue(),
-            settingService.getDockerRegisterAddress(),
-            settingService.getDockerRegisterUser(),
-            settingService.getDockerRegisterPassword()
+            kubernetesSubmitParam
         );
 
         ApplicationLog log = new ApplicationLog();

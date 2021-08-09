@@ -25,7 +25,6 @@ import com.github.dockerjava.api.model.AuthConfig
 import com.github.dockerjava.core.{DefaultDockerClientConfig, DockerClientConfig, DockerClientImpl}
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.github.dockerjava.transport.DockerHttpClient
-import com.streamxhub.streamx.common.conf.K8sConfigConst
 
 import java.time.Duration
 
@@ -60,9 +59,9 @@ object DockerRetriever {
   /**
    * remote image regoster authentication configuration which used by K8s cluster
    */
-  def remoteImageRegisterAuthConfig(dockerRegisterAddress:String,
-                                    dockerRegisterUser:String,
-                                    dockerRegisterPassword:String): AuthConfig = {
+  def remoteImageRegisterAuthConfig(dockerRegisterAddress: String,
+                                    dockerRegisterUser: String,
+                                    dockerRegisterPassword: String): AuthConfig = {
     new AuthConfig()
       .withRegistryAddress(dockerRegisterAddress)
       .withUsername(dockerRegisterUser)
