@@ -25,6 +25,7 @@ import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, Stor
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
+import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
@@ -36,12 +37,13 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
-import java.io.File
+import java.io.{File, FileInputStream}
 import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 import scala.language.postfixOps
 import scala.util.Try
@@ -50,6 +52,8 @@ import scala.util.Try
  * kubernetes native mode submit
  */
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
+
+  private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
   // effective k-v regex pattern of submit.dynamicOption
   private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
@@ -73,7 +77,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
       val savePointDir = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
-
       val actionResult = {
         if (stopRequest.withDrain) {
           client.stopWithSavepoint(jobID, true, savePointDir).get()
@@ -193,7 +196,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
-  protected def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
+  private[submit] def extractProgarmArgs(submitRequest: SubmitRequest): ArrayBuffer[String] = {
     val programArgs = new ArrayBuffer[String]()
     Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
     programArgs += PARAM_KEY_FLINK_CONF
@@ -216,12 +219,13 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     programArgs
   }
 
-  protected def extractProvidedLibs(submitRequest: SubmitRequest): Array[String] = {
+  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): (String, Set[String]) = {
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
       flinkLib,
       APP_JARS,
-      APP_PLUGINS
+      APP_PLUGINS,
+      submitRequest.flinkUserJar
     )
     val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
     version match {
@@ -236,7 +240,18 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
       providedLibs += jobLib
     }
-    providedLibs.toArray
+
+    val libSet = providedLibs.toSet
+
+    // loop join md5sum per file
+    val joinedMd5 = libSet.flatMap(lib =>
+      new File(lib) match {
+        case f if f.isFile => List(f)
+        case d => d.listFiles().toList
+      }
+    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
+
+    DigestUtils.md5Hex(joinedMd5) -> libSet
   }
 
 
