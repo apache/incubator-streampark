@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -75,7 +76,17 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @PostConstruct
     public void initSetting() {
         List<Setting> settingList = super.list();
+        refillSetting(settingList);
         settingList.forEach(x -> settings.put(x.getKey(), x));
+    }
+
+    private void refillSetting(List<Setting> settings) {
+        for (Setting setting : settings) {
+            if ("streamx.console.workspace".equals(setting.getKey())) {
+                setting.setValue(ConfigConst.APP_WORKSPACE());
+                break;
+            }
+        }
     }
 
     @SneakyThrows
