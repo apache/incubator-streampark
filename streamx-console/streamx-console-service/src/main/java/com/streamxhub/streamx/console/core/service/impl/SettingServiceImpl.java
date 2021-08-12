@@ -76,17 +76,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @PostConstruct
     public void initSetting() {
         List<Setting> settingList = super.list();
-        refillSetting(settingList);
         settingList.forEach(x -> settings.put(x.getKey(), x));
-    }
-
-    private void refillSetting(List<Setting> settings) {
-        for (Setting setting : settings) {
-            if ("streamx.console.workspace".equals(setting.getKey())) {
-                setting.setValue(ConfigConst.APP_WORKSPACE());
-                break;
-            }
-        }
     }
 
     @SneakyThrows
