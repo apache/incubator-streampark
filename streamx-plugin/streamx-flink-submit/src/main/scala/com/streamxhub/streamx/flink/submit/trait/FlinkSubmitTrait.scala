@@ -214,5 +214,6 @@ case class WorkspaceEnv(flinkName: String,
                         flinkHome: String,
                         flinkDistJar: String,
                         flinkLib: String,
+                        appUploads: String,
                         appJars: String,
                         appPlugins: String)

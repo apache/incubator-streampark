@@ -122,6 +122,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
       }
       val providedLibs = ListBuffer(
         submitRequest.workspaceEnv.flinkLib,
+        submitRequest.workspaceEnv.appUploads,
         submitRequest.workspaceEnv.appJars,
         submitRequest.workspaceEnv.appPlugins
       )

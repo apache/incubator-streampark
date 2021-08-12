@@ -60,7 +60,7 @@ http.interceptors.request.use(config => {
             data = { params: data }
         } else if (config.method === 'delete') {
             data = { data: $qs.stringify(data) }
-        } else if (config.method !== 'upload') {
+        } else if (config.type !== 'upload') {
             data = $qs.stringify(data)
         }
         return data
@@ -160,6 +160,7 @@ export default {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
+            type: 'upload',
             timeout: blobTimeout // 上传文件超时10分钟
         })
     },
