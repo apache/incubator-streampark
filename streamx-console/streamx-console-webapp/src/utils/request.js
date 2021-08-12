@@ -160,7 +160,6 @@ export default {
             headers: {
                 'Content-Type': 'multipart/form-data'
             },
-            type: 'upload',
             timeout: blobTimeout // 上传文件超时10分钟
         })
     },
