@@ -91,4 +91,21 @@ public enum ExecutionMode implements Serializable {
     public String getName() {
         return name;
     }
+
+    public static boolean isYarnMode(ExecutionMode mode) {
+        return YARN_PRE_JOB.equals(mode) || YARN_APPLICATION.equals(mode) || YARN_SESSION.equals(mode);
+    }
+
+    public static boolean isYarnMode(Integer value) {
+        return isYarnMode(of(value));
+    }
+
+    public static boolean isKubernetesMode(ExecutionMode mode) {
+        return KUBERNETES_NATIVE_SESSION.equals(mode) || KUBERNETES_NATIVE_APPLICATION.equals(mode);
+    }
+
+    public static boolean isKubernetesMode(Integer value) {
+        return isKubernetesMode(of(value));
+    }
+
 }
