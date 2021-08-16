@@ -394,6 +394,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
      * @return
      */
     @Override
+    // fixme
     public AppExistsState checkExists(Application appParam) {
         boolean inDB = this.baseMapper.selectCount(
             new QueryWrapper<Application>().lambda()
@@ -426,7 +427,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             if (inDB) {
                 return AppExistsState.IN_DB;
             }
-            if (YarnUtils.isContains(appParam.getJobName())) {
+            if (ExecutionMode.isYarnMode(appParam.getExecutionMode())
+                && YarnUtils.isContains(appParam.getJobName())) {
                 return AppExistsState.IN_YARN;
             }
         }
@@ -1059,7 +1061,6 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             settingService.getDockerRegisterUser(),
             settingService.getDockerRegisterPassword()
         );
-
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),
             settingService.getFlinkVersion(),

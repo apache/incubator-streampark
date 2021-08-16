@@ -69,6 +69,8 @@ public class EnvInitializer implements ApplicationRunner {
                 ConfigConst.STREAMX_WORKSPACE_DEFAULT()
             )
         );
+        // local storage must exists
+        storageInitialize(StorageType.LFS);
     }
 
     /**

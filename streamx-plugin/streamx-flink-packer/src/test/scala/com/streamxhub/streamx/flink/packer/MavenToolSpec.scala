@@ -53,7 +53,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with jarlibs" in {
         val fatJarPath = outputDir.concat("fat-1.jar")
         val fatJar = MavenTool.buildFatJar(
-          Array(
+          Set(
             path("jars/commons-cli-1.4.jar"),
             path("jars/commons-dbutils-1.7.jar")),
           fatJarPath)
@@ -63,7 +63,7 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       }
       "with jarlibs under directory" in {
         val fatJarPath = outputDir.concat("fat-2.jar")
-        val fatJar = MavenTool.buildFatJar(Array(path("jars/")), fatJarPath)
+        val fatJar = MavenTool.buildFatJar(Set(path("jars/")), fatJarPath)
         fatJar.exists() mustBe true
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-cli-1.4.jar")), "org/apache/commons/cli/DefaultParser.class"))
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
@@ -72,8 +72,8 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with jarlibs and maven artifacts" in {
         val fatJarPath = outputDir.concat("fat-3.jar")
         val fatJar = MavenTool.buildFatJar(
-          Array(path("jars/commons-dbutils-1.7.jar")),
-          Array(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
+          Set(path("jars/commons-dbutils-1.7.jar")),
+          Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
           fatJarPath)
         fatJar.exists() mustBe true
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))
@@ -84,17 +84,17 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
 
     "resolve artifacts" should {
       "with single artifact" in {
-        val jars = MavenTool.resolveArtifacts(Array(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
+        val jars = MavenTool.resolveArtifacts(Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")))
         val expectJars = Array(
           "force-shading-1.13.0.jar",
           "flink-connector-base-1.13.0.jar",
           "kafka-clients-2.4.1.jar")
-        jars.length mustNot be(0)
+        jars.size mustNot be(0)
         jars.forall(jar => jar.exists()) mustBe true
         jars.map(jar => jar.getName).sameElements(expectJars) mustBe true
       }
       "with mutiply artifact" in {
-        val jars = MavenTool.resolveArtifacts(Array(
+        val jars = MavenTool.resolveArtifacts(Set(
           MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0"),
           MavenArtifact.of("org.apache.flink:flink-connector-base:1.13.0")
         ))

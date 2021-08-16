@@ -1471,7 +1471,7 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null,
-        clusterId: values.values || null,
+        clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
       this.handleCreateApp(params)
