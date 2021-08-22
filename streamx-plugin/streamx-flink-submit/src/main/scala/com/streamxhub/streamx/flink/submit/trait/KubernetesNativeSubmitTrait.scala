@@ -25,7 +25,6 @@ import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, Stor
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
 import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
@@ -37,7 +36,7 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
-import java.io.{File, FileInputStream}
+import java.io.File
 import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
@@ -136,7 +135,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
     safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
 
-    if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
+    if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
+      flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
+    } else {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
     if (StringUtils.isNotBlank(submitRequest.option)
@@ -219,7 +220,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     programArgs
   }
 
-  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): (String, Set[String]) = {
+  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
       flinkLib,
@@ -242,16 +243,15 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
 
     val libSet = providedLibs.toSet
-
     // loop join md5sum per file
-    val joinedMd5 = libSet.flatMap(lib =>
-      new File(lib) match {
-        case f if f.isFile => List(f)
-        case d => d.listFiles().toList
-      }
-    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
-
-    DigestUtils.md5Hex(joinedMd5) -> libSet
+    //    val joinedMd5 = libSet.flatMap(lib =>
+    //      new File(lib) match {
+    //        case f if f.isFile => List(f)
+    //        case d => d.listFiles().toList
+    //      }
+    //    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
+    //    DigestUtils.md5Hex(joinedMd5) -> libSet
+    libSet
   }
 
 
