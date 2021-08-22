@@ -20,6 +20,7 @@
         <module>streamx-flink-submit</module>
         <module>streamx-jvm-profiler</module>
         <module>streamx-flink-packer</module>
+        <module>streamx-flink-kubernetes</module>
     </modules>
 
 </project>
