@@ -26,7 +26,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.packer.MavenTool
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
-import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.{ClusterClient, PackagedProgram, PackagedProgramUtils}
 import org.apache.flink.configuration._

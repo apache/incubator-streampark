@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.submit
+package com.streamxhub.streamx.flink.submit.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
