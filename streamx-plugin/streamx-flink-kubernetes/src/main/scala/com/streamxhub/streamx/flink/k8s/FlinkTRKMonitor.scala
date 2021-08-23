@@ -18,26 +18,22 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.cache
+package com.streamxhub.streamx.flink.k8s
 
-import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-import com.streamxhub.streamx.flink.k8s.cache.TRKIDCache.Value
 import com.streamxhub.streamx.flink.k8s.model.TrkId
 
+trait FlinkTRKMonitor {
 
-class TRKIDCache {
-  /**
-   * tracking identifiers of flink kubernetes-session mode
-   */
-  val cache: Cache[TrkId, Value] = Caffeine.newBuilder.build()
+  def createInstance(): FlinkTRKMonitor = new DefaultFlinkTRKMonitor()
+
+  def trackingJob(trkId: TrkId)
+
+  def trackingJob(trkIds: Set[TrkId])
+
+  def unTrackingJob(trkId: TrkId)
+
+  def unTrackingJob(trkIds: Set[TrkId])
+
 
 }
-
-object TRKIDCache {
-  /**
-   * @param updateTime last update time for current key
-   */
-  case class Value(updateTime: Long)
-}
-
 
