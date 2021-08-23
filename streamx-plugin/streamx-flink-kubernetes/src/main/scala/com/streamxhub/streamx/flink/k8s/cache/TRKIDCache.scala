@@ -29,7 +29,7 @@ class TRKIDCache {
   /**
    * tracking identifiers of flink kubernetes-session mode
    */
-  val trkIds: Cache[TrkId, Value] = Caffeine.newBuilder.build()
+  val cache: Cache[TrkId, Value] = Caffeine.newBuilder.build()
 
 }
 

@@ -29,8 +29,7 @@ import com.streamxhub.streamx.flink.k8s.model.TrkId
  * flink kubernetes job status tracking cache
  */
 class FlinkJobStatusTRKCache {
-
-  val jobStatuses: Cache[TrkId, Value] = Caffeine.newBuilder.build()
+  val cache: Cache[TrkId, Value] = Caffeine.newBuilder.build()
 
 }
 

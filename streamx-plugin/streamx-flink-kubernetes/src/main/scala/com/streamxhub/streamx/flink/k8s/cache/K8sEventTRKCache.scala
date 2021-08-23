@@ -33,11 +33,11 @@ class K8sEventTRKCache {
   /**
    * last k8s events of Service kind
    */
-  val lastServiceEvents: Cache[Key, ServiceVal] = Caffeine.newBuilder.build()
+  val serviceCache: Cache[Key, ServiceVal] = Caffeine.newBuilder.build()
   /**
    * last k8s events of Deployment kind
    */
-  val lastDeploymentEvents: Cache[Key, DeploymentVal] = Caffeine.newBuilder.build()
+  val deplymentCache: Cache[Key, DeploymentVal] = Caffeine.newBuilder.build()
 
 }
 
