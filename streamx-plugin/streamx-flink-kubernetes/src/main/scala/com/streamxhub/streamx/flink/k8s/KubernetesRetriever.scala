@@ -24,6 +24,9 @@ import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient}
 
 import scala.util.Try
 
+/**
+ * auther:Al-assad
+ */
 object KubernetesRetriever {
 
   def newK8sClient(): KubernetesClient = {

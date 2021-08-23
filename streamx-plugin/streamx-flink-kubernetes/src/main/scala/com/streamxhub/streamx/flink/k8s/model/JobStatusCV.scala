@@ -23,6 +23,8 @@ package com.streamxhub.streamx.flink.k8s.model
 import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
 
 /**
+ * auther:Al-assad
+ *
  * @param jobState     state of flink job
  * @param jobStartTime flink job starting timestamp
  * @param pollEmitTime tracking polling emit timestamp

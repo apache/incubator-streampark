@@ -22,6 +22,9 @@ package com.streamxhub.streamx.flink.k8s
 
 import com.streamxhub.streamx.flink.k8s.model.TrkId
 
+/**
+ * auther:Al-assad
+ */
 trait FlinkTRKMonitor {
 
   def createInstance(): FlinkTRKMonitor = new DefaultFlinkTRKMonitor()
