@@ -37,6 +37,8 @@ trait FlinkTRKMonitor {
 
   def unTrackingJob(trkIds: Set[TrkId])
 
+  def isInTracking(trkId: TrkId):Boolean
+
 
 }
 

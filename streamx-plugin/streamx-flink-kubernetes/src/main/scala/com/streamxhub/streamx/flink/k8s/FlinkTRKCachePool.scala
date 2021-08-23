@@ -36,7 +36,7 @@ class FlinkTRKCachePool {
   // tracking kubernetes events cache with Service kind
   val k8sServiceEvents: Cache[K8sEventKey, K8sServiceEventCV] = Caffeine.newBuilder.build()
   // tracking kubernetes events cache with Deployment kind
-  val K8sDeploymentEventCV: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
+  val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
   // todo recovery from db
 
@@ -45,6 +45,16 @@ class FlinkTRKCachePool {
    */
   def collectAllTrkIds(): Set[TrkId] = {
     trkIds.asMap().keySet().asScala.toSet
+  }
+
+  /**
+   * determines whether the specified TrkId is in the trace
+   */
+  def isInTracking(trkId: TrkId): Boolean = {
+    if (trkId == null || !trkId.isLegal) {
+      return false
+    }
+    trkIds.getIfPresent(trkId) != null
   }
 
 }

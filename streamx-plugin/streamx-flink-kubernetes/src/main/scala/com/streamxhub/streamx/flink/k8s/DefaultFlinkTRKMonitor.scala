@@ -22,7 +22,6 @@ package com.streamxhub.streamx.flink.k8s
 
 import com.streamxhub.streamx.flink.k8s.model.{TrkId, TrkIdCV}
 
-import java.util.Date
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -40,14 +39,14 @@ class DefaultFlinkTRKMonitor extends FlinkTRKMonitor {
     if (trkId == null || !trkId.isLegal) {
       return
     }
-    trkCache.trkIds.put(trkId, TrkIdCV(new Date().getTime))
+    trkCache.trkIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
   }
 
   def trackingJob(trkIds: Set[TrkId]): Unit = {
     if (Try(trkIds.isEmpty).getOrElse(true)) {
       return
     }
-    val now = new Date().getTime
+    val now = System.currentTimeMillis()
     val trackingMap = trkIds.map(e => (e, TrkIdCV(now))).toMap
     trkCache.trkIds.putAll(trackingMap.asJava)
   }
@@ -66,6 +65,7 @@ class DefaultFlinkTRKMonitor extends FlinkTRKMonitor {
     trkCache.trkIds.invalidateAll(trkIds.asJava)
   }
 
+  override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
 
 }
 
