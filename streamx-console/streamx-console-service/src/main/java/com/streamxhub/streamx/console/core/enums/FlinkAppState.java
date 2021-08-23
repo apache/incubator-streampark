@@ -20,9 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.enums;
 
+
+import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState;
 import lombok.Getter;
 
 import java.io.Serializable;
+import scala.Enumeration;
 
 /**
  * @author benjobs
@@ -144,4 +147,29 @@ public enum FlinkAppState implements Serializable {
         }
         return FlinkAppState.OTHER;
     }
+
+
+    /**
+     * type conversion bridging
+     */
+    public static class Bridge {
+        /**
+         * covert from com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
+         */
+        public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
+            if (FlinkJobState.K8S_DEPLOYING().equals(flinkJobState)) {
+                return DEPLOYING;
+            } else {
+                return of(flinkJobState.toString());
+            }
+        }
+
+        /**
+         * covert to com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
+         */
+        public static Enumeration.Value toK8sFlinkJobState(FlinkAppState flinkAppState) {
+            return FlinkJobState.of(flinkAppState.name());
+        }
+    }
+
 }

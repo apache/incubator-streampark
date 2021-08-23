@@ -408,6 +408,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-kubernetes</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!--以下依赖会自动隔离处理,针对flink1.12和flink1.13不同版本同时支持-->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
