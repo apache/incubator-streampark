@@ -20,6 +20,17 @@
  */
 package com.streamxhub.streamx.flink.k8s
 
+import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient}
+
+import scala.util.Try
+
 object KubernetesRetriever {
+
+  def newK8sClient(): KubernetesClient = {
+    new DefaultKubernetesClient()
+  }
+
+  def checkConnection(): Boolean = Try(newK8sClient().getVersion != null).getOrElse(false)
+
 
 }
