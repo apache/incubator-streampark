@@ -45,6 +45,17 @@
 
       <template v-if="executionMode === 5|| executionMode === 6">
         <a-form-item
+          label="kubernetes namespace"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="default"
+            allowClear
+            v-decorator="[ 'k8sNameSpace']">
+          </a-input>
+        </a-form-item>
+        <a-form-item
           label="kubernetes clusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -1406,7 +1417,8 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description,
-        clusterId: values.values || null,
+        k8sNameSpace: values.k8sNameSpace || null,
+        clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
 
@@ -1471,6 +1483,7 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null,
+        k8sNameSpace: values.k8sNameSpace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
