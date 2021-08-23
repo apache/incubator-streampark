@@ -18,28 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.cache
-
-import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-import com.streamxhub.streamx.flink.k8s.cache.FlinkJobStatusTRKCache.Value
-import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
-import com.streamxhub.streamx.flink.k8s.model.TrkId
+package com.streamxhub.streamx.flink.k8s.model
 
 /**
- * flink kubernetes job status tracking cache
+ * @param updateTime last update time for current key
  */
-class FlinkJobStatusTRKCache {
-  val cache: Cache[TrkId, Value] = Caffeine.newBuilder.build()
-
-}
-
-object FlinkJobStatusTRKCache {
-  /**
-   * @param jobState     state of flink job
-   * @param jobStartTime flink job starting timestamp
-   * @param pollEmitTime tracking polling emit timestamp
-   * @param pollAckTime  traking polling result receive timestamp
-   */
-  case class Value(jobState: FlinkJobState.Value, jobStartTime: Long, pollEmitTime: Long, pollAckTime: Long)
-}
-
+case class TrkIdCV(updateTime: Long)

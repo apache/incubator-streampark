@@ -18,38 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.cache
+package com.streamxhub.streamx.flink.k8s.model
 
-import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-import com.streamxhub.streamx.flink.k8s.cache.K8sEventTRKCache.{DeploymentVal, Key, ServiceVal}
 import com.streamxhub.streamx.flink.k8s.enums.K8sEventAction
-import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.apps.Deployment
 
 /**
- * kubernetes event tracking cache, just for flink-application mode
+ * @param action      event action
+ * @param event       event content
+ * @param pollAckTime tracking polling ack time
  */
-class K8sEventTRKCache {
-  /**
-   * last k8s events of Service kind
-   */
-  val serviceCache: Cache[Key, ServiceVal] = Caffeine.newBuilder.build()
-  /**
-   * last k8s events of Deployment kind
-   */
-  val deplymentCache: Cache[Key, DeploymentVal] = Caffeine.newBuilder.build()
-
-}
-
-object K8sEventTRKCache {
-  case class Key(namespace: String, clusterId: String)
-
-  case class ServiceVal(action: K8sEventAction.Value, event: Service)
-
-  case class DeploymentVal(action: K8sEventAction.Value, event: Deployment)
-}
-
-
-
-
-
+case class K8sDeploymentEventCV(action: K8sEventAction.Value, event: Deployment, pollAckTime: Long)
