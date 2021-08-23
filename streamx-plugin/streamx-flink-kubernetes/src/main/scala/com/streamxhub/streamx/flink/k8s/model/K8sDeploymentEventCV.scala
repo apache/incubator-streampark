@@ -20,11 +20,14 @@
  */
 package com.streamxhub.streamx.flink.k8s.model
 
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.client.Watcher.Action
+
 /**
  * auther:Al-assad
  *
  * @param action     event action
  * @param event      event content
- * @param createTime create time of event
+ * @param pollAckTime polling ack time
  */
-case class K8sDeploymentEventCV(action: Action, event: Deployment, createTime: Long)
+case class K8sDeploymentEventCV(action: Action, event: Deployment, pollAckTime: Long)

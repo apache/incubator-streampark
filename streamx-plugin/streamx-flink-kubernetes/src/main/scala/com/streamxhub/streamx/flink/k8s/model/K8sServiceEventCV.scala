@@ -26,6 +26,6 @@ import io.fabric8.kubernetes.client.Watcher.Action
 /**
  * @param action     event action
  * @param event      event content
- * @param createTime create time of event
+ * @param pollAckTime polling ack time
  */
-case class K8sServiceEventCV(action: Action, event: Service, createTime: Long)
+case class K8sServiceEventCV(action: Action, event: Service, pollAckTime: Long)
