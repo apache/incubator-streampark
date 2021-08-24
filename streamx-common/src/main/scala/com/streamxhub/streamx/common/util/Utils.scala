@@ -91,7 +91,7 @@ object Utils {
   def isAnyBank(items: String*): Boolean = items == null || items.exists(StringUtils.isBlank)
 
   /*
-   * mimicking the try-with-rresource syntax of Java-8+
+   * Mimicking the try-with-rresource syntax of Java-8+
    */
   def tryWithResource[T <: AutoCloseable](handle: T)(func: T => Any): Any = {
     try {
@@ -102,5 +102,23 @@ object Utils {
       }
     }
   }
+
+  /*
+  * Mimicking the try-with-rresource syntax of Java-8+,
+  * and also provides callback function param for handing
+  * Exception.
+  */
+  def tryWithResourceExc[T <: AutoCloseable](handle: T)(func: T => Any)(excFunc: Exception => Any): Any = {
+    try {
+      func(handle)
+    } catch {
+      case e: Exception => excFunc(e)
+    } finally {
+      if (handle != null) {
+        handle.close()
+      }
+    }
+  }
+
 
 }
