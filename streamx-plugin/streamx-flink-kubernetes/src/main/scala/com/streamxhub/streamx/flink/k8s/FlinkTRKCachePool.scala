@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.k8s
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
-import com.streamxhub.streamx.flink.k8s.model.{JobStatusCV, K8sDeploymentEventCV, K8sEventKey, K8sServiceEventCV, TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.k8s.model.{JobStatusCV, K8sDeploymentEventCV, K8sEventKey, TrkId, TrkIdCV}
 import scala.collection.JavaConverters._
 
 /**
@@ -33,8 +33,6 @@ class FlinkTRKCachePool {
   val trkIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
   // tracking flink job status cache
   val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
-  // tracking kubernetes events cache with Service kind
-  val k8sServiceEvents: Cache[K8sEventKey, K8sServiceEventCV] = Caffeine.newBuilder.build()
   // tracking kubernetes events cache with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 

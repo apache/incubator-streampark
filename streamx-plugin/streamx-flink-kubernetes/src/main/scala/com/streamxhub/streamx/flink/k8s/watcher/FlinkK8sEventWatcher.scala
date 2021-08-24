@@ -21,9 +21,8 @@
 package com.streamxhub.streamx.flink.k8s.watcher
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.model.{K8sDeploymentEventCV, K8sEventKey, K8sServiceEventCV, TrkId}
+import com.streamxhub.streamx.flink.k8s.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
 import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
-import io.fabric8.kubernetes.api.model.Service
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 
@@ -36,35 +35,20 @@ import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException
  *
  * @param cachePool cache pool
  */
-class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger {
+class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
   // just for debug
   private val FILTER_MODE = true
 
-
   /**
-   * start wtacher process
+   * start watcher process
    */
   def start(): Unit = {
     if (k8sClient != null) {
       return
     }
     k8sClient = KubernetesRetriever.newK8sClient()
-
-    // watch k8s service events
-    k8sClient.services()
-      .withLabel("type", "flink-native-kubernetes")
-      .watch(new Watcher[Service]() {
-        override def eventReceived(action: Watcher.Action, event: Service): Unit = {
-          handleServiceEvent(action, event)
-        }
-
-        override def onClose(e: KubernetesClientException): Unit = {
-          logInfo(s"K8sEventWatcher[Kind=Service] stop, message=${e.getMessage}")
-        }
-      })
-
     // watch k8s deployment events
     k8sClient.apps().deployments()
       .withLabel("type", "flink-native-kubernetes")
@@ -87,25 +71,6 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger {
     if (k8sClient == null) return
     k8sClient.close()
     k8sClient = null
-  }
-
-  /**
-   * restart watcher process
-   */
-  def restart(): Unit = {
-    stop()
-    start()
-  }
-
-  //noinspection DuplicatedCode
-  private def handleServiceEvent(action: Watcher.Action, event: Service): Unit = {
-    val clusterId = event.getMetadata.getName
-    val namespace = event.getMetadata.getNamespace
-    if (FILTER_MODE && !cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
-      return
-    }
-    cachePool.k8sServiceEvents.put(
-      K8sEventKey(namespace, clusterId), K8sServiceEventCV(action, event, System.currentTimeMillis()))
   }
 
   //noinspection DuplicatedCode
