@@ -26,8 +26,15 @@ import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
  * auther:Al-assad
  *
  * @param jobState     state of flink job
+ * @param jobId        flink jobId hex string
+ * @param jobName      flink job name
  * @param jobStartTime flink job starting timestamp
  * @param pollEmitTime tracking polling emit timestamp
  * @param pollAckTime  traking polling result receive timestamp
  */
-case class JobStatusCV(jobState: FlinkJobState.Value, jobStartTime: Long, pollEmitTime: Long, pollAckTime: Long)
+case class JobStatusCV(jobState: FlinkJobState.Value,
+                       jobId: String,
+                       jobName: String,
+                       jobStartTime: Long,
+                       pollEmitTime: Long,
+                       pollAckTime: Long)
