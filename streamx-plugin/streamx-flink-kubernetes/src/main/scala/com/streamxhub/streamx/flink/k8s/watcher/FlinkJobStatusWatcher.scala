@@ -180,12 +180,12 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
           val jobStatusMsg = jobDetails.iterator().next()
           Some(
             TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
-              FlinkJobState.of(jobStatusMsg.getJobState),
-              jobStatusMsg.getJobId.toHexString,
-              jobStatusMsg.getJobName,
-              jobStatusMsg.getStartTime,
-              pollEmitTime,
-              pollAckTime)
+              jobState = FlinkJobState.of(jobStatusMsg.getJobState),
+              jobId = jobStatusMsg.getJobId.toHexString,
+              jobName = jobStatusMsg.getJobName,
+              jobStartTime = jobStatusMsg.getStartTime,
+              pollEmitTime = pollEmitTime,
+              pollAckTime = pollAckTime)
           )
         } else {
           // when cannot found jobStatusMessage from flink-cluster-client, check last k8s event info
