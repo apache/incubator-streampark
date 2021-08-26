@@ -20,10 +20,19 @@
  */
 package com.streamxhub.streamx.flink.k8s.watcher
 
+import scala.language.implicitConversions
+
 /**
  * auth: Al-assad
  */
-trait FlinkWatcher {
+trait FlinkWatcher extends AutoCloseable{
+
+  /**
+   * Runnable streamline syntax
+   */
+  protected implicit def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
+    def run(): Unit = fun()
+  }
 
   /**
    * stop watcher process
@@ -42,6 +51,5 @@ trait FlinkWatcher {
     stop()
     start()
   }
-
 
 }
