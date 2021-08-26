@@ -1,5 +1,7 @@
 package com.streamxhub.streamx.flink.k8s
 
+import scala.language.implicitConversions
+
 /**
  * auth: Al-assad
  */
