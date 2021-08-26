@@ -32,7 +32,7 @@ import org.apache.flink.runtime.client.JobStatusMessage
 
 import java.util
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
-import javax.annotation.Nullable
+import javax.annotation.{Nonnull, Nullable}
 import javax.annotation.concurrent.ThreadSafe
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.DurationLong
@@ -133,7 +133,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  def touchSessionJob(clusterId: String, namespace: String): Array[(TrkId, JobStatusCV)] = {
+  def touchSessionJob(@Nonnull clusterId: String, @Nonnull namespace: String): Array[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
     tryWithResourceExc(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)) {
       flinkClient =>
@@ -168,7 +168,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  def touchApplicationJob(clusterId: String, namespace: String): Option[(TrkId, JobStatusCV)] = {
+  def touchApplicationJob(@Nonnull clusterId: String, @Nonnull namespace: String): Option[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
     tryWithResourceExc(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)) {
       flinkClient =>
