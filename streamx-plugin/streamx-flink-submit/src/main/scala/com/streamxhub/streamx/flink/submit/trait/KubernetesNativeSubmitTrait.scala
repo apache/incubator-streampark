@@ -62,11 +62,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
                        stopRequest: StopRequest): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
-    val flinkConfig = new Configuration
-    val safeSet = safeSetConfig(flinkConfig) _
-    safeSet(DeploymentOptions.TARGET, executeMode.getName)
-    safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
-    safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
+    val flinkConfig = new Configuration()
+      .safeSet(DeploymentOptions.TARGET, executeMode.getName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -125,15 +124,14 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   @Nonnull def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
     // base from default config
     val flinkConfig = Try(submitRequest.flinkDefaultConfiguration).getOrElse(new Configuration)
-    val safeSet = safeSetConfig(flinkConfig) _
 
     // extract from submitRequest
     flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
-    safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-    safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
-    safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
-    safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-    safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
+      .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
+      .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
+      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
@@ -190,10 +188,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .toMap
   }
 
-  private def safeSetConfig(flinkConfig: Configuration)(option: ConfigOption[String], value: String): Configuration = {
-    flinkConfig match {
-      case x if StringUtils.isNotBlank(value) => x.set(option, value)
-      case x => x
+  private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
+    def safeSet(option: ConfigOption[String], value: String): Configuration = {
+      flinkConfig match {
+        case x if StringUtils.isNotBlank(value) => x.set(option, value)
+        case x => x
+      }
     }
   }
 
