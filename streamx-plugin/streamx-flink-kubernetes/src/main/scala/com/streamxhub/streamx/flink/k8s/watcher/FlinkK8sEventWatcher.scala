@@ -46,6 +46,9 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
   // whether only recording events that are in FlinkTRKCachePool.trkIds, just for debug
   private val FILTER_MODE = true
 
+  /**
+   * start watcher process
+   */
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       k8sClient = KubernetesRetriever.newK8sClient()
@@ -54,6 +57,9 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
     }
   }
 
+  /**
+   * stop watcher process
+   */
   override def stop(): Unit = this.synchronized {
     if (isStarted) {
       k8sClient.close()

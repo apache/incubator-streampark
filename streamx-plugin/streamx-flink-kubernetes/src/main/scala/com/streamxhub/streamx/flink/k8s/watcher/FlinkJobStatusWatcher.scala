@@ -60,6 +60,9 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
   // status of whether FlinkJobWatcher has already started
   @volatile private var isStarted = false
 
+  /**
+   * stop watcher process
+   */
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
@@ -67,6 +70,9 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
     }
   }
 
+  /**
+   * stop watcher process
+   */
   override def stop(): Unit = this.synchronized {
     if (isStarted) {
       // interrupt all running threads
