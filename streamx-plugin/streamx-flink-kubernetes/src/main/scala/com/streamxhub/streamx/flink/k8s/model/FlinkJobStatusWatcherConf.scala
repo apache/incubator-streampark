@@ -26,5 +26,5 @@ package com.streamxhub.streamx.flink.k8s.model
  * @param sglTrkTaskTimeoutSec  maximum execution seconds for a single flink tracking task
  * @param sglTrkTaskIntervalSec interval seconds between two signle flink tracking task
  */
-case class FlinkJobWatcherConf(sglTrkTaskTimeoutSec: Long = 120,
-                               sglTrkTaskIntervalSec: Long = 10)
+case class FlinkJobStatusWatcherConf(sglTrkTaskTimeoutSec: Long = 120,
+                                     sglTrkTaskIntervalSec: Long = 10)

@@ -49,7 +49,7 @@ import scala.util.{Success, Try}
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
-                            conf: FlinkJobWatcherConf = FlinkJobWatcherConf()) extends Logger with FlinkWatcher {
+                            conf: FlinkJobStatusWatcherConf = FlinkJobStatusWatcherConf()) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
