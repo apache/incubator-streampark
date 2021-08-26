@@ -26,29 +26,51 @@ import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 
+import javax.annotation.concurrent.ThreadSafe
+
 /**
  * K8s Event Watcher for Flink Native-K8s Mode.
  * Currently only flink-native-application mode events would be tracked.
- * The results of tracked events would written into cachePool.
+ * The results of traced events would written into cachePool.
  *
  * auther:Al-assad
- *
- * @param cachePool cache pool
  */
+@ThreadSafe
 class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
-  // just for debug
+
+  // status of whether FlinkK8sEventWatcher has already started
+  @volatile private var isStarted = false
+
+  // whether only recording events that are in FlinkTRKCachePool.trkIds, just for debug
   private val FILTER_MODE = true
 
-  /**
-   * start watcher process
-   */
-  def start(): Unit = {
-    if (k8sClient != null) {
-      return
+  override def start(): Unit = this.synchronized {
+    if (!isStarted) {
+      k8sClient = KubernetesRetriever.newK8sClient()
+      prepareEventWatcher(k8sClient)
+      isStarted = true
     }
-    k8sClient = KubernetesRetriever.newK8sClient()
+  }
+
+  override def stop(): Unit = this.synchronized {
+    if (isStarted) {
+      k8sClient.close()
+      k8sClient = null
+      isStarted = false
+    }
+  }
+
+  override def close(): Unit = this.synchronized {
+    if (isStarted) {
+      k8sClient.close()
+      k8sClient = null
+      isStarted = false
+    }
+  }
+
+  private def prepareEventWatcher(k8sClient: KubernetesClient): Unit = {
     // watch k8s deployment events
     k8sClient.apps().deployments()
       .withLabel("type", "flink-native-kubernetes")
@@ -63,17 +85,6 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
       })
   }
 
-
-  /**
-   * stop watcher process
-   */
-  def stop(): Unit = {
-    if (k8sClient == null) return
-    k8sClient.close()
-    k8sClient = null
-  }
-
-  //noinspection DuplicatedCode
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
