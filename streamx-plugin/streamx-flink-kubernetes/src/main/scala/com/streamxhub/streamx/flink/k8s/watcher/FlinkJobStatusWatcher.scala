@@ -25,7 +25,7 @@ import com.streamxhub.streamx.common.util.Utils.tryWithResourceExc
 import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.k8s.model._
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, FlinkWatcher, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.runtime.client.JobStatusMessage
