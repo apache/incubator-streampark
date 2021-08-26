@@ -35,7 +35,7 @@ trait FlinkWatcher extends AutoCloseable{
   }
 
   /**
-   * stop watcher process
+   * start watcher process
    */
   def start()
 
