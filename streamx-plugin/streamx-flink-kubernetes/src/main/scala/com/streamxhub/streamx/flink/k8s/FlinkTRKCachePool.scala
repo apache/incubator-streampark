@@ -22,23 +22,29 @@ package com.streamxhub.streamx.flink.k8s
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.SESSION
-import com.streamxhub.streamx.flink.k8s.model.{JobStatusCV, K8sDeploymentEventCV, K8sEventKey, TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.k8s.model._
 
+import java.util.concurrent.atomic.AtomicReference
+import javax.annotation.concurrent.ThreadSafe
 import scala.collection.JavaConverters._
 
 /**
+ * Tracking info cache pool on flink kubernetes mode.
  * auther:Al-assad
  */
 class FlinkTRKCachePool {
 
-  // tracking identifiers cache
+  // cache for tracking identifiers
   val trkIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
 
-  // tracking flink job status cache
+  // cache for tracking flink job status
   val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
 
-  // tracking kubernetes events cache with Deployment kind
+  // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
+
+  // cache for last traking flink cluster metrics, record
+  val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   // todo recovery from db
 
@@ -66,5 +72,19 @@ class FlinkTRKCachePool {
     .map(trkId => if (trkId.executeMode == SESSION) TrkId(trkId.executeMode, trkId.namespace, trkId.clusterId, "") else trkId)
     .filter(_.isLegal)
 
+}
+
+/**
+ * Thread-safe signle value cache
+ */
+@ThreadSafe
+case class SglValCache[E <: AnyRef](initElement: E) {
+  private val value = new AtomicReference[E](initElement)
+
+  def get: E = value.get()
+
+  def set(newVal: E): Unit = value.set(newVal)
+
+  def update(func: E => E): Unit = value.updateAndGet { case e: E => func(e) }
 
 }
