@@ -21,7 +21,9 @@
 package com.streamxhub.streamx.flink.k8s
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
+import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.SESSION
 import com.streamxhub.streamx.flink.k8s.model.{JobStatusCV, K8sDeploymentEventCV, K8sEventKey, TrkId, TrkIdCV}
+
 import scala.collection.JavaConverters._
 
 /**
@@ -31,8 +33,10 @@ class FlinkTRKCachePool {
 
   // tracking identifiers cache
   val trkIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
+
   // tracking flink job status cache
   val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
+
   // tracking kubernetes events cache with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
@@ -54,5 +58,13 @@ class FlinkTRKCachePool {
     }
     trkIds.getIfPresent(trkId) != null
   }
+
+  /**
+   * collect all legal tracking ids, and remove jobId info of session mode trkId
+   */
+  private[k8s] def collectDistinctTrkIds(): Set[TrkId] = collectAllTrkIds()
+    .map(trkId => if (trkId.executeMode == SESSION) TrkId(trkId.executeMode, trkId.namespace, trkId.clusterId, "") else trkId)
+    .filter(_.isLegal)
+
 
 }
