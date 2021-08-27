@@ -21,19 +21,37 @@
 package com.streamxhub.streamx.flink.k8s
 
 import com.streamxhub.streamx.flink.k8s.model.{TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.k8s.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
-class DefaultFlinkTRKMonitor extends FlinkTRKMonitor {
+class DefaultFlinkTRKMonitor(conf: FlinkTRKConf = FlinkTRKConf.default) extends FlinkTRKMonitor {
 
   // cache pool for storage tracking result
   val trkCache = new FlinkTRKCachePool()
 
+  // remote server tracking watcher
+  val k8sEventWatcher = new FlinkK8sEventWatcher(trkCache)
+  val jobStatusWatcher = new FlinkJobStatusWatcher(trkCache, conf.jobStatusWatcherConf)
+  val metricsWatcher = new FlinkMetricWatcher(trkCache, conf.metricWatcherConf)
 
+  private[this] val allWatchers = Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher)
+
+
+  override def start(): Unit = allWatchers.foreach(_.start())
+
+  override def stop(): Unit = allWatchers.foreach(_.stop())
+
+  override def restart(): Unit = allWatchers.foreach(_.restart())
+
+  override def close(): Unit = {
+    allWatchers.foreach(_.close)
+    trkCache.close()
+  }
 
 
   def trackingJob(trkId: TrkId): Unit = {
@@ -67,6 +85,7 @@ class DefaultFlinkTRKMonitor extends FlinkTRKMonitor {
   }
 
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
+
 
 }
 

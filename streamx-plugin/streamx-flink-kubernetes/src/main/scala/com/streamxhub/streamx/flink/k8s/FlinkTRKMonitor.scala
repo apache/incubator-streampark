@@ -20,24 +20,74 @@
  */
 package com.streamxhub.streamx.flink.k8s
 
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.k8s.model.TrkId
 
 /**
+ * Tracking monitor for flink-k8s-native mode, including
+ * trace of flink jobs status information, flink metrics
+ * information.
+ *
  * author:Al-assad
  */
-trait FlinkTRKMonitor {
+trait FlinkTRKMonitor extends Logger with AutoCloseable {
 
-  def createInstance(): FlinkTRKMonitor = new DefaultFlinkTRKMonitor()
+  /**
+   * Create FlinkTRKMonitor instance.
+   *
+   * @param conf configuration
+   */
+  def createInstance(conf: FlinkTRKConf = FlinkTRKConf.default): FlinkTRKMonitor = new DefaultFlinkTRKMonitor(conf)
 
+  /**
+   * start monitor tracking activities.
+   */
+  def start()
+
+  /**
+   * stop monitor tracking activities.
+   */
+  def stop()
+
+  /**
+   * restart monitor tracking activities.
+   */
+  def restart()
+
+  /**
+   * add tracking for the specified flink job which on k8s cluster.
+   *
+   * @param trkId identifier of flink job
+   */
   def trackingJob(trkId: TrkId)
 
+  /**
+   * add tracking for the specified flinks job which on k8s cluster.
+   *
+   * @param trkIds identifieies of flink job
+   */
   def trackingJob(trkIds: Set[TrkId])
 
+  /**
+   * remove tracking for the specified flink job which on k8s cluster.
+   *
+   * @param trkId identifier of flink job
+   */
   def unTrackingJob(trkId: TrkId)
 
+  /**
+   * remove tracking for the specified flinks job which on k8s cluster.
+   *
+   * @param trkIds identifieies of flink job
+   */
   def unTrackingJob(trkIds: Set[TrkId])
 
-  def isInTracking(trkId: TrkId):Boolean
+  /**
+   * check whether the specified flink job is in tracking.
+   *
+   * @param trkId identifier of flink job
+   */
+  def isInTracking(trkId: TrkId): Boolean
 
 
 }
