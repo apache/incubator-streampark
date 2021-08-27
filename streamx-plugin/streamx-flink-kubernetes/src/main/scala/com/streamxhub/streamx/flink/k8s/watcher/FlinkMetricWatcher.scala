@@ -23,10 +23,9 @@ package com.streamxhub.streamx.flink.k8s.watcher
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.conf.FlinkMetricWatcherConf
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.k8s.model.{FlinkMetricCV, TrkId}
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 
@@ -45,7 +44,7 @@ import scala.util.Try
  */
 @ThreadSafe
 class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
-                         conf: FlinkMetricWatcherConf = FlinkMetricWatcherConf.default) extends Logger with FlinkWatcher {
+                         conf: MetricWatcherConf = MetricWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -64,6 +63,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
       isStarted = true
+      logInfo("[flink-k8s] FlinkMetricWatcher started.")
     }
   }
 
@@ -74,6 +74,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
     if (isStarted) {
       timerSchedule.cancel(true)
       isStarted = false
+      logInfo("[flink-k8s] FlinkMetricWatcher stopped.")
     }
   }
 
@@ -88,6 +89,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
     }
     Try(timerExec.shutdownNow())
     Try(trkTaskExecutor.shutdownNow())
+    logInfo("[flink-k8s] FlinkMetricWatcher closed.")
   }
 
   /**

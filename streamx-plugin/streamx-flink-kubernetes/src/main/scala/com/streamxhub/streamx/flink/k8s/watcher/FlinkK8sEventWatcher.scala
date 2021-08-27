@@ -54,6 +54,7 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
       k8sClient = KubernetesRetriever.newK8sClient()
       prepareEventWatcher(k8sClient)
       isStarted = true
+      logInfo("[flink-k8s] FlinkK8sEventWatcher started.")
     }
   }
 
@@ -65,6 +66,7 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
       k8sClient.close()
       k8sClient = null
       isStarted = false
+      logInfo("[flink-k8s] FlinkK8sEventWatcher stopped.")
     }
   }
 
@@ -73,6 +75,7 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
       k8sClient.close()
       k8sClient = null
       isStarted = false
+      logInfo("[flink-k8s] FlinkK8sEventWatcher closed.")
     }
   }
 

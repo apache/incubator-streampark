@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.flink.k8s.watcher
 
+import scala.language.implicitConversions
+
 /**
  * auth: Al-assad
  */

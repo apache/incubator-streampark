@@ -22,11 +22,10 @@ package com.streamxhub.streamx.flink.k8s.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceExc
-import com.streamxhub.streamx.flink.k8s.conf.FlinkJobStatusWatcherConf
 import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.k8s.model._
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.runtime.client.JobStatusMessage
@@ -50,7 +49,7 @@ import scala.util.Try
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
-                            conf: FlinkJobStatusWatcherConf = FlinkJobStatusWatcherConf.default) extends Logger with FlinkWatcher {
+                            conf: JobStatusWatcherConf = JobStatusWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -64,10 +63,12 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
   /**
    * stop watcher process
    */
+  //noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
       isStarted = true
+      logInfo("[flink-k8s] FlinkJobStatusWatcher started.")
     }
   }
 
@@ -79,12 +80,14 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
       // interrupt all running threads
       timerSchedule.cancel(true)
       isStarted = false
+      logInfo("[flink-k8s] FlinkJobStatusWatcher stopped.")
     }
   }
 
   /**
    * closes resource, relinquishing any underlying resources.
    */
+  //noinspection DuplicatedCode
   override def close(): Unit = this.synchronized {
     if (isStarted) {
       timerSchedule.cancel(true)
@@ -92,6 +95,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
     }
     Try(timerExec.shutdownNow())
     Try(trkTaskExecutor.shutdownNow())
+    logInfo("[flink-k8s] FlinkJobStatusWatcher closed.")
   }
 
   /**
