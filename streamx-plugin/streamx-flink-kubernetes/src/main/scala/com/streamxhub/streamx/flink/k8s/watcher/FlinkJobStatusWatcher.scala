@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.k8s.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceExc
+import com.streamxhub.streamx.flink.k8s.conf.FlinkJobStatusWatcherConf
 import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.k8s.model._
@@ -32,13 +33,13 @@ import org.apache.flink.runtime.client.JobStatusMessage
 
 import java.util
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
-import javax.annotation.{Nonnull, Nullable}
 import javax.annotation.concurrent.ThreadSafe
+import javax.annotation.{Nonnull, Nullable}
 import scala.collection.JavaConverters._
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
-import scala.util.{Success, Try}
+import scala.util.Try
 
 /**
  * Watcher for continuously monitor flink job status on kubernetes-mode,
@@ -49,7 +50,7 @@ import scala.util.{Success, Try}
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
-                            conf: FlinkJobStatusWatcherConf = FlinkJobStatusWatcherConf()) extends Logger with FlinkWatcher {
+                            conf: FlinkJobStatusWatcherConf = FlinkJobStatusWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -97,28 +98,33 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * single flink job status tracking task
    */
   private def trackingTask(): Unit = {
-    // get all tracking ids, and remove jobId info of session mode trkId
+    // get all legal tracking ids
     val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrkIds()).filter(_.nonEmpty).getOrElse(return)
+
     // retieve flink job status in thread pool
-    val trksFuture = trkIds.map(trkId => {
-      val future = Future {
-        trkId.executeMode match {
-          case SESSION => touchSessionJob(trkId.clusterId, trkId.namespace)
-          case APPLICATION => touchApplicationJob(trkId.clusterId, trkId.namespace).toArray
+    val trksFuture: Set[Future[Array[(TrkId, JobStatusCV)]]] =
+      trkIds.map(trkId => {
+        val future = Future {
+          trkId.executeMode match {
+            case SESSION => touchSessionJob(trkId.clusterId, trkId.namespace)
+            case APPLICATION => touchApplicationJob(trkId.clusterId, trkId.namespace).toArray
+          }
         }
-      }
-      future onComplete {
-        case Success(results) => if (!results.isEmpty) {
-          // todo push trk jobStatue update event and remove trk cache record when necessary
-          cachePool.jobStatuses.putAll(results.toMap.asJava)
+        future foreach {
+          trkRs =>
+            if (trkRs.nonEmpty) {
+              // todo push trk jobStatue update event and remove trk cache record when necessary
+              cachePool.jobStatuses.putAll(trkRs.toMap.asJava)
+            }
         }
-      }
-      future
-    })
-    // blocking until all future completes ir timeout
+        future
+      })
+    // blocking until all future are completed or timeout is reached
     val allFutureHold = Future.sequence(trksFuture)
-    Try(Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds)).failed.map(_ =>
-      logError(s"[FlinkJobWatcher] tracking flink job status on kubernetes mode timeout," +
+    Try(
+      Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds)
+    ).failed.map(_ =>
+      logError(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
         s" trackingIds=${trkIds.mkString(",")}"))
   }
@@ -127,6 +133,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * Get flink status information from kubernetes-native-session cluster.
    * The empty array will returned when the k8s-client or flink-cluster-client
    * request fails.
+   *
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
@@ -163,6 +170,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * Get flink status information from kubernetes-native-application cluster.
    * When the k8s-client or flink-cluster-client request fails or inferring
    * from k8s event fails, will return None.
+   *
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
