@@ -30,7 +30,7 @@ import scala.collection.JavaConverters._
 
 /**
  * Tracking info cache pool on flink kubernetes mode.
- * auther:Al-assad
+ * author:Al-assad
  */
 class FlinkTRKCachePool {
 

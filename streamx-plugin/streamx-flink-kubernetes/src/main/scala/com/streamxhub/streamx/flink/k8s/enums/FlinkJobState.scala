@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.k8s.enums
 import org.apache.flink.api.common.JobStatus
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  * flink job status on kubernetes
  */
 object FlinkJobState extends Enumeration {

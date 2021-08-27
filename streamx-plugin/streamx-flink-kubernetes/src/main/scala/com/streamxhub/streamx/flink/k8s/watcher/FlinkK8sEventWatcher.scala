@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.k8s.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.k8s.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, FlinkWatcher, KubernetesRetriever}
+import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 

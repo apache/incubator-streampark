@@ -30,10 +30,11 @@ import scala.util.Try
  */
 class DefaultFlinkTRKMonitor extends FlinkTRKMonitor {
 
-  /**
-   * tracking cache pool
-   */
+  // cache pool for storage tracking result
   val trkCache = new FlinkTRKCachePool()
+
+
+
 
   def trackingJob(trkId: TrkId): Unit = {
     if (trkId == null || !trkId.isLegal) {

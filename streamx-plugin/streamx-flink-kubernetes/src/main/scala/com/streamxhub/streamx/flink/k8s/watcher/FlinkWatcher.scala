@@ -18,9 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
-
-import scala.language.implicitConversions
+package com.streamxhub.streamx.flink.k8s.watcher
 
 /**
  * auth: Al-assad
@@ -46,7 +44,6 @@ trait FlinkWatcher extends AutoCloseable {
     stop()
     start()
   }
-
 
   /**
    * Runnable streamline syntax

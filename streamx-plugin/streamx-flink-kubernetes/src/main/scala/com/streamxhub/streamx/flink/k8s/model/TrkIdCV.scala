@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.k8s.model
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  *
  * @param updateTime last update time for current key
  */

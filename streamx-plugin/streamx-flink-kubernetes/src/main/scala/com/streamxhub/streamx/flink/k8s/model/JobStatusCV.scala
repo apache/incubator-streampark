@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.k8s.model
 import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  *
  * @param jobState     state of flink job
  * @param jobId        flink jobId hex string

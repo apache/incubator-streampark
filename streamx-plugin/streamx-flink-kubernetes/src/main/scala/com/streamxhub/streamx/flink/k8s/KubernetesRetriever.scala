@@ -32,7 +32,7 @@ import javax.annotation.Nullable
 import scala.util.Try
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
 object KubernetesRetriever {
 

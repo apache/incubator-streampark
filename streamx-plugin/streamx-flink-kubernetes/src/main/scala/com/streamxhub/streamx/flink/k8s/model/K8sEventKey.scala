@@ -21,6 +21,6 @@
 package com.streamxhub.streamx.flink.k8s.model
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
 case class K8sEventKey(namespace: String, clusterId: String)

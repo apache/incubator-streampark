@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.k8s
 import com.streamxhub.streamx.flink.k8s.model.TrkId
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
 trait FlinkTRKMonitor {
 

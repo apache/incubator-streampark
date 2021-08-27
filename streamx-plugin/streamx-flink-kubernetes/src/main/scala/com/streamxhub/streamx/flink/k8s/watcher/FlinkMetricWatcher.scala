@@ -26,7 +26,7 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.k8s.conf.FlinkMetricWatcherConf
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.k8s.model.{FlinkMetricCV, TrkId}
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, FlinkWatcher, KubernetesRetriever}
+import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 
@@ -59,6 +59,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
   /**
    * start watcher process
    */
+  // noinspection DuplicatedCode
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
       timerSchedule = timerExec.scheduleAtFixedRate(() => trackingTask(), 0, conf.sglTrkTaskIntervalSec, TimeUnit.SECONDS)
@@ -79,6 +80,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
   /**
    * closes resource, relinquishing any underlying resources.
    */
+  // noinspection DuplicatedCode
   override def close(): Unit = this.synchronized {
     if (isStarted) {
       timerSchedule.cancel(true)
