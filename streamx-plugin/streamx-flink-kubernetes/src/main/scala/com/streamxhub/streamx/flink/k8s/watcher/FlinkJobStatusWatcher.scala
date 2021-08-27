@@ -97,13 +97,13 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    * single flink job status tracking task
    */
   private def trackingTask(): Unit = {
+    // get all tracking ids, and remove jobId info of session mode trkId
     val trkIds: Set[TrkId] = cachePool.collectAllTrkIds()
-    // remove jobId info of session mode trkId
-    val distinctTrkIds = trkIds
       .map(trkId => if (trkId.executeMode == SESSION) TrkId(trkId.executeMode, trkId.namespace, trkId.clusterId, "") else trkId)
       .filter(_.isLegal)
+    if (trkIds.isEmpty) return
     // retieve flink job status in thread pool
-    val trksFuture = distinctTrkIds.map(trkId => {
+    val trksFuture = trkIds.map(trkId => {
       val future = Future {
         trkId.executeMode match {
           case SESSION => touchSessionJob(trkId.clusterId, trkId.namespace)
@@ -120,10 +120,10 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
     })
     // blocking until all future completes ir timeout
     val allFutureHold = Future.sequence(trksFuture)
-    Try(Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds)).map(_ => logError(
-      s"[FlinkJobWatcher] tracking flink job status on kubernetes mode timeout," +
+    Try(Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds))
+      .map(_ => logError(s"[FlinkJobWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
-        s" trackingIds=${distinctTrkIds.mkString(",")}"))
+        s" trackingIds=${trkIds.mkString(",")}"))
   }
 
   /**
