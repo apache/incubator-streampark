@@ -98,10 +98,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
    */
   private def trackingTask(): Unit = {
     // get all tracking ids, and remove jobId info of session mode trkId
-    val trkIds: Set[TrkId] = cachePool.collectAllTrkIds()
-      .map(trkId => if (trkId.executeMode == SESSION) TrkId(trkId.executeMode, trkId.namespace, trkId.clusterId, "") else trkId)
-      .filter(_.isLegal)
-    if (trkIds.isEmpty) return
+    val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrkIds()).filter(_.nonEmpty).getOrElse(return)
     // retieve flink job status in thread pool
     val trksFuture = trkIds.map(trkId => {
       val future = Future {
@@ -120,8 +117,8 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
     })
     // blocking until all future completes ir timeout
     val allFutureHold = Future.sequence(trksFuture)
-    Try(Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds))
-      .map(_ => logError(s"[FlinkJobWatcher] tracking flink job status on kubernetes mode timeout," +
+    Try(Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds)).failed.map(_ =>
+      logError(s"[FlinkJobWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
         s" trackingIds=${trkIds.mkString(",")}"))
   }
@@ -140,16 +137,17 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
         val pollAckTime = System.currentTimeMillis
+        // noinspection DuplicatedCode
         if (CollectionUtils.isNotEmpty(jobDetails)) {
           jobDetails.asScala.map(e => (
             TrkId.onSession(namespace, clusterId, e.getJobId.toHexString),
             JobStatusCV(
-              FlinkJobState.of(e.getJobState),
-              e.getJobId.toHexString,
-              e.getJobName,
-              e.getStartTime,
-              pollEmitTime,
-              pollAckTime))
+              jobState = FlinkJobState.of(e.getJobState),
+              jobId = e.getJobId.toHexString,
+              jobName = e.getJobName,
+              jobStartTime = e.getStartTime,
+              pollEmitTime = pollEmitTime,
+              pollAckTime = pollAckTime))
           ).toArray
         } else {
           Array.empty[(TrkId, JobStatusCV)]
@@ -178,6 +176,7 @@ class FlinkJobStatusWatcher(cachePool: FlinkTRKCachePool,
         if (CollectionUtils.isNotEmpty(jobDetails)) {
           // just receive the first result
           val jobStatusMsg = jobDetails.iterator().next()
+          // noinspection DuplicatedCode
           Some(
             TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
               jobState = FlinkJobState.of(jobStatusMsg.getJobState),

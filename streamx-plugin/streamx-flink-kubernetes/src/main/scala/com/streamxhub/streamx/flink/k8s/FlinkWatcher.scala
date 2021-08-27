@@ -27,13 +27,6 @@ import scala.language.implicitConversions
  */
 trait FlinkWatcher extends AutoCloseable {
 
-  /**
-   * Runnable streamline syntax
-   */
-  protected implicit def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
-    def run(): Unit = fun()
-  }
-
   // todo deplayStart()
 
   /**
@@ -52,6 +45,14 @@ trait FlinkWatcher extends AutoCloseable {
   def restart(): Unit = {
     stop()
     start()
+  }
+
+
+  /**
+   * Runnable streamline syntax
+   */
+  protected implicit def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
+    def run(): Unit = fun()
   }
 
 }
