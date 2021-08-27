@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.k8s.conf
 
 /**
  * author: Al-assad
@@ -26,5 +26,9 @@ package com.streamxhub.streamx.flink.k8s.model
  * @param sglTrkTaskTimeoutSec  maximum execution seconds for a single flink tracking task
  * @param sglTrkTaskIntervalSec interval seconds between two signle flink tracking task
  */
-case class FlinkJobStatusWatcherConf(sglTrkTaskTimeoutSec: Long = 120,
-                                     sglTrkTaskIntervalSec: Long = 10)
+case class FlinkMetricWatcherConf(sglTrkTaskTimeoutSec: Long,
+                                  sglTrkTaskIntervalSec: Long)
+
+object FlinkMetricWatcherConf {
+  def default: FlinkMetricWatcherConf = FlinkMetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 30)
+}
