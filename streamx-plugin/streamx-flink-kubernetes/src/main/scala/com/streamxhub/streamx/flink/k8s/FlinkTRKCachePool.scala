@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.flink.k8s
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
+import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.SESSION
 import com.streamxhub.streamx.flink.k8s.model._
 
@@ -32,7 +33,7 @@ import scala.collection.JavaConverters._
  * Tracking info cache pool on flink kubernetes mode.
  * author:Al-assad
  */
-class FlinkTRKCachePool {
+class FlinkTRKCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
   val trkIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
@@ -47,6 +48,12 @@ class FlinkTRKCachePool {
   val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   // todo recovery from db
+
+  override def close(): Unit = {
+    jobStatuses.cleanUp()
+    k8sDeploymentEvents.cleanUp()
+    trkIds.cleanUp()
+  }
 
   /**
    * collect all tracking identifiers
