@@ -33,7 +33,7 @@ import scala.collection.JavaConverters._
  * Tracking info cache pool on flink kubernetes mode.
  * author:Al-assad
  */
-class FlinkTrackCachePool extends Logger with AutoCloseable {
+class FlinkTrkCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
   val trackIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()

@@ -25,7 +25,7 @@ import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, JobStatusWatcherConf, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.runtime.client.JobStatusMessage
@@ -49,7 +49,7 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkJobStatusWatcher(cachePool: FlinkTrackCachePool,
+class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
                             conf: JobStatusWatcherConf = JobStatusWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()

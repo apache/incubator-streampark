@@ -37,7 +37,7 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
    *
    * @param conf configuration
    */
-  def createInstance(conf: FlinkTrackConf = FlinkTrackConf.default): FlinkTrkMonitor = new DefaultFlinkTrkMonitor(conf)
+  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.default): FlinkTrkMonitor = new DefaultFlinkTrkMonitor(conf)
 
   /**
    * start monitor tracking activities.

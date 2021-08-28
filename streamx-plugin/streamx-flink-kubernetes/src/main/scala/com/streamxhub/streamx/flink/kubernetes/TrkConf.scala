@@ -26,15 +26,15 @@ package com.streamxhub.streamx.flink.kubernetes
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process
  */
-case class FlinkTrackConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
+case class FlinkTrkConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
 
 case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
 
-object FlinkTrackConf {
-  def default: FlinkTrackConf = FlinkTrackConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
+object FlinkTrkConf {
+  def default: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
 }
 
 object MetricWatcherConf {

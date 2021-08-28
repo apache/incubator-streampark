@@ -25,7 +25,7 @@ import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, TrkId}
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConf}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 
@@ -43,7 +43,7 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,
+class FlinkMetricWatcher(cachePool: FlinkTrkCachePool,
                          conf: MetricWatcherConf = MetricWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()

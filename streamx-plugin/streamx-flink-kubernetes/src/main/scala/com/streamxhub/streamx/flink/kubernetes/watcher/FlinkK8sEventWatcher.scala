@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 
@@ -36,7 +36,7 @@ import javax.annotation.concurrent.ThreadSafe
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 

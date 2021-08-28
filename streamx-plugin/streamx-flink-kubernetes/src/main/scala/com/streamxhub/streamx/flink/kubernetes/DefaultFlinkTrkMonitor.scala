@@ -29,10 +29,10 @@ import scala.util.Try
 /**
  * author:Al-assad
  */
-class DefaultFlinkTrkMonitor(conf: FlinkTrackConf = FlinkTrackConf.default) extends FlinkTrkMonitor {
+class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends FlinkTrkMonitor {
 
   // cache pool for storage tracking result
-  val trkCache = new FlinkTrackCachePool()
+  val trkCache = new FlinkTrkCachePool()
 
   // remote server tracking watcher
   val k8sEventWatcher = new FlinkK8sEventWatcher(trkCache)
