@@ -37,7 +37,7 @@ import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
-import java.io.{File, FileInputStream}
+import java.io.File
 import java.lang.{Boolean => JavaBool}
 import java.util.regex.Pattern
 import javax.annotation.Nonnull
@@ -63,11 +63,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
                        stopRequest: StopRequest): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
-    val flinkConfig = new Configuration
-    val safeSet = safeSetConfig(flinkConfig) _
-    safeSet(DeploymentOptions.TARGET, executeMode.getName)
-    safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
-    safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
+    val flinkConfig = new Configuration()
+      .safeSet(DeploymentOptions.TARGET, executeMode.getName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, stopRequest.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, stopRequest.kubernetesNamespace)
 
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var client: ClusterClient[String] = null
@@ -126,17 +125,18 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   @Nonnull def extractEffectiveFlinkConfig(@Nonnull submitRequest: SubmitRequest): Configuration = {
     // base from default config
     val flinkConfig = Try(submitRequest.flinkDefaultConfiguration).getOrElse(new Configuration)
-    val safeSet = safeSetConfig(flinkConfig) _
 
     // extract from submitRequest
     flinkConfig.set(DeploymentOptions.SHUTDOWN_IF_ATTACHED, JavaBool.FALSE)
-    safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
-    safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
-    safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
-    safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-    safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
+      .safeSet(DeploymentOptions.TARGET, submitRequest.executionMode.getName)
+      .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
+      .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
+      .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
+      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
 
-    if (DevelopmentMode.CUSTOMCODE == submitRequest.developmentMode) {
+    if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
+      flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
+    } else {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, submitRequest.appMain)
     }
     if (StringUtils.isNotBlank(submitRequest.option)
@@ -189,10 +189,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .toMap
   }
 
-  private def safeSetConfig(flinkConfig: Configuration)(option: ConfigOption[String], value: String): Configuration = {
-    flinkConfig match {
-      case x if StringUtils.isNotBlank(value) => x.set(option, value)
-      case x => x
+  private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
+    def safeSet(option: ConfigOption[String], value: String): Configuration = {
+      flinkConfig match {
+        case x if StringUtils.isNotBlank(value) => x.set(option, value)
+        case x => x
+      }
     }
   }
 
@@ -219,7 +221,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     programArgs
   }
 
-  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): (String, Set[String]) = {
+  private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
       flinkLib,
@@ -242,16 +244,15 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
 
     val libSet = providedLibs.toSet
-
     // loop join md5sum per file
-    val joinedMd5 = libSet.flatMap(lib =>
-      new File(lib) match {
-        case f if f.isFile => List(f)
-        case d => d.listFiles().toList
-      }
-    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
-
-    DigestUtils.md5Hex(joinedMd5) -> libSet
+    //    val joinedMd5 = libSet.flatMap(lib =>
+    //      new File(lib) match {
+    //        case f if f.isFile => List(f)
+    //        case d => d.listFiles().toList
+    //      }
+    //    ).map(f => DigestUtils.md5Hex(new FileInputStream(f))).mkString("")
+    //    DigestUtils.md5Hex(joinedMd5) -> libSet
+    libSet
   }
 
 
