@@ -54,35 +54,34 @@ class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends 
   }
 
 
-  def trackingJob(trackId: TrkId): Unit = {
-    if (trackId == null || !trackId.isLegal) {
+  def trackingJob(trkId: TrkId): Unit = {
+    if (trkId == null || !trkId.isLegal) {
       return
     }
-    trkCache.trackIds.put(trackId, TrkIdCV(System.currentTimeMillis()))
+    trkCache.trackIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
   }
 
-  def trackingJob(trackIds: Set[TrkId]): Unit = {
-    if (Try(trackIds.isEmpty).getOrElse(true)) {
+  def trackingJob(trkIds: Set[TrkId]): Unit = {
+    if (Try(trkIds.isEmpty).getOrElse(true)) {
       return
     }
     val now = System.currentTimeMillis()
-    val trackingMap = trackIds.map(e => (e, TrkIdCV(now))).toMap
+    val trackingMap = trkIds.map(e => (e, TrkIdCV(now))).toMap
     trkCache.trackIds.putAll(trackingMap.asJava)
   }
 
   def unTrackingJob(trkId: TrkId): Unit = {
-    if (trkId.isLegal)
-    if (trkId == null || !trkId.isLegal) {
+    if (!Try(trkId.isLegal).getOrElse(false)) {
       return
     }
     trkCache.trackIds.invalidate(trkId)
   }
 
-  def unTrackingJob(trackIds: Set[TrkId]): Unit = {
-    if (Try(trackIds.isEmpty).getOrElse(true)) {
+  def unTrackingJob(trkIds: Set[TrkId]): Unit = {
+    if (Try(trkIds.isEmpty).getOrElse(true)) {
       return
     }
-    trkCache.trackIds.invalidateAll(trackIds.asJava)
+    trkCache.trackIds.invalidateAll(trkIds.asJava)
   }
 
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
