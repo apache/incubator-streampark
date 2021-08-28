@@ -46,7 +46,7 @@ import scala.util.Try
  * the traced flink identifiers from FlinkTrackCachePool.trackIds, the traced
  * result of flink jobs status would written to FlinkTrackCachePool.jobStatuses.
  *
- * auther:Al-assad
+ * author:Al-assad
  */
 @ThreadSafe
 class FlinkJobStatusWatcher(cachePool: FlinkTrackCachePool,

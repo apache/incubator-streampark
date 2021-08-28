@@ -71,7 +71,7 @@ public class EnvInitializer implements ApplicationRunner {
         );
         // local storage must exists
         // TODO just for dev|test.
-        storageInitialize(StorageType.LFS);
+        //storageInitialize(StorageType.LFS);
     }
 
     /**

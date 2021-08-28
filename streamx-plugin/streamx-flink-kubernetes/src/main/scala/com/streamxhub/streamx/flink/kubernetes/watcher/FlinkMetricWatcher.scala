@@ -40,7 +40,7 @@ import scala.language.postfixOps
 import scala.util.Try
 
 /**
- * auther:Al-assad
+ * author:Al-assad
  */
 @ThreadSafe
 class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,
@@ -106,7 +106,7 @@ class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,
         val future = Future(collectMetric(id.executeMode, id.clusterId, id.namespace))
         future.foreach { r =>
           if (r.nonEmpty) {
-            accMetrics.updateAndGet { case e: FlinkMetricCV => e + r.get }
+            //accMetrics.updateAndGet { case e: FlinkMetricCV => e + r.get }
           }
         }
         future

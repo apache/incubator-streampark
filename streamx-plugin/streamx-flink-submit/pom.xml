@@ -13,16 +13,15 @@
     <name>StreamX : Flink Submit</name>
 
     <dependencies>
-
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-core</artifactId>
+            <artifactId>streamx-common</artifactId>
             <version>${project.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common</artifactId>
+            <artifactId>streamx-flink-core</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -63,6 +62,7 @@
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
