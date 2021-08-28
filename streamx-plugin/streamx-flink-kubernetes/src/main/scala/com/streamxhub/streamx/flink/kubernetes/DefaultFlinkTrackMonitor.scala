@@ -18,10 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
+package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.k8s.model.{TrkId, TrkIdCV}
-import com.streamxhub.streamx.flink.k8s.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
+import com.streamxhub.streamx.flink.kubernetes.model.{TrackId, TrackIdCV}
+import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._
 import scala.util.Try
@@ -29,10 +29,10 @@ import scala.util.Try
 /**
  * author:Al-assad
  */
-class DefaultFlinkTRKMonitor(conf: FlinkTRKConf = FlinkTRKConf.default) extends FlinkTRKMonitor {
+class DefaultFlinkTrackMonitor(conf: FlinkTrackConf = FlinkTrackConf.default) extends FlinkTrackMonitor {
 
   // cache pool for storage tracking result
-  val trkCache = new FlinkTRKCachePool()
+  val trkCache = new FlinkTrackCachePool()
 
   // remote server tracking watcher
   val k8sEventWatcher = new FlinkK8sEventWatcher(trkCache)
@@ -54,37 +54,37 @@ class DefaultFlinkTRKMonitor(conf: FlinkTRKConf = FlinkTRKConf.default) extends 
   }
 
 
-  def trackingJob(trkId: TrkId): Unit = {
-    if (trkId == null || !trkId.isLegal) {
+  def trackingJob(trackId: TrackId): Unit = {
+    if (trackId == null || !trackId.isLegal) {
       return
     }
-    trkCache.trkIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
+    trkCache.trackIds.put(trackId, TrackIdCV(System.currentTimeMillis()))
   }
 
-  def trackingJob(trkIds: Set[TrkId]): Unit = {
-    if (Try(trkIds.isEmpty).getOrElse(true)) {
+  def trackingJob(trackIds: Set[TrackId]): Unit = {
+    if (Try(trackIds.isEmpty).getOrElse(true)) {
       return
     }
     val now = System.currentTimeMillis()
-    val trackingMap = trkIds.map(e => (e, TrkIdCV(now))).toMap
-    trkCache.trkIds.putAll(trackingMap.asJava)
+    val trackingMap = trackIds.map(e => (e, TrackIdCV(now))).toMap
+    trkCache.trackIds.putAll(trackingMap.asJava)
   }
 
-  def unTrackingJob(trkId: TrkId): Unit = {
+  def unTrackingJob(trkId: TrackId): Unit = {
     if (trkId == null || !trkId.isLegal) {
       return
     }
-    trkCache.trkIds.invalidate(trkId)
+    trkCache.trackIds.invalidate(trkId)
   }
 
-  def unTrackingJob(trkIds: Set[TrkId]): Unit = {
-    if (Try(trkIds.isEmpty).getOrElse(true)) {
+  def unTrackingJob(trackIds: Set[TrackId]): Unit = {
+    if (Try(trackIds.isEmpty).getOrElse(true)) {
       return
     }
-    trkCache.trkIds.invalidateAll(trkIds.asJava)
+    trkCache.trackIds.invalidateAll(trackIds.asJava)
   }
 
-  override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
+  override def isInTracking(trkId: TrackId): Boolean = trkCache.isInTracking(trkId)
 
 
 }

@@ -18,11 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.watcher
+package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey, TrackId}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 
@@ -36,14 +36,14 @@ import javax.annotation.concurrent.ThreadSafe
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 
   // status of whether FlinkK8sEventWatcher has already started
   @volatile private var isStarted = false
 
-  // whether only recording events that are in FlinkTRKCachePool.trkIds, just for debug
+  // whether only recording events that are in FlinkTrackCachePool.trackIds, just for debug
   private val FILTER_MODE = true
 
   /**
@@ -87,7 +87,6 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
         override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
           handleDeploymentEvent(action, event)
         }
-
         override def onClose(e: KubernetesClientException): Unit = {
           logInfo(s"K8sEventWatcher[Kind=Deployment] stop, message=${e.getMessage}")
         }
@@ -97,7 +96,7 @@ class FlinkK8sEventWatcher(cachePool: FlinkTRKCachePool) extends Logger with Fli
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-    if (FILTER_MODE && !cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
+    if (FILTER_MODE && !cachePool.isInTracking(TrackId.onApplication(namespace, clusterId))) {
       return
     }
     cachePool.k8sDeploymentEvents.put(

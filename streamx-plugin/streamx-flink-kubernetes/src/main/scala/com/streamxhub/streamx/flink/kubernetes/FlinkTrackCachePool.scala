@@ -18,12 +18,12 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
+package com.streamxhub.streamx.flink.kubernetes
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode.SESSION
-import com.streamxhub.streamx.flink.k8s.model._
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.SESSION
+import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.atomic.AtomicReference
 import javax.annotation.concurrent.ThreadSafe
@@ -33,18 +33,18 @@ import scala.collection.JavaConverters._
  * Tracking info cache pool on flink kubernetes mode.
  * author:Al-assad
  */
-class FlinkTRKCachePool extends Logger with AutoCloseable {
+class FlinkTrackCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
-  val trkIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
+  val trackIds: Cache[TrackId, TrackIdCV] = Caffeine.newBuilder.build()
 
   // cache for tracking flink job status
-  val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
+  val jobStatuses: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
 
   // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
-  // cache for last traking flink cluster metrics, record
+  // cache for last tracking flink cluster metrics, record
   val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   // todo recovery from db
@@ -52,46 +52,51 @@ class FlinkTRKCachePool extends Logger with AutoCloseable {
   override def close(): Unit = {
     jobStatuses.cleanUp()
     k8sDeploymentEvents.cleanUp()
-    trkIds.cleanUp()
+    trackIds.cleanUp()
   }
 
   /**
    * collect all tracking identifiers
    */
-  def collectAllTrkIds(): Set[TrkId] = {
-    trkIds.asMap().keySet().asScala.toSet
+  def collectAllTrackIds(): Set[TrackId] = {
+    trackIds.asMap().keySet().asScala.toSet
   }
 
   /**
    * determines whether the specified TrkId is in the trace
    */
-  def isInTracking(trkId: TrkId): Boolean = {
-    if (trkId == null || !trkId.isLegal) {
+  def isInTracking(trackId: TrackId): Boolean = {
+    if (trackId == null || !trackId.isLegal){
       return false
     }
-    trkIds.getIfPresent(trkId) != null
+    trackIds.getIfPresent(trackId) != null
   }
 
   /**
    * collect all legal tracking ids, and remove jobId info of session mode trkId
    */
-  private[k8s] def collectDistinctTrkIds(): Set[TrkId] = collectAllTrkIds()
-    .map(trkId => if (trkId.executeMode == SESSION) TrkId(trkId.executeMode, trkId.namespace, trkId.clusterId, "") else trkId)
+  private[kubernetes] def collectDistinctTrackIds(): Set[TrackId] = collectAllTrackIds()
     .filter(_.isLegal)
-
+    .map(id =>
+      id match {
+        case x if x.executeMode == SESSION => TrackId(id.executeMode, id.namespace, id.clusterId, "")
+        case _ => id
+      }
+    )
 }
 
 /**
- * Thread-safe signle value cache
+ * Thread-safe single value cache
  */
 @ThreadSafe
-case class SglValCache[E <: AnyRef](initElement: E) {
-  private val value = new AtomicReference[E](initElement)
+case class SglValCache[T](initElement: T)(implicit manifest: Manifest[T]) {
 
-  def get: E = value.get()
+  private val value = new AtomicReference[T](initElement)
 
-  def set(newVal: E): Unit = value.set(newVal)
+  def get: T = value.get()
 
-  def update(func: E => E): Unit = value.updateAndGet { case e: E => func(e) }
+  def set(newVal: T): Unit = value.set(newVal)
+
+  def update(func: T => T): Unit = value.updateAndGet { case t: T => func(t) }
 
 }

@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.model
 
-import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
 import javax.annotation.Nullable
 import scala.util.Try
@@ -29,13 +29,13 @@ import scala.util.Try
  * tracking identifier for flink on kubernetes
  * author:Al-assad
  */
-case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
-                 namespace: String,
-                 clusterId: String,
-                 @Nullable jobId: String) {
+case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
+                   namespace: String,
+                   clusterId: String,
+                   @Nullable jobId: String) {
 
   /**
-   * check whether fields of trkid are legal
+   * check whether fields of trackId are legal
    */
   def isLegal: Boolean = {
     if (executeMode == null) {
@@ -52,13 +52,12 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
 
 }
 
-object TrkId {
-  def onSession(namespace: String, clusterId: String, jobId: String): TrkId = {
+object TrackId {
+  def onSession(namespace: String, clusterId: String, jobId: String): TrackId = {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String): TrkId = {
+  def onApplication(namespace: String, clusterId: String): TrackId = {
     this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, "")
   }
 }
-
