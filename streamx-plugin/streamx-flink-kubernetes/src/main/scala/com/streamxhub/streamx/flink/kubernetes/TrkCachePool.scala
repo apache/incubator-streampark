@@ -36,15 +36,15 @@ import scala.collection.JavaConverters._
 class FlinkTrackCachePool extends Logger with AutoCloseable {
 
   // cache for tracking identifiers
-  val trackIds: Cache[TrackId, TrackIdCV] = Caffeine.newBuilder.build()
+  val trackIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
 
   // cache for tracking flink job status
-  val jobStatuses: Cache[TrackId, JobStatusCV] = Caffeine.newBuilder.build()
+  val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
 
   // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
-  // cache for last tracking flink cluster metrics, record
+  // cache for last flink cluster metrics
   val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   // todo recovery from db
@@ -58,15 +58,15 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   /**
    * collect all tracking identifiers
    */
-  def collectAllTrackIds(): Set[TrackId] = {
+  def collectAllTrackIds(): Set[TrkId] = {
     trackIds.asMap().keySet().asScala.toSet
   }
 
   /**
    * determines whether the specified TrkId is in the trace
    */
-  def isInTracking(trackId: TrackId): Boolean = {
-    if (trackId == null || !trackId.isLegal){
+  def isInTracking(trackId: TrkId): Boolean = {
+    if (trackId == null || !trackId.isLegal) {
       return false
     }
     trackIds.getIfPresent(trackId) != null
@@ -75,14 +75,12 @@ class FlinkTrackCachePool extends Logger with AutoCloseable {
   /**
    * collect all legal tracking ids, and remove jobId info of session mode trkId
    */
-  private[kubernetes] def collectDistinctTrackIds(): Set[TrackId] = collectAllTrackIds()
+  private[kubernetes] def collectDistinctTrackIds(): Set[TrkId] = collectAllTrackIds()
     .filter(_.isLegal)
-    .map(id =>
-      id match {
-        case x if x.executeMode == SESSION => TrackId(id.executeMode, id.namespace, id.clusterId, "")
-        case _ => id
-      }
-    )
+    .map {
+      case id if id.executeMode == SESSION => TrkId(id.executeMode, id.namespace, id.clusterId, "")
+      case id => id
+    }
 }
 
 /**

@@ -29,10 +29,10 @@ import scala.util.Try
  * tracking identifier for flink on kubernetes
  * author:Al-assad
  */
-case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
-                   namespace: String,
-                   clusterId: String,
-                   @Nullable jobId: String) {
+case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
+                 namespace: String,
+                 clusterId: String,
+                 @Nullable jobId: String) {
 
   /**
    * check whether fields of trackId are legal
@@ -52,12 +52,12 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
 
 }
 
-object TrackId {
-  def onSession(namespace: String, clusterId: String, jobId: String): TrackId = {
+object TrkId {
+  def onSession(namespace: String, clusterId: String, jobId: String): TrkId = {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String): TrackId = {
+  def onApplication(namespace: String, clusterId: String): TrkId = {
     this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, "")
   }
 }

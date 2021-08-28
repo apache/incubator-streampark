@@ -18,9 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
  * author:Al-assad
+ *
+ * @param updateTime last update time for current key
  */
-case class K8sEventKey(namespace: String, clusterId: String)
+case class TrkIdCV(updateTime: Long)

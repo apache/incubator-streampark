@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.model.{TrackId, TrackIdCV}
+import com.streamxhub.streamx.flink.kubernetes.model.{TrkId, TrkIdCV}
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._
@@ -29,7 +29,7 @@ import scala.util.Try
 /**
  * author:Al-assad
  */
-class DefaultFlinkTrackMonitor(conf: FlinkTrackConf = FlinkTrackConf.default) extends FlinkTrackMonitor {
+class DefaultFlinkTrkMonitor(conf: FlinkTrackConf = FlinkTrackConf.default) extends FlinkTrkMonitor {
 
   // cache pool for storage tracking result
   val trkCache = new FlinkTrackCachePool()
@@ -54,37 +54,38 @@ class DefaultFlinkTrackMonitor(conf: FlinkTrackConf = FlinkTrackConf.default) ex
   }
 
 
-  def trackingJob(trackId: TrackId): Unit = {
+  def trackingJob(trackId: TrkId): Unit = {
     if (trackId == null || !trackId.isLegal) {
       return
     }
-    trkCache.trackIds.put(trackId, TrackIdCV(System.currentTimeMillis()))
+    trkCache.trackIds.put(trackId, TrkIdCV(System.currentTimeMillis()))
   }
 
-  def trackingJob(trackIds: Set[TrackId]): Unit = {
+  def trackingJob(trackIds: Set[TrkId]): Unit = {
     if (Try(trackIds.isEmpty).getOrElse(true)) {
       return
     }
     val now = System.currentTimeMillis()
-    val trackingMap = trackIds.map(e => (e, TrackIdCV(now))).toMap
+    val trackingMap = trackIds.map(e => (e, TrkIdCV(now))).toMap
     trkCache.trackIds.putAll(trackingMap.asJava)
   }
 
-  def unTrackingJob(trkId: TrackId): Unit = {
+  def unTrackingJob(trkId: TrkId): Unit = {
+    if (trkId.isLegal)
     if (trkId == null || !trkId.isLegal) {
       return
     }
     trkCache.trackIds.invalidate(trkId)
   }
 
-  def unTrackingJob(trackIds: Set[TrackId]): Unit = {
+  def unTrackingJob(trackIds: Set[TrkId]): Unit = {
     if (Try(trackIds.isEmpty).getOrElse(true)) {
       return
     }
     trkCache.trackIds.invalidateAll(trackIds.asJava)
   }
 
-  override def isInTracking(trkId: TrackId): Boolean = trkCache.isInTracking(trkId)
+  override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
 
 
 }

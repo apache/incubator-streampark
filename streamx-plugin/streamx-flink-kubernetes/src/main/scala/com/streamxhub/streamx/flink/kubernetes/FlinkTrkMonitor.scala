@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.model.TrackId
+import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
@@ -30,14 +30,14 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrackId
  *
  * author:Al-assad
  */
-trait FlinkTrackMonitor extends Logger with AutoCloseable {
+trait FlinkTrkMonitor extends Logger with AutoCloseable {
 
   /**
    * Create FlinkTRKMonitor instance.
    *
    * @param conf configuration
    */
-  def createInstance(conf: FlinkTrackConf = FlinkTrackConf.default): FlinkTrackMonitor = new DefaultFlinkTrackMonitor(conf)
+  def createInstance(conf: FlinkTrackConf = FlinkTrackConf.default): FlinkTrkMonitor = new DefaultFlinkTrkMonitor(conf)
 
   /**
    * start monitor tracking activities.
@@ -59,35 +59,35 @@ trait FlinkTrackMonitor extends Logger with AutoCloseable {
    *
    * @param trkId identifier of flink job
    */
-  def trackingJob(trkId: TrackId)
+  def trackingJob(trkId: TrkId)
 
   /**
    * add tracking for the specified flinks job which on k8s cluster.
    *
    * @param trackIds identifieies of flink job
    */
-  def trackingJob(trackIds: Set[TrackId])
+  def trackingJob(trkIds: Set[TrkId])
 
   /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trkId identifier of flink job
    */
-  def unTrackingJob(trkId: TrackId)
+  def unTrackingJob(trkId: TrkId)
 
   /**
    * remove tracking for the specified flinks job which on k8s cluster.
    *
    * @param trackIds identifieies of flink job
    */
-  def unTrackingJob(trackIds: Set[TrackId])
+  def unTrackingJob(trkIds: Set[TrkId])
 
   /**
    * check whether the specified flink job is in tracking.
    *
    * @param trkId identifier of flink job
    */
-  def isInTracking(trkId: TrackId): Boolean
+  def isInTracking(trkId: TrkId): Boolean
 
 
 }

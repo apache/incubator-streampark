@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey, TrackId}
+import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
 import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
@@ -96,7 +96,7 @@ class FlinkK8sEventWatcher(cachePool: FlinkTrackCachePool) extends Logger with F
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-    if (FILTER_MODE && !cachePool.isInTracking(TrackId.onApplication(namespace, clusterId))) {
+    if (FILTER_MODE && !cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
       return
     }
     cachePool.k8sDeploymentEvents.put(

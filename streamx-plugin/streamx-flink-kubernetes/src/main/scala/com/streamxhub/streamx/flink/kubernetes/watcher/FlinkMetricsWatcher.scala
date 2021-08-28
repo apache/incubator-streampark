@@ -18,14 +18,14 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.watcher
+package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode
-import com.streamxhub.streamx.flink.k8s.model.{FlinkMetricCV, TrkId}
-import com.streamxhub.streamx.flink.k8s.{FlinkTRKCachePool, KubernetesRetriever, MetricWatcherConf}
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.{FlinkTrackCachePool, KubernetesRetriever, MetricWatcherConf}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
 
@@ -43,7 +43,7 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
+class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,
                          conf: MetricWatcherConf = MetricWatcherConf.default) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
@@ -97,24 +97,22 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
    */
   private def trackingTask(): Unit = {
     // get all legal tracking ids
-    val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrkIds()).filter(_.nonEmpty).getOrElse(return)
+    val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrackIds()).filter(_.nonEmpty).getOrElse(return)
     val accMetrics = new AtomicReference[FlinkMetricCV](FlinkMetricCV.empty)
 
-    // retieve flink metrics in thread pool
-    val trksFuture: Set[Future[Option[FlinkMetricCV]]] =
-      trkIds.map(trkId => {
-        val future = Future {
-          collectMertric(trkId.executeMode, trkId.clusterId, trkId.namespace)
-        }
-        future foreach {
-          trkRs =>
-            if (trkRs.nonEmpty)
-              accMetrics.updateAndGet { case e: FlinkMetricCV => e + trkRs.get }
+    // retrieve flink metrics in thread pool
+    val trkFutures: Set[Future[Option[FlinkMetricCV]]] =
+      trkIds.map(id => {
+        val future = Future(collectMetrics(id.executeMode, id.clusterId, id.namespace))
+        future.foreach { metric =>
+          if (metric.nonEmpty) {
+            accMetrics.updateAndGet { case e: FlinkMetricCV => e + metric.get }
+          }
         }
         future
       })
     // blocking until all future are completed or timeout is reached
-    val futureHold = Future.sequence(trksFuture)
+    val futureHold = Future.sequence(trkFutures)
     Try({
       Await.ready(futureHold, conf.sglTrkTaskIntervalSec seconds)
       // write metrics to cache
@@ -133,7 +131,7 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
-  def collectMertric(@Nonnull executeMode: FlinkK8sExecuteMode.Value,
+  def collectMetrics(@Nonnull executeMode: FlinkK8sExecuteMode.Value,
                      @Nonnull clusterId: String,
                      @Nonnull namespace: String): Option[FlinkMetricCV] = {
     // get flink web interface url
@@ -142,14 +140,14 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = Try(
-      Request.get(s"${flinkJmRestUrl}/overview")
+      Request.get(s"$flinkJmRestUrl/overview")
         .execute.returnContent.asString(StandardCharsets.UTF_8)
         .fromJson[FlinkRestOverview])
       .getOrElse(return None)
 
     // call flink rest jm config api
     val flinkJmConfigs = Try(
-      Request.get(s"${flinkJmRestUrl}/jobmanager/config")
+      Request.get(s"$flinkJmRestUrl/jobmanager/config")
         .execute.returnContent.asString(StandardCharsets.UTF_8)
         .fromJson[Array[FlinkRestJmConfigItem]]
         .map(e => (e.key, e.value))
@@ -177,17 +175,17 @@ class FlinkMetricWatcher(cachePool: FlinkTRKCachePool,
 /**
  * bean for response message of flink-rest/overview
  */
-private[k8s] case class FlinkRestOverview(@JsonProperty("taskmanagers") taskManagers: Integer,
-                                          @JsonProperty("slots-total") slotsTotal: Integer,
-                                          @JsonProperty("slots-available") slotsAvailable: Integer,
-                                          @JsonProperty("jobs-running") jobsRunning: Integer,
-                                          @JsonProperty("jobs-finished") jobsFinished: Integer,
-                                          @JsonProperty("jobs-cancelled") jobsCancelled: Integer,
-                                          @JsonProperty("jobs-failed") jobsFailed: Integer,
-                                          @JsonProperty("flink-version") flinkVersion: String)
+private[kubernetes] case class FlinkRestOverview(@JsonProperty("taskmanagers") taskManagers: Integer,
+                                                 @JsonProperty("slots-total") slotsTotal: Integer,
+                                                 @JsonProperty("slots-available") slotsAvailable: Integer,
+                                                 @JsonProperty("jobs-running") jobsRunning: Integer,
+                                                 @JsonProperty("jobs-finished") jobsFinished: Integer,
+                                                 @JsonProperty("jobs-cancelled") jobsCancelled: Integer,
+                                                 @JsonProperty("jobs-failed") jobsFailed: Integer,
+                                                 @JsonProperty("flink-version") flinkVersion: String)
 
 /**
  * bean for response message of flink-rest/jobmanager/config
  */
-private[k8s] case class FlinkRestJmConfigItem(@JsonProperty("key") key: String,
-                                              @JsonProperty("value") value: String)
+private[kubernetes] case class FlinkRestJmConfigItem(@JsonProperty("key") key: String,
+                                                     @JsonProperty("value") value: String)
