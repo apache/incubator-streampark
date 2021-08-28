@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.console.core.enums;
 
 
-import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState;
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import lombok.Getter;
 
 import java.io.Serializable;
