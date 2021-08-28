@@ -18,10 +18,10 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
+package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.k8s.model.TrkId
+import com.streamxhub.streamx.flink.kubernetes.model.TrackId
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
@@ -30,14 +30,14 @@ import com.streamxhub.streamx.flink.k8s.model.TrkId
  *
  * author:Al-assad
  */
-trait FlinkTRKMonitor extends Logger with AutoCloseable {
+trait FlinkTrackMonitor extends Logger with AutoCloseable {
 
   /**
    * Create FlinkTRKMonitor instance.
    *
    * @param conf configuration
    */
-  def createInstance(conf: FlinkTRKConf = FlinkTRKConf.default): FlinkTRKMonitor = new DefaultFlinkTRKMonitor(conf)
+  def createInstance(conf: FlinkTrackConf = FlinkTrackConf.default): FlinkTrackMonitor = new DefaultFlinkTrackMonitor(conf)
 
   /**
    * start monitor tracking activities.
@@ -59,35 +59,35 @@ trait FlinkTRKMonitor extends Logger with AutoCloseable {
    *
    * @param trkId identifier of flink job
    */
-  def trackingJob(trkId: TrkId)
+  def trackingJob(trkId: TrackId)
 
   /**
    * add tracking for the specified flinks job which on k8s cluster.
    *
-   * @param trkIds identifieies of flink job
+   * @param trackIds identifieies of flink job
    */
-  def trackingJob(trkIds: Set[TrkId])
+  def trackingJob(trackIds: Set[TrackId])
 
   /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trkId identifier of flink job
    */
-  def unTrackingJob(trkId: TrkId)
+  def unTrackingJob(trkId: TrackId)
 
   /**
    * remove tracking for the specified flinks job which on k8s cluster.
    *
-   * @param trkIds identifieies of flink job
+   * @param trackIds identifieies of flink job
    */
-  def unTrackingJob(trkIds: Set[TrkId])
+  def unTrackingJob(trackIds: Set[TrackId])
 
   /**
    * check whether the specified flink job is in tracking.
    *
    * @param trkId identifier of flink job
    */
-  def isInTracking(trkId: TrkId): Boolean
+  def isInTracking(trkId: TrackId): Boolean
 
 
 }

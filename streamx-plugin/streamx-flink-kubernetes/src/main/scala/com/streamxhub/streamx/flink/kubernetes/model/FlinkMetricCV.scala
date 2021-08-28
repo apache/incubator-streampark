@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
  * flink clutser mertic info

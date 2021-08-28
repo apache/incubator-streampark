@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
+package com.streamxhub.streamx.flink.kubernetes
 
 /**
  * author: Al-assad
@@ -26,15 +26,15 @@ package com.streamxhub.streamx.flink.k8s
  * @param jobStatusWatcherConf configuration for flink job status tracking process
  * @param metricWatcherConf    configuration for flink metric tracking process
  */
-case class FlinkTRKConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
+case class FlinkTrackConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
 
 case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
 
-object FlinkTRKConf {
-  def default: FlinkTRKConf = FlinkTRKConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
+object FlinkTrackConf {
+  def default: FlinkTrackConf = FlinkTrackConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
 }
 
 object MetricWatcherConf {

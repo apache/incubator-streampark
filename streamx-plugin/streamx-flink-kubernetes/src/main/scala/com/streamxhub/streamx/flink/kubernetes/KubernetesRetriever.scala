@@ -18,9 +18,9 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s
+package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.k8s.enums.FlinkK8sExecuteMode
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient}
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
@@ -68,7 +68,7 @@ object KubernetesRetriever {
     } else {
       flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, namespace)
     }
-    // retrive flink cluster client
+    // retrieve flink cluster client
     val clientFactory: ClusterClientFactory[String] = clusterClientServiceLoader.getClusterClientFactory(flinkConfig)
     val clusterProvider: KubernetesClusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig)
       .asInstanceOf[KubernetesClusterDescriptor]

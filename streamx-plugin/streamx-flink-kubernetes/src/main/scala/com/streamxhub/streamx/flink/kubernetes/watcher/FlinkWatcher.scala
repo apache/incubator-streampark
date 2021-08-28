@@ -18,9 +18,40 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.watcher
+
+import scala.language.implicitConversions
 
 /**
- * author:Al-assad
+ * auth: Al-assad
  */
-case class K8sEventKey(namespace: String, clusterId: String)
+trait FlinkWatcher extends AutoCloseable {
+
+  // todo deplayStart()
+
+  /**
+   * start watcher process
+   */
+  def start()
+
+  /**
+   * stop watcher process
+   */
+  def stop()
+
+  /**
+   * restart watcher process
+   */
+  def restart(): Unit = {
+    stop()
+    start()
+  }
+
+  /**
+   * Runnable streamline syntax
+   */
+  protected implicit def funcToRunnable(fun: () => Unit): Runnable = new Runnable() {
+    def run(): Unit = fun()
+  }
+
+}

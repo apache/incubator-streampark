@@ -18,23 +18,16 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.model
 
-import com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
+import io.fabric8.kubernetes.api.model.apps.Deployment
+import io.fabric8.kubernetes.client.Watcher.Action
 
 /**
  * author:Al-assad
  *
- * @param jobState     state of flink job
- * @param jobId        flink jobId hex string
- * @param jobName      flink job name
- * @param jobStartTime flink job starting timestamp
- * @param pollEmitTime tracking polling emit timestamp
- * @param pollAckTime  traking polling result receive timestamp
+ * @param action     event action
+ * @param event      event content
+ * @param pollAckTime polling ack time
  */
-case class JobStatusCV(jobState: FlinkJobState.Value,
-                       jobId: String,
-                       jobName: String,
-                       jobStartTime: Long,
-                       pollEmitTime: Long,
-                       pollAckTime: Long)
+case class K8sDeploymentEventCV(action: Action, event: Deployment, pollAckTime: Long)

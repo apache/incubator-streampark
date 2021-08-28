@@ -18,28 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.enums
-
-import org.apache.flink.api.common.JobStatus
+package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
  * author:Al-assad
- * flink job status on kubernetes
+ *
+ * @param updateTime last update time for current key
  */
-object FlinkJobState extends Enumeration {
-
-  val K8S_DEPLOYING, LOST, OTHER = Value
-
-  // @see org.apache.flink.api.common.JobStatus
-  val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
-
-  def of(value: String): FlinkJobState.Value = {
-    this.values.find(_.toString == value).getOrElse(OTHER)
-  }
-
-  def of(jobStatus: JobStatus): FlinkJobState.Value = {
-    val jobStatusStr = jobStatus.toString
-    this.values.find(_.toString == jobStatusStr).getOrElse(OTHER)
-  }
-
-}
+case class TrackIdCV(updateTime: Long)

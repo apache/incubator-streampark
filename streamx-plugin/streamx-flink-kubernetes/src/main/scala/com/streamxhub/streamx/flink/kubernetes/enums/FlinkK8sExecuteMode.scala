@@ -18,11 +18,25 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.k8s.model
+package com.streamxhub.streamx.flink.kubernetes.enums
+
+import com.streamxhub.streamx.common.enums.ExecutionMode
 
 /**
  * author:Al-assad
- *
- * @param updateTime last update time for current key
+ * execution mode of flink on kubernetes
  */
-case class TrkIdCV(updateTime: Long)
+object FlinkK8sExecuteMode extends Enumeration {
+
+  val SESSION: FlinkK8sExecuteMode.Value = Value("kubernetes-session")
+  val APPLICATION: FlinkK8sExecuteMode.Value = Value("kubernetes-application")
+
+  def of(mode: ExecutionMode): Value = {
+    mode match {
+      case ExecutionMode.KUBERNETES_NATIVE_SESSION => SESSION
+      case ExecutionMode.KUBERNETES_NATIVE_APPLICATION => APPLICATION
+      case _ => throw new IllegalStateException(s"Illegal K8sExecuteMode, ${mode.name}")
+    }
+  }
+
+}
