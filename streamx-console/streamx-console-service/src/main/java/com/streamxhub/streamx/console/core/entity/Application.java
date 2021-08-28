@@ -48,6 +48,8 @@ import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,6 +100,12 @@ public class Application implements Serializable {
      * flink docker base image
      */
     private String flinkImage;
+
+    /**
+     * k8s部署下的namespace
+     */
+    private String K8sNameSpace;
+
 
     private Integer state;
     /**
@@ -213,6 +221,13 @@ public class Application implements Serializable {
     private transient String createTimeFrom;
     private transient String createTimeTo;
     private transient String backUpDescription;
+
+    @JsonIgnore
+    public void setK8sNameSpace(String k8sNameSpace) {
+        K8sNameSpace = StringUtils.isBlank(k8sNameSpace) ?
+            KubernetesConfigOptions.NAMESPACE.defaultValue() :
+            k8sNameSpace;
+    }
 
     public void setState(Integer state) {
         this.state = state;

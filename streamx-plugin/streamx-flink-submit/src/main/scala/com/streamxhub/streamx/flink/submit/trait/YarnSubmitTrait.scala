@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.ExceptionUtils
-import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.{ClientOptions, CustomCommandLine}
 import org.apache.flink.client.deployment.ClusterSpecification

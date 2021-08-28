@@ -51,6 +51,7 @@ import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
 import com.streamxhub.streamx.flink.submit.*;
+import com.streamxhub.streamx.flink.submit.domain.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -491,6 +492,10 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setDynamicOptions(appParam.getDynamicOptions());
             application.setResolveOrder(appParam.getResolveOrder());
             application.setExecutionMode(appParam.getExecutionMode());
+            application.setClusterId(appParam.getClusterId());
+            application.setFlinkImage(appParam.getFlinkImage());
+            application.setK8sNameSpace(appParam.getK8sNameSpace());
+
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
             application.setAlertEmail(appParam.getAlertEmail());
@@ -854,7 +859,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     application.getAppId(),
                     application.getJobId(),
                     appParam.getSavePointed(),
-                    appParam.getDrain()
+                    appParam.getDrain(),
+                    application.getK8sNameSpace()
                 );
                 StopResponse stopActionResult = FlinkSubmit.stop(ExecutionMode.of(application.getExecutionMode()), stopInfo);
                 String savePointDir = stopActionResult.savePointDir();
@@ -1056,7 +1062,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         KubernetesSubmitParam kubernetesSubmitParam = new KubernetesSubmitParam(
             application.getClusterId(),
             application.getFlinkImage(),
-            KubernetesConfigOptions.NAMESPACE.defaultValue(),
+            application.getK8sNameSpace(),
             settingService.getDockerRegisterAddress(),
             settingService.getDockerRegisterUser(),
             settingService.getDockerRegisterPassword()

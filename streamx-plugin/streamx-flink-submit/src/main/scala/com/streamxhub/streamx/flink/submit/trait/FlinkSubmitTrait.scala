@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{Logger, Utils}
 import com.streamxhub.streamx.flink.core.scala.conf.FlinkRunOption
-import com.streamxhub.streamx.flink.submit.{StopRequest, StopResponse, SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.{CommandLine, Options}
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.cli.{CliArgsException, CliFrontendParser, CustomCommandLine}
