@@ -26,6 +26,7 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.SESSION
 import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.atomic.AtomicReference
+import java.util.function.UnaryOperator
 import javax.annotation.concurrent.ThreadSafe
 import scala.collection.JavaConverters._
 
@@ -95,6 +96,8 @@ case class SglValCache[T](initElement: T)(implicit manifest: Manifest[T]) {
 
   def set(newVal: T): Unit = value.set(newVal)
 
-  def update(func: T => T): Unit = value.updateAndGet { case t: T => func(t) }
+  def update(func: T => T): Unit = value.updateAndGet(new UnaryOperator[T] {
+    override def apply(t: T): T = func(t)
+  })
 
 }

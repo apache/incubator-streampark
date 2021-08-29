@@ -32,6 +32,7 @@ import org.apache.hc.client5.http.fluent.Request
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import java.util.function.UnaryOperator
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
@@ -106,7 +107,9 @@ class FlinkMetricWatcher(cachePool: FlinkTrkCachePool,
         val future = Future(collectMetrics(id.executeMode, id.clusterId, id.namespace))
         future.foreach { metric =>
           if (metric.nonEmpty) {
-            accMetrics.updateAndGet { case e: FlinkMetricCV => e + metric.get }
+            accMetrics.updateAndGet(new UnaryOperator[FlinkMetricCV] {
+              override def apply(t: FlinkMetricCV): FlinkMetricCV = t + metric.get
+            })
           }
         }
         future
