@@ -335,9 +335,9 @@ object ConfigConst {
       |                                                                (v1.1.2)
       |
       |      ┌───────────────────────────────────────────────────┐
-      |      ║   WebSite: http://www.streamxhub.com              ║
-      |      ║   GitHub:  https://github.com/streamxhub/streamx  ║
-      |      ║   Gitee:   https://gitee.com/benjobs/streamx      ║
+      |      │   WebSite: http://www.streamxhub.com              │
+      |      │   GitHub:  https://github.com/streamxhub/streamx  │
+      |      │   Gitee:   https://gitee.com/benjobs/streamx      │
       |      └───────────────────────────────────────────────────┘
       |
       |             [StreamX] Make Flink|Spark easier ô‿ô!
