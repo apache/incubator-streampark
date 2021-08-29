@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.streamxhub.streamx.common.util.ChildFirstClassLoader;
 import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -33,7 +34,6 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
-import com.streamxhub.streamx.console.core.flink.FlinkShimsClassLoader;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -221,7 +221,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
             URL[] urls = {shimsJars.get(0).toURI().toURL()};
 
-            URLClassLoader classLoader = new FlinkShimsClassLoader(urls, getClass().getClassLoader());
+            URLClassLoader classLoader = new ChildFirstClassLoader(urls, getClass().getClassLoader());
 
             shimsClassLoaderCache.put(version, classLoader);
         }
