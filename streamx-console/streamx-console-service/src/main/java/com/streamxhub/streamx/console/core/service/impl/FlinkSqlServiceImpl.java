@@ -33,6 +33,7 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.FlinkSql;
 import com.streamxhub.streamx.console.core.enums.CandidateType;
 import com.streamxhub.streamx.console.core.enums.EffectiveType;
+import com.streamxhub.streamx.console.core.flink.FlinkShimsClassLoader;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import com.streamxhub.streamx.console.core.service.FlinkSqlService;
@@ -189,7 +190,11 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 Class<?> clazz = loader.loadClass("com.streamxhub.streamx.flink.core.FlinkSqlValidator");
                 Method method = clazz.getDeclaredMethod("verifySql", String.class);
                 method.setAccessible(true);
-                return method.invoke(null, sql).toString();
+                Object sqlError = method.invoke(null, sql);
+                if (sqlError == null) {
+                    return null;
+                }
+                return sqlError.toString();
             } catch (Exception e) {
                 e.printStackTrace();
             }
@@ -216,7 +221,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
 
             URL[] urls = {shimsJars.get(0).toURI().toURL()};
 
-            URLClassLoader classLoader = new URLClassLoader(urls, getClass().getClassLoader());
+            URLClassLoader classLoader = new FlinkShimsClassLoader(urls, getClass().getClassLoader());
 
             shimsClassLoaderCache.put(version, classLoader);
         }
