@@ -30,7 +30,7 @@ import scala.util.Try
  * author:Al-assad
  */
 case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
-                 namespace: String,
+                 namespace: String = "default",
                  clusterId: String,
                  @Nullable jobId: String) {
 
