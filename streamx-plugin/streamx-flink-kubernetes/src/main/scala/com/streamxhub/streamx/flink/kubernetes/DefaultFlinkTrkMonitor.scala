@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, FlinkTrkConf, JobStatusCV, TrkId, TrkIdCV}
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._
@@ -86,6 +86,13 @@ class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends 
 
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
 
+  override def getJobStatus(trkId: TrkId): Option[JobStatusCV] = Option(trkCache.jobStatuses.getIfPresent(trkId))
+
+  override def getJobStatus(trkIds: Set[TrkId]): Map[TrkId, JobStatusCV] = trkCache.jobStatuses.getAllPresent(trkIds.asJava).asScala.toMap
+
+  override def getAllJobStatus: Map[TrkId, JobStatusCV] = Map(trkCache.jobStatuses.asMap().asScala.toSeq: _*)
+
+  override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.get)
 
 }
 

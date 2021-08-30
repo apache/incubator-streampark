@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, FlinkTrkConf, JobStatusCV, TrkId}
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
@@ -31,13 +31,6 @@ import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId}
  * author:Al-assad
  */
 trait FlinkTrkMonitor extends Logger with AutoCloseable {
-
-  /**
-   * Create FlinkTRKMonitor instance.
-   *
-   * @param conf configuration
-   */
-  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.default): FlinkTrkMonitor = new DefaultFlinkTrkMonitor(conf)
 
   /**
    * start monitor tracking activities.
@@ -89,6 +82,36 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
    */
   def isInTracking(trkId: TrkId): Boolean
 
+  /**
+   * get flink status
+   */
+  def getJobStatus(trkId: TrkId): Option[JobStatusCV]
 
+  /**
+   * get flink status
+   */
+  def getJobStatus(trkIds: Set[TrkId]): Map[TrkId, JobStatusCV]
+
+  /**
+   * get all flink status in tracking result pool
+   */
+  def getAllJobStatus: Map[TrkId, JobStatusCV]
+
+  /**
+   * get flink cluster metrics
+   */
+  def getClusterMetrics: Option[FlinkMetricCV]
+
+
+
+}
+
+object FlinkTrkMonitor {
+  /**
+   * Create FlinkTRKMonitor instance.
+   *
+   * @param conf configuration
+   */
+  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.default): FlinkTrkMonitor = new DefaultFlinkTrkMonitor(conf)
 }
 
