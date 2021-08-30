@@ -76,8 +76,8 @@ object KubernetesRetriever {
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
     flinkConfig.setString(KubernetesConfigOptions.CLUSTER_ID, clusterId)
     flinkConfig.set(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(FLINK_CLIENT_TIMEOUT_SEC))
-    flinkConfig.set(RestOptions.AWAIT_LEADER_TIMEOUT, FLINK_REST_AWAIT_TIMEOUT_SEC * 1000)
-    flinkConfig.set(RestOptions.RETRY_MAX_ATTEMPTS, FLINK_REST_RETRY_MAX_ATTEMPTS)
+    flinkConfig.setLong(RestOptions.AWAIT_LEADER_TIMEOUT, FLINK_REST_AWAIT_TIMEOUT_SEC * 1000)
+    flinkConfig.setInteger(RestOptions.RETRY_MAX_ATTEMPTS, FLINK_REST_RETRY_MAX_ATTEMPTS)
     if (Try(namespace.isEmpty).getOrElse(true)) {
       flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
     } else {
