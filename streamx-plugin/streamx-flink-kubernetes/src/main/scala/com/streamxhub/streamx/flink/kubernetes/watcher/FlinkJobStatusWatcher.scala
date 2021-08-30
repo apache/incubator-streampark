@@ -144,7 +144,9 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
    */
   def touchSessionJob(@Nonnull clusterId: String, @Nonnull namespace: String): Array[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
-    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)) {
+    tryWithResourceException(
+      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION))
+        .getOrElse(return Array.empty[(TrkId, JobStatusCV)])) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
@@ -181,7 +183,8 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
    */
   def touchApplicationJob(@Nonnull clusterId: String, @Nonnull namespace: String): Option[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
-    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)) {
+    tryWithResourceException(
+      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)).getOrElse(return None)) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()

@@ -22,12 +22,14 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
+import org.apache.flink.client.cli.ClientOptions
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{Configuration, DeploymentOptions}
+import org.apache.flink.configuration.{Configuration, DeploymentOptions, RestOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
+import java.time.Duration
 import javax.annotation.Nullable
 import scala.util.Try
 
@@ -35,6 +37,14 @@ import scala.util.Try
  * author:Al-assad
  */
 object KubernetesRetriever {
+
+  // see org.apache.flink.client.cli.ClientOptions.CLIENT_TIMEOUT}
+  val FLINK_CLIENT_TIMEOUT_SEC = 30L
+  // see org.apache.flink.configuration.RestOptions.AWAIT_LEADER_TIMEOUT
+  val FLINK_REST_AWAIT_TIMEOUT_SEC = 10L
+  // see org.apache.flink.configuration.RestOptions.RETRY_MAX_ATTEMPTS
+  val FLINK_REST_RETRY_MAX_ATTEMPTS = 2
+
 
   /**
    * get new KubernetesClient
@@ -65,6 +75,9 @@ object KubernetesRetriever {
     val flinkConfig = new Configuration()
     flinkConfig.setString(DeploymentOptions.TARGET, executeMode.toString)
     flinkConfig.setString(KubernetesConfigOptions.CLUSTER_ID, clusterId)
+    flinkConfig.set(ClientOptions.CLIENT_TIMEOUT, Duration.ofSeconds(FLINK_CLIENT_TIMEOUT_SEC))
+    flinkConfig.set(RestOptions.AWAIT_LEADER_TIMEOUT, FLINK_REST_AWAIT_TIMEOUT_SEC * 1000)
+    flinkConfig.set(RestOptions.RETRY_MAX_ATTEMPTS, FLINK_REST_RETRY_MAX_ATTEMPTS)
     if (Try(namespace.isEmpty).getOrElse(true)) {
       flinkConfig.setString(KubernetesConfigOptions.NAMESPACE, KubernetesConfigOptions.NAMESPACE.defaultValue())
     } else {
@@ -79,6 +92,7 @@ object KubernetesRetriever {
       .getClusterClient
     flinkClient
   }
+
 
 
 }

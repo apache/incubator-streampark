@@ -28,6 +28,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, MetricWatch
 import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever}
 import org.apache.flink.configuration.{JobManagerOptions, MemorySize, TaskManagerOptions}
 import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.util.Timeout
 
 import java.nio.charset.StandardCharsets
 import java.util.concurrent.atomic.AtomicReference
@@ -144,6 +145,8 @@ class FlinkMetricWatcher(cachePool: FlinkTrkCachePool,
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = Try(
       Request.get(s"$flinkJmRestUrl/overview")
+        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
         .fromJson[FlinkRestOverview])
       .getOrElse(return None)
@@ -151,6 +154,8 @@ class FlinkMetricWatcher(cachePool: FlinkTrkCachePool,
     // call flink rest jm config api
     val flinkJmConfigs = Try(
       Request.get(s"$flinkJmRestUrl/jobmanager/config")
+        .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+        .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
         .execute.returnContent.asString(StandardCharsets.UTF_8)
         .fromJson[Array[FlinkRestJmConfigItem]]
         .map(e => (e.key, e.value))
