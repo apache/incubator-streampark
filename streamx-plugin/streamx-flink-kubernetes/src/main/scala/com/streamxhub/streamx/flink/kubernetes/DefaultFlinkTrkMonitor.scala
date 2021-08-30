@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.model.{TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId, TrkIdCV}
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._

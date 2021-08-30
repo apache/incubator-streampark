@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.model.TrkId
+import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId}
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
