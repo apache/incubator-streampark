@@ -18,7 +18,7 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.kubernetes.model
+package com.streamxhub.streamx.flink.kubernetes
 
 /**
  * author: Al-assad
@@ -28,8 +28,10 @@ package com.streamxhub.streamx.flink.kubernetes.model
  */
 case class FlinkTrkConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
 
+// configuration for FlinkMetricWatcher
 case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
+// configuration for FlinkJobStatusWatcher
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
 

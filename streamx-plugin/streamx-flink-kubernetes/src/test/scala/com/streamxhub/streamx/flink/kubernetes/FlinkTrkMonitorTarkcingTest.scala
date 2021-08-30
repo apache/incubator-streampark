@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.model.{FlinkTrkConf, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
 import org.scalatest.Assertions.assertThrows
