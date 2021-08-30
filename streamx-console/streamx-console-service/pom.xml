@@ -360,7 +360,7 @@
             <version>5.2.4</version>
         </dependency>
 
-        <!--flink 尽量不暴露具体的flink的依赖包和版本.-->
+        <!-- flink 尽量不暴露具体的f依赖包和版本-->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-1.12</artifactId>
@@ -373,6 +373,7 @@
             </exclusions>
         </dependency>
 
+        <!--在开发阶段,两个版本的jar,只能存在一个,选择1.13-->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-shims_flink-1.13</artifactId>
