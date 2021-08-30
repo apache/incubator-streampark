@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
-import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, FlinkTrkConf, JobStatusCV, TrkId, TrkIdCV}
+import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
 import scala.collection.JavaConverters._
@@ -52,7 +52,6 @@ class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends 
     allWatchers.foreach(_.close)
     trkCache.close()
   }
-
 
   def trackingJob(trkId: TrkId): Unit = {
     if (trkId == null || !trkId.isLegal) {
@@ -94,5 +93,9 @@ class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends 
 
   override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.get)
 
+  /**
+   * collect all TrkId which in tracking
+   */
+  override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
 }
 

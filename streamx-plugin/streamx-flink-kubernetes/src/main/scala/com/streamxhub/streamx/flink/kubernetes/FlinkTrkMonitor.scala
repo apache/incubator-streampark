@@ -83,6 +83,11 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
   def isInTracking(trkId: TrkId): Boolean
 
   /**
+   * collect all TrkId which in tracking
+   */
+  def getAllTrackingIds: Set[TrkId]
+
+  /**
    * get flink status
    */
   def getJobStatus(trkId: TrkId): Option[JobStatusCV]
