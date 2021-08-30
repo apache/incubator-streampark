@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
-import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient}
+import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.deployment.{ClusterClientFactory, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.{Configuration, DeploymentOptions}
@@ -39,6 +39,7 @@ object KubernetesRetriever {
   /**
    * get new KubernetesClient
    */
+  @throws(classOf[KubernetesClientException])
   def newK8sClient(): KubernetesClient = {
     new DefaultKubernetesClient()
   }
@@ -56,6 +57,7 @@ object KubernetesRetriever {
   /**
    * get new flink cluster client of kubernetes mode
    */
+  @throws(classOf[Exception])
   def newFinkClusterClient(clusterId: String,
                            @Nullable namespace: String,
                            executeMode: FlinkK8sExecuteMode.Value): ClusterClient[String] = {
