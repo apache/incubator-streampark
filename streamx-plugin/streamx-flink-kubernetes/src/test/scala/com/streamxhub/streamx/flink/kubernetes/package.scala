@@ -34,7 +34,9 @@ package object kubernetes {
   }
 
   def watchK8sEventCache(implicit trkMonitor: FlinkTrkMonitor): Unit = {
+
     new Timer().scheduleAtFixedRate(() => println(s"[k8s-event]-${System.currentTimeMillis} => " +
+      s"count=${trkMonitor.asInstanceOf[DefaultFlinkTrkMonitor].trkCache.k8sDeploymentEvents.asMap().size} | " +
       s"${trkMonitor.asInstanceOf[DefaultFlinkTrkMonitor].trkCache.k8sDeploymentEvents.asMap().asScala.mkString(",")}"), 0, 1500)
   }
 

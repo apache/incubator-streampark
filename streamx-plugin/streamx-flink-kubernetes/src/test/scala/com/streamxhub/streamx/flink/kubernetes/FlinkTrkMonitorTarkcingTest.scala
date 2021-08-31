@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.google.common.eventbus.Subscribe
+import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -33,7 +35,6 @@ import scala.util.Try
  * test FlinkTrkMonitor tracking feature
  */
 class FlinkTrkMonitorTarkcingTest {
-
 
   implicit var trkMonitor: DefaultFlinkTrkMonitor = _
 
@@ -54,11 +55,13 @@ class FlinkTrkMonitorTarkcingTest {
   @Test def testMonitor(): Unit = {
     watchJobStatusCache
     watchMetricsCache
+    watchTrkIdsCache
     trkMonitor.start()
     trkMonitor.trackingJob(trkIds.toSet)
     while (true) {}
   }
 
+  // test start, stop, close action
   @Test def testMonitorStartStop(): Unit = {
     watchMetricsCache
     watchJobStatusCacheSize
@@ -74,7 +77,7 @@ class FlinkTrkMonitorTarkcingTest {
     assertThrows(classOf[RejectedExecutionException])
   }
 
-
+  // test tracking, untracking action
   @Test def testTrackinAndUnTracking(): Unit = {
     watchJobStatusCacheSize
     watchMetricsCache
@@ -89,6 +92,24 @@ class FlinkTrkMonitorTarkcingTest {
     trkMonitor.unTrackingJob(trkId)
     assertFalse(trkMonitor.isInTracking(trkId))
     Thread.sleep(10 * 1000)
+  }
+
+  // test change event subscribe
+  @Test def testStatusEventsSubscribe(): Unit = {
+//    watchK8sEventCache
+    watchTrkIdsCache
+    watchJobStatusCache
+    trkMonitor.registerListener(new ChangeEventListener())
+    trkMonitor.start()
+    trkMonitor.trackingJob(trkIds.toSet)
+    while (true) {}
+
+  }
+
+  class ChangeEventListener {
+    @Subscribe def catchJobStatusEvent(event: FlinkJobStatusChangeEvent): Unit = {
+      println(s"[catch-jobStatus]-${System.currentTimeMillis()}-${event}")
+    }
   }
 
 
