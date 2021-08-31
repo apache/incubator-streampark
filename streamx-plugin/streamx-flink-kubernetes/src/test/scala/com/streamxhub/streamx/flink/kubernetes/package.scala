@@ -2,6 +2,7 @@ package com.streamxhub.streamx.flink
 
 import java.util.{Timer, TimerTask}
 import scala.language.implicitConversions
+import scala.collection.JavaConverters._
 
 package object kubernetes {
 
@@ -30,6 +31,11 @@ package object kubernetes {
   def watchTrkIdsCacheSize(implicit trkMonitor: FlinkTrkMonitor): Unit = {
     new Timer().scheduleAtFixedRate(() => println(s"[trkIds-size]-${System.currentTimeMillis} => " +
       s"${trkMonitor.getAllTrackingIds.size}"), 0, 1500)
+  }
+
+  def watchK8sEventCache(implicit trkMonitor: FlinkTrkMonitor): Unit = {
+    new Timer().scheduleAtFixedRate(() => println(s"[k8s-event]-${System.currentTimeMillis} => " +
+      s"${trkMonitor.asInstanceOf[DefaultFlinkTrkMonitor].trkCache.k8sDeploymentEvents.asMap().asScala.mkString(",")}"), 0, 1500)
   }
 
 
