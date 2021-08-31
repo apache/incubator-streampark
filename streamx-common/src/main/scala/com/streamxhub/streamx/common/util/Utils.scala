@@ -93,7 +93,7 @@ object Utils {
   /*
    * Mimicking the try-with-resource syntax of Java-8+
    */
-  def tryWithResource[R,T <: AutoCloseable](handle: T)(func: T => R): R = {
+  def tryWithResource[R, T <: AutoCloseable](handle: T)(func: T => R): R = {
     try {
       func(handle)
     } finally {
@@ -108,9 +108,11 @@ object Utils {
   * and also provides callback function param for handing
   * Exception.
   */
-  def tryWithResourceException[R,T <: AutoCloseable](handle: T)(func: T => R)(excFunc: Exception => R): R = {
+  def tryWithResourceException[R, T <: AutoCloseable](handle: T)(func: T => R)(excFunc: Throwable => R): R = {
     try {
       func(handle)
+    } catch {
+      case e: Throwable => excFunc(e)
     } finally {
       if (handle != null) {
         handle.close()
