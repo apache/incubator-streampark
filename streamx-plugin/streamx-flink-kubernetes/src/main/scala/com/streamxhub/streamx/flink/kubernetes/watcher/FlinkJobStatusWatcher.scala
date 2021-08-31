@@ -125,7 +125,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
               // put job status to cache
               cachePool.jobStatuses.putAll(trkRs.toMap.asJava)
               // publish JobStatuChangeEvent when necessary
-              filterJobStatusChangeEvent(trkRs).foreach(eventBus.post)
+              filterJobStatusChangeEvent(trkRs).foreach(eventBus.postAsync)
               // remove trkId from cache of job that needs to be untracked
               filterUnTrackingJobs(trkRs).foreach(cachePool.trackIds.invalidate)
             }

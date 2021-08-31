@@ -21,23 +21,31 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 
-import com.google.common.eventbus.AsyncEventBus
+import com.google.common.eventbus.{AsyncEventBus, EventBus}
 
 import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
 
 /**
  * author: Al-assad
  */
+// noinspection UnstableApiUsage
 class ChangeEventBus {
 
   private val execPool = new ThreadPoolExecutor(6, 12,
     0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable](10000))
 
-  private[kubernetes] val eventBus = new AsyncEventBus("[streamx][flink-k8s]ChangeEventBus", execPool)
+  private[kubernetes] val asyncEventBus = new AsyncEventBus("[streamx][flink-k8s]AsyncEventBus", execPool)
 
-  def post(event: AnyRef): Unit = eventBus.post(event)
+  private[kubernetes] val syncEventBus = new EventBus("[streamx][flink-k8s]SyncEventBus")
 
-  def registerListener(listener: AnyRef):Unit = eventBus.register(listener)
+  def postAsync(event: AnyRef): Unit = asyncEventBus.post(event)
+
+  def postSync(event: AnyRef): Unit = syncEventBus.post(event)
+
+  def registerListener(listener: AnyRef): Unit = {
+    asyncEventBus.register(listener)
+    syncEventBus.register(listener)
+  }
 
 
 }
