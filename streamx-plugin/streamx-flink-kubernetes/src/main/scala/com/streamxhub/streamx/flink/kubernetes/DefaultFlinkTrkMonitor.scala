@@ -32,15 +32,19 @@ import scala.util.Try
 class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends FlinkTrkMonitor {
 
   // cache pool for storage tracking result
-  val trkCache = new FlinkTrkCachePool()
+  implicit val trkCache: FlinkTrkCachePool = new FlinkTrkCachePool()
+
+  // eventBus for change event
+  implicit val evenBus: ChangeEventBus = new ChangeEventBus()
 
   // remote server tracking watcher
-  val k8sEventWatcher = new FlinkK8sEventWatcher(trkCache)
-  val jobStatusWatcher = new FlinkJobStatusWatcher(trkCache, conf.jobStatusWatcherConf)
-  val metricsWatcher = new FlinkMetricWatcher(trkCache, conf.metricWatcherConf)
+  val k8sEventWatcher = new FlinkK8sEventWatcher()
+  val jobStatusWatcher = new FlinkJobStatusWatcher(conf.jobStatusWatcherConf)
+  val metricsWatcher = new FlinkMetricWatcher(conf.metricWatcherConf)
 
   private[this] val allWatchers = Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher)
 
+  override def registerListener(listener: AnyRef): Unit = evenBus.registerListener(listener)
 
   override def start(): Unit = allWatchers.foreach(_.start())
 

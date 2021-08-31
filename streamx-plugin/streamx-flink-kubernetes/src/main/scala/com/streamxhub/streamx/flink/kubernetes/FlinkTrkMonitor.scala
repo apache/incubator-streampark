@@ -32,6 +32,17 @@ import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV
  */
 trait FlinkTrkMonitor extends Logger with AutoCloseable {
 
+
+  /**
+   * Register listener to EventBus.
+   *
+   * At present, the implementation of listener is in the
+   * same form as Guava EvenBus Listener. The events that
+   * can be subcribed to are included in
+   * com.streamxhub.streamx.flink.kubernetes.event
+   */
+  def registerListener(listener: AnyRef)
+
   /**
    * start monitor tracking activities.
    */
@@ -106,7 +117,6 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
    * get flink cluster metrics
    */
   def getClusterMetrics: Option[FlinkMetricCV]
-
 
 
 }

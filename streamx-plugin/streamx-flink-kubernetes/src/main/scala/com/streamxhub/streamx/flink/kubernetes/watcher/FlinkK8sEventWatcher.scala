@@ -36,7 +36,7 @@ import javax.annotation.concurrent.ThreadSafe
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkK8sEventWatcher(cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
+class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
 
   private var k8sClient: KubernetesClient = _
 

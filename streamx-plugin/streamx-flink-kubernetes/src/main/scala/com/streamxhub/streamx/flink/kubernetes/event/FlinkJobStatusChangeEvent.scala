@@ -18,31 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.kubernetes.enums
+package com.streamxhub.streamx.flink.kubernetes.event
 
-import org.apache.flink.api.common.JobStatus
+import com.streamxhub.streamx.flink.kubernetes.model.{JobStatusCV, TrkId}
 
 /**
- * author:Al-assad
- * flink job status on kubernetes
+ * author: Al-assad
  */
-object FlinkJobState extends Enumeration {
-
-  val K8S_DEPLOYING, LOST, OTHER = Value
-
-  // @see org.apache.flink.api.common.JobStatus
-  val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
-
-  def of(value: String): FlinkJobState.Value = {
-    this.values.find(_.toString == value).getOrElse(OTHER)
-  }
-
-  def of(jobStatus: JobStatus): FlinkJobState.Value = {
-    val jobStatusStr = jobStatus.toString
-    this.values.find(_.toString == jobStatusStr).getOrElse(OTHER)
-  }
-
-  // is flink job ending state
-  def isEndState(state: FlinkJobState.Value): Boolean =  Seq(FAILED, CANCELED, FINISHED).contains(state)
-
-}
+case class FlinkJobStatusChangeEvent(trkId: TrkId, jobStatus: JobStatusCV)

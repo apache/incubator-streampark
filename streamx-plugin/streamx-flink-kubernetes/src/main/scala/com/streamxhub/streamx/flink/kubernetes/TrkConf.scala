@@ -28,11 +28,24 @@ package com.streamxhub.streamx.flink.kubernetes
  */
 case class FlinkTrkConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
 
-// configuration for FlinkMetricWatcher
+/**
+ * configuration for FlinkMetricWatcher
+ *
+ * @param sglTrkTaskTimeoutSec  run timeout of single tracking task
+ * @param sglTrkTaskIntervalSec interval seconds between two single tracking task
+ */
 case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
 
-// configuration for FlinkJobStatusWatcher
-case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
+/**
+ * configuration for FlinkJobStatusWatcher
+ *
+ * @param sglTrkTaskTimeoutSec         run timeout of single tracking task
+ * @param sglTrkTaskIntervalSec        interval seconds between two single tracking task
+ * @param lostStatusJobKeepTrackingSec LOST flink state job keep tracking seconds
+ */
+case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
+                                sglTrkTaskIntervalSec: Long,
+                                lostStatusJobKeepTrackingSec: Int = 3600)
 
 
 object FlinkTrkConf {

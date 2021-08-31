@@ -24,18 +24,20 @@ import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
+import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
-import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
+import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
 import org.apache.commons.collections.CollectionUtils
 import org.apache.flink.runtime.client.JobStatusMessage
 
 import java.util
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
+import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
-import javax.annotation.{Nonnull, Nullable}
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
 import scala.language.{implicitConversions, postfixOps}
@@ -49,8 +51,9 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
-                            conf: JobStatusWatcherConf = JobStatusWatcherConf.default) extends Logger with FlinkWatcher {
+class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.default)
+                           (implicit val cachePool: FlinkTrkCachePool,
+                            implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()
   private implicit val trkTaskExecutor: ExecutionContextExecutorService = ExecutionContext.fromExecutorService(trkTaskExecPool)
@@ -118,8 +121,13 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
         future foreach {
           trkRs =>
             if (trkRs.nonEmpty) {
-              // todo push trk jobStatue update event and remove trk cache record when necessary
+              implicit val preCache: mutable.Map[TrkId, JobStatusCV] = cachePool.jobStatuses.getAllPresent(trkRs.map(_._1).toSet.asJava).asScala
+              // put job status to cache
               cachePool.jobStatuses.putAll(trkRs.toMap.asJava)
+              // publish JobStatuChangeEvent when necessary
+              filterJobStatusChangeEvent(trkRs).foreach(eventBus.post)
+              // remove trkId from cache of job that needs to be untracked
+              filterUnTrackingJobs(trkRs).foreach(cachePool.trackIds.invalidate)
             }
         }
         future
@@ -134,6 +142,41 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
         s" trackingIds=${trackIds.mkString(",")}"))
   }
 
+  // todo abstract
+
+  /**
+   * Filter out flink job change event
+   */
+  private[this] def filterJobStatusChangeEvent(trkRs: Array[(TrkId, JobStatusCV)])
+                                              (implicit preCache: mutable.Map[TrkId, JobStatusCV]): Array[FlinkJobStatusChangeEvent] = {
+    trkRs.filter(e =>
+      preCache.get(e._1) match {
+        case cv if cv.isEmpty => true
+        case cv if cv.get.jobState != e._2.jobState => true
+        case _ => false
+      })
+      .map(e => FlinkJobStatusChangeEvent(e._1, e._2))
+  }
+
+  /**
+   * Filter out flink job trkIds that needs to be untracked.
+   * untracked conditions:
+   *  1. Job state is flink ending state (such as FINISHED, FAILED, etc);
+   *  2. When job state is LOST state, it is more than conf.lostStatusJobKeepTrackingSec
+   *     before the trkId cache record has added.
+   */
+  private[this] def filterUnTrackingJobs(trkRs: Array[(TrkId, JobStatusCV)]): Array[TrkId] = {
+    lazy val now = System.currentTimeMillis
+    trkRs.filter(r => r._2.jobState match {
+      case state if FlinkJobState.isEndState(state) => true
+      case FlinkJobState.LOST =>
+        Try(cachePool.trackIds.getIfPresent(r._1))
+          .map(c => now - c.updateTime >= conf.lostStatusJobKeepTrackingSec)
+          .getOrElse(false)
+      case _ => false
+    }).map(_._1)
+  }
+
   /**
    * Get flink status information from kubernetes-native-session cluster.
    * The empty array will returned when the k8s-client or flink-cluster-client
@@ -144,15 +187,14 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
    */
   def touchSessionJob(@Nonnull clusterId: String, @Nonnull namespace: String): Array[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
-    tryWithResourceException(
-      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION))
-        .getOrElse(return Array.empty[(TrkId, JobStatusCV)])) {
+    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
         val pollAckTime = System.currentTimeMillis
-        // noinspection DuplicatedCode
-        if (CollectionUtils.isNotEmpty(jobDetails)) {
+        if (CollectionUtils.isEmpty(jobDetails)) {
+          Array.empty[(TrkId, JobStatusCV)]
+        } else {
           jobDetails.asScala.map(e => (
             TrkId.onSession(namespace, clusterId, e.getJobId.toHexString),
             JobStatusCV(
@@ -163,8 +205,6 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
               pollEmitTime = pollEmitTime,
               pollAckTime = pollAckTime))
           ).toArray
-        } else {
-          Array.empty[(TrkId, JobStatusCV)]
         }
     } {
       exception =>
@@ -175,66 +215,58 @@ class FlinkJobStatusWatcher(cachePool: FlinkTrkCachePool,
 
   /**
    * Get flink status information from kubernetes-native-application cluster.
-   * When the k8s-client or flink-cluster-client request fails or inferring
-   * from k8s event fails, will return None.
+   * When the flink-cluster-client request fails, will infer the job statue
+   * from k8s events.
    *
    * This method can be called directly from outside, without affecting the
    * current cachePool result.
    */
   def touchApplicationJob(@Nonnull clusterId: String, @Nonnull namespace: String): Option[(TrkId, JobStatusCV)] = {
-    val pollEmitTime = System.currentTimeMillis
-    tryWithResourceException(
-      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)).getOrElse(return None)) {
+    implicit val pollEmitTime: Long = System.currentTimeMillis
+    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
-        val pollAckTime = System.currentTimeMillis
-        if (CollectionUtils.isNotEmpty(jobDetails)) {
+        if (CollectionUtils.isEmpty(jobDetails)) {
+          inferFlinkJobStateFromK8sEvent(clusterId, namespace)
+        } else {
           // just receive the first result
           val jobStatusMsg = jobDetails.iterator().next()
           // noinspection DuplicatedCode
-          Some(
-            TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
-              jobState = FlinkJobState.of(jobStatusMsg.getJobState),
-              jobId = jobStatusMsg.getJobId.toHexString,
-              jobName = jobStatusMsg.getJobName,
-              jobStartTime = jobStatusMsg.getStartTime,
-              pollEmitTime = pollEmitTime,
-              pollAckTime = pollAckTime)
-          )
-        } else {
-          // when cannot found jobStatusMessage from flink-cluster-client, check last k8s event info
-          val k8sEventKey = K8sEventKey(namespace, clusterId)
-          val deploymentEvent = cachePool.k8sDeploymentEvents.getIfPresent(k8sEventKey)
-          val jobState = inferFlinkJobStateFromK8sEvent(deploymentEvent)
-          // ignore FlinkJobState.LOST
-          jobState match {
-            case FlinkJobState.LOST => None
-            case _ => Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, pollAckTime))
-          }
+          Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
+            jobState = FlinkJobState.of(jobStatusMsg.getJobState),
+            jobId = jobStatusMsg.getJobId.toHexString,
+            jobName = jobStatusMsg.getJobName,
+            jobStartTime = jobStatusMsg.getStartTime,
+            pollEmitTime = pollEmitTime,
+            pollAckTime = System.currentTimeMillis))
         }
     } {
-      exception =>
-        logError(s"failed to list remote flink jobs on kubernetes-application-mode cluster, errorStack=${exception.getMessage}")
-        None
+      exception => inferFlinkJobStateFromK8sEvent(clusterId, namespace)
     }
   }
 
   /**
    * infer the current flink state from the last relevant k8s events
    */
-  private def inferFlinkJobStateFromK8sEvent(@Nullable deployEvent: K8sDeploymentEventCV): FlinkJobState.Value = {
-    if (deployEvent == null) {
-      FlinkJobState.LOST
-    } else {
-      val isDelete = deployEvent.action == Action.DELETED
-      val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
-      (isDelete, isDeployAvailable) match {
-        case (true, true) => FlinkJobState.FINISHED
-        case (true, false) => FlinkJobState.FAILED
-        case _ => FlinkJobState.K8S_DEPLOYING
+  private def inferFlinkJobStateFromK8sEvent(clusterId: String, namespace: String)
+                                            (implicit pollEmitTime: Long): Option[(TrkId, JobStatusCV)] = {
+    val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
+    // infer from k8s deployment event
+    val jobState = {
+      if (deployEvent == null) {
+        FlinkJobState.LOST
+      } else {
+        val isDelete = deployEvent.action == Action.DELETED
+        val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
+        (isDelete, isDeployAvailable) match {
+          case (true, true) => FlinkJobState.FINISHED
+          case (true, false) => FlinkJobState.FAILED
+          case _ => FlinkJobState.K8S_DEPLOYING
+        }
       }
     }
+    Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, System.currentTimeMillis))
   }
 
 }
