@@ -360,32 +360,6 @@
             <version>5.2.4</version>
         </dependency>
 
-        <!-- flink 尽量不暴露具体的f依赖包和版本-->
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
-            <version>1.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!--在开发阶段,两个版本的jar,只能存在一个,选择1.13-->
-        <dependency>
-            <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
-            <version>1.1.1</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.flink</groupId>
-                    <artifactId>*</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-repl</artifactId>
@@ -424,6 +398,12 @@
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-kubernetes</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-sqlclient</artifactId>
+            <version>1.1.1</version>
         </dependency>
 
         <dependency>
@@ -473,21 +453,35 @@
             </plugin>
 
             <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/assembly/assembly.xml</descriptor>
-                    </descriptors>
-                </configuration>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.0.2</version>
                 <executions>
                     <execution>
-                        <id>make-assembly</id>
                         <phase>package</phase>
                         <goals>
-                            <goal>single</goal>
+                            <goal>copy</goal>
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                    <excludeTransitive>false</excludeTransitive>
+                    <stripVersion>false</stripVersion>
+                    <artifactItems>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.12</artifactId>
+                            <version>1.1.1</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.streamxhub.streamx</groupId>
+                            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+                            <version>1.1.1</version>
+                            <outputDirectory>${project.build.directory}/shims</outputDirectory>
+                        </dependency>
+                    </artifactItems>
+                </configuration>
             </plugin>
 
             <plugin>
@@ -511,7 +505,6 @@
                     </filesets>
                 </configuration>
             </plugin>
-
 
             <plugin>
                 <groupId>com.github.eirslett</groupId>
@@ -575,8 +568,27 @@
                         </configuration>
                     </execution>
                 </executions>
-
             </plugin>
+
+            <!--放在最后,确保依赖其他插件生成的目录和文件都能成功打包进去-->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
