@@ -40,7 +40,7 @@ import scala.language.postfixOps
 import scala.util.Try
 
 /**
- * author:Al-assad
+ * auther:Al-assad
  */
 @ThreadSafe
 class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,

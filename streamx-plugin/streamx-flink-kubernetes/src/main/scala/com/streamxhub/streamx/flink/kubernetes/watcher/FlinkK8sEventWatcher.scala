@@ -33,7 +33,7 @@ import javax.annotation.concurrent.ThreadSafe
  * Currently only flink-native-application mode events would be tracked.
  * The results of traced events would written into cachePool.
  *
- * author:Al-assad
+ * auther:Al-assad
  */
 @ThreadSafe
 class FlinkK8sEventWatcher(cachePool: FlinkTrackCachePool) extends Logger with FlinkWatcher {
