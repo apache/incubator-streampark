@@ -97,6 +97,6 @@ case class SglValCache[T](initElement: T)(implicit manifest: Manifest[T]) {
 
   def set(newVal: T): Unit = value.set(newVal)
 
-  def update(func: T => T): Unit = value.updateAndGet { case t: T => func(t) }
+//  def update(func: T => T): Unit = value.updateAndGet { case t: T => func(t) }
 
 }

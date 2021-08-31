@@ -106,7 +106,7 @@ class FlinkMetricWatcher(cachePool: FlinkTrackCachePool,
         val future = Future(collectMetric(id.executeMode, id.clusterId, id.namespace))
         future.foreach { r =>
           if (r.nonEmpty) {
-            accMetrics.updateAndGet { case e: FlinkMetricCV => e + r.get }
+            //accMetrics.updateAndGet { case e: FlinkMetricCV => e + r.get }
           }
         }
         future

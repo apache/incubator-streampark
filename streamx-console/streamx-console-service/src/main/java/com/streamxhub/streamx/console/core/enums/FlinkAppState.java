@@ -170,6 +170,7 @@ public enum FlinkAppState implements Serializable {
         public static Enumeration.Value toK8sFlinkJobState(FlinkAppState flinkAppState) {
             return FlinkJobState.of(flinkAppState.name());
         }
+
     }
 
 }
