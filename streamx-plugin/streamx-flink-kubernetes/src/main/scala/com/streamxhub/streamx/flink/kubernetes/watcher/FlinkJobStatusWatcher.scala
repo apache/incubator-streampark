@@ -185,13 +185,15 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
    */
   def touchSessionJob(@Nonnull clusterId: String, @Nonnull namespace: String): Array[(TrkId, JobStatusCV)] = {
     val pollEmitTime = System.currentTimeMillis
-    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)) {
+    lazy val defaultResult = Array.empty[(TrkId, JobStatusCV)]
+    tryWithResourceException(
+      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)).getOrElse(return defaultResult)) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
         val pollAckTime = System.currentTimeMillis
         if (CollectionUtils.isEmpty(jobDetails)) {
-          Array.empty[(TrkId, JobStatusCV)]
+          defaultResult
         } else {
           jobDetails.asScala.map(e => (
             TrkId.onSession(namespace, clusterId, e.getJobId.toHexString),
@@ -207,7 +209,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     } {
       exception =>
         logError(s"failed to list remote flink jobs on kubernetes-native-mode cluster, errorStack=${exception.getMessage}")
-        Array.empty[(TrkId, JobStatusCV)]
+        defaultResult
     }
   }
 
@@ -221,12 +223,14 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
    */
   def touchApplicationJob(@Nonnull clusterId: String, @Nonnull namespace: String): Option[(TrkId, JobStatusCV)] = {
     implicit val pollEmitTime: Long = System.currentTimeMillis
-    tryWithResourceException(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)) {
+    lazy val k8sInferResult = inferFlinkJobStateFromK8sEvent(clusterId, namespace)
+    tryWithResourceException(
+      Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)).getOrElse(return k8sInferResult)) {
       flinkClient =>
         val jobDetailsFuture = flinkClient.listJobs()
         val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
         if (CollectionUtils.isEmpty(jobDetails)) {
-          inferFlinkJobStateFromK8sEvent(clusterId, namespace)
+          k8sInferResult
         } else {
           // just receive the first result
           val jobStatusMsg = jobDetails.iterator().next()
@@ -239,9 +243,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
             pollEmitTime = pollEmitTime,
             pollAckTime = System.currentTimeMillis))
         }
-    } {
-      exception => inferFlinkJobStateFromK8sEvent(clusterId, namespace)
-    }
+    }(exception => k8sInferResult)
   }
 
   /**
