@@ -96,7 +96,7 @@ class FlinkTrkMonitorTarkcingTest {
 
   // test change event subscribe
   @Test def testStatusEventsSubscribe(): Unit = {
-//    watchK8sEventCache
+    //    watchK8sEventCache
     watchTrkIdsCache
     watchJobStatusCache
     trkMonitor.registerListener(new ChangeEventListener())
@@ -110,6 +110,15 @@ class FlinkTrkMonitorTarkcingTest {
     @Subscribe def catchJobStatusEvent(event: FlinkJobStatusChangeEvent): Unit = {
       println(s"[catch-jobStatus]-${System.currentTimeMillis()}-${event}")
     }
+  }
+
+  // test checkIsInRemoteCluster
+  @Test def testCheckIsInRemoteCluster(): Unit = {
+    val check = (trkId: TrkId) => println(s"[check-is-in-remote-cluster] trkId=$trkId, isExists=${trkMonitor.checkIsInRemoteCluster(trkId)}")
+    check(TrkId.onSession("default", "flink-session", "7ff03ff5d0b3c66d65a7b4f3ad6ca2a4"))
+    check(TrkId.onSession("default", "flink-session", "7ff03ff5d0b3c66d65a7b4f3ad6ca2a2"))
+    check(TrkId.onApplication("default", "flink-app3"))
+    check(TrkId.onApplication("default", "flink-app4"))
   }
 
 

@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
@@ -97,9 +99,12 @@ class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends 
 
   override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.get)
 
-  /**
-   * collect all TrkId which in tracking
-   */
   override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
+
+  override def checkIsInRemoteCluster(trkId: TrkId): Boolean = trkId.executeMode match {
+    case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace).exists(trkId.jobId == _._2.jobId)
+    case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace).exists(_._2.jobState != FlinkJobState.LOST)
+    case _ => false
+  }
 }
 

@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV, TrkId}
+import org.apache.flink.annotation.Public
 
 /**
  * Tracking monitor for flink-k8s-native mode, including
@@ -30,6 +31,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV
  *
  * author:Al-assad
  */
+@Public
 trait FlinkTrkMonitor extends Logger with AutoCloseable {
 
 
@@ -118,6 +120,10 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
    */
   def getClusterMetrics: Option[FlinkMetricCV]
 
+  /**
+   * check whether flink job is in remote kubernetes cluster
+   */
+  def checkIsInRemoteCluster(trkId: TrkId): Boolean
 
 }
 
