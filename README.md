@@ -209,7 +209,7 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="200"><br>
+    <img src="http://assets.streamxhub.com/benjobs.jpeg?1234" alt="Join the Group" width="200"><br>
     <span>join us (verification information: "StreamX")</span>
 </div>
 
