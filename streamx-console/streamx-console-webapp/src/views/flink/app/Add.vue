@@ -1094,7 +1094,6 @@ export default {
 
     handleBeforeUpload(file) {
       if (file.type !== 'application/java-archive') {
-        console.log('upload file type :' + file.type)
         if (!/\.(jar|JAR)$/.test(file.name)) {
           this.loading = false
           this.$message.error('Only jar files can be uploaded! please check your file.')
