@@ -16,6 +16,7 @@
         <fabric8.k8s-client.version>5.7.0</fabric8.k8s-client.version>
         <caffeine.version>2.9.2</caffeine.version>
         <apache.httpclient5.version>5.0.3</apache.httpclient5.version>
+        <guava.version>30.0-jre</guava.version>
         <scalatest.skiptests>true</scalatest.skiptests>
     </properties>
 
@@ -68,6 +69,11 @@
             <groupId>org.apache.httpcomponents.client5</groupId>
             <artifactId>httpclient5-fluent</artifactId>
             <version>${apache.httpclient5.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
     </dependencies>
 
