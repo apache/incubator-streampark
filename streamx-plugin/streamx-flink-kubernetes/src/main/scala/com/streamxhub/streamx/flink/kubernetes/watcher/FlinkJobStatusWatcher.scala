@@ -142,8 +142,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
         s" trackingIds=${trackIds.mkString(",")}"))
   }
 
-  // todo abstract
-
   /**
    * Filter out flink job change event
    */
