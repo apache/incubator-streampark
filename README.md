@@ -42,7 +42,7 @@ The original intention of `StreamX` is to make the development of `Flink` easier
 development phases and tasks. Our ultimate goal is to build a one-stop big data solution integrating stream processing,
 batch processing, data warehouse and data laker.
 
-[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-live.mp4)
+[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 ![](http://assets.streamxhub.com/streamx-main.png?12345)
 
@@ -209,8 +209,8 @@ Thank you to all our backers!
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/joinus0714.png" alt="Join the Group" width="200"><br>
-    <span>join us</span>
+    <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="200"><br>
+    <span>join us (verification information: "StreamX")</span>
 </div>
 
 

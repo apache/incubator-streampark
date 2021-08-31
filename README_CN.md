@@ -44,7 +44,7 @@ Make Flink|Spark easier!!!
 规范了项目的配置，鼓励函数式编程，定义了最佳的编程方式，提供了一系列开箱即用的 `Connectors` ，标准化了配置、开发、测试、部署、监控、运维的整个过程， 提供 `Scala` 和 `Java` 两套api，
 其最终目的是打造一个一站式大数据平台，流批一体，湖仓一体的解决方案
 
-[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx.mp4)
+[![StreamX video](http://assets.streamxhub.com/streamx_player.png)](http://assets.streamxhub.com/streamx-video.mp4)
 
 ![](http://assets.streamxhub.com/streamx-main.png?12345)
 
@@ -198,7 +198,7 @@ StreamX现在离这个目标还有一段距离，还需持续投入，相应的�
 </div>
 
 <div align="center">
-    <img src="http://assets.streamxhub.com/joinus0714.png" alt="Join the Group" width="200"><br>
-    <span>扫微信二维码加群讨论</span>
+    <img src="http://assets.streamxhub.com/benjobs.jpeg" alt="Join the Group" width="200"><br>
+    <span>扫微信二维码加群讨论(验证信息:"StreamX")</span>
 </div>
 
