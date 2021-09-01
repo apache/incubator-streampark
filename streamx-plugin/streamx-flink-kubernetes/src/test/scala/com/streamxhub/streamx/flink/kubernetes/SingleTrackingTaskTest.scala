@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Test
  */
 class SingleTrackingTaskTest {
 
-  val trkMonitor: DefaultFlinkTrkMonitor = FlinkTrkMonitor.createInstance().asInstanceOf[DefaultFlinkTrkMonitor]
+  val trkMonitor: DefaultFlinkTrkMonitor = FlinkTrkMonitorFactory.createInstance().asInstanceOf[DefaultFlinkTrkMonitor]
 
   // retrieve flink job status  info
   @Test def testSignleTrackingFlinkJobStatus(): Unit = {

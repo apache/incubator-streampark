@@ -48,7 +48,7 @@ class FlinkTrkMonitorTarkcingTest {
   @BeforeEach
   private def init(): Unit = {
     if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = FlinkTrkMonitor.createInstance(FlinkTrkConf.debug).asInstanceOf[DefaultFlinkTrkMonitor]
+    trkMonitor = FlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf).asInstanceOf[DefaultFlinkTrkMonitor]
   }
 
 

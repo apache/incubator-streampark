@@ -129,7 +129,13 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
 
 }
 
-object FlinkTrkMonitor {
+/**
+ * Factory of FlinkTrkMonitor.
+ * This is the entry point for external calls to the
+ * streamx.flink.kubernetes package.
+ */
+@Public
+object FlinkTrkMonitorFactory {
 
   /**
    * Create FlinkTRKMonitor instance.
@@ -139,11 +145,10 @@ object FlinkTrkMonitor {
    *                  In this case, there is no need to display the call to FlinkTrkMonitor.start(),
    *                  useless the monitor is expected to start immediately.
    */
-  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.default, lazyStart: Boolean = false): FlinkTrkMonitor =
+  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.defaultConf, lazyStart: Boolean = false): FlinkTrkMonitor =
     if (lazyStart) {
       new DefaultFlinkTrkMonitor(conf) with FlinkTrkMonitorLazyStartAop
     } else {
       new DefaultFlinkTrkMonitor(conf)
     }
 }
-

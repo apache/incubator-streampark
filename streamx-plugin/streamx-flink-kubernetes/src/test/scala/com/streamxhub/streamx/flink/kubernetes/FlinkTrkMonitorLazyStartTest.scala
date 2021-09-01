@@ -39,7 +39,7 @@ class FlinkTrkMonitorLazyStartTest {
   @BeforeEach
   private def init(): Unit = {
     if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = FlinkTrkMonitor.createInstance(FlinkTrkConf.debug, lazyStart = true)
+    trkMonitor = FlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf, lazyStart = true)
   }
 
   // test lazy start
