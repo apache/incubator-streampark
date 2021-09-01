@@ -29,6 +29,7 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.function.UnaryOperator
 import javax.annotation.concurrent.ThreadSafe
 import scala.collection.JavaConverters._
+import scala.util.Try
 
 /**
  * Tracking info cache pool on flink kubernetes mode.
@@ -66,11 +67,10 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   /**
    * determines whether the specified TrkId is in the trace
    */
-  def isInTracking(trackId: TrkId): Boolean = {
-    if (trackId == null || !trackId.isLegal) {
+  def isInTracking(trkId: TrkId): Boolean = {
+    if (Try(trkId.nonLegal).getOrElse(true))
       return false
-    }
-    trackIds.getIfPresent(trackId) != null
+    trackIds.getIfPresent(trkId) != null
   }
 
   /**

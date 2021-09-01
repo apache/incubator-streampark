@@ -50,6 +50,11 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
     }
   }
 
+  /**
+   * check whether fields of trackId are no legal
+   */
+  def nonLegal:Boolean = !isLegal
+
 }
 
 object TrkId {
