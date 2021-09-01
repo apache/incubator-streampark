@@ -26,9 +26,9 @@ import org.junit.jupiter.api.{BeforeEach, Test}
 import scala.language.implicitConversions
 import scala.util.Try
 
-class FlinkTrkMonitorLazyStartTest {
+class K8sFlinkTrkMonitorLazyStartTest {
 
-  implicit var trkMonitor: FlinkTrkMonitor = _
+  implicit var trkMonitor: K8sFlinkTrkMonitor = _
 
   private val trkIds = Array(
     TrkId.onSession("default", "flink-session", "2333"),
@@ -39,7 +39,7 @@ class FlinkTrkMonitorLazyStartTest {
   @BeforeEach
   private def init(): Unit = {
     if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = FlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf, lazyStart = true)
+    trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf, lazyStart = true)
   }
 
   // test lazy start

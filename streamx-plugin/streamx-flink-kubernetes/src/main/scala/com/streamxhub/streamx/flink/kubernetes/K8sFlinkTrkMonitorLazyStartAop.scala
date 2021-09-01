@@ -29,7 +29,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV
  *
  * author:Al-assad
  */
-trait FlinkTrkMonitorLazyStartAop extends FlinkTrkMonitor {
+trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
 
   abstract override def trackingJob(trkId: TrkId): Unit = {
     start()

@@ -34,9 +34,9 @@ import scala.util.Try
 /**
  * test FlinkTrkMonitor tracking feature
  */
-class FlinkTrkMonitorTarkcingTest {
+class K8sFlinkTrkMonitorTarkcingTest {
 
-  implicit var trkMonitor: DefaultFlinkTrkMonitor = _
+  implicit var trkMonitor: DefaultK8sFlinkTrkMonitor = _
 
   private val trkIds = Array(
     TrkId.onSession("default", "flink-session", "2333"),
@@ -48,7 +48,7 @@ class FlinkTrkMonitorTarkcingTest {
   @BeforeEach
   private def init(): Unit = {
     if (trkMonitor != null) Try(trkMonitor.close())
-    trkMonitor = FlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf).asInstanceOf[DefaultFlinkTrkMonitor]
+    trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf).asInstanceOf[DefaultK8sFlinkTrkMonitor]
   }
 
 

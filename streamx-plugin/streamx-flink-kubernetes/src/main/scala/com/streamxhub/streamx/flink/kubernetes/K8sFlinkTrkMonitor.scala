@@ -34,7 +34,7 @@ import org.apache.flink.annotation.Public
  * author:Al-assad
  */
 @Public
-trait FlinkTrkMonitor extends Logger with AutoCloseable {
+trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
 
 
   /**
@@ -135,7 +135,7 @@ trait FlinkTrkMonitor extends Logger with AutoCloseable {
  * streamx.flink.kubernetes package.
  */
 @Public
-object FlinkTrkMonitorFactory {
+object K8sFlinkTrkMonitorFactory {
 
   /**
    * Create FlinkTRKMonitor instance.
@@ -145,10 +145,10 @@ object FlinkTrkMonitorFactory {
    *                  In this case, there is no need to display the call to FlinkTrkMonitor.start(),
    *                  useless the monitor is expected to start immediately.
    */
-  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.defaultConf, lazyStart: Boolean = false): FlinkTrkMonitor =
+  def createInstance(conf: FlinkTrkConf = FlinkTrkConf.defaultConf, lazyStart: Boolean = false): K8sFlinkTrkMonitor =
     if (lazyStart) {
-      new DefaultFlinkTrkMonitor(conf) with FlinkTrkMonitorLazyStartAop
+      new DefaultK8sFlinkTrkMonitor(conf) with K8sFlinkTrkMonitorLazyStartAop
     } else {
-      new DefaultFlinkTrkMonitor(conf)
+      new DefaultK8sFlinkTrkMonitor(conf)
     }
 }
