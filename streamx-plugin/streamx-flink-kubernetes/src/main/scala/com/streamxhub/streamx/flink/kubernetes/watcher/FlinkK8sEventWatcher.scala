@@ -27,6 +27,7 @@ import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
 
 import javax.annotation.concurrent.ThreadSafe
+import scala.util.Try
 
 /**
  * K8s Event Watcher for Flink Native-K8s Mode.
@@ -51,7 +52,10 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
    */
   override def start(): Unit = this.synchronized {
     if (!isStarted) {
-      k8sClient = KubernetesRetriever.newK8sClient()
+      k8sClient = Try(KubernetesRetriever.newK8sClient()).getOrElse {
+        logError("[flink-k8s] FlinkK8sEventWatcher fails to start.")
+        return
+      }
       prepareEventWatcher(k8sClient)
       isStarted = true
       logInfo("[flink-k8s] FlinkK8sEventWatcher started.")
@@ -87,6 +91,7 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
         override def eventReceived(action: Watcher.Action, event: Deployment): Unit = {
           handleDeploymentEvent(action, event)
         }
+
         override def onClose(e: KubernetesClientException): Unit = {
           logInfo(s"K8sEventWatcher[Kind=Deployment] stop, message=${e.getMessage}")
         }
