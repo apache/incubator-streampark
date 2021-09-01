@@ -28,6 +28,8 @@ import org.apache.flink.annotation.Public
  * Tracking monitor for flink-k8s-native mode, including
  * trace of flink jobs status information, flink metrics
  * information.
+ * This is the entry point for external calls to the
+ * streamx.flink.kubernetes package.
  *
  * author:Al-assad
  */
