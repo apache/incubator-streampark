@@ -45,7 +45,7 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.default)
+class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf)
                         (implicit val cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
 
   private val trkTaskExecPool = Executors.newWorkStealingPool()

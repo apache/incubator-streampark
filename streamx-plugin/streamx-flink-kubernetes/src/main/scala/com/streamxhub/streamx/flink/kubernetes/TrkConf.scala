@@ -49,21 +49,21 @@ case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
 
 
 object FlinkTrkConf {
-  def default: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
+  def defaultConf: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.defaultConf, MetricWatcherConf.defaultConf)
 
-  def debug: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.default, MetricWatcherConf.debug)
+  def debugConf: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.defaultConf, MetricWatcherConf.debugConf)
 }
 
 object MetricWatcherConf {
-  def default: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 30)
+  def defaultConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 30)
 
-  def debug: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
+  def debugConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
 }
 
 object JobStatusWatcherConf {
-  def default: JobStatusWatcherConf = JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 10)
+  def defaultConf: JobStatusWatcherConf = JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 10)
 
-  def debug: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
+  def debugConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
 }
 
 

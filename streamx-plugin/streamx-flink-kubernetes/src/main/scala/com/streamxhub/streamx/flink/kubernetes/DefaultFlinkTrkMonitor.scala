@@ -31,7 +31,7 @@ import scala.util.Try
 /**
  * author:Al-assad
  */
-class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.default) extends FlinkTrkMonitor {
+class DefaultFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) extends FlinkTrkMonitor {
 
   // cache pool for storage tracking result
   implicit val trkCache: FlinkTrkCachePool = new FlinkTrkCachePool()

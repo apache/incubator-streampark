@@ -51,7 +51,7 @@ import scala.util.Try
  * auther:Al-assad
  */
 @ThreadSafe
-class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.default)
+class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.defaultConf)
                            (implicit val cachePool: FlinkTrkCachePool,
                             implicit val eventBus: ChangeEventBus) extends Logger with FlinkWatcher {
 
