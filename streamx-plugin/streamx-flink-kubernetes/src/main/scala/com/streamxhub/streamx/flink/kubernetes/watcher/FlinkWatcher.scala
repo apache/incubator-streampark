@@ -27,20 +27,23 @@ import scala.language.implicitConversions
  */
 trait FlinkWatcher extends AutoCloseable {
 
-  // todo deplayStart()
-
   /**
-   * start watcher process
+   * Start watcher process.
+   * This method should be a thread-safe implementation of
+   * light locking and can be called idempotently.
    */
   def start()
 
   /**
-   * stop watcher process
+   * Stop watcher process.
+   * This method should be a thread-safe implementation of
+   * light locking and can be called idempotently.
    */
   def stop()
 
   /**
-   * restart watcher process
+   * This method should be a thread-safe implementation of
+   * light locking and can be called idempotently.
    */
   def restart(): Unit = {
     stop()
