@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{K8sDeploymentEventCV, K8sEventKey}
 import com.streamxhub.streamx.flink.kubernetes.{FlinkTrkCachePool, KubernetesRetriever}
 import io.fabric8.kubernetes.api.model.apps.Deployment
 import io.fabric8.kubernetes.client.{KubernetesClient, KubernetesClientException, Watcher}
@@ -43,9 +43,6 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
 
   // status of whether FlinkK8sEventWatcher has already started
   @volatile private var isStarted = false
-
-  // whether only recording events that are in FlinkTrackCachePool.trackIds, just for debug
-  private val FILTER_MODE = true
 
   /**
    * start watcher process
@@ -101,9 +98,10 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-    if (FILTER_MODE && !cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
-      return
-    }
+//    if (!cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
+//      return
+//    }
+    // just tracking every flink-k8s-native event :)
     cachePool.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId), K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
   }
