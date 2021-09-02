@@ -33,4 +33,4 @@ case class FlinkJobOperaEvent(trkId: TrkId, expectJobState: FlinkJobOpera) exten
   def this(trkId: TrkId, expectJobState: FlinkJobState.Value) = this(trkId, FlinkJobOpera(expectJobState, System.currentTimeMillis))
 }
 
-case class FlinkJobOpera(expectJobState: FlinkJobState.Value, pollTime: Long)
+case class FlinkJobOpera(expect: FlinkJobState.Value, pollTime: Long)

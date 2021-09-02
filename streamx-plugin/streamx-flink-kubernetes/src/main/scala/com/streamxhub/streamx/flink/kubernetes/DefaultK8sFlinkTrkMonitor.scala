@@ -20,8 +20,10 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.{APPLICATION, SESSION}
+import com.streamxhub.streamx.flink.kubernetes.event.{BuildInEvent, FlinkJobOperaEvent, FlinkJobStatusChangeEvent}
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
@@ -29,6 +31,8 @@ import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
+ * Default K8sFlinkTrkMonitor implementation.
+ *
  * author:Al-assad
  */
 class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) extends K8sFlinkTrkMonitor {
@@ -37,7 +41,7 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
   implicit val trkCache: FlinkTrkCachePool = new FlinkTrkCachePool()
 
   // eventBus for change event
-  implicit val evenBus: ChangeEventBus = new ChangeEventBus()
+  implicit val eventBus: ChangeEventBus = new ChangeEventBus()
 
   // remote server tracking watcher
   val k8sEventWatcher = new FlinkK8sEventWatcher()
@@ -46,7 +50,12 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
 
   private[this] val allWatchers = Array[FlinkWatcher](k8sEventWatcher, jobStatusWatcher, metricsWatcher)
 
-  override def registerListener(listener: AnyRef): Unit = evenBus.registerListener(listener)
+  {
+    // register build-in event listener
+    eventBus.registerListener(new BuildInEventListener)
+  }
+
+  override def registerListener(listener: AnyRef): Unit = eventBus.registerListener(listener)
 
   override def start(): Unit = allWatchers.foreach(_.start())
 
@@ -104,5 +113,58 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace).exists(_._2.jobState != FlinkJobState.LOST)
     case _ => false
   }
+
+  override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {
+    if (sync)
+      eventBus.postSync(event)
+    else
+      eventBus.postAsync(event)
+  }
+
+
+  /**
+   * Build-in Event Listener of K8sFlinkTrkMonitor.
+   */
+  class BuildInEventListener {
+
+    /**
+     * Watch the FlinkJobOperaEvent, then update relevant cache record and
+     * trigger a new FlinkJobStatusChangeEvent.
+     */
+    // noinspection UnstableApiUsage
+    @Subscribe def catchFlinkJobOperaEvent(event: FlinkJobOperaEvent): Unit = {
+      if (Try(event.trkId.nonLegal).getOrElse(true)) {
+        return
+      }
+      val preCache = trkCache.jobStatuses.getIfPresent(event.trkId)
+
+      // determine if the current event should be ignored
+      val shouldIgnore: Boolean = (preCache, event.expectJobState) match {
+        case (preCache, _) if preCache == null => false
+        // discard current event when the job state is consistent
+        case (preCache, expectJobState) if preCache.jobState == expectJobState.expect => true
+        // discard current event when current event is too late
+        case (preCache, expectJobState) if expectJobState.pollTime <= preCache.pollAckTime => true
+        case _ => false
+      }
+      if (shouldIgnore) {
+        return
+      }
+
+      // update relevant cache
+      val newCache = {
+        if (preCache != null) {
+          preCache.copy(jobState = event.expectJobState.expect)
+        } else {
+          JobStatusCV(event.expectJobState.expect, event.trkId.jobId, "", 0, event.expectJobState.pollTime, System.currentTimeMillis)
+        }
+      }
+      trkCache.jobStatuses.put(event.trkId, newCache)
+      // post new FlinkJobStatusChangeEvent
+      eventBus.postAsync(FlinkJobStatusChangeEvent(event.trkId, newCache))
+    }
+
+  }
+
 }
 

@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV, TrkId}
 import org.apache.flink.annotation.Public
 
@@ -126,6 +127,13 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
    * check whether flink job is in remote kubernetes cluster
    */
   def checkIsInRemoteCluster(trkId: TrkId): Boolean
+
+  /**
+   * post event to build-in EventBus of K8sFlinkTrkMonitor
+   *
+   * @param sync should this event be consumed sync or async
+   */
+  def postEvent(event: BuildInEvent, sync: Boolean = true)
 
 }
 
