@@ -249,6 +249,16 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
+    public FlinkAppState getFlinkAppStateEnum() {
+        return FlinkAppState.of(state);
+    }
+
+    @JsonIgnore
+    public ExecutionMode getExecutionModeEnum() {
+        return ExecutionMode.of(executionMode);
+    }
+
+    @JsonIgnore
     public boolean cpFailedTrigger() {
         return this.cpMaxFailureInterval != null && this.cpFailureRateInterval != null && this.cpFailureAction != null;
     }
