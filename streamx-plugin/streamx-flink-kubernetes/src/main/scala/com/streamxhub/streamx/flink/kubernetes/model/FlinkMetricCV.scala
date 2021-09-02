@@ -49,6 +49,8 @@ case class FlinkMetricCV(totalJmMemory: Integer,
       math.max(pollAckTime, another.pollAckTime)
     )
   }
+  def totalJob(): Integer = runningJob + finishedJob + cancelledJob + failedJob
+
 }
 
 object FlinkMetricCV {
