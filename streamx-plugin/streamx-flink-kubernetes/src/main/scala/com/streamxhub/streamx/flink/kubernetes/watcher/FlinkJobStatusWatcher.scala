@@ -262,7 +262,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
         (isDelete, isDeployAvailable) match {
           case (true, true) => FlinkJobState.FINISHED
           case (true, false) => FlinkJobState.FAILED
-          case _ => FlinkJobState.K8S_DEPLOYING
+          case _ => FlinkJobState.K8S_INITIALIZING
         }
       }
     }

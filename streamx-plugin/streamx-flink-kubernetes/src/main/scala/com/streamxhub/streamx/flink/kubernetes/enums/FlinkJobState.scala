@@ -28,7 +28,7 @@ import org.apache.flink.api.common.JobStatus
  */
 object FlinkJobState extends Enumeration {
 
-  val K8S_DEPLOYING, LOST, OTHER = Value
+  val K8S_INITIALIZING, STARTING, LOST, OTHER = Value
 
   // @see org.apache.flink.api.common.JobStatus
   val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
