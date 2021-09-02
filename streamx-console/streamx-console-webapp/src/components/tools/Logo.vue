@@ -29,7 +29,7 @@ export default {
   },
   data () {
     return {
-      logoImg: require('@assets/imgs/logo2.svg')
+      logoImg: require('@/assets/imgs/logo2.svg')
     }
   },
   methods: {
@@ -40,7 +40,7 @@ export default {
         },50)
       } else {
         setTimeout(()=>{
-          this.logoImg = require('@assets/imgs/logo2.svg')
+          this.logoImg = require('@/assets/imgs/logo2.svg')
         },50)
       }
     }

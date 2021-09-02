@@ -208,7 +208,7 @@
             v-decorator="[ 'appType', {rules: [{ required: true, message: 'Application Type is required'}]} ]">
             <a-select-option
               value="1">
-              StreamX Flink
+              Botech Flink
             </a-select-option>
             <a-select-option
               value="2">

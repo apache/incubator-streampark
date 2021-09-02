@@ -50,7 +50,7 @@
         <div v-if="app.appType == 1">
           <a-tag
             color="cyan">
-            StreamX Flink
+            Botech Flink
           </a-tag>
         </div>
         <div v-else-if="app.appType == 2">

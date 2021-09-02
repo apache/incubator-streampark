@@ -1,15 +1,7 @@
 <template>
   <div class="footer">
-    <div class="links">
-      <a
-        href="https://github.com/streamxhub/streamx"
-        target="_blank">
-        <a-icon type="github" />
-      </a>
-    </div>
-    <div class="copyright">
-      Copyright<a-icon type="copyright" /> 2019~{{ year }} <span>StreamX</span>
-    </div>
+
+
   </div>
 </template>
 
