@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV, TrkId}
 
 /**
@@ -86,6 +87,10 @@ trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
     super.checkIsInRemoteCluster(trkId)
   }
 
+  abstract override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {
+    start()
+    super.postEvent(event, sync)
+  }
 }
 
 
