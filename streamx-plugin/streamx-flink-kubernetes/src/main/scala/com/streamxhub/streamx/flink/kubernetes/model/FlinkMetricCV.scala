@@ -30,6 +30,9 @@ case class FlinkMetricCV(totalJmMemory: Integer,
                          totalSlot: Integer,
                          availableSlot: Integer,
                          runningJob: Integer,
+                         finishedJob: Integer,
+                         cancelledJob: Integer,
+                         failedJob: Integer,
                          pollAckTime: Long) {
 
   def +(another: FlinkMetricCV): FlinkMetricCV = {
@@ -40,11 +43,14 @@ case class FlinkMetricCV(totalJmMemory: Integer,
       totalSlot + another.totalSlot,
       availableSlot + another.availableSlot,
       runningJob + another.runningJob,
+      finishedJob + another.finishedJob,
+      cancelledJob + another.cancelledJob,
+      failedJob + another.failedJob,
       math.max(pollAckTime, another.pollAckTime)
     )
   }
 }
 
 object FlinkMetricCV {
-  def empty: FlinkMetricCV = FlinkMetricCV(0, 0, 0, 0, 0, 0, System.currentTimeMillis)
+  def empty: FlinkMetricCV = FlinkMetricCV(0, 0, 0, 0, 0, 0, 0, 0, 0, System.currentTimeMillis)
 }

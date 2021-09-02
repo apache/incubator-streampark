@@ -173,6 +173,9 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
         totalSlot = flinkOverview.slotsTotal,
         availableSlot = flinkOverview.slotsAvailable,
         runningJob = flinkOverview.jobsRunning,
+        finishedJob = flinkOverview.jobsFinished,
+        cancelledJob = flinkOverview.jobsCancelled,
+        failedJob = flinkOverview.jobsFailed,
         pollAckTime = ackTime)
     }
     Some(flinkMetricCV)
