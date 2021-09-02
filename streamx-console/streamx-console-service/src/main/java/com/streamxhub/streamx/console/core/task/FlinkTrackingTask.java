@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.console.core.task;
 
+import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -191,7 +193,7 @@ public class FlinkTrackingTask {
         Long now = System.currentTimeMillis();
         lastTrackTime = now;
         TRACKING_MAP.entrySet().stream()
-            .filter(trkElement -> !ExecutionMode.isKubernetesMode(trkElement.getValue().getExecutionMode()))
+            .filter(trkElement -> !isKubernetesMode(trkElement.getValue().getExecutionMode()))
             .forEach(trkElement -> executor.execute(() -> {
                 long key = trkElement.getKey();
                 Application application = trkElement.getValue();
@@ -588,6 +590,9 @@ public class FlinkTrackingTask {
      * 设置正在操作中...
      */
     public static void setOptionState(Long appId, OptionState state) {
+        if (isKubernetesApp(appId)){
+            return;
+        }
         log.info("flinkTrackingTask setOptioning");
         optioningTime = System.currentTimeMillis();
         OPTIONING.put(appId, state);
@@ -598,6 +603,9 @@ public class FlinkTrackingTask {
     }
 
     public static void addTracking(Application application) {
+        if (isKubernetesApp(application)) {
+            return;
+        }
         log.info("flinkTrackingTask add app to tracking,appId:{}", application.getId());
         TRACKING_MAP.put(application.getId(), application);
         STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
@@ -615,6 +623,10 @@ public class FlinkTrackingTask {
      * @param callable
      */
     public static Object refreshTracking(Long appId, Callable callable) throws Exception {
+        if (isKubernetesApp(appId)) {
+            // notes: k8s flink tracking monitor don't need to flush or refresh cache proactively.
+            return callable.call();
+        }
         log.info("flinkTrackingTask flushing app,appId:{}", appId);
         Application application = TRACKING_MAP.get(appId);
         if (application != null) {
@@ -646,6 +658,9 @@ public class FlinkTrackingTask {
     }
 
     public static void stopTracking(Long appId) {
+        if (isKubernetesApp(appId)) {
+            return;
+        }
         log.info("flinkTrackingTask stop app,appId:{}", appId);
         TRACKING_MAP.remove(appId);
     }
@@ -675,6 +690,18 @@ public class FlinkTrackingTask {
         public long getDuration(Long currentTimestamp) {
             return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
         }
+    }
+
+    private static boolean isKubernetesApp(Application application){
+        if (application == null) {
+            return false;
+        }
+        return isKubernetesMode(application.getState());
+    }
+
+    private static boolean isKubernetesApp(Long appId){
+        Application app = TRACKING_MAP.get(appId);
+        return isKubernetesApp(app);
     }
 
 }
