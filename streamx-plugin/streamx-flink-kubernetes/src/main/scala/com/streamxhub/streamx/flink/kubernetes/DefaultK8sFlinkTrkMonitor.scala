@@ -108,10 +108,15 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
 
   override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
 
-  override def checkIsInRemoteCluster(trkId: TrkId): Boolean = trkId.executeMode match {
-    case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace).exists(trkId.jobId == _._2.jobId)
-    case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace).exists(_._2.jobState != FlinkJobState.LOST)
-    case _ => false
+  override def checkIsInRemoteCluster(trkId: TrkId): Boolean = {
+    if (Try(trkId.nonLegal).getOrElse(true)){
+      return false
+    }
+    trkId.executeMode match {
+      case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace).exists(trkId.jobId == _._2.jobId)
+      case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace).exists(_._2.jobState != FlinkJobState.LOST)
+      case _ => false
+    }
   }
 
   override def postEvent(event: BuildInEvent, sync: Boolean): Unit = {
