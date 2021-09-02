@@ -55,7 +55,7 @@ object FlinkTrkConf {
 }
 
 object MetricWatcherConf {
-  def defaultConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 30)
+  def defaultConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 15)
 
   def debugConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
 }
