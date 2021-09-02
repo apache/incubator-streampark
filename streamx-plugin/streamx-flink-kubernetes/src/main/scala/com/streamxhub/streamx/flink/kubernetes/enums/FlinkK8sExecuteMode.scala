@@ -39,4 +39,11 @@ object FlinkK8sExecuteMode extends Enumeration {
     }
   }
 
+  def toExecutionMode(mode: FlinkK8sExecuteMode.Value): ExecutionMode = {
+    mode match {
+      case SESSION => ExecutionMode.KUBERNETES_NATIVE_SESSION
+      case APPLICATION => ExecutionMode.KUBERNETES_NATIVE_APPLICATION
+    }
+  }
+
 }
