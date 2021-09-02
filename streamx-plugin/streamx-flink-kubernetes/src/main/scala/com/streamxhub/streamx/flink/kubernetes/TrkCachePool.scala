@@ -49,8 +49,6 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   // cache for last flink cluster metrics
   val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
-  // todo recovery from db
-
   override def close(): Unit = {
     jobStatuses.cleanUp()
     k8sDeploymentEvents.cleanUp()
