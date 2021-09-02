@@ -612,6 +612,9 @@ public class FlinkTrackingTask {
     }
 
     public static void addSavepoint(Long appId) {
+        if (isKubernetesApp(appId)) {
+            return;
+        }
         log.info("flinkTrackingTask add app to savepoint,appId:{}", appId);
         SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
     }
@@ -693,15 +696,12 @@ public class FlinkTrackingTask {
     }
 
     private static boolean isKubernetesApp(Application application){
-        if (application == null) {
-            return false;
-        }
-        return isKubernetesMode(application.getState());
+        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(application);
     }
 
     private static boolean isKubernetesApp(Long appId){
         Application app = TRACKING_MAP.get(appId);
-        return isKubernetesApp(app);
+        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
     }
 
 }
