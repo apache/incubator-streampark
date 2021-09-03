@@ -152,6 +152,7 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
+    // fixme to adapte for kubernetes-only scenarios
     @PostMapping("yarn")
     public RestResponse yarn() {
         return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
