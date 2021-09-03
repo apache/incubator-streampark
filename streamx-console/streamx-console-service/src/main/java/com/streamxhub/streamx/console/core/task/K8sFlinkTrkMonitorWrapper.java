@@ -87,28 +87,16 @@ public class K8sFlinkTrkMonitorWrapper {
     private List<TrkId> getK8sTrackingApplicationFromDB() {
         // query k8s executiion mode application from db
         final QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("execution_mode", ExecutionMode.getKubernetesMode());
+        queryWrapper
+            .in("execution_mode", ExecutionMode.getKubernetesMode())
+            .eq("tracking", 1);
         List<Application> k8sApplication = applicationService.list(queryWrapper);
         if (CollectionUtils.isEmpty(k8sApplication)) {
             return Lists.newArrayList();
         }
         // filter out the application that should be tracking
         return k8sApplication.stream()
-            .filter(app -> {
-                Enumeration.Value jobState = toK8sFlinkJobState(app.getFlinkAppStateEnum());
-                // do not tracking end state job
-                if (FlinkJobState.isEndState(jobState)) {
-                    return false;
-                }
-                // do not tracking app.tracking = 0 unless the job state is LOST,
-                // K8sTrkMonitor will automatically evicit the LOST tracking record
-                // from tracking list after that failure.
-                if (app.getTracking() == 0 && FlinkJobState.LOST() != jobState) {
-                    return false;
-                }
-                // plz don't simplify the judgement branch here to keep the code readable.
-                return true;
-            })
+            .filter(app -> !FlinkJobState.isEndState(toK8sFlinkJobState(app.getFlinkAppStateEnum())))
             .map(Bridge::toTrkId)
             .collect(Collectors.toList());
     }
@@ -122,9 +110,9 @@ public class K8sFlinkTrkMonitorWrapper {
         public static TrkId toTrkId(@Nonnull Application app) {
             Enumeration.Value mode = FlinkK8sExecuteMode.of(app.getExecutionModeEnum());
             if (FlinkK8sExecuteMode.APPLICATION().equals(mode)) {
-                return TrkId.onApplication(app.getK8sNameSpace(), app.getClusterId());
+                return TrkId.onApplication(app.getK8sNamespace(), app.getClusterId());
             } else if (FlinkK8sExecuteMode.SESSION().equals(mode)) {
-                return TrkId.onSession(app.getK8sNameSpace(), app.getClusterId(), app.getJobId());
+                return TrkId.onSession(app.getK8sNamespace(), app.getClusterId(), app.getJobId());
             } else {
                 throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
             }
