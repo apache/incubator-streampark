@@ -120,6 +120,12 @@ public enum FlinkAppState implements Serializable {
     REVOKED(18),
 
     /**
+     * Lost track of flink job temporarily.
+     * A complete loss of flink job tracking translates into LOST state.
+     */
+    SILENT(19),
+
+    /**
      * yarn 中检查到被killed
      */
     KILLED(-9);
@@ -157,8 +163,8 @@ public enum FlinkAppState implements Serializable {
          * covert from com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
          */
         public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-            if (FlinkJobState.K8S_DEPLOYING().equals(flinkJobState)) {
-                return DEPLOYING;
+            if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
+                return INITIALIZING;
             } else {
                 return of(flinkJobState.toString());
             }

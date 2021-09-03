@@ -1009,7 +1009,8 @@ export default {
           {text: 'CANCELED', value: 11},
           {text: 'FINISHED', value: 12},
           {text: 'SUSPENDED', value: 13},
-          {text: 'LOST', value: 15}
+          {text: 'LOST', value: 15},
+          {text: 'SILENT', value: 19}
         ]
       }, {
         title: 'Deploy Status',
