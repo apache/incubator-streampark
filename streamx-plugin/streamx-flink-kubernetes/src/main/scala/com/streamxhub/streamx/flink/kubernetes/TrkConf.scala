@@ -39,13 +39,16 @@ case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: 
 /**
  * configuration for FlinkJobStatusWatcher
  *
- * @param sglTrkTaskTimeoutSec         run timeout of single tracking task
- * @param sglTrkTaskIntervalSec        interval seconds between two single tracking task
- * @param lostStatusJobKeepTrackingSec LOST flink state job keep tracking seconds
+ * @param sglTrkTaskTimeoutSec          run timeout of single tracking task
+ * @param sglTrkTaskIntervalSec         interval seconds between two single tracking task
+ * @param silentStateJobKeepTrackingSec SILENT flink state job keep tracking seconds
  */
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
                                 sglTrkTaskIntervalSec: Long,
-                                lostStatusJobKeepTrackingSec: Int = 3600)
+                                silentStateJobKeepTrackingSec: Int = 3600) {
+
+  lazy val silentStateJobKeepTrackingMilliSec: Long = silentStateJobKeepTrackingSec * 1000
+}
 
 
 object FlinkTrkConf {
