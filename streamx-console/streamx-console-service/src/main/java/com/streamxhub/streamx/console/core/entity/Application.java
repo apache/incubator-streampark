@@ -45,6 +45,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -222,7 +223,6 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
-    @JsonIgnore
     public void setK8sNamespace(String k8sNamespace) {
         k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
             KubernetesConfigOptions.NAMESPACE.defaultValue() :
@@ -232,7 +232,16 @@ public class Application implements Serializable {
     public void setState(Integer state) {
         this.state = state;
         FlinkAppState appState = of(this.state);
-        switch (appState) {
+        this.tracking = shouldTracking(appState);
+    }
+
+    /**
+     * Determine if a FlinkAppState requires tracking.
+     *
+     * @return 1: need to be tracked | 0: no need to be tracked.
+     */
+    public static Integer shouldTracking(@Nonnull FlinkAppState state) {
+        switch (state) {
             case DEPLOYING:
             case DEPLOYED:
             case CREATED:
@@ -240,11 +249,9 @@ public class Application implements Serializable {
             case FAILED:
             case CANCELED:
             case LOST:
-                this.tracking = 0;
-                break;
+                return 0;
             default:
-                this.tracking = 1;
-                break;
+                return 1;
         }
     }
 
