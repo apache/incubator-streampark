@@ -62,6 +62,7 @@
           <a-input
             type="text"
             placeholder="Please enter Kubernetes clusterId"
+            @change="handleClusterId"
             allowClear
             v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
           </a-input>
@@ -75,7 +76,7 @@
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
-            placeholder="Please enter Flink Base image"
+            placeholder="Please enter Flink Base image, such as: flink:1.13.0-scala_2.11-java8"
             allowClear
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base image is required' }] }]">
           </a-input>
@@ -1088,6 +1089,12 @@ export default {
 
     handleChangeAlertType(value) {
       this.alertType = value
+    },
+
+    handleClusterId(value) {
+      if (this.executionMode === 6){
+        this.form.setFieldsValue({jobName: value.target.value})
+      }
     },
 
     handleJobName(confFile) {
