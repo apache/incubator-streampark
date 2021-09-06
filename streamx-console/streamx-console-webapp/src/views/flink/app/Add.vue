@@ -52,7 +52,7 @@
             type="text"
             placeholder="default"
             allowClear
-            v-decorator="[ 'k8sNameSpace']">
+            v-decorator="[ 'k8sNamespace']">
           </a-input>
         </a-form-item>
         <a-form-item
@@ -1417,7 +1417,7 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description,
-        k8sNameSpace: values.k8sNameSpace || null,
+        k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
@@ -1483,7 +1483,7 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null,
-        k8sNameSpace: values.k8sNameSpace || null,
+        k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }

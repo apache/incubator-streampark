@@ -40,7 +40,7 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="executionMode === 5|| executionMode === 6">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6))  || (executionMode === 5 || executionMode === 6)">
         <a-form-item
           label="kubernetes namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -49,7 +49,7 @@
             type="text"
             placeholder="default"
             allowClear
-            v-decorator="[ 'k8sNameSpace']">
+            v-decorator="[ 'k8sNamespace']">
           </a-input>
         </a-form-item>
 
@@ -66,7 +66,7 @@
         </a-form-item>
       </template>
 
-      <template v-if="executionMode === 6">
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
         <a-form-item
           label="Flink Docker image"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -1507,7 +1507,7 @@ export default {
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description,
-        k8sNameSpace: values.k8sNameSpace || null,
+        k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null,
       }
@@ -1552,7 +1552,7 @@ export default {
         alertEmail: values.alertEmail|| null,
         executionMode: values.executionMode,
         description: values.description || null,
-        k8sNameSpace: values.k8sNameSpace || null,
+        k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
@@ -1717,7 +1717,10 @@ export default {
           'alertEmail': this.app.alertEmail,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
-          'cpFailureAction': this.app.cpFailureAction
+          'cpFailureAction': this.app.cpFailureAction,
+          'clusterId': this.app.clusterId,
+          'flinkImage': this.app.flinkImage,
+          'k8sNamespace': this.app.k8sNamespace
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null

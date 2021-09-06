@@ -105,7 +105,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace;
+    private String k8sNamespace = KubernetesConfigOptions.NAMESPACE.defaultValue() ;
 
 
     private Integer state;
@@ -224,7 +224,7 @@ public class Application implements Serializable {
     private transient String backUpDescription;
 
     public void setK8sNamespace(String k8sNamespace) {
-        k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
             KubernetesConfigOptions.NAMESPACE.defaultValue() :
             k8sNamespace;
     }
