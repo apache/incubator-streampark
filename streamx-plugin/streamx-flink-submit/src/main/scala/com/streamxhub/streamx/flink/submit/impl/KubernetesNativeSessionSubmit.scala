@@ -63,6 +63,8 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))
       MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
+    logInfo(s"[flink-submit] already built flink job fat-jar. " +
+      s"${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}, fatJarPath=${fatJar.getAbsolutePath}")
 
     // retrieve k8s cluster and submit flink job on session mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -91,7 +93,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val submitResult = client.submitJob(jobGraph)
       val jobId = submitResult.get().toString
-      SubmitResponse(client.getClusterId, flinkConfig, jobId)
+      val result = SubmitResponse(client.getClusterId, flinkConfig, jobId)
+      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}")
+      result
     } catch {
       case e: Exception =>
         logError(s"submit flink job fail in ${submitRequest.executionMode} mode")

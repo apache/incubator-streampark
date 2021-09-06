@@ -258,4 +258,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
 
+  protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =
+    s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(KubernetesConfigOptions.CLUSTER_ID)}, " +
+      s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
+
+
 }

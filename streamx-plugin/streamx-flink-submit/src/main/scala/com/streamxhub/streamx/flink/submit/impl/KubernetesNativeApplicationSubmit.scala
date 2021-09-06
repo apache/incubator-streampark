@@ -55,6 +55,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
       //  If it is consistent, it is used directly and returned directly instead of being regenerated
       // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))
     }
+    logInfo(s"[flink-submit] already built flink job fat-jar. " +
+      s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
+
     // build and push flink application image
     val flinkImageTag = {
       val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
@@ -71,6 +74,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     }
     // add flink image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)
+    logInfo(s"[flink-submit] already built flink job docker image. " +
+      s"${flinkConfIdentifierInfo(flinkConfig)}, flinkImageTag=${flinkImageTag}, " +
+      s"baseFlinkImage=${submitRequest.k8sSubmitParam.flinkDockerImage}")
 
     // retrieve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
@@ -85,7 +91,9 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
         .getClusterClient
 
       val clusterId = clusterClient.getClusterId
-      SubmitResponse(clusterId, flinkConfig)
+      val result = SubmitResponse(clusterId, flinkConfig)
+      logInfo(s"[flink-submit] flink job has been submitted. ${flinkConfIdentifierInfo(flinkConfig)}")
+      result
 
     } catch {
       case e: Exception =>
