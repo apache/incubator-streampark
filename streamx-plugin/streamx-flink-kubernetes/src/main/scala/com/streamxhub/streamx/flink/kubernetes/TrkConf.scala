@@ -66,7 +66,8 @@ object MetricWatcherConf {
 object JobStatusWatcherConf {
   def defaultConf: JobStatusWatcherConf = JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 10)
 
-  def debugConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
+  def debugConf: JobStatusWatcherConf =
+    JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5, silentStateJobKeepTrackingSec = 30)
 }
 
 
