@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchJobStatusCacheSize, watchK8sEventCache, watchMetricsCache, watchTrkIdsCacheSize}
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.{BeforeEach, Test}
 

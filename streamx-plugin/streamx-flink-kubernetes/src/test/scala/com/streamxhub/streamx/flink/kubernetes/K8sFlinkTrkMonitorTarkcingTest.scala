@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
+import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchJobStatusCache, watchJobStatusCacheSize, watchMetricsCache, watchTrkIdsCache}
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
