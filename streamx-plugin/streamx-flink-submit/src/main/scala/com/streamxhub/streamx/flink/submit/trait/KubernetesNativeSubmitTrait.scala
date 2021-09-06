@@ -25,7 +25,6 @@ import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, Stor
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
 import com.streamxhub.streamx.flink.submit.domain._
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
@@ -94,18 +93,17 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     }
   }
 
+  //noinspection DuplicatedCode
   /*
-  tips:
-  The default kubernetes cluster communication information will be obtained from ./kube/conf file.
+    tips:
+    The default kubernetes cluster communication information will be obtained from ./kube/conf file.
 
-  If you need to customize the kubernetes cluster context, such as multiple target kubernetes clusters
-  or multiple kubernetes api-server accounts, there are two ways to achieve this：
-   1. Get the KubernetesClusterDescriptor by manually, building the FlinkKubeClient and specify
-       the kubernetes context contents in the FlinkKubeClient.
-   2. Specify an explicit key kubernetes.config.file in flinkConfig instead of the default value.
-
-  todo: Perhaps we need to manage the KubernetesClusterDescriptor instances through CachePool
-  */
+    If you need to customize the kubernetes cluster context, such as multiple target kubernetes clusters
+    or multiple kubernetes api-server accounts, there are two ways to achieve this：
+     1. Get the KubernetesClusterDescriptor by manually, building the FlinkKubeClient and specify
+         the kubernetes context contents in the FlinkKubeClient.
+     2. Specify an explicit key kubernetes.config.file in flinkConfig instead of the default value.
+    */
   def getK8sClusterDescriptorAndSpecification(flinkConfig: Configuration)
   : (KubernetesClusterDescriptor, ClusterSpecification) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
@@ -115,8 +113,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     (clusterDescriptor, clusterSpecification)
   }
 
+  //noinspection DuplicatedCode
   def getK8sClusterDescriptor(flinkConfig: Configuration): KubernetesClusterDescriptor = {
-    getK8sClusterDescriptorAndSpecification(flinkConfig)._1
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
+    clusterDescriptor
   }
 
   /**

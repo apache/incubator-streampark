@@ -99,7 +99,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
   }
 
   override def doStop(stopInfo: StopRequest): StopResponse = {
-    doStop(ExecutionMode.KUBERNETES_NATIVE_APPLICATION, stopInfo)
+    super.doStop(ExecutionMode.KUBERNETES_NATIVE_APPLICATION, stopInfo)
   }
 
 }

@@ -73,7 +73,7 @@ trait FlinkSubmitTrait extends Logger {
     doSubmit(submitRequest)
   }
 
-  def stop(stopRequest: StopRequest): StopResponse = {
+  @throws[Exception] def stop(stopRequest: StopRequest): StopResponse = {
     logInfo(
       s"""
          |"flink stop {"
