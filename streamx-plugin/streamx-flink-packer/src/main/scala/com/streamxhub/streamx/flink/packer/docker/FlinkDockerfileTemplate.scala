@@ -32,17 +32,14 @@ import java.io.File
  * @param flinkBaseImage  flink base docker image name, see https://hub.docker.com/_/flink
  * @param flinkFatjarPath path of flink job fat jar
  */
-case class FlinkDockerfileTemplate(var flinkBaseImage: String, var flinkFatjarPath: String) {
+case class FlinkDockerfileTemplate(flinkBaseImage: String, flinkFatjarPath: String) {
 
-  def getFatJarName: String = new File(flinkFatjarPath).getName
+  lazy val fatJarName: String = new File(flinkFatjarPath).getName
 
   /**
    * get content of DockerFile
    */
-  def dockerfileContent: String = {
-    val fatJarName = getFatJarName
-    DOCKER_FILE_TEMPLATE.format(flinkBaseImage, "/".concat(fatJarName), fatJarName)
-  }
+  def dockerfileContent: String = DOCKER_FILE_TEMPLATE.format(flinkBaseImage, "/".concat(fatJarName), fatJarName)
 
   /**
    * write content of DockerFile to outputPath.
@@ -59,6 +56,11 @@ case class FlinkDockerfileTemplate(var flinkBaseImage: String, var flinkFatjarPa
     FileUtils.write(output, dockerfileContent, "UTF-8")
     output
   }
+
+  /**
+   * get flink job jar such as local:///opt/flink/usrlib/flink-fatjar.jar
+   */
+  def getJobJar: String = s"local:///opt/flink/usrlib/$fatJarName"
 
 }
 

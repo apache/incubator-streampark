@@ -28,9 +28,12 @@ import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.program.ClusterClient
+import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import scala.collection.JavaConverters._
 
+import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -60,19 +63,20 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
     // build and push flink application image
-    val flinkImageTag = {
-      val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
-      val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkDockerImage, fatJar.getAbsolutePath)
-      DockerTool.buildFlinkImage(
-        submitRequest.k8sSubmitParam.dockerAuthConfig,
-        buildWorkspace,
-        dockerFileTemplate,
-        tagName,
-        push = true
-      )
-    }
-    // add flink image tag to flink configuration
+    val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
+    val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkDockerImage, fatJar.getAbsolutePath)
+    val flinkImageTag = DockerTool.buildFlinkImage(
+      submitRequest.k8sSubmitParam.dockerAuthConfig,
+      buildWorkspace,
+      dockerFileTemplate,
+      tagName,
+      push = true)
+
+    // add flink container image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)
+    // add flink pipeline.jars configuration
+    flinkConfig.set(PipelineOptions.JARS, mutable.Buffer(dockerFileTemplate.getJobJar).asJava)
+
     logInfo(s"[flink-submit] already built flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}, " +
       s"flinkImageTag=${flinkImageTag}, baseFlinkImage=${submitRequest.k8sSubmitParam.flinkDockerImage}")
 
