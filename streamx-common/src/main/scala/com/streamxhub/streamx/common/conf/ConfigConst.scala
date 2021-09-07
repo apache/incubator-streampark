@@ -323,6 +323,14 @@ object ConfigConst {
    */
   val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
 
+  /**
+   * namespace for docker image used in docker build env and image register
+   */
+  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val KEY_DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+
+  lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, KEY_DOCKER_IMAGE_NAMESPACE_DEFAULT)
+
 
   val LOGO =
     """
