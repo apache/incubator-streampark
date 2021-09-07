@@ -2,6 +2,7 @@ package com.streamxhub.streamx.flink.packer.docker
 
 import com.github.dockerjava.api.command.PushImageCmd
 import com.google.common.collect.Sets
+import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 import org.apache.commons.io.FileUtils
@@ -14,10 +15,6 @@ import java.io.File
 //noinspection DuplicatedCode
 object DockerTool extends Logger {
 
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val IMAGE_NAMESPACE = "streamx"
 
   /**
    * build and push docker image for flink fat-jar.
@@ -61,9 +58,7 @@ object DockerTool extends Logger {
         logInfo(s"[streamx-packer] docker image built successfully, tag=${tagName}")
         // push docker image
         if (push) {
-          val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName)
-            .withAuthConfig(authConf.toDockerAuthConf)
-            .withTag(tagName)
+          val pushCmd: PushImageCmd = dockerClient.pushImageCmd(tagName).withAuthConfig(authConf.toDockerAuthConf)
           pushCmd.start().awaitCompletion()
           logInfo(s"[streamx-packer] docker image push successfully, tag=${tagName}, registerAddr=${authConf.registerAddress}")
         }
@@ -82,9 +77,7 @@ object DockerTool extends Logger {
   def pushImage(imageTag: String, authConf: DockerAuthConf): Boolean = {
     tryWithResourceException(DockerRetriever.newDockerClient()) {
       client =>
-        val pushCmd: PushImageCmd = client.pushImageCmd(imageTag)
-          .withAuthConfig(authConf.toDockerAuthConf)
-          .withTag(imageTag)
+        val pushCmd: PushImageCmd = client.pushImageCmd(imageTag).withAuthConfig(authConf.toDockerAuthConf)
         pushCmd.start().awaitCompletion()
         true
     } {
@@ -100,7 +93,7 @@ object DockerTool extends Logger {
    * compile image tag with namespace and remote address.
    */
   private def compileTag(tag: String, registerAddr: String): String = {
-    var tagName = if (tag.contains("/")) tag else s"$IMAGE_NAMESPACE/$tag"
+    var tagName = if (tag.contains("/")) tag else s"$DOCKER_IMAGE_NAMESPACE/$tag"
     if (registerAddr.nonEmpty && !tagName.startsWith(registerAddr))
       tagName = s"$registerAddr/$tagName"
     tagName

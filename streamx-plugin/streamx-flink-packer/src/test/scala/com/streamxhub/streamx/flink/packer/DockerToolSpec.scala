@@ -20,7 +20,7 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.flink.packer.docker.DockerTool.IMAGE_NAMESPACE
+import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
 import com.streamxhub.streamx.flink.packer.docker.{DockerAuthConf, DockerTool, FlinkDockerfileTemplate}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
@@ -47,13 +47,13 @@ class DockerToolSpec extends AnyWordSpec with BeforeAndAfter with Matchers {
         val authConf = DockerAuthConf("", "", "")
         val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
         val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
-        tag mustBe s"$IMAGE_NAMESPACE/myflink-job"
+        tag mustBe s"$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
       "when remote register is set" in {
         val authConf = DockerAuthConf("registry.cn-hangzhou.aliyuncs.com", "user123", "123")
         val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
         val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
-        tag mustBe s"${authConf.registerAddress}/$IMAGE_NAMESPACE/myflink-job"
+        tag mustBe s"${authConf.registerAddress}/$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
     }
     "operate image" should {
