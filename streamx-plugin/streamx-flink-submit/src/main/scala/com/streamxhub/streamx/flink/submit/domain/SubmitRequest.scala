@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, ResolveOrder}
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
+import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
 import com.streamxhub.streamx.flink.submit.`trait`.WorkspaceEnv
 import org.apache.flink.client.cli.CliFrontend
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
@@ -39,11 +40,8 @@ import scala.collection.JavaConversions._
 case class KubernetesSubmitParam(clusterId: String,
                                  flinkDockerImage: String,
                                  kubernetesNamespace: String,
-                                 dockerRegisterAddress: String,
-                                 dockerRegisterUser: String,
-                                 dockerRegisterPassword: String)
+                                 @Nullable dockerAuthConfig: DockerAuthConf)
 
-// todo need for more elegant code refactoring
 case class SubmitRequest(flinkHome: String,
                          flinkVersion: String,
                          flinkYaml: String,

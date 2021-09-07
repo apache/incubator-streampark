@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,26 +18,33 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.conf
 
-/**
- * Config for K8s cluster
- * author: Al-assad
- */
-object K8sConfigConst {
+package com.streamxhub.streamx.flink
 
-  /**
-   * docker image regoster address for remote k8s cluster.
-   * when this configuration item is empty, it means that
-   * the dockerhub public repository is used.
-   */
-  lazy val KEY_K8S_IMAGE_REGISTER_ADDRESS = "k8s.image.register.address"
-  lazy val K8S_IMAGE_REGISTER_ADDRESS: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
+import org.codehaus.plexus.util.IOUtil
 
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val IMAGE_NAMESPACE = "streamx"
+import java.io.{IOException, InputStream}
+import java.util
+import java.util.jar.JarFile
+
+package object packer {
+
+  def path: String => String = (path: String) => getClass.getClassLoader.getResource(path).getFile
+
+  def jarEquals(jar1: JarFile, jar2: JarFile, entry: String): Boolean = {
+    var s1: InputStream = null
+    var s2: InputStream = null
+    try {
+      s1 = jar1.getInputStream(jar1.getJarEntry(entry))
+      s2 = jar2.getInputStream(jar2.getJarEntry(entry))
+      util.Arrays.equals(IOUtil.toByteArray(s1), IOUtil.toByteArray(s2))
+    } catch {
+      case e: IOException => false
+    } finally {
+      if (s1 != null) s1.close()
+      if (s2 != null) s2.close()
+    }
+  }
 
 
 }

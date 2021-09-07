@@ -24,7 +24,7 @@ import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.packer.MavenTool
+import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.lang3.StringUtils
