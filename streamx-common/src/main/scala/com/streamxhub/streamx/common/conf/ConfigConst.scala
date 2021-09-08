@@ -283,7 +283,7 @@ object ConfigConst {
 
   val KEY_STREAMX_WORKSPACE = "streamx.workspace.path"
 
-  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
+  val STREAMX_WORKSPACE_DEFAULT = "/Users/yulin/Downloads/streamx-workspace" // todo
 
   lazy val WORKSPACE: String = {
     val workspace = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
