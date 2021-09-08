@@ -37,6 +37,7 @@ import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
+import org.apache.commons.lang3.StringUtils;
 import scala.Enumeration;
 
 /**
@@ -65,8 +66,12 @@ public class K8sFlinkChangeEventListener {
         QueryWrapper<Application> query = new QueryWrapper<>();
         query.eq("execution_mode", mode.getMode())
             .eq("cluster_id", trkId.clusterId())
-            .eq("job_id", jobStatus.jobId())
             .eq("k8s_namespace", trkId.namespace());
+        if (StringUtils.isEmpty(jobStatus.jobId())) {
+            query.or(e -> e.eq("job_id", "").isNull("job_id"));
+        } else {
+            query.eq("job_id", jobStatus.jobId());
+        }
         Application app = applicationService.getOne(query);
         if (app == null) {
             return;

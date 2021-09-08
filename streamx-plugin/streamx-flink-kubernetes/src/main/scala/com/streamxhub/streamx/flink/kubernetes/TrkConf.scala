@@ -45,29 +45,38 @@ case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: 
  */
 case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long,
                                 sglTrkTaskIntervalSec: Long,
-                                silentStateJobKeepTrackingSec: Int = 3600) {
-
-  lazy val silentStateJobKeepTrackingMilliSec: Long = silentStateJobKeepTrackingSec * 1000
-}
-
+                                silentStateJobKeepTrackingSec: Int)
 
 object FlinkTrkConf {
-  def defaultConf: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.defaultConf, MetricWatcherConf.defaultConf)
+  def defaultConf: FlinkTrkConf = FlinkTrkConf(
+    JobStatusWatcherConf.defaultConf,
+    MetricWatcherConf.defaultConf)
 
-  def debugConf: FlinkTrkConf = FlinkTrkConf(JobStatusWatcherConf.defaultConf, MetricWatcherConf.debugConf)
+  def debugConf: FlinkTrkConf = FlinkTrkConf(
+    JobStatusWatcherConf.debugConf,
+    MetricWatcherConf.debugConf)
 }
 
 object MetricWatcherConf {
-  def defaultConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 15)
+  def defaultConf: MetricWatcherConf = MetricWatcherConf(
+    sglTrkTaskTimeoutSec = 120,
+    sglTrkTaskIntervalSec = 15)
 
-  def debugConf: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5)
+  def debugConf: MetricWatcherConf = MetricWatcherConf(
+    sglTrkTaskTimeoutSec = 120,
+    sglTrkTaskIntervalSec = 2)
 }
 
 object JobStatusWatcherConf {
-  def defaultConf: JobStatusWatcherConf = JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 10)
+  def defaultConf: JobStatusWatcherConf = JobStatusWatcherConf(
+    sglTrkTaskTimeoutSec = 120,
+    sglTrkTaskIntervalSec = 10,
+    silentStateJobKeepTrackingSec = 60)
 
-  def debugConf: JobStatusWatcherConf =
-    JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 5, silentStateJobKeepTrackingSec = 30)
+  def debugConf: JobStatusWatcherConf = JobStatusWatcherConf(
+    sglTrkTaskTimeoutSec = 120,
+    sglTrkTaskIntervalSec = 2,
+    silentStateJobKeepTrackingSec = 20)
 }
 
 

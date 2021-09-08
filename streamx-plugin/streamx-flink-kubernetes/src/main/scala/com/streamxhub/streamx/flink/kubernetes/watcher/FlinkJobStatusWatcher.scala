@@ -233,7 +233,6 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
     // relavant deployment event
     lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
-    // previous relvant job statuse cache record
     lazy val preCache = cachePool.jobStatuses.getIfPresent(TrkId.onApplication(namespace, clusterId))
 
     // infer from k8s deployment and event
@@ -254,17 +253,23 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
         preCache match {
           case preCache if preCache == null => FlinkJobState.SILENT
           case preCache if preCache.jobState == FlinkJobState.SILENT &&
-            System.currentTimeMillis - preCache.pollAckTime >= conf.silentStateJobKeepTrackingMilliSec => FlinkJobState.LOST
+            System.currentTimeMillis() - preCache.pollAckTime >= conf.silentStateJobKeepTrackingSec * 1000 => FlinkJobState.LOST
           case _ => FlinkJobState.SILENT
         }
       }
     }
-    Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, System.currentTimeMillis))
+    if (jobState == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT) {
+      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, preCache.pollEmitTime, preCache.pollAckTime))
+    } else {
+      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, System.currentTimeMillis))
+    }
   }
 
 }
 
 object FlinkJobStatusWatcher {
+
+  private val effectEndStates: Seq[FlinkJobState.Value] = FlinkJobState.endingStates.filter(_ != FlinkJobState.LOST)
 
   /**
    * infer flink job state before persistence.
@@ -274,7 +279,7 @@ object FlinkJobStatusWatcher {
    */
   def inferFlinkJobStateFromPersist(curState: FlinkJobState.Value, preState: FlinkJobState.Value): FlinkJobState.Value = {
     if (curState == FlinkJobState.LOST) {
-      if (FlinkJobState.isEndState(curState)) {
+      if (effectEndStates.contains(curState)) {
         preState
       } else {
         FlinkJobState.TERMINATED
