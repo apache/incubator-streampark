@@ -131,7 +131,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
                   case cv if cv.get.jobState != e._2.jobState => true
                   case _ => false
                 }).map(e => FlinkJobStatusChangeEvent(e._1, e._2))
-                .foreach(eventBus.postAsync)
+                .foreach(eventBus.postSync)
               // remove trkId from cache of job that needs to be untracked
               trkRs.filter(r => FlinkJobState.isEndState(r._2.jobState))
                 .map(_._1)
@@ -223,33 +223,65 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
 
   /**
    * Infer the current flink state from the last relevant k8s events.
-   * This method is only used for application-mode job inference.
+   * This method is only used for application-mode job inference in
+   * case of a failed JM rest request.
    */
   private def inferApplicationFlinkJobStateFromK8sEvent(clusterId: String, namespace: String)
                                                        (implicit pollEmitTime: Long): Option[(TrkId, JobStatusCV)] = {
-    val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
-    // infer from k8s deployment event
+
+    // whether deployment exists on kubernetes cluster
+    lazy val isDeployExists = KubernetesRetriever.isDeploymentExists(clusterId, namespace)
+    // relavant deployment event
+    lazy val deployEvent = cachePool.k8sDeploymentEvents.getIfPresent(K8sEventKey(namespace, clusterId))
+    // previous relvant job statuse cache record
+    lazy val preCache = cachePool.jobStatuses.getIfPresent(TrkId.onApplication(namespace, clusterId))
+
+    // infer from k8s deployment and event
     val jobState = {
-      if (deployEvent != null) {
+      if (isDeployExists) {
+        FlinkJobState.K8S_INITIALIZING
+      } else if (deployEvent != null) {
+        // no exists k8s deployment, infer from last deployment event
         val isDelete = deployEvent.action == Action.DELETED
         val isDeployAvailable = deployEvent.event.getStatus.getConditions.exists(_.getReason == "MinimumReplicasAvailable")
         (isDelete, isDeployAvailable) match {
-          case (true, true) => FlinkJobState.FINISHED
+          case (true, true) => FlinkJobState.POS_TERMINATED // maybe FINISHED or CANCEL
           case (true, false) => FlinkJobState.FAILED
           case _ => FlinkJobState.K8S_INITIALIZING
         }
       } else {
         // determine if the state should be SILENT or LOST
-        val preCache = cachePool.jobStatuses.getIfPresent(TrkId.onApplication(namespace, clusterId))
         preCache match {
           case preCache if preCache == null => FlinkJobState.SILENT
-          case preCache if preCache.pollAckTime > 0 &&
+          case preCache if preCache.jobState == FlinkJobState.SILENT &&
             System.currentTimeMillis - preCache.pollAckTime >= conf.silentStateJobKeepTrackingMilliSec => FlinkJobState.LOST
           case _ => FlinkJobState.SILENT
         }
       }
     }
     Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, System.currentTimeMillis))
+  }
+
+}
+
+object FlinkJobStatusWatcher {
+
+  /**
+   * infer flink job state before persistence.
+   *
+   * @param curState current flink job state
+   * @param preState previous flink job state from persistent storage
+   */
+  def inferFlinkJobStateFromPersist(curState: FlinkJobState.Value, preState: FlinkJobState.Value): FlinkJobState.Value = {
+    if (curState == FlinkJobState.LOST) {
+      if (FlinkJobState.isEndState(curState)) {
+        preState
+      } else {
+        FlinkJobState.TERMINATED
+      }
+    } else {
+      curState
+    }
   }
 
 }

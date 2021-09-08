@@ -21,27 +21,34 @@
 
 package com.streamxhub.streamx.console.core.task;
 
-import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
+import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.fromK8sFlinkJobState;
+import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
+
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.eventbus.Subscribe;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
+import scala.Enumeration;
 
 /**
  * Listener for K8sFlinkTrkMonitor
  */
-@Component
 public class K8sFlinkChangeEventListener {
 
-    @Autowired
-    private ApplicationService applicationService;
+    private final ApplicationService applicationService;
+
+    public K8sFlinkChangeEventListener(ApplicationService applicationService) {
+        this.applicationService = applicationService;
+    }
 
     /**
      * catch FlinkJobStatusChangeEvent then storage it persistently to db.
@@ -51,17 +58,31 @@ public class K8sFlinkChangeEventListener {
     public void persistentK8sFlinkJobStatusChangeEvent(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
         TrkId trkId = event.trkId();
-        FlinkAppState state = FlinkAppState.Bridge.fromK8sFlinkJobState(jobStatus.jobState());
+        Enumeration.Value state = jobStatus.jobState();
         ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trkId.executeMode());
 
-        // update state of relevant application record
-        UpdateWrapper<Application> updateWrapper = new UpdateWrapper<>();
-        updateWrapper.set("state", state.getValue())
-            .eq("execution_mode", mode.getMode())
+        // get pre application record
+        QueryWrapper<Application> query = new QueryWrapper<>();
+        query.eq("execution_mode", mode.getMode())
             .eq("cluster_id", trkId.clusterId())
+            .eq("job_id", jobStatus.jobId())
             .eq("k8s_namespace", trkId.namespace());
-        applicationService.update(updateWrapper);
-    }
+        Application app = applicationService.getOne(query);
+        if (app == null) {
+            return;
+        }
 
+        // infer the final flink job state
+        Enumeration.Value preState = toK8sFlinkJobState(FlinkAppState.of(app.getState()));
+        state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(state, preState);
+        app.setState(fromK8sFlinkJobState(state).getValue());
+        // update option State
+        if (FlinkJobState.isEndState(state)) {
+            app.setOptionState(OptionState.NONE.getValue());
+        }
+
+        // update application record
+        applicationService.saveOrUpdate(app);
+    }
 
 }

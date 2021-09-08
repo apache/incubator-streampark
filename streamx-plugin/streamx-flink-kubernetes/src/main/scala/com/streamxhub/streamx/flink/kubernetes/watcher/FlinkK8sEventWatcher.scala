@@ -98,13 +98,14 @@ class FlinkK8sEventWatcher(implicit cachePool: FlinkTrkCachePool) extends Logger
   private def handleDeploymentEvent(action: Watcher.Action, event: Deployment): Unit = {
     val clusterId = event.getMetadata.getName
     val namespace = event.getMetadata.getNamespace
-//    if (!cachePool.isInTracking(TrkId.onApplication(namespace, clusterId))) {
-//      return
-//    }
+    // if (!cachePool.isInTracking(TrkId.onApplication(namespace, clusterId)))
+    //  return
     // just tracking every flink-k8s-native event :)
     cachePool.k8sDeploymentEvents.put(
       K8sEventKey(namespace, clusterId), K8sDeploymentEventCV(action, event, System.currentTimeMillis()))
   }
+
+
 
 
 }
