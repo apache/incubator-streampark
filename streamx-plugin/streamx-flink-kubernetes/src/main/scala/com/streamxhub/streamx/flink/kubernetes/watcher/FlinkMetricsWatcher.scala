@@ -122,7 +122,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
       // write metrics to cache
       cachePool.flinkMetrics.set(accMetrics.get)
     }).failed.map(_ =>
-      logError(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
+      logInfo(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
         s" trackingIds=${trkIds.mkString(",")}"))
   }
