@@ -68,11 +68,11 @@
         v-if="data['state'] === 19"
         class="status-processing-initializing">SILENT</a-tag>
       <a-tag
-        color="#1890ff"
+        color="#8E50FF"
         v-if="data['state'] === 20">TERMINATED</a-tag>
       <a-tag
         color="#1890ff"
-        v-if="data['state'] === 21">POS_TERMINATED</a-tag>
+        v-if="data['state'] === 21">FINISHED</a-tag>
     </div>
     <div v-else class="app_state">
       <a-tag

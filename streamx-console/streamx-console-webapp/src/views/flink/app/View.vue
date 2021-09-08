@@ -1012,7 +1012,7 @@
           {text: 'LOST', value: 15},
           {text: 'SILENT', value: 19},
           {text: 'TERMINATED', value: 20},
-          {text: 'POS_TERMINATED', value: 21},
+          {text: 'FINISHED', value: 21},
         ]
       }, {
         title: 'Deploy Status',
