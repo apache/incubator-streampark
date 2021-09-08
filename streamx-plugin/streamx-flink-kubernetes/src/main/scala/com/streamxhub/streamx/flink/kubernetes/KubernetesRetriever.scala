@@ -20,6 +20,7 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 import io.fabric8.kubernetes.client.{DefaultKubernetesClient, KubernetesClient, KubernetesClientException}
 import org.apache.flink.client.cli.ClientOptions
@@ -31,6 +32,7 @@ import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 
 import java.time.Duration
 import javax.annotation.Nullable
+import scala.collection.JavaConverters._
 import scala.util.Try
 
 /**
@@ -93,6 +95,24 @@ object KubernetesRetriever {
     flinkClient
   }
 
+
+  /**
+   * check whether deployment exists on kubernetes cluster
+   *
+   * @param name      deployment name
+   * @param namespace deployment namespace
+   */
+  def isDeploymentExists(name: String, namespace: String): Boolean =
+    tryWithResourceException(Try(KubernetesRetriever.newK8sClient()).getOrElse(return false)) {
+      client =>
+        client.apps()
+          .deployments()
+          .inNamespace(namespace)
+          .withLabel("type", "flink-native-kubernetes")
+          .list()
+          .getItems.asScala
+          .exists(e => e.getMetadata.getName == name)
+    } { exception => false }
 
 
 }
