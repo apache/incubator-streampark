@@ -67,11 +67,10 @@ public class K8sFlinkChangeEventListener {
         query.eq("execution_mode", mode.getMode())
             .eq("cluster_id", trkId.clusterId())
             .eq("k8s_namespace", trkId.namespace());
-        if (StringUtils.isEmpty(jobStatus.jobId())) {
-            query.or(e -> e.eq("job_id", "").isNull("job_id"));
-        } else {
+        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
             query.eq("job_id", jobStatus.jobId());
         }
+        query.orderByDesc("create_time");
         Application app = applicationService.getOne(query);
         if (app == null) {
             return;
@@ -85,6 +84,7 @@ public class K8sFlinkChangeEventListener {
         if (FlinkJobState.isEndState(state)) {
             app.setOptionState(OptionState.NONE.getValue());
         }
+        app.setJobId(event.jobStatus().jobId());
 
         // update application record
         applicationService.saveOrUpdate(app);
