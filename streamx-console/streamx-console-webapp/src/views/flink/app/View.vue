@@ -842,22 +842,22 @@
   </div>
 </template>
 <script>
-import Ellipsis from '@/components/Ellipsis'
-import State from './State'
-import {mapActions} from 'vuex'
-import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
-import {history, latest} from '@api/savepoint'
-import {flamegraph} from '@api/metrics'
-import {weburl} from '@api/setting'
-import {Terminal} from 'xterm'
-import 'xterm/css/xterm.css'
-import SockJS from 'sockjs-client'
-import {baseUrl} from '@/api/baseUrl'
-import Stomp from 'webstomp-client'
-import SvgIcon from '@/components/SvgIcon'
-import {check} from '@/api/setting'
+  import Ellipsis from '@/components/Ellipsis'
+  import State from './State'
+  import {mapActions} from 'vuex'
+  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+  import {history, latest} from '@api/savepoint'
+  import {flamegraph} from '@api/metrics'
+  import {weburl} from '@api/setting'
+  import {Terminal} from 'xterm'
+  import 'xterm/css/xterm.css'
+  import SockJS from 'sockjs-client'
+  import {baseUrl} from '@/api/baseUrl'
+  import Stomp from 'webstomp-client'
+  import SvgIcon from '@/components/SvgIcon'
+  import {check} from '@/api/setting'
 
-export default {
+  export default {
   components: {Ellipsis, State, SvgIcon},
   data() {
     return {
@@ -1010,7 +1010,9 @@ export default {
           {text: 'FINISHED', value: 12},
           {text: 'SUSPENDED', value: 13},
           {text: 'LOST', value: 15},
-          {text: 'SILENT', value: 19}
+          {text: 'SILENT', value: 19},
+          {text: 'TERMINATED', value: 20},
+          {text: 'POS_TERMINATED', value: 21},
         ]
       }, {
         title: 'Deploy Status',
@@ -1177,7 +1179,9 @@ export default {
           app.state === 11 ||
           app.state === 12 ||
           app.state === 13 ||
-          app.state === 15 || false
+          app.state === 15 ||
+          app.state === 20 ||
+          app.state === 21 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1355,7 +1359,8 @@ export default {
           app.state === 11 ||
           app.state === 12 ||
           app.state === 15 ||
-          app.state === 19 || false
+          app.state === 20 ||
+          app.state === 21 || false
     },
 
     handleDelete(app) {
