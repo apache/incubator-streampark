@@ -64,7 +64,7 @@
         v-if="data['state'] === 16"
         class="status-processing-restarting">MAPPING</a-tag>
       <a-tag
-        color="#65fcdb"
+        color="#738df8"
         v-if="data['state'] === 19"
         class="status-processing-initializing">SILENT</a-tag>
       <a-tag
