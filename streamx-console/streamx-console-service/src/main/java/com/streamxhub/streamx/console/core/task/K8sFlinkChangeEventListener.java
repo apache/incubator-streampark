@@ -37,11 +37,12 @@ import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
-import org.apache.commons.lang3.StringUtils;
+import java.util.Date;
 import scala.Enumeration;
 
 /**
  * Listener for K8sFlinkTrkMonitor
+ * author: Al-assad
  */
 public class K8sFlinkChangeEventListener {
 
@@ -59,7 +60,6 @@ public class K8sFlinkChangeEventListener {
     public void persistentK8sFlinkJobStatusChangeEvent(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
         TrkId trkId = event.trkId();
-        Enumeration.Value state = jobStatus.jobState();
         ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trkId.executeMode());
 
         // get pre application record
@@ -76,18 +76,48 @@ public class K8sFlinkChangeEventListener {
             return;
         }
 
+        // update application record
+        app = updateApplicationWithJobStatusCV(app, jobStatus);
+        applicationService.saveOrUpdate(app);
+    }
+
+
+    private Application updateApplicationWithJobStatusCV(Application app, JobStatusCV jobStatus) {
         // infer the final flink job state
+        Enumeration.Value state = jobStatus.jobState();
         Enumeration.Value preState = toK8sFlinkJobState(FlinkAppState.of(app.getState()));
         state = FlinkJobStatusWatcher.inferFlinkJobStateFromPersist(state, preState);
         app.setState(fromK8sFlinkJobState(state).getValue());
-        // update option State
+
+        // update relevant fields of Application from JobStatusCV
+        app.setJobId(jobStatus.jobId());
+        app.setTotalTask(jobStatus.taskTotal());
         if (FlinkJobState.isEndState(state)) {
             app.setOptionState(OptionState.NONE.getValue());
         }
-        app.setJobId(event.jobStatus().jobId());
 
-        // update application record
-        applicationService.saveOrUpdate(app);
+        // corrective start-time / end-time / duration
+        long preStartTime = app.getStartTime() != null ? app.getStartTime().getTime() : 0;
+        long startTime = Math.max(jobStatus.jobStartTime(), preStartTime);
+
+        long preEndTime = app.getEndTime() != null ? app.getEndTime().getTime() : 0;
+        long endTime = Math.max(jobStatus.jobEndTime(), preEndTime);
+
+        long duration = jobStatus.duration();
+
+        if (FlinkJobState.isEndState(state)) {
+            if (endTime < startTime) {
+                endTime = System.currentTimeMillis();
+            }
+            if (duration <= 0) {
+                duration = endTime - startTime;
+            }
+        }
+        app.setStartTime(new Date(startTime > 0 ? startTime : null));
+        app.setEndTime(new Date(endTime > 0 && endTime >= startTime ? endTime : null));
+        app.setDuration(duration > 0 ? duration : null);
+
+        return app;
     }
 
 }
