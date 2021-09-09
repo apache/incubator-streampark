@@ -104,12 +104,14 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
 
   override def getAllJobStatus: Map[TrkId, JobStatusCV] = Map(trkCache.jobStatuses.asMap().asScala.toSeq: _*)
 
-  override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetricsAgg.get)
+  override def getAggClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetricsAgg.get)
+
+  override def getClutserMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.getIfPresent(clusterKey))
 
   override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
 
   override def checkIsInRemoteCluster(trkId: TrkId): Boolean = {
-    if (Try(trkId.nonLegal).getOrElse(true)){
+    if (Try(trkId.nonLegal).getOrElse(true)) {
       return false
     }
     trkId.executeMode match {
@@ -161,7 +163,11 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
         if (preCache != null) {
           preCache.copy(jobState = event.expectJobState.expect)
         } else {
-          JobStatusCV(event.expectJobState.expect, event.trkId.jobId, "", 0, event.expectJobState.pollTime, System.currentTimeMillis)
+          JobStatusCV(
+            jobState = event.expectJobState.expect,
+            jobId = event.trkId.jobId,
+            pollEmitTime = event.expectJobState.pollTime,
+            pollAckTime = System.currentTimeMillis)
         }
       }
       trkCache.jobStatuses.put(event.trkId, newCache)

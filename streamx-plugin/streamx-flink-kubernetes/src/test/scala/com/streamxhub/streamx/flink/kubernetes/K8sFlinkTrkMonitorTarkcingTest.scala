@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchJobStatusCache, watchJobStatusCacheSize, watchMetricsCache, watchTrkIdsCache}
+import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchJobStatusCache, watchJobStatusCacheSize, watchAggClusterMetricsCache, watchTrkIdsCache}
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -55,7 +55,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
 
   @Test def testMonitor(): Unit = {
     watchJobStatusCache
-    watchMetricsCache
+    watchAggClusterMetricsCache
     watchTrkIdsCache
     trkMonitor.start()
     trkMonitor.trackingJob(trkIds.toSet)
@@ -64,7 +64,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
 
   // test start, stop, close action
   @Test def testMonitorStartStop(): Unit = {
-    watchMetricsCache
+    watchAggClusterMetricsCache
     watchJobStatusCacheSize
 
     trkMonitor.start()
@@ -81,7 +81,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
   // test tracking, untracking action
   @Test def testTrackinAndUnTracking(): Unit = {
     watchJobStatusCacheSize
-    watchMetricsCache
+    watchAggClusterMetricsCache
     watchTrkIdsCache
 
     val trkId = TrkId.onApplication("default", "flink-app3")

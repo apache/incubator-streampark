@@ -41,16 +41,17 @@ object TrkMonitorDebugHelper {
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][status-size]-${System.currentTimeMillis} => " +
       s"${trkMonitor.getAllJobStatus.size}"), 0, 1500)
 
-  // print job metrics cache detail
-  def watchMetricsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
-    new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
-      s"${trkMonitor.getClusterMetrics.map(_.toString).getOrElse("empty")}"), 0, 1500)
+  // print agg flink cluster metrics cache detail
+  def watchAggClusterMetricsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
+    new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
+      s"${trkMonitor.getAggClusterMetrics.map(_.toString).getOrElse("empty")}"), 0, 1500)
 
   // print job metrics cache detail
   def watchJobStatusCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][status]-${System.currentTimeMillis} =>" +
       s"count=${trkMonitor.getAllJobStatus.size} | " +
       s" ${trkMonitor.getAllJobStatus.mkString(", ")}"), 0, 1500)
+
 
   // print trkId cache detail
   def watchTrkIdsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit = {
