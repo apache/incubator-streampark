@@ -25,6 +25,7 @@ import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.fro
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK8sFlinkJobState;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.eventbus.Subscribe;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
@@ -33,7 +34,10 @@ import com.streamxhub.streamx.console.core.enums.OptionState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import com.streamxhub.streamx.flink.kubernetes.event.FlinkClusterMetricChangeEvent;
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent;
+import com.streamxhub.streamx.flink.kubernetes.model.ClusterKey;
+import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
 import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
@@ -41,7 +45,7 @@ import java.util.Date;
 import scala.Enumeration;
 
 /**
- * Listener for K8sFlinkTrkMonitor
+ * Event Listener for K8sFlinkTrkMonitor
  * author: Al-assad
  */
 public class K8sFlinkChangeEventListener {
@@ -53,11 +57,12 @@ public class K8sFlinkChangeEventListener {
     }
 
     /**
-     * catch FlinkJobStatusChangeEvent then storage it persistently to db.
+     * Catch FlinkJobStatusChangeEvent then storage it persistently to db.
+     * Actually update com.streamxhub.streamx.console.core.entity.Application records.
      */
     @SuppressWarnings("UnstableApiUsage")
     @Subscribe
-    public void persistentK8sFlinkJobStatusChangeEvent(FlinkJobStatusChangeEvent event) {
+    public void persistentK8sFlinkJobStatusChange(FlinkJobStatusChangeEvent event) {
         JobStatusCV jobStatus = event.jobStatus();
         TrkId trkId = event.trkId();
         ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(trkId.executeMode());
@@ -119,5 +124,35 @@ public class K8sFlinkChangeEventListener {
 
         return app;
     }
+
+
+    /**
+     * Catch FlinkClusterMetricChangeEvent then storage it persistently to db.
+     * Actually update com.streamxhub.streamx.console.core.entity.Application records.
+     */
+    @Subscribe
+    public void persistentK8sFlinkMetricsChange(FlinkClusterMetricChangeEvent event) {
+        FlinkMetricCV metrics = event.metrics();
+        ClusterKey clusterKey = event.clusterKey();
+        ExecutionMode mode = FlinkK8sExecuteMode.toExecutionMode(clusterKey.executeMode());
+        // discard session mode change
+        if (ExecutionMode.KUBERNETES_NATIVE_SESSION.equals(mode)) {
+            return;
+        }
+
+        UpdateWrapper<Application> update = new UpdateWrapper<>();
+        update.set("jm_memory", metrics.totalJmMemory())
+            .set("tm_memory", metrics.totalTmMemory())
+            .set("total_tm", metrics.totalTm())
+            .set("total_slot", metrics.totalSlot())
+            .set("available_slot", metrics.totalSlot());
+        update.eq("execution_mode", mode.getMode())
+            .eq("cluster_id", clusterKey.clusterId())
+            .eq("k8s_namespace", clusterKey.namespace())
+            .eq("tracking", 1);
+
+        applicationService.update(update);
+    }
+
 
 }

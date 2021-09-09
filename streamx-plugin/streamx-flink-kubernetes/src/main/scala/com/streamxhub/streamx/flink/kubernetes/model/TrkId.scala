@@ -55,6 +55,11 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
    */
   def nonLegal:Boolean = !isLegal
 
+  /**
+   * covert to ClusterKey
+   */
+  def toClusterKey: ClusterKey = ClusterKey(executeMode, namespace, clusterId)
+
 }
 
 object TrkId {

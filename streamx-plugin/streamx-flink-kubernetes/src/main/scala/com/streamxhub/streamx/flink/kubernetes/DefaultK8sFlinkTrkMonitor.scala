@@ -104,7 +104,7 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
 
   override def getAllJobStatus: Map[TrkId, JobStatusCV] = Map(trkCache.jobStatuses.asMap().asScala.toSeq: _*)
 
-  override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.get)
+  override def getClusterMetrics: Option[FlinkMetricCV] = Option(trkCache.flinkMetricsAgg.get)
 
   override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
 

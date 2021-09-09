@@ -22,7 +22,6 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.streamxhub.streamx.common.util.Logger
-import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode.SESSION
 import com.streamxhub.streamx.flink.kubernetes.model._
 
 import java.util.concurrent.atomic.AtomicReference
@@ -46,8 +45,11 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   // cache for tracking kubernetes events with Deployment kind
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
-  // cache for last flink cluster metrics
-  val flinkMetrics: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
+  // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
+  val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build();
+
+  // cache for last aggregate flink cluster metrics
+  val flinkMetricsAgg: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   override def close(): Unit = {
     jobStatuses.cleanUp()
@@ -72,14 +74,10 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   }
 
   /**
-   * collect all legal tracking ids, and remove jobId info of session mode trkId
+   * collect all legal tracking ids, and covert to ClusterKey
    */
-  private[kubernetes] def collectDistinctTrackIds(): Set[TrkId] = collectAllTrackIds()
-    .filter(_.isLegal)
-    .map {
-      case id if id.executeMode == SESSION => TrkId(id.executeMode, id.namespace, id.clusterId, "")
-      case id => id
-    }
+  private[kubernetes] def collectTrkClusterKeys(): Set[ClusterKey] = collectAllTrackIds().filter(_.isLegal).map(_.toClusterKey)
+
 }
 
 /**

@@ -109,15 +109,15 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
    */
   private def trackingTask(): Unit = {
     // get all legal tracking ids
-    val trackIds: Set[TrkId] = Try(cachePool.collectDistinctTrackIds()).filter(_.nonEmpty).getOrElse(return)
+    val trkClusterKeys: Set[ClusterKey] = Try(cachePool.collectTrkClusterKeys()).filter(_.nonEmpty).getOrElse(return)
 
     // retrieve flink job status in thread pool
     val tracksFuture: Set[Future[Array[(TrkId, JobStatusCV)]]] =
-      trackIds.map(trkId => {
+      trkClusterKeys.map(clusterKey => {
         val future = Future {
-          trkId.executeMode match {
-            case SESSION => touchSessionJob(trkId.clusterId, trkId.namespace)
-            case APPLICATION => touchApplicationJob(trkId.clusterId, trkId.namespace).toArray
+          clusterKey.executeMode match {
+            case SESSION => touchSessionJob(clusterKey.clusterId, clusterKey.namespace)
+            case APPLICATION => touchApplicationJob(clusterKey.clusterId, clusterKey.namespace).toArray
           }
         }
         future foreach {
@@ -149,7 +149,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     ).failed.map(_ =>
       logError(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
-        s" trackingIds=${trackIds.mkString(",")}"))
+        s" trakcingClusterKeys=${trkClusterKeys.mkString(",")}"))
   }
 
   /**
