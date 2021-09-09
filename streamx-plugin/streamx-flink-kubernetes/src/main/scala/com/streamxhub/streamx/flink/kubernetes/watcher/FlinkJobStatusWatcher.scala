@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.flink.kubernetes.watcher
 
+import com.fasterxml.jackson.annotation.JsonProperty
+import com.streamxhub.streamx.common.util.JsonUtils.Unmarshal
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.common.util.Utils.tryWithResourceException
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
@@ -28,10 +30,10 @@ import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.{ChangeEventBus, FlinkTrkCachePool, JobStatusWatcherConf, KubernetesRetriever}
 import io.fabric8.kubernetes.client.Watcher.Action
-import org.apache.commons.collections.CollectionUtils
-import org.apache.flink.runtime.client.JobStatusMessage
+import org.apache.hc.client5.http.fluent.Request
+import org.apache.hc.core5.util.Timeout
 
-import java.util
+import java.nio.charset.StandardCharsets
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
 import javax.annotation.Nonnull
 import javax.annotation.concurrent.ThreadSafe
@@ -164,22 +166,13 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     tryWithResourceException(
       Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, SESSION)).getOrElse(return defaultResult)) {
       flinkClient =>
-        val jobDetailsFuture = flinkClient.listJobs()
-        val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
+        val jobDetails = listJobs(flinkClient.getWebInterfaceURL).getOrElse(return defaultResult).jobs
         val pollAckTime = System.currentTimeMillis
-        if (CollectionUtils.isEmpty(jobDetails)) {
+        if (jobDetails.isEmpty) {
           defaultResult
         } else {
-          jobDetails.asScala.map(e => (
-            TrkId.onSession(namespace, clusterId, e.getJobId.toHexString),
-            JobStatusCV(
-              jobState = FlinkJobState.of(e.getJobState),
-              jobId = e.getJobId.toHexString,
-              jobName = e.getJobName,
-              jobStartTime = e.getStartTime,
-              pollEmitTime = pollEmitTime,
-              pollAckTime = pollAckTime))
-          ).toArray
+          jobDetails.map(jobDetail =>
+            TrkId.onSession(namespace, clusterId, jobDetail.jid) -> jobDetail.toJobStatusCV(pollEmitTime, pollAckTime))
         }
     } {
       exception =>
@@ -202,24 +195,29 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     tryWithResourceException(
       Try(KubernetesRetriever.newFinkClusterClient(clusterId, namespace, APPLICATION)).getOrElse(return k8sInferResult)) {
       flinkClient =>
-        val jobDetailsFuture = flinkClient.listJobs()
-        val jobDetails: util.Collection[JobStatusMessage] = jobDetailsFuture.get()
-        if (CollectionUtils.isEmpty(jobDetails)) {
+        val jobDetails = listJobs(flinkClient.getWebInterfaceURL).getOrElse(return k8sInferResult).jobs
+        if (jobDetails.isEmpty) {
           k8sInferResult
         } else {
           // just receive the first result
-          val jobStatusMsg = jobDetails.iterator().next()
+          val jobDetail = jobDetails.iterator.next
           // noinspection DuplicatedCode
-          Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
-            jobState = FlinkJobState.of(jobStatusMsg.getJobState),
-            jobId = jobStatusMsg.getJobId.toHexString,
-            jobName = jobStatusMsg.getJobName,
-            jobStartTime = jobStatusMsg.getStartTime,
-            pollEmitTime = pollEmitTime,
-            pollAckTime = System.currentTimeMillis))
+          Some(TrkId.onApplication(namespace, clusterId) -> jobDetail.toJobStatusCV(pollEmitTime, System.currentTimeMillis))
         }
     }(exception => k8sInferResult)
   }
+
+  /**
+   * list flink jobs from rest api
+   */
+  // noinspection DuplicatedCode
+  private def listJobs(restUrl: String): Option[JobDetails] = Try(
+    Some(Request.get(s"$restUrl/jobmanager/config")
+      .connectTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_REST_AWAIT_TIMEOUT_SEC))
+      .responseTimeout(Timeout.ofSeconds(KubernetesRetriever.FLINK_CLIENT_TIMEOUT_SEC))
+      .execute.returnContent().asString(StandardCharsets.UTF_8)
+      .fromJson[JobDetails])
+  ).getOrElse(None)
 
   /**
    * Infer the current flink state from the last relevant k8s events.
@@ -259,9 +257,17 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
       }
     }
     if (jobState == FlinkJobState.SILENT && preCache != null && preCache.jobState == FlinkJobState.SILENT) {
-      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, preCache.pollEmitTime, preCache.pollAckTime))
+      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
+        jobState = jobState,
+        jobId = "",
+        pollEmitTime = preCache.pollEmitTime,
+        pollAckTime = preCache.pollAckTime))
     } else {
-      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(jobState, "", "", 0, pollEmitTime, System.currentTimeMillis))
+      Some(TrkId.onApplication(namespace, clusterId) -> JobStatusCV(
+        jobState = jobState,
+        jobId = "",
+        pollEmitTime = pollEmitTime,
+        pollAckTime = System.currentTimeMillis))
     }
   }
 
@@ -290,3 +296,41 @@ object FlinkJobStatusWatcher {
   }
 
 }
+
+
+private[kubernetes] case class JobDetails(@JsonProperty("jobs") jobs: Array[JobDetail] = Array())
+
+private[kubernetes] case class JobDetail(@JsonProperty("jid") jid: String,
+                                         @JsonProperty("name") name: String,
+                                         @JsonProperty("state") state: String,
+                                         @JsonProperty("start-time") startTime: Long,
+                                         @JsonProperty("end-time") endTime: Long,
+                                         @JsonProperty("duration") duration: Long,
+                                         @JsonProperty("last-modification") lastModification: Long,
+                                         @JsonProperty("tasks") tasks: JobTask) {
+  def toJobStatusCV(pollEmitTime: Long, pollAckTime: Long): JobStatusCV = {
+    JobStatusCV(
+      jobState = FlinkJobState.of(state),
+      jobId = jid,
+      jobName = name,
+      jobStartTime = startTime,
+      jobEndTime = endTime,
+      duration = duration,
+      taskTotal = tasks.total,
+      pollEmitTime = pollEmitTime,
+      pollAckTime = pollAckTime)
+  }
+}
+
+private[kubernetes] case class JobTask(total: Int,
+                                       created: Int,
+                                       scheduled: Int,
+                                       deploying: Int,
+                                       running: Int,
+                                       finished: Int,
+                                       canceling: Int,
+                                       canceled: Int,
+                                       failed: Int,
+                                       reconciling: Int,
+                                       initializing: Int)
+

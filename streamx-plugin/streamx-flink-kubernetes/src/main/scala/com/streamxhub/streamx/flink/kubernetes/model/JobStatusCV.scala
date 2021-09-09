@@ -34,7 +34,10 @@ import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState
  */
 case class JobStatusCV(jobState: FlinkJobState.Value,
                        jobId: String,
-                       jobName: String,
-                       jobStartTime: Long,
+                       jobName: String = "",
+                       jobStartTime: Long = -1,
+                       jobEndTime: Long = -1,
+                       duration: Long = 0,
+                       taskTotal: Int = 0,
                        pollEmitTime: Long,
                        pollAckTime: Long)

@@ -44,6 +44,7 @@ import scala.util.Try
 /**
  * auther:Al-assad
  */
+//noinspection DuplicatedCode
 @ThreadSafe
 class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf)
                         (implicit val cachePool: FlinkTrkCachePool) extends Logger with FlinkWatcher {
@@ -99,7 +100,10 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
    */
   private def trackingTask(): Unit = {
     // get all legal tracking ids
-    val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrackIds()).filter(_.nonEmpty).getOrElse(return)
+    val trkIds: Set[TrkId] = Try(cachePool.collectDistinctTrackIds()).filter(_.nonEmpty).getOrElse({
+      cachePool.flinkMetrics.set(FlinkMetricCV.empty)
+      return
+    })
     val accMetrics = new AtomicReference[FlinkMetricCV](FlinkMetricCV.empty)
 
     // retrieve flink metrics in thread pool
