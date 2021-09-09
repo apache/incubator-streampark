@@ -46,7 +46,13 @@ object TrkMonitorDebugHelper {
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
       s"${trkMonitor.getAggClusterMetrics.map(_.toString).getOrElse("empty")}"), 0, 1500)
 
-  // print job metrics cache detail
+  // print all cluster metrics for each flink cluster
+  def watchClusterMetricsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
+    new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][metric]-${System.currentTimeMillis} => " +
+      s"count=${trkMonitor.asInstanceOf[DefaultK8sFlinkTrkMonitor].trkCache.flinkMetrics.asMap().size} | " +
+      s"${trkMonitor.asInstanceOf[DefaultK8sFlinkTrkMonitor].trkCache.flinkMetrics.asMap().asScala.mkString(",")}"), 0, 1500)
+
+  // print job cache detail
   def watchJobStatusCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][status]-${System.currentTimeMillis} =>" +
       s"count=${trkMonitor.getAllJobStatus.size} | " +
