@@ -49,7 +49,22 @@ case class FlinkMetricCV(totalJmMemory: Integer,
       math.max(pollAckTime, another.pollAckTime)
     )
   }
+
   def totalJob(): Integer = runningJob + finishedJob + cancelledJob + failedJob
+
+  def equalsPayload(another: FlinkMetricCV): Boolean = {
+    totalJmMemory == another.totalTmMemory &&
+      totalTmMemory == another.totalTmMemory &&
+      totalTm == another.totalTm &&
+      totalSlot == another.totalSlot &&
+      availableSlot == another.availableSlot &&
+      runningJob == another.runningJob &&
+      finishedJob == another.finishedJob &&
+      cancelledJob == another.cancelledJob &&
+      failedJob == another.failedJob
+  }
+
+  def nonEqualsPayload(another: FlinkMetricCV): Boolean = !equalsPayload(another)
 
 }
 

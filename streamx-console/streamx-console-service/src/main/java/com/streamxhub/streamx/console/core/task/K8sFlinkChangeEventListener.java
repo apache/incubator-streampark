@@ -146,7 +146,7 @@ public class K8sFlinkChangeEventListener {
             .set("tm_memory", metrics.totalTmMemory())
             .set("total_tm", metrics.totalTm())
             .set("total_slot", metrics.totalSlot())
-            .set("available_slot", metrics.totalSlot());
+            .set("available_slot", metrics.availableSlot());
         update.eq("execution_mode", mode.getMode())
             .eq("cluster_id", clusterKey.clusterId())
             .eq("k8s_namespace", clusterKey.namespace())

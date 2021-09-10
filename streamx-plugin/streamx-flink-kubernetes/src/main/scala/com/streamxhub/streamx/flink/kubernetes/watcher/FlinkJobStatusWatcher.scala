@@ -149,7 +149,7 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
     Try(
       Await.ready(allFutureHold, conf.sglTrkTaskIntervalSec seconds)
     ).failed.map(_ =>
-      logError(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
+      logInfo(s"[FlinkJobStatusWatcher] tracking flink job status on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +
         s" trakcingClusterKeys=${trkClusterKeys.mkString(",")}"))
   }
