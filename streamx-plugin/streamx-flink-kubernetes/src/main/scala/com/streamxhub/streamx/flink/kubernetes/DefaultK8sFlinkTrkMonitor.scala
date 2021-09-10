@@ -114,9 +114,12 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     if (Try(trkId.nonLegal).getOrElse(true)) {
       return false
     }
+    val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
     trkId.executeMode match {
-      case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace).exists(trkId.jobId == _._2.jobId)
-      case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace).exists(_._2.jobState != FlinkJobState.LOST)
+      case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace, Set(trkId.jobId))
+        .exists(e => nonLost(e._2.jobState))
+      case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace)
+        .exists(e => nonLost(e._2.jobState))
       case _ => false
     }
   }

@@ -118,9 +118,9 @@ public class K8sFlinkChangeEventListener {
                 duration = endTime - startTime;
             }
         }
-        app.setStartTime(new Date(startTime > 0 ? startTime : null));
-        app.setEndTime(new Date(endTime > 0 && endTime >= startTime ? endTime : null));
-        app.setDuration(duration > 0 ? duration : null);
+        app.setStartTime(new Date(startTime > 0 ? startTime : 0));
+        app.setEndTime(new Date(endTime > 0 && endTime >= startTime ? endTime : 0));
+        app.setDuration(duration > 0 ? duration : 0);
 
         return app;
     }
@@ -130,6 +130,7 @@ public class K8sFlinkChangeEventListener {
      * Catch FlinkClusterMetricChangeEvent then storage it persistently to db.
      * Actually update com.streamxhub.streamx.console.core.entity.Application records.
      */
+    @SuppressWarnings("UnstableApiUsage")
     @Subscribe
     public void persistentK8sFlinkMetricsChange(FlinkClusterMetricChangeEvent event) {
         FlinkMetricCV metrics = event.metrics();

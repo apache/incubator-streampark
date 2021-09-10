@@ -34,7 +34,7 @@ class SingleTrackingTaskTest {
   // retrieve flink job status  info
   @Test def testSignleTrackingFlinkJobStatus(): Unit = {
     // test session job
-    val jobStatus1 = trkMonitor.jobStatusWatcher.touchSessionJob("flink-session", "default")
+    val jobStatus1 = trkMonitor.jobStatusWatcher.touchSessionAllJob("flink-session", "default")
     println("result1 = ")
     jobStatus1.foreach(println)
 

@@ -53,12 +53,18 @@ case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
   /**
    * check whether fields of trackId are no legal
    */
-  def nonLegal:Boolean = !isLegal
+  def nonLegal: Boolean = !isLegal
 
   /**
    * covert to ClusterKey
    */
   def toClusterKey: ClusterKey = ClusterKey(executeMode, namespace, clusterId)
+
+  /**
+   * belong to clutser
+   */
+  def belongTo(clusterKey: ClusterKey): Boolean =
+    executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
 
 }
 

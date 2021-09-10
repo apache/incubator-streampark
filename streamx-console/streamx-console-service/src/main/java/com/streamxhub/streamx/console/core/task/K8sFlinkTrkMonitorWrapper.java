@@ -33,6 +33,7 @@ import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
+import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -67,15 +68,19 @@ public class K8sFlinkTrkMonitorWrapper {
      */
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
-        // lazy start monitor
-        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.defaultConf(), true);
+        // lazy start monitor, you can use FlinkTrkConf.debugConf() to get a faster monitoring frequency when in develop mode
+        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf(), true);
+        // todo
+        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
+        TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
+        TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
         initK8sFlinkTrkMonitor(trkMonitor);
         return trkMonitor;
     }
 
     private void initK8sFlinkTrkMonitor(@Nonnull K8sFlinkTrkMonitor trkMonitor) {
         // register change event listener
-        trkMonitor.registerListener(new K8sFlinkChangeEventListener());
+        trkMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService));
         // recovery tracking list
         List<TrkId> k8sApp = getK8sTrackingApplicationFromDB();
         k8sApp.forEach(trkMonitor::trackingJob);
@@ -127,7 +132,7 @@ public class K8sFlinkTrkMonitorWrapper {
         if (application == null) {
             return false;
         }
-        return ExecutionMode.isKubernetesMode(application.getState());
+        return ExecutionMode.isKubernetesMode(application.getExecutionMode());
     }
 
 }
