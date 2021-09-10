@@ -31,9 +31,7 @@ import org.apache.hc.client5.http.fluent.Request
 import org.apache.hc.core5.util.Timeout
 
 import java.nio.charset.StandardCharsets
-import java.util.concurrent.atomic.AtomicReference
 import java.util.concurrent.{Executors, ScheduledFuture, TimeUnit}
-import java.util.function.UnaryOperator
 import javax.annotation.concurrent.ThreadSafe
 import scala.concurrent.duration.DurationLong
 import scala.concurrent.{Await, ExecutionContext, ExecutionContextExecutorService, Future}
@@ -100,11 +98,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
    */
   private def trackingTask(): Unit = {
     // get all legal tracking cluster key
-    val trkClusterKeys: Set[ClusterKey] = Try(cachePool.collectTrkClusterKeys()).filter(_.nonEmpty).getOrElse({
-      cachePool.flinkMetricsAgg.set(FlinkMetricCV.empty)
-      return
-    })
-    val accMetrics = new AtomicReference[FlinkMetricCV](FlinkMetricCV.empty)
+    val trkClusterKeys: Set[ClusterKey] = Try(cachePool.collectTrkClusterKeys()).filter(_.nonEmpty).getOrElse(return)
 
     // retrieve flink metrics in thread pool
     val trkFutures: Set[Future[Option[(ClusterKey, FlinkMetricCV)]]] =
@@ -120,11 +114,6 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
             }
             cachePool.flinkMetrics.put(clusterKey, metric)
             if (isMetricChanged) eventBus.postAsync(FlinkClusterMetricChangeEvent(clusterKey, metric))
-
-            // aggregate metrics
-            accMetrics.updateAndGet(new UnaryOperator[FlinkMetricCV] {
-              override def apply(t: FlinkMetricCV): FlinkMetricCV = t + metric
-            })
         }
         future
       })
@@ -132,8 +121,6 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
     val futureHold = Future.sequence(trkFutures)
     Try({
       Await.ready(futureHold, conf.sglTrkTaskIntervalSec seconds)
-      // write metrics to cache
-      cachePool.flinkMetricsAgg.set(accMetrics.get)
     }).failed.map(_ =>
       logInfo(s"[FlinkMetricWatcher] tracking flink metrics on kubernetes mode timeout," +
         s" limitSeconds=${conf.sglTrkTaskIntervalSec}," +

@@ -49,7 +49,7 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build();
 
   // cache for last aggregate flink cluster metrics
-  val flinkMetricsAgg: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
+  // val flinkMetricsAgg: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
 
   override def close(): Unit = {
     jobStatuses.cleanUp()
@@ -77,6 +77,24 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
    * collect all legal tracking ids, and covert to ClusterKey
    */
   private[kubernetes] def collectTrkClusterKeys(): Set[ClusterKey] = collectAllTrackIds().filter(_.isLegal).map(_.toClusterKey)
+
+  /**
+   * collect the aggregation of flink metrics that in tracking
+   */
+  def collectAccMetric(): FlinkMetricCV = {
+    // get cluster metrics that in tracking
+    val clusterKeys = collectTrkClusterKeys()
+    if (clusterKeys.isEmpty) {
+      return FlinkMetricCV.empty
+    }
+    val metrics = flinkMetrics.getAllPresent(clusterKeys.asJava).asScala
+    if (metrics.isEmpty) {
+      return FlinkMetricCV.empty
+    }
+    // aggregate metrics
+    metrics.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
+  }
+
 
 }
 

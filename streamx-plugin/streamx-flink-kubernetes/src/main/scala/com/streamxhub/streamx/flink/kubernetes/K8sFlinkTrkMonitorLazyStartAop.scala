@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.kubernetes
 
 import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
-import com.streamxhub.streamx.flink.kubernetes.model.{FlinkMetricCV, JobStatusCV, TrkId}
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrkId}
 
 /**
  * AOP for FlinkTrkMonitor used to trigger the run behavior.
@@ -77,9 +77,14 @@ trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
     super.getAllJobStatus
   }
 
-  abstract override def getAggClusterMetrics: Option[FlinkMetricCV] = {
+  abstract override def getAccClusterMetrics: FlinkMetricCV = {
     // hehavior of getting cluster metrics will not trgger a delayed start
-    super.getAggClusterMetrics
+    super.getAccClusterMetrics
+  }
+
+  abstract override def getClutserMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = {
+    // hehavior of getting cluster metrics will not trgger a delayed start
+    super.getClutserMetrics(clusterKey)
   }
 
   abstract override def checkIsInRemoteCluster(trkId: TrkId): Boolean = {
@@ -91,6 +96,7 @@ trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
     start()
     super.postEvent(event, sync)
   }
+
 }
 
 

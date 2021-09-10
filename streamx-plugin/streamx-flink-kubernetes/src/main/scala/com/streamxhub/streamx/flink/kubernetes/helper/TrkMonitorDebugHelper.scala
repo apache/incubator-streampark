@@ -44,7 +44,7 @@ object TrkMonitorDebugHelper {
   // print agg flink cluster metrics cache detail
   def watchAggClusterMetricsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
     new Timer().scheduleAtFixedRate(() => println(s"[flink-k8s][agg-metric]-${System.currentTimeMillis} => " +
-      s"${trkMonitor.getAggClusterMetrics.map(_.toString).getOrElse("empty")}"), 0, 1500)
+      s"${trkMonitor.getAccClusterMetrics}"), 0, 1500)
 
   // print all cluster metrics for each flink cluster
   def watchClusterMetricsCache(implicit trkMonitor: K8sFlinkTrkMonitor): Unit =
