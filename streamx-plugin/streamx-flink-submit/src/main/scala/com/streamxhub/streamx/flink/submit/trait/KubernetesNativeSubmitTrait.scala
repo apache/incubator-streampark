@@ -31,7 +31,7 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, DeploymentOptions}
+import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, DeploymentOptions, PipelineOptions}
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
@@ -135,6 +135,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
+      .safeSet(PipelineOptions.NAME, submitRequest.appName)
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
