@@ -308,21 +308,28 @@ object FlinkJobStatusWatcher {
 
   /**
    * infer flink job state before persistence.
+   * so drama, so sad.
    *
    * @param curState current flink job state
    * @param preState previous flink job state from persistent storage
    */
-  def inferFlinkJobStateFromPersist(curState: FlinkJobState.Value, preState: FlinkJobState.Value): FlinkJobState.Value = {
-    if (curState == FlinkJobState.LOST) {
-      if (effectEndStates.contains(curState)) {
-        preState
-      } else {
-        FlinkJobState.TERMINATED
+  def inferFlinkJobStateFromPersist(curState: FlinkJobState.Value, preState: FlinkJobState.Value): FlinkJobState.Value =
+    curState match {
+      case FlinkJobState.LOST =>
+        if (effectEndStates.contains(curState)) preState
+        else FlinkJobState.TERMINATED
+      case FlinkJobState.POS_TERMINATED => preState match {
+        case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
+        case FlinkJobState.FAILING => FlinkJobState.FAILING
+        case _ => FlinkJobState.FINISHED
       }
-    } else {
-      curState
+      case FlinkJobState.TERMINATED => preState match {
+        case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
+        case FlinkJobState.FAILING => FlinkJobState.FAILING
+        case _ => FlinkJobState.TERMINATED
+      }
+      case _ => curState
     }
-  }
 
 }
 
