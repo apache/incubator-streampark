@@ -113,7 +113,7 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
               val preMetric = cachePool.flinkMetrics.getIfPresent(clusterKey)
               preMetric == null || preMetric.nonEqualsPayload(metric)
             }
-            if (isMetricChanged) eventBus.postSync(FlinkClusterMetricChangeEvent(clusterKey, metric))
+            if (isMetricChanged) eventBus.postAsync(FlinkClusterMetricChangeEvent(clusterKey, metric))
         }
         future
       })
@@ -136,9 +136,8 @@ class FlinkMetricWatcher(conf: MetricWatcherConf = MetricWatcherConf.defaultConf
    * current cachePool result.
    */
   def collectMetrics(clusterKey: ClusterKey): Option[(ClusterKey, FlinkMetricCV)] = {
-    // get flink web interface url
-    val flinkJmRestUrl = Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode)
-      .getWebInterfaceURL).filter(_.nonEmpty).getOrElse(return None)
+    // get flink rest api
+    val flinkJmRestUrl = cachePool.getClusterRestUrl(clusterKey).filter(_.nonEmpty).getOrElse(return None)
 
     // call flink rest overview api
     val flinkOverview: FlinkRestOverview = Try(

@@ -22,8 +22,10 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.github.benmanes.caffeine.cache.{Cache, Caffeine}
 import com.streamxhub.streamx.common.util.Logger
+import com.streamxhub.streamx.common.util.Utils.tryWithResource
 import com.streamxhub.streamx.flink.kubernetes.model._
 
+import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicReference
 import java.util.function.UnaryOperator
 import javax.annotation.concurrent.ThreadSafe
@@ -39,6 +41,9 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   // cache for tracking identifiers
   val trackIds: Cache[TrkId, TrkIdCV] = Caffeine.newBuilder.build()
 
+  // cache for flink Jobmanager rest url
+  val clusterRestUrls: Cache[ClusterKey, String] = Caffeine.newBuilder().expireAfterWrite(24, TimeUnit.HOURS).build()
+
   // cache for tracking flink job status
   val jobStatuses: Cache[TrkId, JobStatusCV] = Caffeine.newBuilder.build()
 
@@ -46,7 +51,7 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
   val k8sDeploymentEvents: Cache[K8sEventKey, K8sDeploymentEventCV] = Caffeine.newBuilder.build()
 
   // cache for last each flink cluster metrics (such as a session cluster or a application cluster)
-  val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build();
+  val flinkMetrics: Cache[ClusterKey, FlinkMetricCV] = Caffeine.newBuilder().build()
 
   // cache for last aggregate flink cluster metrics
   // val flinkMetricsAgg: SglValCache[FlinkMetricCV] = SglValCache[FlinkMetricCV](FlinkMetricCV.empty)
@@ -95,6 +100,23 @@ class FlinkTrkCachePool extends Logger with AutoCloseable {
     metrics.values.fold(FlinkMetricCV.empty)((x, y) => x + y)
   }
 
+  /**
+   * get flink jobmanager rest url from cache which will auto refresh when it it empty.
+   */
+  def getClusterRestUrl(clusterKey: ClusterKey): Option[String] =
+    Option(clusterRestUrls.getIfPresent(clusterKey)).filter(_.nonEmpty).orElse(refreshClusterRestUrl(clusterKey))
+
+  /**
+   * refresh flink jobmanager rest url from remote flink cluster, and cache it.
+   */
+  def refreshClusterRestUrl(clusterKey: ClusterKey): Option[String] = tryWithResource(
+    Try(KubernetesRetriever.newFinkClusterClient(clusterKey.clusterId, clusterKey.namespace, clusterKey.executeMode))
+      .getOrElse(return None)) {
+    client =>
+      val url = Try(client.getWebInterfaceURL).filter(_.nonEmpty).getOrElse(return None)
+      clusterRestUrls.put(clusterKey, url)
+      Some(url)
+  }
 
 }
 
