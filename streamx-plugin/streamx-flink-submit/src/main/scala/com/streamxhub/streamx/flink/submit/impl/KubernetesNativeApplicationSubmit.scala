@@ -50,11 +50,13 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     val buildWorkspace = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/"
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+
     // build fat-jar
     val fatJar = {
-      val fatJarPath = buildWorkspace + "flink-job.jar"
+      val fatJarOutputPath = buildWorkspace + "flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
-      MavenTool.buildFatJar(flinkLibs, fatJarPath)
+      val jarPackDeps =  submitRequest.k8sSubmitParam.jarPackDeps
+      MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
       // cache file MD5 is used to compare whether it is consistent when it is generated next time.
       //  If it is consistent, it is used directly and returned directly instead of being regenerated
       // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))

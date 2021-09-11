@@ -56,12 +56,13 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
     // build fat-jar
     val fatJar = {
+      val fatJarOutputPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/${jobID.toString}/flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
-      val fatJarPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/${jobID.toString}/flink-job.jar"
+      val jarPackDeps =  submitRequest.k8sSubmitParam.jarPackDeps
+      MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
       // cache file MD5 is used to compare whether it is consistent when it is generated next time.
       //  If it is consistent, it is used directly and returned directly instead of being regenerated
       // fatJarCached.getOrElseUpdate(flinkLibs._1, MavenTool.buildFatJar(flinkLibs._2, fatJarPath))
-      MavenTool.buildFatJar(flinkLibs, fatJarPath)
     }
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, jobId=${jobID.toString}, fatJarPath=${fatJar.getAbsolutePath}")

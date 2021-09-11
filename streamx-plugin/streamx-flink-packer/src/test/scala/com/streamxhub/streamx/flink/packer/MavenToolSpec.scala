@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.streamxhub.streamx.common.conf.ConfigConst.KEY_STREAMX_WORKSPACE
-import com.streamxhub.streamx.flink.packer.maven.{MavenArtifact, MavenTool}
+import com.streamxhub.streamx.flink.packer.maven.{JarPackDeps, MavenArtifact, MavenTool}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.matchers.must.Matchers
@@ -73,8 +73,10 @@ class MavenToolSpec extends AnyWordSpec with BeforeAndAfterAll with Matchers {
       "with jarlibs and maven artifacts" in {
         val fatJarPath = outputDir.concat("fat-3.jar")
         val fatJar = MavenTool.buildFatJar(
-          Set(path("jars/commons-dbutils-1.7.jar")),
-          Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
+          JarPackDeps(
+            Set(MavenArtifact.of("org.apache.flink:flink-connector-kafka_2.11:1.13.0")),
+            Set(path("jars/commons-dbutils-1.7.jar"))
+          ),
           fatJarPath)
         fatJar.exists() mustBe true
         assert(jarEquals(new JarFile(fatJarPath), new JarFile(path("jars/commons-dbutils-1.7.jar")), "org/apache/commons/dbutils/DbUtils.class"))

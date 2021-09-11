@@ -10,7 +10,7 @@ import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest
 
 import java.io.File
 import java.util
-import javax.annotation.{Nonnull, Nullable}
+import javax.annotation.Nonnull
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -24,7 +24,7 @@ object MavenTool extends Logger {
   private val isJarFile = (file: File) => file.isFile && Try(Utils.checkJarFile(file.toURL)).isSuccess
 
   /**
-   * Build fat-jar with custom jar libs
+   * Build a fat-jar with custom jar libraries.
    *
    * @param jarLibs       list of jar lib paths for building fat-jar
    * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
@@ -65,23 +65,19 @@ object MavenTool extends Logger {
   }
 
   /**
-   * Build fat-jar with custom jar libs and maven artifacts
+   * Build a fat-jar with custom jar librarties and maven artifacts.
    *
-   * @param jarLibs        list of jar lib paths
-   * @param mavenArtifacts collection of maven artifacts
-   * @param outFatJarPath  output paths of fat-jar
-   * @return File Object of output fat-jar
+   * @param jarPackDeps   maven artifacts and jar libraries for building a fat-jar
+   * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
-  @Nonnull
-  def buildFatJar(@Nullable jarLibs: Set[String], @Nullable mavenArtifacts: Set[MavenArtifact],
-                  @Nonnull outFatJarPath: String): File = {
-    val libs = if (jarLibs == null) Set.empty[String] else jarLibs
-    val arts = if (mavenArtifacts == null) Set.empty[MavenArtifact] else mavenArtifacts
-    if (libs.isEmpty && arts.isEmpty) {
+  def buildFatJar(@Nonnull jarPackDeps: JarPackDeps, @Nonnull outFatJarPath: String): File = {
+    val jarlibs = jarPackDeps.extJarLibs
+    val arts = jarPackDeps.mavenArts
+    if (jarlibs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[Streamx-Maven] empty artifacts.")
     }
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
-    buildFatJar(libs ++ artFilePaths, outFatJarPath)
+    buildFatJar(jarlibs ++ artFilePaths, outFatJarPath)
   }
 
 

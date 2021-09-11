@@ -45,6 +45,9 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
+import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
+import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -552,6 +555,17 @@ public class Application implements Serializable {
             Map<String, Pom> pomMap2 = new HashMap<>(other.pom.size());
             other.pom.forEach(x -> pomMap2.put(x.getGav(), x));
             return Pom.checkPom(pomMap, pomMap2);
+        }
+
+        @JsonIgnore
+        public JarPackDeps toJarPackDeps(){
+            List<MavenArtifact> mvnArts = this.pom.stream()
+                .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                .collect(Collectors.toList());
+            List<String> extJars = this.jar.stream()
+                .map(jar -> ConfigConst.APP_UPLOADS() + "/" + jar)
+                .collect(Collectors.toList());
+            return new JarPackDeps(mvnArts, extJars);
         }
 
     }
