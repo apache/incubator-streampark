@@ -1166,6 +1166,7 @@ export default {
       if (executionMode !== null) {
         const formData = new FormData()
         formData.append('file', data.file)
+        formData.append('executionMode',executionMode)
         upload(formData).then((resp) => {
           this.loading = false
           this.controller.dependency.jar.set(data.file.name, data.file.name)
