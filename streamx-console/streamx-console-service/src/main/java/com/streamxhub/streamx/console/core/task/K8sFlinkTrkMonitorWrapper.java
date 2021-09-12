@@ -69,12 +69,14 @@ public class K8sFlinkTrkMonitorWrapper {
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
         // lazy start monitor, you can use FlinkTrkConf.debugConf() to get a faster monitoring frequency when in develop mode
+        // todo add global configuaryion
         K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf(), true);
-        // todo
-        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
-        TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
-        TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
         initK8sFlinkTrkMonitor(trkMonitor);
+        // todo dev scaffold
+        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
+//        TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
+//        TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
+//        TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
         return trkMonitor;
     }
 
