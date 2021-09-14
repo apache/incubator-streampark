@@ -883,7 +883,6 @@ export default {
   },
 
   mounted() {
-    this.handleYarn()
     const appId = this.applicationId()
     if (appId) {
       this.CleanAppId()
@@ -905,6 +904,9 @@ export default {
         if (!this.app) {
           this.app = resp.data
           this.options = JSON.parse(this.app.options)
+          if (this.app.executionMode === 2 || this.app.executionMode === 3 || this.app.executionMode === 4) {
+            this.handleYarn()
+          }
           this.$nextTick(() => {
             this.handleConfig()
             this.handleFlinkSql()
