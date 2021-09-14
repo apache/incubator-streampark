@@ -30,12 +30,11 @@ object MavenTool extends Logger {
    * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    * @return File Object of output fat-jar
    */
-  @Nonnull
-  def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
+  @throws[Exception] def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
     if (uberJar.isDirectory) {
-      throw new Exception(s"[Streamx-Maven] outFatJarPath($outFatJarPath) should be a file.")
+      throw new Exception(s"[streamx-packer] outFatJarPath($outFatJarPath) should be a file.")
     }
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
@@ -46,7 +45,7 @@ object MavenTool extends Logger {
         case libFile if libFile.isDirectory => libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
         case _ =>
       }
-    logInfo(s"start shaded fat-jar: ${jarLibs.mkString}")
+    logInfo(s"[streamx-packer] start shaded fat-jar: ${jarLibs.mkString}")
     // shade jars
     val shadeRequest = {
       val req = new ShadeRequest
@@ -60,7 +59,7 @@ object MavenTool extends Logger {
     val shader = new DefaultShader()
     shader.enableLogging(plexusLog)
     shader.shade(shadeRequest)
-    logInfo(s"finish build fat-jar: ${uberJar.getAbsolutePath}")
+    logInfo(s"[streamx-packer] finish build fat-jar: ${uberJar.getAbsolutePath}")
     uberJar
   }
 
@@ -70,11 +69,11 @@ object MavenTool extends Logger {
    * @param jarPackDeps   maven artifacts and jar libraries for building a fat-jar
    * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
-  def buildFatJar(@Nonnull jarPackDeps: JarPackDeps, @Nonnull outFatJarPath: String): File = {
+  @throws[Exception] def buildFatJar(@Nonnull jarPackDeps: JarPackDeps, @Nonnull outFatJarPath: String): File = {
     val jarlibs = jarPackDeps.extJarLibs
     val arts = jarPackDeps.mavenArts
     if (jarlibs.isEmpty && arts.isEmpty) {
-      throw new Exception(s"[Streamx-Maven] empty artifacts.")
+      throw new Exception(s"[streamx-packer] empty artifacts.")
     }
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
     buildFatJar(jarlibs ++ artFilePaths, outFatJarPath)
@@ -89,12 +88,11 @@ object MavenTool extends Logger {
    * @param mavenArtifacts collection of maven artifacts
    * @return jar File Object of resolved artifacts
    */
-  @Nonnull
-  def resolveArtifacts(mavenArtifacts: Set[MavenArtifact]): Set[File] = {
+  @throws[Exception] def resolveArtifacts(mavenArtifacts: Set[MavenArtifact]): Set[File] = {
     if (mavenArtifacts == null) Set.empty[File]; else {
       val (repoSystem, session) = MavenRetriever.retrieve()
       val artifacts = mavenArtifacts.map(e => new DefaultArtifact(e.groupId, e.artifactId, "jar", e.version))
-      logInfo(s"start resolving dependencies: ${artifacts.mkString}")
+      logInfo(s"[streamx-packer] start resolving dependencies: ${artifacts.mkString}")
 
       // read relevant artifact descriptor info
       // plz don't simplify the following lambda syntax to maintain the readability of the code.
@@ -104,10 +102,12 @@ object MavenTool extends Logger {
         .flatMap(artDescReq => artDescReq.getDependencies.asScala)
         .filter(dependency => dependency.getScope == "compile")
         .map(dependency => dependency.getArtifact)
-      logInfo(s"resolved dependencies: ${resolvedArtifacts.mkString}")
+
+      val mergedArtifacts = artifacts ++ resolvedArtifacts
+      logInfo(s"[streamx-packer] resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = resolvedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null)).asJava
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null)).asJava
       repoSystem.resolveArtifacts(session, artReqs).asScala
         .map(artifactResult => artifactResult.getArtifact.getFile).toSet
     }
