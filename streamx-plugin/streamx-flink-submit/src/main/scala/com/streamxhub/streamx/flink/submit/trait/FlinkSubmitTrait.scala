@@ -67,7 +67,7 @@ trait FlinkSubmitTrait extends Logger {
          |      "args": ${submitRequest.args},
          |      "clusterId": ${submitRequest.k8sSubmitParam.clusterId},
          |      "kubernetesNamespace": ${submitRequest.k8sSubmitParam.kubernetesNamespace},
-         |      "flinkDockerImage": ${submitRequest.k8sSubmitParam.flinkDockerImage}
+         |      "flinkDockerImage": ${submitRequest.k8sSubmitParam.flinkBaseImage}
          |}
          |""".stripMargin)
     doSubmit(submitRequest)

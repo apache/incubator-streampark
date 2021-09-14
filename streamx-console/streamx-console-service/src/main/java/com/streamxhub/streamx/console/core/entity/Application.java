@@ -45,6 +45,7 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
 import java.util.stream.Collectors;
@@ -199,6 +200,13 @@ public class Application implements Serializable {
     private Date createTime;
 
     /**
+     * flink kubernetes pod template
+     */
+    private String k8sPodTemplate;
+    private String k8sJmPodTemplate;
+    private String k8sTmPodTemplate;
+
+    /**
      * running job
      */
     private transient JobsOverview.Task overview;
@@ -230,6 +238,10 @@ public class Application implements Serializable {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
             KubernetesConfigOptions.NAMESPACE.defaultValue() :
             k8sNamespace;
+    }
+
+    public K8sPodTemplates getK8sPodTemplates(){
+        return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
     }
 
     public void setState(Integer state) {

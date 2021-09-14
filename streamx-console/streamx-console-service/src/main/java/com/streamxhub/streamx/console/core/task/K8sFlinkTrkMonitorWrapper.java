@@ -27,6 +27,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.entity.Application;
+import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
@@ -73,7 +74,7 @@ public class K8sFlinkTrkMonitorWrapper {
         K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf(), true);
         initK8sFlinkTrkMonitor(trkMonitor);
         // todo dev scaffold
-        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
+//        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
 //        TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
 //        TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
 //        TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
@@ -100,6 +101,14 @@ public class K8sFlinkTrkMonitorWrapper {
         List<Application> k8sApplication = applicationService.list(queryWrapper);
         if (CollectionUtils.isEmpty(k8sApplication)) {
             return Lists.newArrayList();
+        }
+        // correct corrupted data
+        List<Application> correctApps = k8sApplication.stream()
+            .filter(app -> Bridge.toTrkId(app).nonLegal())
+            .peek(app -> app.setState(FlinkAppState.DEPLOYED.getValue()))
+            .collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(correctApps)) {
+            applicationService.saveOrUpdateBatch(correctApps);
         }
         // filter out the application that should be tracking
         return k8sApplication.stream()

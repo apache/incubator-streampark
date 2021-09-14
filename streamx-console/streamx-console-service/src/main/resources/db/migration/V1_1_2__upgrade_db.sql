@@ -7,5 +7,8 @@ INSERT INTO `t_setting` VALUES (13, 'docker.register.password', null, 'Docker Re
 ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `CLUSTER_ID` varchar(255) NULL AFTER `JOB_ID`;
 ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_NAMESPACE` varchar(255) NULL AFTER `CLUSTER_ID`;
 ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `FLINK_IMAGE` varchar(255) NULL AFTER `K8S_NAMESPACE`;
+ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_POD_TEMPLATE` text NULL AFTER `ALERT_EMAIL`;
+ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_JM_POD_TEMPLATE` text NULL AFTER `K8S_POD_TEMPLATE`;
+ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_TM_POD_TEMPLATE` text NULL AFTER `K8S_JM_POD_TEMPLATE`;
 
 SET FOREIGN_KEY_CHECKS = 1;

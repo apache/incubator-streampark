@@ -584,6 +584,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setClusterId(appParam.getClusterId());
             application.setFlinkImage(appParam.getFlinkImage());
             application.setK8sNamespace(appParam.getK8sNamespace());
+            application.setK8sPodTemplate(appParam.getK8sPodTemplate());
+            application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
+            application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
 
             //以下参数发生改变不影响正在运行的任务
             application.setDescription(appParam.getDescription());
@@ -959,6 +962,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 String savePointDir = stopActionResult.savePointDir();
                 if (savePointDir != null) {
                     log.info("savePoint path:{}", savePointDir);
+                    log.info("savePoint path:{}", savePointDir);
                     SavePoint savePoint = new SavePoint();
                     Date now = new Date();
                     savePoint.setPath(savePointDir);
@@ -1169,7 +1173,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 settingService.getDockerRegisterAddress(),
                 settingService.getDockerRegisterUser(),
                 settingService.getDockerRegisterPassword()),
-            null
+            application.getK8sPodTemplates()
         );
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),

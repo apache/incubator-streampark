@@ -22,6 +22,7 @@ package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.common.conf.ConfigConst.APP_WORKSPACE
 import com.streamxhub.streamx.common.enums.ExecutionMode
+import com.streamxhub.streamx.flink.kubernetes.PodTemplateTool
 import com.streamxhub.streamx.flink.packer.docker.{DockerTool, FlinkDockerfileTemplate}
 import com.streamxhub.streamx.flink.packer.maven.MavenTool
 import com.streamxhub.streamx.flink.submit.`trait`.KubernetesNativeSubmitTrait
@@ -31,8 +32,9 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration.PipelineOptions
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
-import scala.collection.JavaConverters._
 
+import java.io.File
+import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.Try
 
@@ -41,21 +43,35 @@ import scala.util.Try
  */
 object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
 
-  //noinspection DuplicatedCode
+  // noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
-    assert(Try(submitRequest.k8sSubmitParam.flinkDockerImage.nonEmpty).getOrElse(false))
+    assert(Try(submitRequest.k8sSubmitParam.flinkBaseImage.nonEmpty).getOrElse(false))
 
-    val buildWorkspace = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/"
     // extract flink config
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+    // init build workspace of flink job
+    val buildWorkspace = {
+      val dirPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}"
+      val dir = new File(dirPath)
+      if (!dir.exists()) dir.mkdir()
+      dirPath
+    }
 
-    // build fat-jar
+    // step-1: build k8s pod template file
+    if (submitRequest.k8sSubmitParam.podTemplates != null) {
+      val k8sPodTmplConf = PodTemplateTool.preparePodTemplateFiles(buildWorkspace, submitRequest.k8sSubmitParam.podTemplates)
+      k8sPodTmplConf.mergeToFlinkConf(flinkConfig)
+      logInfo(s"[flink-submit] already built kubernetes pod template file " +
+        s"${flinkConfIdentifierInfo(flinkConfig)}, k8sPodTemplateFile=${k8sPodTmplConf.tmplFiles}")
+    }
+
+    // step-2: build fat-jar
     val fatJar = {
-      val fatJarOutputPath = buildWorkspace + "flink-job.jar"
+      val fatJarOutputPath = s"${buildWorkspace}/fat-flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
-      val jarPackDeps =  submitRequest.k8sSubmitParam.jarPackDeps
+      val jarPackDeps = submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
       // cache file MD5 is used to compare whether it is consistent when it is generated next time.
       //  If it is consistent, it is used directly and returned directly instead of being regenerated
@@ -64,25 +80,23 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
-    // build and push flink application image
+    // step-3: build and push flink application image
     val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
-    val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkDockerImage, fatJar.getAbsolutePath)
+    val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkBaseImage, fatJar.getAbsolutePath)
     val flinkImageTag = DockerTool.buildFlinkImage(
       submitRequest.k8sSubmitParam.dockerAuthConfig,
       buildWorkspace,
       dockerFileTemplate,
       tagName,
       push = true)
-
     // add flink container image tag to flink configuration
     flinkConfig.set(KubernetesConfigOptions.CONTAINER_IMAGE, flinkImageTag)
     // add flink pipeline.jars configuration
     flinkConfig.set(PipelineOptions.JARS, mutable.Buffer(dockerFileTemplate.getJobJar).asJava)
-
     logInfo(s"[flink-submit] already built flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}, " +
-      s"flinkImageTag=${flinkImageTag}, baseFlinkImage=${submitRequest.k8sSubmitParam.flinkDockerImage}")
+      s"flinkImageTag=${flinkImageTag}, baseFlinkImage=${submitRequest.k8sSubmitParam.flinkBaseImage}")
 
-    // retrieve k8s cluster and submit flink job on application mode
+    // step-4: retrieve k8s cluster and submit flink job on application mode
     var clusterDescriptor: KubernetesClusterDescriptor = null
     var clusterClient: ClusterClient[String] = null
 

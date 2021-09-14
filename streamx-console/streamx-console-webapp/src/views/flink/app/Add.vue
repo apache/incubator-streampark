@@ -45,7 +45,7 @@
 
       <template v-if="executionMode === 5|| executionMode === 6">
         <a-form-item
-          label="kubernetes namespace"
+          label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
@@ -56,7 +56,7 @@
           </a-input>
         </a-form-item>
         <a-form-item
-          label="kubernetes clusterId"
+          label="Kubernetes ClusterId"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
@@ -732,6 +732,33 @@
       </a-form-item>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         v-if="jobType === 'customcode'"
         label="Program Args"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -830,6 +857,7 @@ import {
   bigScreenOpen,
   formatSql,
   initEditor,
+  initPodTemplateEditor,
   updateDependency,
   verifySQL
 } from './AddEdit'
@@ -896,8 +924,12 @@ export default {
       submitting: false,
       executionMode: null,
       exclusions: new Map(),
+      podTemplate: '',
+      jmPodTemplate: '',
+      tmPodTemplate: '',
       controller: {
         activeTab: 'pom',
+        podTemplateTab: 'pod-template',
         tagCount: {
           total: 1,
           run: 1,
@@ -921,7 +953,10 @@ export default {
         editor: {
           flinkSql: null,
           bigScreen: null,
-          pom: null
+          pom: null,
+          podTemplate: null,
+          jmPodTemplate: null,
+          tmPodTemplate: null
         },
         flinkSql: {
           defaultValue: '',
@@ -953,6 +988,7 @@ export default {
   beforeMount() {
     this.handleInitForm()
     this.handleInitSQLMode()
+    this.handleK8sPodTemplateEditor()
   },
 
   filters: {
@@ -1000,12 +1036,26 @@ export default {
           })
         }
       }
+      if (this.controller.editor.podTemplate) {
+        this.controller.editor.podTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.jmPodTemplate) {
+        this.controller.editor.jmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.tmPodTemplate) {
+        this.controller.editor.tmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
       this.$refs.confEdit.theme()
     }
   },
 
   methods: {
-
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
@@ -1039,6 +1089,7 @@ export default {
         this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
+      this.handleK8sPodTemplateEditor()
     },
 
     handleInitSQLMode() {
@@ -1046,6 +1097,12 @@ export default {
       this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
       this.$nextTick(() => {
         initEditor(this)
+      })
+    },
+
+    handleK8sPodTemplateEditor(){
+      this.$nextTick(() => {
+        initPodTemplateEditor(this)
       })
     },
 
@@ -1429,6 +1486,11 @@ export default {
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
       }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
+      }
 
       if (this.appType === 1) {
         const configVal = this.form.getFieldValue('config')
@@ -1494,6 +1556,11 @@ export default {
         k8sNamespace: values.k8sNamespace || null,
         clusterId: values.clusterId || null,
         flinkImage: values.flinkImage || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
       }
       this.handleCreateApp(params)
     },

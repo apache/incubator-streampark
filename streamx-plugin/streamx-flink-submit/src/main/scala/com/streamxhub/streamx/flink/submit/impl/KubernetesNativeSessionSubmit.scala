@@ -43,7 +43,7 @@ import scala.util.Try
  */
 object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Logger {
 
-  //noinspection DuplicatedCode
+  // noinspection DuplicatedCode
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
     // require parameters
     assert(Try(submitRequest.k8sSubmitParam.clusterId.nonEmpty).getOrElse(false))
@@ -54,6 +54,7 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
     }
     // extract flink configuration
     val flinkConfig = extractEffectiveFlinkConfig(submitRequest)
+
     // build fat-jar
     val fatJar = {
       val fatJarOutputPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/${jobID.toString}/flink-job.jar"
@@ -82,7 +83,6 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
             .orElse(Lists.newArrayList())
             : _*
         ).build()
-
       val jobGraph = PackagedProgramUtils.createJobGraph(
         packageProgram,
         flinkConfig,
