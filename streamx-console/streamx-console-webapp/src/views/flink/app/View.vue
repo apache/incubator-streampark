@@ -599,7 +599,8 @@
           <a-form-item
             label="flame Graph"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="executionMode !== 5 && executionMode !== 6">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -895,6 +896,7 @@
       flameGraph: false,
       restart: false,
       application: null,
+      executionMode: null,
       latestSavePoint: null,
       historySavePoint: null,
       allowNonRestoredState: false,
@@ -1196,6 +1198,7 @@
         }).then((resp) => {
           this.latestSavePoint = resp.data || null
           this.startVisible = true
+          this.executionMode = app.executionMode
           if (!this.latestSavePoint) {
             history({
               appId: this.application.id,
