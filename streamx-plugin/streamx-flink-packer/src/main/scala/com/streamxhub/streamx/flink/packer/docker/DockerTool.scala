@@ -74,7 +74,7 @@ object DockerTool extends Logger {
    *
    * @return successful or failed
    */
-  def pushImage(imageTag: String, authConf: DockerAuthConf): Boolean = {
+  @throws[Exception] def pushImage(imageTag: String, authConf: DockerAuthConf): Boolean = {
     tryWithResourceException(DockerRetriever.newDockerClient()) {
       client =>
         val pushCmd: PushImageCmd = client.pushImageCmd(imageTag).withAuthConfig(authConf.toDockerAuthConf)
