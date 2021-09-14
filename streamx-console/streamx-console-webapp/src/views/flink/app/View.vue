@@ -426,7 +426,8 @@
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
-              && record['optionState'] === 0"
+              && record['optionState'] === 0
+              && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
             v-permit="'app:mapping'"
             @click.native="handleMapping(record)"/>
           <svg-icon
