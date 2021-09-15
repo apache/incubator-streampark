@@ -42,11 +42,6 @@ trait K8sFlinkTrkMonitorLazyStartAop extends K8sFlinkTrkMonitor {
     super.unTrackingJob(trkId)
   }
 
-  override def reTrackingJob(trkId: TrkId): Unit = {
-    start()
-    super.unTrackingJob(trkId)
-  }
-
   abstract override def isInTracking(trkId: TrkId): Boolean = {
     start()
     super.isInTracking(trkId)
