@@ -83,6 +83,9 @@ public class K8sFlinkChangeEventListener {
 
         // update application record
         app = updateApplicationWithJobStatusCV(app, jobStatus);
+        // when a flink job status change event can be received, it means
+        // that the operation command sent by streamx has been completed.
+        app.setOptionState(OptionState.NONE.getValue());
         applicationService.saveOrUpdate(app);
     }
 

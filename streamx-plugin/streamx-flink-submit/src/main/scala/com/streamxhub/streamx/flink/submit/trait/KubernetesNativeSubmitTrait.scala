@@ -23,7 +23,8 @@ package com.streamxhub.streamx.flink.submit.`trait`
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, StorageType}
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
-import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
+import com.streamxhub.streamx.common.util.DeflaterUtils
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
@@ -31,14 +32,13 @@ import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, DeploymentOptions, PipelineOptions}
+import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
-import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -54,11 +54,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
-  // effective k-v regex pattern of submit.dynamicOption
-  private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
-  protected def doStop(@Nonnull executeMode: ExecutionMode,
+  @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
                        stopRequest: StopRequest): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
@@ -74,19 +72,19 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val savePointDir = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
-      val actionResult = {
-        if (stopRequest.withDrain) {
-          client.stopWithSavepoint(jobID, true, savePointDir).get()
-        } else if (stopRequest.withSavePoint) {
-          client.cancelWithSavepoint(jobID, savePointDir).get()
-        } else {
-          client.cancel(jobID).get()
+      val savePointDir = stopRequest.customSavePointPath
+
+      val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
+        case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
+        case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
+        case _ => client.cancel(jobID).get()
           ""
-        }
       }
       StopResponse(actionResult)
-
+    } catch {
+      case e: Exception =>
+        logger.error(s"[flink-submit] stop flink job failed, mode=${executeMode.toString}, stopRequest=${stopRequest}")
+        throw e
     } finally {
       if (client != null) client.close()
       if (clusterDescriptor != null) clusterDescriptor.close()
@@ -134,7 +132,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
+      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
@@ -174,22 +172,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       flinkConfig.removeConfig(KubernetesConfigOptions.NAMESPACE)
 
     flinkConfig
-  }
-
-  /**
-   * extract flink configuration from submitRequest.dynamicOption
-   */
-  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
-    if (Utils.isEmpty(dynamicOption)) {
-      return Map.empty
-    }
-    dynamicOption
-      .filter(_ != null)
-      .map(_.trim)
-      .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-      .filter(!_.matches())
-      .map(m => m.group(2) -> m.group(3))
-      .toMap
   }
 
   private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {

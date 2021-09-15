@@ -85,9 +85,11 @@ import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.model.FlinkMetricCV;
+import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.submit.FlinkSubmit;
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper;
 import com.streamxhub.streamx.flink.submit.domain.KubernetesSubmitParam;
 import com.streamxhub.streamx.flink.submit.domain.StopRequest;
 import com.streamxhub.streamx.flink.submit.domain.StopResponse;
@@ -121,6 +123,7 @@ import org.apache.flink.client.deployment.application.ApplicationConfiguration;
 import org.apache.flink.configuration.JobManagerOptions;
 import org.apache.flink.configuration.MemorySize;
 import org.apache.flink.configuration.TaskManagerOptions;
+import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -950,12 +953,21 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         //此步骤可能会比较耗时,重新开启一个线程去执行
         executorService.submit(() -> {
             try {
+                // intfer savepoint
+                String customSavepoint = "";
+                if (isKubernetesApp(application)) {
+                    customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
+                        FlinkSubmitHelper
+                            .extractDynamicOptionAsJava(application.getDynamicOptions())
+                            .getOrDefault(SavepointConfigOptions.SAVEPOINT_PATH.key(), "");
+                }
                 StopRequest stopInfo = new StopRequest(
                     settingService.getEffectiveFlinkHome(),
                     application.getAppId(),
                     application.getJobId(),
                     appParam.getSavePointed(),
                     appParam.getDrain(),
+                    customSavepoint,
                     application.getK8sNamespace()
                 );
                 StopResponse stopActionResult = FlinkSubmit.stop(ExecutionMode.of(application.getExecutionMode()), stopInfo);
@@ -979,6 +991,19 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 // 保持savepoint失败.则将之前的统统设置为过期
                 if (appParam.getSavePointed()) {
                     savePointService.obsolete(application.getId());
+                }
+                // retracking flink job on kubernetes and logging exception
+                if (isKubernetesApp(application)){
+                    TrkId trkid = toTrkId(application);
+                    k8sFlinkTrkMonitor.unTrackingJob(trkid);
+                    ApplicationLog log = new ApplicationLog();
+                    log.setAppId(application.getId());
+                    log.setStartTime(new Date());
+                    log.setYarnAppId(application.getClusterId());
+                    log.setException(ExceptionUtils.stringifyException(e));
+                    log.setSuccess(false);
+                    applicationLogService.save(log);
+                    k8sFlinkTrkMonitor.trackingJob(trkid);
                 }
             }
         });

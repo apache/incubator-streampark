@@ -591,7 +591,7 @@
           <svg-icon
             slot="icon"
             name="play"/>
-          Start application
+          Start Application
         </template>
 
         <a-form
@@ -713,8 +713,8 @@
           :form="formStopSavePoint">
           <a-form-item
             label="Savepoint"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -726,8 +726,8 @@
           </a-form-item>
           <a-form-item
             label="Drain"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -737,6 +737,19 @@
             <span
               class="conf-switch"
               style="color:darkgrey"> Send max watermark before stoping</span>
+          </a-form-item>
+          <a-form-item
+            label="Custom SavePoint"
+            style="margin-bottom: 10px"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="savePoint">
+            <a-input
+              type="text"
+              placeholder="Entry the custom savepoint path"
+              v-model="customSavepoint"
+              v-decorator="['customSavepoint']"/>
+            <div style="color:darkgrey">Custom savepoint path is not supported on YARN mode.</div>
           </a-form-item>
         </a-form>
 
@@ -894,6 +907,7 @@
       formMapping: null,
       drain: false,
       savePoint: true,
+      customSavepoint: null,
       flameGraph: false,
       restart: false,
       application: null,
@@ -1294,6 +1308,7 @@
       const id = this.application.id
       const savePointed = this.savePoint
       const drain = this.drain
+      const customSavePoint = this.customSavepoint
       this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
@@ -1307,7 +1322,8 @@
         cancel({
           id: id,
           savePointed: savePointed,
-          drain: drain
+          drain: drain,
+          savePoint: customSavePoint
         }).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(

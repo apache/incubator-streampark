@@ -47,7 +47,7 @@ import scala.Enumeration;
 
 /**
  * Flink K8s Tracking Monitor Wrapper.
- *
+ * <p>
  * todo Notes
  * Currentlty Tracking Monitor of Flink on K8s and on YARN are independent
  * of each other, this is because the tracking behavior of Flink on K8s is
@@ -55,7 +55,7 @@ import scala.Enumeration;
  * Mybe we need to refactor to a unified Flink Tracking Monitor in the
  * future, both tracking-on-k8s and tracking-on-yarn will exist as plugins
  * for this unified implementation.
- *
+ * <p>
  * author: Al-assad
  */
 @Configuration
@@ -65,19 +65,22 @@ public class K8sFlinkTrkMonitorWrapper {
     private ApplicationService applicationService;
 
     /**
-     * register FlinkTrkMonitor bean for tracking flink job on kubernetes.
+     * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
      */
+    @SuppressWarnings("CommentedOutCode")
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
         // lazy start monitor, you can use FlinkTrkConf.debugConf() to get a faster monitoring frequency when in develop mode
         // todo add global configuaryion
         K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf(), true);
         initK8sFlinkTrkMonitor(trkMonitor);
-        // todo dev scaffold
-//        TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
-//        TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
-//        TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
-//        TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
+
+        /* dev scaffold: watch flink k8s tracking cache,
+          see com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper for items. */
+        // TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
+        // TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
+        // TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
+        // TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
         return trkMonitor;
     }
 
@@ -133,13 +136,12 @@ public class K8sFlinkTrkMonitorWrapper {
                 throw new IllegalArgumentException("Illegal K8sExecuteMode, mode=" + app.getExecutionMode());
             }
         }
-
     }
 
     /**
      * Determine if application it is flink-on-kubernetes mode.
      */
-    public static boolean isKubernetesApp(Application application){
+    public static boolean isKubernetesApp(Application application) {
         if (application == null) {
             return false;
         }
