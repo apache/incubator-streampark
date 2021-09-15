@@ -82,6 +82,11 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     trkCache.flinkMetrics.invalidate(trkId)
   }
 
+  override def reTrackingJob(trkId: TrkId): Unit = {
+    unTrackingJob(trkId)
+    trackingJob(trkId)
+  }
+
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
 
   override def getJobStatus(trkId: TrkId): Option[JobStatusCV] = Option(trkCache.jobStatuses.getIfPresent(trkId))
@@ -165,6 +170,5 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     }
 
   }
-
 }
 

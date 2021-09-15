@@ -78,6 +78,15 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   def unTrackingJob(trkId: TrkId)
 
   /**
+   * Retracking the specified flink job which on k8s cluster.
+   * Mainly used to force a refresh of the trace state on a
+   * reentrant basis.
+   *
+   * @param trkId identifier of flink job
+   */
+  def reTrackingJob(trkId: TrkId)
+
+  /**
    * check whether the specified flink job is in tracking.
    *
    * @param trkId identifier of flink job
