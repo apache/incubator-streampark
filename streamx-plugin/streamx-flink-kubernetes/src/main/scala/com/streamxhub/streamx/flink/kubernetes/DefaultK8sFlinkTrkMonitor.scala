@@ -74,26 +74,12 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     trkCache.trackIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
   }
 
-  def trackingJob(trkIds: Set[TrkId]): Unit = {
-    val legalTrkIds = Try(trkIds.filter(_.isLegal)).getOrElse(return)
-    if (legalTrkIds.isEmpty)
-      return
-    val now = System.currentTimeMillis()
-    val trackingMap = legalTrkIds.map(e => (e, TrkIdCV(now))).toMap
-    trkCache.trackIds.putAll(trackingMap.asJava)
-  }
-
   def unTrackingJob(trkId: TrkId): Unit = {
     if (Try(trkId.nonLegal).getOrElse(true))
       return
     trkCache.trackIds.invalidate(trkId)
-  }
-
-  def unTrackingJob(trkIds: Set[TrkId]): Unit = {
-    val legalTrkIds = Try(trkIds.filter(_.isLegal)).getOrElse(return)
-    if (legalTrkIds.isEmpty)
-      return
-    trkCache.trackIds.invalidateAll(legalTrkIds.asJava)
+    trkCache.jobStatuses.invalidate(trkId)
+    trkCache.flinkMetrics.invalidate(trkId)
   }
 
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)

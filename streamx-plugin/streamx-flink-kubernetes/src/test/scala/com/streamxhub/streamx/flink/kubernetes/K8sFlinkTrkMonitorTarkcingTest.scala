@@ -58,7 +58,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
     watchAggClusterMetricsCache
     watchTrkIdsCache
     trkMonitor.start()
-    trkMonitor.trackingJob(trkIds.toSet)
+    trkIds.foreach(trkMonitor.trackingJob)
     while (true) {}
   }
 
@@ -68,7 +68,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
     watchJobStatusCacheSize
 
     trkMonitor.start()
-    trkMonitor.trackingJob(trkIds.toSet)
+    trkIds.foreach(trkMonitor.trackingJob)
     Thread.sleep(20 * 1000)
     trkMonitor.stop()
     Thread.sleep(10 * 1000)
@@ -102,7 +102,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
     watchJobStatusCache
     trkMonitor.registerListener(new ChangeEventListener())
     trkMonitor.start()
-    trkMonitor.trackingJob(trkIds.toSet)
+    trkIds.foreach(trkMonitor.trackingJob)
     while (true) {}
 
   }

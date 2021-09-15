@@ -50,7 +50,7 @@ class K8sFlinkTrkMonitorLazyStartTest {
     watchAggClusterMetricsCache
     watchK8sEventCache
     println("[trk-monitor] call trackingJob")
-    trkMonitor.trackingJob(trkIds.toSet)
+    trkIds.foreach(trkMonitor.trackingJob)
     Thread.sleep(30 * 1000)
     trkMonitor.trackingJob(TrkId.onApplication("default", "flink-app3"))
     Thread.sleep(20 * 1000)

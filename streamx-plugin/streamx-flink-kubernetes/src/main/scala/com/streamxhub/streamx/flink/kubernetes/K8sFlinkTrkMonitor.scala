@@ -71,25 +71,11 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   def trackingJob(trkId: TrkId)
 
   /**
-   * add tracking for the specified flinks job which on k8s cluster.
-   *
-   * @param trackIds identifieies of flink job
-   */
-  def trackingJob(trkIds: Set[TrkId])
-
-  /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trkId identifier of flink job
    */
   def unTrackingJob(trkId: TrkId)
-
-  /**
-   * remove tracking for the specified flinks job which on k8s cluster.
-   *
-   * @param trackIds identifieies of flink job
-   */
-  def unTrackingJob(trkIds: Set[TrkId])
 
   /**
    * check whether the specified flink job is in tracking.
