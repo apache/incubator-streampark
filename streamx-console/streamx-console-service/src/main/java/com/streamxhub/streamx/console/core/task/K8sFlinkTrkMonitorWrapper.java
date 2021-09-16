@@ -29,6 +29,7 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.console.core.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
+import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Enumeration;
@@ -60,37 +62,40 @@ import scala.Enumeration;
 public class K8sFlinkTrkMonitorWrapper {
 
     private final ApplicationService applicationService;
-
+    private final AlertService alertService;
     private final K8sFlinkConfig k8sFlinkConfig;
 
     public K8sFlinkTrkMonitorWrapper(ApplicationService applicationService,
+                                     AlertService alertService,
                                      K8sFlinkConfig k8sFlinkConfig) {
         this.applicationService = applicationService;
         this.k8sFlinkConfig = k8sFlinkConfig;
+        this.alertService = alertService;
     }
 
     /**
      * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
      */
-    @SuppressWarnings("CommentedOutCode")
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
-        // lazy start monitor.
+        // lazy start tracking monitor
         K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(k8sFlinkConfig.toFlinkTrkConf(), true);
         initK8sFlinkTrkMonitor(trkMonitor);
 
-        /* dev scaffold: watch flink k8s tracking cache,
-          see com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper for items. */
-        // TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
-        // TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
-        // TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
-        // TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
+        /* Dev scaffold: watch flink k8s tracking cache,
+           see com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper for items.
+           Exampl:
+               TrkMonitorDebugHelper.watchTrkIdsCache(trkMonitor);
+               TrkMonitorDebugHelper.watchJobStatusCache(trkMonitor);
+               TrkMonitorDebugHelper.watchAggClusterMetricsCache(trkMonitor);
+               TrkMonitorDebugHelper.watchClusterMetricsCache(trkMonitor);
+        */
         return trkMonitor;
     }
 
     private void initK8sFlinkTrkMonitor(@Nonnull K8sFlinkTrkMonitor trkMonitor) {
         // register change event listener
-        trkMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService));
+        trkMonitor.registerListener(new K8sFlinkChangeEventListener(applicationService, alertService));
         // recovery tracking list
         List<TrkId> k8sApp = getK8sTrackingApplicationFromDB();
         k8sApp.forEach(trkMonitor::trackingJob);

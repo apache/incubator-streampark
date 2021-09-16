@@ -28,9 +28,11 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.google.common.eventbus.Subscribe;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.service.AlertService;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
@@ -42,6 +44,10 @@ import com.streamxhub.streamx.flink.kubernetes.model.JobStatusCV;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import com.streamxhub.streamx.flink.kubernetes.watcher.FlinkJobStatusWatcher;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import scala.Enumeration;
 
 /**
@@ -51,9 +57,21 @@ import scala.Enumeration;
 public class K8sFlinkChangeEventListener {
 
     private final ApplicationService applicationService;
+    private final AlertService alertService;
 
-    public K8sFlinkChangeEventListener(ApplicationService applicationService) {
+    private final ExecutorService executor = new ThreadPoolExecutor(
+        Runtime.getRuntime().availableProcessors(),
+        100,
+        20L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("streamx-notify-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
+    );
+
+    public K8sFlinkChangeEventListener(ApplicationService applicationService, AlertService alertService) {
         this.applicationService = applicationService;
+        this.alertService = alertService;
     }
 
     /**
@@ -87,6 +105,13 @@ public class K8sFlinkChangeEventListener {
         // that the operation command sent by streamx has been completed.
         app.setOptionState(OptionState.NONE.getValue());
         applicationService.saveOrUpdate(app);
+
+        // email alerts when necessary
+        FlinkAppState state = FlinkAppState.of(app.getState());
+        if (FlinkAppState.FAILED.equals(state) || FlinkAppState.LOST.equals(state)){
+            Application finalApp = app;
+            executor.execute(() -> alertService.alert(finalApp, state));
+        }
     }
 
 
