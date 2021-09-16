@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,33 +18,24 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.console.system.runner;
-
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
+package com.streamxhub.streamx.common.conf;
 
 /**
  * @author benjobs
  */
-@Order
-@Slf4j
-@Component
-public class StartedUpRunner implements ApplicationRunner {
+public class ConfigurationOptions {
 
-    @Autowired
-    private ConfigurableApplicationContext context;
 
-    @Override
-    public void run(ApplicationArguments args) {
-        if (context.isActive()) {
-            log.info(" start successful，time：" + LocalDateTime.now());
-        }
-    }
+    public static String KEY_APPLICATION_ARGS = "$internal.application.program-args";
+
+    public static String KEY_APPLICATION_MAIN_CLASS = "$internal.application.main";
+
+    public static String KEY_TOTAL_PROCESS_MEMORY = "jobmanager.memory.process.size";
+
+    public static String KEY_TOTAL_FLINK_MEMORY = "jobmanager.memory.flink.size";
+
+    public static String KEY_JVM_HEAP_MEMORY = "jobmanager.memory.heap.size";
+
+    public static String KEY_OFF_HEAP_MEMORY = "jobmanager.memory.off-heap.size";
+
 }

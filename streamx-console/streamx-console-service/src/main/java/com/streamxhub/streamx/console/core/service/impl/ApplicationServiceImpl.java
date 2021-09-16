@@ -68,6 +68,10 @@ import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.enums.NoticeType;
 import com.streamxhub.streamx.console.core.enums.OptionState;
+import com.streamxhub.streamx.console.core.entity.*;
+import com.streamxhub.streamx.console.core.enums.*;
+import com.streamxhub.streamx.common.conf.ConfigurationOptions;
+import com.streamxhub.streamx.common.conf.FlinkMemorySize;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.runner.EnvInitializer;
 import com.streamxhub.streamx.console.core.service.ApplicationBackUpService;
@@ -80,6 +84,8 @@ import com.streamxhub.streamx.console.core.service.MessageService;
 import com.streamxhub.streamx.console.core.service.ProjectService;
 import com.streamxhub.streamx.console.core.service.SavePointService;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.console.core.runner.EnvInitializer;
+import com.streamxhub.streamx.console.core.service.*;
 import com.streamxhub.streamx.console.core.task.FlinkTrackingTask;
 import com.streamxhub.streamx.console.system.authentication.ServerComponent;
 import com.streamxhub.streamx.flink.core.scala.conf.ParameterCli;
@@ -114,6 +120,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.jar.Manifest;
 import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
+import com.streamxhub.streamx.flink.submit.FlinkSubmit;
+import com.streamxhub.streamx.flink.submit.domain.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -1078,8 +1086,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         flinkUserJar = String.format("%s/%s.jar", classPath, application.getModule());
                         break;
                     case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}", ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
-                            application.getMainClass());
+                        appConf = String.format("json://{\"%s\":\"%s\"}", ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS, application.getMainClass());
                         classPath = String.format("%s/%s", workspace, application.getId());
                         flinkUserJar = String.format("%s/%s", classPath, application.getJar());
                         break;
@@ -1095,8 +1102,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                         flinkUserJar = new File(libPath, application.getModule().concat(".jar")).getAbsolutePath();
                         break;
                     case APACHE_FLINK:
-                        appConf = String.format("json://{\"%s\":\"%s\"}", ApplicationConfiguration.APPLICATION_MAIN_CLASS.key(),
-                            application.getMainClass());
+                        appConf = String.format("json://{\"%s\":\"%s\"}", ConfigurationOptions.KEY_APPLICATION_MAIN_CLASS, application.getMainClass());
                         libPath = new File(application.getLocalAppBase(), application.getModule());
                         flinkUserJar = new File(libPath, application.getModule().concat(".jar")).getAbsolutePath();
                         break;
@@ -1227,13 +1233,13 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
         try {
             SubmitResponse submitResponse = FlinkSubmit.submit(submitInfo);
             if (submitResponse.flinkConfig() != null) {
-                String jmMemory = submitResponse.flinkConfig().toMap().get(JobManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                String jmMemory = submitResponse.flinkConfig().toMap().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
                 if (jmMemory != null) {
-                    application.setJmMemory(MemorySize.parse(jmMemory).getMebiBytes());
+                    application.setJmMemory(FlinkMemorySize.parse(jmMemory).getMebiBytes());
                 }
-                String tmMemory = submitResponse.flinkConfig().toMap().get(TaskManagerOptions.TOTAL_PROCESS_MEMORY.key());
+                String tmMemory = submitResponse.flinkConfig().toMap().get(ConfigurationOptions.KEY_TOTAL_PROCESS_MEMORY);
                 if (tmMemory != null) {
-                    application.setTmMemory(MemorySize.parse(tmMemory).getMebiBytes());
+                    application.setTmMemory(FlinkMemorySize.parse(tmMemory).getMebiBytes());
                 }
             }
             application.setAppId(submitResponse.clusterId());
