@@ -383,7 +383,8 @@
       <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-number
           :min="1"
           :step="1"
@@ -394,7 +395,8 @@
       <a-form-item
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-group compact>
           <a-input-number
             :min="1"
