@@ -26,21 +26,19 @@ import static com.streamxhub.streamx.console.core.enums.FlinkAppState.Bridge.toK
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.google.common.collect.Lists;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.console.core.conf.K8sFlinkConfig;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 import com.streamxhub.streamx.console.core.service.ApplicationService;
-import com.streamxhub.streamx.flink.kubernetes.FlinkTrkConf;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitor;
 import com.streamxhub.streamx.flink.kubernetes.K8sFlinkTrkMonitorFactory;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkJobState;
 import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode;
-import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper;
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import org.apache.commons.collections.CollectionUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import scala.Enumeration;
@@ -61,8 +59,15 @@ import scala.Enumeration;
 @Configuration
 public class K8sFlinkTrkMonitorWrapper {
 
-    @Autowired
-    private ApplicationService applicationService;
+    private final ApplicationService applicationService;
+
+    private final K8sFlinkConfig k8sFlinkConfig;
+
+    public K8sFlinkTrkMonitorWrapper(ApplicationService applicationService,
+                                     K8sFlinkConfig k8sFlinkConfig) {
+        this.applicationService = applicationService;
+        this.k8sFlinkConfig = k8sFlinkConfig;
+    }
 
     /**
      * Register FlinkTrkMonitor bean for tracking flink job on kubernetes.
@@ -70,9 +75,8 @@ public class K8sFlinkTrkMonitorWrapper {
     @SuppressWarnings("CommentedOutCode")
     @Bean(destroyMethod = "close")
     public K8sFlinkTrkMonitor registerFlinkTrackingMonitor() {
-        // lazy start monitor, you can use FlinkTrkConf.debugConf() to get a faster monitoring frequency when in develop mode
-        // todo add global configuaryion
-        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(FlinkTrkConf.debugConf(), true);
+        // lazy start monitor.
+        K8sFlinkTrkMonitor trkMonitor = K8sFlinkTrkMonitorFactory.createInstance(k8sFlinkConfig.toFlinkTrkConf(), true);
         initK8sFlinkTrkMonitor(trkMonitor);
 
         /* dev scaffold: watch flink k8s tracking cache,

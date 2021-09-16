@@ -283,7 +283,7 @@ object ConfigConst {
 
   val KEY_STREAMX_WORKSPACE = "streamx.workspace.path"
 
-  val STREAMX_WORKSPACE_DEFAULT = "/Users/yulin/Downloads/streamx-workspace" // todo
+  val STREAMX_WORKSPACE_DEFAULT = "/streamx"
 
   lazy val WORKSPACE: String = {
     val workspace = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
@@ -326,11 +326,9 @@ object ConfigConst {
   /**
    * namespace for docker image used in docker build env and image register
    */
-  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
-  val KEY_DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
-
-  lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, KEY_DOCKER_IMAGE_NAMESPACE_DEFAULT)
-
+    val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+    val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+    lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   val LOGO =
     """
