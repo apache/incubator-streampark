@@ -319,12 +319,12 @@ object FlinkJobStatusWatcher {
         else FlinkJobState.TERMINATED
       case FlinkJobState.POS_TERMINATED => preState match {
         case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
-        case FlinkJobState.FAILING => FlinkJobState.FAILING
+        case FlinkJobState.FAILING => FlinkJobState.FAILED
         case _ => FlinkJobState.FINISHED
       }
       case FlinkJobState.TERMINATED => preState match {
         case FlinkJobState.CANCELLING => FlinkJobState.CANCELED
-        case FlinkJobState.FAILING => FlinkJobState.FAILING
+        case FlinkJobState.FAILING => FlinkJobState.FAILED
         case _ => FlinkJobState.TERMINATED
       }
       case _ => curState
