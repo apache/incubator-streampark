@@ -7,10 +7,10 @@ title: '文档中心'
 tagline: ── make Flink|Spark easier ✨
 action:
 - text: Quick Start
-  link: /zh/docs/guide/intro
+  link: /docs/guide/intro
   type: primary
 - text: StreamX Console
-  link: /zh/docs/console/deploy
+  link: /docs/console/deploy
   type: primary  
 features:
 - title: 源码可控

@@ -706,7 +706,7 @@ class JavaUser implements Serializable {
 
 ### 容错和语义
 
-启用 Flink 的 `checkpointing` 后，`KafkaSink` 可以提供`精确一次`的语义保证,具体开启`checkpointing`的设置请参考第二章关于[项目配置](/docs/guide/quickstart/conf/#checkpoints)部分
+启用 Flink 的 `checkpointing` 后，`KafkaSink` 可以提供`精确一次`的语义保证,具体开启`checkpointing`的设置请参考第二章关于[项目配置](/docs/doc/guide/quickstart/conf/#checkpoints)部分
 
 除了启用 Flink 的 checkpointing，你也可以通过将适当的 `semantic` 参数传递给 `KafkaSink` 来选择三种不同的操作模式
 
