@@ -1,4 +1,0 @@
----
-sponsor: true
----
-
