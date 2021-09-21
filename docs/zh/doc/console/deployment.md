@@ -113,7 +113,8 @@ streamx-console-service-${version}
 
 #### 配置 
 
-用IDE导入刚从git上clone下来的StreamX源码(推荐使用`IntelliJ IDEA`),进入到`resources`下,编辑application-prod.xml,找到`datasource`,修改下jdbc的连接信息,具体可参考安装部署章节[修改配置](http://www.streamxhub.com/docs/zh/console/deploy/#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE) 部分
+用IDE导入刚从git上clone下来的StreamX源码(推荐使用`IntelliJ IDEA`),进入到`resources`下,编辑application-prod.xml,找到`datasource`,修改下jdbc的连接信息,具体可参考安装部署章节[修改配置](http://www.streamxhub.com/zh/doc/console/deploy/#%E4%BF%AE%E6%94%B9%E9%85%8D%E7%BD%AE) 部分
+
 <img src="http://assets.streamxhub.com/131861625472901_.pic_hd.jpg" />
 
 
