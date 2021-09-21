@@ -6,13 +6,13 @@ heroText: StreamX
 title: '文档中心'
 tagline: ── make Flink|Spark easier ✨
 action:
-- text: 开始开始
-  link: /zh/doc/guide/intro
+- text: Quick Start
+  link: /docs/guide/intro
   type: primary
-- text: 一站式平台
-  link: /zh/doc/console/deploy
+- text: StreamX Console
+  link: /docs/console/deploy
   type: primary  
-  features:
+features:
 - title: 源码可控
   details: 高质量的代码,重要步骤注释清晰,后端代码通过阿里代码规范检查,前端代码全部经过eslint语法的严格检验,保证可读性和健壮性
 

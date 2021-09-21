@@ -6,6 +6,7 @@ original: true
 date: 2020/03/25
 ---
 
+
 > streamx-console 是一个综合实时数据平台,低代码(Low Code),Flink Sql平台,可以较好的管理Flink任务,集成了项目编译、发布、参数配置、启动、savepoint,火焰图(flame graph),Flink SQL,监控等诸多功能于一体,大大简化了Flink任务的日常操作和维护,融合了诸多最佳实践。其最终目标是打造成一个实时数仓,流批一体的一站式大数据解决方案
 
 streamx-console 提供了开箱即用的安装包,安装之前对环境有些要求,具体要求如下
