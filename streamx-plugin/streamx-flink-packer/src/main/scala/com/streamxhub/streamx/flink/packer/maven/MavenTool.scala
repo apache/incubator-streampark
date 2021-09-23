@@ -45,7 +45,7 @@ object MavenTool extends Logger {
         case libFile if libFile.isDirectory => libFile.listFiles.filter(isJarFile).foreach(jarSet.add)
         case _ =>
       }
-    logInfo(s"[streamx-packer] start shaded fat-jar: ${jarLibs.mkString}")
+    logInfo(s"[streamx-packer] start shaded fat-jar: ${jarLibs.mkString(",")}")
     // shade jars
     val shadeRequest = {
       val req = new ShadeRequest
