@@ -57,7 +57,11 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
 
     // build fat-jar
     val fatJar = {
-      val fatJarOutputPath = s"$APP_WORKSPACE/${submitRequest.k8sSubmitParam.clusterId}/${jobID.toString}/flink-job.jar"
+      // sub workspace dir like: APP_WORKSPACE/k8s-clusterId@k8s-namespace/job-name/
+      // is streamx, flink job-name under the specified clusterId/namespace must be unique.
+      val fatJarOutputPath = s"$APP_WORKSPACE" +
+        s"/${flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)}@${flinkConfig.getString(KubernetesConfigOptions.NAMESPACE)}" +
+        s"/${flinkConfig.getString(PipelineOptions.NAME)}/flink-job.jar"
       val flinkLibs = extractProvidedLibs(submitRequest)
       val jarPackDeps =  submitRequest.k8sSubmitParam.jarPackDeps
       MavenTool.buildFatJar(jarPackDeps.merge(flinkLibs), fatJarOutputPath)
@@ -77,9 +81,9 @@ object KubernetesNativeSessionSubmit extends KubernetesNativeSubmitTrait with Lo
       // build JobGraph
       packageProgram = PackagedProgram.newBuilder()
         .setJarFile(fatJar)
+        .setConfiguration(flinkConfig)
         .setEntryPointClassName(flinkConfig.get(ApplicationConfiguration.APPLICATION_MAIN_CLASS))
-        .setArguments(
-          flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
+        .setArguments(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_ARGS)
             .orElse(Lists.newArrayList())
             : _*
         ).build()
