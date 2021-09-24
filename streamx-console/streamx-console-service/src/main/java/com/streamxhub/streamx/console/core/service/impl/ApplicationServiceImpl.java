@@ -1128,7 +1128,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 case YARN_PRE_JOB:
                 case KUBERNETES_NATIVE_SESSION:
                 case KUBERNETES_NATIVE_APPLICATION:
-                    flinkUserJar = ConfigConst.APP_PLUGINS().concat(sqlDistJar);
+                    flinkUserJar = ConfigConst.APP_PLUGINS().concat("/").concat(sqlDistJar);
                     break;
                 case YARN_APPLICATION:
                     String pluginPath = HdfsUtils.getDefaultFS().concat(ConfigConst.APP_PLUGINS());
