@@ -25,6 +25,14 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- The flink session mode would resolve the DAG within streamx process,
+             so a full build dependencies is required. -->
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
             <artifactId>streamx-flink-packer</artifactId>
