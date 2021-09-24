@@ -134,6 +134,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
       .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
+      .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
@@ -207,9 +208,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
+    //
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
-      flinkLib,
+//      flinkLib,
       APP_JARS,
       APP_PLUGINS,
       submitRequest.flinkUserJar
