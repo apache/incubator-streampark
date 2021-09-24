@@ -39,7 +39,7 @@ case class FlinkDockerfileTemplate(flinkBaseImage: String, flinkFatjarPath: Stri
   /**
    * get content of DockerFile
    */
-  def dockerfileContent: String = DOCKER_FILE_TEMPLATE.format(flinkBaseImage, "/".concat(fatJarName), fatJarName)
+  def dockerfileContent: String = DOCKER_FILE_TEMPLATE.format(flinkBaseImage, fatJarName, fatJarName)
 
   /**
    * write content of DockerFile to outputPath.
@@ -76,6 +76,5 @@ object FlinkDockerfileTemplate {
       |RUN mkdir -p $FLINK_HOME/usrlib
       |COPY %s $FLINK_HOME/usrlib/%s
       |""".stripMargin
-
 
 }
