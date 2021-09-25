@@ -40,7 +40,7 @@
         </a-select>
       </a-form-item>
 
-      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6))  || (executionMode === 5 || executionMode === 6)">
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
         <a-form-item
           label="Kubernetes Namespace"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
