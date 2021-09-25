@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.submit.domain
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, ResolveOrder}
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, ResolveOrder}
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils, PropertiesUtils}
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates
 import com.streamxhub.streamx.flink.packer.docker.DockerAuthConf
@@ -38,12 +38,22 @@ import java.util.{Map => JavaMap}
 import javax.annotation.Nullable
 import scala.collection.JavaConversions._
 
+/**
+ * @param clusterId            flink cluster id in k8s cluster.
+ * @param flinkBaseImage       tag name of base flink docker image.
+ * @param kubernetesNamespace  k8s namespace.
+ * @param jarPackDeps          additional dependencies info for flink job.
+ * @param dockerAuthConfig     docker authentication configuration.
+ * @param podTemplates         custom flink k8s pod-template content.
+ * @param flinkRestExposedType flink rest-service exposed type on k8s cluster.
+ */
 case class KubernetesSubmitParam(clusterId: String,
                                  flinkBaseImage: String,
                                  kubernetesNamespace: String,
                                  jarPackDeps: JarPackDeps,
                                  @Nullable dockerAuthConfig: DockerAuthConf,
-                                 @Nullable podTemplates: K8sPodTemplates)
+                                 @Nullable podTemplates: K8sPodTemplates,
+                                 @Nullable flinkRestExposedType: FlinkK8sRestExposedType)
 
 case class SubmitRequest(flinkHome: String,
                          flinkVersion: String,

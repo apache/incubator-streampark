@@ -68,17 +68,36 @@
 
       <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
         <a-form-item
-          label="Flink Docker image"
+          label="Flink Base Docker Image"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
-            placeholder="Please enter Flink Base image"
+            placeholder="Please enter the tag of Flink base docker image"
             allowClear
-            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base image is required' }] }]">
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
           </a-input>
         </a-form-item>
       </template>
+
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-form-item
+          label="Rest-Service Exposed Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="classloader.resolve-order"
+            v-decorator="[ 'k8sRestExposedType' ]">
+            <a-select-option
+              v-for="(o,index) in k8sRestExposedType"
+              :key="`k8s_rest_exposed_type_${index}`"
+              :value="o.order">
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
 
       <template v-if="app.jobType === 2">
 
@@ -978,6 +997,11 @@ export default {
         { name: 'parent-first', order: 0 },
         { name: 'child-first', order: 1 }
       ],
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
       executionModes: [
         { mode: 'local', value: 0, disabled: true },
         { mode: 'remote', value: 1, disabled: true },
@@ -1546,6 +1570,7 @@ export default {
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         executionMode: values.executionMode,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
@@ -1596,6 +1621,7 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail|| null,
         executionMode: values.executionMode,
@@ -1765,6 +1791,7 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
+          'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,

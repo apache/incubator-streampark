@@ -71,15 +71,33 @@
 
       <template v-if="executionMode === 6">
         <a-form-item
-          label="Flink Docker image"
+          label="Flink Base Docker Image"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
           :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
           <a-input
             type="text"
-            placeholder="Please enter Flink Base image, such as: flink:1.13.0-scala_2.11-java8"
+            placeholder="Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8"
             allowClear
-            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base image is required' }] }]">
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
           </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="executionMode === 6">
+        <a-form-item
+          label="Rest-Service Exposed Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="classloader.resolve-order"
+            v-decorator="[ 'k8sRestExposedType' ]">
+            <a-select-option
+              v-for="(o,index) in k8sRestExposedType"
+              :key="`k8s_rest_exposed_type_${index}`"
+              :value="o.order">
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
         </a-form-item>
       </template>
 
@@ -884,6 +902,11 @@ export default {
         {name: 'parent-first', order: 0},
         {name: 'child-first', order: 1}
       ],
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
       executionModes: {
         sql: [
           {mode: 'local', value: 0, disabled: true},
@@ -1089,6 +1112,7 @@ export default {
         this.form.getFieldDecorator(item.key, {initialValue: item.defaultValue, preserve: true})
       })
       this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
+      this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
       this.form.getFieldDecorator('executionMode', {initialValue: 4})
       this.form.getFieldDecorator('restartSize', {initialValue: 0})
     },
@@ -1492,6 +1516,7 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
         description: values.description,
@@ -1563,6 +1588,7 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
         description: values.description || null,

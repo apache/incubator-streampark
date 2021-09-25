@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.FsOperatorGetter;
@@ -200,6 +201,10 @@ public class Application implements Serializable {
     private Date createTime;
 
     /**
+     * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
+     */
+    private Integer k8sRestExposedType;
+    /**
      * flink kubernetes pod template
      */
     private String k8sPodTemplate;
@@ -275,6 +280,11 @@ public class Application implements Serializable {
     @JsonIgnore
     public FlinkAppState getFlinkAppStateEnum() {
         return FlinkAppState.of(state);
+    }
+
+    @JsonIgnore
+    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum(){
+        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
     }
 
     @JsonIgnore
@@ -446,7 +456,8 @@ public class Application implements Serializable {
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
         if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-            !this.getExecutionMode().equals(other.getExecutionMode())) {
+            !this.getExecutionMode().equals(other.getExecutionMode()) ||
+            !this.getK8sRestExposedType().equals(other.getK8sRestExposedType())) {
             return false;
         }
 

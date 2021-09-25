@@ -585,6 +585,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             application.setClusterId(appParam.getClusterId());
             application.setFlinkImage(appParam.getFlinkImage());
             application.setK8sNamespace(appParam.getK8sNamespace());
+            application.setK8sRestExposedType(appParam.getK8sRestExposedType());
             application.setK8sPodTemplate(appParam.getK8sPodTemplate());
             application.setK8sJmPodTemplate(appParam.getK8sJmPodTemplate());
             application.setK8sTmPodTemplate(appParam.getK8sTmPodTemplate());
@@ -1194,7 +1195,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                 settingService.getDockerRegisterAddress(),
                 settingService.getDockerRegisterUser(),
                 settingService.getDockerRegisterPassword()),
-            application.getK8sPodTemplates()
+            application.getK8sPodTemplates(),
+            application.getK8sRestExposedTypeEnum()
         );
         SubmitRequest submitInfo = new SubmitRequest(
             settingService.getEffectiveFlinkHome(),

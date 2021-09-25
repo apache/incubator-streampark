@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, StorageType}
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, StorageType}
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
@@ -35,6 +35,7 @@ import org.apache.flink.client.program.ClusterClient
 import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
@@ -50,6 +51,7 @@ import scala.util.Try
 /**
  * kubernetes native mode submit
  */
+//noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
@@ -57,7 +59,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
   @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
-                       stopRequest: StopRequest): StopResponse = {
+                                          stopRequest: StopRequest): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
     val flinkConfig = new Configuration()
@@ -135,6 +137,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
       .safeSet(PipelineOptions.NAME, submitRequest.appName)
       .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
+      .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
@@ -208,10 +211,9 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
-    //
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
-//      flinkLib,
+      // flinkLib,
       APP_JARS,
       APP_PLUGINS,
       submitRequest.flinkUserJar
@@ -247,5 +249,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(KubernetesConfigOptions.CLUSTER_ID)}, " +
       s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
 
+
+  private def covertToServiceExposedType(exposedType: FlinkK8sRestExposedType): ServiceExposedType = exposedType match {
+    case FlinkK8sRestExposedType.ClusterIP => ServiceExposedType.ClusterIP
+    case FlinkK8sRestExposedType.LoadBalancer => ServiceExposedType.LoadBalancer
+    case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
+    case _ => ServiceExposedType.LoadBalancer
+  }
 
 }
