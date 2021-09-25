@@ -910,7 +910,7 @@ export default {
       executionModes: {
         sql: [
           {mode: 'local', value: 0, disabled: true},
-          {mode: 'remote', value: 1, disabled: true},
+          {mode: 'standalone', value: 1, disabled: true},
           {mode: 'yarn pre-job', value: 2, disabled: true},
           {mode: 'yarn session', value: 3, disabled: true},
           {mode: 'yarn application', value: 4, disabled: false},
@@ -919,12 +919,12 @@ export default {
         ],
         customcode: [
           {mode: 'local', value: 0, disabled: true},
-          {mode: 'remote', value: 1, disabled: true},
+          {mode: 'standalone', value: 1, disabled: true},
           {mode: 'yarn pre-job', value: 2, disabled: true},
           {mode: 'yarn session', value: 3, disabled: true},
           {mode: 'yarn application', value: 4, disabled: false},
-          {mode: 'kubernetes session (support soon)', value: 5, disabled: true},
-          {mode: 'kubernetes application (support soon)', value: 6, disabled: true}
+          {mode: 'kubernetes session (comming soon)', value: 5, disabled: true},
+          {mode: 'kubernetes application (comming soon)', value: 6, disabled: true}
         ],
       },
       cpTriggerAction: [
