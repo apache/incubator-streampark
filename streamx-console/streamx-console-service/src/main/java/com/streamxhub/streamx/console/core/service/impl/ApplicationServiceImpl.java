@@ -909,6 +909,12 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             String path = this.projectService.getAppConfPath(application.getProjectId(), application.getModule());
             application.setConfPath(path);
         }
+        // add flink web url info for k8s-mode
+        if (isKubernetesApp(application)) {
+            String restUrl = k8sFlinkTrkMonitor.getRemoteRestUrl(toTrkId(application));
+            application.setFlinkRestUrl(restUrl);
+        }
+
         return application;
     }
 
@@ -1242,6 +1248,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             log.setYarnAppId(submitResponse.clusterId());
             application.setStartTime(new Date());
             application.setEndTime(null);
+            if (isKubernetesApp(application)){
+                application.setDeploy(DeployState.DONE.get());
+            }
             updateById(application);
 
             //2) 启动完成将任务加入到监控中...

@@ -1,5 +1,6 @@
 <template>
   <a-card :bordered="false" style="margin-top: 20px;">
+
     <a-descriptions
       v-if="app"
       bordered
@@ -13,9 +14,16 @@
           icon="arrow-left"
           @click="handleGoBack()"
           style="float: right;margin-top: -8px" />
+        <a-button
+          type="danger"
+          icon="cloud"
+          @click="handleFlinkWebUiView"
+          :disabled="this.app.flinkRestUrl === null"
+          style="float: right;margin-top: -8px;margin-right: 20px">Flink Web UI</a-button>
         <a-divider
           style="margin-top: 5px;margin-bottom: -5px" />
       </template>
+
       <a-descriptions-item
         label="Application Name">
         {{ app.jobName }}
@@ -972,8 +980,13 @@ export default {
       })
     },
     handleView(appId) {
+      if (this.yarn !== null) {
         const url = this.yarn + '/proxy/' + appId + '/'
         window.open(url)
+      }
+    },
+    handleFlinkWebUiView() {
+      window.open(this.app.flinkRestUrl)
     },
     handleSavePoint() {
       const params = {

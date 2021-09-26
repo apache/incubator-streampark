@@ -239,6 +239,11 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
+    /**
+     * Flink Web UI Url
+     */
+    private transient String flinkRestUrl;
+
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
             KubernetesConfigOptions.NAMESPACE.defaultValue() :
