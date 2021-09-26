@@ -92,7 +92,7 @@
         <guava.version>30.0-jre</guava.version>
 
         <checkstyle.version>2.17</checkstyle.version>
-        <puppycrawl.version>8.18</puppycrawl.version>
+        <puppycrawl.version>8.29</puppycrawl.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
