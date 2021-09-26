@@ -81,6 +81,7 @@ object KubernetesNativeApplicationSubmit extends KubernetesNativeSubmitTrait {
     logInfo(s"[flink-submit] already built flink job fat-jar. " +
       s"${flinkConfIdentifierInfo(flinkConfig)}, fatJarPath=${fatJar.getAbsolutePath}")
 
+    logInfo(s"[flink-submit] start building flink job docker image. ${flinkConfIdentifierInfo(flinkConfig)}")
     // step-3: build and push flink application image
     val tagName = s"flinkjob-${submitRequest.k8sSubmitParam.clusterId}"
     val dockerFileTemplate = new FlinkDockerfileTemplate(submitRequest.k8sSubmitParam.flinkBaseImage, fatJar.getAbsolutePath)
