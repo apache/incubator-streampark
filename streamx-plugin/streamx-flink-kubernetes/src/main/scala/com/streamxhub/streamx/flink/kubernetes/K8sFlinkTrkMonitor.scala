@@ -25,6 +25,8 @@ import com.streamxhub.streamx.flink.kubernetes.event.BuildInEvent
 import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV, JobStatusCV, TrkId}
 import org.apache.flink.annotation.Public
 
+import javax.annotation.Nullable
+
 /**
  * Tracking monitor for flink-k8s-native mode, including
  * trace of flink jobs status information, flink metrics
@@ -46,36 +48,36 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
    * can be subcribed are included in
    * com.streamxhub.streamx.flink.kubernetes.event
    */
-  def registerListener(listener: AnyRef)
+  def registerListener(listener: AnyRef): Unit
 
   /**
    * start monitor tracking activities immediately.
    */
-  def start()
+  def start(): Unit
 
   /**
    * stop monitor tracking activities immediately.
    */
-  def stop()
+  def stop(): Unit
 
   /**
    * restart monitor tracking activities immediately.
    */
-  def restart()
+  def restart(): Unit
 
   /**
    * add tracking for the specified flink job which on k8s cluster.
    *
    * @param trkId identifier of flink job
    */
-  def trackingJob(trkId: TrkId)
+  def trackingJob(trkId: TrkId): Unit
 
   /**
    * remove tracking for the specified flink job which on k8s cluster.
    *
    * @param trkId identifier of flink job
    */
-  def unTrackingJob(trkId: TrkId)
+  def unTrackingJob(trkId: TrkId): Unit
 
   /**
    * check whether the specified flink job is in tracking.
@@ -124,7 +126,12 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
    *
    * @param sync should this event be consumed sync or async
    */
-  def postEvent(event: BuildInEvent, sync: Boolean = true)
+  def postEvent(event: BuildInEvent, sync: Boolean = true): Unit
+
+  /**
+   * get flink web rest url of k8s cluster
+   */
+  @Nullable def getRemoteRestUrl(trkId: TrkId): String
 
 }
 

@@ -27,6 +27,7 @@ import com.streamxhub.streamx.flink.kubernetes.event.{BuildInEvent, FlinkJobOper
 import com.streamxhub.streamx.flink.kubernetes.model._
 import com.streamxhub.streamx.flink.kubernetes.watcher.{FlinkJobStatusWatcher, FlinkK8sEventWatcher, FlinkMetricWatcher, FlinkWatcher}
 
+import javax.annotation.Nullable
 import scala.collection.JavaConverters._
 import scala.util.Try
 
@@ -116,6 +117,8 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
     else
       eventBus.postAsync(event)
   }
+
+  @Nullable override def getRemoteRestUrl(trkId: TrkId): String = trkCache.clusterRestUrls.getIfPresent(ClusterKey.of(trkId))
 
 
   /**
