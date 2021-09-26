@@ -137,7 +137,10 @@ class FlinkJobStatusWatcher(conf: JobStatusWatcherConf = JobStatusWatcherConf.de
             // remove trkId from cache of job that needs to be untracked
             trkRs.filter(r => FlinkJobState.isEndState(r._2.jobState))
               .map(_._1)
-              .foreach(cachePool.trackIds.invalidate)
+              .foreach(trkId => {
+                cachePool.trackIds.invalidate(trkId)
+                if (trkId.executeMode == APPLICATION) cachePool.clusterRestUrls.invalidate(trkId.toClusterKey)
+              })
         }
         future
       })
