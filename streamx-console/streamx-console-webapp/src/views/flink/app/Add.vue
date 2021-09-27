@@ -81,9 +81,7 @@
             v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
           </a-input>
         </a-form-item>
-      </template>
 
-      <template v-if="executionMode === 6">
         <a-form-item
           label="Rest-Service Exposed Type"
           :label-col="{lg: {span: 5}, sm: {span: 7}}"
@@ -414,7 +412,7 @@
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
-        v-show="executionMode !== 5 && executionMode !== 6">
+        v-if="executionMode !== 5 && executionMode !== 6">
         <a-input-group compact>
           <a-input-number
             :min="1"
