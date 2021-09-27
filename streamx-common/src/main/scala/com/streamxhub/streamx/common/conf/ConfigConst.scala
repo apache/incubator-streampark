@@ -62,6 +62,10 @@ object ConfigConst {
    */
   val KEY_KERBEROS = "kerberos"
 
+  val KEY_HADOOP_USER_NAME = "HADOOP_USER_NAME"
+
+  val DEFAULT_HADOOP_USER_NAME = "hdfs"
+
   /**
    * hadoop.security.authentication
    */
