@@ -121,7 +121,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.runtime.jobgraph.SavepointConfigOptions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -964,7 +963,7 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
                     customSavepoint = StringUtils.isNotBlank(appParam.getSavePoint()) ? appParam.getSavePoint() :
                         FlinkSubmitHelper
                             .extractDynamicOptionAsJava(application.getDynamicOptions())
-                            .getOrDefault(SavepointConfigOptions.SAVEPOINT_PATH.key(), "");
+                            .getOrDefault(ConfigConst.KEY_FLINK_SAVEPOINT_PATH(), "");
                 }
                 StopRequest stopInfo = new StopRequest(
                     settingService.getEffectiveFlinkHome(),

@@ -110,7 +110,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String k8sNamespace = KubernetesConfigOptions.NAMESPACE.defaultValue() ;
+    private String k8sNamespace = "default";
 
 
     private Integer state;
