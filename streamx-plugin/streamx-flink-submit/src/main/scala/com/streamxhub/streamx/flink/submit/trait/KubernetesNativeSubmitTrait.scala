@@ -21,25 +21,25 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, StorageType}
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, StorageType}
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
-import com.streamxhub.streamx.common.util.{DeflaterUtils, Utils}
+import com.streamxhub.streamx.common.util.DeflaterUtils
+import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
-import org.apache.commons.codec.digest.DigestUtils
 import org.apache.commons.collections.MapUtils
 import org.apache.commons.lang.StringUtils
 import org.apache.flink.api.common.JobID
 import org.apache.flink.client.deployment.application.ApplicationConfiguration
 import org.apache.flink.client.deployment.{ClusterSpecification, DefaultClusterClientServiceLoader}
 import org.apache.flink.client.program.ClusterClient
-import org.apache.flink.configuration.{ConfigOption, Configuration, CoreOptions, DeploymentOptions}
+import org.apache.flink.configuration._
 import org.apache.flink.kubernetes.KubernetesClusterDescriptor
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions.ServiceExposedType
 import org.apache.flink.runtime.jobgraph.SavepointConfigOptions
 
 import java.io.File
 import java.lang.{Boolean => JavaBool}
-import java.util.regex.Pattern
 import javax.annotation.Nonnull
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
@@ -51,16 +51,15 @@ import scala.util.Try
 /**
  * kubernetes native mode submit
  */
+//noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
-  // effective k-v regex pattern of submit.dynamicOption
-  private val DYNAMIC_OPTION_ITEM_PATTERN = Pattern.compile("(-D)?(\\S+)=(\\S+)")
 
   // Tip: Perhaps it would be better to let users freely specify the savepoint directory
-  protected def doStop(@Nonnull executeMode: ExecutionMode,
-                       stopRequest: StopRequest): StopResponse = {
+  @throws[Exception] protected def doStop(@Nonnull executeMode: ExecutionMode,
+                                          stopRequest: StopRequest): StopResponse = {
     assert(StringUtils.isNotBlank(stopRequest.clusterId))
 
     val flinkConfig = new Configuration()
@@ -75,37 +74,36 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       clusterDescriptor = getK8sClusterDescriptor(flinkConfig)
       client = clusterDescriptor.retrieve(flinkConfig.getString(KubernetesConfigOptions.CLUSTER_ID)).getClusterClient
       val jobID = JobID.fromHexString(stopRequest.jobId)
-      val savePointDir = getOptionFromDefaultFlinkConfig(stopRequest.flinkHome, SavepointConfigOptions.SAVEPOINT_PATH)
-      val actionResult = {
-        if (stopRequest.withDrain) {
-          client.stopWithSavepoint(jobID, true, savePointDir).get()
-        } else if (stopRequest.withSavePoint) {
-          client.cancelWithSavepoint(jobID, savePointDir).get()
-        } else {
-          client.cancel(jobID).get()
+      val savePointDir = stopRequest.customSavePointPath
+
+      val actionResult = (stopRequest.withSavePoint, stopRequest.withDrain) match {
+        case (true, true) if savePointDir.nonEmpty => client.stopWithSavepoint(jobID, true, savePointDir).get()
+        case (true, false) if savePointDir.nonEmpty => client.cancelWithSavepoint(jobID, savePointDir).get()
+        case _ => client.cancel(jobID).get()
           ""
-        }
       }
       StopResponse(actionResult)
-
+    } catch {
+      case e: Exception =>
+        logger.error(s"[flink-submit] stop flink job failed, mode=${executeMode.toString}, stopRequest=${stopRequest}")
+        throw e
     } finally {
       if (client != null) client.close()
       if (clusterDescriptor != null) clusterDescriptor.close()
     }
   }
 
+  //noinspection DuplicatedCode
   /*
-  tips:
-  The default kubernetes cluster communication information will be obtained from ./kube/conf file.
+    tips:
+    The default kubernetes cluster communication information will be obtained from ./kube/conf file.
 
-  If you need to customize the kubernetes cluster context, such as multiple target kubernetes clusters
-  or multiple kubernetes api-server accounts, there are two ways to achieve this：
-   1. Get the KubernetesClusterDescriptor by manually, building the FlinkKubeClient and specify
-       the kubernetes context contents in the FlinkKubeClient.
-   2. Specify an explicit key kubernetes.config.file in flinkConfig instead of the default value.
-
-  todo: Perhaps we need to manage the KubernetesClusterDescriptor instances through CachePool
-  */
+    If you need to customize the kubernetes cluster context, such as multiple target kubernetes clusters
+    or multiple kubernetes api-server accounts, there are two ways to achieve this：
+     1. Get the KubernetesClusterDescriptor by manually, building the FlinkKubeClient and specify
+         the kubernetes context contents in the FlinkKubeClient.
+     2. Specify an explicit key kubernetes.config.file in flinkConfig instead of the default value.
+    */
   def getK8sClusterDescriptorAndSpecification(flinkConfig: Configuration)
   : (KubernetesClusterDescriptor, ClusterSpecification) = {
     val serviceLoader = new DefaultClusterClientServiceLoader
@@ -115,8 +113,12 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     (clusterDescriptor, clusterSpecification)
   }
 
+  //noinspection DuplicatedCode
   def getK8sClusterDescriptor(flinkConfig: Configuration): KubernetesClusterDescriptor = {
-    getK8sClusterDescriptorAndSpecification(flinkConfig)._1
+    val serviceLoader = new DefaultClusterClientServiceLoader
+    val clientFactory = serviceLoader.getClusterClientFactory(flinkConfig)
+    val clusterDescriptor = clientFactory.createClusterDescriptor(flinkConfig).asInstanceOf[KubernetesClusterDescriptor]
+    clusterDescriptor
   }
 
   /**
@@ -132,7 +134,10 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
       .safeSet(KubernetesConfigOptions.CLUSTER_ID, submitRequest.k8sSubmitParam.clusterId)
       .safeSet(KubernetesConfigOptions.NAMESPACE, submitRequest.k8sSubmitParam.kubernetesNamespace)
       .safeSet(SavepointConfigOptions.SAVEPOINT_PATH, submitRequest.savePoint)
-      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkDockerImage)
+      .safeSet(KubernetesConfigOptions.CONTAINER_IMAGE, submitRequest.k8sSubmitParam.flinkBaseImage)
+      .safeSet(PipelineOptions.NAME, submitRequest.appName)
+      .safeSet(CoreOptions.CLASSLOADER_RESOLVE_ORDER, submitRequest.resolveOrder.getName)
+      .set(KubernetesConfigOptions.REST_SERVICE_EXPOSED_TYPE, covertToServiceExposedType(submitRequest.k8sSubmitParam.flinkRestExposedType))
 
     if (DevelopmentMode.FLINKSQL == submitRequest.developmentMode) {
       flinkConfig.set(ApplicationConfiguration.APPLICATION_MAIN_CLASS, "com.streamxhub.streamx.flink.cli.SqlClient")
@@ -173,22 +178,6 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     flinkConfig
   }
 
-  /**
-   * extract flink configuration from submitRequest.dynamicOption
-   */
-  @Nonnull def extractDynamicOption(dynamicOption: Array[String]): Map[String, String] = {
-    if (Utils.isEmpty(dynamicOption)) {
-      return Map.empty
-    }
-    dynamicOption
-      .filter(_ != null)
-      .map(_.trim)
-      .map(DYNAMIC_OPTION_ITEM_PATTERN.matcher(_))
-      .filter(!_.matches())
-      .map(m => m.group(2) -> m.group(3))
-      .toMap
-  }
-
   private[submit] implicit class EnhanceFlinkConfiguration(flinkConfig: Configuration) {
     def safeSet(option: ConfigOption[String], value: String): Configuration = {
       flinkConfig match {
@@ -224,7 +213,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
     val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
-      flinkLib,
+      // flinkLib,
       APP_JARS,
       APP_PLUGINS,
       submitRequest.flinkUserJar
@@ -255,5 +244,17 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
     libSet
   }
 
+
+  protected def flinkConfIdentifierInfo(@Nonnull conf: Configuration): String =
+    s"executionMode=${conf.get(DeploymentOptions.TARGET)}, clusterId=${conf.get(KubernetesConfigOptions.CLUSTER_ID)}, " +
+      s"namespace=${conf.get(KubernetesConfigOptions.NAMESPACE)}"
+
+
+  private def covertToServiceExposedType(exposedType: FlinkK8sRestExposedType): ServiceExposedType = exposedType match {
+    case FlinkK8sRestExposedType.ClusterIP => ServiceExposedType.ClusterIP
+    case FlinkK8sRestExposedType.LoadBalancer => ServiceExposedType.LoadBalancer
+    case FlinkK8sRestExposedType.NodePort => ServiceExposedType.NodePort
+    case _ => ServiceExposedType.LoadBalancer
+  }
 
 }

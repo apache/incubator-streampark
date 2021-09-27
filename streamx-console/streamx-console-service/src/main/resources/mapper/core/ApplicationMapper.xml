@@ -12,7 +12,7 @@
         <result column="APP_ID" jdbcType="VARCHAR" property="appId"/>
         <result column="CLUSTER_ID" jdbcType="VARCHAR" property="clusterId"/>
         <result column="FLINK_IMAGE" jdbcType="VARCHAR" property="flinkImage"/>
-        <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="K8sNameSpace"/>
+        <result column="K8S_NAMESPACE" jdbcType="VARCHAR" property="k8sNamespace"/>
         <result column="APP_TYPE" jdbcType="INTEGER" property="appType"/>
         <result column="JOB_TYPE" jdbcType="INTEGER" property="jobType"/>
         <result column="EXECUTION_MODE" jdbcType="INTEGER" property="executionMode"/>
@@ -43,6 +43,10 @@
         <result column="ALERT_EMAIL" jdbcType="VARCHAR" property="alertEmail"/>
         <result column="DESCRIPTION" jdbcType="VARCHAR" property="description"/>
         <result column="CREATE_TIME" jdbcType="DATE" property="createTime"/>
+        <result column="K8S_REST_EXPOSED_TYPE" jdbcType="INTEGER" property="k8sRestExposedType"/>
+        <result column="K8S_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sPodTemplate"/>
+        <result column="K8S_JM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sJmPodTemplate"/>
+        <result column="K8S_TM_POD_TEMPLATE" jdbcType="LONGVARCHAR" property="k8sTmPodTemplate"/>
     </resultMap>
 
     <select id="page" resultType="application" parameterType="application">

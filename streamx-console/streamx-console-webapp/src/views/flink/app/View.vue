@@ -426,7 +426,8 @@
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
-              && record['optionState'] === 0"
+              && record['optionState'] === 0
+              && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
             v-permit="'app:mapping'"
             @click.native="handleMapping(record)"/>
           <svg-icon
@@ -590,7 +591,7 @@
           <svg-icon
             slot="icon"
             name="play"/>
-          Start application
+          Start Application
         </template>
 
         <a-form
@@ -599,7 +600,8 @@
           <a-form-item
             label="flame Graph"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="executionMode !== 5 && executionMode !== 6">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -711,8 +713,8 @@
           :form="formStopSavePoint">
           <a-form-item
             label="Savepoint"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -724,8 +726,8 @@
           </a-form-item>
           <a-form-item
             label="Drain"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -735,6 +737,19 @@
             <span
               class="conf-switch"
               style="color:darkgrey"> Send max watermark before stoping</span>
+          </a-form-item>
+          <a-form-item
+            label="Custom SavePoint"
+            style="margin-bottom: 10px"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="savePoint">
+            <a-input
+              type="text"
+              placeholder="Entry the custom savepoint path"
+              v-model="customSavepoint"
+              v-decorator="['customSavepoint']"/>
+            <div style="color:darkgrey">Custom savepoint path is not supported on YARN mode.</div>
           </a-form-item>
         </a-form>
 
@@ -842,22 +857,22 @@
   </div>
 </template>
 <script>
-import Ellipsis from '@/components/Ellipsis'
-import State from './State'
-import {mapActions} from 'vuex'
-import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
-import {history, latest} from '@api/savepoint'
-import {flamegraph} from '@api/metrics'
-import {weburl} from '@api/setting'
-import {Terminal} from 'xterm'
-import 'xterm/css/xterm.css'
-import SockJS from 'sockjs-client'
-import {baseUrl} from '@/api/baseUrl'
-import Stomp from 'webstomp-client'
-import SvgIcon from '@/components/SvgIcon'
-import {check} from '@/api/setting'
+  import Ellipsis from '@/components/Ellipsis'
+  import State from './State'
+  import {mapActions} from 'vuex'
+  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+  import {history, latest} from '@api/savepoint'
+  import {flamegraph} from '@api/metrics'
+  import {weburl} from '@api/setting'
+  import {Terminal} from 'xterm'
+  import 'xterm/css/xterm.css'
+  import SockJS from 'sockjs-client'
+  import {baseUrl} from '@/api/baseUrl'
+  import Stomp from 'webstomp-client'
+  import SvgIcon from '@/components/SvgIcon'
+  import {check} from '@/api/setting'
 
-export default {
+  export default {
   components: {Ellipsis, State, SvgIcon},
   data() {
     return {
@@ -892,9 +907,11 @@ export default {
       formMapping: null,
       drain: false,
       savePoint: true,
+      customSavepoint: null,
       flameGraph: false,
       restart: false,
       application: null,
+      executionMode: null,
       latestSavePoint: null,
       historySavePoint: null,
       allowNonRestoredState: false,
@@ -1009,7 +1026,10 @@ export default {
           {text: 'CANCELED', value: 11},
           {text: 'FINISHED', value: 12},
           {text: 'SUSPENDED', value: 13},
-          {text: 'LOST', value: 15}
+          {text: 'LOST', value: 15},
+          {text: 'SILENT', value: 19},
+          {text: 'TERMINATED', value: 20},
+          {text: 'FINISHED', value: 21},
         ]
       }, {
         title: 'Deploy Status',
@@ -1176,7 +1196,9 @@ export default {
           app.state === 11 ||
           app.state === 12 ||
           app.state === 13 ||
-          app.state === 15 || false
+          app.state === 15 ||
+          app.state === 20 ||
+          app.state === 21 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1191,6 +1213,7 @@ export default {
         }).then((resp) => {
           this.latestSavePoint = resp.data || null
           this.startVisible = true
+          this.executionMode = app.executionMode
           if (!this.latestSavePoint) {
             history({
               appId: this.application.id,
@@ -1285,6 +1308,7 @@ export default {
       const id = this.application.id
       const savePointed = this.savePoint
       const drain = this.drain
+      const customSavePoint = this.customSavepoint
       this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
@@ -1298,7 +1322,8 @@ export default {
         cancel({
           id: id,
           savePointed: savePointed,
-          drain: drain
+          drain: drain,
+          savePoint: customSavePoint
         }).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
@@ -1354,7 +1379,8 @@ export default {
           app.state === 11 ||
           app.state === 12 ||
           app.state === 15 ||
-          app.state === 19 || false
+          app.state === 20 ||
+          app.state === 21 || false
     },
 
     handleDelete(app) {

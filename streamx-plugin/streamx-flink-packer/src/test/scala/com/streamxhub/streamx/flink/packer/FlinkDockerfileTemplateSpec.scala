@@ -20,7 +20,8 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.flink.packer.FlinkDockerfileTemplate.DEFAULT_DOCKER_FILE_NAME
+import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate
+import com.streamxhub.streamx.flink.packer.docker.FlinkDockerfileTemplate.DEFAULT_DOCKER_FILE_NAME
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers

@@ -108,6 +108,8 @@ object ConfigConst {
 
   val KEY_FLINK_APP_NAME = "yarn.application.name"
 
+  val KEY_FLINK_SAVEPOINT_PATH = "execution.savepoint.path"
+
   // --checkpoints--
   val KEY_FLINK_CHECKPOINTS_ENABLE = "flink.checkpoints.enable"
 
@@ -323,6 +325,12 @@ object ConfigConst {
    */
   val DEFAULT_MAVEN_REMOTE_URL = "https://repo1.maven.org/maven2/"
 
+  /**
+   * namespace for docker image used in docker build env and image register
+   */
+    val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+    val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+    lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   val LOGO =
     """

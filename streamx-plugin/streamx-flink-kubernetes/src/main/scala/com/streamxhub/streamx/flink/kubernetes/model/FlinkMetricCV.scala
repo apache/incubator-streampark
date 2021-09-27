@@ -30,21 +30,44 @@ case class FlinkMetricCV(totalJmMemory: Integer,
                          totalSlot: Integer,
                          availableSlot: Integer,
                          runningJob: Integer,
+                         finishedJob: Integer,
+                         cancelledJob: Integer,
+                         failedJob: Integer,
                          pollAckTime: Long) {
 
   def +(another: FlinkMetricCV): FlinkMetricCV = {
-    FlinkMetricCV(
+    this.copy(
       totalJmMemory + another.totalJmMemory,
       totalTmMemory + another.totalTmMemory,
       totalTm + another.totalTm,
       totalSlot + another.totalSlot,
       availableSlot + another.availableSlot,
       runningJob + another.runningJob,
+      finishedJob + another.finishedJob,
+      cancelledJob + another.cancelledJob,
+      failedJob + another.failedJob,
       math.max(pollAckTime, another.pollAckTime)
     )
   }
+
+  def totalJob(): Integer = runningJob + finishedJob + cancelledJob + failedJob
+
+  def equalsPayload(another: FlinkMetricCV): Boolean = {
+    totalJmMemory == another.totalTmMemory &&
+      totalTmMemory == another.totalTmMemory &&
+      totalTm == another.totalTm &&
+      totalSlot == another.totalSlot &&
+      availableSlot == another.availableSlot &&
+      runningJob == another.runningJob &&
+      finishedJob == another.finishedJob &&
+      cancelledJob == another.cancelledJob &&
+      failedJob == another.failedJob
+  }
+
+  def nonEqualsPayload(another: FlinkMetricCV): Boolean = !equalsPayload(another)
+
 }
 
 object FlinkMetricCV {
-  def empty: FlinkMetricCV = FlinkMetricCV(0, 0, 0, 0, 0, 0, System.currentTimeMillis)
+  def empty: FlinkMetricCV = FlinkMetricCV(0, 0, 0, 0, 0, 0, 0, 0, 0, System.currentTimeMillis)
 }

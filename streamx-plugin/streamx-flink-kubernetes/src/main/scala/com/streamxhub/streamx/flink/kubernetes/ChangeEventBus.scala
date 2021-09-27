@@ -20,29 +20,32 @@
  */
 package com.streamxhub.streamx.flink.kubernetes
 
+
+import com.google.common.eventbus.{AsyncEventBus, EventBus}
+
+import java.util.concurrent.{LinkedBlockingQueue, ThreadPoolExecutor, TimeUnit}
+
 /**
  * author: Al-assad
- *
- * @param jobStatusWatcherConf configuration for flink job status tracking process
- * @param metricWatcherConf    configuration for flink metric tracking process
  */
-case class FlinkTrackConf(jobStatusWatcherConf: JobStatusWatcherConf, metricWatcherConf: MetricWatcherConf)
+// noinspection UnstableApiUsage
+class ChangeEventBus {
 
-case class MetricWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
+  private val execPool = new ThreadPoolExecutor(6, 12,
+    0L, TimeUnit.MILLISECONDS, new LinkedBlockingQueue[Runnable](10000))
 
-case class JobStatusWatcherConf(sglTrkTaskTimeoutSec: Long, sglTrkTaskIntervalSec: Long)
+  private[kubernetes] val asyncEventBus = new AsyncEventBus("[streamx][flink-k8s]AsyncEventBus", execPool)
+
+  private[kubernetes] val syncEventBus = new EventBus("[streamx][flink-k8s]SyncEventBus")
+
+  def postAsync(event: AnyRef): Unit = asyncEventBus.post(event)
+
+  def postSync(event: AnyRef): Unit = syncEventBus.post(event)
+
+  def registerListener(listener: AnyRef): Unit = {
+    asyncEventBus.register(listener)
+    syncEventBus.register(listener)
+  }
 
 
-object FlinkTrackConf {
-  def default: FlinkTrackConf = FlinkTrackConf(JobStatusWatcherConf.default, MetricWatcherConf.default)
 }
-
-object MetricWatcherConf {
-  def default: MetricWatcherConf = MetricWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 30)
-}
-
-object JobStatusWatcherConf {
-  def default: JobStatusWatcherConf = JobStatusWatcherConf(sglTrkTaskTimeoutSec = 120, sglTrkTaskIntervalSec = 10)
-}
-
-

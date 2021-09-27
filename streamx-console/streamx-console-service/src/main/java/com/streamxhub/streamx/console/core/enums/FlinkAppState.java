@@ -91,7 +91,8 @@ public enum FlinkAppState implements Serializable {
     /**
      * All of the job's tasks have successfully finished.
      */
-    SUCCEEDED(12),
+    FINISHED(12),
+
     /**
      * The job has been suspended which means that it has been stopped but not been removed from a
      * potential HA job store.
@@ -118,6 +119,22 @@ public enum FlinkAppState implements Serializable {
 
     //已回滚
     REVOKED(18),
+
+    /**
+     * Lost track of flink job temporarily.
+     * A complete loss of flink job tracking translates into LOST state.
+     */
+    SILENT(19),
+
+    /**
+     * Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED
+     */
+    TERMINATED(20),
+
+    /**
+     * Flink job has terminated vaguely, maybe FINISHED, CACNELED or FAILED
+     */
+    POS_TERMINATED (21),
 
     /**
      * yarn 中检查到被killed
@@ -157,8 +174,8 @@ public enum FlinkAppState implements Serializable {
          * covert from com.streamxhub.streamx.flink.k8s.enums.FlinkJobState
          */
         public static FlinkAppState fromK8sFlinkJobState(Enumeration.Value flinkJobState) {
-            if (FlinkJobState.K8S_DEPLOYING().equals(flinkJobState)) {
-                return DEPLOYING;
+            if (FlinkJobState.K8S_INITIALIZING().equals(flinkJobState)) {
+                return INITIALIZING;
             } else {
                 return of(flinkJobState.toString());
             }

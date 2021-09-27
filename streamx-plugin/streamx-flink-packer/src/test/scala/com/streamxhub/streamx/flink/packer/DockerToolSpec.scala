@@ -20,7 +20,8 @@
  */
 package com.streamxhub.streamx.flink.packer
 
-import com.streamxhub.streamx.common.conf.K8sConfigConst._
+import com.streamxhub.streamx.common.conf.ConfigConst.DOCKER_IMAGE_NAMESPACE
+import com.streamxhub.streamx.flink.packer.docker.{DockerAuthConf, DockerTool, FlinkDockerfileTemplate}
 import org.apache.commons.io.FileUtils
 import org.scalatest.BeforeAndAfter
 import org.scalatest.matchers.must.Matchers
@@ -43,16 +44,16 @@ class DockerToolSpec extends AnyWordSpec with BeforeAndAfter with Matchers {
   "DockerTool" when {
     "build flink image without push" should {
       "when remote register is not set" in {
+        val authConf = DockerAuthConf("", "", "")
         val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
-        val tag = DockerTool.buildFlinkImage(null, null, null, outputDir.getAbsolutePath, template, "myflink-job")
-        tag mustBe s"$IMAGE_NAMESPACE/myflink-job"
+        val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
+        tag mustBe s"$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
       "when remote register is set" in {
-        System.setProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "registry.cn-hangzhou.aliyuncs.com")
+        val authConf = DockerAuthConf("registry.cn-hangzhou.aliyuncs.com", "user123", "123")
         val template = new FlinkDockerfileTemplate("flink:1.13.0-scala_2.11", path("flink/WordCountSQL.jar"))
-        val tag = DockerTool.buildFlinkImage(null, null, null, outputDir.getAbsolutePath, template, "myflink-job")
-        tag mustBe s"$K8S_IMAGE_REGISTER_ADDRESS/$IMAGE_NAMESPACE/myflink-job"
-
+        val tag = DockerTool.buildFlinkImage(authConf, outputDir.getAbsolutePath, template, "myflink-job")
+        tag mustBe s"${authConf.registerAddress}/$DOCKER_IMAGE_NAMESPACE/myflink-job"
       }
     }
     "operate image" should {

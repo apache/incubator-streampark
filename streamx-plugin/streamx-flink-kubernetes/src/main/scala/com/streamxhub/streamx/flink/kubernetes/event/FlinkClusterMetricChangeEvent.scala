@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2019 The StreamX Project
+ * Copyright (c) 2021 The StreamX Project
  * <p>
  * Licensed to the Apache Software Foundation (ASF) under one
  * or more contributor license agreements. See the NOTICE file
@@ -18,26 +18,11 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.common.conf
+package com.streamxhub.streamx.flink.kubernetes.event
+
+import com.streamxhub.streamx.flink.kubernetes.model.{ClusterKey, FlinkMetricCV}
 
 /**
- * Config for K8s cluster
  * author: Al-assad
  */
-object K8sConfigConst {
-
-  /**
-   * docker image regoster address for remote k8s cluster.
-   * when this configuration item is empty, it means that
-   * the dockerhub public repository is used.
-   */
-  lazy val KEY_K8S_IMAGE_REGISTER_ADDRESS = "k8s.image.register.address"
-  lazy val K8S_IMAGE_REGISTER_ADDRESS: String = System.getProperty(KEY_K8S_IMAGE_REGISTER_ADDRESS, "")
-
-  /**
-   * namespace for docker image used in docker build env and image register
-   */
-  val IMAGE_NAMESPACE = "streamx"
-
-
-}
+case class FlinkClusterMetricChangeEvent(clusterKey: ClusterKey, metrics: FlinkMetricCV) extends BuildInEvent

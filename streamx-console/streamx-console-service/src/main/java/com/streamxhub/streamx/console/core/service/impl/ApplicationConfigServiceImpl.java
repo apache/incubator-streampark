@@ -41,6 +41,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -239,9 +240,9 @@ public class ApplicationConfigServiceImpl
     @Override
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
-            String profiles = context.getEnvironment().getActiveProfiles()[0];
+            String[] activeProfiles = context.getEnvironment().getActiveProfiles();
             String path;
-            if (profiles.equals(PROD_ENV_NAME)) {
+            if (ArrayUtils.isNotEmpty(activeProfiles) && activeProfiles[0].equals(PROD_ENV_NAME)) {
                 //生产环境部署读取conf/flink-application.template
                 path = WebUtils.getAppDir("conf").concat("/flink-application.template");
             } else {

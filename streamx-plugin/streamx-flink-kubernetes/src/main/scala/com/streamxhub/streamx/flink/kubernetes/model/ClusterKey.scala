@@ -18,28 +18,19 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.packer
+package com.streamxhub.streamx.flink.kubernetes.model
 
-import java.util.regex.Pattern
+import com.streamxhub.streamx.flink.kubernetes.enums.FlinkK8sExecuteMode
 
-case class MavenArtifact(groupId: String, artifactId: String, version: String) {
+/**
+ * flink cluster identifier on kubernetes
+ * author:Al-assad
+ */
+case class ClusterKey(executeMode: FlinkK8sExecuteMode.Value,
+                      namespace: String = "default",
+                      clusterId: String)
+
+object ClusterKey {
+  def of(trkId: TrkId): ClusterKey = ClusterKey(trkId.executeMode, trkId.namespace, trkId.clusterId)
 }
 
-object MavenArtifact {
-  private val p = Pattern.compile("([^: ]+):([^: ]+):([^: ]+)")
-
-  /**
-   * build from coords
-   */
-  def of(coords: String): MavenArtifact = {
-    p.matcher(coords) match {
-      case m if m.matches() =>
-        val groupId = m.group(1)
-        val artifactId = m.group(2)
-        val version = m.group(3)
-        MavenArtifact(groupId, artifactId, version)
-      case _ =>
-        throw new IllegalArgumentException(s"Bad artifact coordinates $coords, expected format is <groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>")
-    }
-  }
-}

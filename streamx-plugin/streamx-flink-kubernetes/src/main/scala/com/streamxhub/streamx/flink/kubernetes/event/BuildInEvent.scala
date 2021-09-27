@@ -18,11 +18,8 @@
  * specific language governing permissions and limitations
  * under the License.
  */
-package com.streamxhub.streamx.flink.kubernetes.model
+package com.streamxhub.streamx.flink.kubernetes.event
 
-/**
- * author:Al-assad
- *
- * @param updateTime last update time for current key
- */
-case class TrackIdCV(updateTime: Long)
+trait BuildInEvent {
+
+}

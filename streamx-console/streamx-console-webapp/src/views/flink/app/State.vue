@@ -63,6 +63,16 @@
         color="#13c2c2"
         v-if="data['state'] === 16"
         class="status-processing-restarting">MAPPING</a-tag>
+      <a-tag
+        color="#738df8"
+        v-if="data['state'] === 19"
+        class="status-processing-initializing">SILENT</a-tag>
+      <a-tag
+        color="#8E50FF"
+        v-if="data['state'] === 20">TERMINATED</a-tag>
+      <a-tag
+        color="#1890ff"
+        v-if="data['state'] === 21">FINISHED</a-tag>
     </div>
     <div v-else class="app_state">
       <a-tag

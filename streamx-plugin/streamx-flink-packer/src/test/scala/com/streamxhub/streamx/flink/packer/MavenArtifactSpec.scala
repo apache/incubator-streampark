@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.flink.packer
 
 import com.streamxhub.streamx.flink.packer.MavenArtifactSpec.illegalArtifactCoordsCases
+import com.streamxhub.streamx.flink.packer.maven.MavenArtifact
 import org.scalatest.matchers.must.Matchers
 import org.scalatest.wordspec.AnyWordSpec
 

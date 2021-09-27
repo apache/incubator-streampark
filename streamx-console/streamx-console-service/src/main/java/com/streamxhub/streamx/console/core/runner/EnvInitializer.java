@@ -62,16 +62,14 @@ public class EnvInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        System.getProperties().setProperty(
-            ConfigConst.KEY_STREAMX_WORKSPACE(),
-            context.getEnvironment().getProperty(
-                ConfigConst.KEY_STREAMX_WORKSPACE(),
-                ConfigConst.STREAMX_WORKSPACE_DEFAULT()
-            )
-        );
+        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
         // local storage must exists
-        // TODO just for dev|test.
-        //storageInitialize(StorageType.LFS);
+        storageInitialize(StorageType.LFS);
+    }
+
+    private void overrideSystemProp(String key, String defaultValue){
+        System.getProperties().setProperty(key, context.getEnvironment().getProperty(key, defaultValue));
     }
 
     /**

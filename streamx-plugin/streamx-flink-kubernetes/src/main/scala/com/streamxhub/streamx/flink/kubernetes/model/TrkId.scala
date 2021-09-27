@@ -29,10 +29,10 @@ import scala.util.Try
  * tracking identifier for flink on kubernetes
  * author:Al-assad
  */
-case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
-                   namespace: String,
-                   clusterId: String,
-                   @Nullable jobId: String) {
+case class TrkId(executeMode: FlinkK8sExecuteMode.Value,
+                 namespace: String = "default",
+                 clusterId: String,
+                 @Nullable jobId: String) {
 
   /**
    * check whether fields of trackId are legal
@@ -42,22 +42,38 @@ case class TrackId(executeMode: FlinkK8sExecuteMode.Value,
       return false
     }
     executeMode match {
-      case FlinkK8sExecuteMode.SESSION =>
-        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
       case FlinkK8sExecuteMode.APPLICATION =>
+        Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false)
+      case FlinkK8sExecuteMode.SESSION =>
         Try(namespace.nonEmpty).getOrElse(false) && Try(clusterId.nonEmpty).getOrElse(false) && Try(jobId.nonEmpty).getOrElse(false)
       case _ => false
     }
   }
 
+  /**
+   * check whether fields of trackId are no legal
+   */
+  def nonLegal: Boolean = !isLegal
+
+  /**
+   * covert to ClusterKey
+   */
+  def toClusterKey: ClusterKey = ClusterKey(executeMode, namespace, clusterId)
+
+  /**
+   * belong to clutser
+   */
+  def belongTo(clusterKey: ClusterKey): Boolean =
+    executeMode == clusterKey.executeMode && namespace == clusterKey.namespace && clusterId == clusterKey.clusterId
+
 }
 
-object TrackId {
-  def onSession(namespace: String, clusterId: String, jobId: String): TrackId = {
+object TrkId {
+  def onSession(namespace: String, clusterId: String, jobId: String): TrkId = {
     this (FlinkK8sExecuteMode.SESSION, namespace, clusterId, jobId)
   }
 
-  def onApplication(namespace: String, clusterId: String): TrackId = {
+  def onApplication(namespace: String, clusterId: String): TrkId = {
     this (FlinkK8sExecuteMode.APPLICATION, namespace, clusterId, "")
   }
 }

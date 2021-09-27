@@ -23,15 +23,32 @@ package com.streamxhub.streamx.flink.kubernetes.enums
 import org.apache.flink.api.common.JobStatus
 
 /**
- * author:Al-assad
  * flink job status on kubernetes
+ * author:Al-assad
  */
 object FlinkJobState extends Enumeration {
 
-  val K8S_DEPLOYING, LOST, OTHER = Value
+  // flink job has been submit by the streamx.
+  val STARTING,
+  // flink k8s resources are being initialized.
+  K8S_INITIALIZING,
+  // lost track of flink job temporarily.
+  SILENT,
+  // flink job has terminated positively (maybe FINISHED or CANCELED)
+  POS_TERMINATED,
+  // flink job has terminated (maybe FINISHED, CACNELED or FAILED)
+  TERMINATED,
+  // lost track of flink job completely.
+  LOST,
+  // other flink state
+  OTHER = Value
 
+  // the following enum have the same meaning as the native flink state enum.
   // @see org.apache.flink.api.common.JobStatus
   val INITIALIZING, CREATED, RUNNING, FAILING, FAILED, CANCELLING, CANCELED, FINISHED, RESTARTING, SUSPENDED, RECONCILING = Value
+
+  // ending flink states, the tracking monitor will stop tracking these states of flink job.
+  val endingStates = Seq(FAILED, CANCELED, FINISHED, POS_TERMINATED, TERMINATED, LOST)
 
   def of(value: String): FlinkJobState.Value = {
     this.values.find(_.toString == value).getOrElse(OTHER)
@@ -41,5 +58,8 @@ object FlinkJobState extends Enumeration {
     val jobStatusStr = jobStatus.toString
     this.values.find(_.toString == jobStatusStr).getOrElse(OTHER)
   }
+
+  // whether flink job state is ending state
+  def isEndState(state: FlinkJobState.Value): Boolean = endingStates.contains(state)
 
 }

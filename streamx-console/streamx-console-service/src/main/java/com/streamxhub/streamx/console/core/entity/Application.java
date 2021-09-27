@@ -29,6 +29,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
+import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.FsOperatorGetter;
@@ -45,10 +46,16 @@ import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
 import com.streamxhub.streamx.console.core.service.SettingService;
+import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
+import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
+import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import java.io.File;
 import java.io.IOException;
@@ -103,7 +110,7 @@ public class Application implements Serializable {
     /**
      * k8s部署下的namespace
      */
-    private String K8sNameSpace;
+    private String k8sNamespace = "default";
 
 
     private Integer state;
@@ -194,6 +201,17 @@ public class Application implements Serializable {
     private Date createTime;
 
     /**
+     * The exposed type of the rest service of K8s(kubernetes.rest-service.exposed.type)
+     */
+    private Integer k8sRestExposedType;
+    /**
+     * flink kubernetes pod template
+     */
+    private String k8sPodTemplate;
+    private String k8sJmPodTemplate;
+    private String k8sTmPodTemplate;
+
+    /**
      * running job
      */
     private transient JobsOverview.Task overview;
@@ -221,28 +239,62 @@ public class Application implements Serializable {
     private transient String createTimeTo;
     private transient String backUpDescription;
 
-    @JsonIgnore
-    public void setK8sNameSpace(String k8sNameSpace) {
-        K8sNameSpace = StringUtils.isBlank(k8sNameSpace) ? "default" : k8sNameSpace;
+    /**
+     * Flink Web UI Url
+     */
+    private transient String flinkRestUrl;
+
+    public void setK8sNamespace(String k8sNamespace) {
+        this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
+            KubernetesConfigOptions.NAMESPACE.defaultValue() :
+            k8sNamespace;
+    }
+
+    public K8sPodTemplates getK8sPodTemplates(){
+        return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
     }
 
     public void setState(Integer state) {
         this.state = state;
         FlinkAppState appState = of(this.state);
-        switch (appState) {
+        this.tracking = shouldTracking(appState);
+    }
+
+    /**
+     * Determine if a FlinkAppState requires tracking.
+     *
+     * @return 1: need to be tracked | 0: no need to be tracked.
+     */
+    public static Integer shouldTracking(@Nonnull FlinkAppState state) {
+        switch (state) {
             case DEPLOYING:
             case DEPLOYED:
             case CREATED:
-            case SUCCEEDED:
+            case FINISHED:
             case FAILED:
             case CANCELED:
+            case TERMINATED:
+            case POS_TERMINATED:
             case LOST:
-                this.tracking = 0;
-                break;
+                return 0;
             default:
-                this.tracking = 1;
-                break;
+                return 1;
         }
+    }
+
+    @JsonIgnore
+    public FlinkAppState getFlinkAppStateEnum() {
+        return FlinkAppState.of(state);
+    }
+
+    @JsonIgnore
+    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum(){
+        return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
+    }
+
+    @JsonIgnore
+    public ExecutionMode getExecutionModeEnum() {
+        return ExecutionMode.of(executionMode);
     }
 
     @JsonIgnore
@@ -409,7 +461,8 @@ public class Application implements Serializable {
         //6) Dynamic Option 是否发生变化
         //7) Program Args 是否发生变化
         if (!this.getResolveOrder().equals(other.getResolveOrder()) ||
-            !this.getExecutionMode().equals(other.getExecutionMode())) {
+            !this.getExecutionMode().equals(other.getExecutionMode()) ||
+            !this.getK8sRestExposedType().equals(other.getK8sRestExposedType())) {
             return false;
         }
 
@@ -530,6 +583,17 @@ public class Application implements Serializable {
             Map<String, Pom> pomMap2 = new HashMap<>(other.pom.size());
             other.pom.forEach(x -> pomMap2.put(x.getGav(), x));
             return Pom.checkPom(pomMap, pomMap2);
+        }
+
+        @JsonIgnore
+        public JarPackDeps toJarPackDeps(){
+            List<MavenArtifact> mvnArts = this.pom.stream()
+                .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
+                .collect(Collectors.toList());
+            List<String> extJars = this.jar.stream()
+                .map(jar -> ConfigConst.APP_UPLOADS() + "/" + jar)
+                .collect(Collectors.toList());
+            return new JarPackDeps(mvnArts, extJars);
         }
 
     }
