@@ -11,7 +11,7 @@ import org.eclipse.aether.resolution.{ArtifactDescriptorRequest, ArtifactRequest
 import java.io.File
 import java.util
 import javax.annotation.Nonnull
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.util.Try
 
 /**
@@ -99,7 +99,7 @@ object MavenTool extends Logger {
       val resolvedArtifacts = artifacts
         .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos, null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
-        .flatMap(artDescReq => artDescReq.getDependencies.asScala)
+        .flatMap(artDescReq => artDescReq.getDependencies)
         .filter(dependency => dependency.getScope == "compile")
         .map(dependency => dependency.getArtifact)
 
@@ -107,8 +107,8 @@ object MavenTool extends Logger {
       logInfo(s"[streamx-packer] resolved dependencies: ${mergedArtifacts.mkString}")
 
       // download artifacts
-      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null)).asJava
-      repoSystem.resolveArtifacts(session, artReqs).asScala
+      val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
+      repoSystem.resolveArtifacts(session, artReqs)
         .map(artifactResult => artifactResult.getArtifact.getFile).toSet
     }
   }
