@@ -6,7 +6,7 @@ INSERT INTO `t_setting` VALUES (13, 'docker.register.password', null, 'Docker Re
 
 ALTER TABLE `streamx`.`t_flink_app`
     ADD COLUMN `CLUSTER_ID` varchar(255) NULL AFTER `JOB_ID`,
-    ADD COLUMN `K8S_NAME_SPACE` varchar(255) NULL AFTER `CLUSTER_ID`,
+    ADD COLUMN `K8S_NAMESPACE` varchar(255) NULL AFTER `CLUSTER_ID`,
     ADD COLUMN `FLINK_IMAGE` varchar(255) NULL AFTER `K8S_NAMESPACE`;
 
 SET FOREIGN_KEY_CHECKS = 1;
