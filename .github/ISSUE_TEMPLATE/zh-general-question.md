@@ -1,6 +1,7 @@
 ---
 name: "\U0001F914 问题提问（Ask a Question）"
-about: 我想提问一个问题 title: "[Question] 标题 "
+about: 我想提问一个问题
+title: "[Question] 标题 "
 labels: type/question
 ---
 

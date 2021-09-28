@@ -151,7 +151,7 @@ object SqlCommand extends enumeratum.Enum[SqlCommand] {
    */
   case object CREATE_VIEW extends SqlCommand(
     "create view",
-    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\s+)\\s+AS\\s+(.*)", {
+    "CREATE\\s+(TEMPORARY\\s+|)VIEW\\s+(\\S+)\\s+AS\\s+(.*)", {
       case a if a.length < 2 => None
       case x => Some(Array[String](x.head, x.last))
     }

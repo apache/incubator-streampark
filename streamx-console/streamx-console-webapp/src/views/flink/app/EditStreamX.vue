@@ -1407,9 +1407,11 @@ export default {
 
     handleBeforeUpload(file) {
       if (file.type !== 'application/java-archive') {
-        this.loading = false
-        this.$message.error('You can only upload jar file !')
-        return false
+        if (!/\.(jar|JAR)$/.test(file.name)) {
+          this.loading = false
+          this.$message.error('Only jar files can be uploaded! please check your file.')
+          return false
+        }
       }
       this.loading = true
       return true
