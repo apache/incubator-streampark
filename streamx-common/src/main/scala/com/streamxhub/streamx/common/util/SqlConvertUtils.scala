@@ -143,7 +143,7 @@ object SqlConvertUtils extends Logger {
       }
     }
 
-    val body = sql.substring(sql.indexOf("("), sql.lastIndexOf(")") + 1)
+    val body = sql.substring(sql.indexOf("("),sql.lastIndexOf(")") + 1)
       .replaceAll("\r\n", "")
       .replaceFirst("\\(", "(\n")
       .replaceFirst("\\)$", "\n)")
