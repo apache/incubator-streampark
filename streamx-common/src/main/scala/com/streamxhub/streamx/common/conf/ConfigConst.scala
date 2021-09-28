@@ -331,21 +331,21 @@ object ConfigConst {
   val LOGO =
     """
       |
-      |                 _____ __                         __  __
-      |                / ___// /_________  ____ _____ ___\ \/_/
-      |                \__ \/ __/ ___/ _ \/ __ `/ __ `__ \\ ./
-      |               ___/ / /_/ /  /  __/ /_/ / / / / /  >  <
-      |              /____/\__/_/   \___/\__,_/_/ /_/ /_/_/\ \
-      |                                                     \|
+      |                 .+.
+      |           _____/ /_________  ____ _____ ___  _  __
+      |          / ___/ __/ ___/ _ \/ __ `/ __ `__ \| |/_/
+      |         (__  ) /_/ /  /  __/ /_/ / / / / / />  <
+      |        /____/\__/_/   \___/\__,_/_/ /_/ /_/_/|_|
+      |                                              |/
+      |                                              .
       |
-      |         ┌────────────────────────────────────────────────────┐
-      |         │   WebSite:  http://www.streamxhub.com              │
-      |         │   GitHub :  https://github.com/streamxhub/streamx  │
-      |         │   Gitee  :  https://gitee.com/benjobs/streamx      │
-      |         │   Ver    :  1.1.2                                  │
-      |         └────────────────────────────────────────────────────┘
+      |        WebSite:  http://www.streamxhub.com
+      |        GitHub :  https://github.com/streamxhub/streamx
+      |        Gitee  :  https://gitee.com/benjobs/streamx
+      |        Ver    :  1.2.0
       |
-      |               [StreamX] Make Flink|Spark easier ô‿ô!
+      |        [StreamX] Make Flink|Spark easier ô‿ô!
+      |
       |
       |""".stripMargin
 
