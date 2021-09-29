@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
-        implements UserRoleService {
+    implements UserRoleService {
 
     @Override
     @Transactional
@@ -54,10 +54,10 @@ public class UserRoleServiceImpl extends ServiceImpl<UserRoleMapper, UserRole>
     @Override
     public List<String> findUserIdsByRoleId(String[] roleIds) {
         List<UserRole> list =
-                baseMapper.selectList(
-                        new LambdaQueryWrapper<UserRole>().in(UserRole::getRoleId, (Object) roleIds));
+            baseMapper.selectList(
+                new LambdaQueryWrapper<UserRole>().in(UserRole::getRoleId, (Object) roleIds));
         return list.stream()
-                .map(userRole -> String.valueOf(userRole.getUserId()))
-                .collect(Collectors.toList());
+            .map(userRole -> String.valueOf(userRole.getUserId()))
+            .collect(Collectors.toList());
     }
 }

@@ -6,6 +6,8 @@
 
     <dependencySets>
         <dependencySet>
+            <unpack>false</unpack>
+            <scope>runtime</scope>
             <useProjectArtifact>true</useProjectArtifact>
             <outputDirectory>lib</outputDirectory>
             <excludes>
@@ -27,6 +29,11 @@
         <fileSet>
             <directory>src/assembly/bin</directory>
             <outputDirectory>bin</outputDirectory>
+            <fileMode>0755</fileMode>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/shims</directory>
+            <outputDirectory>lib</outputDirectory>
             <fileMode>0755</fileMode>
         </fileSet>
         <fileSet>
@@ -53,4 +60,5 @@
             </includes>
         </fileSet>
     </fileSets>
+
 </assembly>

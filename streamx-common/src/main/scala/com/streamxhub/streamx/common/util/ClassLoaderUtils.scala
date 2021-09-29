@@ -26,6 +26,8 @@ import java.util.function.Supplier
 
 object ClassLoaderUtils extends Logger {
 
+  val originalClassLoader = Thread.currentThread().getContextClassLoader
+
   /**
    * 指定 classLoader执行代码...
    *

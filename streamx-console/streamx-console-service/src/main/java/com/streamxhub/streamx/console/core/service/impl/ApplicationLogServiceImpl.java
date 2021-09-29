@@ -42,7 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationLogServiceImpl extends ServiceImpl<ApplicationLogMapper, ApplicationLog>
-        implements ApplicationLogService {
+    implements ApplicationLogService {
 
     @Override
     public IPage<ApplicationLog> page(ApplicationLog applicationLog, RestRequest request) {

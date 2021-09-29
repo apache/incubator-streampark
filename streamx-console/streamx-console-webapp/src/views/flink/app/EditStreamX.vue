@@ -22,6 +22,83 @@
           type="info" />
       </a-form-item>
 
+      <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          @change="handleChangeMode">
+          <a-select-option
+            v-for="(o,index) in executionModes"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <template v-if="(executionMode == null && (app.executionMode === 5 || app.executionMode === 6)) || (executionMode === 5 || executionMode === 6)">
+        <a-form-item
+          label="Kubernetes Namespace"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="default"
+            allowClear
+            v-decorator="[ 'k8sNamespace']">
+          </a-input>
+        </a-form-item>
+
+        <a-form-item
+          label="Kubernetes ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Kubernetes clusterId"
+            allowClear
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-form-item
+          label="Flink Base Docker Image"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter the tag of Flink base docker image"
+            allowClear
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-form-item
+          label="Rest-Service Exposed Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="classloader.resolve-order"
+            v-decorator="[ 'k8sRestExposedType' ]">
+            <a-select-option
+              v-for="(o,index) in k8sRestExposedType"
+              :key="`k8s_rest_exposed_type_${index}`"
+              :value="o.order">
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
+
       <template v-if="app.jobType === 2">
 
         <a-form-item
@@ -379,23 +456,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
-          <a-select-option
-            v-for="(o,index) in executionMode"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
         label="Parallelism"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -420,7 +480,8 @@
       <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-number
           :min="1"
           :step="1"
@@ -431,7 +492,8 @@
       <a-form-item
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-group compact>
           <a-input-number
             :min="1"
@@ -718,6 +780,33 @@
       </a-form-item>
 
       <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="(executionMode == null && app.executionMode === 6) || executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+        </a-tabs>
+      </a-form-item>
+
+      <a-form-item
         label="Description"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -879,6 +968,7 @@ import SvgIcon from '@/components/SvgIcon'
 const Base64 = require('js-base64').Base64
 import {
   initEditor,
+  initPodTemplateEditor,
   verifySQL,
   bigScreenOpen,
   bigScreenOk,
@@ -907,13 +997,19 @@ export default {
         { name: 'parent-first', order: 0 },
         { name: 'child-first', order: 1 }
       ],
-      executionMode: [
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
+      ],
+      executionModes: [
         { mode: 'local', value: 0, disabled: true },
-        { mode: 'remote', value: 1, disabled: true },
-        { mode: 'yarn-session', value: 3, disabled: true },
-        { mode: 'kubernetes', value: 5, disabled: true }
+        { mode: 'standalone', value: 1, disabled: true },
+        { mode: 'yarn pre-job', value: 2, disabled: true },
+        { mode: 'yarn session', value: 3, disabled: true },
+        { mode: 'yarn application', value: 4, disabled: false },
+        { mode: 'kubernetes session', value: 5, disabled: false },
+        { mode: 'kubernetes application', value: 6, disabled: false }
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },
@@ -949,7 +1045,11 @@ export default {
       optionsValueMapping: {},
       loading: false,
       submitting: false,
+      executionMode: null,
       validateAgain: false,
+      podTemplate: null,
+      jmPodTemplate: null,
+      tmPodTemplate: null,
       configuration: [
         { key: 'tc', name: ' time characteristic' },
         { key: 'cp', name: ' checkpoints' },
@@ -958,6 +1058,7 @@ export default {
       ],
       controller: {
         activeTab: 'pom',
+        podTemplateTab: 'pod-template',
         tagCount: {
           total: 1,
           run: 1,
@@ -981,7 +1082,10 @@ export default {
         editor: {
           flinkSql: null,
           bigScreen: null,
-          pom: null
+          pom: null,
+          podTemplate: null,
+          jmPodTemplate: null,
+          tmPodTemplate: null
         },
         flinkSql: {
           value: null,
@@ -1082,6 +1186,10 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
     },
 
     handleChangeConf(item) {
@@ -1275,6 +1383,12 @@ export default {
       applyPom(this)
     },
 
+    handleK8sPodTemplateEditor(){
+      this.$nextTick(() => {
+        initPodTemplateEditor(this)
+      })
+    },
+
     handleEditPom(pom) {
       const pomString = toPomString(pom)
       this.activeTab = 'pom'
@@ -1304,16 +1418,26 @@ export default {
     },
 
     handleCustomRequest(data) {
-      const formData = new FormData()
-      formData.append('file', data.file)
-      upload(formData).then((response) => {
-        this.loading = false
-        this.controller.dependency.jar.set(data.file.name, data.file.name)
-        this.handleUpdateDependency()
-      }).catch((error) => {
-        this.$message.error(error.message)
-        this.loading = false
-      })
+      const executionMode =  this.form.getFieldValue('executionMode') || null
+      if (executionMode !== null) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        formData.append('executionMode',executionMode)
+        upload(formData).then((response) => {
+          this.loading = false
+          this.controller.dependency.jar.set(data.file.name, data.file.name)
+          this.handleUpdateDependency()
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+      } else {
+        this.$swal.fire(
+            'Failed',
+            'Please select "execution Mode" first',
+            'error'
+        )
+      }
     },
 
     handleRemovePom(pom) {
@@ -1448,10 +1572,19 @@ export default {
         cpFailureRateInterval: values.cpFailureRateInterval || null,
         cpFailureAction: values.cpFailureAction || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         executionMode: values.executionMode,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
-        description: values.description
+        description: values.description,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkImage: values.flinkImage || null,
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
       }
       this.handleUpdateApp(params)
     },
@@ -1490,10 +1623,19 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail|| null,
         executionMode: values.executionMode,
-        description: values.description || null
+        description: values.description || null,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkImage: values.flinkImage || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
       }
       this.handleUpdateApp(params)
     },
@@ -1651,18 +1793,28 @@ export default {
           'description': this.app.description,
           'dynamicOptions': this.app.dynamicOptions,
           'resolveOrder': this.app.resolveOrder,
+          'k8sRestExposedType': this.app.k8sRestExposedType,
           'executionMode': this.app.executionMode,
           'restartSize': this.app.restartSize,
           'alertEmail': this.app.alertEmail,
           'cpMaxFailureInterval': this.app.cpMaxFailureInterval,
           'cpFailureRateInterval': this.app.cpFailureRateInterval,
-          'cpFailureAction': this.app.cpFailureAction
+          'cpFailureAction': this.app.cpFailureAction,
+          'clusterId': this.app.clusterId,
+          'flinkImage': this.app.flinkImage,
+          'k8sNamespace': this.app.k8sNamespace,
         })
         if (this.app.jobType === 2) {
           this.flinkSql.sql = this.app.flinkSql || null
           this.flinkSql.dependency = this.app.dependency || null
           initEditor(this,Base64.decode(this.flinkSql.sql))
           this.handleInitDependency()
+        }
+        if (this.app.executionMode === 6) {
+          this.podTemplate = this.app.k8sPodTemplate
+          this.jmPodTemplate = this.app.k8sJmPodTemplate
+          this.tmPodTemplate = this.app.k8sTmPodTemplate
+          initPodTemplateEditor(this)
         }
       })
 
@@ -1709,6 +1861,21 @@ export default {
     myTheme() {
       if (this.app.jobType === 2) {
         this.controller.editor.flinkSql.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.podTemplate) {
+        this.controller.editor.podTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.jmPodTemplate) {
+        this.controller.editor.jmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.tmPodTemplate) {
+        this.controller.editor.tmPodTemplate.updateOptions({
           theme: this.ideTheme()
         })
       }

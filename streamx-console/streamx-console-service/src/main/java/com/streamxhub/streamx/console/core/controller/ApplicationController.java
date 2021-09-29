@@ -17,6 +17,7 @@
 package com.streamxhub.streamx.console.core.controller;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -151,6 +152,7 @@ public class ApplicationController {
         return RestResponse.create();
     }
 
+    // fixme to adapte for kubernetes-only scenarios
     @PostMapping("yarn")
     public RestResponse yarn() {
         return RestResponse.create().data(HadoopUtils.getRMWebAppURL(false));
@@ -224,8 +226,9 @@ public class ApplicationController {
 
     @PostMapping("upload")
     @RequiresPermissions("app:create")
-    public RestResponse upload(MultipartFile file) throws IOException {
-        boolean upload = applicationService.upload(file);
+    public RestResponse upload(MultipartFile file, Integer executionMode) throws Exception {
+        StorageType storageType = Application.getStorageType(executionMode);
+        boolean upload = applicationService.upload(file, storageType);
         return RestResponse.create().data(upload);
     }
 

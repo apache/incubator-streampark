@@ -21,16 +21,14 @@
 package com.streamxhub.streamx.flink.submit.impl
 
 import com.streamxhub.streamx.flink.submit.`trait`.FlinkSubmitTrait
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
-
-import java.lang
+import com.streamxhub.streamx.flink.submit.domain._
 
 object LocalSubmit extends FlinkSubmitTrait {
   override def doSubmit(submitInfo: SubmitRequest): SubmitResponse = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 
-  override def doStop(flinkHome: String, appId: String, jobStringId: String, savePoint: lang.Boolean, drain: lang.Boolean): String = {
+  override def doStop(stopInfo: StopRequest): StopResponse = {
     throw new UnsupportedOperationException("Unsupported local Submit ")
   }
 }

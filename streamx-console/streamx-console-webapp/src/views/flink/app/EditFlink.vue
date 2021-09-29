@@ -35,6 +35,23 @@
       </a-form-item>
 
       <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
+          <a-select-option
+            v-for="(o,index) in executionMode"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <a-form-item
         label="Program Jar"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -83,23 +100,6 @@
             :key="`resolve_order_${index}`"
             :value="o.order">
             {{ o.name }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
-          <a-select-option
-            v-for="(o,index) in executionMode"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
           </a-select-option>
         </a-select>
       </a-form-item>
@@ -464,12 +464,13 @@ export default {
         { name: 'child-first', order: 1 }
       ],
       executionMode: [
-        { mode: 'local', value: 0,disabled: true },
-        { mode: 'remote', value: 1,disabled: true },
-        { mode: 'yarn pre-job', value: 2,disabled: true },
-        { mode: 'yarn-session', value: 3,disabled: true },
-        { mode: 'yarn application', value: 4,disabled: false },
-        { mode: 'kubernetes', value: 5,disabled: true }
+        { mode: 'local', value: 0, disabled: true },
+        { mode: 'standalone', value: 1, disabled: true },
+        { mode: 'yarn pre-job', value: 2, disabled: true },
+        { mode: 'yarn session', value: 3, disabled: true },
+        { mode: 'yarn application', value: 4, disabled: false },
+        { mode: 'kubernetes session (comming soon)', value: 5, disabled: true },
+        { mode: 'kubernetes application (comming soon)', value: 6, disabled: true }
       ],
       cpTriggerAction: [
         { name: 'alert', value: 1 },

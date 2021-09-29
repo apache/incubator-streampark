@@ -116,7 +116,7 @@ class JdbcASyncClientFunction[T: TypeInformation, R: TypeInformation](sqlFun: T 
                   if (list.isEmpty) {
                     resultFuture.complete(Collections.singleton(resultFunc(input, Map.empty[String, R])))
                   } else {
-                    resultFuture.complete(list.map(x => resultFunc(input, x.getMap.asScala.toMap)))
+                    resultFuture.complete(list.map(x => resultFunc(input, x.getMap.toMap)))
                   }
                 } else throw event.cause()
               }

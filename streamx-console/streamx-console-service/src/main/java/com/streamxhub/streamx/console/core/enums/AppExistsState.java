@@ -40,7 +40,12 @@ public enum AppExistsState implements Serializable {
     /**
      * 正在运行的yarn里存在
      */
-    IN_YARN(2);
+    IN_YARN(2),
+
+    /**
+     * exists in remote kubernetes cluster.
+     */
+    IN_KUBERNETES(3);
 
     int value;
 

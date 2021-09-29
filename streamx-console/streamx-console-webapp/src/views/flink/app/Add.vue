@@ -25,6 +25,79 @@
         </a-select>
       </a-form-item>
 
+      <a-form-item
+        label="Execution Mode"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        <a-select
+          placeholder="Execution Mode"
+          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]"
+          @change="handleChangeMode">
+          <a-select-option
+            v-for="(o,index) in executionModes[jobType]"
+            :key="`execution_mode_${index}`"
+            :disabled="o.disabled"
+            :value="o.value">
+            {{ o.mode }}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+
+      <template v-if="executionMode === 5|| executionMode === 6">
+        <a-form-item
+          label="Kubernetes Namespace"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="default"
+            allowClear
+            v-decorator="[ 'k8sNamespace']">
+          </a-input>
+        </a-form-item>
+        <a-form-item
+          label="Kubernetes ClusterId"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter Kubernetes clusterId"
+            @change="handleClusterId"
+            allowClear
+            v-decorator="[ 'clusterId', {rules: [{ required: true, message: 'Kubernetes clusterId is required' }] }]">
+          </a-input>
+        </a-form-item>
+      </template>
+
+      <template v-if="executionMode === 6">
+        <a-form-item
+          label="Flink Base Docker Image"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-input
+            type="text"
+            placeholder="Please enter the tag of Flink base docker image, such as: flink:1.13.0-scala_2.11-java8"
+            allowClear
+            v-decorator="[ 'flinkImage', {rules: [{ required: true, message: 'Flink Base Docker Image is required' }] }]">
+          </a-input>
+        </a-form-item>
+        <a-form-item
+          label="Rest-Service Exposed Type"
+          :label-col="{lg: {span: 5}, sm: {span: 7}}"
+          :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+          <a-select
+            placeholder="classloader.resolve-order"
+            v-decorator="[ 'k8sRestExposedType' ]">
+            <a-select-option
+              v-for="(o,index) in k8sRestExposedType"
+              :key="`k8s_rest_exposed_type_${index}`"
+              :value="o.order">
+              {{ o.name }}
+            </a-select-option>
+          </a-select>
+        </a-form-item>
+      </template>
+
       <template v-if="jobType === 'sql'">
         <a-form-item
           label="Flink SQL"
@@ -52,7 +125,7 @@
             type="fullscreen"
             title="Full Screen"
             two-tone-color="#4a9ff5"
-            @click="handleBigScreenOpen()" />
+            @click="handleBigScreenOpen()"/>
         </a-form-item>
 
         <a-form-item
@@ -82,7 +155,7 @@
                     style="padding-top: 40px">
                     <a-icon
                       type="inbox"
-                      :style="{ fontSize: '70px' }" />
+                      :style="{ fontSize: '70px' }"/>
                   </p>
                   <p
                     class="ant-upload-text"
@@ -119,7 +192,7 @@
                   <a-tag class="tag-dependency" color="#2db7f5">POM</a-tag>
                   {{ value.artifactId }}-{{ value.version }}.jar
                 </span>
-                <a-icon type="close" class="icon-close" @click="handleRemovePom(value)" />
+                <a-icon type="close" class="icon-close" @click="handleRemovePom(value)"/>
               </template>
             </a-alert>
             <a-alert
@@ -130,7 +203,7 @@
               closable>
               <template slot="message">
                 <span><a-tag class="tag-dependency" color="#108ee9">JAR</a-tag>{{ value }}</span>
-                <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)" />
+                <a-icon type="close" class="icon-close" @click="handleRemoveJar(value)"/>
               </template>
             </a-alert>
           </div>
@@ -145,14 +218,14 @@
             un-checked-children="OFF"
             @click="handleSQLConf"
             v-model="isSetConfig"
-            v-decorator="[ 'config' ]" />
+            v-decorator="[ 'config' ]"/>
           <a-icon
             v-if="isSetConfig"
             type="setting"
             style="margin-left: 10px"
             theme="twoTone"
             two-tone-color="#4a9ff5"
-            @click="handleSQLConf(true)" />
+            @click="handleSQLConf(true)"/>
         </a-form-item>
       </template>
 
@@ -244,7 +317,7 @@
             type="text"
             allowClear
             placeholder="Please enter Main class"
-            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]" />
+            v-decorator="[ 'mainClass', {rules: [{ required: true, message: 'Program Main is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -267,7 +340,7 @@
                 theme="twoTone"
                 two-tone-color="#4a9ff5"
                 @click.stop="handleEditConfig()"
-                title="edit config" />
+                title="edit config"/>
             </template>
           </a-tree-select>
         </a-form-item>
@@ -281,7 +354,7 @@
           type="text"
           placeholder="Please enter jobName"
           allowClear
-          v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,required: true}]}]" />
+          v-decorator="['jobName',{ rules: [{ validator: handleCheckJobName,required: true}]}]"/>
       </a-form-item>
 
       <a-form-item
@@ -301,23 +374,6 @@
       </a-form-item>
 
       <a-form-item
-        label="Execution Mode"
-        :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
-        <a-select
-          placeholder="Execution Mode"
-          v-decorator="[ 'executionMode', {rules: [{ required: true, message: 'Execution Mode is required' }] }]">
-          <a-select-option
-            v-for="(o,index) in executionMode"
-            :key="`execution_mode_${index}`"
-            :disabled="o.disabled"
-            :value="o.value">
-            {{ o.mode }}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-
-      <a-form-item
         label="Parallelism"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
         :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
@@ -325,7 +381,7 @@
           :min="1"
           :step="1"
           placeholder="The parallelism with which to run the program"
-          v-decorator="['parallelism']" />
+          v-decorator="['parallelism']"/>
       </a-form-item>
 
       <a-form-item
@@ -336,24 +392,26 @@
           :min="1"
           :step="1"
           placeholder="Number of slots per TaskManager"
-          v-decorator="['slot']" />
+          v-decorator="['slot']"/>
       </a-form-item>
 
       <a-form-item
         label="Fault Restart Size"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-number
           :min="1"
           :step="1"
           placeholder="restart max size"
-          v-decorator="['restartSize']" />
+          v-decorator="['restartSize']"/>
       </a-form-item>
 
       <a-form-item
         label="CheckPoint Failure Options"
         :label-col="{lg: {span: 5}, sm: {span: 7}}"
-        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }">
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode !== 5 && executionMode !== 6">
         <a-input-group compact>
           <a-input-number
             :min="1"
@@ -383,7 +441,8 @@
               v-for="(o,index) in cpTriggerAction"
               :key="`cp_trigger_${index}`"
               :value="o.value">
-              <a-icon :type="o.value === 1?'alert':'sync'"/> {{ o.name }}
+              <a-icon :type="o.value === 1?'alert':'sync'"/>
+              {{ o.name }}
             </a-select-option>
           </a-select>
         </a-input-group>
@@ -392,7 +451,8 @@
           <span class="note-info" style="margin-bottom: 12px">
             <a-tag color="#2db7f5" class="tag-note">Note</a-tag>
             Operation after checkpoint failure, e.g:<br>
-            Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
+            Within <span class="note-elem">5 minutes</span>(checkpoint failure rate interval), if the number of checkpoint failures reaches <span
+              class="note-elem">10</span> (max failures per interval),action will be triggered(alert or restart job)
           </span>
         </p>
       </a-form-item>
@@ -445,7 +505,7 @@
             type="text"
             placeholder="Please enter mobile number"
             allowClear
-            v-decorator="[ 'alertSms', {rules: [{ required: true, message: 'mobile number is required' }]} ]" />
+            v-decorator="[ 'alertSms', {rules: [{ required: true, message: 'mobile number is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -456,7 +516,7 @@
           <a-textarea
             rows="4"
             placeholder="Please enter sms template"
-            v-decorator="['alertSmsTemplate', {rules: [{ required: true, message: 'SMS Template is required' }]} ]" />
+            v-decorator="['alertSmsTemplate', {rules: [{ required: true, message: 'SMS Template is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -468,7 +528,7 @@
             type="text"
             placeholder="Please enter DingTask Url"
             allowClear
-            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]" />
+            v-decorator="[ 'alertDingURL', {rules: [{ required: true, message: 'DingTask Url is required' }]} ]"/>
         </a-form-item>
 
         <a-form-item
@@ -480,7 +540,7 @@
             type="text"
             placeholder="Please enter DingTask receive user"
             allowClear
-            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]" />
+            v-decorator="[ 'alertDingUser', {rules: [{ required: true, message: 'DingTask receive user is required' }]} ]"/>
         </a-form-item>
 
       </template>
@@ -497,21 +557,21 @@
           type="text"
           :placeholder="conf.placeholder"
           allowClear
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]" />
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <a-switch
           v-if="conf.type === 'switch'"
           disabled
           checked-children="ON"
           un-checked-children="OFF"
           v-model="switchDefaultValue"
-          v-decorator="[`${conf.name}`]" />
+          v-decorator="[`${conf.name}`]"/>
         <a-input-number
           v-if="conf.type === 'number'"
           :min="conf.min"
           :max="conf.max"
           :default-value="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]" />
+          v-decorator="[`${conf.name}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span
           v-if="conf.type === 'switch'"
           class="conf-switch">
@@ -576,7 +636,7 @@
           :max="conf.max"
           :default-value="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]" />
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span
           v-if="conf.type === 'switch'"
           class="conf-switch">
@@ -622,7 +682,7 @@
           :max="conf.max"
           :default-value="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]" />
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span
           v-if="conf.type === 'switch'"
           class="conf-switch">
@@ -668,7 +728,7 @@
           :max="conf.max"
           :default-value="conf.defaultValue"
           :step="conf.step"
-          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]" />
+          v-decorator="[`${conf.key}`,{ rules:[{ validator: conf.validator } ]}]"/>
         <span
           v-if="conf.type === 'switch'"
           class="conf-switch">({{ conf.placeholder }})</span>
@@ -685,7 +745,34 @@
           rows="4"
           name="dynamicOptions"
           placeholder="$key=$value,If there are multiple parameters,you can new line enter them (-D <arg>)"
-          v-decorator="['dynamicOptions']" />
+          v-decorator="['dynamicOptions']"/>
+      </a-form-item>
+
+      <a-form-item
+        label="Kubernetes Pod Template"
+        :label-col="{lg: {span: 5}, sm: {span: 7}}"
+        :wrapper-col="{lg: {span: 16}, sm: {span: 17} }"
+        v-show="executionMode === 6">
+        <a-tabs type="card" v-model="controller.podTemplateTab">
+          <a-tab-pane
+            key="pod-template"
+            tab="Pod Template"
+            forceRender>
+            <div class="pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="jm-pod-template"
+            tab="JM Pod Template"
+            forceRender>
+            <div class="jm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+          <a-tab-pane
+            key="tm-pod-template"
+            tab="TM Pod Template"
+            forceRender>
+            <div class="tm-pod-template-box syntax-true" style="height: 300px"></div>
+          </a-tab-pane>
+        </a-tabs>
       </a-form-item>
 
       <a-form-item
@@ -697,7 +784,7 @@
           rows="4"
           name="args"
           placeholder="<arguments>"
-          v-decorator="['args']" />
+          v-decorator="['args']"/>
       </a-form-item>
 
       <a-form-item
@@ -708,7 +795,7 @@
           rows="4"
           name="description"
           placeholder="Please enter description for this application"
-          v-decorator="['description']" />
+          v-decorator="['description']"/>
       </a-form-item>
 
       <a-form-item
@@ -767,36 +854,38 @@
       ref="confEdit"
       @close="handleEditConfClose"
       @ok="handleEditConfOk"
-      :visiable="controller.visiable.conf" />
+      :visiable="controller.visiable.conf"/>
   </a-card>
 </template>
 
 <script>
 import Ellipsis from '@/components/Ellipsis'
-import { jars, listConf, modules, select } from '@api/project'
-import { create, upload, exists, main, name, readConf, checkJar } from '@api/application'
-import { template } from '@api/config'
+import {jars, listConf, modules, select} from '@api/project'
+import {create, exists, main, name, readConf, upload} from '@api/application'
+import {template} from '@api/config'
 import Mergely from './Mergely'
 import configOptions from './Option'
-const Base64 = require('js-base64').Base64
 import SvgIcon from '@/components/SvgIcon'
 
 import {
-  initEditor,
-  verifySQL,
-  bigScreenOpen,
-  bigScreenOk,
-  bigScreenClose,
-  formatSql,
   applyPom,
-  updateDependency
+  bigScreenClose,
+  bigScreenOk,
+  bigScreenOpen,
+  formatSql,
+  initEditor,
+  initPodTemplateEditor,
+  updateDependency,
+  verifySQL
 } from './AddEdit'
 
-import { toPomString } from './Pom'
+import {toPomString} from './Pom'
+
+const Base64 = require('js-base64').Base64
 
 export default {
   name: 'AppAdd',
-  components: { Mergely,Ellipsis,SvgIcon },
+  components: {Mergely, Ellipsis, SvgIcon},
   data() {
     return {
       jobType: 'sql',
@@ -807,20 +896,37 @@ export default {
       moduleList: [],
       jars: [],
       resolveOrder: [
-        { name: 'parent-first', order: 0 },
-        { name: 'child-first', order: 1 }
+        {name: 'parent-first', order: 0},
+        {name: 'child-first', order: 1}
       ],
-      executionMode: [
-        { mode: 'yarn application', value: 4, disabled: false },
-        { mode: 'yarn pre-job', value: 2, disabled: true },
-        { mode: 'local', value: 0, disabled: true },
-        { mode: 'remote', value: 1, disabled: true },
-        { mode: 'yarn-session', value: 3, disabled: true },
-        { mode: 'kubernetes', value: 5, disabled: true }
+      k8sRestExposedType: [
+        {name: 'LoadBalancer', order: 0},
+        {name: 'ClusterIP', order: 1},
+        {name: 'NodePort', order: 2}
       ],
+      executionModes: {
+        sql: [
+          {mode: 'local', value: 0, disabled: true},
+          {mode: 'standalone', value: 1, disabled: true},
+          {mode: 'yarn pre-job', value: 2, disabled: true},
+          {mode: 'yarn session', value: 3, disabled: true},
+          {mode: 'yarn application', value: 4, disabled: false},
+          {mode: 'kubernetes session', value: 5, disabled: false},
+          {mode: 'kubernetes application', value: 6, disabled: false}
+        ],
+        customcode: [
+          {mode: 'local', value: 0, disabled: true},
+          {mode: 'standalone', value: 1, disabled: true},
+          {mode: 'yarn pre-job', value: 2, disabled: true},
+          {mode: 'yarn session', value: 3, disabled: true},
+          {mode: 'yarn application', value: 4, disabled: false},
+          {mode: 'kubernetes session (comming soon)', value: 5, disabled: true},
+          {mode: 'kubernetes application (comming soon)', value: 6, disabled: true}
+        ],
+      },
       cpTriggerAction: [
-        { name: 'alert', value: 1 },
-        { name: 'restart', value: 2 }
+        {name: 'alert', value: 1},
+        {name: 'restart', value: 2}
       ],
       app: null,
       bigScreenVisible: false,
@@ -831,9 +937,9 @@ export default {
       alert: true,
       alertTypes: [
         {name: 'E-mail', value: 1, disabled: false},
-        {name: 'SMS', value: 2,disabled: true},
-        {name: 'Ding Ding Task', value: 3,disabled: true},
-        {name: 'Wechat', value: 4,disabled: true},
+        {name: 'SMS', value: 2, disabled: true},
+        {name: 'Ding Ding Task', value: 3, disabled: true},
+        {name: 'Wechat', value: 4, disabled: true},
       ],
       alertType: [],
       configOverride: null,
@@ -849,9 +955,14 @@ export default {
       uploadJars: [],
       loading: false,
       submitting: false,
+      executionMode: null,
       exclusions: new Map(),
+      podTemplate: '',
+      jmPodTemplate: '',
+      tmPodTemplate: '',
       controller: {
         activeTab: 'pom',
+        podTemplateTab: 'pod-template',
         tagCount: {
           total: 1,
           run: 1,
@@ -875,7 +986,10 @@ export default {
         editor: {
           flinkSql: null,
           bigScreen: null,
-          pom: null
+          pom: null,
+          podTemplate: null,
+          jmPodTemplate: null,
+          tmPodTemplate: null
         },
         flinkSql: {
           defaultValue: '',
@@ -907,6 +1021,7 @@ export default {
   beforeMount() {
     this.handleInitForm()
     this.handleInitSQLMode()
+    this.handleK8sPodTemplateEditor()
   },
 
   filters: {
@@ -921,12 +1036,12 @@ export default {
 
   computed: {
     dynamicOptions() {
-      return function(group) {
+      return function (group) {
         return this.options.filter(x => x.group === group)
       }
     },
     hasOptions() {
-      return function(items) {
+      return function (items) {
         return this.options.filter(x => items.includes(x.key))
       }
     },
@@ -954,12 +1069,26 @@ export default {
           })
         }
       }
+      if (this.controller.editor.podTemplate) {
+        this.controller.editor.podTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.jmPodTemplate) {
+        this.controller.editor.jmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
+      if (this.controller.editor.tmPodTemplate) {
+        this.controller.editor.tmPodTemplate.updateOptions({
+          theme: this.ideTheme()
+        })
+      }
       this.$refs.confEdit.theme()
     }
   },
 
   methods: {
-
     filterOption(input, option) {
       return option.componentOptions.children[0].text.toLowerCase().indexOf(input.toLowerCase()) >= 0
     },
@@ -977,11 +1106,12 @@ export default {
       this.optionsKeyMapping = new Map()
       this.options.forEach((item, index, array) => {
         this.optionsKeyMapping.set(item.key, item)
-        this.form.getFieldDecorator(item.key, { initialValue: item.defaultValue, preserve: true })
+        this.form.getFieldDecorator(item.key, {initialValue: item.defaultValue, preserve: true})
       })
-      this.form.getFieldDecorator('resolveOrder', { initialValue: 0 })
-      this.form.getFieldDecorator('executionMode', { initialValue: 4 })
-      this.form.getFieldDecorator('restartSize', { initialValue: 0 })
+      this.form.getFieldDecorator('resolveOrder', {initialValue: 0})
+      this.form.getFieldDecorator('k8sRestExposedType', {initialValue: 0})
+      this.form.getFieldDecorator('executionMode', {initialValue: 4})
+      this.form.getFieldDecorator('restartSize', {initialValue: 0})
     },
 
     handleChangeJobType(value) {
@@ -990,16 +1120,23 @@ export default {
       if (this.jobType === 'sql') {
         this.handleInitSQLMode()
       } else {
-        this.form.getFieldDecorator('jobType', { initialValue: 'customcode' })
+        this.form.getFieldDecorator('jobType', {initialValue: 'customcode'})
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.defaultValue)
       }
+      this.handleK8sPodTemplateEditor()
     },
 
     handleInitSQLMode() {
-      this.form.getFieldDecorator('jobType', { initialValue: 'sql' })
-      this.form.getFieldDecorator('tableEnv', { initialValue: '1' })
+      this.form.getFieldDecorator('jobType', {initialValue: 'sql'})
+      this.form.getFieldDecorator('tableEnv', {initialValue: '1'})
       this.$nextTick(() => {
         initEditor(this)
+      })
+    },
+
+    handleK8sPodTemplateEditor(){
+      this.$nextTick(() => {
+        initPodTemplateEditor(this)
       })
     },
 
@@ -1016,6 +1153,10 @@ export default {
       }).catch((error) => {
         this.$message.error(error.message)
       })
+    },
+
+    handleChangeMode(mode) {
+      this.executionMode = mode
     },
 
     handleChangeJmMemory(value) {
@@ -1041,11 +1182,17 @@ export default {
       this.alertType = value
     },
 
+    handleClusterId(value) {
+      if (this.executionMode === 6){
+        this.form.setFieldsValue({jobName: value.target.value})
+      }
+    },
+
     handleJobName(confFile) {
       name({
         config: confFile
       }).then((resp) => {
-        this.form.setFieldsValue({ 'jobName': resp.data })
+        this.form.setFieldsValue({'jobName': resp.data})
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -1105,16 +1252,26 @@ export default {
     },
 
     handleCustomRequest(data) {
-      const formData = new FormData()
-      formData.append('file', data.file)
-      upload(formData).then((resp) => {
-        this.loading = false
-        this.controller.dependency.jar.set(data.file.name, data.file.name)
-        this.handleUpdateDependency()
-      }).catch((error) => {
-        this.$message.error(error.message)
-        this.loading = false
-      })
+      const executionMode =  this.form.getFieldValue('executionMode') || null
+      if (executionMode !== null) {
+        const formData = new FormData()
+        formData.append('file', data.file)
+        formData.append('executionMode',executionMode)
+        upload(formData).then((resp) => {
+          this.loading = false
+          this.controller.dependency.jar.set(data.file.name, data.file.name)
+          this.handleUpdateDependency()
+        }).catch((error) => {
+          this.$message.error(error.message)
+          this.loading = false
+        })
+      } else {
+        this.$swal.fire(
+            'Failed',
+            'Please select "execution Mode" first',
+            'error'
+        )
+      }
     },
 
     handleRemovePom(pom) {
@@ -1141,13 +1298,13 @@ export default {
     },
 
     handleBigScreenOk() {
-      bigScreenOk(this,function() {
+      bigScreenOk(this, function () {
         //设置小输入框的值.
         this.controller.editor.flinkSql.getModel().setValue(this.controller.flinkSql.value)
       })
     },
 
-    handleBigScreenClose () {
+    handleBigScreenClose() {
       bigScreenClose(this)
     },
 
@@ -1194,7 +1351,7 @@ export default {
         module: this.module,
         jar: jar
       }).then((resp) => {
-        this.form.setFieldsValue({ 'mainClass': resp.data })
+        this.form.setFieldsValue({'mainClass': resp.data})
       }).catch((error) => {
         this.$message.error(error.message)
       })
@@ -1204,7 +1361,7 @@ export default {
       if (value === null || value === undefined || value === '') {
         callback(new Error('Application Name is required'))
       } else {
-        exists({ jobName: value }).then((resp) => {
+        exists({jobName: value}).then((resp) => {
           const exists = parseInt(resp.data)
           if (exists === 0) {
             callback()
@@ -1217,13 +1374,13 @@ export default {
       }
     },
 
-    handleCheckCheckPoint (rule, value, callback) {
-      const cpMaxFailureInterval =  this.form.getFieldValue('cpMaxFailureInterval')
+    handleCheckCheckPoint(rule, value, callback) {
+      const cpMaxFailureInterval = this.form.getFieldValue('cpMaxFailureInterval')
       const cpFailureRateInterval = this.form.getFieldValue('cpFailureRateInterval')
       const cpFailureAction = this.form.getFieldValue('cpFailureAction')
 
-      if( cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null ) {
-        if( cpFailureAction === 1) {
+      if (cpMaxFailureInterval != null && cpFailureRateInterval != null && cpFailureAction != null) {
+        if (cpFailureAction === 1) {
           const alertEmail = this.form.getFieldValue('alertEmail')
           if (alertEmail == null) {
             this.form.setFields({
@@ -1238,7 +1395,7 @@ export default {
         } else {
           callback()
         }
-      } else if(cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
+      } else if (cpMaxFailureInterval == null && cpFailureRateInterval == null && cpFailureAction == null) {
         callback()
       } else {
         callback(new Error('options all required or all empty'))
@@ -1319,7 +1476,7 @@ export default {
             this.controller.flinkSql.success = true
             this.controller.flinkSql.errorMsg = null
           } else {
-            verifySQL(this,(success) => {
+            verifySQL(this, (success) => {
               if (!success) {
                 return
               }
@@ -1355,9 +1512,18 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail || null,
-        description: values.description
+        description: values.description,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkImage: values.flinkImage || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
       }
 
       if (this.appType === 1) {
@@ -1418,9 +1584,18 @@ export default {
         cpFailureAction: values.cpFailureAction || null,
         dynamicOptions: values.dynamicOptions || null,
         resolveOrder: values.resolveOrder,
+        k8sRestExposedType: values.k8sRestExposedType,
         restartSize: values.restartSize,
         alertEmail: values.alertEmail,
-        description: values.description || null
+        description: values.description || null,
+        k8sNamespace: values.k8sNamespace || null,
+        clusterId: values.clusterId || null,
+        flinkImage: values.flinkImage || null
+      }
+      if (params.executionMode === 6) {
+        params.k8sPodTemplate = this.podTemplate
+        params.k8sJmPodTemplate = this.jmPodTemplate
+        params.k8sTmPodTemplate = this.tmPodTemplate
       }
       this.handleCreateApp(params)
     },
@@ -1429,7 +1604,7 @@ export default {
       const options = {}
       for (const k in values) {
         const v = values[k]
-        if (v != null && v !== '' && v !== undefined ) {
+        if (v != null && v !== '' && v !== undefined) {
           if (k === 'parallelism') {
             options['parallelism.default'] = v
           } else if (k === 'slot') {
@@ -1468,7 +1643,7 @@ export default {
         const created = resp.data
         this.submitting = false
         if (created) {
-          this.$router.push({ path: '/flink/app' })
+          this.$router.push({path: '/flink/app'})
         }
       }).catch((error) => {
         this.submitting = false

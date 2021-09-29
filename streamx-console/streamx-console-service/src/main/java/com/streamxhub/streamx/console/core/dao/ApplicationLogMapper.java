@@ -38,5 +38,5 @@ public interface ApplicationLogMapper extends BaseMapper<ApplicationLog> {
     IPage<ApplicationLog> page(Page<Application> page, @Param("appId") Long appId);
 
     @Delete("delete from t_flink_log where app_id=#{appId}")
-    void removeApp(@Param("appId")Long appId);
+    void removeApp(@Param("appId") Long appId);
 }

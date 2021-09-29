@@ -20,9 +20,12 @@
  */
 package com.streamxhub.streamx.console.core.task;
 
+import static com.streamxhub.streamx.common.enums.ExecutionMode.isKubernetesMode;
+
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
@@ -72,6 +75,8 @@ import java.util.concurrent.*;
  * 魔鬼在细节中<br>
  * 魔鬼在细节中...<br>
  * </strong>
+ *
+ * This implementation is currently only used for tracing flink job on yarn
  *
  * @author benjobs
  */
@@ -137,12 +142,12 @@ public class FlinkTrackingTask {
     private static final Byte DEFAULT_FLAG_BYTE = Byte.valueOf("0");
 
     private final ExecutorService executor = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("flink-tracking-executor"));
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("flink-tracking-executor"));
 
     @Autowired
     public void setApplicationService(ApplicationService appService) {
@@ -187,62 +192,66 @@ public class FlinkTrackingTask {
     private void tracking() {
         Long now = System.currentTimeMillis();
         lastTrackTime = now;
-        TRACKING_MAP.forEach((key, application) -> executor.execute(() -> {
-            final StopFrom stopFrom = STOP_FROM_MAP.getOrDefault(key, null) == null ? StopFrom.NONE : STOP_FROM_MAP.get(key);
-            final OptionState optionState = OPTIONING.get(key);
-            try {
-                // 1) 到flink的REST Api中查询状态
-                assert application.getId() != null;
-                getFromFlinkRestApi(application, stopFrom);
-            } catch (Exception flinkException) {
-                // 2) 到 YARN REST api中查询状态
+        TRACKING_MAP.entrySet().stream()
+            .filter(trkElement -> !isKubernetesMode(trkElement.getValue().getExecutionMode()))
+            .forEach(trkElement -> executor.execute(() -> {
+                long key = trkElement.getKey();
+                Application application = trkElement.getValue();
+                final StopFrom stopFrom = STOP_FROM_MAP.getOrDefault(key, null) == null ? StopFrom.NONE : STOP_FROM_MAP.get(key);
+                final OptionState optionState = OPTIONING.get(key);
                 try {
-                    getFromYarnRestApi(application, stopFrom);
-                } catch (Exception yarnException) {
-                    /**
-                     * 3) 从flink的restAPI和yarn的restAPI都查询失败</br>
-                     * 此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
-                     * 1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
-                     * 2: 如果操作状态为STARTING,则需要判断操作间隔是否在30秒之内(启动可能需要时间,这里给足够多的时间去完成启动)</br>
-                     */
-                    if (optionState == null
+                    // 1) 到flink的REST Api中查询状态
+                    assert application.getId() != null;
+                    getFromFlinkRestApi(application, stopFrom);
+                } catch (Exception flinkException) {
+                    // 2) 到 YARN REST api中查询状态
+                    try {
+                        getFromYarnRestApi(application, stopFrom);
+                    } catch (Exception yarnException) {
+                        /**
+                         * 3) 从flink的restAPI和yarn的restAPI都查询失败</br>
+                         * 此时需要根据管理端正在操作的状态来决定是否返回最终状态,需满足:</br>
+                         * 1: 操作状态为为取消和正常的状态跟踪(操作状态不为STARTING)</br>
+                         * 2: 如果操作状态为STARTING,则需要判断操作间隔是否在30秒之内(启动可能需要时间,这里给足够多的时间去完成启动)</br>
+                         */
+                        if (optionState == null
                             || !optionState.equals(OptionState.STARTING)
                             || now - optioningTime >= STARTING_INTERVAL) {
-                        //非正在手动映射appId
-                        if (application.getState() != FlinkAppState.MAPPING.getValue()) {
+                            //非正在手动映射appId
+                            if (application.getState() != FlinkAppState.MAPPING.getValue()) {
                             log.error("flinkTrackingTask getFromFlinkRestApi and getFromYarnRestApi error,job failed,savePoint obsoleted!");
-                            if (StopFrom.NONE.equals(stopFrom)) {
-                                savePointService.obsolete(application.getId());
-                                application.setState(FlinkAppState.LOST.getValue());
-                                alertService.alert(application, FlinkAppState.LOST);
-                            } else {
-                                application.setState(FlinkAppState.CANCELED.getValue());
+                                if (StopFrom.NONE.equals(stopFrom)) {
+                                    savePointService.obsolete(application.getId());
+                                    application.setState(FlinkAppState.LOST.getValue());
+                                    alertService.alert(application, FlinkAppState.LOST);
+                                } else {
+                                    application.setState(FlinkAppState.CANCELED.getValue());
+                                }
                             }
-                        }
-                        /**
-                         * 进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
-                         * 需清空savepoint.
-                         */
-                        cleanSavepoint(application);
-                        cleanOptioning(optionState, key);
-                        application.setEndTime(new Date());
-                        this.persistentAndClean(application);
+                            /**
+                             * 进入到这一步说明前两种方式获取信息都失败,此步是最后一步,直接会判别任务取消或失联</br>
+                             * 需清空savepoint.
+                             */
+                            cleanSavepoint(application);
+                            cleanOptioning(optionState, key);
+                            application.setEndTime(new Date());
+                            this.persistentAndClean(application);
 
-                        FlinkAppState appState = FlinkAppState.of(application.getState());
-                        if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
-                            alertService.alert(application, FlinkAppState.of(application.getState()));
-                            if (appState.equals(FlinkAppState.FAILED)) {
-                                try {
-                                    applicationService.start(application, true);
-                                } catch (Exception e) {
-                                    e.printStackTrace();
+                            FlinkAppState appState = FlinkAppState.of(application.getState());
+                            if (appState.equals(FlinkAppState.FAILED) || appState.equals(FlinkAppState.LOST)) {
+                                alertService.alert(application, FlinkAppState.of(application.getState()));
+                                if (appState.equals(FlinkAppState.FAILED)) {
+                                    try {
+                                        applicationService.start(application, true);
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
                                 }
                             }
                         }
                     }
                 }
-            }
-        }));
+            }));
     }
 
     /**
@@ -355,7 +364,7 @@ public class FlinkTrackingTask {
                             //x分钟之内超过Y次CheckPoint失败触发动作
                             long minute = counter.getDuration(checkPoint.getTriggerTimestamp());
                             if (minute <= application.getCpFailureRateInterval()
-                                    && counter.getCount() >= application.getCpMaxFailureInterval()) {
+                                && counter.getCount() >= application.getCpMaxFailureInterval()) {
                                 CHECK_POINT_FAILED_MAP.remove(application.getJobId());
                                 if (application.getCpFailureAction() == 1) {
                                     alertService.alert(application, CheckPointStatus.FAILED);
@@ -549,7 +558,8 @@ public class FlinkTrackingTask {
 
     private static List<Application> getAllApplications() {
         QueryWrapper<Application> queryWrapper = new QueryWrapper<>();
-        queryWrapper.eq("tracking", 1);
+        queryWrapper.eq("tracking", 1)
+            .notIn("execution_mode", ExecutionMode.getKubernetesMode());
         return applicationService.list(queryWrapper);
     }
 
@@ -580,6 +590,9 @@ public class FlinkTrackingTask {
      * 设置正在操作中...
      */
     public static void setOptionState(Long appId, OptionState state) {
+        if (isKubernetesApp(appId)){
+            return;
+        }
         log.info("flinkTrackingTask setOptioning");
         optioningTime = System.currentTimeMillis();
         OPTIONING.put(appId, state);
@@ -590,12 +603,18 @@ public class FlinkTrackingTask {
     }
 
     public static void addTracking(Application application) {
+        if (isKubernetesApp(application)) {
+            return;
+        }
         log.info("flinkTrackingTask add app to tracking,appId:{}", application.getId());
         TRACKING_MAP.put(application.getId(), application);
         STARTING_CACHE.put(application.getId(), DEFAULT_FLAG_BYTE);
     }
 
     public static void addSavepoint(Long appId) {
+        if (isKubernetesApp(appId)) {
+            return;
+        }
         log.info("flinkTrackingTask add app to savepoint,appId:{}", appId);
         SAVEPOINT_CACHE.put(appId, DEFAULT_FLAG_BYTE);
     }
@@ -607,6 +626,10 @@ public class FlinkTrackingTask {
      * @param callable
      */
     public static Object refreshTracking(Long appId, Callable callable) throws Exception {
+        if (isKubernetesApp(appId)) {
+            // notes: k8s flink tracking monitor don't need to flush or refresh cache proactively.
+            return callable.call();
+        }
         log.info("flinkTrackingTask flushing app,appId:{}", appId);
         Application application = TRACKING_MAP.get(appId);
         if (application != null) {
@@ -638,6 +661,9 @@ public class FlinkTrackingTask {
     }
 
     public static void stopTracking(Long appId) {
+        if (isKubernetesApp(appId)) {
+            return;
+        }
         log.info("flinkTrackingTask stop app,appId:{}", appId);
         TRACKING_MAP.remove(appId);
     }
@@ -667,6 +693,15 @@ public class FlinkTrackingTask {
         public long getDuration(Long currentTimestamp) {
             return (currentTimestamp - this.getTimestamp()) / 1000 / 60;
         }
+    }
+
+    private static boolean isKubernetesApp(Application application){
+        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(application);
+    }
+
+    private static boolean isKubernetesApp(Long appId){
+        Application app = TRACKING_MAP.get(appId);
+        return K8sFlinkTrkMonitorWrapper.isKubernetesApp(app);
     }
 
 }
