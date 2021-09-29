@@ -84,13 +84,13 @@ public class KafkaSource<T> {
 
     public DataStreamSource<KafkaRecord<T>> getDataStream() {
         FlinkKafkaConsumer<KafkaRecord<T>> consumer = com.streamxhub.streamx.flink.core.scala.source.KafkaSource.getSource(
-                this.context,
-                this.property,
-                this.topics,
-                this.alias,
-                this.deserializer,
-                this.strategy,
-                null);
+            this.context,
+            this.property,
+            this.topics,
+            this.alias,
+            this.deserializer,
+            this.strategy,
+            null);
         return context.getJavaEnv().addSource(consumer);
     }
 

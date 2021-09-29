@@ -57,10 +57,10 @@ class KafkaSink(@(transient@param) val ctx: StreamingContext,
    * @param stream
    * @param alias
    * @param topic
-   * @param serializer 序列化Scheam,不指定默认使用SimpleStringSchema
-   * @param partitioner         指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
-   *                            注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
-   *                            )
+   * @param serializer  序列化Scheam,不指定默认使用SimpleStringSchema
+   * @param partitioner 指定kafka分区器(默认使用<b>KafkaEqualityPartitioner</b>分区器,顾名思义,该分区器可以均匀的将数据写到各个分区中去,
+   *                    注意:Flink中默认使用的是<span style="color:RED">FlinkFixedPartitioner</span>分区器,该分区器需要特别注意sink的并行度和kafka的分区数,不然会出现往一个分区写...
+   *                    )
    * @tparam T
    * @return
    */

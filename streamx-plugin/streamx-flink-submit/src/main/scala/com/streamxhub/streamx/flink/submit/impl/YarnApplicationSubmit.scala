@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.{CustomCommandLine, ExecutionConfigAccessor, ProgramOptions}
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -89,7 +89,7 @@ object YarnApplicationSubmit extends YarnSubmitTrait {
                ||__________________________________________________________________|
                |""".stripMargin)
 
-          SubmitResponse(applicationId, flinkConfig)
+          SubmitResponse(applicationId.toString, flinkConfig)
         } finally if (clusterDescriptor != null) {
           clusterDescriptor.close()
         }

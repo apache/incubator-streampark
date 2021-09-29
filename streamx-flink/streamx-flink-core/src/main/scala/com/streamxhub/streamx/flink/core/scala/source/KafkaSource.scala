@@ -24,7 +24,7 @@ import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.util.{ConfigUtils, Utils}
 import com.streamxhub.streamx.flink.core.scala.StreamingContext
 import org.apache.flink.api.common.eventtime.WatermarkStrategy
-import org.apache.flink.api.common.typeinfo.TypeInformation
+import org.apache.flink.api.common.typeinfo.{BasicTypeInfo, TypeInformation}
 import org.apache.flink.api.java.typeutils.TypeExtractor.getForClass
 import org.apache.flink.streaming.api.scala.{DataStream, _}
 import org.apache.flink.streaming.connectors.kafka.internals.KafkaTopicPartition
@@ -32,6 +32,7 @@ import org.apache.flink.streaming.connectors.kafka.{FlinkKafkaConsumer, KafkaDes
 import org.apache.kafka.clients.consumer.{ConsumerConfig, ConsumerRecord}
 
 import java.io
+import java.nio.charset.StandardCharsets
 import java.util.Properties
 import java.util.regex.Pattern
 import scala.annotation.meta.param
@@ -194,8 +195,10 @@ class KafkaRecord[T: TypeInformation](
 
 class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSchema[T]) extends KafkaDeserializationSchema[KafkaRecord[T]] {
 
+  private val charset = StandardCharsets.UTF_8
+
   override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): KafkaRecord[T] = {
-    val key = if (record.key() == null) null else new String(record.key())
+    val key = if (record.key() == null) null else new String(record.key(), charset)
     val value = deserializer.deserialize(record)
     val offset = record.offset()
     val partition = record.partition()
@@ -211,11 +214,15 @@ class KafkaDeserializer[T: TypeInformation](deserializer: KafkaDeserializationSc
 }
 
 class KafkaStringDeserializationSchema extends KafkaDeserializationSchema[String] {
+
+  private val charset = StandardCharsets.UTF_8
+
   override def isEndOfStream(nextElement: String): Boolean = false
 
-  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value())
+  override def deserialize(record: ConsumerRecord[Array[Byte], Array[Byte]]): String = new String(record.value(), charset)
 
-  override def getProducedType: TypeInformation[String] = getForClass(classOf[String])
+  override def getProducedType: TypeInformation[String] = BasicTypeInfo.STRING_TYPE_INFO
+
 }
 
 

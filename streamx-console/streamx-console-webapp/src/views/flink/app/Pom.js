@@ -19,35 +19,35 @@
  * under the License.
  */
 export function toPomString(pom) {
-  const groupId = pom.groupId
-  const artifactId = pom.artifactId
-  const version = pom.version
-  const exclusions = pom.exclusions || []
-  let exclusionString = ''
-  let pomString = ''
-  if (exclusions.length > 0) {
-    exclusions.forEach((item) => {
-      exclusionString +=
-        '        <exclusion>\n' +
-        '          <groupId>' + item.groupId + '</groupId>\n' +
-        '          <artifactId>' + item.artifactId + '</artifactId>\n' +
-        '        </exclusion>\n'
-    })
-    pomString =
-      '  <dependency>\n' +
-      '     <groupId>' + groupId + '</groupId>\n' +
-      '     <artifactId>' + artifactId + '</artifactId>\n' +
-      '     <version>' + version + '</version>\n' +
-      '     <exclusions>\n' + exclusionString +
-      '     </exclusions>\n' +
-      '   </dependency>'
-  } else {
-    pomString =
-      '  <dependency>\n' +
-      '    <groupId>' + groupId + '</groupId>\n' +
-      '    <artifactId>' + artifactId + '</artifactId>\n' +
-      '    <version>' + version + '</version>\n' +
-      '  </dependency>'
-  }
-  return pomString
+    const groupId = pom.groupId
+    const artifactId = pom.artifactId
+    const version = pom.version
+    const exclusions = pom.exclusions || []
+    let exclusionString = ''
+    let pomString = ''
+    if (exclusions.length > 0) {
+        exclusions.forEach((item) => {
+            exclusionString +=
+                '        <exclusion>\n' +
+                '          <groupId>' + item.groupId + '</groupId>\n' +
+                '          <artifactId>' + item.artifactId + '</artifactId>\n' +
+                '        </exclusion>\n'
+        })
+        pomString =
+            '  <dependency>\n' +
+            '     <groupId>' + groupId + '</groupId>\n' +
+            '     <artifactId>' + artifactId + '</artifactId>\n' +
+            '     <version>' + version + '</version>\n' +
+            '     <exclusions>\n' + exclusionString +
+            '     </exclusions>\n' +
+            '   </dependency>'
+    } else {
+        pomString =
+            '  <dependency>\n' +
+            '    <groupId>' + groupId + '</groupId>\n' +
+            '    <artifactId>' + artifactId + '</artifactId>\n' +
+            '    <version>' + version + '</version>\n' +
+            '  </dependency>'
+    }
+    return pomString
 }

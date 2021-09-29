@@ -35,5 +35,5 @@ public interface EffectiveMapper extends BaseMapper<Effective> {
     Effective get(@Param("appId") Long appId, @Param("type") int type);
 
     @Delete("delete from t_flink_effective where app_id=#{appId}")
-    void removeApp(@Param("appId")Long appId);
+    void removeApp(@Param("appId") Long appId);
 }

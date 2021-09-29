@@ -36,7 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class TutorialServiceImpl extends ServiceImpl<TutorialMapper, Tutorial>
-        implements TutorialService {
+    implements TutorialService {
     @Override
     public Tutorial getByName(String name) {
         return this.baseMapper.getByName(name);

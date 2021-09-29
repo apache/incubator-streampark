@@ -42,6 +42,9 @@
     <sun v-if="name==='sun'"></sun>
     <moon v-if="name==='moon'"></moon>
     <user v-if="name==='user'"></user>
+    <docker v-if="name==='docker'"></docker>
+    <auth v-if="name==='auth'"></auth>
+    <password v-if="name==='password'"></password>
   </span>
 </template>
 
@@ -88,7 +91,10 @@ import {
   resetpass,
   sun,
   moon,
-  user
+  user,
+  docker,
+  auth,
+  password
 } from '@/core/icons'
 
 export default {
@@ -135,7 +141,10 @@ export default {
     resetpass,
     sun,
     moon,
-    user
+    user,
+    docker,
+    auth,
+    password
   },
   props: {
     name: {

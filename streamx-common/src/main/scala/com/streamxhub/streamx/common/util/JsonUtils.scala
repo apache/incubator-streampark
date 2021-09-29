@@ -55,4 +55,12 @@ object JsonUtils extends Serializable {
 
   def write(obj: AnyRef): String = mapper.writeValueAsString(obj)
 
+  implicit class Unmarshal(jsonStr: String) {
+    def fromJson[T]()(implicit manifest: Manifest[T]): T = read[T](jsonStr)
+  }
+
+  implicit class Marshal(obj: AnyRef) {
+    def toJson: String = write(obj)
+  }
+
 }

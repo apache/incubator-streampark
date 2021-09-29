@@ -48,6 +48,9 @@ import resetpass from '@/assets/icons/resetpass.svg?inline'
 import sun from '@/assets/icons/sun.svg?inline'
 import moon from '@/assets/icons/moon.svg?inline'
 import user from '@/assets/icons/user.svg?inline'
+import docker from '@/assets/icons/docker.svg?inline'
+import auth from '@/assets/icons/auth.svg?inline'
+import password from '@/assets/icons/password.svg?inline'
 
 export {
   analyse,
@@ -91,5 +94,8 @@ export {
   resetpass,
   sun,
   moon,
-  user
+  user,
+  docker,
+  auth,
+  password
 }

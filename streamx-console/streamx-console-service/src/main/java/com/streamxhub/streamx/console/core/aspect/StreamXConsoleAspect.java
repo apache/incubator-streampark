@@ -44,8 +44,8 @@ import java.util.Objects;
 public class StreamXConsoleAspect {
 
     @Pointcut("execution(public" +
-            " com.streamxhub.streamx.console.base.domain.RestResponse" +
-            " com.streamxhub.streamx.console.*.controller.*.*(..))"
+        " com.streamxhub.streamx.console.base.domain.RestResponse" +
+        " com.streamxhub.streamx.console.*.controller.*.*(..))"
     )
     public void response() {
     }
@@ -67,7 +67,7 @@ public class StreamXConsoleAspect {
             e.printStackTrace();
             response = Objects.requireNonNull(RestResponse.create()
                     .put("status", "error"))
-                    .put("exception", ExceptionUtils.stringifyException(e));
+                .put("exception", ExceptionUtils.stringifyException(e));
         }
         return response;
     }

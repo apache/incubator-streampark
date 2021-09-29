@@ -29,7 +29,6 @@ import com.streamxhub.streamx.console.core.enums.EffectiveType;
  */
 public interface EffectiveService extends IService<Effective> {
     /**
-     *
      * @param appId
      * @param config
      */

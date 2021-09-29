@@ -46,11 +46,11 @@ public class Effective {
 
     private transient EffectiveType effectiveType;
 
-    public Effective(){
+    public Effective() {
 
     }
 
-    public Effective(Long appId,EffectiveType type,Long targetId) {
+    public Effective(Long appId, EffectiveType type, Long targetId) {
         this.appId = appId;
         this.targetType = type.getType();
         this.targetId = targetId;

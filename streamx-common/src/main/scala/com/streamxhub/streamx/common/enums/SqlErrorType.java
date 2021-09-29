@@ -21,9 +21,7 @@
 package com.streamxhub.streamx.common.enums;
 
 /**
- *
  * @author benjobs
- *
  */
 public enum SqlErrorType {
     /**

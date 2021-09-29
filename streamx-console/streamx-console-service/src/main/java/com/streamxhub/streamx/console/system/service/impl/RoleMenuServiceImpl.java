@@ -38,7 +38,7 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class RoleMenuServiceImpl extends ServiceImpl<RoleMenuMapper, RoleMenu>
-        implements RoleMenuServie {
+    implements RoleMenuServie {
 
     @Override
     @Transactional

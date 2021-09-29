@@ -22,6 +22,7 @@ package com.streamxhub.streamx.console.core.service;
 
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.AppExistsState;
@@ -70,10 +71,10 @@ public interface ApplicationService extends IService<Application> {
 
     void tailMvnDownloading(Long id);
 
-    boolean upload(MultipartFile file) throws IOException;
+    boolean upload(MultipartFile file, StorageType storageType) throws Exception;
 
     /**
-     * 将 lastst的设置为Effective的,(此时才真正变成当前生效的)
+     * 将 latest的设置为Effective的,(此时才真正变成当前生效的)
      */
     void toEffective(Application application);
 

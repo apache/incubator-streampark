@@ -64,8 +64,8 @@ public class PassportController {
 
     @PostMapping("signin")
     public RestResponse signin(
-            @NotBlank(message = "{required}") String username,
-            @NotBlank(message = "{required}") String password) throws Exception {
+        @NotBlank(message = "{required}") String username,
+        @NotBlank(message = "{required}") String password) throws Exception {
 
         username = StringUtils.lowerCase(username);
         User user = this.userService.findByName(username);

@@ -41,6 +41,7 @@ import org.apache.http.impl.client.HttpClients
 
 import java.io.{File, IOException}
 import java.net.InetAddress
+import java.security.PrivilegedAction
 import java.util
 import java.util.concurrent.ConcurrentHashMap
 import java.util.{Timer, TimerTask, HashMap => JavaHashMap}
@@ -58,15 +59,44 @@ object HadoopUtils extends Logger {
   private[this] lazy val HADOOP_CONF_DIR: String = "HADOOP_CONF_DIR"
   private[this] lazy val CONF_SUFFIX: String = "/etc/hadoop"
 
+  private val hadoopUserName: String = SystemPropertyUtils.get(KEY_HADOOP_USER_NAME, DEFAULT_HADOOP_USER_NAME)
+
   private[this] var reusableYarnClient: YarnClient = _
 
   private[this] var reusableConf: Configuration = _
 
-  private[util] var hdfs: FileSystem = getFileSystem(hadoopConf)
+  private[this] var reusableHdfs: FileSystem = _
 
   private[this] var rmHttpURL: String = _
 
   private[this] lazy val configurationCache: util.Map[String, Configuration] = new ConcurrentHashMap[String, Configuration]()
+
+  def hdfs: FileSystem = {
+    if (reusableHdfs == null) {
+      reusableHdfs = Try {
+        val ugi = UserGroupInformation.createRemoteUser(hadoopUserName)
+        ugi.doAs[FileSystem](new PrivilegedAction[FileSystem]() {
+          override def run(): FileSystem = FileSystem.get(reusableConf)
+        })
+      } match {
+        case Success(fs) => fs
+        case Failure(e) =>
+          throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
+      }
+    }
+    reusableHdfs
+  }
+
+  def yarnClient: YarnClient = {
+    if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
+      reusableYarnClient = YarnClient.createYarnClient
+      val yarnConf = new YarnConfiguration(hadoopConf)
+      reusableYarnClient.init(yarnConf)
+      reusableYarnClient.start()
+    }
+    reusableYarnClient
+  }
+
 
   lazy val kerberosConf: Map[String, String] = SystemPropertyUtils.get("app.home", null) match {
     case null =>
@@ -85,15 +115,6 @@ object HadoopUtils extends Logger {
     case Failure(_) => FileUtils.resolvePath(FileUtils.getPathFromEnv(HADOOP_HOME), CONF_SUFFIX)
     case Success(value) => value
   }
-
-  private[this] def getFileSystem(hadoopConf: Configuration): FileSystem = {
-    Try(FileSystem.get(hadoopConf)) match {
-      case Success(fs) => fs
-      case Failure(e) =>
-        throw new IllegalArgumentException(s"[StreamX] access hdfs error.$e")
-    }
-  }
-
 
   def getConfigurationFromHadoopConfDir(confDir: String = hadoopConfDir): Configuration = {
     if (!configurationCache.containsKey(confDir)) {
@@ -119,6 +140,9 @@ object HadoopUtils extends Logger {
    * </pre>
    */
   def hadoopConf: Configuration = {
+
+    var tgt: KerberosTicket = null
+
     def initHadoopConf(): Configuration = {
       val conf = getConfigurationFromHadoopConfDir(hadoopConfDir)
       //add hadoopConfDir to classpath...you know why???
@@ -138,6 +162,20 @@ object HadoopUtils extends Logger {
       conf.set("fs.file.impl", classOf[LocalFileSystem].getName)
       conf.set("fs.hdfs.impl.disable.cache", "true")
       conf
+    }
+
+    def closeHadoop(): Unit = {
+      if (tgt != null && !tgt.isDestroyed) {
+        tgt.destroy()
+      }
+      if (reusableYarnClient != null) {
+        reusableYarnClient.close()
+        reusableYarnClient = null
+      }
+      if (reusableHdfs != null) {
+        reusableHdfs.close()
+        reusableHdfs = null
+      }
     }
 
     def kerberosLogin(conf: Configuration): Unit = {
@@ -176,7 +214,7 @@ object HadoopUtils extends Logger {
       val user = UserGroupInformation.getLoginUser
       val method = classOf[UserGroupInformation].getDeclaredMethod("getTGT")
       method.setAccessible(true)
-      val tgt = method.invoke(user).asInstanceOf[KerberosTicket]
+      tgt = method.invoke(user).asInstanceOf[KerberosTicket]
       Option(tgt) match {
         case Some(value) =>
           val start = value.getStartTime.getTime
@@ -191,13 +229,12 @@ object HadoopUtils extends Logger {
       val refreshTime = getRefreshTime
       timer.schedule(new TimerTask {
         override def run(): Unit = {
+          /*
+          closeHadoop()
           reusableConf = initHadoopConf()
           kerberosLogin(reusableConf)
-          hdfs = getFileSystem(reusableConf)
-          if (reusableYarnClient != null) {
-            reusableYarnClient.close()
-            reusableYarnClient = null
-          }
+          */
+          UserGroupInformation.getLoginUser.checkTGTAndReloginFromKeytab()
           logInfo(s"Check Kerberos Tgt And reLogin From Keytab Finish:refresh time: ${DateUtils.format()}")
         }
       }, refreshTime, refreshTime)
@@ -215,16 +252,6 @@ object HadoopUtils extends Logger {
       }
     }
     reusableConf
-  }
-
-  def yarnClient: YarnClient = {
-    if (reusableYarnClient == null || !reusableYarnClient.isInState(STATE.STARTED)) {
-      reusableYarnClient = YarnClient.createYarnClient
-      val yarnConf = new YarnConfiguration(hadoopConf)
-      reusableYarnClient.init(yarnConf)
-      reusableYarnClient.start()
-    }
-    reusableYarnClient
   }
 
   /**
@@ -348,7 +375,7 @@ object HadoopUtils extends Logger {
     val tmpDir = FileUtils.createTempDir()
     val fs = FileSystem.get(new Configuration)
     val sourcePath = fs.makeQualified(new Path(jarOnHdfs))
-    if (!fs.exists(sourcePath)) throw new IOException("jar file: " + jarOnHdfs + " doesn't exist.")
+    if (!fs.exists(sourcePath)) throw new IOException(s"jar file: $jarOnHdfs doesn't exist.")
     val destPath = new Path(tmpDir.getAbsolutePath + "/" + sourcePath.getName)
     fs.copyToLocalFile(sourcePath, destPath)
     new File(destPath.toString).getAbsolutePath
