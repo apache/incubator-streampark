@@ -41,6 +41,7 @@ import com.streamxhub.streamx.console.core.service.ApplicationConfigService;
 import com.streamxhub.streamx.console.core.service.EffectiveService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.ArrayUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Service;
@@ -61,8 +62,8 @@ import java.util.List;
 @Service
 @Transactional(propagation = Propagation.SUPPORTS, readOnly = true, rollbackFor = Exception.class)
 public class ApplicationConfigServiceImpl
-        extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
-        implements ApplicationConfigService {
+    extends ServiceImpl<ApplicationConfigMapper, ApplicationConfig>
+    implements ApplicationConfigService {
 
     private String flinkConfTemplate = null;
 
@@ -95,12 +96,12 @@ public class ApplicationConfigServiceImpl
     public void setLatest(Long appId, Long configId) {
         LambdaUpdateWrapper<ApplicationConfig> updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
         updateWrapper.set(ApplicationConfig::getLatest, 0)
-                .eq(ApplicationConfig::getAppId, appId);
+            .eq(ApplicationConfig::getAppId, appId);
         this.update(updateWrapper);
 
         updateWrapper = new UpdateWrapper<ApplicationConfig>().lambda();
         updateWrapper.set(ApplicationConfig::getLatest, 1)
-                .eq(ApplicationConfig::getId, configId);
+            .eq(ApplicationConfig::getId, configId);
         this.update(updateWrapper);
     }
 
@@ -222,7 +223,7 @@ public class ApplicationConfigServiceImpl
     public List<ApplicationConfig> history(Application application) {
         LambdaQueryWrapper<ApplicationConfig> wrapper = new QueryWrapper<ApplicationConfig>().lambda();
         wrapper.eq(ApplicationConfig::getAppId, application.getId())
-                .orderByDesc(ApplicationConfig::getVersion);
+            .orderByDesc(ApplicationConfig::getVersion);
 
         List<ApplicationConfig> configList = this.baseMapper.selectList(wrapper);
         ApplicationConfig effective = getEffective(application.getId());
@@ -239,9 +240,9 @@ public class ApplicationConfigServiceImpl
     @Override
     public synchronized String readTemplate() {
         if (flinkConfTemplate == null) {
-            String profiles = context.getEnvironment().getActiveProfiles()[0];
+            String[] activeProfiles = context.getEnvironment().getActiveProfiles();
             String path;
-            if (profiles.equals(PROD_ENV_NAME)) {
+            if (ArrayUtils.isNotEmpty(activeProfiles) && activeProfiles[0].equals(PROD_ENV_NAME)) {
                 //生产环境部署读取conf/flink-application.template
                 path = WebUtils.getAppDir("conf").concat("/flink-application.template");
             } else {

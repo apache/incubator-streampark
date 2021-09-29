@@ -24,9 +24,9 @@ import com.streamxhub.streamx.common.util.ThreadUtils;
 import com.streamxhub.streamx.console.core.entity.Note;
 import com.streamxhub.streamx.console.core.service.NoteBookService;
 import com.streamxhub.streamx.console.core.service.SettingService;
-import com.streamxhub.streamx.repl.flink.interpreter.FlinkInterpreter;
-import com.streamxhub.streamx.repl.flink.interpreter.InterpreterOutput;
-import com.streamxhub.streamx.repl.flink.interpreter.InterpreterResult;
+import com.streamxhub.streamx.flink.repl.interpreter.FlinkInterpreter;
+import com.streamxhub.streamx.flink.repl.interpreter.InterpreterOutput;
+import com.streamxhub.streamx.flink.repl.interpreter.InterpreterResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,13 +47,13 @@ public class NoteBookServiceImpl implements NoteBookService {
     private SettingService settingService;
 
     private ExecutorService executorService = new ThreadPoolExecutor(
-            Runtime.getRuntime().availableProcessors() * 2,
-            200,
-            60L,
-            TimeUnit.SECONDS,
-            new LinkedBlockingQueue<>(1024),
-            ThreadUtils.threadFactory("notebook-submit-executor"),
-            new ThreadPoolExecutor.AbortPolicy()
+        Runtime.getRuntime().availableProcessors() * 2,
+        200,
+        60L,
+        TimeUnit.SECONDS,
+        new LinkedBlockingQueue<>(1024),
+        ThreadUtils.threadFactory("notebook-submit-executor"),
+        new ThreadPoolExecutor.AbortPolicy()
     );
 
     @Override

@@ -26,7 +26,7 @@ import org.apache.curator.retry.RetryNTimes
 import org.apache.zookeeper.CreateMode
 
 import java.nio.charset.StandardCharsets
-import scala.collection.JavaConverters._
+import scala.collection.JavaConversions._
 import scala.collection.mutable
 
 object ZooKeeperUtils {
@@ -78,7 +78,7 @@ object ZooKeeperUtils {
     val stat = client.checkExists.forPath(path)
     stat match {
       case null => List.empty[String]
-      case _ => client.getChildren.forPath(path).asScala.toList
+      case _ => client.getChildren.forPath(path).toList
     }
   }
 

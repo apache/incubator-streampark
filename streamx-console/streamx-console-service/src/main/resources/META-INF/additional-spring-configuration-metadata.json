@@ -14,6 +14,36 @@
       "name": "streamx.hdfs.workspace",
       "type": "java.lang.String",
       "description": "Description for streamx.hdfs.workspace."
+    },
+    {
+      "name": "streamx.docker.register.image-namespace",
+      "type": "java.lang.String",
+      "description": "Description for streamx.docker.register.image-namespace."
+    },
+    {
+      "name": "streamx.flink-k8s.tracking.silent-state-keep-sec",
+      "type": "java.lang.String",
+      "description": "Description for streamx.flink-k8s.tracking.silent-state-keep-sec."
+    },
+    {
+      "name": "streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status",
+      "type": "java.lang.String",
+      "description": "Description for streamx.flink-k8s.tracking.polling-task-timeout-sec.job-status."
+    },
+    {
+      "name": "streamx.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric",
+      "type": "java.lang.String",
+      "description": "Description for streamx.flink-k8s.tracking.polling-task-timeout-sec.cluster-metric."
+    },
+    {
+      "name": "streamx.flink-k8s.tracking.polling-interval-sec.job-status",
+      "type": "java.lang.String",
+      "description": "Description for streamx.flink-k8s.tracking.polling-interval-sec.job-status."
+    },
+    {
+      "name": "streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric",
+      "type": "java.lang.String",
+      "description": "Description for streamx.flink-k8s.tracking.polling-interval-sec.cluster-metric."
     }
   ]
 }

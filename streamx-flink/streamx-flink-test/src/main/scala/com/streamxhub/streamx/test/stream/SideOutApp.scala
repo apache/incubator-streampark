@@ -36,6 +36,7 @@ object SideOutApp extends FlinkStreaming {
 
   override def handle(): Unit = {
     val source = context.addSource(new SideSource())
+
     /**
      * 侧输出流。。。
      * 官方写法:设置侧输出流

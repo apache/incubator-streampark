@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-flink-shims</artifactId>
-        <version>1.1.1</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>streamx-flink-shims-base</artifactId>
@@ -55,7 +55,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- 支持一些自定义的消息格式，比如kafka里面消息格式是json的，或者需要自定义函数支持 -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-common</artifactId>
@@ -63,7 +62,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- 使用Blink Planner -->
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-table-planner-blink_${scala.binary.version}</artifactId>

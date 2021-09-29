@@ -6,13 +6,18 @@
     <parent>
         <groupId>com.streamxhub.streamx</groupId>
         <artifactId>streamx-plugin</artifactId>
-        <version>1.1.1</version>
+        <version>1.2.0</version>
     </parent>
 
     <artifactId>streamx-flink-submit</artifactId>
     <name>StreamX : Flink Submit</name>
 
     <dependencies>
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
@@ -20,9 +25,23 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- The flink session mode would resolve the DAG within streamx process,
+             so a full build dependencies is required. -->
         <dependency>
             <groupId>com.streamxhub.streamx</groupId>
-            <artifactId>streamx-common</artifactId>
+            <artifactId>streamx-flink-shims_flink-1.13</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-packer</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.streamxhub.streamx</groupId>
+            <artifactId>streamx-flink-kubernetes</artifactId>
             <version>${project.version}</version>
         </dependency>
 
@@ -37,6 +56,12 @@
             <artifactId>hadoop-mapreduce-client-core</artifactId>
             <version>${hadoop.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -44,6 +69,12 @@
             <artifactId>hbase-client</artifactId>
             <version>${hbase.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -51,11 +82,30 @@
             <artifactId>flink-yarn_${scala.binary.version}</artifactId>
             <version>${flink.version}</version>
             <scope>provided</scope>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-kubernetes_${scala.binary.version}</artifactId>
+            <version>${flink.version}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>${guava.version}</version>
         </dependency>
 
     </dependencies>

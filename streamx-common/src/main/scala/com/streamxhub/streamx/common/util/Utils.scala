@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.common.util
 
+import org.apache.commons.lang.StringUtils
+
 import java.io.{BufferedInputStream, File, FileInputStream, IOException}
 import java.net.URL
 import java.util.jar.{JarFile, JarInputStream}
@@ -29,7 +31,7 @@ import scala.util.{Failure, Success, Try}
 
 object Utils {
 
-  private[this] val OS = System.getProperty("os.name").toLowerCase
+  private[this] lazy val OS = System.getProperty("os.name").toLowerCase
 
   def notEmpty(elem: Any): Boolean = {
     elem match {
@@ -47,7 +49,7 @@ object Utils {
 
   def uuid(): String = UUID.randomUUID().toString.replaceAll("-", "")
 
-  def require(requirement: Boolean, message: String) {
+  def require(requirement: Boolean, message: String): Unit = {
     if (!requirement)
       throw new IllegalArgumentException(s"requirement failed: $message")
   }
@@ -82,5 +84,40 @@ object Utils {
   def isLinux: Boolean = OS.indexOf("linux") >= 0
 
   def isWindows: Boolean = OS.indexOf("windows") >= 0
+
+  /**
+   * if any blank strings exist
+   */
+  def isAnyBank(items: String*): Boolean = items == null || items.exists(StringUtils.isBlank)
+
+  /*
+   * Mimicking the try-with-resource syntax of Java-8+
+   */
+  def tryWithResource[R, T <: AutoCloseable](handle: T)(func: T => R): R = {
+    try {
+      func(handle)
+    } finally {
+      if (handle != null) {
+        handle.close()
+      }
+    }
+  }
+
+  /*
+  * Mimicking the try-with-resource syntax of Java-8+,
+  * and also provides callback function param for handing
+  * Exception.
+  */
+  def tryWithResourceException[R, T <: AutoCloseable](handle: T)(func: T => R)(excFunc: Throwable => R): R = {
+    try {
+      func(handle)
+    } catch {
+      case e: Throwable => excFunc(e)
+    } finally {
+      if (handle != null) {
+        handle.close()
+      }
+    }
+  }
 
 }

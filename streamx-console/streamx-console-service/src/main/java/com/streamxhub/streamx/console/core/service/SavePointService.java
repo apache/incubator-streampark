@@ -24,6 +24,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
 import com.streamxhub.streamx.console.base.exception.ServiceException;
+import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.entity.SavePoint;
 
 /**
@@ -37,10 +38,10 @@ public interface SavePointService extends IService<SavePoint> {
 
     SavePoint getLatest(Long id);
 
-    Boolean delete(Long id) throws ServiceException;
+    Boolean delete(Long id, Application application) throws ServiceException;
 
     IPage<SavePoint> page(SavePoint savePoint, RestRequest request);
 
-    void removeApp(Long appId);
+    void removeApp(Application application);
 
 }

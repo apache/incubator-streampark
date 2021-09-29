@@ -36,7 +36,7 @@ object HdfsUtils extends Logger {
 
   def list(src: String): List[FileStatus] = HadoopUtils.hdfs.listStatus(getPath(src)).toList
 
-  def movie(src: String, dst: String): Unit = HadoopUtils.hdfs.rename(getPath(src), getPath(dst))
+  def move(src: String, dst: String): Unit = HadoopUtils.hdfs.rename(getPath(src), getPath(dst))
 
   def mkdirs(path: String): Unit = HadoopUtils.hdfs.mkdirs(getPath(path))
 
@@ -50,8 +50,8 @@ object HdfsUtils extends Logger {
   def upload(src: String, dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
     HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, getPath(src), getPath(dst))
 
-  def upload2(srcs: Array[String], dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
-    HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, srcs.map(getPath), getPath(dst))
+  def uploadMulti(src: Array[String], dst: String, delSrc: Boolean = false, overwrite: Boolean = true): Unit =
+    HadoopUtils.hdfs.copyFromLocalFile(delSrc, overwrite, src.map(getPath), getPath(dst))
 
   def download(src: String, dst: String, delSrc: Boolean = false, useRawLocalFileSystem: Boolean = false): Unit =
     HadoopUtils.hdfs.copyToLocalFile(delSrc, getPath(src), getPath(dst), useRawLocalFileSystem)

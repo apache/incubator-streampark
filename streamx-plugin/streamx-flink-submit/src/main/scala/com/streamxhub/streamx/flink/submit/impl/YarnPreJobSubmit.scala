@@ -23,7 +23,7 @@ package com.streamxhub.streamx.flink.submit.impl
 import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
-import com.streamxhub.streamx.flink.submit.{SubmitRequest, SubmitResponse}
+import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
 import org.apache.flink.client.cli.CustomCommandLine
 import org.apache.flink.client.deployment.DefaultClusterClientServiceLoader
@@ -126,7 +126,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
            ||__________________________________________________________________|
            |""".stripMargin)
 
-      SubmitResponse(applicationId, flinkConfig)
+      SubmitResponse(applicationId.toString, flinkConfig)
     } finally if (clusterDescriptor != null) {
       clusterDescriptor.close()
     }

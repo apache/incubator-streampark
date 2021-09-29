@@ -40,5 +40,5 @@ public interface MessageService extends IService<Message> {
     /**
      * @return
      */
-    IPage<Message> getUnRead(NoticeType noticeType,RestRequest request);
+    IPage<Message> getUnRead(NoticeType noticeType, RestRequest request);
 }

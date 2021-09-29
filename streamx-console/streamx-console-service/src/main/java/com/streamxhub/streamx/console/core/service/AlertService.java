@@ -24,8 +24,6 @@ import com.streamxhub.streamx.console.core.entity.Application;
 import com.streamxhub.streamx.console.core.enums.CheckPointStatus;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
 
-import java.io.Serializable;
-
 /**
  * @author benjobs
  */
@@ -40,7 +38,6 @@ public interface AlertService {
 
 
     void alert(Application application, FlinkAppState appState);
-
 
 
 }

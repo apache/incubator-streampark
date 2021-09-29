@@ -85,7 +85,7 @@ public class ShiroRealm extends AuthorizingRealm {
      */
     @Override
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken)
-            throws AuthenticationException {
+        throws AuthenticationException {
         // 这里的 token是从 JWTFilter 的 executeLogin 方法传递过来的，已经经过了解密
         String token = (String) authenticationToken.getCredentials();
         String username = JWTUtil.getUsername(token);

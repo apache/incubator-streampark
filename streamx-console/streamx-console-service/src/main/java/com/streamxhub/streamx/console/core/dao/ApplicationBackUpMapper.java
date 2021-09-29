@@ -37,12 +37,12 @@ public interface ApplicationBackUpMapper extends BaseMapper<ApplicationBackUp> {
     IPage<ApplicationBackUp> page(Page<ApplicationBackUp> page, @Param("appId") Long appId);
 
     @Select("SELECT * from t_app_backup where app_id=#{appId} order by create_time desc limit 1")
-    ApplicationBackUp getLastBackup(@Param("appId")Long appId);
+    ApplicationBackUp getLastBackup(@Param("appId") Long appId);
 
     @Delete("delete from t_app_backup where app_id=#{appId}")
-    void removeApp(@Param("appId")Long appId);
+    void removeApp(@Param("appId") Long appId);
 
     @Select("SELECT * from t_app_backup where app_id=#{appId} and sql_id=#{sqlId}")
-    ApplicationBackUp getFlinkSqlBackup(@Param("appId")Long appId,@Param("sqlId") Long sqlId);
+    ApplicationBackUp getFlinkSqlBackup(@Param("appId") Long appId, @Param("sqlId") Long sqlId);
 
 }

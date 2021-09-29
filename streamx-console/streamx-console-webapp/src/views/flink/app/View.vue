@@ -426,7 +426,8 @@
               && optionApps.deploy.get(record.id) === undefined
               && optionApps.stoping.get(record.id) === undefined
               && optionApps.starting.get(record.id) === undefined
-              && record['optionState'] === 0"
+              && record['optionState'] === 0
+              && (record['executionMode'] === 2 || record['executionMode'] === 3 || record['executionMode'] === 4)"
             v-permit="'app:mapping'"
             @click.native="handleMapping(record)"/>
           <svg-icon
@@ -590,7 +591,7 @@
           <svg-icon
             slot="icon"
             name="play"/>
-          Start application
+          Start Application
         </template>
 
         <a-form
@@ -599,7 +600,8 @@
           <a-form-item
             label="flame Graph"
             :label-col="{lg: {span: 7}, sm: {span: 7}}"
-            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="executionMode !== 5 && executionMode !== 6">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -711,8 +713,8 @@
           :form="formStopSavePoint">
           <a-form-item
             label="Savepoint"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -724,8 +726,8 @@
           </a-form-item>
           <a-form-item
             label="Drain"
-            :label-col="{lg: {span: 5}, sm: {span: 5}}"
-            :wrapper-col="{lg: {span: 17}, sm: {span: 5} }">
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }">
             <a-switch
               checked-children="ON"
               un-checked-children="OFF"
@@ -735,6 +737,19 @@
             <span
               class="conf-switch"
               style="color:darkgrey"> Send max watermark before stoping</span>
+          </a-form-item>
+          <a-form-item
+            label="Custom SavePoint"
+            style="margin-bottom: 10px"
+            :label-col="{lg: {span: 7}, sm: {span: 7}}"
+            :wrapper-col="{lg: {span: 16}, sm: {span: 4} }"
+            v-show="savePoint">
+            <a-input
+              type="text"
+              placeholder="Entry the custom savepoint path"
+              v-model="customSavepoint"
+              v-decorator="['customSavepoint']"/>
+            <div style="color:darkgrey">Custom savepoint path is not supported on YARN mode.</div>
           </a-form-item>
         </a-form>
 
@@ -842,22 +857,22 @@
   </div>
 </template>
 <script>
-import Ellipsis from '@/components/Ellipsis'
-import State from './State'
-import {mapActions} from 'vuex'
-import {list, dashboard, cancel, deploy, revoke, mapping, start, clean, yarn, remove} from '@api/application'
-import {latest, history} from '@api/savepoint'
-import {flamegraph} from '@api/metrics'
-import {weburl} from '@api/setting'
-import {Terminal} from 'xterm'
-import 'xterm/css/xterm.css'
-import SockJS from 'sockjs-client'
-import {baseUrl} from '@/api/baseUrl'
-import Stomp from 'webstomp-client'
-import SvgIcon from '@/components/SvgIcon'
-import {check} from '@/api/setting'
+  import Ellipsis from '@/components/Ellipsis'
+  import State from './State'
+  import {mapActions} from 'vuex'
+  import {cancel, clean, dashboard, deploy, list, mapping, remove, revoke, start, yarn} from '@api/application'
+  import {history, latest} from '@api/savepoint'
+  import {flamegraph} from '@api/metrics'
+  import {weburl} from '@api/setting'
+  import {Terminal} from 'xterm'
+  import 'xterm/css/xterm.css'
+  import SockJS from 'sockjs-client'
+  import {baseUrl} from '@/api/baseUrl'
+  import Stomp from 'webstomp-client'
+  import SvgIcon from '@/components/SvgIcon'
+  import {check} from '@/api/setting'
 
-export default {
+  export default {
   components: {Ellipsis, State, SvgIcon},
   data() {
     return {
@@ -892,9 +907,11 @@ export default {
       formMapping: null,
       drain: false,
       savePoint: true,
+      customSavepoint: null,
       flameGraph: false,
       restart: false,
       application: null,
+      executionMode: null,
       latestSavePoint: null,
       historySavePoint: null,
       allowNonRestoredState: false,
@@ -955,10 +972,10 @@ export default {
           customRender: 'customRender'
         },
         onFilter: (value, record) =>
-          record.jobName
-            .toString()
-            .toLowerCase()
-            .includes(value.toLowerCase()),
+            record.jobName
+                .toString()
+                .toLowerCase()
+                .includes(value.toLowerCase()),
         onFilterDropdownVisibleChange: visible => {
           if (visible) {
             setTimeout(() => {
@@ -1009,7 +1026,10 @@ export default {
           {text: 'CANCELED', value: 11},
           {text: 'FINISHED', value: 12},
           {text: 'SUSPENDED', value: 13},
-          {text: 'LOST', value: 15}
+          {text: 'LOST', value: 15},
+          {text: 'SILENT', value: 19},
+          {text: 'TERMINATED', value: 20},
+          {text: 'FINISHED', value: 21},
         ]
       }, {
         title: 'Deploy Status',
@@ -1028,7 +1048,6 @@ export default {
   },
 
   mounted() {
-    this.handleYarn()
     this.handleDashboard()
     this.handleFetch(true)
     const timer = window.setInterval(() => {
@@ -1066,7 +1085,7 @@ export default {
       }
     },
 
-    handleDeployTitle (deploy) {
+    handleDeployTitle(deploy) {
       switch (deploy) {
         case -1:
           return 'dependency changed,but download dependency failed'
@@ -1114,7 +1133,7 @@ export default {
             title: 'The current job is deploying',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             deploy({
               id: id,
               restart: restart,
@@ -1149,7 +1168,7 @@ export default {
             title: 'The current job is mapping',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             mapping({
               id: id,
               appId: appId,
@@ -1172,12 +1191,14 @@ export default {
 
     handleIsStart(app) {
       const status = app.state === 0 ||
-        app.state === 2 ||
-        app.state === 9 ||
-        app.state === 11 ||
-        app.state === 12 ||
-        app.state === 13 ||
-        app.state === 15 || false
+          app.state === 2 ||
+          app.state === 9 ||
+          app.state === 11 ||
+          app.state === 12 ||
+          app.state === 13 ||
+          app.state === 15 ||
+          app.state === 20 ||
+          app.state === 21 || false
 
       const optionState = this.optionApps.starting.get(app.id) == undefined || app['optionState'] == 0 || false
 
@@ -1192,6 +1213,7 @@ export default {
         }).then((resp) => {
           this.latestSavePoint = resp.data || null
           this.startVisible = true
+          this.executionMode = app.executionMode
           if (!this.latestSavePoint) {
             history({
               appId: this.application.id,
@@ -1237,7 +1259,7 @@ export default {
             title: 'The current job is starting',
             showConfirmButton: false,
             timer: 2000
-          }).then((r)=> {
+          }).then((r) => {
             start({
               id: id,
               savePointed: savePointed,
@@ -1248,9 +1270,9 @@ export default {
               const code = parseInt(resp.data)
               if (code === 0) {
                 this.$swal.fire(
-                  'Failed',
-                  'startup failed, please check the startup log :)',
-                  'error'
+                    'Failed',
+                    'startup failed, please check the startup log :)',
+                    'error'
                 )
               } else if (code === -1) {
                 this.$swal.fire(
@@ -1286,6 +1308,7 @@ export default {
       const id = this.application.id
       const savePointed = this.savePoint
       const drain = this.drain
+      const customSavePoint = this.customSavepoint
       this.optionApps.stoping.set(id, new Date().getTime())
       this.handleMapUpdate('stoping')
       this.handleStopCancel()
@@ -1299,13 +1322,14 @@ export default {
         cancel({
           id: id,
           savePointed: savePointed,
-          drain: drain
+          drain: drain,
+          savePoint: customSavePoint
         }).then((resp) => {
           if (resp.status === 'error') {
             this.$swal.fire(
-              'Failed',
-              resp.exception,
-              'error'
+                'Failed',
+                resp.exception,
+                'error'
             )
           }
         })
@@ -1319,12 +1343,12 @@ export default {
 
     handleCheckFlameGraph() {
       if (this.flameGraph) {
-        weburl({}).then((resp)=>{
-          if ( resp.data == null || resp.data === '' ) {
+        weburl({}).then((resp) => {
+          if (resp.data == null || resp.data === '') {
             this.$swal.fire(
-              'Failed',
-              ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
-              'error'
+                'Failed',
+                ' flameGraph enable Failed <br><br> StreamX Webapp address not defined <br><br> please check!',
+                'error'
             )
             this.flameGraph = false
           }
@@ -1334,34 +1358,35 @@ export default {
 
     handleFlameGraph(app) {
       flamegraph({
-          appId: app.id,
-          width: document.documentElement.offsetWidth || document.body.offsetWidth
-        },
-        (resp) => {
-          if (resp != null) {
-            const blob = new Blob([resp], {type: 'image/svg+xml'})
-            const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
-            window.open(imageUrl)
-          }
-        },
-        {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
+            appId: app.id,
+            width: document.documentElement.offsetWidth || document.body.offsetWidth
+          },
+          (resp) => {
+            if (resp != null) {
+              const blob = new Blob([resp], {type: 'image/svg+xml'})
+              const imageUrl = (window.URL || window.webkitURL).createObjectURL(blob)
+              window.open(imageUrl)
+            }
+          },
+          {loading: 'flameGraph generating...', error: 'flameGraph generate failed'}
       )
     },
 
-    handleCanDelete (app) {
+    handleCanDelete(app) {
       return app.state === 0 ||
-        app.state === 2 ||
-        app.state === 9 ||
-        app.state === 11 ||
-        app.state === 12 ||
-        app.state === 15 ||
-        app.state === 19 || false
+          app.state === 2 ||
+          app.state === 9 ||
+          app.state === 11 ||
+          app.state === 12 ||
+          app.state === 15 ||
+          app.state === 20 ||
+          app.state === 21 || false
     },
 
     handleDelete(app) {
       remove({
         id: app.id
-      }).then((resp)=>{
+      }).then((resp) => {
         this.$swal.fire({
           icon: 'success',
           title: 'delete successful',
@@ -1499,16 +1524,22 @@ export default {
       }
     },
 
-    handleYarn() {
-      yarn({}).then((resp) => {
-        this.yarn = resp.data
-      })
-    },
-
     handleView(params) {
       if (params.state === 6 || params.state === 7 || params['optionState'] === 4) {
-        const url = this.yarn + '/proxy/' + params['appId'] + '/'
-        window.open(url)
+        // yarn-pre-job|yarn-session|yarn-application
+        const executionMode = params['executionMode']
+        if (executionMode === 2 || executionMode === 3 || executionMode === 4) {
+          if(this.yarn == null) {
+            yarn({}).then((resp) => {
+              this.yarn = resp.data
+              const url = this.yarn + '/proxy/' + params['appId'] + '/'
+              window.open(url)
+            })
+          } else {
+            const url = this.yarn + '/proxy/' + params['appId'] + '/'
+            window.open(url)
+          }
+        }
       }
     },
 
@@ -1519,9 +1550,9 @@ export default {
           this.$router.push({'path': '/flink/app/add'})
         } else {
           this.$swal.fire(
-            'Failed',
-            'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
-            'error'
+              'Failed',
+              'Please check "StreamX Console Workspace" is defined and make sure have read and write permissions',
+              'error'
           )
         }
       })
@@ -1536,10 +1567,10 @@ export default {
       }
     },
 
-    handleRevoke (app) {
+    handleRevoke(app) {
       revoke({
         id: app.id
-      }).then((resp)=>{
+      }).then((resp) => {
 
       })
     },
@@ -1595,7 +1626,7 @@ export default {
         this.stompClient.subscribe(
             '/resp/mvn',
             (msg) => {
-              if(msg.body.startsWith('[Exception]')) {
+              if (msg.body.startsWith('[Exception]')) {
                 this.$swal.fire(
                     'Failed',
                     msg.body,

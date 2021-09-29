@@ -194,6 +194,7 @@ class JdbcOutputFormat[T: TypeInformation](implicit prop: Properties, toSQlFun: 
 }
 
 //-------------Jdbc2PCSinkFunction exactly-once support ---------------------------------------------------------------------------------------
+
 /**
  * (flink checkpoint + db transactionId) 模拟了提交读.充分利用flink的checkpoint机制,经过flink checkpoint确认过的数据才提交
  *
