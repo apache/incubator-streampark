@@ -20,8 +20,9 @@
  */
 package com.streamxhub.streamx.flink.submit.`trait`
 
-import com.streamxhub.streamx.common.conf.ConfigConst.{APP_SAVEPOINTS, KEY_FLINK_PARALLELISM}
-import com.streamxhub.streamx.common.enums.DevelopmentMode
+import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.conf.Workspace
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, StorageType}
 import com.streamxhub.streamx.common.util.ExceptionUtils
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.CommandLine
@@ -47,6 +48,8 @@ import scala.util.Try
  */
 trait YarnSubmitTrait extends FlinkSubmitTrait {
 
+  lazy val workspace = new Workspace(StorageType.HDFS)
+
   override def doStop(stopRequest: StopRequest): StopResponse = {
 
     val jobID = getJobID(stopRequest.jobId)
@@ -67,7 +70,7 @@ trait YarnSubmitTrait extends FlinkSubmitTrait {
       stopRequest.flinkHome,
       ConfigOptions.key(CheckpointingOptions.SAVEPOINT_DIRECTORY.key())
         .stringType()
-        .defaultValue(s"hdfs://$APP_SAVEPOINTS")
+        .defaultValue(s"${workspace.APP_SAVEPOINTS}")
     )
 
     val savepointPathFuture = (Try(stopRequest.withSavePoint).getOrElse(false), Try(stopRequest.withDrain).getOrElse(false)) match {

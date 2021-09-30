@@ -25,6 +25,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
 import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
@@ -101,13 +102,6 @@ public class Project implements Serializable {
     @JsonIgnore
     private transient SettingService settingService;
 
-    private String getStreamXWorkspace() {
-        if (settingService == null) {
-            settingService = SpringContextUtils.getBean(SettingService.class);
-        }
-        return settingService.getStreamXWorkspace();
-    }
-
     /**
      * 获取项目源码路径
      *
@@ -116,7 +110,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = getStreamXWorkspace().concat("/project");
+            appSource = WorkspaceGetter.local().PROJECT_LOCAL_DIR();
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -134,7 +128,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getAppBase() {
-        String appBase = getStreamXWorkspace().concat("/app/");
+        String appBase = WorkspaceGetter.local().APP_WORKSPACE().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 

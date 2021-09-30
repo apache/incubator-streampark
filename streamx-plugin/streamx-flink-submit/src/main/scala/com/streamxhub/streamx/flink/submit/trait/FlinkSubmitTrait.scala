@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
-import com.streamxhub.streamx.common.util.{Logger, Utils}
+import com.streamxhub.streamx.common.util.{Logger, SystemPropertyUtils, Utils}
 import com.streamxhub.streamx.flink.core.scala.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.domain._
 import org.apache.commons.cli.{CommandLine, Options}
@@ -198,7 +198,7 @@ trait FlinkSubmitTrait extends Logger {
   }
 
   private[submit] lazy val jvmProfilerJar: String = {
-    val pluginsPath = System.getProperty("app.home").concat("/plugins")
+    val pluginsPath = SystemPropertyUtils.get("app.home").concat("/plugins")
     val pluginsDir = new File(pluginsPath)
     pluginsDir.list().filter(_.matches("streamx-jvm-profiler-.*\\.jar")) match {
       case Array() => throw new IllegalArgumentException(s"[StreamX] can no found streamx-jvm-profiler jar in $pluginsPath")
@@ -213,9 +213,19 @@ trait FlinkSubmitTrait extends Logger {
 
 }
 
-case class WorkspaceEnv(flinkName: String,
-                        flinkHome: String,
-                        flinkDistJar: String,
-                        flinkLib: String,
-                        appJars: String,
-                        appPlugins: String)
+/**
+ *
+ * @param flinkName
+ * @param flinkHome
+ * @param flinkDistJar
+ * @param flinkLib
+ * @param appJars
+ * @param appPlugins
+ * #TODO: className provisional
+ */
+case class HdfsWorkspace(flinkName: String,
+                         flinkHome: String,
+                         flinkDistJar: String,
+                         flinkLib: String,
+                         appJars: String,
+                         appPlugins: String)

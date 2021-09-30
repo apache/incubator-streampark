@@ -22,9 +22,12 @@
 package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
 import com.streamxhub.streamx.common.fs.FsOperatorGetter;
+import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.extern.slf4j.Slf4j;
@@ -62,14 +65,15 @@ public class EnvInitializer implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_LOCAL(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
+        overrideSystemProp(ConfigConst.KEY_STREAMX_WORKSPACE_REMOTE(), ConfigConst.STREAMX_WORKSPACE_DEFAULT());
         overrideSystemProp(ConfigConst.KEY_DOCKER_IMAGE_NAMESPACE(), ConfigConst.DOCKER_IMAGE_NAMESPACE_DEFAULT());
-        // local storage must exists
-        storageInitialize(StorageType.LFS);
     }
 
-    private void overrideSystemProp(String key, String defaultValue){
-        System.getProperties().setProperty(key, context.getEnvironment().getProperty(key, defaultValue));
+    private void overrideSystemProp(String key, String defaultValue) {
+        String value = context.getEnvironment().getProperty(key, defaultValue);
+        log.info("initialize system properties: key:{}, value:{}", key, value);
+        SystemPropertyUtils.set(key, value);
     }
 
     /**
@@ -78,40 +82,40 @@ public class EnvInitializer implements ApplicationRunner {
      */
     public synchronized void storageInitialize(StorageType storageType) throws Exception {
         if (initialized.get(storageType) == null) {
-
             FsOperator fsOperator = FsOperatorGetter.get(storageType);
+            Workspace workspace = WorkspaceGetter.get(storageType);
 
-            String appUploads = ConfigConst.APP_UPLOADS();
+            String appUploads = workspace.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
                 log.info("mkdir {} starting ...", appUploads);
                 fsOperator.mkdirs(appUploads);
             }
 
-            String appWorkspace = ConfigConst.APP_WORKSPACE();
+            String appWorkspace = workspace.APP_WORKSPACE();
             if (!fsOperator.exists(appWorkspace)) {
                 log.info("mkdir {} starting ...", appWorkspace);
                 fsOperator.mkdirs(appWorkspace);
             }
 
-            String appBackups = ConfigConst.APP_BACKUPS();
+            String appBackups = workspace.APP_BACKUPS();
             if (!fsOperator.exists(appBackups)) {
                 log.info("mkdir {} starting ...", appBackups);
                 fsOperator.mkdirs(appBackups);
             }
 
-            String appSavePoints = ConfigConst.APP_SAVEPOINTS();
+            String appSavePoints = workspace.APP_SAVEPOINTS();
             if (!fsOperator.exists(appSavePoints)) {
                 log.info("mkdir {} starting ...", appSavePoints);
                 fsOperator.mkdirs(appSavePoints);
             }
 
-            String appJars = ConfigConst.APP_JARS();
+            String appJars = workspace.APP_JARS();
             if (!fsOperator.exists(appJars)) {
                 log.info("mkdir {} starting ...", appJars);
                 fsOperator.mkdirs(appJars);
             }
 
-            String appPlugins = ConfigConst.APP_PLUGINS();
+            String appPlugins = workspace.APP_PLUGINS();
             if (fsOperator.exists(appPlugins)) {
                 fsOperator.delete(appPlugins);
             }
@@ -128,7 +132,7 @@ public class EnvInitializer implements ApplicationRunner {
                 }
             }
 
-            String appShims = ConfigConst.APP_SHIMS();
+            String appShims = workspace.APP_SHIMS();
             if (fsOperator.exists(appShims)) {
                 fsOperator.delete(appShims);
             }
@@ -148,9 +152,9 @@ public class EnvInitializer implements ApplicationRunner {
                 }
             }
             // create maven local repository dir
-            String localMavnRepo = ConfigConst.MAVEN_LOCAL_DIR();
-            if (FsOperatorGetter.get(LFS).exists(localMavnRepo)) {
-                FsOperatorGetter.get(LFS).mkdirs(localMavnRepo);
+            String localMavenRepo = workspace.MAVEN_LOCAL_DIR();
+            if (FsOperatorGetter.get(LFS).exists(localMavenRepo)) {
+                FsOperatorGetter.get(LFS).mkdirs(localMavenRepo);
             }
             initialized.put(storageType, Boolean.TRUE);
         }
@@ -161,7 +165,8 @@ public class EnvInitializer implements ApplicationRunner {
         if (flinkLocalHome == null) {
             throw new ExceptionInInitializerError("[StreamX] FLINK_HOME is undefined,Make sure that Flink is installed.");
         }
-        String appFlink = ConfigConst.APP_FLINK();
+        Workspace workspace = Workspace.of(storageType);
+        String appFlink = workspace.APP_FLINK();
         FsOperator fsOperator = FsOperatorGetter.get(storageType);
         if (!fsOperator.exists(appFlink)) {
             log.info("mkdir {} starting ...", appFlink);

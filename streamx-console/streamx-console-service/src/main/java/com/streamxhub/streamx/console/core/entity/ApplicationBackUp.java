@@ -21,7 +21,7 @@
 package com.streamxhub.streamx.console.core.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -59,7 +59,7 @@ public class ApplicationBackUp {
         this.createTime = new Date();
         this.path = String.format(
             "%s/%d/%d",
-            ConfigConst.APP_BACKUPS(),
+            WorkspaceGetter.remote(),
             application.getId(),
             createTime.getTime()
         );

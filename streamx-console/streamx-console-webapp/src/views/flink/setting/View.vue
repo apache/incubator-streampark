@@ -9,7 +9,6 @@
         <a-list-item v-for="(item,index) in settings" :key="index">
           <a-list-item-meta style="width: 50%">
             <svg-icon class="avatar" name="flink" size="large" slot="avatar" v-if="item.key === 'env.flink.home'"></svg-icon>
-            <svg-icon class="avatar" name="workspace" size="large" slot="avatar" v-if="item.key === 'streamx.console.workspace'"></svg-icon>
             <svg-icon class="avatar" name="maven" size="large" slot="avatar" v-if="item.key === 'maven.central.repository'"></svg-icon>
             <svg-icon class="avatar" name="http" size="large" slot="avatar" v-if="item.key === 'streamx.console.webapp.address'"></svg-icon>
             <svg-icon class="avatar" name="host" size="large" slot="avatar" v-if="item.key === 'alert.email.host'"></svg-icon>
