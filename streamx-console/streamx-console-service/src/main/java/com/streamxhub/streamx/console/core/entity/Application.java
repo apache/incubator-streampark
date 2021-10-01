@@ -26,7 +26,8 @@ import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.Workspace;
+import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
@@ -37,7 +38,6 @@ import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
 import com.streamxhub.streamx.console.base.util.JsonUtils;
-import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.ApplicationType;
 import com.streamxhub.streamx.console.core.enums.DeployState;
 import com.streamxhub.streamx.console.core.enums.FlinkAppState;
@@ -45,22 +45,21 @@ import com.streamxhub.streamx.console.core.metrics.flink.CheckPoints;
 import com.streamxhub.streamx.console.core.metrics.flink.JobsOverview;
 import com.streamxhub.streamx.console.core.metrics.flink.Overview;
 import com.streamxhub.streamx.console.core.metrics.yarn.AppInfo;
-import com.streamxhub.streamx.console.core.service.SettingService;
 import com.streamxhub.streamx.flink.kubernetes.model.K8sPodTemplates;
 import com.streamxhub.streamx.flink.packer.maven.JarPackDeps;
 import com.streamxhub.streamx.flink.packer.maven.MavenArtifact;
-import java.util.stream.Collectors;
-import javax.annotation.Nonnull;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
+import javax.annotation.Nonnull;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.streamxhub.streamx.console.core.enums.FlinkAppState.of;
 
@@ -250,7 +249,7 @@ public class Application implements Serializable {
             k8sNamespace;
     }
 
-    public K8sPodTemplates getK8sPodTemplates(){
+    public K8sPodTemplates getK8sPodTemplates() {
         return K8sPodTemplates.of(k8sPodTemplate, k8sJmPodTemplate, k8sTmPodTemplate);
     }
 
@@ -288,7 +287,7 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum(){
+    public FlinkK8sRestExposedType getK8sRestExposedTypeEnum() {
         return FlinkK8sRestExposedType.of(this.k8sRestExposedType);
     }
 
@@ -313,26 +312,24 @@ public class Application implements Serializable {
     }
 
     @JsonIgnore
-    public File getLocalAppBase() {
-        String localWorkspace = SpringContextUtils.getBean(SettingService.class).getStreamXWorkspace();
-        return new File(localWorkspace.concat("/app/").concat(projectId.toString()));
+    public File getLocalAppHome() {
+        return new File(WorkspaceGetter.local().APP_WORKSPACE().concat("/app/").concat(projectId.toString()));
     }
 
     @JsonIgnore
-    public File getLocalFlinkSqlBase() {
-        String localWorkspace = SpringContextUtils.getBean(SettingService.class).getStreamXWorkspace();
-        File flinkSql = new File(localWorkspace, "flinksql");
+    public File getRemoteAppHome() {
+        return new File(WorkspaceGetter.remote().APP_WORKSPACE().concat("/").concat(id.toString()));
+    }
+
+    @JsonIgnore
+    public File getLocalFlinkSqlHome() {
+        File flinkSql = new File(WorkspaceGetter.local().APP_WORKSPACE(), "flinksql");
         if (!flinkSql.exists()) {
             flinkSql.mkdirs();
         }
         return new File(flinkSql, id.toString());
     }
 
-    @JsonIgnore
-    public File getAppHome() {
-        String workspace = ConfigConst.APP_WORKSPACE();
-        return new File(workspace.concat("/").concat(id.toString()));
-    }
 
     @JsonIgnore
     public AppInfo httpYarnAppInfo() throws Exception {
@@ -534,6 +531,10 @@ public class Application implements Serializable {
         return FsOperatorGetter.get(getStorageType());
     }
 
+    public Workspace getWorkspace() {
+        return WorkspaceGetter.get(getStorageType());
+    }
+
     @Data
     public static class Dependency {
         private List<Pom> pom = Collections.emptyList();
@@ -586,12 +587,12 @@ public class Application implements Serializable {
         }
 
         @JsonIgnore
-        public JarPackDeps toJarPackDeps(){
+        public JarPackDeps toJarPackDeps() {
             List<MavenArtifact> mvnArts = this.pom.stream()
                 .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
                 .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                .map(jar -> ConfigConst.APP_UPLOADS() + "/" + jar)
+                .map(jar -> WorkspaceGetter.local().APP_UPLOADS() + "/" + jar)
                 .collect(Collectors.toList());
             return new JarPackDeps(mvnArts, extJars);
         }

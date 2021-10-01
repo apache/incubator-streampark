@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.ConfigConst;
+import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -117,7 +117,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public boolean checkWorkspace() {
-        String workspace = getStreamXWorkspace();
+        String workspace = WorkspaceGetter.local().WORKSPACE();
         if (Utils.isEmpty(workspace)) {
             return false;
         }
@@ -235,11 +235,6 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
     @Override
     public String getEffectiveFlinkHome() {
         return Utils.isEmpty(this.getEnvFlinkHome()) ? System.getenv("FLINK_HOME") : this.getEnvFlinkHome();
-    }
-
-    @Override
-    public String getStreamXWorkspace() {
-        return settings.get(SettingService.KEY_STREAMX_WORKSPACE).getValue();
     }
 
     @Override

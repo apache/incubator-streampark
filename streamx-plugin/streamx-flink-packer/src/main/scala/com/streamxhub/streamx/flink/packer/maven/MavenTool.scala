@@ -33,9 +33,7 @@ object MavenTool extends Logger {
   @throws[Exception] def buildFatJar(@Nonnull jarLibs: Set[String], @Nonnull outFatJarPath: String): File = {
     // check userJarPath
     val uberJar = new File(outFatJarPath)
-    if (uberJar.isDirectory) {
-      throw new Exception(s"[streamx-packer] outFatJarPath($outFatJarPath) should be a file.")
-    }
+    require(uberJar.isFile, s"[streamx-packer] outFatJarPath($outFatJarPath) should be a file.")
     // resolve all jarLibs
     val jarSet = new util.HashSet[File]
     jarLibs.map(lib => new File(lib))
@@ -70,13 +68,13 @@ object MavenTool extends Logger {
    * @param outFatJarPath output paths of fat-jar, like "/streamx/workspace/233/my-fat.jar"
    */
   @throws[Exception] def buildFatJar(@Nonnull jarPackDeps: JarPackDeps, @Nonnull outFatJarPath: String): File = {
-    val jarlibs = jarPackDeps.extJarLibs
+    val jarLibs = jarPackDeps.extJarLibs
     val arts = jarPackDeps.mavenArts
-    if (jarlibs.isEmpty && arts.isEmpty) {
+    if (jarLibs.isEmpty && arts.isEmpty) {
       throw new Exception(s"[streamx-packer] empty artifacts.")
     }
     val artFilePaths = resolveArtifacts(arts).map(_.getAbsolutePath)
-    buildFatJar(jarlibs ++ artFilePaths, outFatJarPath)
+    buildFatJar(jarLibs ++ artFilePaths, outFatJarPath)
   }
 
 

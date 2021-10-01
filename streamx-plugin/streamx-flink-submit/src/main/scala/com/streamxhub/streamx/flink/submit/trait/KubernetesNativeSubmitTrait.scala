@@ -21,6 +21,7 @@
 package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
+import com.streamxhub.streamx.common.conf.Workspace
 import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, StorageType}
 import com.streamxhub.streamx.common.fs.FsOperatorGetter
 import com.streamxhub.streamx.common.util.DeflaterUtils
@@ -53,6 +54,8 @@ import scala.util.Try
  */
 //noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
+
+  lazy val workspace:Workspace = new Workspace(StorageType.LFS)
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
@@ -211,23 +214,22 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
   }
 
   private[submit] def extractProvidedLibs(submitRequest: SubmitRequest): Set[String] = {
-    val flinkLib = s"$APP_FLINK/${new File(submitRequest.flinkHome).getName}/lib"
     val providedLibs = ArrayBuffer(
       // flinkLib,
-      APP_JARS,
-      APP_PLUGINS,
+      workspace.APP_JARS,
+      workspace.APP_PLUGINS,
       submitRequest.flinkUserJar
     )
     val version = submitRequest.flinkVersion.split("\\.").map(_.trim.toInt)
     version match {
       case Array(1, 13, _) =>
-        providedLibs += s"$APP_SHIMS/flink-1.13"
+        providedLibs += s"${workspace.APP_SHIMS}/flink-1.13"
       case Array(1, 11 | 12, _) =>
-        providedLibs += s"$APP_SHIMS/flink-1.12"
+        providedLibs += s"${workspace.APP_SHIMS}/flink-1.12"
       case _ =>
         throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
     }
-    val jobLib = s"$APP_WORKSPACE/${submitRequest.jobID}/lib"
+    val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
     if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
       providedLibs += jobLib
     }

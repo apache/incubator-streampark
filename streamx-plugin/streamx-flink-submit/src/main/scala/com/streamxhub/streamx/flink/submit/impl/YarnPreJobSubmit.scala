@@ -46,6 +46,7 @@ import scala.util.Try
 /**
  * yarn PreJob mode submit
  */
+@deprecated
 object YarnPreJobSubmit extends YarnSubmitTrait {
 
   override def doSubmit(submitRequest: SubmitRequest): SubmitResponse = {
@@ -135,8 +136,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
   private def getEffectiveConfiguration[T](submitRequest: SubmitRequest, activeCustomCommandLine: CustomCommandLine, commandLine: CommandLine) = {
     val effectiveConfiguration = super.applyConfiguration(submitRequest, activeCustomCommandLine, commandLine)
     val (providedLibs, programArgs) = {
-      val providedLibs = ListBuffer(submitRequest.workspaceEnv.appJars)
-
+      val providedLibs = ListBuffer(submitRequest.hdfsWorkspace.appJars)
       val programArgs = new ArrayBuffer[String]()
       Try(submitRequest.args.split("\\s+")).getOrElse(Array()).foreach(x => if (x.nonEmpty) programArgs += x)
       programArgs += PARAM_KEY_APP_NAME

@@ -20,6 +20,8 @@
  */
 package com.streamxhub.streamx.common.conf
 
+import com.streamxhub.streamx.common.util.SystemPropertyUtils
+
 object ConfigConst {
   /**
    *
@@ -287,42 +289,11 @@ object ConfigConst {
 
   val KEY_ES_CLIENT_TRANSPORT_SNIFF = "client.transport.sniff"
 
-  val KEY_STREAMX_WORKSPACE = "streamx.workspace.path"
+  val KEY_STREAMX_WORKSPACE_LOCAL = "streamx.workspace.local"
+
+  val KEY_STREAMX_WORKSPACE_REMOTE = "streamx.workspace.remote"
 
   val STREAMX_WORKSPACE_DEFAULT = "/streamx"
-
-  lazy val WORKSPACE: String = {
-    val workspace = System.getProperties.getProperty(KEY_STREAMX_WORKSPACE, STREAMX_WORKSPACE_DEFAULT)
-    require(!workspace.startsWith("hdfs://"))
-    workspace
-  }
-
-  lazy val APP_PLUGINS = s"$WORKSPACE/plugins"
-
-  /**
-   * 存放不同版本flink相关的jar
-   */
-  lazy val APP_SHIMS = s"$WORKSPACE/shims"
-
-  lazy val APP_UPLOADS = s"$WORKSPACE/uploads"
-
-  lazy val APP_WORKSPACE = s"$WORKSPACE/workspace"
-
-  lazy val APP_FLINK = s"$WORKSPACE/flink"
-
-  lazy val APP_BACKUPS = s"$WORKSPACE/backups"
-
-  lazy val APP_SAVEPOINTS = s"$WORKSPACE/savepoints"
-
-  /**
-   * 存放全局公共的jar
-   */
-  lazy val APP_JARS = s"$WORKSPACE/jars"
-
-  /**
-   * dirpath of the maven local repository with built-in compilation process
-   */
-  lazy val MAVEN_LOCAL_DIR = s"$WORKSPACE/mvnrepo"
 
   /**
    * maven repository used for built-in compilation
@@ -332,9 +303,9 @@ object ConfigConst {
   /**
    * namespace for docker image used in docker build env and image register
    */
-    val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
-    val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
-    lazy val DOCKER_IMAGE_NAMESPACE: String = System.getProperties.getProperty(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
+  val KEY_DOCKER_IMAGE_NAMESPACE = "streamx.docker.register.image-namespace"
+  val DOCKER_IMAGE_NAMESPACE_DEFAULT = "streamx"
+  lazy val DOCKER_IMAGE_NAMESPACE: String = SystemPropertyUtils.get(KEY_DOCKER_IMAGE_NAMESPACE, DOCKER_IMAGE_NAMESPACE_DEFAULT)
 
   val LOGO =
     """
