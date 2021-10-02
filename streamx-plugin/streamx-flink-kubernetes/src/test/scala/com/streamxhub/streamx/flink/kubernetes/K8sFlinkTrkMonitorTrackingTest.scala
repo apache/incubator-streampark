@@ -35,7 +35,7 @@ import scala.util.Try
 /**
  * test FlinkTrkMonitor tracking feature
  */
-class K8sFlinkTrkMonitorTracingTest {
+class K8sFlinkTrkMonitorTrackingTest {
 
   implicit var trkMonitor: DefaultK8sFlinkTrkMonitor = _
 
