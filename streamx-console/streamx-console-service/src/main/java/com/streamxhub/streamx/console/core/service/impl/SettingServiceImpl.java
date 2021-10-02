@@ -22,7 +22,7 @@ package com.streamxhub.streamx.console.core.service.impl;
 
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.conf.WorkspaceGetter;
+import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.common.util.CommandUtils;
 import com.streamxhub.streamx.common.util.PropertiesUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -117,7 +117,7 @@ public class SettingServiceImpl extends ServiceImpl<SettingMapper, Setting>
 
     @Override
     public boolean checkWorkspace() {
-        String workspace = WorkspaceGetter.local().WORKSPACE();
+        String workspace = Workspace.local().WORKSPACE();
         if (Utils.isEmpty(workspace)) {
             return false;
         }

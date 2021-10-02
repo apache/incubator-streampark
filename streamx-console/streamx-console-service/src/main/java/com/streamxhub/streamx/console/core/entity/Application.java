@@ -27,13 +27,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.streamxhub.streamx.common.conf.Workspace;
-import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.common.enums.DevelopmentMode;
 import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.FlinkK8sRestExposedType;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.HadoopUtils;
 import com.streamxhub.streamx.common.util.HttpClientUtils;
 import com.streamxhub.streamx.common.util.Utils;
@@ -313,17 +311,17 @@ public class Application implements Serializable {
 
     @JsonIgnore
     public File getLocalAppHome() {
-        return new File(WorkspaceGetter.local().APP_WORKSPACE().concat("/app/").concat(projectId.toString()));
+        return new File(Workspace.local().APP_WORKSPACE().concat("/app/").concat(projectId.toString()));
     }
 
     @JsonIgnore
     public File getRemoteAppHome() {
-        return new File(WorkspaceGetter.remote().APP_WORKSPACE().concat("/").concat(id.toString()));
+        return new File(Workspace.remote().APP_WORKSPACE().concat("/").concat(id.toString()));
     }
 
     @JsonIgnore
     public File getLocalFlinkSqlHome() {
-        File flinkSql = new File(WorkspaceGetter.local().APP_WORKSPACE(), "flinksql");
+        File flinkSql = new File(Workspace.local().APP_WORKSPACE(), "flinksql");
         if (!flinkSql.exists()) {
             flinkSql.mkdirs();
         }
@@ -528,11 +526,11 @@ public class Application implements Serializable {
     }
 
     public FsOperator getFsOperator() {
-        return FsOperatorGetter.get(getStorageType());
+        return FsOperator.of(getStorageType());
     }
 
     public Workspace getWorkspace() {
-        return WorkspaceGetter.get(getStorageType());
+        return Workspace.of(getStorageType());
     }
 
     @Data
@@ -592,7 +590,7 @@ public class Application implements Serializable {
                 .map(pom -> new MavenArtifact(pom.getGroupId(), pom.getArtifactId(), pom.getVersion()))
                 .collect(Collectors.toList());
             List<String> extJars = this.jar.stream()
-                .map(jar -> WorkspaceGetter.local().APP_UPLOADS() + "/" + jar)
+                .map(jar -> Workspace.local().APP_UPLOADS() + "/" + jar)
                 .collect(Collectors.toList());
             return new JarPackDeps(mvnArts, extJars);
         }

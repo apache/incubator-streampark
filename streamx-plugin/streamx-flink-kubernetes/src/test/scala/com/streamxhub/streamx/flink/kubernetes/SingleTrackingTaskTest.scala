@@ -32,7 +32,7 @@ class SingleTrackingTaskTest {
   val trkMonitor: DefaultK8sFlinkTrkMonitor = K8sFlinkTrkMonitorFactory.createInstance().asInstanceOf[DefaultK8sFlinkTrkMonitor]
 
   // retrieve flink job status  info
-  @Test def testSignleTrackingFlinkJobStatus(): Unit = {
+  @Test def testSingleTrackingFlinkJobStatus(): Unit = {
     // test session job
     val jobStatus1 = trkMonitor.jobStatusWatcher.touchSessionAllJob("flink-session", "default")
     println("result1 = ")

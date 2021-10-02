@@ -23,23 +23,12 @@ package com.streamxhub.streamx.common.fs
 
 import com.streamxhub.streamx.common.enums.StorageType
 
-/**
- * just for java.
- *
- * @author benjobs
- */
-object FsOperatorGetter {
-  /**
-   * specify the file system type
-   */
-  def get(storageType: StorageType): FsOperator = FsOperator.of(storageType)
-
-}
-
 object FsOperator {
-  /**
-   * specify the file system type
-   */
+
+  lazy val lfs: FsOperator = FsOperator.of(StorageType.LFS)
+
+  lazy val hdfs: FsOperator = FsOperator.of(StorageType.HDFS)
+
   def of(storageType: StorageType): FsOperator = {
     storageType match {
       case StorageType.HDFS => HdfsOperator
@@ -50,8 +39,7 @@ object FsOperator {
 
 }
 
-
-trait FsOperator {
+abstract class FsOperator {
 
   def exists(path: String): Boolean
 

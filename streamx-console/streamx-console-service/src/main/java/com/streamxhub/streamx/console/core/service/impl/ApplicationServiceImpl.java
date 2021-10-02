@@ -33,7 +33,6 @@ import com.streamxhub.streamx.common.enums.ExecutionMode;
 import com.streamxhub.streamx.common.enums.ResolveOrder;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.*;
 import com.streamxhub.streamx.console.base.domain.Constant;
 import com.streamxhub.streamx.console.base.domain.RestRequest;
@@ -140,9 +139,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Autowired
     private K8sFlinkTrkMonitor k8sFlinkTrkMonitor;
 
-    private Workspace localWorkspace = WorkspaceGetter.local();
+    private Workspace localWorkspace = Workspace.local();
 
-    private Workspace remoteWorkspace =  WorkspaceGetter.remote();
+    private Workspace remoteWorkspace =  Workspace.remote();
 
     private final ExecutorService executorService = new ThreadPoolExecutor(
         Runtime.getRuntime().availableProcessors() * 2,
@@ -240,9 +239,9 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
     @Override
     public boolean upload(MultipartFile file, StorageType storageType) throws Exception {
         envInitializer.storageInitialize(storageType);
-        String APP_UPLOADS = WorkspaceGetter.get(storageType).APP_UPLOADS();
+        String APP_UPLOADS = Workspace.of(storageType).APP_UPLOADS();
         String uploadFile = APP_UPLOADS.concat("/").concat(Objects.requireNonNull(file.getOriginalFilename()));
-        FsOperator fsOperator = FsOperatorGetter.get(storageType);
+        FsOperator fsOperator = FsOperator.of(storageType);
         //1)检查文件是否存在,md5是否一致.
         if (fsOperator.exists(uploadFile)) {
             String md5 = DigestUtils.md5Hex(file.getInputStream());

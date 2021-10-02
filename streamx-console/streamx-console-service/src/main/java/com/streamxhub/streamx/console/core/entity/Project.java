@@ -25,9 +25,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.streamxhub.streamx.common.conf.WorkspaceGetter;
+import com.streamxhub.streamx.common.conf.Workspace;
 import com.streamxhub.streamx.console.base.util.CommonUtils;
-import com.streamxhub.streamx.console.base.util.SpringContextUtils;
 import com.streamxhub.streamx.console.core.enums.GitAuthorizedError;
 import com.streamxhub.streamx.console.core.service.SettingService;
 import lombok.Data;
@@ -110,7 +109,7 @@ public class Project implements Serializable {
     @JsonIgnore
     public File getAppSource() {
         if (appSource == null) {
-            appSource = WorkspaceGetter.local().PROJECT_LOCAL_DIR();
+            appSource = Workspace.local().PROJECT_LOCAL_DIR();
         }
         File sourcePath = new File(appSource);
         if (!sourcePath.exists()) {
@@ -128,7 +127,7 @@ public class Project implements Serializable {
 
     @JsonIgnore
     public File getAppBase() {
-        String appBase = WorkspaceGetter.local().APP_WORKSPACE().concat("/app/");
+        String appBase = Workspace.local().APP_WORKSPACE().concat("/app/");
         return new File(appBase.concat(id.toString()));
     }
 

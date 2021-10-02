@@ -29,24 +29,13 @@ import com.streamxhub.streamx.common.util.{HdfsUtils, SystemPropertyUtils}
  * @param storageType
  */
 
+object Workspace {
 
-/**
- * just for java.
- *
- * @author benjobs
- */
-object WorkspaceGetter {
   lazy val local: Workspace = Workspace.of(StorageType.LFS)
+
   lazy val remote: Workspace = Workspace.of(StorageType.HDFS)
 
-  def get(storageType: StorageType): Workspace = Workspace.of(storageType)
-}
-
-object Workspace {
-  /**
-   * specify the file system type
-   */
-  def of(storageType: StorageType): Workspace = new Workspace(storageType)
+  def of(storageType: StorageType): Workspace = Workspace(storageType)
 
 }
 
@@ -94,12 +83,12 @@ case class Workspace(storageType: StorageType) {
   /**
    * dirpath of the maven local repository with built-in compilation process
    */
-  lazy val MAVEN_LOCAL_DIR = s"${Workspace(StorageType.LFS)}/mvnrepo"
+  lazy val MAVEN_LOCAL_DIR = s"${Workspace.local.WORKSPACE}/mvnrepo"
 
   /**
    * local sourceCode dir.(for git...)
    */
-  lazy val PROJECT_LOCAL_DIR = s"${Workspace(StorageType.LFS)}/project"
+  lazy val PROJECT_LOCAL_DIR = s"${Workspace.local.WORKSPACE}/project"
 
 }
 

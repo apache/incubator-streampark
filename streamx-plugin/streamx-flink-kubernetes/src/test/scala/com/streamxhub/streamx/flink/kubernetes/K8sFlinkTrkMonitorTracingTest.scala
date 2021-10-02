@@ -35,7 +35,7 @@ import scala.util.Try
 /**
  * test FlinkTrkMonitor tracking feature
  */
-class K8sFlinkTrkMonitorTarkcingTest {
+class K8sFlinkTrkMonitorTracingTest {
 
   implicit var trkMonitor: DefaultK8sFlinkTrkMonitor = _
 
@@ -79,7 +79,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
   }
 
   // test tracking, untracking action
-  @Test def testTrackinAndUnTracking(): Unit = {
+  @Test def testTrackingAndUnTracking(): Unit = {
     watchJobStatusCacheSize
     watchAggClusterMetricsCache
     watchTrkIdsCache

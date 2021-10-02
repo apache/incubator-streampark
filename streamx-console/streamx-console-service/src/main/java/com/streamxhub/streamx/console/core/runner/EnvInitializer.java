@@ -23,10 +23,8 @@ package com.streamxhub.streamx.console.core.runner;
 
 import com.streamxhub.streamx.common.conf.ConfigConst;
 import com.streamxhub.streamx.common.conf.Workspace;
-import com.streamxhub.streamx.common.conf.WorkspaceGetter;
 import com.streamxhub.streamx.common.enums.StorageType;
 import com.streamxhub.streamx.common.fs.FsOperator;
-import com.streamxhub.streamx.common.fs.FsOperatorGetter;
 import com.streamxhub.streamx.common.util.SystemPropertyUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
 import com.streamxhub.streamx.console.core.service.SettingService;
@@ -84,8 +82,8 @@ public class EnvInitializer implements ApplicationRunner {
      */
     public synchronized void storageInitialize(StorageType storageType) throws Exception {
         if (initialized.get(storageType) == null) {
-            FsOperator fsOperator = FsOperatorGetter.get(storageType);
-            Workspace workspace = WorkspaceGetter.get(storageType);
+            FsOperator fsOperator = FsOperator.of(storageType);
+            Workspace workspace = Workspace.of(storageType);
 
             String appUploads = workspace.APP_UPLOADS();
             if (!fsOperator.exists(appUploads)) {
@@ -155,8 +153,8 @@ public class EnvInitializer implements ApplicationRunner {
             }
             // create maven local repository dir
             String localMavenRepo = workspace.MAVEN_LOCAL_DIR();
-            if (FsOperatorGetter.get(LFS).exists(localMavenRepo)) {
-                FsOperatorGetter.get(LFS).mkdirs(localMavenRepo);
+            if (FsOperator.lfs().exists(localMavenRepo)) {
+                FsOperator.lfs().mkdirs(localMavenRepo);
             }
             initialized.put(storageType, Boolean.TRUE);
         }
@@ -169,7 +167,7 @@ public class EnvInitializer implements ApplicationRunner {
         }
         Workspace workspace = Workspace.of(storageType);
         String appFlink = workspace.APP_FLINK();
-        FsOperator fsOperator = FsOperatorGetter.get(storageType);
+        FsOperator fsOperator = FsOperator.of(storageType);
         if (!fsOperator.exists(appFlink)) {
             log.info("mkdir {} starting ...", appFlink);
             fsOperator.mkdirs(appFlink);
