@@ -375,7 +375,8 @@ public class ApplicationServiceImpl extends ServiceImpl<ApplicationMapper, Appli
             envInitializer.checkFlinkEnv(application.getStorageType());
             envInitializer.storageInitialize(application.getStorageType());
             return true;
-        } catch (Throwable ignored) {
+        } catch (Throwable e) {
+            log.error(ExceptionUtils.stringifyException(e));
             return false;
         }
     }

@@ -47,7 +47,7 @@ class Length extends ScalarFunction {
   def eval(str: String): Int = {
     str match {
       case null => 0
-      case x =>  x.length
+      case x => x.length
     }
   }
 }

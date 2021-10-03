@@ -52,7 +52,7 @@ case class Workspace(storageType: StorageType) {
           case null => STREAMX_WORKSPACE_DEFAULT
           case p =>
             require(p.startsWith("hdfs://"))
-            val path = p.replaceFirst("^hdfs://((.*):\\d+|)", "")
+            val path = p.replaceFirst("^hdfs://((.*):\\d+/+|/+|)", "/")
             s"${HdfsUtils.getDefaultFS}$path"
         }
     }
