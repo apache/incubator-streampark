@@ -12,5 +12,11 @@ ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_POD_TEMPLATE` text NULL AFTE
 ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_JM_POD_TEMPLATE` text NULL AFTER `K8S_POD_TEMPLATE`;
 ALTER TABLE `streamx`.`t_flink_app` ADD COLUMN `K8S_TM_POD_TEMPLATE` text NULL AFTER `K8S_JM_POD_TEMPLATE`;
 
+
+delete from `t_setting` where `NUM` = 4;
+update `t_setting` set `NUM`=`NUM`-1 where `NUM` > 3;
+
+update `t_flink_project` set `url`='https://gitee.com/streamxhub/streamx-quickstart.git' where `NAME`='streamx-quickstart';
+
 SET FOREIGN_KEY_CHECKS = 1;
 

@@ -23,7 +23,6 @@ package com.streamxhub.streamx.flink.packer.maven
 import com.google.common.collect.Lists
 import com.streamxhub.streamx.common.conf.ConfigConst.DEFAULT_MAVEN_REMOTE_URL
 import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.StorageType
 import org.apache.maven.repository.internal.MavenRepositorySystemUtils
 import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory
 import org.eclipse.aether.repository.{LocalRepository, RemoteRepository}
@@ -54,7 +53,7 @@ object MavenRetriever {
   /**
    * default maven local repository
    */
-  lazy val localRepo = new LocalRepository(new Workspace(StorageType.LFS).MAVEN_LOCAL_DIR)
+  lazy val localRepo = new LocalRepository(Workspace.local.MAVEN_LOCAL_DIR)
 
   private lazy val locator = MavenRepositorySystemUtils.newServiceLocator
 

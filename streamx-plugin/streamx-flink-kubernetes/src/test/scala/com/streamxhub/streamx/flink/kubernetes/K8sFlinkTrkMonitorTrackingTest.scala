@@ -22,7 +22,7 @@ package com.streamxhub.streamx.flink.kubernetes
 
 import com.google.common.eventbus.Subscribe
 import com.streamxhub.streamx.flink.kubernetes.event.FlinkJobStatusChangeEvent
-import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchJobStatusCache, watchJobStatusCacheSize, watchAggClusterMetricsCache, watchTrkIdsCache}
+import com.streamxhub.streamx.flink.kubernetes.helper.TrkMonitorDebugHelper.{watchAggClusterMetricsCache, watchJobStatusCache, watchJobStatusCacheSize, watchTrkIdsCache}
 import com.streamxhub.streamx.flink.kubernetes.model.TrkId
 import org.junit.jupiter.api.Assertions.{assertFalse, assertTrue}
 import org.junit.jupiter.api.{BeforeEach, Test}
@@ -35,7 +35,7 @@ import scala.util.Try
 /**
  * test FlinkTrkMonitor tracking feature
  */
-class K8sFlinkTrkMonitorTarkcingTest {
+class K8sFlinkTrkMonitorTrackingTest {
 
   implicit var trkMonitor: DefaultK8sFlinkTrkMonitor = _
 
@@ -79,7 +79,7 @@ class K8sFlinkTrkMonitorTarkcingTest {
   }
 
   // test tracking, untracking action
-  @Test def testTrackinAndUnTracking(): Unit = {
+  @Test def testTrackingAndUnTracking(): Unit = {
     watchJobStatusCacheSize
     watchAggClusterMetricsCache
     watchTrkIdsCache

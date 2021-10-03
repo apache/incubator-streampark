@@ -23,7 +23,6 @@ package com.streamxhub.streamx.flink.submit.test
 import com.streamxhub.streamx.common.util.Logger
 import com.streamxhub.streamx.flink.core.scala.conf.FlinkRunOption
 import com.streamxhub.streamx.flink.submit.domain
-import com.streamxhub.streamx.flink.submit.domain.SubmitResponse
 import org.apache.commons.cli.Options
 import org.apache.flink.client.cli.CliFrontend.loadCustomCommandLines
 import org.apache.flink.client.cli.{CliFrontendParser, CustomCommandLine}

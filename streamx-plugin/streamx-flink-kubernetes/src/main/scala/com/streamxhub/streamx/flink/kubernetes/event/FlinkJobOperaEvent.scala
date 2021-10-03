@@ -29,7 +29,7 @@ import com.streamxhub.streamx.flink.kubernetes.model.TrkId
  *
  * author: Al-assad
  */
-case class FlinkJobOperaEvent(trkId: TrkId, expectJobState: FlinkJobOpera) extends BuildInEvent{
+case class FlinkJobOperaEvent(trkId: TrkId, expectJobState: FlinkJobOpera) extends BuildInEvent {
   def this(trkId: TrkId, expectJobState: FlinkJobState.Value) = this(trkId, FlinkJobOpera(expectJobState, System.currentTimeMillis))
 }
 

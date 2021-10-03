@@ -124,7 +124,7 @@ case class SubmitRequest(flinkHome: String,
     /**
      * 必须保持本机flink和hdfs里的flink版本和配置都完全一致.
      */
-    val workspace = new Workspace(StorageType.HDFS)
+    val workspace = Workspace.remote
     val flinkName = new File(flinkHome).getName
     val flinkHdfsHome = s"${workspace.APP_FLINK}/$flinkName"
     HdfsWorkspace(

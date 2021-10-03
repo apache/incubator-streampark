@@ -20,8 +20,7 @@
  */
 package com.streamxhub.streamx.flink.submit.impl
 
-import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, StorageType}
+import com.streamxhub.streamx.common.enums.DevelopmentMode
 import com.streamxhub.streamx.common.util.{DeflaterUtils, HdfsUtils}
 import com.streamxhub.streamx.flink.submit.`trait`.YarnSubmitTrait
 import com.streamxhub.streamx.flink.submit.domain._

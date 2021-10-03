@@ -22,8 +22,8 @@ package com.streamxhub.streamx.flink.submit.`trait`
 
 import com.streamxhub.streamx.common.conf.ConfigConst._
 import com.streamxhub.streamx.common.conf.Workspace
-import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType, StorageType}
-import com.streamxhub.streamx.common.fs.FsOperatorGetter
+import com.streamxhub.streamx.common.enums.{DevelopmentMode, ExecutionMode, FlinkK8sRestExposedType}
+import com.streamxhub.streamx.common.fs.FsOperator
 import com.streamxhub.streamx.common.util.DeflaterUtils
 import com.streamxhub.streamx.flink.submit.FlinkSubmitHelper.extractDynamicOption
 import com.streamxhub.streamx.flink.submit.domain._
@@ -55,7 +55,7 @@ import scala.util.Try
 //noinspection DuplicatedCode
 trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
 
-  lazy val workspace:Workspace = new Workspace(StorageType.LFS)
+  lazy val workspace: Workspace = Workspace.local
 
   private[submit] val fatJarCached = new mutable.HashMap[String, File]()
 
@@ -230,7 +230,7 @@ trait KubernetesNativeSubmitTrait extends FlinkSubmitTrait {
         throw new UnsupportedOperationException(s"Unsupported flink version: ${submitRequest.flinkVersion}")
     }
     val jobLib = s"${workspace.APP_WORKSPACE}/${submitRequest.jobID}/lib"
-    if (FsOperatorGetter.get(StorageType.LFS).exists(jobLib)) {
+    if (FsOperator.lfs.exists(jobLib)) {
       providedLibs += jobLib
     }
 
