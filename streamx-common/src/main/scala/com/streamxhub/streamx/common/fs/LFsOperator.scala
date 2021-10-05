@@ -101,6 +101,7 @@ object LFsOperator extends FsOperator with Logger {
   }
 
   override def fileMd5(path: String): String = {
+    require(path != null && path.nonEmpty)
     DigestUtils.md5Hex(IOUtils.toByteArray(new FileInputStream(path)))
   }
 
