@@ -21,18 +21,18 @@
 package com.streamxhub.streamx.flink.kubernetes.model
 
 /**
- * flink clutser mertic info
+ * flink cluster metric info
  * author: Al-assad
  */
-case class FlinkMetricCV(totalJmMemory: Integer,
-                         totalTmMemory: Integer,
-                         totalTm: Integer,
-                         totalSlot: Integer,
-                         availableSlot: Integer,
-                         runningJob: Integer,
-                         finishedJob: Integer,
-                         cancelledJob: Integer,
-                         failedJob: Integer,
+case class FlinkMetricCV(totalJmMemory: Integer = 0,
+                         totalTmMemory: Integer = 0,
+                         totalTm: Integer = 0,
+                         totalSlot: Integer = 0,
+                         availableSlot: Integer = 0,
+                         runningJob: Integer = 0,
+                         finishedJob: Integer = 0,
+                         cancelledJob: Integer = 0,
+                         failedJob: Integer = 0,
                          pollAckTime: Long) {
 
   def +(another: FlinkMetricCV): FlinkMetricCV = {
@@ -69,5 +69,5 @@ case class FlinkMetricCV(totalJmMemory: Integer,
 }
 
 object FlinkMetricCV {
-  def empty: FlinkMetricCV = FlinkMetricCV(0, 0, 0, 0, 0, 0, 0, 0, 0, System.currentTimeMillis)
+  def empty: FlinkMetricCV = FlinkMetricCV(pollAckTime = System.currentTimeMillis)
 }

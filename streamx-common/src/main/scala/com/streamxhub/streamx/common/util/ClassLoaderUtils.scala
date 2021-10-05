@@ -26,7 +26,7 @@ import java.util.function.Supplier
 
 object ClassLoaderUtils extends Logger {
 
-  val originalClassLoader = Thread.currentThread().getContextClassLoader
+  private[this] lazy val originalClassLoader: ClassLoader = Thread.currentThread().getContextClassLoader
 
   /**
    * 指定 classLoader执行代码...
@@ -37,7 +37,6 @@ object ClassLoaderUtils extends Logger {
    * @return
    */
   def runAsClassLoader[R](targetClassLoader: ClassLoader, func: () => R): R = {
-    val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
       func()
@@ -58,7 +57,6 @@ object ClassLoaderUtils extends Logger {
    * @return
    */
   def runAsClassLoader[R](targetClassLoader: ClassLoader, supplier: Supplier[R]): R = {
-    val originalClassLoader = Thread.currentThread.getContextClassLoader
     try {
       Thread.currentThread.setContextClassLoader(targetClassLoader)
       supplier.get()

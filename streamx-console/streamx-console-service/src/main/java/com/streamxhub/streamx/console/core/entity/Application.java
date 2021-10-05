@@ -50,7 +50,6 @@ import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.flink.kubernetes.configuration.KubernetesConfigOptions;
 
 import javax.annotation.Nonnull;
 import java.io.File;
@@ -243,7 +242,7 @@ public class Application implements Serializable {
 
     public void setK8sNamespace(String k8sNamespace) {
         this.k8sNamespace = StringUtils.isBlank(k8sNamespace) ?
-            KubernetesConfigOptions.NAMESPACE.defaultValue() :
+            "default" :
             k8sNamespace;
     }
 

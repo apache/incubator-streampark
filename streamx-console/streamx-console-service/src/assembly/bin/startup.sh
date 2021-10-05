@@ -73,18 +73,13 @@ echo_w () {
     printf "[${BLUE_COLOR}StreamX${RES}] ${WHITE_COLOR}$1${RES}\n"
 }
 
-
 # OS specific support.  $var _must_ be set to either true or false.
 cygwin=false
-darwin=false
 os400=false
-hpux=false
 # shellcheck disable=SC2006
 case "`uname`" in
 CYGWIN*) cygwin=true;;
-Darwin*) darwin=true;;
 OS400*) os400=true;;
-HP-UX*) hpux=true;;
 esac
 
 # resolve links - $0 may be a softlink
@@ -115,7 +110,6 @@ APP_CONF="$APP_BASE"/conf
 APP_BIN="$APP_BASE"/bin
 APP_LIB="$APP_BASE"/lib
 APP_PID="$APP_BASE"/.pid
-APP_OUT="$APP_BASE"/logs/streamx.out
 # shellcheck disable=SC2034
 APP_TMPDIR="$APP_BASE"/temp
 
@@ -306,6 +300,7 @@ fi
 
 APP_CLASSPATH=".:${JAVA_HOME}/lib:${JAVA_HOME}/jre/lib"
 # shellcheck disable=SC2206
+# shellcheck disable=SC2010
 JARS=$(ls "$APP_LIB"/*.jar | grep -v "$APP_LIB/streamx-flink-shims_.*.jar$")
 # shellcheck disable=SC2128
 for jar in $JARS;do
@@ -348,6 +343,7 @@ eval "${RUNJAVA}" \
   -Dapp.home="${APP_HOME}" \
   -Dpid="${APP_PID}" \
   -Dspring.config.location="${PROPER}" \
-  $MAIN >> "${APP_OUT}" 2>&1 &
+  $MAIN >/dev/null 2>&1  &
+
 
 exit 0;

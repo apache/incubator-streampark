@@ -25,7 +25,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.streamxhub.streamx.common.util.UpwardClassLoader;
+import com.streamxhub.streamx.common.util.BottomUpClassLoader;
 import com.streamxhub.streamx.common.util.ClassLoaderUtils;
 import com.streamxhub.streamx.common.util.DeflaterUtils;
 import com.streamxhub.streamx.console.base.util.WebUtils;
@@ -52,6 +52,7 @@ import java.net.URLClassLoader;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
@@ -196,7 +197,7 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
                 }
                 return sqlError.toString();
             } catch (Exception e) {
-                log.error("[StreamX] verifySql invocationTargetException:{}", e);
+                log.error("verifySql invocationTargetException: {}", e.getMessage());
             }
             return null;
         });
@@ -212,15 +213,15 @@ public class FlinkSqlServiceImpl extends ServiceImpl<FlinkSqlMapper, FlinkSql> i
             String shimsRegex = "streamx-flink-shims_flink-(1.12|1.13)-(.*).jar";
             Pattern pattern = Pattern.compile(shimsRegex, Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
-            List<File> shimsJars = Arrays.stream(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {
+            List<File> shimsJars = Arrays.stream(Objects.requireNonNull(new File(WebUtils.getAppDir("lib")).listFiles((pathname) -> {
                 Matcher matcher = pattern.matcher(pathname.getName());
                 return matcher.matches() && version.equals(matcher.group(1));
-            })).collect(Collectors.toList());
+            }))).collect(Collectors.toList());
 
-            assert shimsJars != null && shimsJars.size() == 1;
+            assert shimsJars.size() == 1;
 
             URL[] urls = {shimsJars.get(0).toURI().toURL()};
-            URLClassLoader classLoader = new UpwardClassLoader(urls, getClass().getClassLoader());
+            URLClassLoader classLoader = new BottomUpClassLoader(urls, getClass().getClassLoader());
             shimsClassLoaderCache.put(version, classLoader);
         }
 

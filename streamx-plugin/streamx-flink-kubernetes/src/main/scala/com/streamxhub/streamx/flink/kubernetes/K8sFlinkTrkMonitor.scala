@@ -114,7 +114,7 @@ trait K8sFlinkTrkMonitor extends Logger with AutoCloseable {
   /**
    * get flink cluster metrics
    */
-  def getClutserMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV]
+  def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV]
 
   /**
    * check whether flink job is in remote kubernetes cluster

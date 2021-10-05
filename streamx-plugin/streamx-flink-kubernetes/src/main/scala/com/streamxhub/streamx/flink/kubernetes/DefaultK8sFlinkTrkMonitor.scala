@@ -70,17 +70,17 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
   }
 
   def trackingJob(trkId: TrkId): Unit = {
-    if (Try(trkId.nonLegal).getOrElse(true))
-      return
-    trkCache.trackIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
+    if (!Try(trkId.nonLegal).getOrElse(true)) {
+      trkCache.trackIds.put(trkId, TrkIdCV(System.currentTimeMillis()))
+    }
   }
 
   def unTrackingJob(trkId: TrkId): Unit = {
-    if (Try(trkId.nonLegal).getOrElse(true))
-      return
-    trkCache.trackIds.invalidate(trkId)
-    trkCache.jobStatuses.invalidate(trkId)
-    trkCache.flinkMetrics.invalidate(trkId)
+    if (!Try(trkId.nonLegal).getOrElse(true)) {
+      trkCache.trackIds.invalidate(trkId)
+      trkCache.jobStatuses.invalidate(trkId)
+      trkCache.flinkMetrics.invalidate(ClusterKey.of(trkId))
+    }
   }
 
   override def isInTracking(trkId: TrkId): Boolean = trkCache.isInTracking(trkId)
@@ -93,21 +93,20 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
 
   override def getAccClusterMetrics: FlinkMetricCV = trkCache.collectAccMetric()
 
-  override def getClutserMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.getIfPresent(clusterKey))
+  override def getClusterMetrics(clusterKey: ClusterKey): Option[FlinkMetricCV] = Option(trkCache.flinkMetrics.getIfPresent(clusterKey))
 
   override def getAllTrackingIds: Set[TrkId] = trkCache.collectAllTrackIds()
 
   override def checkIsInRemoteCluster(trkId: TrkId): Boolean = {
-    if (Try(trkId.nonLegal).getOrElse(true)) {
-      return false
-    }
-    val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
-    trkId.executeMode match {
-      case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace, Set(trkId.jobId))
-        .exists(e => nonLost(e._2.jobState))
-      case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace)
-        .exists(e => nonLost(e._2.jobState))
-      case _ => false
+    if (Try(trkId.nonLegal).getOrElse(true)) false; else {
+      val nonLost = (state: FlinkJobState.Value) => state != FlinkJobState.LOST || state != FlinkJobState.SILENT
+      trkId.executeMode match {
+        case SESSION => jobStatusWatcher.touchSessionJob(trkId.clusterId, trkId.namespace, Set(trkId.jobId))
+          .exists(e => nonLost(e._2.jobState))
+        case APPLICATION => jobStatusWatcher.touchApplicationJob(trkId.clusterId, trkId.namespace)
+          .exists(e => nonLost(e._2.jobState))
+        case _ => false
+      }
     }
   }
 
@@ -132,39 +131,37 @@ class DefaultK8sFlinkTrkMonitor(conf: FlinkTrkConf = FlinkTrkConf.defaultConf) e
      */
     // noinspection UnstableApiUsage
     @Subscribe def catchFlinkJobOperaEvent(event: FlinkJobOperaEvent): Unit = {
-      if (Try(event.trkId.nonLegal).getOrElse(true)) {
-        return
-      }
-      val preCache = trkCache.jobStatuses.getIfPresent(event.trkId)
+      if (!Try(event.trkId.nonLegal).getOrElse(true)) {
 
-      // determine if the current event should be ignored
-      val shouldIgnore: Boolean = (preCache, event.expectJobState) match {
-        case (preCache, _) if preCache == null => false
-        // discard current event when the job state is consistent
-        case (preCache, expectJobState) if preCache.jobState == expectJobState.expect => true
-        // discard current event when current event is too late
-        case (preCache, expectJobState) if expectJobState.pollTime <= preCache.pollAckTime => true
-        case _ => false
-      }
-      if (shouldIgnore) {
-        return
-      }
+        val preCache = trkCache.jobStatuses.getIfPresent(event.trkId)
 
-      // update relevant cache
-      val newCache = {
-        if (preCache != null) {
-          preCache.copy(jobState = event.expectJobState.expect)
-        } else {
-          JobStatusCV(
-            jobState = event.expectJobState.expect,
-            jobId = event.trkId.jobId,
-            pollEmitTime = event.expectJobState.pollTime,
-            pollAckTime = System.currentTimeMillis)
+        // determine if the current event should be ignored
+        val shouldIgnore: Boolean = (preCache, event.expectJobState) match {
+          case (preCache, _) if preCache == null => false
+          // discard current event when the job state is consistent
+          case (preCache, expectJobState) if preCache.jobState == expectJobState.expect => true
+          // discard current event when current event is too late
+          case (preCache, expectJobState) if expectJobState.pollTime <= preCache.pollAckTime => true
+          case _ => false
+        }
+        if (!shouldIgnore) {
+          // update relevant cache
+          val newCache = {
+            if (preCache != null) {
+              preCache.copy(jobState = event.expectJobState.expect)
+            } else {
+              JobStatusCV(
+                jobState = event.expectJobState.expect,
+                jobId = event.trkId.jobId,
+                pollEmitTime = event.expectJobState.pollTime,
+                pollAckTime = System.currentTimeMillis)
+            }
+          }
+          trkCache.jobStatuses.put(event.trkId, newCache)
+          // post new FlinkJobStatusChangeEvent
+          eventBus.postAsync(FlinkJobStatusChangeEvent(event.trkId, newCache))
         }
       }
-      trkCache.jobStatuses.put(event.trkId, newCache)
-      // post new FlinkJobStatusChangeEvent
-      eventBus.postAsync(FlinkJobStatusChangeEvent(event.trkId, newCache))
     }
 
   }
