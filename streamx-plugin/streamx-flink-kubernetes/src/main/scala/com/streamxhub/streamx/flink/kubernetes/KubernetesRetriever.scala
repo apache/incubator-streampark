@@ -57,7 +57,7 @@ object KubernetesRetriever {
   }
 
   /**
-   * check connection of kubernetes clutser
+   * check connection of kubernetes cluster
    */
   def checkK8sConnection(): Boolean = {
     Try(newK8sClient().getVersion != null).getOrElse(false)
@@ -112,7 +112,7 @@ object KubernetesRetriever {
           .list()
           .getItems.asScala
           .exists(e => e.getMetadata.getName == name)
-    } { exception => false }
+    } { _ => false }
 
 
 }

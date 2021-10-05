@@ -36,7 +36,7 @@ import javax.annotation.Nullable
 case class DockerAuthConf(@Nullable registerAddress: String, registerUsername: String, registerPassword: String) {
 
   /**
-   * covert to com.github.dockerjava.api.model.AuthConfig
+   * covert to com.github.docker.java.api.model.AuthConfig
    */
   def toDockerAuthConf: AuthConfig = new AuthConfig()
     .withRegistryAddress(registerAddress)

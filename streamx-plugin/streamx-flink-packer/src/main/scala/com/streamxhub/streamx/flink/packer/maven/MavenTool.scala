@@ -97,9 +97,9 @@ object MavenTool extends Logger {
       val resolvedArtifacts = artifacts
         .map(artifact => new ArtifactDescriptorRequest(artifact, MavenRetriever.remoteRepos, null))
         .map(artDescReq => repoSystem.readArtifactDescriptor(session, artDescReq))
-        .flatMap(artDescReq => artDescReq.getDependencies)
-        .filter(dependency => dependency.getScope == "compile")
-        .map(dependency => dependency.getArtifact)
+        .flatMap(_.getDependencies)
+        .filter(_.getScope == "compile")
+        .map(_.getArtifact)
 
       val mergedArtifacts = artifacts ++ resolvedArtifacts
       logInfo(s"[streamx-packer] resolved dependencies: ${mergedArtifacts.mkString}")
@@ -107,7 +107,7 @@ object MavenTool extends Logger {
       // download artifacts
       val artReqs = mergedArtifacts.map(artifact => new ArtifactRequest(artifact, MavenRetriever.remoteRepos, null))
       repoSystem.resolveArtifacts(session, artReqs)
-        .map(artifactResult => artifactResult.getArtifact.getFile).toSet
+        .map(_.getArtifact.getFile).toSet
     }
   }
 

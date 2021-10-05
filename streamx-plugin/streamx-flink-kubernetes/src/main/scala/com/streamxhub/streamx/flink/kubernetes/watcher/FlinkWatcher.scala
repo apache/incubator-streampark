@@ -32,14 +32,14 @@ trait FlinkWatcher extends AutoCloseable {
    * This method should be a thread-safe implementation of
    * light locking and can be called idempotently.
    */
-  def start()
+  def start(): Unit
 
   /**
    * Stop watcher process.
    * This method should be a thread-safe implementation of
    * light locking and can be called idempotently.
    */
-  def stop()
+  def stop(): Unit
 
   /**
    * This method should be a thread-safe implementation of
