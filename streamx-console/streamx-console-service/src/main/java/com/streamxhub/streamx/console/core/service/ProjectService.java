@@ -45,6 +45,8 @@ public interface ProjectService extends IService<Project> {
 
     void tailBuildLog(Long id);
 
+    void closeBuildLog(Long id);
+
     List<String> modules(Long id);
 
     List<String> jars(Project project);

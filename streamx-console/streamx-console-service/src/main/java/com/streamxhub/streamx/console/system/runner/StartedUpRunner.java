@@ -44,7 +44,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            log.info(" start successful，time：" + LocalDateTime.now());
+            log.info("Streamx-console start successful，time：" + LocalDateTime.now());
         }
     }
 }
