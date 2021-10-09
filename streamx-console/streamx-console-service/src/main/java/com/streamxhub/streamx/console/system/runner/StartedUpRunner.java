@@ -47,7 +47,7 @@ public class StartedUpRunner implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) {
         if (context.isActive()) {
-            System.out.println(ansi().eraseScreen().fg(YELLOW).a("\n\n              .+.                          ").fg(RED).a("       ").reset());
+            System.out.println(ansi().eraseScreen().fg(YELLOW).a("\n\n              .+.                          ").reset());
             System.out.println(ansi().eraseScreen().fg(YELLOW).a("        _____/ /_________  ____ _____ ___ ").fg(RED).a(" _  __").reset());
             System.out.println(ansi().eraseScreen().fg(YELLOW).a("       / ___/ __/ ___/ _ \\/ __ `/ __ `__ \\").fg(RED).a("| |/_/").reset());
             System.out.println(ansi().eraseScreen().fg(YELLOW).a("      (__  ) /_/ /  /  __/ /_/ / / / / / /").fg(RED).a(">  <  ").reset());

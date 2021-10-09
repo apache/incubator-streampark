@@ -41,7 +41,6 @@ object FlinkSqlValidator extends Logger {
       StreamExecutionEnvironment.getExecutionEnvironment,
       EnvironmentSettings
         .newInstance
-        .useBlinkPlanner
         .inStreamingMode
         .build
     ).getConfig
