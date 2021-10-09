@@ -89,15 +89,19 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
              |""".stripMargin)
 
         var savepointRestoreSettings = SavepointRestoreSettings.none();
+
         if (submitRequest.savePoint != null) {
           // 判断参数 submitRequest.option 中是否包涵 -n 参数；赋值 allowNonRestoredState: true or false
           var allowNonRestoredState = false;
           if (submitRequest.option != null && submitRequest.option.contains(" -n ")) {
             allowNonRestoredState = true;
+
           } else {
             savepointRestoreSettings = SavepointRestoreSettings.forPath(submitRequest.savePoint, allowNonRestoredState)
+
           }
         }
+
         logInfo(
           s"""
              |------------------------<<savepointRestoreSettings>>--------------
@@ -107,6 +111,7 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
 
         val packagedProgram = PackagedProgram
           .newBuilder
+          .setSavepointRestoreSettings(savepointRestoreSettings)
           .setJarFile(new File(submitRequest.flinkUserJar))
           .setEntryPointClassName(flinkConfig.getOptional(ApplicationConfiguration.APPLICATION_MAIN_CLASS).get())
           .setArguments(
