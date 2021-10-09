@@ -35,9 +35,11 @@ import org.apache.flink.yarn.configuration.{YarnConfigOptions, YarnDeploymentTar
 import org.apache.flink.yarn.entrypoint.YarnJobClusterEntrypoint
 import org.apache.hadoop.fs.{Path => HadoopPath}
 import org.apache.hadoop.yarn.api.records.ApplicationId
-
 import java.io.File
 import java.lang.{Boolean => JavaBool}
+
+import org.apache.flink.runtime.jobgraph.SavepointRestoreSettings
+
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
@@ -83,6 +85,23 @@ object YarnPreJobSubmit extends YarnSubmitTrait {
           s"""
              |------------------------<<specification>>-------------------------
              |$clusterSpecification
+             |------------------------------------------------------------------
+             |""".stripMargin)
+
+        var savepointRestoreSettings = SavepointRestoreSettings.none();
+        if (submitRequest.savePoint != null) {
+          // 判断参数 submitRequest.option 中是否包涵 -n 参数；赋值 allowNonRestoredState: true or false
+          var allowNonRestoredState = false;
+          if (submitRequest.option != null && submitRequest.option.contains(" -n ")) {
+            allowNonRestoredState = true;
+          } else {
+            savepointRestoreSettings = SavepointRestoreSettings.forPath(submitRequest.savePoint, allowNonRestoredState)
+          }
+        }
+        logInfo(
+          s"""
+             |------------------------<<savepointRestoreSettings>>--------------
+             |$savepointRestoreSettings
              |------------------------------------------------------------------
              |""".stripMargin)
 
